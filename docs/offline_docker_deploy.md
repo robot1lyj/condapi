@@ -114,3 +114,27 @@ scripts/docker/run_dev.sh -p 6666 --gpus 2 -- \
 ```bash
 OPENPI_DATA_HOME=/data/openpi_cache scripts/docker/run_dev.sh --gpus 1
 ```
+
+## 8. 需要新增挂载时的处理（方案 A：保存环境并重建）
+Docker 不能给“已存在的容器”新增挂载，所以需要保存当前环境并重建容器。流程如下：
+```bash
+# 停止当前容器
+docker stop openpi_dev
+
+# 把当前容器保存成新镜像（保留已安装的依赖/修改）
+docker commit openpi_dev openpi_dev_custom:2025-01-15
+
+# 删除旧容器（释放名称）
+docker rm openpi_dev
+
+# 用新镜像重建，并加入新的挂载
+IMAGE=openpi_dev_custom:2025-01-15 \
+scripts/docker/run_dev.sh \
+  --mount /share/home/linyongjia/lyj/openpi \
+  --bind /new/data:/data \
+  --gpus 2
+```
+
+说明：
+- `docker commit` 只会保存容器内文件系统，不会包含挂载的目录。
+- 镜像标签建议加日期，方便追溯与回滚。
