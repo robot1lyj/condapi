@@ -42,50 +42,33 @@ scripts/docker/run_dev.sh
 脚本默认以当前宿主机用户 UID:GID 运行容器，避免宿主机文件被 root 覆盖权限。  
 若需要后台运行：`scripts/docker/run_dev.sh -d`。
 
-## 5. 常用启动命令（端口 / GPU / 挂载）
-端口默认是 `6666`，如果你要显式指定或改成其他端口：
-```bash
-# 宿主机 6666 -> 容器 6666
-scripts/docker/run_dev.sh -p 6666:6666
-
-# 改成 7000
-scripts/docker/run_dev.sh -p 7000
-```
-
-指定 GPU 数量或设备：
-```bash
-# 使用 2 张 GPU
-scripts/docker/run_dev.sh --gpus 2
-
-# 使用指定 GPU 设备
-scripts/docker/run_dev.sh --gpus 0,1
-
-# 不使用 GPU
-scripts/docker/run_dev.sh --no-gpu
-```
-
-映射额外目录或文件（可重复）：
+## 5. 一条命令完成启动（进入 bash + 用户 + 端口 + GPU + 挂载）
+下面是一条“全量版”启动命令，直接进入容器 bash。你只需要按需替换路径和 GPU 数即可：
 ```bash
 scripts/docker/run_dev.sh \
-  --bind /data/models:/openpi_assets/models \
-  --bind /data/config.yaml:/app/config.yaml
+  --mount /share/home/linyongjia/lyj/openpi \
+  --user $(id -u):$(id -g) \
+  --gpus 2 \
+  -p 6666 \
+  --bind /share/data:/data \
+  -- /bin/bash
 ```
 
-替换默认代码挂载目录：
+参数说明（都在这一条里）：
+- `--mount`：挂载你的项目目录到容器 `/app`。
+- `--user`：用宿主机用户 UID:GID 运行，避免权限被 root 改掉。
+- `--gpus`：GPU 数量（或用 `--gpus 0,1` 指定设备）。
+- `-p 6666`：映射端口；默认也是 6666，这里显式写清楚。
+- `--bind`：额外挂载文件或目录（可重复）。
+- `-- /bin/bash`：进入容器交互式 bash。
+
+如果你不想写完整命令，最低限度也可以这样（默认端口 6666、默认进入 bash）：
 ```bash
-scripts/docker/run_dev.sh --mount /path/to/openpi
+cd /share/home/linyongjia/lyj/openpi
+scripts/docker/run_dev.sh --gpus 2
 ```
 
-指定用户/权限（避免宿主机文件被 root 改权限）：
-```bash
-# 显式指定 UID:GID
-scripts/docker/run_dev.sh --user 1000:1000
-
-# 如果确实需要 root
-scripts/docker/run_dev.sh --as-root
-```
-
-如果之前已经被 root 改了权限，可在宿主机修复：
+如果之前权限已经被 root 改了，可在宿主机修复：
 ```bash
 sudo chown -R "$USER":"$USER" /share/home/linyongjia/lyj/openpi
 ```
