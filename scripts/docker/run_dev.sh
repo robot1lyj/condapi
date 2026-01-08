@@ -6,7 +6,8 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
 IMAGE="${IMAGE:-openpi_dev}"
 NAME="${NAME:-openpi_dev}"
-DATA_DIR="${OPENPI_DATA_HOME:-$HOME/.cache/openpi}"
+DATA_DIR="${OPENPI_DATA_HOME:-/share/home/linyongjia/.cache/openpi}"
+LEROBOT_DATA_DIR="${LEROBOT_DATA_DIR:-/share/home/linyongjia/data}"
 WORKDIR="${WORKDIR:-/app}"
 GPU_SPEC="${GPU_SPEC:-all}"
 DETACH=0
@@ -29,7 +30,8 @@ Options:
   -p, --port <port>     Expose port (repeatable). "8000" or "8000:8000".
   --gpus <spec>         GPU spec: "all", "count=N", "N", or "0,1".
   --no-gpu              Disable GPU access.
-  --data <path>         Host path for OPENPI_DATA_HOME (default: ~/.cache/openpi)
+  --data <path>         Host path for OPENPI_DATA_HOME (default: /share/home/linyongjia/.cache/openpi)
+  --lerobot-data <path> Host path for LeRobot datasets (default: /share/home/linyongjia/data)
   --mount <path>        Bind-mount repo/workspace to /app (default: repo root)
   --bind <a:b>          Extra bind mount (repeatable), e.g. /host/file:/container/file
   --user <uid:gid>      Run as this UID:GID (default: current user)
@@ -69,6 +71,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --data)
       DATA_DIR="$2"
+      shift 2
+      ;;
+    --lerobot-data)
+      LEROBOT_DATA_DIR="$2"
       shift 2
       ;;
     --mount)
@@ -124,14 +130,17 @@ if docker ps -a --format '{{.Names}}' | grep -Fxq "$NAME"; then
 fi
 
 mkdir -p "$DATA_DIR"
+mkdir -p "$LEROBOT_DATA_DIR"
 
 run_args=(
   --name "$NAME"
   --init
   -e OPENPI_DATA_HOME=/openpi_assets
+  -e HF_LEROBOT_HOME="${HF_LEROBOT_HOME:-/data}"
   -e IS_DOCKER=true
   -e NVIDIA_DRIVER_CAPABILITIES=all
   -v "$DATA_DIR":/openpi_assets
+  -v "$LEROBOT_DATA_DIR":/data
   -w "$WORKDIR"
 )
 
