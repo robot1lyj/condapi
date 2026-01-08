@@ -15,6 +15,8 @@ DEFAULT_PORT=6666
 PORTS=()
 MOUNT_SRC="${MOUNT_SRC:-$REPO_ROOT}"
 EXTRA_MOUNTS=()
+USER_SPEC="${USER_SPEC:-}"
+RUN_AS_ROOT=0
 COMMAND=()
 
 usage() {
@@ -30,6 +32,8 @@ Options:
   --data <path>         Host path for OPENPI_DATA_HOME (default: ~/.cache/openpi)
   --mount <path>        Bind-mount repo/workspace to /app (default: repo root)
   --bind <a:b>          Extra bind mount (repeatable), e.g. /host/file:/container/file
+  --user <uid:gid>      Run as this UID:GID (default: current user)
+  --as-root             Run as root (disables --user)
   --workdir <path>      Container working directory (default: /app)
   --host-net            Use host network (ignores -p/--port).
   -d, --detach          Run container in background.
@@ -74,6 +78,16 @@ while [[ $# -gt 0 ]]; do
     --bind)
       EXTRA_MOUNTS+=("$2")
       shift 2
+      ;;
+    --user)
+      USER_SPEC="$2"
+      RUN_AS_ROOT=0
+      shift 2
+      ;;
+    --as-root)
+      RUN_AS_ROOT=1
+      USER_SPEC=""
+      shift
       ;;
     --workdir)
       WORKDIR="$2"
@@ -120,6 +134,13 @@ run_args=(
   -v "$DATA_DIR":/openpi_assets
   -w "$WORKDIR"
 )
+
+if (( RUN_AS_ROOT == 0 )); then
+  if [[ -z "$USER_SPEC" ]]; then
+    USER_SPEC="$(id -u):$(id -g)"
+  fi
+  run_args+=(--user "$USER_SPEC" -e HOME=/tmp)
+fi
 
 if [[ -n "$MOUNT_SRC" ]]; then
   run_args+=(-v "$MOUNT_SRC":/app)

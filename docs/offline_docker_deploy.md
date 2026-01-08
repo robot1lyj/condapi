@@ -39,6 +39,7 @@ scripts/docker/run_dev.sh
 ```
 
 默认会把仓库挂到 `/app`，因此你可以在宿主机修改代码并立即生效。  
+脚本默认以当前宿主机用户 UID:GID 运行容器，避免宿主机文件被 root 覆盖权限。  
 若需要后台运行：`scripts/docker/run_dev.sh -d`。
 
 ## 5. 常用启动命令（端口 / GPU / 挂载）
@@ -73,6 +74,20 @@ scripts/docker/run_dev.sh \
 替换默认代码挂载目录：
 ```bash
 scripts/docker/run_dev.sh --mount /path/to/openpi
+```
+
+指定用户/权限（避免宿主机文件被 root 改权限）：
+```bash
+# 显式指定 UID:GID
+scripts/docker/run_dev.sh --user 1000:1000
+
+# 如果确实需要 root
+scripts/docker/run_dev.sh --as-root
+```
+
+如果之前已经被 root 改了权限，可在宿主机修复：
+```bash
+sudo chown -R "$USER":"$USER" /share/home/linyongjia/lyj/openpi
 ```
 
 ## 6. 在容器中运行服务/实验
