@@ -52,7 +52,7 @@ uv run pytest -m manual
 ## Agent Automation
 - After completing requested changes, automatically run `git add -A` and `git commit -m "<message>"`.
 - Never `git push`; the user will push.
-- If no commit message is provided, ask for one before committing.
+- Commit messages are written by the agent when not explicitly provided.
 - Commit messages should be in Chinese.
 
 ## Environment & Configuration Tips
