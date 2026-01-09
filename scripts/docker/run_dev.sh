@@ -8,6 +8,7 @@ IMAGE="${IMAGE:-openpi_dev}"
 NAME="${NAME:-openpi_dev}"
 DATA_DIR="${OPENPI_DATA_HOME:-/share/home/linyongjia/.cache/openpi/openpi-assets}"
 LEROBOT_DATA_DIR="${LEROBOT_DATA_DIR:-/share/home/linyongjia/data}"
+OUTPUT_DIR="${OPENPI_OUTPUT_DIR:-/share/home/linyongjia/output/openpi}"
 OPENPI_DATA_HOME_IN_CONTAINER="${OPENPI_DATA_HOME_IN_CONTAINER:-/root/.cache/openpi}"
 OPENPI_ASSETS_MOUNT="${OPENPI_ASSETS_MOUNT:-${OPENPI_DATA_HOME_IN_CONTAINER}/openpi-assets}"
 WORKDIR="${WORKDIR:-/app}"
@@ -34,6 +35,7 @@ Options:
   --no-gpu              Disable GPU access.
   --data <path>         Host path for openpi-assets cache (default: /share/home/linyongjia/.cache/openpi/openpi-assets)
   --lerobot-data <path> Host path for LeRobot datasets (default: /share/home/linyongjia/data)
+  --output <path>       Host path for training outputs (default: /share/home/linyongjia/output/openpi)
   --mount <path>        Bind-mount repo/workspace to /app (default: repo root)
   --bind <a:b>          Extra bind mount (repeatable), e.g. /host/file:/container/file
   --user <uid:gid>      Run as this UID:GID (default: current user)
@@ -77,6 +79,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --lerobot-data)
       LEROBOT_DATA_DIR="$2"
+      shift 2
+      ;;
+    --output)
+      OUTPUT_DIR="$2"
       shift 2
       ;;
     --mount)
@@ -133,16 +139,19 @@ fi
 
 mkdir -p "$DATA_DIR"
 mkdir -p "$LEROBOT_DATA_DIR"
+mkdir -p "$OUTPUT_DIR"
 
 run_args=(
   --name "$NAME"
   --init
   -e OPENPI_DATA_HOME="$OPENPI_DATA_HOME_IN_CONTAINER"
+  -e OPENPI_OUTPUT_DIR=/output/openpi
   -e HF_LEROBOT_HOME="${HF_LEROBOT_HOME:-/data}"
   -e IS_DOCKER=true
   -e NVIDIA_DRIVER_CAPABILITIES=all
   -v "$DATA_DIR":"$OPENPI_ASSETS_MOUNT"
   -v "$LEROBOT_DATA_DIR":/data
+  -v "$OUTPUT_DIR":/output/openpi
   -w "$WORKDIR"
 )
 

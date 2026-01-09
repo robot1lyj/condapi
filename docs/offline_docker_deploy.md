@@ -45,6 +45,7 @@ scripts/docker/run_dev.sh
 默认已映射以下路径（无需额外参数）：
 - 模型缓存：`/share/home/linyongjia/.cache/openpi/openpi-assets` -> 容器 `/root/.cache/openpi/openpi-assets`
 - LeRobot 数据：`/share/home/linyongjia/data` -> 容器 `/data`（并设置 `HF_LEROBOT_HOME=/data`）
+- 训练输出：`/share/home/linyongjia/output/openpi` -> 容器 `/output/openpi`（并设置 `OPENPI_OUTPUT_DIR=/output/openpi`）
 
 ## 5. 一条命令完成启动（进入 bash + 用户 + 端口 + GPU + 挂载）
 下面是一条“全量版”启动命令，直接进入容器 bash。你只需要按需替换路径和 GPU 数即可：
@@ -102,7 +103,16 @@ scripts/docker/run_dev.sh -p 6666 --gpus 2 -- \
   --port 6666
 ```
 
-## 7. 数据缓存目录（权重/下载）
+## 7. 训练输出位置（checkpoint）
+默认训练输出在容器 `/app/checkpoints/<config>/<exp_name>`。  
+如果你希望输出到默认映射的 `/output/openpi`，请在训练命令中加：
+```bash
+uv run scripts/train.py pi05_libero \
+  --exp-name my_experiment \
+  --checkpoint-base-dir /output/openpi
+```
+
+## 8. 数据缓存目录（权重/下载）
 默认映射 `/share/home/linyongjia/.cache/openpi/openpi-assets` 到容器 `/root/.cache/openpi/openpi-assets`。  
 如需自定义目录：
 ```bash
@@ -114,7 +124,7 @@ OPENPI_DATA_HOME=/data/openpi_assets scripts/docker/run_dev.sh --gpus 1
 scripts/docker/run_dev.sh --lerobot-data /data/lerobot
 ```
 
-## 8. 需要新增挂载时的处理（方案 A：保存环境并重建）
+## 9. 需要新增挂载时的处理（方案 A：保存环境并重建）
 Docker 不能给“已存在的容器”新增挂载，所以需要保存当前环境并重建容器。流程如下：
 ```bash
 # 停止当前容器
