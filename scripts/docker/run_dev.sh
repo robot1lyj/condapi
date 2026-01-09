@@ -11,6 +11,8 @@ LEROBOT_DATA_DIR="${LEROBOT_DATA_DIR:-/share/home/linyongjia/data}"
 OUTPUT_DIR="${OPENPI_OUTPUT_DIR:-/share/home/linyongjia/output/openpi}"
 OPENPI_DATA_HOME_IN_CONTAINER="${OPENPI_DATA_HOME_IN_CONTAINER:-/root/.cache/openpi}"
 OPENPI_ASSETS_MOUNT="${OPENPI_ASSETS_MOUNT:-${OPENPI_DATA_HOME_IN_CONTAINER}/openpi-assets}"
+USER_NAME="${USER_NAME:-linyongjia}"
+HOME_DIR="${HOME_DIR:-/home/linyongjia}"
 WORKDIR="${WORKDIR:-/app}"
 GPU_SPEC="${GPU_SPEC:-all}"
 DETACH=0
@@ -161,7 +163,7 @@ run_args=(
 )
 
 if (( RUN_AS_ROOT == 0 )); then
-  run_args+=(--user "$USER_SPEC" -e HOME=/tmp)
+  run_args+=(--user "$USER_SPEC" -e HOME="$HOME_DIR" -e USER="$USER_NAME" -e LOGNAME="$USER_NAME")
 fi
 
 if [[ -n "$MOUNT_SRC" ]]; then

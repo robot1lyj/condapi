@@ -42,6 +42,7 @@ scripts/docker/run_dev.sh
 脚本默认以 linyongjia 用户运行（UID:GID=1011:1011）。  
 非 root 运行时会自动把容器缓存路径切换到 `/openpi_cache`，避免 `/root` 权限问题。  
 若需要后台运行：`scripts/docker/run_dev.sh -d`。
+如果看到提示 `I have no name!`，说明镜像里没有该用户条目，请重新构建镜像后再启动。
 
 默认已映射以下路径（无需额外参数）：
 - 模型缓存：`/share/home/linyongjia/.cache/openpi/openpi-assets` -> 容器 `/openpi_cache/openpi-assets`

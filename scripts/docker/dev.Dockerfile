@@ -2,11 +2,23 @@
 FROM nvidia/cuda:12.2.2-cudnn8-runtime-ubuntu22.04@sha256:2d913b09e6be8387e1a10976933642c73c840c0b735f0bf3c28d97fc9bc422e0
 COPY --from=ghcr.io/astral-sh/uv:0.5.1 /uv /uvx /bin/
 
+ARG USER_NAME=linyongjia
+ARG USER_UID=1011
+ARG USER_GID=1011
+
 WORKDIR /app
 
 RUN apt-get update \
     && apt-get install -y git git-lfs linux-headers-generic build-essential clang \
     && rm -rf /var/lib/apt/lists/*
+
+RUN if ! getent group "${USER_GID}" >/dev/null; then groupadd -g "${USER_GID}" "${USER_NAME}"; fi \
+    && if ! id -u "${USER_NAME}" >/dev/null 2>&1; then useradd -m -u "${USER_UID}" -g "${USER_GID}" -s /bin/bash "${USER_NAME}"; fi \
+    && mkdir -p /openpi_cache \
+    && chown -R "${USER_UID}:${USER_GID}" /openpi_cache
+
+ENV USER="${USER_NAME}"
+ENV HOME="/home/${USER_NAME}"
 
 ENV UV_LINK_MODE=copy
 ENV UV_PROJECT_ENVIRONMENT=/.venv
