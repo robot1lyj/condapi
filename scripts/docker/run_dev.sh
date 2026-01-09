@@ -19,8 +19,8 @@ DEFAULT_PORT=6666
 PORTS=()
 MOUNT_SRC="${MOUNT_SRC:-$REPO_ROOT}"
 EXTRA_MOUNTS=()
-USER_SPEC="${USER_SPEC:-}"
-RUN_AS_ROOT=1
+USER_SPEC="${USER_SPEC:-1011:1011}"
+RUN_AS_ROOT=0
 COMMAND=()
 
 usage() {
@@ -38,7 +38,7 @@ Options:
   --output <path>       Host path for training outputs (default: /share/home/linyongjia/output/openpi)
   --mount <path>        Bind-mount repo/workspace to /app (default: repo root)
   --bind <a:b>          Extra bind mount (repeatable), e.g. /host/file:/container/file
-  --user <uid:gid>      Run as this UID:GID (default: current user)
+  --user <uid:gid>      Run as this UID:GID (default: 1011:1011 for linyongjia)
   --as-root             Run as root (disables --user)
   --workdir <path>      Container working directory (default: /app)
   --host-net            Use host network (ignores -p/--port).
@@ -46,7 +46,7 @@ Options:
   -h, --help            Show help.
 
 Examples:
-  scripts/docker/run_dev.sh -p 8000 --gpus 2
+  scripts/docker/run_dev.sh -p 8000 --gpus all
   scripts/docker/run_dev.sh --gpus 0,1 --data /data/openpi -- /bin/bash
 EOF
 }
@@ -161,9 +161,6 @@ run_args=(
 )
 
 if (( RUN_AS_ROOT == 0 )); then
-  if [[ -z "$USER_SPEC" ]]; then
-    USER_SPEC="$(id -u):$(id -g)"
-  fi
   run_args+=(--user "$USER_SPEC" -e HOME=/tmp)
 fi
 
