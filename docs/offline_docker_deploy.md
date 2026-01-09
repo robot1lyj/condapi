@@ -40,12 +40,14 @@ scripts/docker/run_dev.sh
 
 默认会把仓库挂到 `/app`，因此你可以在宿主机修改代码并立即生效。  
 脚本默认以 root 运行容器（匹配默认缓存路径在 `/root/.cache`）。  
+如果使用 `--user` 以宿主机用户运行，会自动把容器缓存路径切换到 `/openpi_cache`，避免 `/root` 权限问题。  
 若需要后台运行：`scripts/docker/run_dev.sh -d`。
 
 默认已映射以下路径（无需额外参数）：
 - 模型缓存：`/share/home/linyongjia/.cache/openpi/openpi-assets` -> 容器 `/root/.cache/openpi/openpi-assets`
 - LeRobot 数据：`/share/home/linyongjia/data` -> 容器 `/data`（并设置 `HF_LEROBOT_HOME=/data`）
 - 训练输出：`/share/home/linyongjia/output/openpi` -> 容器 `/output/openpi`（并设置 `OPENPI_OUTPUT_DIR=/output/openpi`）
+若使用 `--user`，模型缓存会改为容器 `/openpi_cache/openpi-assets`（仍使用同一个宿主机目录）。
 
 ## 5. 一条命令完成启动（进入 bash + 用户 + 端口 + GPU + 挂载）
 下面是一条“全量版”启动命令，直接进入容器 bash。你只需要按需替换路径和 GPU 数即可：
@@ -68,11 +70,7 @@ scripts/docker/run_dev.sh \
 ```bash
 --user $(id -u):$(id -g)
 ```
-注意：使用非 root 用户时，建议同时指定可写的容器缓存路径，例如：
-```bash
-OPENPI_DATA_HOME_IN_CONTAINER=/home/$(whoami)/.cache/openpi \
-scripts/docker/run_dev.sh --user $(id -u):$(id -g)
-```
+注意：使用 `--user` 时脚本会自动把缓存路径切到 `/openpi_cache`，无需额外参数。
 
 如果你不想写完整命令，最低限度也可以这样（默认端口 6666、默认进入 bash）：
 ```bash
@@ -112,7 +110,21 @@ uv run scripts/train.py pi05_libero \
   --checkpoint-base-dir /output/openpi
 ```
 
-## 8. 数据缓存目录（权重/下载）
+## 8. 训练示例（JAX）
+下面给出一个完整训练示例（假设已准备好数据与配置）：
+```bash
+# 1) 计算归一化统计（按配置名）
+uv run scripts/compute_norm_stats.py --config-name pi05_libero
+
+# 2) 启动训练（输出到 /output/openpi）
+XLA_PYTHON_CLIENT_MEM_FRACTION=0.9 \
+uv run scripts/train.py pi05_libero \
+  --exp-name my_experiment \
+  --checkpoint-base-dir /output/openpi
+```
+训练产物位置：`/output/openpi/pi05_libero/my_experiment/`
+
+## 9. 数据缓存目录（权重/下载）
 默认映射 `/share/home/linyongjia/.cache/openpi/openpi-assets` 到容器 `/root/.cache/openpi/openpi-assets`。  
 如需自定义目录：
 ```bash
@@ -124,7 +136,7 @@ OPENPI_DATA_HOME=/data/openpi_assets scripts/docker/run_dev.sh --gpus 1
 scripts/docker/run_dev.sh --lerobot-data /data/lerobot
 ```
 
-## 9. 需要新增挂载时的处理（方案 A：保存环境并重建）
+## 10. 需要新增挂载时的处理（方案 A：保存环境并重建）
 Docker 不能给“已存在的容器”新增挂载，所以需要保存当前环境并重建容器。流程如下：
 ```bash
 # 停止当前容器

@@ -137,6 +137,11 @@ if docker ps -a --format '{{.Names}}' | grep -Fxq "$NAME"; then
   exit 1
 fi
 
+if (( RUN_AS_ROOT == 0 )) && [[ "$OPENPI_DATA_HOME_IN_CONTAINER" == "/root/.cache/openpi" ]]; then
+  OPENPI_DATA_HOME_IN_CONTAINER="/openpi_cache"
+  OPENPI_ASSETS_MOUNT="${OPENPI_DATA_HOME_IN_CONTAINER}/openpi-assets"
+fi
+
 mkdir -p "$DATA_DIR"
 mkdir -p "$LEROBOT_DATA_DIR"
 mkdir -p "$OUTPUT_DIR"
