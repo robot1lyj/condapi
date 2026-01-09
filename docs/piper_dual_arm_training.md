@@ -54,6 +54,19 @@
 > 注意：如果修改 `action_dim` 或 `max_token_len`，将无法直接加载官方基座权重（形状不匹配），需要从头训练或换用匹配权重。
 
 ## 5. 训练前的容器挂载（离线 Docker）
+默认数据目录为宿主机 `/share/home/linyongjia/data`，容器内映射为 `/data`，并设置 `HF_LEROBOT_HOME=/data`。
+因此数据集如果位于：
+```
+/share/home/linyongjia/data/pen
+```
+容器内路径就是 `/data/pen`，对应的 `repo_id` 直接使用 `local/pen`（与 `meta/info.json` 一致），无需改动。
+
+`local/pen` 里的 `local` 是 LeRobot 的本地数据前缀，表示从 `$HF_LEROBOT_HOME/pen` 读取数据，不是一个真实目录名。
+
+如果你把数据放到了其它路径，二选一即可：
+- 调整挂载：`scripts/docker/run_dev.sh --lerobot-data /你的/数据根目录`
+- 或直接绑定：`scripts/docker/run_dev.sh --bind /实际数据集路径:/data/pen`
+
 确保数据集在容器内可见，例如：
 ```bash
 scripts/docker/run_dev.sh --gpus all --bind /home/lyj/pen:/data/pen -- /bin/bash
