@@ -20,6 +20,7 @@ import openpi.models.tokenizer as _tokenizer
 import openpi.policies.aloha_policy as aloha_policy
 import openpi.policies.droid_policy as droid_policy
 import openpi.policies.libero_policy as libero_policy
+import openpi.policies.piper_policy as piper_policy
 import openpi.shared.download as _download
 import openpi.shared.normalize as _normalize
 import openpi.training.droid_rlds_dataset as droid_rlds_dataset
@@ -352,6 +353,82 @@ class LeRobotLiberoDataConfig(DataConfigFactory):
             repack_transforms=repack_transform,
             data_transforms=data_transforms,
             model_transforms=model_transforms,
+        )
+
+
+@dataclasses.dataclass(frozen=True)
+class LeRobotPiperDataConfig(DataConfigFactory):
+    """
+    Data config for dual-arm Piper datasets in LeRobot format.
+    Update the keys below if your dataset uses different names.
+    """
+
+    base_image_key: str = "observation.images.top_rgb"
+    left_wrist_image_key: str = "observation.images.left_wrist"
+    right_wrist_image_key: str = "observation.images.right_wrist"
+    state_key: str = "observation.state"
+    action_key: str = "action"
+    prompt_key: str = "prompt"
+    action_sequence_keys: Sequence[str] = ("action",)
+    robot_action_dim: int = 14
+    use_delta_joint_actions: bool = True
+    swap_left_right: bool = False
+    default_prompt: str | None = None
+
+    @override
+    def create(self, assets_dirs: pathlib.Path, model_config: _model.BaseModelConfig) -> DataConfig:
+        repack_transform = _transforms.Group(
+            inputs=[
+                _transforms.RepackTransform(
+                    {
+                        self.base_image_key: self.base_image_key,
+                        self.left_wrist_image_key: self.left_wrist_image_key,
+                        self.right_wrist_image_key: self.right_wrist_image_key,
+                        self.state_key: self.state_key,
+                        self.action_key: self.action_key,
+                        self.prompt_key: self.prompt_key,
+                    }
+                )
+            ]
+        )
+
+        data_transforms = _transforms.Group(
+            inputs=[
+                piper_policy.PiperInputs(
+                    action_dim=model_config.action_dim,
+                    model_type=model_config.model_type,
+                    base_image_key=self.base_image_key,
+                    left_wrist_image_key=self.left_wrist_image_key,
+                    right_wrist_image_key=self.right_wrist_image_key,
+                    state_key=self.state_key,
+                    action_key=self.action_key,
+                    prompt_key=self.prompt_key,
+                    swap_left_right=self.swap_left_right,
+                )
+            ],
+            outputs=[
+                piper_policy.PiperOutputs(
+                    action_dim=self.robot_action_dim,
+                    swap_left_right=self.swap_left_right,
+                )
+            ],
+        )
+
+        if self.use_delta_joint_actions:
+            delta_action_mask = _transforms.make_bool_mask(6, -1, 6, -1)
+            data_transforms = data_transforms.push(
+                inputs=[_transforms.DeltaActions(delta_action_mask)],
+                outputs=[_transforms.AbsoluteActions(delta_action_mask)],
+            )
+
+        model_transforms = ModelTransformFactory(default_prompt=self.default_prompt)(model_config)
+
+        return dataclasses.replace(
+            self.create_base_config(assets_dirs, model_config),
+            repack_transforms=repack_transform,
+            data_transforms=data_transforms,
+            model_transforms=model_transforms,
+            action_sequence_keys=self.action_sequence_keys,
         )
 
 
@@ -760,6 +837,32 @@ _CONFIGS = [
         weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi05_base/params"),
         pytorch_weight_path="/path/to/your/pytorch_weight_path",
         num_train_steps=30_000,
+    ),
+    TrainConfig(
+        name="pi0_piper_dual",
+        model=pi0_config.Pi0Config(),
+        data=LeRobotPiperDataConfig(
+            repo_id="local/pen",
+            base_config=DataConfig(prompt_from_task=True),
+            robot_action_dim=14,
+            use_delta_joint_actions=True,
+            swap_left_right=False,
+        ),
+        weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi0_base/params"),
+        num_train_steps=20_000,
+    ),
+    TrainConfig(
+        name="pi05_piper_dual",
+        model=pi0_config.Pi0Config(pi05=True, discrete_state_input=True),
+        data=LeRobotPiperDataConfig(
+            repo_id="local/pen",
+            base_config=DataConfig(prompt_from_task=True),
+            robot_action_dim=14,
+            use_delta_joint_actions=True,
+            swap_left_right=False,
+        ),
+        weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi05_base/params"),
+        num_train_steps=20_000,
     ),
     #
     # Fine-tuning Aloha configs.
