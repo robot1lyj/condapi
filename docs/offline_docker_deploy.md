@@ -14,7 +14,7 @@ docker build -f scripts/docker/dev.Dockerfile -t openpi_dev .
 docker save openpi_dev -o openpi_dev.tar
 ```
 
-如需离线使用模型权重，建议提前下载到默认缓存目录 `/share/home/linyongjia/.cache/openpi`，之后整体拷到离线服务器并自动映射为容器内的 `/openpi_assets`。
+如需离线使用模型权重，建议提前下载到默认缓存目录 `/share/home/linyongjia/.cache/openpi/openpi-assets`，之后整体拷到离线服务器并自动映射为容器内的 `/root/.cache/openpi/openpi-assets`。
 
 ## 2. 有网机器：打包项目文件
 ```bash
@@ -39,11 +39,11 @@ scripts/docker/run_dev.sh
 ```
 
 默认会把仓库挂到 `/app`，因此你可以在宿主机修改代码并立即生效。  
-脚本默认以当前宿主机用户 UID:GID 运行容器，避免宿主机文件被 root 覆盖权限。  
+脚本默认以 root 运行容器（匹配默认缓存路径在 `/root/.cache`）。  
 若需要后台运行：`scripts/docker/run_dev.sh -d`。
 
 默认已映射以下路径（无需额外参数）：
-- 模型缓存：`/share/home/linyongjia/.cache/openpi` -> 容器 `/openpi_assets`
+- 模型缓存：`/share/home/linyongjia/.cache/openpi/openpi-assets` -> 容器 `/root/.cache/openpi/openpi-assets`
 - LeRobot 数据：`/share/home/linyongjia/data` -> 容器 `/data`（并设置 `HF_LEROBOT_HOME=/data`）
 
 ## 5. 一条命令完成启动（进入 bash + 用户 + 端口 + GPU + 挂载）
@@ -51,7 +51,6 @@ scripts/docker/run_dev.sh
 ```bash
 scripts/docker/run_dev.sh \
   --mount /share/home/linyongjia/lyj/openpi \
-  --user $(id -u):$(id -g) \
   --gpus 2 \
   -p 6666 \
   -- /bin/bash
@@ -59,11 +58,20 @@ scripts/docker/run_dev.sh \
 
 参数说明（都在这一条里）：
 - `--mount`：挂载你的项目目录到容器 `/app`。
-- `--user`：用宿主机用户 UID:GID 运行，避免权限被 root 改掉。
 - `--gpus`：GPU 数量（或用 `--gpus 0,1` 指定设备）。
 - `-p 6666`：映射端口；默认也是 6666，这里显式写清楚。
 - `--bind`：额外挂载文件或目录（可重复）。`/data` 已默认映射，无需再写。
 - `-- /bin/bash`：进入容器交互式 bash。
+
+如需以宿主机用户运行（避免 root 修改 `/app` 权限），可在同一条命令里加：
+```bash
+--user $(id -u):$(id -g)
+```
+注意：使用非 root 用户时，建议同时指定可写的容器缓存路径，例如：
+```bash
+OPENPI_DATA_HOME_IN_CONTAINER=/home/$(whoami)/.cache/openpi \
+scripts/docker/run_dev.sh --user $(id -u):$(id -g)
+```
 
 如果你不想写完整命令，最低限度也可以这样（默认端口 6666、默认进入 bash）：
 ```bash
@@ -81,7 +89,7 @@ sudo chown -R "$USER":"$USER" /share/home/linyongjia/lyj/openpi
 ```bash
 uv run scripts/serve_policy.py policy:checkpoint \
   --policy.config=pi05_libero \
-  --policy.dir=/openpi_assets/checkpoints/pi05_libero \
+  --policy.dir=/root/.cache/openpi/openpi-assets/checkpoints/pi05_libero \
   --port 6666
 ```
 
@@ -90,15 +98,15 @@ uv run scripts/serve_policy.py policy:checkpoint \
 scripts/docker/run_dev.sh -p 6666 --gpus 2 -- \
   uv run scripts/serve_policy.py policy:checkpoint \
   --policy.config=pi05_libero \
-  --policy.dir=/openpi_assets/checkpoints/pi05_libero \
+  --policy.dir=/root/.cache/openpi/openpi-assets/checkpoints/pi05_libero \
   --port 6666
 ```
 
 ## 7. 数据缓存目录（权重/下载）
-默认映射 `/share/home/linyongjia/.cache/openpi` 到容器 `/openpi_assets`。  
+默认映射 `/share/home/linyongjia/.cache/openpi/openpi-assets` 到容器 `/root/.cache/openpi/openpi-assets`。  
 如需自定义目录：
 ```bash
-OPENPI_DATA_HOME=/data/openpi_cache scripts/docker/run_dev.sh --gpus 1
+OPENPI_DATA_HOME=/data/openpi_assets scripts/docker/run_dev.sh --gpus 1
 ```
 
 如需自定义 LeRobot 数据目录：
