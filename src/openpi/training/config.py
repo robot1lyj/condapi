@@ -842,7 +842,7 @@ _CONFIGS = [
         name="pi0_piper_dual",
         model=pi0_config.Pi0Config(),
         data=LeRobotPiperDataConfig(
-            repo_id="local/pen_merged",
+            repo_id="local/pen",
             base_config=DataConfig(prompt_from_task=True),
             robot_action_dim=14,
             use_delta_joint_actions=True,
@@ -855,7 +855,7 @@ _CONFIGS = [
         name="pi05_piper_dual",
         model=pi0_config.Pi0Config(pi05=True, discrete_state_input=True),
         data=LeRobotPiperDataConfig(
-            repo_id="local/pen_merged",
+            repo_id="local/pen",
             base_config=DataConfig(prompt_from_task=True),
             robot_action_dim=14,
             use_delta_joint_actions=True,

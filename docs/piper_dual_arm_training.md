@@ -1,6 +1,6 @@
 # Piper 双臂数据集训练配置说明（openpi）
 
-本说明基于 `docs/offline_docker_deploy.md` 的离线 Docker 部署流程，并结合本地双臂数据集示例 `/share/home/linyongjia/data/pen_merged`。
+本说明基于 `docs/offline_docker_deploy.md` 的离线 Docker 部署流程，并结合本地双臂数据集示例 `/share/home/linyongjia/data/pen`。
 
 ## 1. 需要修改的代码位置
 - `src/openpi/policies/piper_policy.py`  
@@ -9,7 +9,7 @@
 - `src/openpi/training/config.py`  
   新增 `LeRobotPiperDataConfig` 数据配置，并添加训练配置 `pi0_piper_dual`、`pi05_piper_dual`。
 
-## 2. 数据集与键映射（/share/home/linyongjia/data/pen_merged）
+## 2. 数据集与键映射（/share/home/linyongjia/data/pen）
 数据集 `meta/info.json` 中的关键字段（示例）：
 - `observation.state`: 14 维（右臂 6 关节 + 右夹爪 + 左臂 6 关节 + 左夹爪）
 - `action`: 14 维（**右臂在前、左臂在后**，顺序为 `right_*` 再 `left_*`）
@@ -26,7 +26,7 @@
 - `action` -> `actions`
 
 ## 3. 双臂 Piper 配置要点
-针对 `/share/home/linyongjia/data/pen_merged`，在 `LeRobotPiperDataConfig` 中建议设定：
+针对 `/share/home/linyongjia/data/pen`，在 `LeRobotPiperDataConfig` 中建议设定：
 - `action_sequence_keys = ("action",)`  
   数据集动作字段是 `action`（非 `actions`）。
 - `robot_action_dim = 14`  
@@ -57,21 +57,21 @@
 默认数据目录为宿主机 `/share/home/linyongjia/data`，容器内映射为 `/data`，并设置 `HF_LEROBOT_HOME=/data`。
 因此数据集如果位于：
 ```
-/share/home/linyongjia/data/pen_merged
+/share/home/linyongjia/data/pen
 ```
-容器内路径就是 `/data/pen_merged`，对应的 `repo_id` 直接使用 `local/pen_merged`（与 `meta/info.json` 一致），无需改动。
+容器内路径就是 `/data/pen`，对应的 `repo_id` 直接使用 `local/pen`（与 `meta/info.json` 一致），无需改动。
 
-`local/pen_merged` 里的 `local` 是 LeRobot 的本地数据前缀，表示从 `$HF_LEROBOT_HOME/pen_merged` 读取数据，不是一个真实目录名。
+`local/pen` 里的 `local` 是 LeRobot 的本地数据前缀，表示从 `$HF_LEROBOT_HOME/pen` 读取数据，不是一个真实目录名。
 
 如果你把数据放到了其它路径，二选一即可：
 - 调整挂载：`scripts/docker/run_dev.sh --lerobot-data /你的/数据根目录`
-- 或直接绑定：`scripts/docker/run_dev.sh --bind /实际数据集路径:/data/pen_merged`
+- 或直接绑定：`scripts/docker/run_dev.sh --bind /实际数据集路径:/data/pen`
 
 确保数据集在容器内可见，例如：
 ```bash
-scripts/docker/run_dev.sh --gpus all --bind /share/home/linyongjia/data/pen_merged:/data/pen_merged -- /bin/bash
+scripts/docker/run_dev.sh --gpus all --bind /share/home/linyongjia/data/pen:/data/pen -- /bin/bash
 ```
-容器内默认设置 `HF_LEROBOT_HOME=/data`，因此 `repo_id` 应为 `local/pen_merged`。
+容器内默认设置 `HF_LEROBOT_HOME=/data`，因此 `repo_id` 应为 `local/pen`。
 
 ## 6. 计算归一化统计 + 启动训练
 `scripts/compute_norm_stats.py` 无需改动，直接按配置运行即可。
