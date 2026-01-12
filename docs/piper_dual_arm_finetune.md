@@ -122,6 +122,18 @@ UV_CACHE_DIR=/openpi_cache/uv \
 uv run --no-sync scripts/compute_norm_stats.py --config-name pi0_piper_dual
 ```
 
+**权限问题的推荐处理方式**
+- 不要用 `sudo uv run`，否则缓存会被 root 占用。
+- 一次性修复缓存权限（如已被 root 占用）：
+```bash
+sudo mkdir -p /home/linyongjia/.cache/uv
+sudo chown -R linyongjia:linyongjia /home/linyongjia/.cache/uv
+```
+- 或长期使用可写缓存目录（更稳）：
+```bash
+export UV_CACHE_DIR=/openpi_cache/uv
+```
+
 ## 5. 训练曲线与日志在哪里？
 Piper 配置已默认 `wandb_enabled=false`，避免任何联网行为。  
 如需曲线，请显式开启 `--wandb-enabled true`（可能触网），并自行评估风险。

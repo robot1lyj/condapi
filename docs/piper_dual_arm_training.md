@@ -178,3 +178,15 @@ uv run --no-sync scripts/train.py pi05_piper_dual \
 UV_CACHE_DIR=/openpi_cache/uv \
 uv run --no-sync scripts/compute_norm_stats.py --config-name pi05_piper_dual
 ```
+
+**权限问题的推荐处理方式**
+- 不要用 `sudo uv run`，否则缓存会被 root 占用。
+- 一次性修复缓存权限（如已被 root 占用）：
+```bash
+sudo mkdir -p /home/linyongjia/.cache/uv
+sudo chown -R linyongjia:linyongjia /home/linyongjia/.cache/uv
+```
+- 或长期使用可写缓存目录（更稳）：
+```bash
+export UV_CACHE_DIR=/openpi_cache/uv
+```
