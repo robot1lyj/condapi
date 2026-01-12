@@ -59,6 +59,51 @@ uv run scripts/train.py pi0_piper_dual \
    例如：`CheckpointWeightLoader("/path/to/pi0_droid/params")`
 2) 用同样命令跑，但把 `peak_lr` 调小一点。
 
+### 离线环境运行建议（无外网）
+如果容器无法访问公网，`uv run` 可能会尝试同步依赖并访问 PyPI。建议改用以下方式：
+
+**方式 A：直接用已安装的 venv Python（推荐）**
+```bash
+python scripts/compute_norm_stats.py --config-name pi0_piper_dual
+
+XLA_PYTHON_CLIENT_MEM_FRACTION=0.9 \
+python scripts/train.py pi0_piper_dual \
+  --exp-name piper_ft_base \
+  --checkpoint-base-dir /output/openpi \
+  --batch-size 8 \
+  --num-train-steps 5000 \
+  --log-interval 20 \
+  --save-interval 200 \
+  --keep-period 1000 \
+  --lr-schedule.peak-lr 2e-5 \
+  --lr-schedule.warmup-steps 300
+```
+
+**方式 B：继续用 uv，但禁止同步**
+```bash
+UV_NO_SYNC=1 \
+uv run --no-sync scripts/compute_norm_stats.py --config-name pi0_piper_dual
+
+XLA_PYTHON_CLIENT_MEM_FRACTION=0.9 \
+UV_NO_SYNC=1 \
+uv run --no-sync scripts/train.py pi0_piper_dual \
+  --exp-name piper_ft_base \
+  --checkpoint-base-dir /output/openpi \
+  --batch-size 8 \
+  --num-train-steps 5000 \
+  --log-interval 20 \
+  --save-interval 200 \
+  --keep-period 1000 \
+  --lr-schedule.peak-lr 2e-5 \
+  --lr-schedule.warmup-steps 300
+```
+
+如果出现 `Permission denied` 的缓存问题，可临时指定可写缓存目录：
+```bash
+UV_CACHE_DIR=/openpi_cache/uv \
+uv run --no-sync scripts/compute_norm_stats.py --config-name pi0_piper_dual
+```
+
 ## 5. 训练曲线与日志在哪里？
 训练脚本默认使用 `wandb`：
 - 如果 `wandb_enabled=True`，曲线会写到 wandb（需要网络）。  
