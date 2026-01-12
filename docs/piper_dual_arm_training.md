@@ -78,6 +78,18 @@ mkdir -p /share/home/linyongjia/data/local
 ln -s /share/home/linyongjia/data/pen /share/home/linyongjia/data/local/pen
 ```
 
+**注意：宿主机路径软链在容器内可能断开**  
+建议改用相对软链（宿主机与容器都可解析）：
+```bash
+rm -f /share/home/linyongjia/data/local/pen
+ln -s ../pen /share/home/linyongjia/data/local/pen
+```
+在容器内等价写法：
+```bash
+rm -f /data/local/pen
+ln -s ../pen /data/local/pen
+```
+
 **数据集名字变化时（例如从 pen 换成 pen_v2）：**
 - 方案 A：改 `repo_id` 并建立同名软链
 ```bash
