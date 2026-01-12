@@ -64,7 +64,7 @@ uv run scripts/train.py pi0_piper_dual \
 
 **离线强制关闭联网（先执行一次）**
 ```bash
-export WANDB_MODE=disabled
+export UV_CACHE_DIR=/openpi_cache/uv
 export WANDB_DISABLED=true
 export HF_HUB_OFFLINE=1
 export HUGGINGFACE_HUB_OFFLINE=1
@@ -80,6 +80,10 @@ export HF_DATASETS_OFFLINE=1
 
 **方式 A：直接用已安装的 venv Python（推荐）**
 ```bash
+export UV_CACHE_DIR=/openpi_cache/uv
+export WANDB_DISABLED=true
+export HF_HUB_OFFLINE=1
+
 python scripts/compute_norm_stats.py --config-name pi0_piper_dual
 
 XLA_PYTHON_CLIENT_MEM_FRACTION=0.9 \
@@ -98,11 +102,14 @@ python scripts/train.py pi0_piper_dual \
 
 **方式 B：继续用 uv，但禁止同步**
 ```bash
-UV_NO_SYNC=1 \
+export UV_CACHE_DIR=/openpi_cache/uv
+export WANDB_DISABLED=true
+export HF_HUB_OFFLINE=1
+export UV_NO_SYNC=1
+
 uv run --no-sync scripts/compute_norm_stats.py --config-name pi0_piper_dual
 
 XLA_PYTHON_CLIENT_MEM_FRACTION=0.9 \
-UV_NO_SYNC=1 \
 uv run --no-sync scripts/train.py pi0_piper_dual \
   --exp-name piper_ft_base \
   --checkpoint-base-dir /output/openpi \
@@ -118,7 +125,7 @@ uv run --no-sync scripts/train.py pi0_piper_dual \
 
 如果出现 `Permission denied` 的缓存问题，可临时指定可写缓存目录：
 ```bash
-UV_CACHE_DIR=/openpi_cache/uv \
+export UV_CACHE_DIR=/openpi_cache/uv
 uv run --no-sync scripts/compute_norm_stats.py --config-name pi0_piper_dual
 ```
 
