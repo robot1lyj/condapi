@@ -9,13 +9,15 @@ ARG USER_GID=1011
 WORKDIR /app
 
 RUN apt-get update \
-    && apt-get install -y git git-lfs linux-headers-generic build-essential clang \
+    && apt-get install -y git git-lfs linux-headers-generic build-essential clang sudo \
     && rm -rf /var/lib/apt/lists/*
 
 RUN if ! getent group "${USER_GID}" >/dev/null; then groupadd -g "${USER_GID}" "${USER_NAME}"; fi \
     && if ! id -u "${USER_NAME}" >/dev/null 2>&1; then useradd -m -u "${USER_UID}" -g "${USER_GID}" -s /bin/bash "${USER_NAME}"; fi \
-    && mkdir -p /openpi_cache \
-    && chown -R "${USER_UID}:${USER_GID}" /openpi_cache
+    && mkdir -p /openpi_cache "/home/${USER_NAME}/.cache" \
+    && chown -R "${USER_UID}:${USER_GID}" /openpi_cache "/home/${USER_NAME}/.cache" \
+    && echo "${USER_NAME} ALL=(ALL) NOPASSWD:ALL" > "/etc/sudoers.d/${USER_NAME}" \
+    && chmod 440 "/etc/sudoers.d/${USER_NAME}"
 
 ENV USER="${USER_NAME}"
 ENV HOME="/home/${USER_NAME}"
