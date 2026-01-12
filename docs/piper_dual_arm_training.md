@@ -69,7 +69,28 @@
 
 如果你的数据现在在 `/share/home/linyongjia/data/pen`，可以二选一：
 - 移动目录：`mv /share/home/linyongjia/data/pen /share/home/linyongjia/data/local/pen`
-- 或创建软链：`ln -s /share/home/linyongjia/data/pen /share/home/linyongjia/data/local/pen`
+- 或创建软链（推荐）：`ln -s /share/home/linyongjia/data/pen /share/home/linyongjia/data/local/pen`
+
+### 软链使用教程（推荐）
+**首次创建：**
+```bash
+mkdir -p /share/home/linyongjia/data/local
+ln -s /share/home/linyongjia/data/pen /share/home/linyongjia/data/local/pen
+```
+
+**数据集名字变化时（例如从 pen 换成 pen_v2）：**
+- 方案 A：改 `repo_id` 并建立同名软链
+```bash
+mkdir -p /share/home/linyongjia/data/local
+ln -sfn /share/home/linyongjia/data/pen_v2 /share/home/linyongjia/data/local/pen_v2
+```
+然后把训练配置里的 `repo_id` 改成 `local/pen_v2`。
+
+- 方案 B：不改 `repo_id`，让旧名指向新数据
+```bash
+ln -sfn /share/home/linyongjia/data/pen_v2 /share/home/linyongjia/data/local/pen
+```
+这时 `repo_id` 仍然用 `local/pen`，但实际读的是 `pen_v2`。
 
 如果你把数据放到了其它路径，二选一即可：
 - 调整挂载：`scripts/docker/run_dev.sh --lerobot-data /你的/数据根目录`
