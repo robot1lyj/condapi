@@ -849,6 +849,7 @@ _CONFIGS = [
             swap_left_right=False,
         ),
         weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi0_base/params"),
+        wandb_enabled=False,
         num_train_steps=20_000,
     ),
     TrainConfig(
@@ -862,6 +863,7 @@ _CONFIGS = [
             swap_left_right=False,
         ),
         weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi05_base/params"),
+        wandb_enabled=False,
         num_train_steps=20_000,
     ),
     #

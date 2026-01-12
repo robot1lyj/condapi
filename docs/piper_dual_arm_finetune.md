@@ -60,7 +60,23 @@ uv run scripts/train.py pi0_piper_dual \
 2) 用同样命令跑，但把 `peak_lr` 调小一点。
 
 ### 离线环境运行建议（无外网）
-如果容器无法访问公网，`uv run` 可能会尝试同步依赖并访问 PyPI。建议改用以下方式：
+如果容器无法访问公网，建议先关闭所有可能联网的入口，并确保权重/资产都在本地缓存。
+
+**离线强制关闭联网（先执行一次）**
+```bash
+export WANDB_MODE=disabled
+export WANDB_DISABLED=true
+export HF_HUB_OFFLINE=1
+export HUGGINGFACE_HUB_OFFLINE=1
+export TRANSFORMERS_OFFLINE=1
+export HF_DATASETS_OFFLINE=1
+```
+
+**权重与资产本地化（避免访问 gs:// 或 HF）**
+- 优先使用本地路径：`/openpi_cache/openpi-assets/checkpoints/.../params`
+- 如果仍使用 `gs://`，请确保对应内容已缓存到 `OPENPI_DATA_HOME`（默认 `/openpi_cache/openpi-assets`）。
+
+`uv run` 可能会尝试同步依赖并访问 PyPI。建议改用以下方式：
 
 **方式 A：直接用已安装的 venv Python（推荐）**
 ```bash
@@ -76,7 +92,8 @@ python scripts/train.py pi0_piper_dual \
   --save-interval 200 \
   --keep-period 1000 \
   --lr-schedule.peak-lr 2e-5 \
-  --lr-schedule.warmup-steps 300
+  --lr-schedule.warmup-steps 300 \
+  --wandb-enabled false
 ```
 
 **方式 B：继续用 uv，但禁止同步**
@@ -95,7 +112,8 @@ uv run --no-sync scripts/train.py pi0_piper_dual \
   --save-interval 200 \
   --keep-period 1000 \
   --lr-schedule.peak-lr 2e-5 \
-  --lr-schedule.warmup-steps 300
+  --lr-schedule.warmup-steps 300 \
+  --wandb-enabled false
 ```
 
 如果出现 `Permission denied` 的缓存问题，可临时指定可写缓存目录：
@@ -105,18 +123,11 @@ uv run --no-sync scripts/compute_norm_stats.py --config-name pi0_piper_dual
 ```
 
 ## 5. 训练曲线与日志在哪里？
-训练脚本默认使用 `wandb`：
-- 如果 `wandb_enabled=True`，曲线会写到 wandb（需要网络）。  
-- 如果你在离线环境，建议二选一：
-  - 关闭：`--wandb-enabled false`（只保留终端日志）
-  - 离线记录：`WANDB_MODE=offline`，并把目录指到输出盘：
-    ```bash
-    WANDB_MODE=offline WANDB_DIR=/output/openpi/wandb \
-    uv run scripts/train.py ...
-    ```
+Piper 配置已默认 `wandb_enabled=false`，避免任何联网行为。  
+如需曲线，请显式开启 `--wandb-enabled true`（可能触网），并自行评估风险。
 
 **输出目录 `/output/openpi` 里默认只有 checkpoint 与 assets**，不包含曲线。  
-如果需要曲线，请用 wandb（在线或离线）。
+如果需要曲线，请自行启用 wandb 或外部日志方案。
 
 ## 6. 现实评测记录表（填写你自己的结果）
 > 只填“真实机器人效果”，不要填 loss/curve。

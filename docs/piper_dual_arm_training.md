@@ -87,9 +87,26 @@ uv run scripts/train.py pi05_piper_dual \
   --checkpoint-base-dir /output/openpi
 ```
 如果训练 Pi0，替换为 `pi0_piper_dual`。
+Piper 配置已默认 `wandb_enabled=false`，如需启用请显式传 `--wandb-enabled true`。
 
 ### 离线环境运行建议（无外网）
-如果容器无法访问公网，`uv run` 可能会尝试同步依赖并访问 PyPI。建议改用以下方式：
+如果容器无法访问公网，建议先关闭所有可能联网的入口，并确保权重/资产都在本地缓存。
+
+**离线强制关闭联网（先执行一次）**
+```bash
+export WANDB_MODE=disabled
+export WANDB_DISABLED=true
+export HF_HUB_OFFLINE=1
+export HUGGINGFACE_HUB_OFFLINE=1
+export TRANSFORMERS_OFFLINE=1
+export HF_DATASETS_OFFLINE=1
+```
+
+**权重与资产本地化（避免访问 gs:// 或 HF）**
+- 优先使用本地路径：`/openpi_cache/openpi-assets/checkpoints/.../params`
+- 如果仍使用 `gs://`，请确保对应内容已缓存到 `OPENPI_DATA_HOME`（默认 `/openpi_cache/openpi-assets`）。
+
+`uv run` 可能会尝试同步依赖并访问 PyPI。建议改用以下方式：
 
 **方式 A：直接用已安装的 venv Python（推荐）**
 ```bash
@@ -98,7 +115,8 @@ python scripts/compute_norm_stats.py --config-name pi05_piper_dual
 XLA_PYTHON_CLIENT_MEM_FRACTION=0.9 \
 python scripts/train.py pi05_piper_dual \
   --exp-name piper_dual_exp \
-  --checkpoint-base-dir /output/openpi
+  --checkpoint-base-dir /output/openpi \
+  --wandb-enabled false
 ```
 
 **方式 B：继续用 uv，但禁止同步**
@@ -110,7 +128,8 @@ XLA_PYTHON_CLIENT_MEM_FRACTION=0.9 \
 UV_NO_SYNC=1 \
 uv run --no-sync scripts/train.py pi05_piper_dual \
   --exp-name piper_dual_exp \
-  --checkpoint-base-dir /output/openpi
+  --checkpoint-base-dir /output/openpi \
+  --wandb-enabled false
 ```
 
 如果出现 `Permission denied` 的缓存问题，可临时指定可写缓存目录：
