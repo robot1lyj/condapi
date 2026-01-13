@@ -9,7 +9,7 @@ ARG USER_GID=1011
 WORKDIR /app
 
 RUN apt-get update \
-    && apt-get install -y git git-lfs wget curl rsync ca-certificates linux-headers-generic build-essential clang sudo libgl1 libglib2.0-0 \
+    && apt-get install -y git git-lfs wget curl rsync ca-certificates linux-headers-generic build-essential clang sudo libgl1 libglib2.0-0 ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
 RUN if ! getent group "${USER_GID}" >/dev/null; then groupadd -g "${USER_GID}" "${USER_NAME}"; fi \
