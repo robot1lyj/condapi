@@ -117,3 +117,20 @@ python scripts/train.py pi05_piper_dual \
 | --- | --- | --- | --- | --- | --- | --- | --- |
 |  | pi0_base / pi0_droid |  |  |  |  |  |  |
 |  |  |  |  |  |  |  |  |
+
+## 7. 如何继续训练（从 5000 到 8000）
+支持续训，不需要重头开始。要点：
+- 保持同一个 `config` 和 `exp-name`
+- 把 `--num-train-steps` 改成“新的总步数”（不是增量）
+- 加 `--resume true`
+
+示例：
+```bash
+python scripts/train.py pi0_piper_dual \
+  --exp-name piper_ft_base \
+  --checkpoint-base-dir /output/openpi \
+  --num-train-steps 8000 \
+  --resume true
+```
+
+不要同时加 `--overwrite`，否则会清掉旧 checkpoint。
