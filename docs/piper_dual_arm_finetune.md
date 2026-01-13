@@ -78,7 +78,7 @@ python scripts/train.py pi0_piper_dual \
   --keep-period 1000 \
   --lr-schedule.peak-lr 2e-5 \
   --lr-schedule.warmup-steps 300 \
-  --wandb-enabled false
+  --no-wandb-enabled
 ```
 
 如果你要用 `pi0_droid` 权重：  
@@ -98,8 +98,24 @@ python scripts/train.py pi05_piper_dual \
   --keep-period 1000 \
   --lr-schedule.peak-lr 2e-5 \
   --lr-schedule.warmup-steps 300 \
-  --wandb-enabled false
+  --no-wandb-enabled
 ```
+
+### 训练命令参数说明
+| 参数 | 含义 | 建议/说明 |
+| --- | --- | --- |
+| `XLA_PYTHON_CLIENT_MEM_FRACTION` | JAX GPU 显存占用比例 | 0.9 常用；显存紧张可降到 0.8 |
+| `pi0_piper_dual / pi05_piper_dual` | 训练配置名 | 对应你在 `config.py` 定义的 Piper 配置 |
+| `--exp-name` | 实验名 | 决定 checkpoint 子目录 |
+| `--checkpoint-base-dir` | 输出根目录 | 默认 `/output/openpi` |
+| `--batch-size` | 全局 batch | 8 起步，小数据更稳 |
+| `--num-train-steps` | 总步数 | 小数据建议 4k~8k |
+| `--log-interval` | 日志打印间隔 | 20~50 便于观察 |
+| `--save-interval` | checkpoint 间隔 | 200~500 便于线下评测 |
+| `--keep-period` | 长期保留间隔 | 1000 或更大 |
+| `--lr-schedule.peak-lr` | 峰值学习率 | base: 2e-5~3e-5；droid: 1e-5~2e-5 |
+| `--lr-schedule.warmup-steps` | 预热步数 | 200~500 |
+| `--no-wandb-enabled` | 关闭 wandb | 离线建议关闭 |
 
 ## 5. pi0 vs pi05 的微调差异（官方定义 + 调参建议）
 官方差异要点：
