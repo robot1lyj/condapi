@@ -197,3 +197,9 @@ sudo chown -R linyongjia:linyongjia /home/linyongjia/.cache/uv
 ```bash
 export UV_CACHE_DIR=/openpi_cache/uv
 ```
+
+**/app 无写权限时的修复**
+如果 `/app` 目录因为 root 写入导致无法修改代码，可执行一次性修复：
+```bash
+sudo chown -R linyongjia:linyongjia /app
+```
