@@ -59,10 +59,17 @@ class Policy(BasePolicy):
             self._model = self._model.to(pytorch_device)
             self._model.eval()
             self._sample_actions = model.sample_actions
+            self._sample_actions_rtc = getattr(model, "sample_actions_rtc", None)
         else:
             # JAX model setup
             self._sample_actions = nnx_utils.module_jit(model.sample_actions)
             self._rng = rng or jax.random.key(0)
+            if hasattr(model, "sample_actions_rtc"):
+                self._sample_actions_rtc = nnx_utils.module_jit(
+                    model.sample_actions_rtc, static_argnames=("d", "s")
+                )
+            else:
+                self._sample_actions_rtc = None
 
     @override
     def infer(self, obs: dict, *, noise: np.ndarray | None = None) -> dict:  # type: ignore[misc]
@@ -105,9 +112,78 @@ class Policy(BasePolicy):
         }
         return outputs
 
+    @override
+    def infer_rtc(self, obs: dict, rtc: dict, *, noise: np.ndarray | None = None) -> dict:  # type: ignore[misc]
+        if self._sample_actions_rtc is None:
+            raise NotImplementedError("RTC inference is not supported by this policy.")
+
+        inputs = jax.tree.map(lambda x: x, obs)
+        inputs = self._input_transform(inputs)
+
+        prev_actions = rtc.get("prev_actions")
+        reset = bool(rtc.get("reset", False))
+        if reset:
+            prev_actions = None
+
+        if not self._is_pytorch_model:
+            inputs = jax.tree.map(lambda x: jnp.asarray(x)[np.newaxis, ...], inputs)
+            self._rng, sample_rng_or_pytorch_device = jax.random.split(self._rng)
+            prev_actions = _prepare_prev_actions(prev_actions, jnp.asarray)
+        else:
+            inputs = jax.tree.map(lambda x: torch.from_numpy(np.array(x)).to(self._pytorch_device)[None, ...], inputs)
+            sample_rng_or_pytorch_device = self._pytorch_device
+            prev_actions = _prepare_prev_actions(
+                prev_actions, lambda x: torch.from_numpy(np.array(x)).to(self._pytorch_device)
+            )
+
+        d = int(rtc["d"])
+        s = int(rtc["s"])
+
+        sample_kwargs = dict(self._sample_kwargs)
+        if noise is not None:
+            noise = torch.from_numpy(noise).to(self._pytorch_device) if self._is_pytorch_model else jnp.asarray(noise)
+            if noise.ndim == 2:
+                noise = noise[None, ...]
+            sample_kwargs["noise"] = noise
+
+        observation = _model.Observation.from_dict(inputs)
+        start_time = time.monotonic()
+        outputs = {
+            "state": inputs["state"],
+            "actions": self._sample_actions_rtc(
+                sample_rng_or_pytorch_device, observation, prev_actions=prev_actions, d=d, s=s, **sample_kwargs
+            ),
+        }
+        model_time = time.monotonic() - start_time
+        if self._is_pytorch_model:
+            outputs = jax.tree.map(lambda x: np.asarray(x[0, ...].detach().cpu()), outputs)
+        else:
+            outputs = jax.tree.map(lambda x: np.asarray(x[0, ...]), outputs)
+
+        outputs = self._output_transform(outputs)
+        outputs["policy_timing"] = {
+            "infer_ms": model_time * 1000,
+        }
+        return outputs
+
     @property
     def metadata(self) -> dict[str, Any]:
         return self._metadata
+
+
+def _prepare_prev_actions(prev_actions: Any, to_array) -> Any:
+    if prev_actions is None:
+        return None
+    prev_actions = to_array(prev_actions)
+    if getattr(prev_actions, "ndim", None) == 2:
+        prev_actions = prev_actions[None, ...]
+    elif getattr(prev_actions, "ndim", None) != 3:
+        raise ValueError("prev_actions must be a 2D or 3D array.")
+    if prev_actions.shape[0] != 1:
+        raise ValueError("prev_actions batch size must be 1.")
+    if prev_actions.shape[1] == 0:
+        return None
+    return prev_actions
 
 
 class PolicyRecorder(_base_policy.BasePolicy):
@@ -126,6 +202,19 @@ class PolicyRecorder(_base_policy.BasePolicy):
         results = self._policy.infer(obs)
 
         data = {"inputs": obs, "outputs": results}
+        data = flax.traverse_util.flatten_dict(data, sep="/")
+
+        output_path = self._record_dir / f"step_{self._record_step}"
+        self._record_step += 1
+
+        np.save(output_path, np.asarray(data))
+        return results
+
+    @override
+    def infer_rtc(self, obs: dict, rtc: dict) -> dict:  # type: ignore[misc]
+        results = self._policy.infer_rtc(obs, rtc)
+
+        data = {"inputs": obs, "rtc": rtc, "outputs": results}
         data = flax.traverse_util.flatten_dict(data, sep="/")
 
         output_path = self._record_dir / f"step_{self._record_step}"

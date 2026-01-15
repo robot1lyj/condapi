@@ -122,9 +122,28 @@ def _load_metadata(path: str | None) -> dict:
     return data
 
 
+def _populate_action_metadata(policy: _policy.Policy, metadata: dict) -> None:
+    model = getattr(policy, "_model", None)
+    if model is None:
+        return
+    action_horizon = getattr(model, "action_horizon", None)
+    action_dim = getattr(model, "action_dim", None)
+    if action_horizon is None or action_dim is None:
+        config = getattr(model, "config", None)
+        if action_horizon is None:
+            action_horizon = getattr(config, "action_horizon", None)
+        if action_dim is None:
+            action_dim = getattr(config, "action_dim", None)
+    if action_horizon is not None:
+        metadata.setdefault("action_horizon", int(action_horizon))
+    if action_dim is not None:
+        metadata.setdefault("action_dim", int(action_dim))
+
+
 def main(args: Args) -> None:
     policy = create_policy(args)
     policy_metadata = dict(policy.metadata)
+    _populate_action_metadata(policy, policy_metadata)
     rtc_metadata = _load_metadata(args.rtc_metadata)
     if rtc_metadata:
         policy_metadata.update(rtc_metadata)
