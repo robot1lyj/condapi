@@ -1,6 +1,8 @@
 import dataclasses
 import enum
+import json
 import logging
+import pathlib
 import socket
 
 import tyro
@@ -18,6 +20,14 @@ class EnvMode(enum.Enum):
     ALOHA_SIM = "aloha_sim"
     DROID = "droid"
     LIBERO = "libero"
+
+
+class RtcMode(enum.Enum):
+    """RTC handling mode for websocket inference."""
+
+    OFF = "off"
+    AUTO = "auto"
+    ONLY = "only"
 
 
 @dataclasses.dataclass
@@ -50,6 +60,11 @@ class Args:
     port: int = 8000
     # Record the policy's behavior for debugging.
     record: bool = False
+
+    # RTC handling mode: off (ignore), auto (use if provided), only (require rtc payload).
+    rtc_mode: RtcMode = RtcMode.OFF
+    # Optional metadata JSON file to send during handshake (merged into policy.metadata).
+    rtc_metadata: str | None = None
 
     # Specifies how to load the policy. If not provided, the default policy for the environment will be used.
     policy: Checkpoint | Default = dataclasses.field(default_factory=Default)
@@ -96,9 +111,24 @@ def create_policy(args: Args) -> _policy.Policy:
             return create_default_policy(args.env, default_prompt=args.default_prompt)
 
 
+def _load_metadata(path: str | None) -> dict:
+    if path is None:
+        return {}
+    metadata_path = pathlib.Path(path)
+    with metadata_path.open("r", encoding="utf-8") as handle:
+        data = json.load(handle)
+    if not isinstance(data, dict):
+        raise ValueError(f"Metadata JSON must be an object, got: {type(data).__name__}")
+    return data
+
+
 def main(args: Args) -> None:
     policy = create_policy(args)
-    policy_metadata = policy.metadata
+    policy_metadata = dict(policy.metadata)
+    rtc_metadata = _load_metadata(args.rtc_metadata)
+    if rtc_metadata:
+        policy_metadata.update(rtc_metadata)
+    policy_metadata["rtc_mode"] = args.rtc_mode.value
 
     # Record the policy's behavior.
     if args.record:
@@ -112,6 +142,7 @@ def main(args: Args) -> None:
         policy=policy,
         host="0.0.0.0",
         port=args.port,
+        rtc_mode=args.rtc_mode.value,
         metadata=policy_metadata,
     )
     server.serve_forever()

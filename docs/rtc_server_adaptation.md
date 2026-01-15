@@ -105,7 +105,28 @@ python scripts/serve_policy.py \
   --policy.dir /output/openpi/pi05_piper_dual/piper_ft_pi05/4999
 ```
 
-### 4.3 新增 RTC 推理入口
+### 4.3 Metadata/handshake 配置（推荐）
+- **不要每次请求都附带 metadata**：增加 payload 且易版本不一致；握手阶段一次性发送即可。
+- **服务端加载元数据**：建议使用模板文件并在启动时加载或注入到 `policy.metadata`。
+- **客户端侧兜底**：metadata 缺失时可读本地 override 文件，仅用于本地对齐，不必上送。
+- **CLI 指定**：`scripts/serve_policy.py` 支持 `--rtc-metadata <path>` 载入 JSON。
+- **模板参考**：`/home/lyj/orin_VR/inference/remote_infer/rtc_metadata_template.json`
+- **相机信息来源**：`/home/lyj/orin_VR/configs/piper_inference_dual.json` 中 `cameras` 字段。
+
+示例模板字段（节选）：
+```
+{
+  "model_name": "pi05_piper_dual",
+  "action_horizon": 50,
+  "action_dim": 14,
+  "control_hz": 30,
+  "use_delta_joint_actions": true,
+  "action_units": "absolute_radians",
+  "input_keys": ["observation.state", "prompt", "observation.images.<cam_name>"]
+}
+```
+
+### 4.4 新增 RTC 推理入口
 建议新增一个推理函数（示意命名）：
 - `openpi/serving/rtc_infer.py` or `openpi/models/rtc_sampler.py`
 - 提供 `sample_actions_rtc(observation, prev_actions, d, s, ...)`
@@ -116,7 +137,7 @@ python scripts/serve_policy.py \
 3) 在采样循环中加入 ΠGDM 引导（公式 2/3/4）。
 4) 返回完整 `A_new`（长度 `H`）。
 
-### 4.4 修改采样过程（pi0 模型）
+### 4.5 修改采样过程（pi0 模型）
 `pi0` 模型采样入口：
 - `openpi/src/openpi/models/pi0.py :: sample_actions`
 
@@ -158,17 +179,19 @@ JAX 计算向量-雅可比积建议：
 ## 9. 实施结论与疑问
 
 ### 9.1 已确认结论
-- **d/s 计算归属**：`d` 由客户端基于端到端 RTT 估计并上报；服务端只使用该 `d` 做引导。推荐 `d = ceil(RTT / Δt)`，滑动窗口保守估计 `d_est = max(last_b)` 或 `p95 + 1`；最终确保 `s = max(d_est, s_min)` 且满足 `d <= s <= H - d`。
+- **d/s 计算归属**：`d` 由客户端基于端到端 RTT 估计并上报；服务端只使用该 `d` 做引导。推荐 `d = ceil(RTT / Δt)`，滑动窗口保守估计 `d_est = max(last_b)` 或 `p95 + 1`；最终确保 `s = max(d_est, s_min)` 且满足 `d <= s <= H - d`。RTT 以**推理请求的往返时间**为主（发包→收包），`/healthz` 仅连通性不适合统计。
 - **prev_actions 来源**：推荐客户端每次携带，服务端尽量无状态；可加 `rtc.reset=true` 作为重置标志。若服务端维护状态，需要新连接清空 + `episode_id/reset_rtc` + prompt/相机变更重置。
 - **动作语义**：`pi05_piper_dual` 使用 `use_delta_joint_actions=True`，推理输出已还原为**绝对关节角**；`prev_actions` 必须同语义。夹爪保持绝对（`make_bool_mask(6, -1, 6, -1)`）。
-- **能力元数据**：建议至少补 `action_horizon`、`action_dim`、`control_hz`、`use_delta_joint_actions`；可在 `scripts/serve_policy.py` 组装或在 `policy_config.create_trained_policy` 注入。
+- **d/s 校验责任**：服务端做 sanity check + clamp（`d<0`→0，`s<d`→`s=d`，`s>H-d`→`s=H-d`）。若异常，记录 warning，必要时回退普通推理。
+- **prev_actions 尺寸处理**：`action_dim` 不一致直接拒绝 RTC；长度不足右侧 padding（0 或 last action），长度过长截断保留最后 `H-s` 步。
+- **rtc.reset 语义**：`rtc.reset=true` 清空 prev_actions/RTC 状态，默认不影响 prompt/观测缓存；prompt 变化可视为隐式 reset。更稳妥可引入 `episode_id` 做隔离。
+- **能力元数据**：建议至少补 `action_horizon`、`action_dim`、`control_hz`、`use_delta_joint_actions`；在握手阶段发送。客户端无需每次上送 metadata。
 - **适配范围**：先覆盖 `pi0/π0.5`（`pi0.py` 采样路径），再扩展 `pi0_fast`；给 BaseModel 增加 `sample_actions_rtc`，Policy 优先调用，未实现回退 `sample_actions`。
 - **性能与稳定**：ΠGDM 引导用 `jax.vjp` 计算 VJP，采样循环用 `lax.scan + jit`；`β` 裁剪（典型 5），`τ` 设下限如 `1e-3`，必要时加 `grad_norm` clamp。若开销过大，可降低 `n` 或仅前 `k` 步引导；guidance 用 `float32` 更稳。
 
 ### 9.2 新增疑问 / 待确认
-- **RTT 测量协议**：客户端如何测 RTT？需要在 ws 里定义 `ping/pong` 时间戳字段或沿用现有健康检查？
-- **d/s 校验责任**：服务端是否需要对 `d/s` 做 sanity check 和 clamp？若不满足约束，是报错还是自动修正？
-- **prev_actions 尺寸/对齐**：`prev_actions` 的维度不一致或长度小于 `H-s` 时，服务端如何处理（pad/报错）？
-- **rtc.reset 语义**：`reset` 是否只清空 prev_actions，还是也影响缓存的观测/提示词？是否需要 `episode_id` 级别隔离？
-- **能力元数据来源**：`control_hz` 与 `action_dim` 是否能从 config/metadata 稳定获取？如果不同机器人频率不一致，谁是单一事实源？
-- **RTC 未实现的模型**：当客户端带 `rtc`，但模型未实现 `sample_actions_rtc` 时，服务端应回退旧推理还是明确返回错误？
+- **RTC envelope 版本化**：是否需要 `rtc.version` 字段，以便未来兼容不同 mask/引导策略？
+- **action_horizon 来源冲突**：RTC payload 携带 `action_horizon` 时，是否必须与服务端/metadata 一致？不一致时如何处理？
+- **并发请求策略**：同一连接是否允许未完成的推理叠加请求？若允许，如何保证 prev_actions 一致性？
+- **时间戳字段**：是否需要在响应里回传 `server_time_ms`/`recv_time_ms` 便于客户端统计与排障？
+- **相机 key 一致性**：`observation.images.<cam_name>` 的 cam_name 是否需在握手时白名单校验？
