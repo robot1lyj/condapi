@@ -55,6 +55,9 @@ uv run pytest -m manual
 - Commit messages are written by the agent when not explicitly provided.
 - Commit messages should be in Chinese.
 
+## RTC 兼容性要求
+- 任何 RTC 改动必须确保旧推理路径保持可用，且可与 RTC 同时存在（可按 `rtc_mode` 切换或自动回退）。
+
 ## Environment & Configuration Tips
 - Repo is tested on Ubuntu 22.04; GPU is required for most training/inference.
 - Checkpoints download to `~/.cache/openpi`; override with `OPENPI_DATA_HOME` if needed.
