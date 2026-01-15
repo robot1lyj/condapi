@@ -82,7 +82,7 @@ python /home/lyj/orin_VR/inference/run_piper_inference_remote.py \
 
 ## 4. 图像尺寸与 dtype 建议
 - 训练侧统一会 `resize_with_pad` 到 224×224。
-- 推理时可直接发送 224×224（推荐），或发送 480×640 让服务端再缩放。
+- 推理时可直接发送 224×224（推荐）
 - 建议用 `uint8` 传输（`openpi_client.image_tools` 会保持训练一致的处理逻辑）。
 
 ## 5. 常见问题
