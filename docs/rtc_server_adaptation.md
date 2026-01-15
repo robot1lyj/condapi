@@ -195,3 +195,53 @@ JAX 计算向量-雅可比积建议：
 - **并发请求策略**：同一连接是否允许未完成的推理叠加请求？若允许，如何保证 prev_actions 一致性？
 - **时间戳字段**：是否需要在响应里回传 `server_time_ms`/`recv_time_ms` 便于客户端统计与排障？
 - **相机 key 一致性**：`observation.images.<cam_name>` 的 cam_name 是否需在握手时白名单校验？
+
+## 10. 服务端实施计划（本次范围）
+
+### 10.1 协议与启动参数
+- 在 `websocket_policy_server.py` 解析 `obs`/`rtc` envelope，剥离 `rtc` 后再构造 `Observation`。
+- 在 `scripts/serve_policy.py` 增加 `--rtc-mode {off,auto,only}`，默认 `off`。
+- 支持 `--rtc-metadata <path>`，在握手返回 `rtc_mode`、`action_horizon`、`action_dim`、`control_hz`、`use_delta_joint_actions`。
+- RTC payload 与 metadata 冲突时：优先服务端 metadata；冲突记录 warning 并回退普通推理（可配置）。
+
+### 10.2 RTC 推理入口
+- 增加 `sample_actions_rtc(...)`，参数包含 `prev_actions`、`d`、`s`、`action_horizon`、`action_dim`。
+- 处理 `prev_actions` 长度/维度：不足右侧 padding，过长截断至最近 `H-s` 步。
+- `d/s` 约束：`d<0`→0，`s<d`→`s=d`，`s>H-d`→`s=H-d`，异常记录 warning。
+
+### 10.3 采样引导集成（pi0 路径）
+- 在 `pi0.py` 的采样循环中加入 ΠGDM 引导与 soft mask。
+- 引导计算使用 `jax.vjp`，并对 `β`、`τ` 做裁剪以稳态收敛。
+- 若开启 RTC 但采样失败或引导异常，回退普通推理并记录 error。
+
+### 10.4 可观测性与回归验证
+- 服务端日志输出：`rtc_mode`、`d/s`、`action_horizon`、是否 RTC/回退。
+- `/healthz` 与握手保持原语义；RTC 元数据仅在握手返回。
+- 添加最小验证脚本/用例：非 RTC 推理不变；RTC 请求返回动作且无断档。
+
+## 11. 客户端需要做什么（文档补充，不在本次实现）
+
+### 11.1 连接与握手
+- 连接后读取握手 metadata，确认 `rtc_mode` 与 `action_horizon/action_dim/control_hz`。
+- 若 `rtc_mode=off` 或握手缺失，则退回旧协议（裸 `obs`）。
+- 可在本地提供 metadata override，仅用于兜底，不上送服务端。
+
+### 11.2 RTC 请求内容
+- 采用 envelope 发送：
+  - `obs`：原观测数据。
+  - `rtc.prev_actions`：长度为 `H-s` 的**绝对关节角**动作序列。
+  - `rtc.d`：基于 RTT 估计的延迟步数（`ceil(RTT / Δt)`）。
+  - `rtc.s`：执行步数，建议 `s = max(d_est, s_min)`。
+  - `rtc.action_horizon/action_dim`：用于 sanity check。
+  - `rtc.reset=true`：在新 episode、prompt 变更或相机变更时显式重置。
+- 动作语义必须与服务端一致（`use_delta_joint_actions=True` 时发送绝对角）。
+
+### 11.3 prev_actions 与执行对齐
+- `prev_actions` 必须来自**实际执行过的动作**（不要用“预测但未执行”的动作）。
+- 初次请求或重置时可发送空数组，服务端负责 padding。
+- 若客户端允许并发请求，必须确保 prev_actions 与执行顺序一致；不确定时改为串行。
+
+### 11.4 客户端统计与回退
+- 维护滑动窗口统计 RTT（如 `b=10`），取 `max` 或 `p95+1` 作为 `d_est`。
+- 若收到服务端 RTC 错误或回退标记，记录日志并退回普通推理。
+- 可选：记录 `d_obs`、动作断档率，便于调参。
