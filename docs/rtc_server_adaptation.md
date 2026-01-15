@@ -155,10 +155,20 @@ JAX 计算向量-雅可比积建议：
 2) **先跑“无 RTC 引导”的异步执行**，验证不卡顿。
 3) **再接入 RTC inpainting**，解决 chunk 边界跳变。
 
-## 9. 实施疑问 / 待确认
-- **d/s 计算归属**：`d` 由客户端基于 RTT 计算并上报，还是服务端基于推理耗时估计？是否需要滑动窗口或保守上界？
-- **prev_actions 的来源**：由客户端每次携带，还是服务端按连接维护状态？若连接重置/丢包，是否需要 `reset_rtc` 指令？
-- **动作语义确认**：`pi05_piper_dual` 当前输出是绝对角还是 delta？`prev_actions` 需要与模型输出严格一致。
-- **能力元数据缺口**：是否已有 `action_horizon`、`control_hz`、`action_dim` 可供客户端获取？若没有，需要在哪里补充？
-- **适配范围**：RTC 只针对 `pi0` 还是要扩展到 `pi05`？不同模型的采样路径是否需要统一接口？
-- **性能与数值稳定**：ΠGDM 引导项的 VJP 计算在 JAX 中如何做最小开销？是否需要上限步数或 β 自适应策略？
+## 9. 实施结论与疑问
+
+### 9.1 已确认结论
+- **d/s 计算归属**：`d` 由客户端基于端到端 RTT 估计并上报；服务端只使用该 `d` 做引导。推荐 `d = ceil(RTT / Δt)`，滑动窗口保守估计 `d_est = max(last_b)` 或 `p95 + 1`；最终确保 `s = max(d_est, s_min)` 且满足 `d <= s <= H - d`。
+- **prev_actions 来源**：推荐客户端每次携带，服务端尽量无状态；可加 `rtc.reset=true` 作为重置标志。若服务端维护状态，需要新连接清空 + `episode_id/reset_rtc` + prompt/相机变更重置。
+- **动作语义**：`pi05_piper_dual` 使用 `use_delta_joint_actions=True`，推理输出已还原为**绝对关节角**；`prev_actions` 必须同语义。夹爪保持绝对（`make_bool_mask(6, -1, 6, -1)`）。
+- **能力元数据**：建议至少补 `action_horizon`、`action_dim`、`control_hz`、`use_delta_joint_actions`；可在 `scripts/serve_policy.py` 组装或在 `policy_config.create_trained_policy` 注入。
+- **适配范围**：先覆盖 `pi0/π0.5`（`pi0.py` 采样路径），再扩展 `pi0_fast`；给 BaseModel 增加 `sample_actions_rtc`，Policy 优先调用，未实现回退 `sample_actions`。
+- **性能与稳定**：ΠGDM 引导用 `jax.vjp` 计算 VJP，采样循环用 `lax.scan + jit`；`β` 裁剪（典型 5），`τ` 设下限如 `1e-3`，必要时加 `grad_norm` clamp。若开销过大，可降低 `n` 或仅前 `k` 步引导；guidance 用 `float32` 更稳。
+
+### 9.2 新增疑问 / 待确认
+- **RTT 测量协议**：客户端如何测 RTT？需要在 ws 里定义 `ping/pong` 时间戳字段或沿用现有健康检查？
+- **d/s 校验责任**：服务端是否需要对 `d/s` 做 sanity check 和 clamp？若不满足约束，是报错还是自动修正？
+- **prev_actions 尺寸/对齐**：`prev_actions` 的维度不一致或长度小于 `H-s` 时，服务端如何处理（pad/报错）？
+- **rtc.reset 语义**：`reset` 是否只清空 prev_actions，还是也影响缓存的观测/提示词？是否需要 `episode_id` 级别隔离？
+- **能力元数据来源**：`control_hz` 与 `action_dim` 是否能从 config/metadata 稳定获取？如果不同机器人频率不一致，谁是单一事实源？
+- **RTC 未实现的模型**：当客户端带 `rtc`，但模型未实现 `sample_actions_rtc` 时，服务端应回退旧推理还是明确返回错误？
