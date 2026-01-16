@@ -18,7 +18,7 @@
 python scripts/serve_policy.py \
   --port 6666 \
   --rtc-mode=auto \
-  --rtc-metadata /path/to/rtc_metadata.json \
+  --rtc-metadata docs/rtc_metadata_piper_dual.json \
   policy:checkpoint \
   --policy.config=pi05_piper_dual \
   --policy.dir /output/openpi/pi05_piper_dual/piper_ft_pi05/4999
@@ -29,7 +29,7 @@ python scripts/serve_policy.py \
 python scripts/serve_policy.py \
   --port 6666 \
   --rtc-mode=only \
-  --rtc-metadata /path/to/rtc_metadata.json \
+  --rtc-metadata docs/rtc_metadata_piper_dual.json \
   policy:checkpoint \
   --policy.config=pi05_piper_dual \
   --policy.dir /output/openpi/pi05_piper_dual/piper_ft_pi05/4999
@@ -44,16 +44,27 @@ python scripts/serve_policy.py \
   - `action_horizon`/`action_dim`：必须与模型一致；服务端会从模型自动补齐这两项。
   - `control_hz`：用于客户端计算 `d` 的参考；服务端仅透传。
   - `use_delta_joint_actions`：动作语义标记；服务端仅透传。
+- 本仓库已提供模板：`docs/rtc_metadata_piper_dual.json`（参考 `/home/lyj/pen/meta/info.json`）。
 - `d/s` 不在服务端配置：这两个值由客户端上报，服务端只做 clamp 与一致性检查。
 
 示例 `rtc_metadata.json`（服务端准备）：
 ```
 {
   "model_name": "pi05_piper_dual",
+  "robot_type": "piper_shm",
+  "repo_id": "local/pen",
   "action_horizon": 50,
   "action_dim": 14,
   "control_hz": 30,
-  "use_delta_joint_actions": true
+  "use_delta_joint_actions": true,
+  "action_units": "absolute_radians",
+  "input_keys": [
+    "observation.state",
+    "prompt",
+    "observation.images.top_rgb",
+    "observation.images.left_wrist",
+    "observation.images.right_wrist"
+  ]
 }
 ```
 
@@ -61,7 +72,7 @@ python scripts/serve_policy.py \
 - **pi0.5/JAX 才能用 RTC**：目前 RTC 仅实现于 `pi0.py` 路径；若 checkpoint 目录含 `model.safetensors`（PyTorch），RTC 会回退普通推理或报错（`rtc_mode=only`）。
 - **metadata 必须与模型一致**：`action_horizon/action_dim` 以服务端为准；若 payload 不一致会被拒绝或回退。
 - **推荐 `rtc_mode=auto`**：保证旧客户端仍可用，RTC 失败自动回退，便于灰度。
-- **metadata JSON 需自行准备**：仓库未自动生成该文件，请按模板手工创建。
+- **metadata JSON 已提供模板**：`docs/rtc_metadata_piper_dual.json`，如有改动需同步更新。
 
 ## 1. 为什么要改（现状问题）
 - 目前服务端是“同步式 chunk 推理”：客户端每次请求必须等待推理完成才能得到新动作块。
@@ -163,8 +174,7 @@ python scripts/serve_policy.py \
 - **服务端加载元数据**：建议使用模板文件并在启动时加载或注入到 `policy.metadata`。
 - **客户端侧兜底**：metadata 缺失时可读本地 override 文件，仅用于本地对齐，不必上送。
 - **CLI 指定**：`scripts/serve_policy.py` 支持 `--rtc-metadata <path>` 载入 JSON。
-- **模板参考**：`/home/lyj/orin_VR/inference/remote_infer/rtc_metadata_template.json`
-- **相机信息来源**：`/home/lyj/orin_VR/configs/piper_inference_dual.json` 中 `cameras` 字段。
+- **模板参考**：`docs/rtc_metadata_piper_dual.json`（基于 `/home/lyj/pen/meta/info.json`）。
 
 示例模板字段（节选）：
 ```

@@ -1,0 +1,17 @@
+{
+  "model_name": "pi05_piper_dual",
+  "robot_type": "piper_shm",
+  "repo_id": "local/pen",
+  "action_horizon": 50,
+  "action_dim": 14,
+  "control_hz": 30,
+  "use_delta_joint_actions": true,
+  "action_units": "absolute_radians",
+  "input_keys": [
+    "observation.state",
+    "prompt",
+    "observation.images.top_rgb",
+    "observation.images.left_wrist",
+    "observation.images.right_wrist"
+  ]
+}
