@@ -57,6 +57,12 @@ python scripts/serve_policy.py \
 }
 ```
 
+### 0.3 服务端注意事项（必看）
+- **pi0.5/JAX 才能用 RTC**：目前 RTC 仅实现于 `pi0.py` 路径；若 checkpoint 目录含 `model.safetensors`（PyTorch），RTC 会回退普通推理或报错（`rtc_mode=only`）。
+- **metadata 必须与模型一致**：`action_horizon/action_dim` 以服务端为准；若 payload 不一致会被拒绝或回退。
+- **推荐 `rtc_mode=auto`**：保证旧客户端仍可用，RTC 失败自动回退，便于灰度。
+- **metadata JSON 需自行准备**：仓库未自动生成该文件，请按模板手工创建。
+
 ## 1. 为什么要改（现状问题）
 - 目前服务端是“同步式 chunk 推理”：客户端每次请求必须等待推理完成才能得到新动作块。
 - 远程推理存在明显 RTT（120~160ms），会在 chunk 边界产生停顿或不连续跳变。
