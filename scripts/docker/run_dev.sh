@@ -4,7 +4,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
-IMAGE="${IMAGE:-openpi_dev}"
+IMAGE="${IMAGE:-openpi_dev_sudo}"
 NAME="${NAME:-openpi_dev}"
 DATA_DIR="${OPENPI_DATA_HOME:-/share/home/linyongjia/.cache/openpi/openpi-assets}"
 LEROBOT_DATA_DIR="${LEROBOT_DATA_DIR:-/share/home/linyongjia/data}"
@@ -30,7 +30,7 @@ usage() {
 Usage: scripts/docker/run_dev.sh [options] [-- <command>]
 
 Options:
-  --image <name>        Docker image to run (default: openpi_dev)
+  --image <name>        Docker image to run (default: openpi_dev_sudo)
   --name <name>         Container name (default: openpi_dev)
   -p, --port <port>     Expose port (repeatable). "8000" or "8000:8000".
   --gpus <spec>         GPU spec: "all", "count=N", "N", or "0,1".

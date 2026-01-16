@@ -1,4 +1,4 @@
-# 离线服务器 Docker 部署指南（openpi_dev）
+# 离线服务器 Docker 部署指南（openpi_dev_sudo）
 
 本指南面向“离线服务器 + Docker 部署”的场景：在有网机器构建镜像与准备项目文件，迁移到离线服务器后直接启动即可使用。
 
@@ -8,10 +8,10 @@ git clone --recurse-submodules <repo_url> openpi
 cd openpi
 
 # 构建自包含开发镜像（含依赖 + 代码）
-docker build -f scripts/docker/dev.Dockerfile -t openpi_dev .
+docker build -f scripts/docker/dev.Dockerfile -t openpi_dev_sudo .
 
 # 导出镜像文件，准备迁移
-docker save openpi_dev -o openpi_dev.tar
+docker save openpi_dev_sudo -o openpi_dev_sudo.tar
 ```
 
 如需离线使用模型权重，建议提前下载到默认缓存目录 `/share/home/linyongjia/.cache/openpi/openpi-assets`，之后整体拷到离线服务器并自动映射为容器内的 `/root/.cache/openpi/openpi-assets`。
@@ -23,12 +23,12 @@ tar -czf openpi_repo.tar.gz openpi
 ```
 
 ## 3. 迁移到离线服务器
-将 `openpi_dev.tar` 与 `openpi_repo.tar.gz` 拷贝到离线服务器（U盘/内网均可）。
+将 `openpi_dev_sudo.tar` 与 `openpi_repo.tar.gz` 拷贝到离线服务器（U盘/内网均可）。
 
 ## 4. 离线服务器：导入与启动
 ```bash
 # 导入镜像
-docker load -i openpi_dev.tar
+docker load -i openpi_dev_sudo.tar
 
 # 解压项目
 tar -xzf openpi_repo.tar.gz
