@@ -10,6 +10,53 @@
 >   --policy.dir /output/openpi/pi05_piper_dual/piper_ft_pi05/4999
 > ```
 
+## 0. 服务端 RTC 启动命令（新增）
+
+### 0.1 推荐命令
+灰度上线（兼容旧客户端）：
+```bash
+python scripts/serve_policy.py \
+  --port 6666 \
+  --rtc-mode=auto \
+  --rtc-metadata /path/to/rtc_metadata.json \
+  policy:checkpoint \
+  --policy.config=pi05_piper_dual \
+  --policy.dir /output/openpi/pi05_piper_dual/piper_ft_pi05/4999
+```
+
+强制 RTC（仅用于联调/验证）：
+```bash
+python scripts/serve_policy.py \
+  --port 6666 \
+  --rtc-mode=only \
+  --rtc-metadata /path/to/rtc_metadata.json \
+  policy:checkpoint \
+  --policy.config=pi05_piper_dual \
+  --policy.dir /output/openpi/pi05_piper_dual/piper_ft_pi05/4999
+```
+
+### 0.2 服务端 RTC 参数设置（仅服务端）
+- `--rtc-mode`：`off`/`auto`/`only`。
+  - `off`：忽略 RTC；完全保持旧推理。
+  - `auto`：有 `rtc` 才走 RTC；失败或不支持自动回退普通推理（推荐默认）。
+  - `only`：必须有 `rtc`；缺失或出错直接返回错误。
+- `--rtc-metadata`：握手阶段发送的元数据 JSON，用于 RTC 校验与对齐（服务端侧设置）。
+  - `action_horizon`/`action_dim`：必须与模型一致；服务端会从模型自动补齐这两项。
+  - `control_hz`：用于客户端计算 `d` 的参考；服务端仅透传。
+  - `use_delta_joint_actions`：动作语义标记；服务端仅透传。
+- `d/s` 不在服务端配置：这两个值由客户端上报，服务端只做 clamp 与一致性检查。
+
+示例 `rtc_metadata.json`（服务端准备）：
+```
+{
+  "model_name": "pi05_piper_dual",
+  "action_horizon": 50,
+  "action_dim": 14,
+  "control_hz": 30,
+  "use_delta_joint_actions": true
+}
+```
+
 ## 1. 为什么要改（现状问题）
 - 目前服务端是“同步式 chunk 推理”：客户端每次请求必须等待推理完成才能得到新动作块。
 - 远程推理存在明显 RTT（120~160ms），会在 chunk 边界产生停顿或不连续跳变。
