@@ -84,6 +84,14 @@ scripts/docker/run_dev.sh --gpus all
 sudo chown -R "$USER":"$USER" /share/home/linyongjia/lyj/openpi
 ```
 
+如果需要在容器里一次性删除项目目录（避免宿主机权限问题），可用下面命令挂载父目录并以 root 删除。请确认路径无误：
+```bash
+OPENPI_DATA_HOME=/tmp/openpi-assets LEROBOT_DATA_DIR=/tmp/lerobot OPENPI_OUTPUT_DIR=/tmp/openpi-output \
+NAME=openpi_dev_rm scripts/docker/run_dev.sh \
+  --as-root --no-gpu --host-net --mount /share/home/linyongjia/lyj -- \
+  /bin/bash -lc 'rm -rf /app/openpi'
+```
+
 ## 6. 在容器中运行服务/实验
 进入容器后可按需运行（注意端口与映射一致）：
 ```bash
