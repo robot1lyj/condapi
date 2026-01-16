@@ -272,16 +272,19 @@ JAX 计算向量-雅可比积建议：
 - 解析 `obs/rtc` envelope，剥离 `rtc` 后再构造 `Observation`；兼容旧协议（payload 直接是 `obs`）。
 - `rtc_mode=off` 时忽略 `rtc`；`rtc_mode=auto` 尝试 RTC，失败/不支持则回退普通推理；`rtc_mode=only` 强制 RTC，缺失或出错返回错误。
 - 响应里新增 `server_timing.rtc_used/rtc_warnings/rtc_error`，用于客户端判定是否发生回退与参数被 clamp 的原因。
+- 代码位置：`src/openpi/serving/websocket_policy_server.py`。
 
 ### 11.2 RTC 参数校验与预处理
 - 校验 `d/s`、`action_horizon/action_dim`，并做 clamp；异常时记录 warning 或回退（视 `rtc_mode`）。
 - `prev_actions` 支持空数组；不足长度右侧 padding、过长截断保留最近 `H-s` 步。
 - `rtc.reset=true` 时忽略 `prev_actions`，以确保新 episode 或 prompt/camera 变化时不串状态。
+- 代码位置：`src/openpi/serving/websocket_policy_server.py`。
 
 ### 11.3 Policy 与模型侧改动
 - `Policy` 新增 `infer_rtc`，优先调用 `sample_actions_rtc`；未实现时抛出 `NotImplementedError` 由服务端回退。
 - `pi0.py` 增加 `sample_actions_rtc`：ΠGDM + soft mask，引导项用 `jax.vjp` 计算 VJP，`β/τ` 做裁剪。
 - `serve_policy.py` 握手 metadata 自动补齐 `action_horizon/action_dim`（从模型配置读取），并合并 `--rtc-metadata`。
+- 代码位置：`src/openpi/policies/policy.py`、`src/openpi/models/pi0.py`、`scripts/serve_policy.py`。
 
 ### 11.4 旧推理与 RTC 共存保证
 - 旧客户端仍可发送裸 `obs`；服务端保持原 `policy.infer` 路径不变。
