@@ -29,6 +29,7 @@ USER_GID=""
 USER_GROUP_NAME=""
 UV_CACHE_DIR_IN_CONTAINER=""
 OPENPI_OUTPUT_DIR_IN_CONTAINER="/output/openpi"
+ENTER_EXISTING=0
 
 usage() {
   cat <<'EOF'
@@ -47,6 +48,7 @@ Options:
   --bind <a:b>          Extra bind mount (repeatable), e.g. /host/file:/container/file
   --user <uid:gid>      Run as this UID:GID (default: 1110:1011 for linyongjia)
   --as-root             Run as root (disables --user)
+  --enter               Enter an existing container (start if needed).
   --workdir <path>      Container working directory (default: /app)
   --host-net            Use host network (ignores -p/--port).
   -d, --detach          Run container in background.
@@ -55,6 +57,7 @@ Options:
 Examples:
   scripts/docker/run_dev.sh -p 8000 --gpus all
   scripts/docker/run_dev.sh --gpus 0,1 --data /data/openpi -- /bin/bash
+  scripts/docker/run_dev.sh --enter -- /bin/bash
 EOF
 }
 
@@ -110,6 +113,10 @@ while [[ $# -gt 0 ]]; do
       USER_SPEC=""
       shift
       ;;
+    --enter)
+      ENTER_EXISTING=1
+      shift
+      ;;
     --workdir)
       WORKDIR="$2"
       shift 2
@@ -139,11 +146,6 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-if docker ps -a --format '{{.Names}}' | grep -Fxq "$NAME"; then
-  echo "Container \"$NAME\" already exists. Remove it or choose a new name." >&2
-  exit 1
-fi
-
 if (( RUN_AS_ROOT == 0 )) && [[ "$OPENPI_DATA_HOME_IN_CONTAINER" == "/root/.cache/openpi" ]]; then
   OPENPI_DATA_HOME_IN_CONTAINER="/openpi_cache"
   OPENPI_ASSETS_MOUNT="${OPENPI_DATA_HOME_IN_CONTAINER}/openpi-assets"
@@ -166,6 +168,57 @@ if (( RUN_AS_ROOT == 0 )); then
   if [[ -z "$USER_GROUP_NAME" ]]; then
     USER_GROUP_NAME="$USER_NAME"
   fi
+fi
+
+if (( ENTER_EXISTING )); then
+  if ! docker ps -a --format '{{.Names}}' | grep -Fxq "$NAME"; then
+    echo "Container \"$NAME\" does not exist. Create it first." >&2
+    exit 1
+  fi
+  if ! docker ps --format '{{.Names}}' | grep -Fxq "$NAME"; then
+    docker start "$NAME" >/dev/null
+  fi
+  if [[ ${#COMMAND[@]} -eq 0 ]]; then
+    COMMAND=(/bin/bash)
+  fi
+  if (( RUN_AS_ROOT == 0 )); then
+    command_str=$(printf '%q ' "${COMMAND[@]}")
+    command_str=${command_str% }
+    bootstrap_cmd=$(cat <<EOF
+set -euo pipefail
+if ! getent group "$USER_GID" >/dev/null; then
+  echo "${USER_GROUP_NAME}:x:${USER_GID}:" >> /etc/group
+fi
+if ! getent passwd "$USER_UID" >/dev/null; then
+  echo "${USER_NAME}:x:${USER_UID}:${USER_GID}:,,,:${HOME_DIR}:/bin/bash" >> /etc/passwd
+fi
+echo "${USER_NAME} ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/${USER_NAME}
+chmod 440 /etc/sudoers.d/${USER_NAME}
+mkdir -p \
+  "${HOME_DIR}" \
+  "${HOME_DIR}/.cache/jax" \
+  "${OPENPI_DATA_HOME_IN_CONTAINER}" \
+  "${UV_CACHE_DIR_IN_CONTAINER}" \
+  "${OPENPI_OUTPUT_DIR_IN_CONTAINER}"
+chown "${USER_UID}:${USER_GID}" \
+  "${HOME_DIR}" \
+  "${HOME_DIR}/.cache" \
+  "${HOME_DIR}/.cache/jax" \
+  "${OPENPI_DATA_HOME_IN_CONTAINER}" \
+  "${UV_CACHE_DIR_IN_CONTAINER}" \
+  "${OPENPI_OUTPUT_DIR_IN_CONTAINER}"
+export HOME="${HOME_DIR}" USER="${USER_NAME}" LOGNAME="${USER_NAME}"
+exec su -m -s /bin/bash "${USER_NAME}" -c "cd \"${WORKDIR}\" && exec ${command_str}"
+EOF
+)
+    exec docker exec -it -u 0 "$NAME" /bin/bash -lc "$bootstrap_cmd"
+  fi
+  exec docker exec -it -u 0 -w "$WORKDIR" "$NAME" "${COMMAND[@]}"
+fi
+
+if docker ps -a --format '{{.Names}}' | grep -Fxq "$NAME"; then
+  echo "Container \"$NAME\" already exists. Remove it or choose a new name." >&2
+  exit 1
 fi
 
 mkdir -p "$DATA_DIR"
