@@ -3,7 +3,7 @@ FROM nvidia/cuda:12.2.2-cudnn8-runtime-ubuntu22.04@sha256:2d913b09e6be8387e1a109
 COPY --from=ghcr.io/astral-sh/uv:0.5.1 /uv /uvx /bin/
 
 ARG USER_NAME=linyongjia
-ARG USER_UID=1011
+ARG USER_UID=1110
 ARG USER_GID=1011
 
 WORKDIR /app
@@ -11,6 +11,13 @@ WORKDIR /app
 RUN apt-get update \
     && apt-get install -y git git-lfs wget curl rsync ca-certificates linux-headers-generic build-essential clang sudo libgl1 libglib2.0-0 ffmpeg \
     && rm -rf /var/lib/apt/lists/*
+
+# Silence NGC license banner in interactive shells.
+RUN for f in /etc/profile /etc/bash.bashrc /etc/profile.d/*; do \
+    if [ -f "$f" ] && grep -q "NGC-DL-CONTAINER-LICENSE" "$f"; then \
+        sed -i '/NGC-DL-CONTAINER-LICENSE/d' "$f"; \
+    fi; \
+  done
 
 RUN if ! getent group "${USER_GID}" >/dev/null; then groupadd -g "${USER_GID}" "${USER_NAME}"; fi \
     && if ! id -u "${USER_NAME}" >/dev/null 2>&1; then useradd -m -u "${USER_UID}" -g "${USER_GID}" -s /bin/bash "${USER_NAME}"; fi \

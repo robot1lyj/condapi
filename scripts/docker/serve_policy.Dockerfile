@@ -15,6 +15,13 @@ WORKDIR /app
 # Needed because LeRobot uses git-lfs.
 RUN apt-get update && apt-get install -y git git-lfs linux-headers-generic build-essential clang
 
+# Silence NGC license banner in interactive shells.
+RUN for f in /etc/profile /etc/bash.bashrc /etc/profile.d/*; do \
+    if [ -f "$f" ] && grep -q "NGC-DL-CONTAINER-LICENSE" "$f"; then \
+        sed -i '/NGC-DL-CONTAINER-LICENSE/d' "$f"; \
+    fi; \
+  done
+
 # Copy from the cache instead of linking since it's a mounted volume
 ENV UV_LINK_MODE=copy
 

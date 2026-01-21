@@ -112,14 +112,7 @@ action_chunk = policy.infer(example)["actions"]
 You can also test this out in the [example notebook](examples/inference.ipynb).
 
 We provide detailed step-by-step examples for running inference of our pre-trained checkpoints on [DROID](examples/droid/README.md) and [ALOHA](examples/aloha_real/README.md) robots.
-
-**Remote Inference**: We provide [examples and code](docs/remote_inference.md) for running inference of our models **remotely**: the model can run on a different server and stream actions to the robot via a websocket connection. This makes it easy to use more powerful GPUs off-robot and keep robot and policy environments separate.
-
-**Test inference without a robot**: We provide a [script](examples/simple_client/README.md) for testing inference without a robot. This script will generate a random observation and run inference with the model. See [here](examples/simple_client/README.md) for more details.
-
-
-
-
+See [docs/README.md](docs/README.md) for a categorized documentation index.
 
 ## Fine-Tuning Base Models on Your Own Data
 
@@ -176,7 +169,6 @@ This will spin up a server that listens on port 8000 and waits for observations 
 
 For running the LIBERO eval in particular, we provide (and recommend using) a Dockerized workflow that handles both the policy server and the evaluation script together. See the [LIBERO README](examples/libero/README.md) for more details.
 
-If you want to embed a policy server call in your own robot runtime, we have a minimal example of how to do so in the [remote inference docs](docs/remote_inference.md).
 
 
 

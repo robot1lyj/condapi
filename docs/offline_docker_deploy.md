@@ -53,7 +53,7 @@ scripts/docker/run_dev.sh
 ## 5. 一条命令完成启动（进入 bash + 用户 + 端口 + GPU + 挂载）
 下面是一条“全量版”启动命令，直接进入容器 bash。你只需要按需替换路径和 GPU 数即可：
 ```bash
- IMAGE=openpi_dev_sudo scripts/docker/run_dev.sh \
+scripts/docker/run_dev.sh \
   --mount /share/home/linyongjia/lyj/openpi \
   --gpus all \
   -p 6666 \
