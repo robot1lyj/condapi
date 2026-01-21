@@ -28,6 +28,7 @@ USER_UID=""
 USER_GID=""
 USER_GROUP_NAME=""
 UV_CACHE_DIR_IN_CONTAINER=""
+OPENPI_OUTPUT_DIR_IN_CONTAINER="/output/openpi"
 
 usage() {
   cat <<'EOF'
@@ -255,8 +256,19 @@ if ! getent passwd "$USER_UID" >/dev/null; then
 fi
 echo "${USER_NAME} ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/${USER_NAME}
 chmod 440 /etc/sudoers.d/${USER_NAME}
-mkdir -p "${HOME_DIR}" "${OPENPI_DATA_HOME_IN_CONTAINER}" "${UV_CACHE_DIR_IN_CONTAINER}"
-chown "${USER_UID}:${USER_GID}" "${HOME_DIR}" "${OPENPI_DATA_HOME_IN_CONTAINER}" "${UV_CACHE_DIR_IN_CONTAINER}"
+mkdir -p \
+  "${HOME_DIR}" \
+  "${HOME_DIR}/.cache/jax" \
+  "${OPENPI_DATA_HOME_IN_CONTAINER}" \
+  "${UV_CACHE_DIR_IN_CONTAINER}" \
+  "${OPENPI_OUTPUT_DIR_IN_CONTAINER}"
+chown "${USER_UID}:${USER_GID}" \
+  "${HOME_DIR}" \
+  "${HOME_DIR}/.cache" \
+  "${HOME_DIR}/.cache/jax" \
+  "${OPENPI_DATA_HOME_IN_CONTAINER}" \
+  "${UV_CACHE_DIR_IN_CONTAINER}" \
+  "${OPENPI_OUTPUT_DIR_IN_CONTAINER}"
 export HOME="${HOME_DIR}" USER="${USER_NAME}" LOGNAME="${USER_NAME}"
 exec su -m -s /bin/bash "${USER_NAME}" -c "cd \"${WORKDIR}\" && exec ${command_str}"
 EOF
