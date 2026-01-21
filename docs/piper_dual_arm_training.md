@@ -109,6 +109,19 @@ python scripts/train.py pi05_piper_dual \
 sudo mkdir -p /home/linyongjia/.cache/uv
 sudo chown -R linyongjia:linyongjia /home/linyongjia/.cache/uv
 ```
+- 推荐将 HuggingFace 缓存固定到 `/openpi_cache`：
+```bash
+export HF_HOME=/openpi_cache/huggingface
+export HUGGINGFACE_HUB_CACHE=$HF_HOME/hub
+export HF_DATASETS_CACHE=$HF_HOME/datasets
+export TRANSFORMERS_CACHE=$HF_HOME/transformers
+
+mkdir -p $HF_HOME $HUGGINGFACE_HUB_CACHE $HF_DATASETS_CACHE $TRANSFORMERS_CACHE
+```
+  - 如果 `/openpi_cache` 仍无权限：
+```bash
+sudo chown -R 1110:1011 /openpi_cache
+```
 - `/app` 无写权限时修复：
 ```bash
 sudo chown -R linyongjia:linyongjia /app
