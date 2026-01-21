@@ -122,6 +122,16 @@ mkdir -p $HF_HOME $HUGGINGFACE_HUB_CACHE $HF_DATASETS_CACHE $TRANSFORMERS_CACHE
 ```bash
 sudo chown -R 1110:1011 /openpi_cache
 ```
+- 训练输出目录（checkpoint）权限修复（一次性）：
+```bash
+sudo mkdir -p /output/openpi
+sudo chown -R 1110:1011 /output/openpi
+```
+- JAX 编译缓存权限修复（一次性）：
+```bash
+sudo mkdir -p /home/linyongjia/.cache/jax
+sudo chown -R 1110:1011 /home/linyongjia/.cache
+```
 - `/app` 无写权限时修复：
 ```bash
 sudo chown -R linyongjia:linyongjia /app
