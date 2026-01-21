@@ -24,6 +24,10 @@ EXTRA_MOUNTS=()
 USER_SPEC="${USER_SPEC:-1110:1011}"
 RUN_AS_ROOT=0
 COMMAND=()
+USER_UID=""
+USER_GID=""
+USER_GROUP_NAME=""
+UV_CACHE_DIR_IN_CONTAINER=""
 
 usage() {
   cat <<'EOF'
@@ -144,6 +148,25 @@ if (( RUN_AS_ROOT == 0 )) && [[ "$OPENPI_DATA_HOME_IN_CONTAINER" == "/root/.cach
   OPENPI_ASSETS_MOUNT="${OPENPI_DATA_HOME_IN_CONTAINER}/openpi-assets"
 fi
 
+UV_CACHE_DIR_IN_CONTAINER="${UV_CACHE_DIR:-${OPENPI_DATA_HOME_IN_CONTAINER}/uv}"
+
+if (( RUN_AS_ROOT == 0 )); then
+  if [[ "$USER_SPEC" != *:* ]]; then
+    echo "Invalid --user value (expected uid:gid): $USER_SPEC" >&2
+    exit 1
+  fi
+  USER_UID="${USER_SPEC%%:*}"
+  USER_GID="${USER_SPEC##*:}"
+  if [[ -z "$USER_UID" || -z "$USER_GID" ]]; then
+    echo "Invalid --user value (expected uid:gid): $USER_SPEC" >&2
+    exit 1
+  fi
+  USER_GROUP_NAME="${USER_GROUP_NAME:-$(getent group "$USER_GID" | awk -F: '{print $1}')}"
+  if [[ -z "$USER_GROUP_NAME" ]]; then
+    USER_GROUP_NAME="$USER_NAME"
+  fi
+fi
+
 mkdir -p "$DATA_DIR"
 mkdir -p "$LEROBOT_DATA_DIR"
 mkdir -p "$OUTPUT_DIR"
@@ -154,6 +177,7 @@ run_args=(
   -e OPENPI_DATA_HOME="$OPENPI_DATA_HOME_IN_CONTAINER"
   -e OPENPI_OUTPUT_DIR=/output/openpi
   -e HF_LEROBOT_HOME="${HF_LEROBOT_HOME:-/data}"
+  -e UV_CACHE_DIR="$UV_CACHE_DIR_IN_CONTAINER"
   -e IS_DOCKER=true
   -e NVIDIA_DRIVER_CAPABILITIES=all
   -v "$DATA_DIR":"$OPENPI_ASSETS_MOUNT"
@@ -163,7 +187,7 @@ run_args=(
 )
 
 if (( RUN_AS_ROOT == 0 )); then
-  run_args+=(--user "$USER_SPEC" -e HOME="$HOME_DIR" -e USER="$USER_NAME" -e LOGNAME="$USER_NAME")
+  run_args+=(-e HOME="$HOME_DIR" -e USER="$USER_NAME" -e LOGNAME="$USER_NAME")
 fi
 
 if [[ -n "$MOUNT_SRC" ]]; then
@@ -217,4 +241,27 @@ if [[ ${#COMMAND[@]} -eq 0 ]]; then
   COMMAND=(/bin/bash)
 fi
 
-docker run "${run_args[@]}" "$IMAGE" "${COMMAND[@]}"
+RUN_COMMAND=("${COMMAND[@]}")
+if (( RUN_AS_ROOT == 0 )); then
+  command_str=$(printf '%q ' "${COMMAND[@]}")
+  command_str=${command_str% }
+  bootstrap_cmd=$(cat <<EOF
+set -euo pipefail
+if ! getent group "$USER_GID" >/dev/null; then
+  echo "${USER_GROUP_NAME}:x:${USER_GID}:" >> /etc/group
+fi
+if ! getent passwd "$USER_UID" >/dev/null; then
+  echo "${USER_NAME}:x:${USER_UID}:${USER_GID}:,,,:${HOME_DIR}:/bin/bash" >> /etc/passwd
+fi
+echo "${USER_NAME} ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/${USER_NAME}
+chmod 440 /etc/sudoers.d/${USER_NAME}
+mkdir -p "${HOME_DIR}" "${OPENPI_DATA_HOME_IN_CONTAINER}" "${UV_CACHE_DIR_IN_CONTAINER}"
+chown "${USER_UID}:${USER_GID}" "${HOME_DIR}" "${OPENPI_DATA_HOME_IN_CONTAINER}" "${UV_CACHE_DIR_IN_CONTAINER}"
+export HOME="${HOME_DIR}" USER="${USER_NAME}" LOGNAME="${USER_NAME}"
+exec su -m -s /bin/bash "${USER_NAME}" -c "cd \"${WORKDIR}\" && exec ${command_str}"
+EOF
+)
+  RUN_COMMAND=(/bin/bash -lc "$bootstrap_cmd")
+fi
+
+docker run "${run_args[@]}" "$IMAGE" "${RUN_COMMAND[@]}"
