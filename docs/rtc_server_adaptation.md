@@ -1,18 +1,9 @@
-# OpenPI 服务器端 RTC 适配指南（pi05_piper_dual）
+# OpenPI 服务器端 RTC 推理指南（pi05_piper_dual）
 
-> 目标：在 `openpi` 服务端实现 Real-Time Chunking（RTC）推理，使远程推理在高延迟下仍连续、平滑。当前服务端启动命令：
-> 
-> ```bash
-> python scripts/serve_policy.py \
->   --port 6666 \
->   policy:checkpoint \
->   --policy.config=pi05_piper_dual \
->   --policy.dir /output/openpi/pi05_piper_dual/piper_ft_pi05/4999
-> ```
+> 目标：在 `openpi` 服务端启用 Real-Time Chunking（RTC）推理，使远程推理在高延迟下仍连续、平滑。
 
-## 0. 服务端 RTC 启动命令（新增）
+## 快速开始（推荐）
 
-### 0.1 推荐命令
 灰度上线（兼容旧客户端）：
 ```bash
 python scripts/serve_policy.py \
@@ -24,7 +15,7 @@ python scripts/serve_policy.py \
   --policy.dir /output/openpi/pi05_piper_dual/piper_ft_pi05/4999
 ```
 
-强制 RTC（仅用于联调/验证）：
+强制 RTC（仅联调/验证）：
 ```bash
 python scripts/serve_policy.py \
   --port 6666 \
@@ -35,19 +26,37 @@ python scripts/serve_policy.py \
   --policy.dir /output/openpi/pi05_piper_dual/piper_ft_pi05/4999
 ```
 
-### 0.2 服务端 RTC 参数设置（仅服务端）
-- `--rtc-mode`：`off`/`auto`/`only`。
-  - `off`：忽略 RTC；完全保持旧推理。
-  - `auto`：有 `rtc` 才走 RTC；失败或不支持自动回退普通推理（推荐默认）。
-  - `only`：必须有 `rtc`；缺失或出错直接返回错误。
-- `--rtc-metadata`：握手阶段发送的元数据 JSON，用于 RTC 校验与对齐（服务端侧设置）。
-  - `action_horizon`/`action_dim`：必须与模型一致；服务端会从模型自动补齐这两项。
-  - `control_hz`：用于客户端计算 `d` 的参考；服务端仅透传。
-  - `use_delta_joint_actions`：动作语义标记；服务端仅透传。
-- 本仓库已提供模板：`docs/rtc_metadata_piper_dual.json`（参考 `/home/lyj/pen/meta/info.json`）。
-- `d/s` 不在服务端配置：这两个值由客户端上报，服务端只做 clamp 与一致性检查。
+关闭 RTC（保持旧推理）：
+```bash
+python scripts/serve_policy.py \
+  --port 6666 \
+  --rtc-mode=off \
+  policy:checkpoint \
+  --policy.config=pi05_piper_dual \
+  --policy.dir /output/openpi/pi05_piper_dual/piper_ft_pi05/4999
+```
 
-示例 `rtc_metadata.json`（服务端准备）：
+## 运行参数说明（服务端）
+
+- `--rtc-mode`：`off`/`auto`/`only`
+  - `off`：忽略 RTC，完全走旧推理路径。
+  - `auto`：请求带 `rtc` 则走 RTC；失败或不支持自动回退旧推理（推荐默认）。
+  - `only`：必须含 `rtc`，否则返回错误。
+- `--rtc-metadata <path>`：RTC 握手元数据 JSON（仅服务端配置）。
+  - 建议使用模板：`docs/rtc_metadata_piper_dual.json`。
+  - `action_horizon/action_dim` 必须与模型一致（服务端会从模型补齐/校验）。
+  - `control_hz/use_delta_joint_actions` 只透传给客户端。
+- `--port`：服务端端口（默认 8000）。
+- `--default-prompt`：可选固定 prompt。
+
+## 兼容性说明
+
+- **保持旧推理路径可用**：推荐 `--rtc-mode=auto`，满足 RTC 与旧客户端共存的要求。
+- **仅 JAX pi0 路径支持 RTC**：如果 checkpoint 使用 PyTorch（含 `model.safetensors`），RTC 会回退普通推理或报错（`rtc_mode=only`）。
+
+## Metadata 模板（服务端准备）
+
+示例字段：
 ```
 {
   "model_name": "pi05_piper_dual",
@@ -68,7 +77,7 @@ python scripts/serve_policy.py \
 }
 ```
 
-### 0.3 服务端注意事项（必看）
+## 0. 服务端注意事项（必看）
 - **pi0.5/JAX 才能用 RTC**：目前 RTC 仅实现于 `pi0.py` 路径；若 checkpoint 目录含 `model.safetensors`（PyTorch），RTC 会回退普通推理或报错（`rtc_mode=only`）。
 - **metadata 必须与模型一致**：`action_horizon/action_dim` 以服务端为准；若 payload 不一致会被拒绝或回退。
 - **推荐 `rtc_mode=auto`**：保证旧客户端仍可用，RTC 失败自动回退，便于灰度。
