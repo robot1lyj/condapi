@@ -45,7 +45,7 @@ python scripts/serve_policy.py \
 - `--rtc-metadata <path>`：RTC 握手元数据 JSON（仅服务端配置）。
   - 建议使用模板：`docs/rtc_metadata_piper_dual.json`。
   - `action_horizon/action_dim` 必须与模型一致（服务端会从模型补齐/校验）。
-  - `control_hz/use_delta_joint_actions` 只透传给客户端。
+  - `control_hz/use_delta_joint_actions` 只透传给客户端；`use_delta_joint_actions` 表示模型是否在**delta 动作空间**训练。
 - `--port`：服务端端口（默认 8000）。
 - `--default-prompt`：可选固定 prompt。
 
@@ -64,6 +64,7 @@ python scripts/serve_policy.py \
   "repo_id": "local/pen",
   "action_horizon": 50,
   "action_dim": 14,
+  "robot_action_dim": 14,
   "control_hz": 30,
   "use_delta_joint_actions": true,
   "action_units": "absolute_radians",
@@ -73,9 +74,20 @@ python scripts/serve_policy.py \
     "observation.images.top_rgb",
     "observation.images.left_wrist",
     "observation.images.right_wrist"
-  ]
+  ],
+  "image_keys": [
+    "observation.images.top_rgb",
+    "observation.images.left_wrist",
+    "observation.images.right_wrist"
+  ],
+  "prompt_key": "prompt",
+  "action_key": "action"
 }
 ```
+
+说明：
+- `use_delta_joint_actions=true` 表示**模型内部**在 delta 空间训练；推理输出会经过 `AbsoluteActions` 转为绝对角。
+- RTC 的 `prev_actions` 必须与模型内部空间一致（即 delta）；若客户端只有绝对角，需要先按 joint mask 做 `prev_actions_delta = prev_actions_abs - state`（夹爪保持绝对）。
 
 ## 0. 服务端注意事项（必看）
 - **pi0.5/JAX 才能用 RTC**：目前 RTC 仅实现于 `pi0.py` 路径；若 checkpoint 目录含 `model.safetensors`（PyTorch），RTC 会回退普通推理或报错（`rtc_mode=only`）。
@@ -191,10 +203,24 @@ python scripts/serve_policy.py \
   "model_name": "pi05_piper_dual",
   "action_horizon": 50,
   "action_dim": 14,
+  "robot_action_dim": 14,
   "control_hz": 30,
   "use_delta_joint_actions": true,
   "action_units": "absolute_radians",
-  "input_keys": ["observation.state", "prompt", "observation.images.<cam_name>"]
+  "input_keys": [
+    "observation.state",
+    "prompt",
+    "observation.images.top_rgb",
+    "observation.images.left_wrist",
+    "observation.images.right_wrist"
+  ],
+  "image_keys": [
+    "observation.images.top_rgb",
+    "observation.images.left_wrist",
+    "observation.images.right_wrist"
+  ],
+  "prompt_key": "prompt",
+  "action_key": "action"
 }
 ```
 
@@ -221,7 +247,7 @@ JAX 计算向量-雅可比积建议：
 - 使用 `jax.vjp` 或 `jax.grad` 计算 `∂Â_t^1/∂A_t^τ` 对应的 VJP。
 
 ## 5. 必要注意事项
-- **动作格式**：`use_delta_joint_actions=True` 时，模型输出已经是**绝对关节角**。`prev_actions` 也必须是绝对角，否则会出现“二次累加”。
+- **动作语义**：`pi05_piper_dual` 在 `src/openpi/training/config.py` 中配置 `use_delta_joint_actions=True`，模型内部为 delta；推理输出经 `AbsoluteActions` 转为绝对角。RTC 的 `prev_actions` 必须是 delta，否则会出现“二次累加”。若客户端只持有绝对角，请用 `make_bool_mask(6, -1, 6, -1)` 对关节维做 `prev_actions_delta = prev_actions_abs - state`（夹爪保持绝对）。
 - **d/s 计算**：`d` 必须是“步数”，而不是毫秒；建议取最近 `b` 次延迟的 `max`（更保守）。
 - **s 约束**：若 `s < d`，RTC 不能保证连续；服务端可主动 clamp 为 `s = max(s, d)`。
 - **β 裁剪**：小步数控制场景下必须做裁剪，否则引导项可能发散。
@@ -253,7 +279,7 @@ JAX 计算向量-雅可比积建议：
 ### 9.1 已确认结论
 - **d/s 计算归属**：`d` 由客户端基于端到端 RTT 估计并上报；服务端只使用该 `d` 做引导。推荐 `d = ceil(RTT / Δt)`，滑动窗口保守估计 `d_est = max(last_b)` 或 `p95 + 1`；最终确保 `s = max(d_est, s_min)` 且满足 `d <= s <= H - d`。RTT 以**推理请求的往返时间**为主（发包→收包），`/healthz` 仅连通性不适合统计。
 - **prev_actions 来源**：推荐客户端每次携带，服务端尽量无状态；可加 `rtc.reset=true` 作为重置标志。若服务端维护状态，需要新连接清空 + `episode_id/reset_rtc` + prompt/相机变更重置。
-- **动作语义**：`pi05_piper_dual` 使用 `use_delta_joint_actions=True`，推理输出已还原为**绝对关节角**；`prev_actions` 必须同语义。夹爪保持绝对（`make_bool_mask(6, -1, 6, -1)`）。
+- **动作语义**：`pi05_piper_dual` 使用 `use_delta_joint_actions=True`（模型内部 delta）；推理输出经 `AbsoluteActions` 还原为绝对角。RTC 的 `prev_actions` 需为 delta；若客户端只有绝对角，需按 `make_bool_mask(6, -1, 6, -1)` 转换（夹爪保持绝对）。
 - **d/s 校验责任**：服务端做 sanity check + clamp（`d<0`→0，`s<d`→`s=d`，`s>H-d`→`s=H-d`）。若异常，记录 warning，必要时回退普通推理。
 - **prev_actions 尺寸处理**：`action_dim` 不一致直接拒绝 RTC；长度不足右侧 padding（0 或 last action），长度过长截断保留最后 `H-s` 步。
 - **rtc.reset 语义**：`rtc.reset=true` 清空 prev_actions/RTC 状态，默认不影响 prompt/观测缓存；prompt 变化可视为隐式 reset。更稳妥可引入 `episode_id` 做隔离。
