@@ -58,6 +58,19 @@ Success criteria:
 - `serve_policy.py --port <PORT>` process exists
 - container-local `http://127.0.0.1:<PORT>/healthz` returns `OK`
 
+## Required completion output
+When user asks "训练/推理是否完成" or asks to show evidence, always return raw output from:
+```bash
+PORT=6666 \
+bash docs/skills/openpi_infer_docker/scripts/check_infer_remote.sh
+```
+The output must include these sections:
+- `===== docker ps =====`
+- `===== docker logs: <container> (tail N) =====`
+- `===== container file log: /tmp/openpi_infer_<port>.log (tail N) =====`
+- `===== healthz =====`
+- `===== process grep =====`
+
 ## Environment variables
 - `PORT` default `6666`
 - `RTC_MODE` default `off`
