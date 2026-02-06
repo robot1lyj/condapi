@@ -60,7 +60,7 @@ if [ -z "$proc_line" ]; then
   exit 1
 fi
 
-health="$(docker exec "$container_name" bash -lc "python -c \"import urllib.request;print(urllib.request.urlopen('http://127.0.0.1:$port/healthz', timeout=5).read().decode().strip())\"" || true)"
+health="$(docker exec "$container_name" bash -lc "wget -qO- --timeout=5 http://127.0.0.1:$port/healthz" 2>/dev/null || true)"
 if [ "$health" != "OK" ]; then
   echo "[err] health check failed on port $port, got: ${health:-<empty>}"
   exit 1

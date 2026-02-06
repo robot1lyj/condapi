@@ -69,6 +69,10 @@ class Args:
     # Specifies how to load the policy. If not provided, the default policy for the environment will be used.
     policy: Checkpoint | Default = dataclasses.field(default_factory=Default)
 
+    # Optional override for train config data repo_id used while constructing policy transforms/norm stats.
+    # Example: local/towel_merged
+    policy_repo_id: str | None = None
+
 
 # Default checkpoints that should be used for each environment.
 DEFAULT_CHECKPOINT: dict[EnvMode, Checkpoint] = {
@@ -91,11 +95,28 @@ DEFAULT_CHECKPOINT: dict[EnvMode, Checkpoint] = {
 }
 
 
-def create_default_policy(env: EnvMode, *, default_prompt: str | None = None) -> _policy.Policy:
+def _override_policy_repo_id(train_config: _config.TrainConfig, policy_repo_id: str | None) -> _config.TrainConfig:
+    if policy_repo_id is None:
+        return train_config
+    data_config_factory = train_config.data
+    if not dataclasses.is_dataclass(data_config_factory):
+        raise ValueError("Train config data is not a dataclass; cannot override repo_id.")
+    if not hasattr(data_config_factory, "repo_id"):
+        raise ValueError("Train config data has no repo_id field; cannot override repo_id.")
+    logging.info("Overriding policy repo_id to: %s", policy_repo_id)
+    return dataclasses.replace(train_config, data=dataclasses.replace(data_config_factory, repo_id=policy_repo_id))
+
+
+def create_default_policy(
+    env: EnvMode, *, default_prompt: str | None = None, policy_repo_id: str | None = None
+) -> _policy.Policy:
     """Create a default policy for the given environment."""
     if checkpoint := DEFAULT_CHECKPOINT.get(env):
+        train_config = _override_policy_repo_id(_config.get_config(checkpoint.config), policy_repo_id)
         return _policy_config.create_trained_policy(
-            _config.get_config(checkpoint.config), checkpoint.dir, default_prompt=default_prompt
+            train_config,
+            checkpoint.dir,
+            default_prompt=default_prompt,
         )
     raise ValueError(f"Unsupported environment mode: {env}")
 
@@ -104,11 +125,14 @@ def create_policy(args: Args) -> _policy.Policy:
     """Create a policy from the given arguments."""
     match args.policy:
         case Checkpoint():
+            train_config = _override_policy_repo_id(_config.get_config(args.policy.config), args.policy_repo_id)
             return _policy_config.create_trained_policy(
-                _config.get_config(args.policy.config), args.policy.dir, default_prompt=args.default_prompt
+                train_config,
+                args.policy.dir,
+                default_prompt=args.default_prompt,
             )
         case Default():
-            return create_default_policy(args.env, default_prompt=args.default_prompt)
+            return create_default_policy(args.env, default_prompt=args.default_prompt, policy_repo_id=args.policy_repo_id)
 
 
 def _load_metadata(path: str | None) -> dict:

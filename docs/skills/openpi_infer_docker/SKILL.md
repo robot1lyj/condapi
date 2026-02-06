@@ -62,6 +62,7 @@ Success criteria:
 - `PORT` default `6666`
 - `RTC_MODE` default `off`
 - `DEFAULT_PROMPT` optional
+- `POLICY_REPO_ID` optional; if unset, auto-detected from latest training log
 - `CONFIG_NAME`/`EXP_NAME`/`STEP` optional manual override
 - `CONTAINER_NAME` default `openpi_dev`
 - `FORCE_RESTART` default `1` (kill existing same-port server before start)

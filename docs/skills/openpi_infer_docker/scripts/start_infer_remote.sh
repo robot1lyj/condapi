@@ -41,12 +41,14 @@ load_profile "$PROFILE_FILE"
 : "${REMOTE_USER:?REMOTE_USER is required}"
 : "${REMOTE_HOST:?REMOTE_HOST is required}"
 : "${REMOTE_PORT:?REMOTE_PORT is required}"
-: "${ROOT:?ROOT is required}"
 : "${OPENPI_OUTPUT_DIR:?OPENPI_OUTPUT_DIR is required}"
+: "${WORKDIR:=/app}"
+: "${OPENPI_OUTPUT_DIR_IN_CONTAINER:=/output/openpi}"
 
 PORT="${PORT:-6666}"
-RTC_MODE="${RTC_MODE:-off}"
+RTC_MODE_RAW="${RTC_MODE:-off}"
 DEFAULT_PROMPT="${DEFAULT_PROMPT:-}"
+POLICY_REPO_ID="${POLICY_REPO_ID:-}"
 CONTAINER_NAME="${CONTAINER_NAME:-openpi_dev}"
 FORCE_RESTART="${FORCE_RESTART:-1}"
 
@@ -103,9 +105,15 @@ if [ -z "$CONFIG_NAME" ] || [ -z "$EXP_NAME" ] || [ -z "$STEP" ]; then
   exit 1
 fi
 
-policy_dir="$OPENPI_OUTPUT_DIR/$CONFIG_NAME/$EXP_NAME/$STEP"
+policy_dir_host="$OPENPI_OUTPUT_DIR/$CONFIG_NAME/$EXP_NAME/$STEP"
 if [ -n "$auto_policy_dir" ] && [ "$CONFIG_NAME" = "$auto_config" ] && [ "$EXP_NAME" = "$auto_exp" ] && [ "$STEP" = "$auto_step" ]; then
-  policy_dir="$auto_policy_dir"
+  policy_dir_host="$auto_policy_dir"
+fi
+
+policy_dir_container="$OPENPI_OUTPUT_DIR_IN_CONTAINER/$CONFIG_NAME/$EXP_NAME/$STEP"
+if [[ "$policy_dir_host" == "$OPENPI_OUTPUT_DIR/"* ]]; then
+  suffix="${policy_dir_host#"$OPENPI_OUTPUT_DIR/"}"
+  policy_dir_container="$OPENPI_OUTPUT_DIR_IN_CONTAINER/$suffix"
 fi
 
 default_prompt_arg=""
@@ -113,22 +121,44 @@ if [ -n "$DEFAULT_PROMPT" ]; then
   default_prompt_arg="--default-prompt $(printf '%q' "$DEFAULT_PROMPT")"
 fi
 
-serve_cmd="python scripts/serve_policy.py --port $PORT --rtc-mode $RTC_MODE policy:checkpoint --policy.config=$CONFIG_NAME --policy.dir $policy_dir $default_prompt_arg"
+if [ -z "$POLICY_REPO_ID" ] && [ -n "$auto_repo_id" ]; then
+  POLICY_REPO_ID="$auto_repo_id"
+fi
+policy_repo_id_arg=""
+if [ -n "$POLICY_REPO_ID" ]; then
+  policy_repo_id_arg="--policy-repo-id $POLICY_REPO_ID"
+fi
+
+rtc_mode_upper="$(echo "$RTC_MODE_RAW" | tr '[:lower:]' '[:upper:]')"
+case "$rtc_mode_upper" in
+  OFF|AUTO|ONLY) ;;
+  *)
+    echo "[err] invalid RTC_MODE: $RTC_MODE_RAW (expected off|auto|only or OFF|AUTO|ONLY)"
+    exit 1
+    ;;
+esac
+
+serve_cmd="python scripts/serve_policy.py --port $PORT --rtc-mode $rtc_mode_upper $policy_repo_id_arg policy:checkpoint --policy.config=$CONFIG_NAME --policy.dir $policy_dir_container $default_prompt_arg"
+serve_cmd_b64="$(printf '%s' "$serve_cmd" | base64 | tr -d '\n')"
 
 echo "[info] repo_id=$auto_repo_id prompt_mode=$prompt_mode"
 echo "[info] resolved config=$CONFIG_NAME exp=$EXP_NAME step=$STEP"
-echo "[info] policy_dir=$policy_dir"
+echo "[info] policy_dir_host=$policy_dir_host"
+echo "[info] policy_dir_container=$policy_dir_container"
+echo "[info] rtc_mode=$rtc_mode_upper"
+echo "[info] policy_repo_id=${POLICY_REPO_ID:-<none>}"
 echo "[info] serve_cmd=$serve_cmd"
 
 ssh -p "$REMOTE_PORT" "$REMOTE_USER@$REMOTE_HOST" /bin/bash -s -- \
-  "$CONTAINER_NAME" "$PORT" "$ROOT" "$FORCE_RESTART" "$serve_cmd" <<'REMOTE_SCRIPT'
+  "$CONTAINER_NAME" "$PORT" "$WORKDIR" "$FORCE_RESTART" "$serve_cmd_b64" <<'REMOTE_SCRIPT'
 set -euo pipefail
 
 container_name="$1"
 port="$2"
-root="$3"
+workdir="$3"
 force_restart="$4"
-serve_cmd="$5"
+serve_cmd_b64="$5"
+serve_cmd="$(printf '%s' "$serve_cmd_b64" | base64 -d)"
 
 if ! docker ps --format '{{.Names}}' | grep -Fxq "$container_name"; then
   echo "[err] container not running: $container_name"
@@ -137,25 +167,37 @@ fi
 
 if [ "$force_restart" = "1" ]; then
   docker exec "$container_name" bash -lc "\
-    pids=\$(ps -ef | grep 'scripts/serve_policy.py' | grep -- '--port $port' | grep -v grep | awk '{print \$2}'); \
+    pids=\$(ps -ef | grep 'scripts/serve_policy.py' | grep -- '--port $port' | grep -v grep | awk '{print \$2}' || true); \
     if [ -n \"\$pids\" ]; then kill \$pids; fi"
 fi
 
 docker exec "$container_name" bash -lc "\
-  cd '$root'; \
+  cd '$workdir'; \
   nohup $serve_cmd > /tmp/openpi_infer_${port}.log 2>&1 & \
   echo \$! > /tmp/openpi_infer_${port}.pid"
 
-sleep 2
-
-proc_line="$(docker exec "$container_name" bash -lc "ps -ef | grep 'scripts/serve_policy.py' | grep -- '--port $port' | grep -v grep | head -n 1" || true)"
+proc_line=""
+for _ in $(seq 1 30); do
+  proc_line="$(docker exec "$container_name" bash -lc "ps -ef | grep 'scripts/serve_policy.py' | grep -- '--port $port' | grep -v grep | head -n 1" || true)"
+  if [ -n "$proc_line" ]; then
+    break
+  fi
+  sleep 1
+done
 if [ -z "$proc_line" ]; then
   echo "[err] failed to start serve_policy on port $port"
   docker exec "$container_name" bash -lc "tail -n 60 /tmp/openpi_infer_${port}.log || true"
   exit 1
 fi
 
-health="$(docker exec "$container_name" bash -lc "python -c \"import urllib.request;print(urllib.request.urlopen('http://127.0.0.1:$port/healthz', timeout=5).read().decode().strip())\"" || true)"
+health=""
+for _ in $(seq 1 240); do
+  health="$(docker exec "$container_name" bash -lc "wget -qO- --timeout=5 http://127.0.0.1:$port/healthz" 2>/dev/null || true)"
+  if [ "$health" = "OK" ]; then
+    break
+  fi
+  sleep 1
+done
 if [ "$health" != "OK" ]; then
   echo "[err] server started but health check failed: ${health:-<empty>}"
   docker exec "$container_name" bash -lc "tail -n 60 /tmp/openpi_infer_${port}.log || true"
