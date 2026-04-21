@@ -3,6 +3,10 @@ assets/
 checkpoints/
 data/
 wandb/
+/artifacts/pi-conda-offline-bundle/
+/artifacts/pi-conda-offline-bundle.tar
+/artifacts/pi-conda-offline-bundle.tar.gz
+/.codex
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

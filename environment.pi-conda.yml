@@ -1,0 +1,12 @@
+name: pi-conda
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11.13
+  - pip=25.1
+  - git=2.45
+  - ffmpeg
+  - libglib
+  - libstdcxx-ng
+  - ca-certificates
+  - openssl
