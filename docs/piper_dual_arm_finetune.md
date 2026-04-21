@@ -3,19 +3,24 @@
 本说明只讲“超参数含义 + 针对 150 条左右数据的建议”，并给出 pi0/pi05 的启动样例。
 
 ## 1. 先决条件（简要）
-- 使用 `repo_id=local/pen`，本地路径需满足 `/data/local/pen`（详见训练说明文档）。
+- 当前分支默认按 `pi-conda` 环境训练，先看 [`docs/piper_conda_training.md`](./piper_conda_training.md)。
+- 默认使用 `repo_id=local/pen`，也可以在命令行里覆盖成 `local/towel_merged` 之类的新数据集。
 - 离线环境建议先设置：
 ```bash
-export UV_CACHE_DIR=/openpi_cache/uv
 export WANDB_DISABLED=true
 export HF_HUB_OFFLINE=1
 export HUGGINGFACE_HUB_OFFLINE=1
 export TRANSFORMERS_OFFLINE=1
 export HF_DATASETS_OFFLINE=1
+export OPENPI_DATA_HOME=/share/home/linyongjia/.cache/openpi
+export HF_HOME=/share/home/linyongjia/.cache/huggingface
+export HF_LEROBOT_HOME=/share/home/linyongjia/data
 ```
 - 先计算归一化统计：
 ```bash
-python scripts/compute_norm_stats.py --config-name pi0_piper_dual
+conda run -n pi-conda python scripts/compute_norm_stats.py \
+  --config-name pi0_piper_dual \
+  --repo-id local/pen
 ```
 
 ## 2. 关键超参数含义与建议
@@ -64,13 +69,13 @@ action_horizon / fps
 - 需要更长规划：保持 30~50  
 训练和推理必须一致，否则动作时间尺度会错。
 
-## 4. 训练命令样例（python）
+## 4. 训练命令样例（conda 默认）
 下面示例以 `pi0_piper_dual` 为例，权重来自 `pi0_base`：
 ```bash
 XLA_PYTHON_CLIENT_MEM_FRACTION=0.9 \
-python scripts/train.py pi0_piper_dual \
+conda run -n pi-conda python scripts/train.py pi0_piper_dual \
   --exp-name piper_ft_base \
-  --checkpoint-base-dir /output/openpi \
+  --checkpoint-base-dir /share/home/linyongjia/output/openpi \
   --batch-size 8 \
   --num-train-steps 5000 \
   --log-interval 20 \
@@ -88,9 +93,9 @@ python scripts/train.py pi0_piper_dual \
 再给一个 **pi05** 的微调样例（权重来自 `pi05_base`）：
 ```bash
 XLA_PYTHON_CLIENT_MEM_FRACTION=0.9 \
-python scripts/train.py pi05_piper_dual \
+conda run -n pi-conda python scripts/train.py pi05_piper_dual \
   --exp-name piper_ft_pi05 \
-  --checkpoint-base-dir /output/openpi \
+  --checkpoint-base-dir /share/home/linyongjia/output/openpi \
   --batch-size 8 \
   --num-train-steps 5000 \
   --log-interval 20 \
@@ -107,7 +112,7 @@ python scripts/train.py pi05_piper_dual \
 | `XLA_PYTHON_CLIENT_MEM_FRACTION` | JAX GPU 显存占用比例 | 0.9 常用；显存紧张可降到 0.8 |
 | `pi0_piper_dual / pi05_piper_dual` | 训练配置名 | 对应你在 `config.py` 定义的 Piper 配置 |
 | `--exp-name` | 实验名 | 决定 checkpoint 子目录 |
-| `--checkpoint-base-dir` | 输出根目录 | 默认 `/output/openpi` |
+| `--checkpoint-base-dir` | 输出根目录 | 当前分支默认 `/share/home/linyongjia/output/openpi` |
 | `--batch-size` | 全局 batch | 8 起步，小数据更稳 |
 | `--num-train-steps` | 总步数 | 小数据建议 4k~8k |
 | `--log-interval` | 日志打印间隔 | 20~50 便于观察 |
@@ -142,9 +147,9 @@ python scripts/train.py pi05_piper_dual \
 
 示例：
 ```bash
-python scripts/train.py pi0_piper_dual \
+conda run -n pi-conda python scripts/train.py pi0_piper_dual \
   --exp-name piper_ft_base \
-  --checkpoint-base-dir /output/openpi \
+  --checkpoint-base-dir /share/home/linyongjia/output/openpi \
   --num-train-steps 8000 \
   --resume true
 ```

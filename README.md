@@ -42,7 +42,9 @@ git clone --recurse-submodules git@github.com:Physical-Intelligence/openpi.git
 git submodule update --init --recursive
 ```
 
-We use [uv](https://docs.astral.sh/uv/) to manage Python dependencies. See the [uv installation instructions](https://docs.astral.sh/uv/getting-started/installation/) to set it up. Once uv is installed, run the following to set up the environment:
+On the `conda-pi` branch, the default server-side training path is the non-container conda workflow documented in [docs/piper_conda_training.md](docs/piper_conda_training.md). That flow creates a `pi-conda` environment on the training server and is the recommended path for offline fine-tuning on this branch.
+
+If you are doing general local development on an online machine, the upstream `uv` workflow is still available:
 
 ```bash
 GIT_LFS_SKIP_SMUDGE=1 uv sync
@@ -51,7 +53,7 @@ GIT_LFS_SKIP_SMUDGE=1 uv pip install -e .
 
 NOTE: `GIT_LFS_SKIP_SMUDGE=1` is needed to pull LeRobot as a dependency.
 
-**Docker**: As an alternative to uv installation, we provide instructions for installing openpi using Docker. If you encounter issues with your system setup, consider using Docker to simplify installation. See [Docker Setup](docs/docker.md) for more details.
+**Docker**: Docker is retained as an optional fallback, but it is no longer the default training path on this branch. See [Docker Setup](docs/docker.md) if you specifically want a containerized workflow.
 
 
 
@@ -121,12 +123,14 @@ We will fine-tune the $\pi_{0.5}$ model on the [LIBERO dataset](https://libero-p
 2. Defining training configs and running training
 3. Spinning up a policy server and running inference
 
+On the `conda-pi` branch, the default way to run the commands below is from the `pi-conda` environment, either via `conda run -n pi-conda python ...` or after activating that environment first. For the full offline server setup, see [docs/piper_conda_training.md](docs/piper_conda_training.md).
+
 ### 1. Convert your data to a LeRobot dataset
 
 We provide a minimal example script for converting LIBERO data to a LeRobot dataset in [`examples/libero/convert_libero_data_to_lerobot.py`](examples/libero/convert_libero_data_to_lerobot.py). You can easily modify it to convert your own data! You can download the raw LIBERO dataset from [here](https://huggingface.co/datasets/openvla/modified_libero_rlds), and run the script with:
 
 ```bash
-uv run examples/libero/convert_libero_data_to_lerobot.py --data_dir /path/to/your/libero/data
+conda run -n pi-conda python examples/libero/convert_libero_data_to_lerobot.py --data_dir /path/to/your/libero/data
 ```
 
 **Note:** If you just want to fine-tune on LIBERO, you can skip this step, because our LIBERO fine-tuning configs point to a pre-converted LIBERO dataset. This step is merely an example that you can adapt to your own data.
@@ -144,13 +148,13 @@ We provide example fine-tuning configs for [π₀](src/openpi/training/config.py
 Before we can run training, we need to compute the normalization statistics for the training data. Run the script below with the name of your training config:
 
 ```bash
-uv run scripts/compute_norm_stats.py --config-name pi05_libero
+conda run -n pi-conda python scripts/compute_norm_stats.py --config-name pi05_libero
 ```
 
 Now we can kick off training with the following command (the `--overwrite` flag is used to overwrite existing checkpoints if you rerun fine-tuning with the same config):
 
 ```bash
-XLA_PYTHON_CLIENT_MEM_FRACTION=0.9 uv run scripts/train.py pi05_libero --exp-name=my_experiment --overwrite
+XLA_PYTHON_CLIENT_MEM_FRACTION=0.9 conda run -n pi-conda python scripts/train.py pi05_libero --exp-name=my_experiment --overwrite
 ```
 
 The command will log training progress to the console and save checkpoints to the `checkpoints` directory. You can also monitor training progress on the Weights & Biases dashboard. For maximally using the GPU memory, set `XLA_PYTHON_CLIENT_MEM_FRACTION=0.9` before running training -- this enables JAX to use up to 90% of the GPU memory (vs. the default of 75%).
@@ -162,12 +166,12 @@ The command will log training progress to the console and save checkpoints to th
 Once training is complete, we can run inference by spinning up a policy server and then querying it from a LIBERO evaluation script. Launching a model server is easy (we use the checkpoint for iteration 20,000 for this example, modify as needed):
 
 ```bash
-uv run scripts/serve_policy.py policy:checkpoint --policy.config=pi05_libero --policy.dir=checkpoints/pi05_libero/my_experiment/20000
+conda run -n pi-conda python scripts/serve_policy.py policy:checkpoint --policy.config=pi05_libero --policy.dir=checkpoints/pi05_libero/my_experiment/20000
 ```
 
 This will spin up a server that listens on port 8000 and waits for observations to be sent to it. We can then run an evaluation script (or robot runtime) that queries the server.
 
-For running the LIBERO eval in particular, we provide (and recommend using) a Dockerized workflow that handles both the policy server and the evaluation script together. See the [LIBERO README](examples/libero/README.md) for more details.
+If you specifically want a combined containerized LIBERO eval workflow, we still provide a Dockerized path that handles both the policy server and the evaluation script together. See the [LIBERO README](examples/libero/README.md) for more details.
 
 
 

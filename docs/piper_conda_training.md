@@ -1,5 +1,7 @@
 # Piper 双臂离线 Conda 训练说明（服务器非容器环境）
 
+这是 `conda-pi` 分支当前默认的训练路径。Docker 流程只保留为可选方案，不再作为默认训练入口。
+
 这份说明对应 `conda-pi` 分支，目标是：
 
 - 不再依赖 `uv`
@@ -59,16 +61,17 @@ scp -P 12222 pi-conda-offline-bundle.tar linyongjia@172.31.11.122:/share/home/li
 
 ## 3. 服务器离线安装
 
-在训练服务器非容器环境执行：
+在训练服务器非容器环境执行。默认代码目录使用我们现在同步过去的分支副本：
+`/share/home/linyongjia/conda-pi/openpi`
 
 ```bash
 cd /share/home/linyongjia
 tar -xf pi-conda-offline-bundle.tar
-cd /share/home/linyongjia/openpi
+cd /share/home/linyongjia/conda-pi/openpi
 
 bash scripts/conda/install_offline_bundle.sh \
   --bundle-dir /share/home/linyongjia/pi-conda-offline-bundle \
-  --openpi-dir /share/home/linyongjia/openpi \
+  --openpi-dir /share/home/linyongjia/conda-pi/openpi \
   --env-name pi-conda
 ```
 
@@ -125,7 +128,7 @@ conda run -n pi-conda python scripts/train.py pi05_piper_dual \
 
 ```bash
 conda run -n pi-conda python scripts/conda/patch_transformers.py \
-  --openpi-dir /share/home/linyongjia/openpi
+  --openpi-dir /share/home/linyongjia/conda-pi/openpi
 ```
 
 如果后面重装了 `transformers`，再执行一次上面这条命令即可。
