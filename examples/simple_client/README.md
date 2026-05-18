@@ -8,14 +8,7 @@ You can specify which runtime environment to use using the `--env` flag. You can
 uv run examples/simple_client/main.py --help
 ```
 
-## With Docker
-
-```bash
-export SERVER_ARGS="--env ALOHA_SIM"
-docker compose -f examples/simple_client/compose.yml up --build
-```
-
-## Without Docker
+## Run
 
 Terminal window 1:
 

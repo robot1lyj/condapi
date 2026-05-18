@@ -53,11 +53,6 @@ GIT_LFS_SKIP_SMUDGE=1 uv pip install -e .
 
 NOTE: `GIT_LFS_SKIP_SMUDGE=1` is needed to pull LeRobot as a dependency.
 
-**Docker**: Docker is retained as an optional fallback, but it is no longer the default training path on this branch. See [Docker Setup](docs/docker.md) if you specifically want a containerized workflow.
-
-
-
-
 ## Model Checkpoints
 
 ### Base Models
@@ -171,7 +166,7 @@ conda run -n pi-conda python scripts/serve_policy.py policy:checkpoint --policy.
 
 This will spin up a server that listens on port 8000 and waits for observations to be sent to it. We can then run an evaluation script (or robot runtime) that queries the server.
 
-If you specifically want a combined containerized LIBERO eval workflow, we still provide a Dockerized path that handles both the policy server and the evaluation script together. See the [LIBERO README](examples/libero/README.md) for more details.
+See the [LIBERO README](examples/libero/README.md) for more details.
 
 
 
@@ -313,7 +308,7 @@ We will collect common issues and their solutions here. If you encounter an issu
 | Policy server connection errors           | Check that the server is running and listening on the expected port. Verify network connectivity and firewall settings between client and server.                                            |
 | Missing norm stats error when training    | Run `scripts/compute_norm_stats.py` with your config name before starting training.                                                                                                          |
 | Dataset download fails                    | Check your internet connection. For HuggingFace datasets, ensure you're logged in (`huggingface-cli login`).                                                                                 |
-| CUDA/GPU errors                           | Verify NVIDIA drivers are installed correctly. For Docker, ensure nvidia-container-toolkit is installed. Check GPU compatibility. You do NOT need CUDA libraries installed at a system level --- they will be installed via uv. You may even want to try *uninstalling* system CUDA libraries if you run into CUDA issues, since system libraries can sometimes cause conflicts. |
+| CUDA/GPU errors                           | Verify NVIDIA drivers are installed correctly. Check GPU compatibility. You do NOT need CUDA libraries installed at a system level --- they will be installed via uv. You may even want to try *uninstalling* system CUDA libraries if you run into CUDA issues, since system libraries can sometimes cause conflicts. |
 | Import errors when running examples       | Make sure you've installed all dependencies with `uv sync`. Some examples may have additional requirements listed in their READMEs.                    |
 | Action dimensions mismatch                | Verify your data processing transforms match the expected input/output dimensions of your robot. Check the action space definitions in your policy classes.                                  |
 | Diverging training loss                            | Check the `q01`, `q99`, and `std` values in `norm_stats.json` for your dataset. Certain dimensions that are rarely used can end up with very small `q01`, `q99`, or `std` values, leading to huge states and actions after normalization. You can manually adjust the norm stats as a workaround. |

@@ -1,13 +1,6 @@
 # Run Aloha Sim
 
-## With Docker
-
-```bash
-export SERVER_ARGS="--env ALOHA_SIM"
-docker compose -f examples/aloha_sim/compose.yml up --build
-```
-
-## Without Docker
+## Run
 
 Terminal window 1:
 

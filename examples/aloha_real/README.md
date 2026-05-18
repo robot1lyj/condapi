@@ -9,14 +9,7 @@ This repo uses a fork of the ALOHA repo, with very minor modifications to use Re
 1. Follow the [hardware installation instructions](https://github.com/tonyzhaozh/aloha?tab=readme-ov-file#hardware-installation) in the ALOHA repo.
 1. Modify the `third_party/aloha/aloha_scripts/realsense_publisher.py` file to use serial numbers for your cameras.
 
-## With Docker
-
-```bash
-export SERVER_ARGS="--env ALOHA --default_prompt='take the toast out of the toaster'"
-docker compose -f examples/aloha_real/compose.yml up --build
-```
-
-## Without Docker
+## Run
 
 Terminal window 1:
 

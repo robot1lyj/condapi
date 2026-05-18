@@ -1,6 +1,6 @@
 # Piper 双臂数据集训练配置说明（openpi / conda 默认）
 
-当前分支默认按训练服务器的非容器 `conda` 环境运行，环境名是 `pi-conda`。Docker 只保留为可选兼容方案，不再作为默认训练入口。
+当前分支默认按训练服务器的非容器 `conda` 环境运行，环境名是 `pi-conda`。
 
 如果你要按步骤完成离线安装、补齐依赖并启动训练，先看：
 [`docs/piper_conda_training.md`](./piper_conda_training.md)
@@ -164,7 +164,7 @@ conda run -n pi-conda python scripts/train.py pi05_piper_dual \
 如果不存在，需要在有网机器预下载后拷贝到 `OPENPI_DATA_HOME` 对应路径。
 
 ## 8. 数据与路径排错
-- 不要再按 Docker 流程假设 `/data/local/...`、`/output/openpi`、`/.venv` 这些容器路径。
+- 请使用当前分支的服务器路径布局，不要沿用旧的容器路径。
 - 训练输出目录默认使用：
 
 ```bash
