@@ -15,6 +15,7 @@
 - `/share/home/linyongjia/datasets/piper_pen_v001`
 - `/share/home/linyongjia/datasets/piper_pen_v002`
 - `/share/home/linyongjia/datasets/piper_dish1_v001`
+- `/share/home/linyongjia/datasets/openarms_folding_v001`
 
 ## 1. 核心规则
 
@@ -29,8 +30,13 @@
 
 - `pi05_piper_dual`
 - `pi0_piper_dual`
+- `pi05_openarms_dual`
+- `pi0_openarms_dual`
 
-这两个配置仍保留默认 `repo_id`，但实际训练时应在命令行里显式覆盖为数据集绝对路径。
+这些配置都应在命令行里显式覆盖为数据集绝对路径。
+
+- `pi*_piper_dual`：14 维双臂 Piper 数据
+- `pi*_openarms_dual`：16 维 `openarms_follower` 双臂数据
 
 ## 3. 训练前环境变量
 
@@ -58,6 +64,15 @@ conda run -n pi-conda python scripts/compute_norm_stats.py \
   --config-name pi05_piper_dual \
   --repo-id /share/home/linyongjia/datasets/piper_pen_v002
 ```
+
+如果数据集是从更大的 LeRobot 数据集中抽出来的，建议先执行：
+
+```bash
+python scripts/repair_lerobot_subset.py \
+  --dataset-dir /share/home/linyongjia/datasets/openarms_folding_v001
+```
+
+修复完 parquet/video/metadata 一致性后，再计算 `norm_stats.json`。
 
 快速抽样检查：
 
@@ -129,5 +144,6 @@ norm_stats: ./norm_stats.json
 
 - 如果目录里的 episode 数变了，就新建版本目录，不要原地覆盖。
 - 如果 `meta/info.json`、`episodes.jsonl`、`data/*.parquet` 数量不一致，这个版本就不应继续训练。
+- 如果数据是从更大的 LeRobot 数据集抽出来的，必须额外检查 parquet 内部 `episode_index` 是否与文件名/metadata 一致。
 - 不要在服务器上手改 `config.py` 去切数据集。
 - 不要再新增 `local/pen`、`local/dish` 这类训练入口。

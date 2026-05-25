@@ -383,6 +383,9 @@ class LeRobotPiperDataConfig(DataConfigFactory):
     prompt_key: str = "prompt"
     action_sequence_keys: Sequence[str] = ("action",)
     robot_action_dim: int = 14
+    delta_action_mask: Sequence[bool] | None = dataclasses.field(
+        default_factory=lambda: _transforms.make_bool_mask(6, -1, 6, -1)
+    )
     use_delta_joint_actions: bool = True
     swap_left_right: bool = False
     default_prompt: str | None = None
@@ -426,11 +429,10 @@ class LeRobotPiperDataConfig(DataConfigFactory):
             ],
         )
 
-        if self.use_delta_joint_actions:
-            delta_action_mask = _transforms.make_bool_mask(6, -1, 6, -1)
+        if self.use_delta_joint_actions and self.delta_action_mask is not None:
             data_transforms = data_transforms.push(
-                inputs=[_transforms.DeltaActions(delta_action_mask)],
-                outputs=[_transforms.AbsoluteActions(delta_action_mask)],
+                inputs=[_transforms.DeltaActions(self.delta_action_mask)],
+                outputs=[_transforms.AbsoluteActions(self.delta_action_mask)],
             )
 
         model_transforms = ModelTransformFactory(default_prompt=self.default_prompt)(model_config)
@@ -871,6 +873,36 @@ _CONFIGS = [
             repo_id="local/pen",
             base_config=DataConfig(prompt_from_task=True),
             robot_action_dim=14,
+            use_delta_joint_actions=True,
+            swap_left_right=False,
+        ),
+        weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi05_base/params"),
+        wandb_enabled=False,
+        num_train_steps=20_000,
+    ),
+    TrainConfig(
+        name="pi0_openarms_dual",
+        model=pi0_config.Pi0Config(action_dim=16),
+        data=LeRobotPiperDataConfig(
+            repo_id="/share/home/linyongjia/datasets/openarms_folding_v001",
+            base_config=DataConfig(prompt_from_task=True),
+            robot_action_dim=16,
+            delta_action_mask=_transforms.make_bool_mask(7, -1, 7, -1),
+            use_delta_joint_actions=True,
+            swap_left_right=False,
+        ),
+        weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi0_base/params"),
+        wandb_enabled=False,
+        num_train_steps=20_000,
+    ),
+    TrainConfig(
+        name="pi05_openarms_dual",
+        model=pi0_config.Pi0Config(pi05=True, discrete_state_input=True, action_dim=16),
+        data=LeRobotPiperDataConfig(
+            repo_id="/share/home/linyongjia/datasets/openarms_folding_v001",
+            base_config=DataConfig(prompt_from_task=True),
+            robot_action_dim=16,
+            delta_action_mask=_transforms.make_bool_mask(7, -1, 7, -1),
             use_delta_joint_actions=True,
             swap_left_right=False,
         ),

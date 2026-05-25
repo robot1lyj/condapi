@@ -25,6 +25,13 @@
   videos/
   norm_stats.json
   manifest.yaml
+
+/share/home/linyongjia/datasets/openarms_folding_v001/
+  meta/
+  data/
+  videos/
+  norm_stats.json
+  manifest.yaml
 ```
 
 ## 3. 命名规则
@@ -40,6 +47,7 @@
 - `piper_pen_v001`
 - `piper_pen_v002`
 - `piper_dish1_v001`
+- `openarms_folding_v001`
 
 ## 4. 什么时候必须新建版本
 
@@ -84,3 +92,40 @@ norm_stats: ./norm_stats.json
 - 每路相机 `videos/chunk-*/.../episode_*.mp4` 数量
 
 如果这些不一致，这个版本不应进入训练。
+
+## 8. 从大数据集抽子集时的额外检查
+
+如果一个版本目录是从更大的 LeRobot 数据集中抽出来的，除了上面的基础检查，还必须额外检查：
+
+- parquet 文件名里的 episode 编号，是否与 `meta/episodes.jsonl` 一致
+- 每个 parquet 内部的 `episode_index` 列，是否与文件名一致
+- 每个 parquet 的行数，是否与视频真实可读帧数一致
+- 每个 episode 的 `timestamp` 末尾，是否会在 `round(timestamp * fps)` 后越过视频最后一帧
+
+如果这些不一致，必须先修数据，再训练或计算 `norm_stats.json`。
+
+对于这类问题，仓库提供了一个修复脚本：
+
+```bash
+python scripts/repair_lerobot_subset.py \
+  --dataset-dir /share/home/linyongjia/datasets/openarms_folding_v001
+```
+
+这个脚本会：
+
+1. 统计每个 episode 对应视频的真实帧数
+2. 裁掉 parquet 末尾超出视频可索引范围的样本
+3. 把 parquet 内部的 `episode_index` 列重写成与文件名一致
+4. 同步更新 `meta/episodes.jsonl`
+5. 更新 `meta/info.json`
+6. 输出 `meta/repair_report.json`
+
+建议先用：
+
+```bash
+python scripts/repair_lerobot_subset.py \
+  --dataset-dir /share/home/linyongjia/datasets/openarms_folding_v001 \
+  --dry-run
+```
+
+确认修复规模后再正式执行。
