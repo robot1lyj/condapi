@@ -1,9 +1,9 @@
 # Piper 双臂远程推理（服务器端）
 
-本说明针对双臂 Piper 数据集（`local/pen`）的服务端推理流程。
+本说明针对双臂 Piper 版本化数据集目录的服务端推理流程。
 
 ## 0. 前提检查
-- 已完成训练，且 checkpoint 目录存在（`params/` 或 `model.safetensors`，同时有 `assets/local/pen/norm_stats.json`）。
+- 已完成训练，且 checkpoint 目录存在（`params/` 或 `model.safetensors`，同时有 `assets/<dataset_id>/norm_stats.json`）。
 - 服务器与机器人网络互通，端口已放行。
 - 远端服务默认使用 `conda run -n pi-conda python` 启动（离线环境不使用 `uv run`）。
 

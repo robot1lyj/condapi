@@ -14,7 +14,7 @@ export TRANSFORMERS_OFFLINE=1
 export HF_DATASETS_OFFLINE=1
 export OPENPI_DATA_HOME=/share/home/linyongjia/.cache/openpi
 export HF_HOME=/share/home/linyongjia/.cache/huggingface
-export HF_LEROBOT_HOME=/share/home/linyongjia/data
+export HF_LEROBOT_HOME=/share/home/linyongjia/datasets
 ```
 - 先计算归一化统计：
 ```bash

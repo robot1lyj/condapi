@@ -1,7 +1,7 @@
 {
   "model_name": "pi05_piper_dual",
   "robot_type": "piper_shm",
-  "repo_id": "local/pen",
+  "repo_id": "/share/home/linyongjia/datasets/piper_pen_v001",
   "action_horizon": 50,
   "action_dim": 14,
   "robot_action_dim": 14,

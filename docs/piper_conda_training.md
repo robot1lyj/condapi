@@ -97,7 +97,7 @@ export HF_HOME=/share/home/linyongjia/.cache/huggingface
 export HUGGINGFACE_HUB_CACHE=$HF_HOME/hub
 export HF_DATASETS_CACHE=$HF_HOME/datasets
 export TRANSFORMERS_CACHE=$HF_HOME/transformers
-export HF_LEROBOT_HOME=/share/home/linyongjia/data
+export HF_LEROBOT_HOME=/share/home/linyongjia/datasets
 ```
 
 ## 5. 训练命令

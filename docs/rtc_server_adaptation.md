@@ -61,7 +61,7 @@ python scripts/serve_policy.py \
 {
   "model_name": "pi05_piper_dual",
   "robot_type": "piper_shm",
-  "repo_id": "local/pen",
+  "repo_id": "/share/home/linyongjia/datasets/piper_pen_v001",
   "action_horizon": 50,
   "action_dim": 14,
   "robot_action_dim": 14,
@@ -195,7 +195,7 @@ python scripts/serve_policy.py \
 - **服务端加载元数据**：建议使用模板文件并在启动时加载或注入到 `policy.metadata`。
 - **客户端侧兜底**：metadata 缺失时可读本地 override 文件，仅用于本地对齐，不必上送。
 - **CLI 指定**：`scripts/serve_policy.py` 支持 `--rtc-metadata <path>` 载入 JSON。
-- **模板参考**：`docs/rtc_metadata_piper_dual.json`（基于 `/home/lyj/pen/meta/info.json`）。
+- **模板参考**：`docs/rtc_metadata_piper_dual.json`（建议与对应的版本化数据集目录保持一致）。
 
 示例模板字段（节选）：
 ```
