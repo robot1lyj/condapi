@@ -102,12 +102,12 @@ export HF_LEROBOT_HOME=/share/home/linyongjia/data
 
 ## 5. 训练命令
 
-先算归一化统计：
+先算归一化统计。当前推荐直接传版本化数据集目录绝对路径，统计默认写回数据集根目录：
 
 ```bash
 conda run -n pi-conda python scripts/compute_norm_stats.py \
   --config-name pi05_piper_dual \
-  --repo-id local/dish
+  --repo-id /share/home/linyongjia/datasets/piper_dish_v001
 ```
 
 再启动训练：
@@ -117,7 +117,7 @@ XLA_PYTHON_CLIENT_MEM_FRACTION=0.9 \
 conda run -n pi-conda python scripts/train.py pi05_piper_dual \
   --exp-name piper_ft_pi05_dish \
   --checkpoint-base-dir /share/home/linyongjia/output/openpi \
-  --data.repo_id local/dish
+  --data.repo_id /share/home/linyongjia/datasets/piper_dish_v001
 ```
 
 ## 6. transformers 补丁

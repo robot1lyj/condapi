@@ -69,7 +69,7 @@ def save_state(
     step: int,
 ):
     def save_assets(directory: epath.Path):
-        # Save the normalization stats.
+        # Save the normalization stats into the checkpoint for inference portability.
         data_config = data_loader.data_config()
         norm_stats = data_config.norm_stats
         if norm_stats is not None and data_config.asset_id is not None:

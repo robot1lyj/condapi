@@ -6,6 +6,7 @@ import dataclasses
 import difflib
 import logging
 import pathlib
+import re
 from typing import Any, Literal, Protocol, TypeAlias
 
 import etils.epath as epath
@@ -179,7 +180,7 @@ class DataConfigFactory(abc.ABC):
 
     def create_base_config(self, assets_dirs: pathlib.Path, model_config: _model.BaseModelConfig) -> DataConfig:
         repo_id = self.repo_id if self.repo_id is not tyro.MISSING else None
-        asset_id = self.assets.asset_id or repo_id
+        asset_id = self.assets.asset_id or _default_asset_id(repo_id)
         return dataclasses.replace(
             self.base_config or DataConfig(),
             repo_id=repo_id,
@@ -199,6 +200,17 @@ class DataConfigFactory(abc.ABC):
         except FileNotFoundError:
             logging.info(f"Norm stats not found in {data_assets_dir}, skipping.")
         return None
+
+
+def _default_asset_id(repo_id: str | None) -> str | None:
+    if repo_id is None:
+        return None
+    if "://" in repo_id:
+        return repo_id
+    if repo_id.startswith("/"):
+        name = pathlib.Path(repo_id).name
+        return re.sub(r"[^A-Za-z0-9._-]+", "_", name)
+    return repo_id
 
 
 @dataclasses.dataclass(frozen=True)

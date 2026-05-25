@@ -1,11 +1,12 @@
 """Compute normalization statistics for a config.
 
-This script is used to compute the normalization statistics for a given config. It
-will compute the mean and standard deviation of the data in the dataset and save it
-to the config assets directory.
+By default, this writes `norm_stats.json` into the dataset root directory. This makes
+versioned dataset directories self-contained for training. The legacy assets
+directory layout can still be used by explicitly passing `output_dir`.
 """
 
 import dataclasses
+import pathlib
 import numpy as np
 import tqdm
 import tyro
@@ -87,7 +88,21 @@ def create_rlds_dataloader(
     return data_loader, num_batches
 
 
-def main(config_name: str, max_frames: int | None = None, repo_id: str | None = None):
+def _default_output_dir(data_config: _config.DataConfig, config: _config.TrainConfig) -> pathlib.Path:
+    if data_config.repo_id is None:
+        raise ValueError("Data config must have a repo_id")
+    repo_path = pathlib.Path(data_config.repo_id)
+    if repo_path.is_absolute():
+        return repo_path
+    return config.assets_dirs / (data_config.asset_id or data_config.repo_id)
+
+
+def main(
+    config_name: str,
+    max_frames: int | None = None,
+    repo_id: str | None = None,
+    output_dir: str | None = None,
+):
     config = _config.get_config(config_name)
     if repo_id:
         config = dataclasses.replace(config, data=dataclasses.replace(config.data, repo_id=repo_id))
@@ -111,7 +126,7 @@ def main(config_name: str, max_frames: int | None = None, repo_id: str | None = 
 
     norm_stats = {key: stats.get_statistics() for key, stats in stats.items()}
 
-    output_path = config.assets_dirs / data_config.repo_id
+    output_path = pathlib.Path(output_dir) if output_dir is not None else _default_output_dir(data_config, config)
     print(f"Writing stats to: {output_path}")
     normalize.save(output_path, norm_stats)
 

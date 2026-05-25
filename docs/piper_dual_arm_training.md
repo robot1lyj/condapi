@@ -1,114 +1,39 @@
-# Piper 双臂数据集训练配置说明（openpi / conda 默认）
+# Piper 双臂数据集训练规范（版本化目录方案）
 
-当前分支默认按训练服务器的非容器 `conda` 环境运行，环境名是 `pi-conda`。
+当前推荐方案不再使用 `local/<alias>` 软链，也不再要求在服务器上修改 `config.py`。
 
-如果你要按步骤完成离线安装、补齐依赖并启动训练，先看：
-[`docs/piper_conda_training.md`](./piper_conda_training.md)
+训练时直接传入一份**不可变的版本化数据集目录绝对路径**。每个目录都应自包含：
 
-## 1. 数据集与 repo_id（默认 `local/pen`）
-Piper 双臂默认训练配置仍然使用 `repo_id=local/pen`。在当前服务器上，常见数据集目录位于：
+- `meta/`
+- `data/`
+- `videos/`
+- `norm_stats.json`
+- 可选：`manifest.yaml`
 
-- `/share/home/linyongjia/data/pen`
-- `/share/home/linyongjia/data/towel_merged`
-- `/share/home/linyongjia/data/dish1_codex_v1`
+推荐目录命名：
 
-推荐做法：
+- `/share/home/linyongjia/datasets/piper_pen_v001`
+- `/share/home/linyongjia/datasets/piper_pen_v002`
+- `/share/home/linyongjia/datasets/piper_dish1_v001`
 
-- 固定 `HF_LEROBOT_HOME=/share/home/linyongjia/data`
-- 默认配置保持 `local/pen`
-- 如果切换数据集，优先在命令行里用 `--repo-id` 覆盖，例如 `local/towel_merged`
+## 1. 核心规则
 
-快速 smoke test：
+- 一个目录就是一个正式数据版本。
+- 正式版本发布后不要原地修改；新增数据请新建 `v002`。
+- `norm_stats.json` 默认与数据集目录绑定，直接写在数据集根目录。
+- 训练命令永远显式传绝对路径，不再依赖 `local/pen` 这类别名。
 
-```bash
-conda run -n pi-conda python scripts/compute_norm_stats.py \
-  --config-name pi05_piper_dual \
-  --repo-id local/towel_merged \
-  --max-frames 2000
-```
+## 2. Piper 默认配置
 
-## 2. 数据集字段与映射（以 `pen` 为例）
-`meta/info.json` 常见关键字段：
+在 [`src/openpi/training/config.py`](../src/openpi/training/config.py) 中：
 
-- `observation.state`: 14 维（右臂 6 关节 + 右夹爪 + 左臂 6 关节 + 左夹爪）
-- `action`: 14 维（右臂在前、左臂在后，绝对关节角）
-- `observation.images.top_rgb`
-- `observation.images.left_wrist`
-- `observation.images.right_wrist`
+- `pi05_piper_dual`
+- `pi0_piper_dual`
 
-映射到模型输入：
+这两个配置仍保留默认 `repo_id`，但实际训练时应在命令行里显式覆盖为数据集绝对路径。
 
-- `top_rgb` -> `image.base_0_rgb`
-- `left_wrist` -> `image.left_wrist_0_rgb`
-- `right_wrist` -> `image.right_wrist_0_rgb`
-- `observation.state` -> `state`
-- `action` -> `actions`
+## 3. 训练前环境变量
 
-## 2.1 orin_VR raw_hdf5 转 LeRobot v2.1
-`openpi` 当前不是按最新 LeRobot 主线格式工作，而是依赖仓库里 pin 的旧版 `lerobot`，对应的本地数据布局仍是 LeRobot `v2.1`。
-
-如果你的采集目录还是 `orin_VR` 的 raw 格式（`meta/info.json` 里有 `raw_format_version=orin_vr_raw_hdf5_v1`，例如 `dish1_new` / `dish2_new` 这种），先执行转换：
-
-```bash
-python ../data/convert_orin_vr_raw_to_lerobot.py \
-  --source /path/to/raw_dataset \
-  --target /path/to/output_dataset \
-  --repo-id local/pen \
-  --validate-openpi-piper-dual
-```
-
-常见例子：
-
-```bash
-python ../data/convert_orin_vr_raw_to_lerobot.py \
-  --source /home/jetson/data/local/dish1_new \
-  --target /home/jetson/data/local/dish1 \
-  --repo-id local/dish1 \
-  --validate-openpi-piper-dual \
-  --overwrite
-```
-
-输入 raw 目录应包含：
-
-- `meta/info.json`
-- `meta/episodes.jsonl`
-- `episodes/episode_*.hdf5`
-- `videos/<camera_key>/episode_*.mp4`
-
-输出会生成 openpi 可直接读取的 LeRobot v2.1 目录：
-
-- `meta/info.json`
-- `meta/episodes.jsonl`
-- `meta/tasks.jsonl`
-- `meta/episodes_stats.jsonl`
-- `meta/stats.json`
-- `data/chunk-000/episode_*.parquet`
-- `videos/chunk-000/<camera_key>/episode_*.mp4`
-
-## 3. Piper 双臂默认配置（已在配置里设置）
-在 `src/openpi/training/config.py`：
-
-- `repo_id="local/pen"`
-- `action_sequence_keys=("action",)`
-- `robot_action_dim=14`
-- `use_delta_joint_actions=True`（只对 12 个关节做 delta，两个夹爪保持绝对）
-- `swap_left_right=False`（右臂在前）
-- `wandb_enabled=False`（离线默认禁用）
-
-## 4. 默认 conda 运行环境
-训练服务器默认使用 `pi-conda`：
-
-```bash
-conda activate pi-conda
-```
-
-如果不想激活环境，所有命令都可以写成：
-
-```bash
-conda run -n pi-conda python ...
-```
-
-## 5. 训练前环境变量（先执行一次）
 ```bash
 export WANDB_DISABLED=true
 export HF_HUB_OFFLINE=1
@@ -124,66 +49,85 @@ export TRANSFORMERS_CACHE=$HF_HOME/transformers
 export HF_LEROBOT_HOME=/share/home/linyongjia/data
 ```
 
-## 6. 用 conda 环境启动（默认）
-### 6.1 计算归一化统计
+## 4. 计算归一化统计
+
+默认会写到数据集根目录：
+
 ```bash
 conda run -n pi-conda python scripts/compute_norm_stats.py \
   --config-name pi05_piper_dual \
-  --repo-id local/pen
+  --repo-id /share/home/linyongjia/datasets/piper_pen_v002
 ```
 
-如需快速检查可加：
+快速抽样检查：
 
 ```bash
 conda run -n pi-conda python scripts/compute_norm_stats.py \
   --config-name pi05_piper_dual \
-  --repo-id local/pen \
+  --repo-id /share/home/linyongjia/datasets/piper_pen_v002 \
   --max-frames 2000
 ```
 
-### 6.2 启动训练
+如果你明确需要旧的 assets 目录布局，可以额外传：
+
+```bash
+  --output-dir /share/home/linyongjia/conda-pi/openpi/assets/pi05_piper_dual/piper_pen_v002
+```
+
+## 5. 启动训练
+
+直接传数据集绝对路径：
+
 ```bash
 XLA_PYTHON_CLIENT_MEM_FRACTION=0.9 \
 conda run -n pi-conda python scripts/train.py pi05_piper_dual \
-  --exp-name piper_dual_exp \
+  --exp-name piper_pen_v002_bs32_fsdp2 \
   --checkpoint-base-dir /share/home/linyongjia/output/openpi \
-  --data.repo_id local/pen \
-  --wandb-enabled false
+  --data.repo_id /share/home/linyongjia/datasets/piper_pen_v002 \
+  --batch-size 32 \
+  --fsdp-devices 2 \
+  --overwrite
 ```
 
-训练 Pi0 时将 `pi05_piper_dual` 替换为 `pi0_piper_dual`。
+训练 Pi0 时，将 `pi05_piper_dual` 替换为 `pi0_piper_dual`。
 
-## 7. 权重与资产本地化
-训练配置默认使用 `gs://` 权重路径。离线环境必须确保已缓存到本地，例如：
+## 6. 一键入口脚本
 
-```text
-/share/home/linyongjia/.cache/openpi/openpi-assets/checkpoints/pi05_base/params
-/share/home/linyongjia/.cache/openpi/openpi-assets/checkpoints/pi0_base/params
-```
-
-如果不存在，需要在有网机器预下载后拷贝到 `OPENPI_DATA_HOME` 对应路径。
-
-## 8. 数据与路径排错
-- 请使用当前分支的服务器路径布局，不要沿用旧的容器路径。
-- 训练输出目录默认使用：
+仓库提供了一个薄封装：
 
 ```bash
-mkdir -p /share/home/linyongjia/output/openpi
+conda run -n pi-conda bash scripts/piper_dataset_train.sh \
+  --dataset-dir /share/home/linyongjia/datasets/piper_pen_v002 \
+  --exp-name piper_pen_v002_bs32_fsdp2 \
+  --batch-size 32 \
+  --fsdp-devices 2 \
+  --overwrite
 ```
 
-- 新数据集先做一次 smoke test：
+这个脚本会：
 
-```bash
-conda run -n pi-conda python scripts/compute_norm_stats.py \
-  --config-name pi05_piper_dual \
-  --repo-id <your_repo_id> \
-  --max-frames 2000
+1. 校验 `meta/info.json` 是否存在
+2. 默认先在数据集目录内生成 `norm_stats.json`
+3. 再启动训练
+
+## 7. manifest.yaml 建议
+
+建议每个版本目录附带一份人工可读的 `manifest.yaml`：
+
+```yaml
+dataset_id: piper_pen_v002
+robot: piper
+format: lerobot_v2.1
+task: put the pen into the box
+episodes: 149
+source: piper_pen_v001 + appended_sessions_20260524
+status: frozen
+norm_stats: ./norm_stats.json
 ```
 
-- 如果 `compute_norm_stats` 在 `datasets/parquet` 阶段失败，先检查 `meta/info.json` 和 parquet 实际列名是否一致，尤其是图像 key 是否存在 `left_wrist` / `right_wrist` 与 `*_rgb` 的命名偏差。
-- 如果 `transformers` 被重装过，需要重新覆盖 openpi patch：
+## 8. 排错原则
 
-```bash
-conda run -n pi-conda python scripts/conda/patch_transformers.py \
-  --openpi-dir /share/home/linyongjia/conda-pi/openpi
-```
+- 如果目录里的 episode 数变了，就新建版本目录，不要原地覆盖。
+- 如果 `meta/info.json`、`episodes.jsonl`、`data/*.parquet` 数量不一致，这个版本就不应继续训练。
+- 不要在服务器上手改 `config.py` 去切数据集。
+- 不要再新增 `local/pen`、`local/dish` 这类训练入口。

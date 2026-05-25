@@ -4,7 +4,7 @@
 
 ## 1. 先决条件（简要）
 - 当前分支默认按 `pi-conda` 环境训练，先看 [`docs/piper_conda_training.md`](./piper_conda_training.md)。
-- 默认使用 `repo_id=local/pen`，也可以在命令行里覆盖成 `local/towel_merged` 之类的新数据集。
+- 当前推荐直接使用版本化数据集目录绝对路径，不再依赖 `local/pen` 这类软链入口。
 - 离线环境建议先设置：
 ```bash
 export WANDB_DISABLED=true
@@ -20,7 +20,7 @@ export HF_LEROBOT_HOME=/share/home/linyongjia/data
 ```bash
 conda run -n pi-conda python scripts/compute_norm_stats.py \
   --config-name pi0_piper_dual \
-  --repo-id local/pen
+  --repo-id /share/home/linyongjia/datasets/piper_pen_v001
 ```
 
 ## 2. 关键超参数含义与建议
@@ -76,6 +76,7 @@ XLA_PYTHON_CLIENT_MEM_FRACTION=0.9 \
 conda run -n pi-conda python scripts/train.py pi0_piper_dual \
   --exp-name piper_ft_base \
   --checkpoint-base-dir /share/home/linyongjia/output/openpi \
+  --data.repo_id /share/home/linyongjia/datasets/piper_pen_v001 \
   --batch-size 8 \
   --num-train-steps 5000 \
   --log-interval 20 \
@@ -96,6 +97,7 @@ XLA_PYTHON_CLIENT_MEM_FRACTION=0.9 \
 conda run -n pi-conda python scripts/train.py pi05_piper_dual \
   --exp-name piper_ft_pi05 \
   --checkpoint-base-dir /share/home/linyongjia/output/openpi \
+  --data.repo_id /share/home/linyongjia/datasets/piper_pen_v001 \
   --batch-size 8 \
   --num-train-steps 5000 \
   --log-interval 20 \
@@ -150,6 +152,7 @@ conda run -n pi-conda python scripts/train.py pi05_piper_dual \
 conda run -n pi-conda python scripts/train.py pi0_piper_dual \
   --exp-name piper_ft_base \
   --checkpoint-base-dir /share/home/linyongjia/output/openpi \
+  --data.repo_id /share/home/linyongjia/datasets/piper_pen_v001 \
   --num-train-steps 8000 \
   --resume true
 ```
