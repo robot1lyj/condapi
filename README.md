@@ -44,11 +44,9 @@ git submodule update --init --recursive
 
 On the `conda-pi` branch, the default server-side training path is the non-container conda workflow documented in [docs/piper_conda_training.md](docs/piper_conda_training.md). That flow creates a `pi-conda` environment on the training server and is the recommended path for offline fine-tuning on this branch.
 
-If you are doing general local development on an online machine, the upstream `uv` workflow is still available:
-
 ```bash
-GIT_LFS_SKIP_SMUDGE=1 uv sync
-GIT_LFS_SKIP_SMUDGE=1 uv pip install -e .
+bash scripts/conda/build_offline_bundle.sh artifacts/pi-conda-offline-bundle
+bash scripts/conda/install_offline_bundle.sh --bundle-dir artifacts/pi-conda-offline-bundle --env-name pi-conda
 ```
 
 NOTE: `GIT_LFS_SKIP_SMUDGE=1` is needed to pull LeRobot as a dependency.
@@ -189,25 +187,25 @@ openpi now provides PyTorch implementations of π₀ and π₀.₅ models alongs
 - EMA (exponential moving average) weights during training
 
 ### Setup
-1. Make sure that you have the latest version of all dependencies installed: `uv sync`
+1. Make sure that the `pi-conda` environment is installed with `scripts/conda/install_offline_bundle.sh`.
 
-2. Double check that you have transformers 4.53.2 installed: `uv pip show transformers`
+2. Double check that you have transformers 4.53.2 installed: `conda run -n pi-conda python -m pip show transformers`
 
 3. Apply the transformers library patches:
    ```bash
-   cp -r ./src/openpi/models_pytorch/transformers_replace/* .venv/lib/python3.11/site-packages/transformers/
+   conda run -n pi-conda python scripts/conda/patch_transformers.py --openpi-dir .
    ```
 
 This overwrites several files in the transformers library with necessary model changes: 1) supporting AdaRMS, 2) correctly controlling the precision of activations, and 3) allowing the KV cache to be used without being updated.
 
-**WARNING**: With the default uv link mode (hardlink), this will permanently affect the transformers library in your uv cache, meaning the changes will survive reinstallations of transformers and could even propagate to other projects that use transformers. To fully undo this operation, you must run `uv cache clean transformers`.
+If `transformers` is reinstalled, run `scripts/conda/patch_transformers.py` again inside `pi-conda`.
 
 ### Converting JAX Models to PyTorch
 
 To convert a JAX model checkpoint to PyTorch format:
 
 ```bash
-uv run examples/convert_jax_model_to_pytorch.py \
+conda run -n pi-conda python examples/convert_jax_model_to_pytorch.py \
     --checkpoint_dir /path/to/jax/checkpoint \
     --config_name <config name> \
     --output_path /path/to/converted/pytorch/checkpoint
@@ -237,7 +235,7 @@ action_chunk = policy.infer(example)["actions"]
 The policy server works identically with PyTorch models - just point to the converted checkpoint directory:
 
 ```bash
-uv run scripts/serve_policy.py policy:checkpoint \
+conda run -n pi-conda python scripts/serve_policy.py policy:checkpoint \
     --policy.config=pi05_droid \
     --policy.dir=/path/to/converted/pytorch/checkpoint
 ```
@@ -248,7 +246,7 @@ To finetune a model in PyTorch:
 
 1. Convert the JAX base model to PyTorch format:
    ```bash
-   uv run examples/convert_jax_model_to_pytorch.py \
+   conda run -n pi-conda python examples/convert_jax_model_to_pytorch.py \
        --config_name <config name> \
        --checkpoint_dir /path/to/jax/base/model \
        --output_path /path/to/pytorch/base/model
@@ -260,21 +258,21 @@ To finetune a model in PyTorch:
 
 ```bash
 # Single GPU training:
-uv run scripts/train_pytorch.py <config_name> --exp_name <run_name> --save_interval <interval>
+conda run -n pi-conda python scripts/train_pytorch.py <config_name> --exp_name <run_name> --save_interval <interval>
 
 # Example:
-uv run scripts/train_pytorch.py debug --exp_name pytorch_test
-uv run scripts/train_pytorch.py debug --exp_name pytorch_test --resume  # Resume from latest checkpoint
+conda run -n pi-conda python scripts/train_pytorch.py debug --exp_name pytorch_test
+conda run -n pi-conda python scripts/train_pytorch.py debug --exp_name pytorch_test --resume  # Resume from latest checkpoint
 
 # Multi-GPU training (single node):
-uv run torchrun --standalone --nnodes=1 --nproc_per_node=<num_gpus> scripts/train_pytorch.py <config_name> --exp_name <run_name>
+conda run -n pi-conda torchrun --standalone --nnodes=1 --nproc_per_node=<num_gpus> scripts/train_pytorch.py <config_name> --exp_name <run_name>
 
 # Example:
-uv run torchrun --standalone --nnodes=1 --nproc_per_node=2 scripts/train_pytorch.py pi0_aloha_sim --exp_name pytorch_ddp_test
-uv run torchrun --standalone --nnodes=1 --nproc_per_node=2 scripts/train_pytorch.py pi0_aloha_sim --exp_name pytorch_ddp_test --resume
+conda run -n pi-conda torchrun --standalone --nnodes=1 --nproc_per_node=2 scripts/train_pytorch.py pi0_aloha_sim --exp_name pytorch_ddp_test
+conda run -n pi-conda torchrun --standalone --nnodes=1 --nproc_per_node=2 scripts/train_pytorch.py pi0_aloha_sim --exp_name pytorch_ddp_test --resume
 
 # Multi-Node Training:
-uv run torchrun \
+conda run -n pi-conda torchrun \
     --nnodes=<num_nodes> \
     --nproc_per_node=<gpus_per_node> \
     --node_rank=<rank_of_node> \
@@ -303,12 +301,12 @@ We will collect common issues and their solutions here. If you encounter an issu
 
 | Issue                                     | Resolution                                                                                                                                                                                   |
 | ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `uv sync` fails with dependency conflicts | Try removing the virtual environment directory (`rm -rf .venv`) and running `uv sync` again. If issues persist, check that you have the latest version of `uv` installed (`uv self update`). |
+| `install_offline_bundle.sh` fails with dependency conflicts | Rebuild the offline bundle from `scripts/conda/requirements-pi-pip.txt` and reinstall the `pi-conda` environment with `--force`. |
 | Training runs out of GPU memory           | Make sure you set `XLA_PYTHON_CLIENT_MEM_FRACTION=0.9` (or higher) before running training to allow JAX to use more GPU memory. You can also use `--fsdp-devices <n>` where `<n>` is your number of GPUs, to enable [fully-sharded data parallelism](https://engineering.fb.com/2021/07/15/open-source/fsdp/), which reduces memory usage in exchange for slower training (the amount of slowdown depends on your particular setup). If you are still running out of memory, you may want to consider disabling EMA.        |
 | Policy server connection errors           | Check that the server is running and listening on the expected port. Verify network connectivity and firewall settings between client and server.                                            |
 | Missing norm stats error when training    | Run `scripts/compute_norm_stats.py` with your config name before starting training.                                                                                                          |
 | Dataset download fails                    | Check your internet connection. For HuggingFace datasets, ensure you're logged in (`huggingface-cli login`).                                                                                 |
-| CUDA/GPU errors                           | Verify NVIDIA drivers are installed correctly. Check GPU compatibility. You do NOT need CUDA libraries installed at a system level --- they will be installed via uv. You may even want to try *uninstalling* system CUDA libraries if you run into CUDA issues, since system libraries can sometimes cause conflicts. |
-| Import errors when running examples       | Make sure you've installed all dependencies with `uv sync`. Some examples may have additional requirements listed in their READMEs.                    |
+| CUDA/GPU errors                           | Verify NVIDIA drivers are installed correctly. Check GPU compatibility and the CUDA packages installed in the conda environment. |
+| Import errors when running examples       | Make sure you've installed the `pi-conda` environment and local editable packages with `scripts/conda/install_offline_bundle.sh`. Some examples may have additional requirements listed in their READMEs.                    |
 | Action dimensions mismatch                | Verify your data processing transforms match the expected input/output dimensions of your robot. Check the action space definitions in your policy classes.                                  |
 | Diverging training loss                            | Check the `q01`, `q99`, and `std` values in `norm_stats.json` for your dataset. Certain dimensions that are rarely used can end up with very small `q01`, `q99`, or `std` values, leading to huge states and actions after normalization. You can manually adjust the norm stats as a workaround. |

@@ -49,12 +49,10 @@ RUN mkdir /python && \
     cd ~ && rm -rf /python && \
     rm -rf /var/lib/apt/lists/*
 
-COPY --from=ghcr.io/astral-sh/uv:0.5.6 /uv /bin/uv
-ENV UV_HTTP_TIMEOUT=120
-ENV UV_LINK_MODE=copy
 COPY ./examples/aloha_real/requirements.txt /tmp/requirements.txt
 COPY ./packages/openpi-client/pyproject.toml /tmp/openpi-client/pyproject.toml
-RUN uv pip sync --python 3.10 --system /tmp/requirements.txt /tmp/openpi-client/pyproject.toml
+RUN python3.10 -m pip install --upgrade pip \
+    && python3.10 -m pip install -r /tmp/requirements.txt /tmp/openpi-client/pyproject.toml
 
 ENV PYTHONPATH=/app:/app/src:/app/packages/openpi-client/src:/root/interbotix_ws/src/aloha/aloha_scripts:/root/interbotix_ws/src/aloha
 WORKDIR /app

@@ -15,10 +15,10 @@ Terminal window 1:
 
 ```bash
 # Create virtual environment
-uv venv --python 3.10 examples/aloha_real/.venv
-source examples/aloha_real/.venv/bin/activate
-uv pip sync examples/aloha_real/requirements.txt
-uv pip install -e packages/openpi-client
+conda create -n pi-conda python=3.10 examples/aloha_real/pi-conda -y
+source examples/aloha_real/pi-conda/bin/activate
+python -m pip install -r examples/aloha_real/requirements.txt
+python -m pip install -e packages/openpi-client
 
 # Run the robot
 python -m examples.aloha_real.main
@@ -33,7 +33,7 @@ roslaunch aloha ros_nodes.launch
 Terminal window 3:
 
 ```bash
-uv run scripts/serve_policy.py --env ALOHA --default_prompt='take the toast out of the toaster'
+conda run -n pi-conda python scripts/serve_policy.py --env ALOHA --default_prompt='take the toast out of the toaster'
 ```
 
 ## **ALOHA Checkpoint Guide**

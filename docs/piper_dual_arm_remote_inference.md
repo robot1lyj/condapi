@@ -5,7 +5,7 @@
 ## 0. 前提检查
 - 已完成训练，且 checkpoint 目录存在（`params/` 或 `model.safetensors`，同时有 `assets/<dataset_id>/norm_stats.json`）。
 - 服务器与机器人网络互通，端口已放行。
-- 远端服务默认使用 `conda run -n pi-conda python` 启动（离线环境不使用 `uv run`）。
+- 远端服务默认使用 `conda run -n pi-conda python` 启动。
 
 ## 1. 服务器端启动（policy server）
 离线环境建议先设置：

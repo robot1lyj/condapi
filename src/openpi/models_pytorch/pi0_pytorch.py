@@ -114,7 +114,12 @@ class PI0Pytorch(nn.Module):
         # Initialize gradient checkpointing flag
         self.gradient_checkpointing_enabled = False
 
-        msg = "transformers_replace is not installed correctly. Please install it with `uv pip install transformers==4.53.2` and `cp -r ./src/openpi/models_pytorch/transformers_replace/* .venv/lib/python3.11/site-packages/transformers/`."
+        msg = (
+            "transformers_replace is not installed correctly. Please install "
+            "`transformers==4.53.2` and then run "
+            "`python scripts/conda/patch_transformers.py --openpi-dir <openpi_repo>` "
+            "to overlay the openpi transformers patches."
+        )
         try:
             from transformers.models.siglip import check
 

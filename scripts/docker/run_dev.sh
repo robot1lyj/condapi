@@ -27,7 +27,6 @@ COMMAND=()
 USER_UID=""
 USER_GID=""
 USER_GROUP_NAME=""
-UV_CACHE_DIR_IN_CONTAINER=""
 OPENPI_OUTPUT_DIR_IN_CONTAINER="/output/openpi"
 ENTER_EXISTING=0
 
@@ -151,8 +150,6 @@ if (( RUN_AS_ROOT == 0 )) && [[ "$OPENPI_DATA_HOME_IN_CONTAINER" == "/root/.cach
   OPENPI_ASSETS_MOUNT="${OPENPI_DATA_HOME_IN_CONTAINER}/openpi-assets"
 fi
 
-UV_CACHE_DIR_IN_CONTAINER="${UV_CACHE_DIR:-${OPENPI_DATA_HOME_IN_CONTAINER}/uv}"
-
 if (( RUN_AS_ROOT == 0 )); then
   if [[ "$USER_SPEC" != *:* ]]; then
     echo "Invalid --user value (expected uid:gid): $USER_SPEC" >&2
@@ -198,14 +195,12 @@ mkdir -p \
   "${HOME_DIR}" \
   "${HOME_DIR}/.cache/jax" \
   "${OPENPI_DATA_HOME_IN_CONTAINER}" \
-  "${UV_CACHE_DIR_IN_CONTAINER}" \
   "${OPENPI_OUTPUT_DIR_IN_CONTAINER}"
 chown "${USER_UID}:${USER_GID}" \
   "${HOME_DIR}" \
   "${HOME_DIR}/.cache" \
   "${HOME_DIR}/.cache/jax" \
   "${OPENPI_DATA_HOME_IN_CONTAINER}" \
-  "${UV_CACHE_DIR_IN_CONTAINER}" \
   "${OPENPI_OUTPUT_DIR_IN_CONTAINER}"
 export HOME="${HOME_DIR}" USER="${USER_NAME}" LOGNAME="${USER_NAME}"
 exec su -m -s /bin/bash "${USER_NAME}" -c "cd \"${WORKDIR}\" && exec ${command_str}"
@@ -231,7 +226,6 @@ run_args=(
   -e OPENPI_DATA_HOME="$OPENPI_DATA_HOME_IN_CONTAINER"
   -e OPENPI_OUTPUT_DIR=/output/openpi
   -e HF_LEROBOT_HOME="${HF_LEROBOT_HOME:-/data}"
-  -e UV_CACHE_DIR="$UV_CACHE_DIR_IN_CONTAINER"
   -e IS_DOCKER=true
   -e NVIDIA_DRIVER_CAPABILITIES=all
   -v "$DATA_DIR":"$OPENPI_ASSETS_MOUNT"
@@ -313,14 +307,12 @@ mkdir -p \
   "${HOME_DIR}" \
   "${HOME_DIR}/.cache/jax" \
   "${OPENPI_DATA_HOME_IN_CONTAINER}" \
-  "${UV_CACHE_DIR_IN_CONTAINER}" \
   "${OPENPI_OUTPUT_DIR_IN_CONTAINER}"
 chown "${USER_UID}:${USER_GID}" \
   "${HOME_DIR}" \
   "${HOME_DIR}/.cache" \
   "${HOME_DIR}/.cache/jax" \
   "${OPENPI_DATA_HOME_IN_CONTAINER}" \
-  "${UV_CACHE_DIR_IN_CONTAINER}" \
   "${OPENPI_OUTPUT_DIR_IN_CONTAINER}"
 export HOME="${HOME_DIR}" USER="${USER_NAME}" LOGNAME="${USER_NAME}"
 exec su -m -s /bin/bash "${USER_NAME}" -c "cd \"${WORKDIR}\" && exec ${command_str}"

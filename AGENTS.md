@@ -9,17 +9,17 @@
 - `third_party/` and submodules: vendored deps; keep changes scoped and justified.
 
 ## Build, Test, and Development Commands
-Use `uv` for dependency management (Python 3.11). Typical setup:
+Use the conda workflow for dependency management (Python 3.11). Typical setup:
 ```bash
 git submodule update --init --recursive
-GIT_LFS_SKIP_SMUDGE=1 uv sync
-GIT_LFS_SKIP_SMUDGE=1 uv pip install -e .
+bash scripts/conda/build_offline_bundle.sh artifacts/pi-conda-offline-bundle
+bash scripts/conda/install_offline_bundle.sh --bundle-dir artifacts/pi-conda-offline-bundle --env-name pi-conda
 ```
 Common workflows:
 ```bash
-uv run scripts/compute_norm_stats.py --config-name pi05_libero
-XLA_PYTHON_CLIENT_MEM_FRACTION=0.9 uv run scripts/train.py pi05_libero --exp-name=my_experiment
-uv run scripts/serve_policy.py policy:checkpoint --policy.config=pi05_libero --policy.dir=checkpoints/pi05_libero/my_experiment/20000
+conda run -n pi-conda python scripts/compute_norm_stats.py --config-name pi05_libero
+XLA_PYTHON_CLIENT_MEM_FRACTION=0.9 conda run -n pi-conda python scripts/train.py pi05_libero --exp-name=my_experiment
+conda run -n pi-conda python scripts/serve_policy.py policy:checkpoint --policy.config=pi05_libero --policy.dir=checkpoints/pi05_libero/my_experiment/20000
 ```
 Optional Docker path:
 ```bash
@@ -37,11 +37,11 @@ docker compose -f scripts/docker/compose.yml up --build
 - Naming: tests are `*_test.py` (see `src/openpi/*_test.py`).
 - Run all tests:
 ```bash
-uv run pytest
+conda run -n pi-conda python -m pytest
 ```
 - Manual-only tests are marked `manual`:
 ```bash
-uv run pytest -m manual
+conda run -n pi-conda python -m pytest -m manual
 ```
 
 ## Commit & Pull Request Guidelines

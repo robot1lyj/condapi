@@ -5,13 +5,13 @@ We use the Libero dataset (stored in RLDS) for this example, but it can be easil
 modified for any other data you have saved in a custom format.
 
 Usage:
-uv run examples/libero/convert_libero_data_to_lerobot.py --data_dir /path/to/your/data
+conda run -n pi-conda python examples/libero/convert_libero_data_to_lerobot.py --data_dir /path/to/your/data
 
 If you want to push your dataset to the Hugging Face Hub, you can use the following command:
-uv run examples/libero/convert_libero_data_to_lerobot.py --data_dir /path/to/your/data --push_to_hub
+conda run -n pi-conda python examples/libero/convert_libero_data_to_lerobot.py --data_dir /path/to/your/data --push_to_hub
 
 Note: to run the script, you need to install tensorflow_datasets:
-`uv pip install tensorflow tensorflow_datasets`
+`python -m pip install tensorflow tensorflow_datasets`
 
 You can download the raw Libero datasets from https://huggingface.co/datasets/openvla/modified_libero_rlds
 The resulting dataset will get saved to the $HF_LEROBOT_HOME directory.

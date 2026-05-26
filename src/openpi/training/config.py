@@ -882,7 +882,7 @@ _CONFIGS = [
     ),
     TrainConfig(
         name="pi0_openarms_dual",
-        model=pi0_config.Pi0Config(action_dim=16),
+        model=pi0_config.Pi0Config(),
         data=LeRobotPiperDataConfig(
             repo_id="/share/home/linyongjia/datasets/openarms_folding_v001",
             base_config=DataConfig(prompt_from_task=True),
@@ -897,7 +897,7 @@ _CONFIGS = [
     ),
     TrainConfig(
         name="pi05_openarms_dual",
-        model=pi0_config.Pi0Config(pi05=True, discrete_state_input=True, action_dim=16),
+        model=pi0_config.Pi0Config(pi05=True, discrete_state_input=True),
         data=LeRobotPiperDataConfig(
             repo_id="/share/home/linyongjia/datasets/openarms_folding_v001",
             base_config=DataConfig(prompt_from_task=True),
