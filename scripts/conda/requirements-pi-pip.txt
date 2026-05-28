@@ -23,6 +23,7 @@ jax-cuda12-pjrt==0.5.3
 jax-cuda12-plugin==0.5.3
 jaxlib==0.5.3
 jaxtyping==0.2.36
+matplotlib==3.10.3
 ml-collections==1.0.0
 ml-dtypes==0.4.1
 msgpack==1.1.1

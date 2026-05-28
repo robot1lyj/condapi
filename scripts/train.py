@@ -1,6 +1,7 @@
 import dataclasses
 import functools
 import logging
+import os
 import platform
 from typing import Any
 
@@ -22,6 +23,7 @@ import openpi.shared.nnx_utils as nnx_utils
 import openpi.training.checkpoints as _checkpoints
 import openpi.training.config as _config
 import openpi.training.data_loader as _data_loader
+import openpi.training.metrics as _metrics
 import openpi.training.optimizer as _optimizer
 import openpi.training.sharding as sharding
 import openpi.training.utils as training_utils
@@ -55,19 +57,36 @@ def init_wandb(config: _config.TrainConfig, *, resuming: bool, log_code: bool = 
     ckpt_dir = config.checkpoint_dir
     if not ckpt_dir.exists():
         raise FileNotFoundError(f"Checkpoint directory {ckpt_dir} does not exist.")
-    if resuming:
-        run_id = (ckpt_dir / "wandb_id.txt").read_text().strip()
-        wandb.init(id=run_id, resume="must", project=config.project_name)
+    run_id_path = ckpt_dir / "wandb_id.txt"
+    if resuming and run_id_path.exists():
+        run_id = run_id_path.read_text().strip()
+        wandb.init(id=run_id, resume="allow", project=config.project_name, dir=str(ckpt_dir))
     else:
         wandb.init(
             name=config.exp_name,
             config=dataclasses.asdict(config),
             project=config.project_name,
+            dir=str(ckpt_dir),
         )
-        (ckpt_dir / "wandb_id.txt").write_text(wandb.run.id)
+        run_id_path.write_text(wandb.run.id)
 
     if log_code:
         wandb.run.log_code(epath.Path(__file__).parent.parent)
+
+
+def _configure_offline_wandb(config: _config.TrainConfig) -> None:
+    if not config.wandb_enabled:
+        return
+
+    os.environ.setdefault("WANDB_MODE", "offline")
+    os.environ.pop("WANDB_DISABLED", None)
+    os.environ.setdefault("WANDB_DIR", str(config.checkpoint_dir))
+    os.environ.setdefault("WANDB_SILENT", "true")
+
+
+def _learning_rate(config: _config.TrainConfig, step: int) -> float:
+    schedule = config.lr_schedule.create()
+    return float(jax.device_get(schedule(step)))
 
 
 def _load_weights_and_validate(loader: _weight_loaders.WeightLoader, params_shape: at.Params) -> at.Params:
@@ -194,6 +213,7 @@ def train_step(
 def main(config: _config.TrainConfig):
     init_logging()
     logging.info(f"Running on: {platform.node()}")
+    _configure_offline_wandb(config)
 
     if config.batch_size % jax.device_count() != 0:
         raise ValueError(
@@ -248,6 +268,7 @@ def main(config: _config.TrainConfig):
     )
 
     start_step = int(train_state.step)
+    metric_logger = _metrics.LocalMetricLogger(config.checkpoint_dir, resume_step=start_step if resuming else None)
     pbar = tqdm.tqdm(
         range(start_step, config.num_train_steps),
         initial=start_step,
@@ -263,17 +284,22 @@ def main(config: _config.TrainConfig):
         if step % config.log_interval == 0:
             stacked_infos = common_utils.stack_forest(infos)
             reduced_info = jax.device_get(jax.tree.map(jnp.mean, stacked_infos))
+            reduced_info["learning_rate"] = _learning_rate(config, step)
             info_str = ", ".join(f"{k}={v:.4f}" for k, v in reduced_info.items())
             pbar.write(f"Step {step}: {info_str}")
             wandb.log(reduced_info, step=step)
+            metric_logger.log(step, reduced_info)
             infos = []
         batch = next(data_iter)
 
         if (step % config.save_interval == 0 and step > start_step) or step == config.num_train_steps - 1:
             _checkpoints.save_state(checkpoint_manager, train_state, data_loader, step)
 
+    metric_logger.flush()
     logging.info("Waiting for checkpoint manager to finish")
     checkpoint_manager.wait_until_finished()
+    if config.wandb_enabled:
+        wandb.finish()
 
 
 if __name__ == "__main__":

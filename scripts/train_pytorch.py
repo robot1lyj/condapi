@@ -45,6 +45,7 @@ import openpi.models_pytorch.pi0_pytorch
 import openpi.shared.normalize as _normalize
 import openpi.training.config as _config
 import openpi.training.data_loader as _data
+import openpi.training.metrics as _metrics
 
 
 def init_logging():
@@ -79,16 +80,28 @@ def init_wandb(config: _config.TrainConfig, *, resuming: bool, enabled: bool = T
     if not ckpt_dir.exists():
         raise FileNotFoundError(f"Checkpoint directory {ckpt_dir} does not exist.")
 
-    if resuming:
-        run_id = (ckpt_dir / "wandb_id.txt").read_text().strip()
-        wandb.init(id=run_id, resume="must", project=config.project_name)
+    run_id_path = ckpt_dir / "wandb_id.txt"
+    if resuming and run_id_path.exists():
+        run_id = run_id_path.read_text().strip()
+        wandb.init(id=run_id, resume="allow", project=config.project_name, dir=str(ckpt_dir))
     else:
         wandb.init(
             name=config.exp_name,
             config=dataclasses.asdict(config),
             project=config.project_name,
+            dir=str(ckpt_dir),
         )
-        (ckpt_dir / "wandb_id.txt").write_text(wandb.run.id)
+        run_id_path.write_text(wandb.run.id)
+
+
+def configure_offline_wandb(config: _config.TrainConfig):
+    if not config.wandb_enabled:
+        return
+
+    os.environ.setdefault("WANDB_MODE", "offline")
+    os.environ.pop("WANDB_DISABLED", None)
+    os.environ.setdefault("WANDB_DIR", str(config.checkpoint_dir))
+    os.environ.setdefault("WANDB_SILENT", "true")
 
 
 def setup_ddp():
@@ -310,6 +323,7 @@ def train_loop(config: _config.TrainConfig):
     use_ddp, local_rank, device = setup_ddp()
     is_main = (not use_ddp) or (dist.get_rank() == 0)
     set_seed(config.seed, local_rank)
+    configure_offline_wandb(config)
 
     # Initialize checkpoint directory and wandb
     resuming = False
@@ -468,6 +482,7 @@ def train_loop(config: _config.TrainConfig):
     if resuming:
         global_step = load_checkpoint(model, optim, config.checkpoint_dir, device)
         logging.info(f"Resumed training from step {global_step}")
+    metric_logger = _metrics.LocalMetricLogger(config.checkpoint_dir, resume_step=global_step if resuming else None)
 
     def lr_schedule(step: int):
         if step < warmup_steps:
@@ -585,8 +600,8 @@ def train_loop(config: _config.TrainConfig):
                     else f"step={global_step} loss={avg_loss:.4f} lr={avg_lr:.2e} time={elapsed:.1f}s"
                 )
 
-                # Log to wandb
-                if config.wandb_enabled and len(infos) > 0:
+                # Log to wandb and local metrics.
+                if len(infos) > 0:
                     log_payload = {
                         "loss": avg_loss,
                         "learning_rate": avg_lr,
@@ -595,7 +610,9 @@ def train_loop(config: _config.TrainConfig):
                     }
                     if avg_grad_norm is not None:
                         log_payload["grad_norm"] = avg_grad_norm
-                    wandb.log(log_payload, step=global_step)
+                    metric_logger.log(global_step, log_payload)
+                    if config.wandb_enabled:
+                        wandb.log(log_payload, step=global_step)
 
                 start_time = time.time()
                 infos = []  # Reset stats collection
@@ -614,6 +631,9 @@ def train_loop(config: _config.TrainConfig):
     # Close progress bar
     if pbar is not None:
         pbar.close()
+
+    if is_main:
+        metric_logger.flush()
 
     # Finish wandb run
     if is_main and config.wandb_enabled:

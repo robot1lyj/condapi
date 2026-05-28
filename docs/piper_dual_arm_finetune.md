@@ -7,7 +7,9 @@
 - 当前推荐直接使用版本化数据集目录绝对路径，不再依赖 `local/pen` 这类软链入口。
 - 离线环境建议先设置：
 ```bash
-export WANDB_DISABLED=true
+unset WANDB_DISABLED
+export WANDB_MODE=offline
+export WANDB_SILENT=true
 export HF_HUB_OFFLINE=1
 export HUGGINGFACE_HUB_OFFLINE=1
 export TRANSFORMERS_OFFLINE=1
@@ -83,8 +85,7 @@ conda run -n pi-conda python scripts/train.py pi0_piper_dual \
   --save-interval 200 \
   --keep-period 1000 \
   --lr-schedule.peak-lr 2e-5 \
-  --lr-schedule.warmup-steps 300 \
-  --no-wandb-enabled
+  --lr-schedule.warmup-steps 300
 ```
 
 如果你要用 `pi0_droid` 权重：  
@@ -104,8 +105,7 @@ conda run -n pi-conda python scripts/train.py pi05_piper_dual \
   --save-interval 200 \
   --keep-period 1000 \
   --lr-schedule.peak-lr 2e-5 \
-  --lr-schedule.warmup-steps 300 \
-  --no-wandb-enabled
+  --lr-schedule.warmup-steps 300
 ```
 
 ### 训练命令参数说明
@@ -122,7 +122,14 @@ conda run -n pi-conda python scripts/train.py pi05_piper_dual \
 | `--keep-period` | 长期保留间隔 | 1000 或更大 |
 | `--lr-schedule.peak-lr` | 峰值学习率 | base: 2e-5~3e-5；droid: 1e-5~2e-5 |
 | `--lr-schedule.warmup-steps` | 预热步数 | 200~500 |
-| `--no-wandb-enabled` | 关闭 wandb | 离线建议关闭 |
+| `--wandb-enabled / --no-wandb-enabled` | 是否记录 W&B | 默认离线 W&B；不联网，需要完全关闭时才用 `--no-wandb-enabled` |
+
+默认会在实验目录下写入离线曲线：
+
+- `wandb/`：W&B offline run。
+- `metrics/metrics.jsonl`、`metrics/metrics.csv`：结构化指标。
+- `metrics/plots/training_curves.png`：聚合曲线。
+- `metrics/plots/<metric>.png`：单指标曲线。
 
 ## 5. pi0 vs pi05 的微调差异（官方定义 + 调参建议）
 官方差异要点：

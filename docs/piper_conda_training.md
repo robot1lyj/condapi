@@ -86,7 +86,9 @@ conda run -n pi-conda python ...
 推荐固定这些环境变量：
 
 ```bash
-export WANDB_DISABLED=true
+unset WANDB_DISABLED
+export WANDB_MODE=offline
+export WANDB_SILENT=true
 export HF_HUB_OFFLINE=1
 export HUGGINGFACE_HUB_OFFLINE=1
 export TRANSFORMERS_OFFLINE=1
@@ -117,10 +119,23 @@ XLA_PYTHON_CLIENT_MEM_FRACTION=0.9 \
 conda run -n pi-conda python scripts/train.py pi05_piper_dual \
   --exp-name piper_ft_pi05_dish \
   --checkpoint-base-dir /share/home/linyongjia/output/openpi \
-  --data.repo_id /share/home/linyongjia/datasets/piper_dish_v001
+  --data.repo_id /share/home/linyongjia/datasets/piper_dish_v001 \
+  --log-interval 20
 ```
 
-## 6. transformers 补丁
+## 6. 离线训练曲线
+
+训练默认使用离线 W&B，不会联网同步。每个实验目录下会同时生成：
+
+- `wandb/`：W&B offline run 文件，可后续手动 sync 或用 W&B 工具查看。
+- `metrics/metrics.jsonl`：逐次日志点的结构化指标。
+- `metrics/metrics.csv`：同一批指标的表格版本。
+- `metrics/plots/training_curves.png`：聚合训练曲线图。
+- `metrics/plots/<metric>.png`：每个指标的单独曲线图。
+
+`--log-interval 20` 表示每 20 step 记录一次，比默认 100 step 更密；如果需要更细可以设为 `10`。
+
+## 7. transformers 补丁
 
 `openpi` 当前仍然需要把 `src/openpi/models_pytorch/transformers_replace/` 覆盖到安装后的 `transformers` 里。
 

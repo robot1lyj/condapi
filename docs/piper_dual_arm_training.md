@@ -41,7 +41,9 @@
 ## 3. 训练前环境变量
 
 ```bash
-export WANDB_DISABLED=true
+unset WANDB_DISABLED
+export WANDB_MODE=offline
+export WANDB_SILENT=true
 export HF_HUB_OFFLINE=1
 export HUGGINGFACE_HUB_OFFLINE=1
 export TRANSFORMERS_OFFLINE=1
@@ -100,6 +102,7 @@ conda run -n pi-conda python scripts/train.py pi05_piper_dual \
   --checkpoint-base-dir /share/home/linyongjia/output/openpi \
   --data.repo_id /share/home/linyongjia/datasets/piper_pen_v002 \
   --batch-size 32 \
+  --log-interval 20 \
   --fsdp-devices 2 \
   --overwrite
 ```
@@ -115,6 +118,7 @@ conda run -n pi-conda bash scripts/piper_dataset_train.sh \
   --dataset-dir /share/home/linyongjia/datasets/piper_pen_v002 \
   --exp-name piper_pen_v002_bs32_fsdp2 \
   --batch-size 32 \
+  --log-interval 20 \
   --fsdp-devices 2 \
   --overwrite
 ```
@@ -124,6 +128,13 @@ conda run -n pi-conda bash scripts/piper_dataset_train.sh \
 1. 校验 `meta/info.json` 是否存在
 2. 默认先在数据集目录内生成 `norm_stats.json`
 3. 再启动训练
+
+训练曲线会写入实验目录：
+
+- `wandb/`：离线 W&B run，不会联网同步。
+- `metrics/metrics.jsonl` 和 `metrics/metrics.csv`：结构化指标。
+- `metrics/plots/training_curves.png`：更密的聚合训练曲线。
+- `metrics/plots/<metric>.png`：单指标曲线。
 
 ## 7. manifest.yaml 建议
 

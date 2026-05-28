@@ -14,6 +14,7 @@ Optional:
   --config NAME              Train config (default: pi05_piper_dual)
   --checkpoint-base-dir DIR  Output root (default: /share/home/linyongjia/output/openpi)
   --batch-size N             Batch size (default: 32)
+  --log-interval N           Metrics/logging interval (default: 20)
   --fsdp-devices N           FSDP devices (default: 2)
   --max-frames N             If set, recompute norm stats using at most N frames
   --overwrite                Pass --overwrite to train.py
@@ -27,6 +28,7 @@ EXP_NAME=""
 CONFIG_NAME="pi05_piper_dual"
 CHECKPOINT_BASE_DIR="/share/home/linyongjia/output/openpi"
 BATCH_SIZE="32"
+LOG_INTERVAL="20"
 FSDP_DEVICES="2"
 MAX_FRAMES=""
 OVERWRITE=0
@@ -53,6 +55,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --batch-size)
       BATCH_SIZE="$2"
+      shift 2
+      ;;
+    --log-interval)
+      LOG_INTERVAL="$2"
       shift 2
       ;;
     --fsdp-devices)
@@ -115,6 +121,7 @@ TRAIN_CMD=(
   --checkpoint-base-dir "$CHECKPOINT_BASE_DIR"
   --data.repo_id "$DATASET_DIR"
   --batch-size "$BATCH_SIZE"
+  --log-interval "$LOG_INTERVAL"
   --fsdp-devices "$FSDP_DEVICES"
 )
 
