@@ -218,6 +218,23 @@ class LocalMetricLogger:
 
         image.save(self.plots_dir / "training_curves.png")
 
+        for name in names:
+            image = Image.new("RGB", (panel_width, panel_height), "white")
+            draw = ImageDraw.Draw(image)
+            self._draw_pillow_panel(
+                draw,
+                name,
+                series[name],
+                y_offset=0,
+                panel_width=panel_width,
+                panel_height=panel_height,
+                margin_left=margin_left,
+                margin_right=margin_right,
+                margin_top=margin_top,
+                margin_bottom=margin_bottom,
+            )
+            image.save(self.plots_dir / f"{_safe_filename(name)}.png")
+
     def _draw_pillow_panel(
         self,
         draw: Any,
