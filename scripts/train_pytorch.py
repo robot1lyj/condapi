@@ -98,10 +98,10 @@ def configure_offline_wandb(config: _config.TrainConfig):
     if not config.wandb_enabled:
         return
 
-    os.environ.setdefault("WANDB_MODE", "offline")
+    os.environ["WANDB_MODE"] = "offline"
     os.environ.pop("WANDB_DISABLED", None)
     os.environ.setdefault("WANDB_DIR", str(config.checkpoint_dir))
-    os.environ.setdefault("WANDB_SILENT", "true")
+    os.environ["WANDB_SILENT"] = "true"
 
 
 def setup_ddp():
