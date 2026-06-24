@@ -56,7 +56,7 @@ artifacts/pi-conda-offline-bundle/
 
 ```bash
 tar -C artifacts -cf pi-conda-offline-bundle.tar pi-conda-offline-bundle
-scp -P 12222 pi-conda-offline-bundle.tar linyongjia@172.31.11.122:/share/home/linyongjia/
+scp -P 12222 pi-conda-offline-bundle.tar linyongjia@172.31.11.108:/share/home/linyongjia/
 ```
 
 ## 3. 服务器离线安装

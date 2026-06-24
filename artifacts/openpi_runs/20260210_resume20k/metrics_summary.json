@@ -1,0 +1,33 @@
+{
+  "num_points": 750,
+  "last_step": 19980,
+  "metrics": {
+    "grad_norm": {
+      "final": 0.1417,
+      "min": 0.1222,
+      "max": 0.2602,
+      "mean_last_n": 0.15751500000000002,
+      "trend": "down"
+    },
+    "loss": {
+      "final": 0.0113,
+      "min": 0.0102,
+      "max": 0.0311,
+      "mean_last_n": 0.012749999999999997,
+      "trend": "down"
+    },
+    "param_norm": {
+      "final": 1804.5061,
+      "min": 1803.4325,
+      "max": 1804.5061,
+      "mean_last_n": 1804.5018649999997,
+      "trend": "flat"
+    }
+  },
+  "flags": {
+    "loss_plateau": false,
+    "grad_norm_spike": false
+  },
+  "generated_at": "2026-02-10T07:46:29.772585Z",
+  "log_path": "/monitor/metrics/pi05_piper_dual/piper_ft_pi05_towel_merged_98ep_fresh_20260209/20260210_092715/train.log"
+}
