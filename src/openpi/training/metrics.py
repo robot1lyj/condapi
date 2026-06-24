@@ -1,3 +1,4 @@
+import atexit
 import csv
 import json
 import math
@@ -48,13 +49,14 @@ def _moving_average(values: list[float], window: int) -> list[float]:
 class LocalMetricLogger:
     """Writes training metrics to jsonl/csv and renders offline curve images."""
 
-    def __init__(self, run_dir: str | pathlib.Path, *, resume_step: int | None = None, plot_every_n_logs: int = 10):
+    def __init__(self, run_dir: str | pathlib.Path, *, resume_step: int | None = None, plot_every_n_logs: int = 5, flush_on_log: bool = False):
         self.run_dir = pathlib.Path(run_dir)
         self.metrics_dir = self.run_dir / "metrics"
         self.plots_dir = self.metrics_dir / "plots"
         self.jsonl_path = self.metrics_dir / "metrics.jsonl"
         self.csv_path = self.metrics_dir / "metrics.csv"
         self._plot_every_n_logs = max(1, plot_every_n_logs)
+        self._flush_on_log = flush_on_log
         self._logs_since_plot = 0
         self.metrics_dir.mkdir(parents=True, exist_ok=True)
         self.plots_dir.mkdir(parents=True, exist_ok=True)
@@ -64,6 +66,9 @@ class LocalMetricLogger:
             self._rows = [row for row in self._rows if int(row.get("step", -1)) < resume_step]
             self._rewrite_jsonl()
             self.flush()
+
+        # Ensure metrics are written even if training is interrupted
+        atexit.register(self._on_exit)
 
     def log(self, step: int, metrics: Mapping[str, Any]) -> None:
         row: dict[str, int | float | str | bool] = {"step": int(step)}
@@ -81,7 +86,7 @@ class LocalMetricLogger:
 
         self._write_csv()
         self._logs_since_plot += 1
-        if self._logs_since_plot >= self._plot_every_n_logs:
+        if self._flush_on_log or self._logs_since_plot >= self._plot_every_n_logs:
             self._write_plots()
             self._logs_since_plot = 0
 
@@ -89,6 +94,13 @@ class LocalMetricLogger:
         self._write_csv()
         self._write_plots()
         self._logs_since_plot = 0
+
+    def _on_exit(self) -> None:
+        """Ensure metrics are flushed even on SIGTERM/SIGINT."""
+        try:
+            self.flush()
+        except Exception:
+            pass
 
     def _read_existing_rows(self) -> list[dict[str, Any]]:
         if not self.jsonl_path.exists():
