@@ -390,6 +390,9 @@ class LeRobotPiperDataConfig(DataConfigFactory):
         default_factory=lambda: _transforms.make_bool_mask(6, -1, 6, -1)
     )
     use_delta_joint_actions: bool = True
+    # "relative": UMI-style, all actions relative to current state (matches π0.5 pretraining)
+    # "chained_delta": each action = diff from previous action (error accumulates)
+    action_style: str = "relative"
     swap_left_right: bool = False
     default_prompt: str | None = None
 
@@ -433,9 +436,15 @@ class LeRobotPiperDataConfig(DataConfigFactory):
         )
 
         if self.use_delta_joint_actions and self.delta_action_mask is not None:
+            if self.action_style == "chained_delta":
+                action_cls = _transforms.ChainedDeltaActions
+                action_out_cls = _transforms.AbsoluteChainedDeltaActions
+            else:
+                action_cls = _transforms.DeltaActions  # UMI-style relative
+                action_out_cls = _transforms.AbsoluteActions
             data_transforms = data_transforms.push(
-                inputs=[_transforms.DeltaActions(self.delta_action_mask)],
-                outputs=[_transforms.AbsoluteActions(self.delta_action_mask)],
+                inputs=[action_cls(self.delta_action_mask)],
+                outputs=[action_out_cls(self.delta_action_mask)],
             )
 
         model_transforms = ModelTransformFactory(default_prompt=self.default_prompt)(model_config)

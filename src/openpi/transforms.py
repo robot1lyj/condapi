@@ -202,10 +202,19 @@ class SubsampleActions(DataTransformFn):
 
 @dataclasses.dataclass(frozen=True)
 class DeltaActions(DataTransformFn):
-    """Repacks absolute actions into delta action space."""
+    """Repacks absolute actions into action space relative to the current state.
 
-    # Boolean mask for the action dimensions to be repacked into delta action space. Length
-    # can be smaller than the actual number of dimensions. If None, this transform is a no-op.
+    This implements the UMI-style "relative trajectory" approach: each action in the
+    chunk is an offset from the robot's CURRENT STATE at prediction time, not from
+    the previous action. This is the same as what LeRobot calls "relative actions"
+    and is consistent with π0.5's pretraining distribution.
+
+    For chained deltas (each action relative to the previous action), see
+    `ChainedDeltaActions` instead.
+    """
+
+    # Boolean mask for the action dimensions to be repacked. Length can be smaller
+    # than the actual number of dimensions. If None, this transform is a no-op.
     # See `make_bool_mask` for more details.
     mask: Sequence[bool] | None
 
@@ -222,13 +231,61 @@ class DeltaActions(DataTransformFn):
         return data
 
 
+# Alias: RelativeActions is the correct name for the UMI-style transform above.
+# DeltaActions is kept for backward compatibility with existing configs.
+RelativeActions = DeltaActions
+
+
+@dataclasses.dataclass(frozen=True)
+class ChainedDeltaActions(DataTransformFn):
+    """Repacks absolute actions into chained delta action space.
+
+    Each action in the chunk is relative to the PREVIOUS action (error accumulates):
+        action[t+0] = abs[t+0] - state[t]
+        action[t+1] = abs[t+1] - abs[t+0]
+        action[t+2] = abs[t+2] - abs[t+1]
+        ...
+
+    This is different from `DeltaActions` which makes all actions relative to the
+    current state (UMI-style). Chained deltas can accumulate prediction errors over
+    long horizons.
+    """
+
+    mask: Sequence[bool] | None
+
+    def __call__(self, data: DataDict) -> DataDict:
+        if "actions" not in data or self.mask is None:
+            return data
+
+        state, actions = data["state"], data["actions"]
+        mask = np.asarray(self.mask)
+        dims = mask.shape[-1]
+
+        # First action: delta from current state (for masked dims)
+        # Subsequent actions: delta from previous action
+        actions_delta = actions.copy()
+        actions_delta[..., 0, :dims] = np.where(
+            mask, actions[..., 0, :dims] - state[..., :dims], actions[..., 0, :dims]
+        )
+        for i in range(1, actions.shape[-2]):
+            actions_delta[..., i, :dims] = np.where(
+                mask, actions[..., i, :dims] - actions[..., i - 1, :dims], actions[..., i, :dims]
+            )
+        data["actions"] = actions_delta
+
+        return data
+
+
 @dataclasses.dataclass(frozen=True)
 class AbsoluteActions(DataTransformFn):
-    """Repacks delta actions into absolute action space."""
+    """Repacks delta/relative actions back into absolute action space.
 
-    # Boolean mask for the action dimensions to be repacked into absolute action space. Length
-    # can be smaller than the actual number of dimensions. If None, this transform is a no-op.
-    # See `make_bool_mask` for more details.
+    Reverses the `DeltaActions` (= `RelativeActions`) transform. For masked
+    dimensions, adds the current state back to each action.
+    """
+
+    # Boolean mask for the action dimensions. Length can be smaller than the actual
+    # number of dimensions. If None, this transform is a no-op.
     mask: Sequence[bool] | None
 
     def __call__(self, data: DataDict) -> DataDict:
@@ -239,6 +296,39 @@ class AbsoluteActions(DataTransformFn):
         mask = np.asarray(self.mask)
         dims = mask.shape[-1]
         actions[..., :dims] += np.expand_dims(np.where(mask, state[..., :dims], 0), axis=-2)
+        data["actions"] = actions
+
+        return data
+
+
+# Alias for clarity
+AbsoluteRelativeActions = AbsoluteActions
+
+
+@dataclasses.dataclass(frozen=True)
+class AbsoluteChainedDeltaActions(DataTransformFn):
+    """Reverses `ChainedDeltaActions`, converting chained deltas back to absolute."""
+
+    mask: Sequence[bool] | None
+
+    def __call__(self, data: DataDict) -> DataDict:
+        if "actions" not in data or self.mask is None:
+            return data
+
+        state, actions = data["state"], data["actions"]
+        mask = np.asarray(self.mask)
+        dims = mask.shape[-1]
+
+        # First action: add state back (must happen before cumulative sum since
+        # subsequent steps chain from the recovered absolute action)
+        actions[..., 0, :dims] = np.where(
+            mask, actions[..., 0, :dims] + state[..., :dims], actions[..., 0, :dims]
+        )
+        # Cumulatively add deltas: a[i] = d[i] + a[i-1]
+        for i in range(1, actions.shape[-2]):
+            actions[..., i, :dims] = np.where(
+                mask, actions[..., i, :dims] + actions[..., i - 1, :dims], actions[..., i, :dims]
+            )
         data["actions"] = actions
 
         return data
