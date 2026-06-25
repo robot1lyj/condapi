@@ -931,7 +931,7 @@ _CONFIGS = [
         model=pi0_config.Pi0Config(pi05=True, discrete_state_input=True),
         data=LeRobotPiperDataConfig(
             repo_id="/share/home/linyongjia/datasets/high_quality_folding",
-            base_config=DataConfig(prompt_from_task=True, train_episodes=list(range(1000))),
+            base_config=DataConfig(prompt_from_task=True, train_episodes=[i for i in range(1000) if i != 54]),
             base_image_key="observation.images.base",  # HQ dataset uses "base" (not "top_rgb")
             robot_action_dim=16,
             delta_action_mask=_transforms.make_bool_mask(7, -1, 7, -1),
