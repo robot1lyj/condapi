@@ -55,6 +55,43 @@ conda run -n pi-conda python scripts/serve_policy.py --port 6666 policy:checkpoi
   --policy.config=<config> --policy.dir=<dir>
 ```
 
+## HQ 数据集训练 (1200 集, high_quality_folding)
+
+### 1. 分割 + 正则化
+```bash
+conda run -n pi-conda python scripts/split_and_norm_relative.py \
+    --dataset /share/home/linyongjia/datasets/high_quality_folding \
+    --train-episodes 1000 --val-episodes 200 \
+    --config pi05_openarms_dual_hq
+```
+
+### 2. 桥接 norm_stats 路径 (⚠️ 必须!)
+```bash
+mkdir -p assets/pi05_openarms_dual_hq
+ln -sf /share/home/linyongjia/datasets/high_quality_folding \
+    assets/pi05_openarms_dual_hq/high_quality_folding
+```
+不做这一步训练会报 `Norm stats not found`。
+
+### 3. 训练
+```bash
+XLA_PYTHON_CLIENT_MEM_FRACTION=0.9 \
+conda run -n pi-conda python scripts/train.py pi05_openarms_dual_hq \
+    --exp-name openarms_hq_bs32_fsdp2 \
+    --checkpoint-base-dir /share/home/linyongjia/output/openpi
+```
+预估: ~76h (3.2天) on 2×A800, batch=32, 100k steps.
+
+### 4. 离线评估
+```bash
+conda run -n pi-conda python scripts/evaluate_checkpoint.py \
+    --config pi05_openarms_dual_hq \
+    --checkpoint-dir <checkpoint_path> \
+    --dataset /share/home/linyongjia/datasets/high_quality_folding \
+    --val-split "1000:1200" \
+    --output ./eval_report
+```
+
 ## Pre-flight Checks
 - 确认服务器可达: `ssh -p 12222 linyongjia@172.31.11.108 echo ok`
 - 确认 conda 环境存在: `conda run -n pi-conda python -c "import openpi"`

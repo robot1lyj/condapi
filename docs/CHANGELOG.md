@@ -7,6 +7,22 @@ Design decisions → `docs/decisions/`. Architecture → `docs/ARCHITECTURE.md`.
 
 ---
 
+## 2026-06-25
+
+- **`pi05_openarms_dual_hq` 训练配置**: 基于 robot-folding 博客消融实验结论，新建 HQ 数据集 (1200 集) 的 π0.5 微调配
+  置。关键参数：`base_image_key="observation.images.base"` (HQ 数据集用 `base` 非 `top_rgb`)，
+  `action_style="relative"` (UMI-style，博客验证 +15%)，`train_episodes=list(range(1000))`
+  (openpi 不自动读取 LeRobot splits)，`num_train_steps=100_000` (博客 recipe)。
+- **`evaluate_checkpoint.py` 修复**: 不再硬编码 `top_rgb`，自动检测 `base`/`top_rgb` 相机 key；
+  修复 `delta_timestamps=None` 导致 action 无法比对 ground truth 的 bug；
+  新增 `task_index→prompt` 映射支持。
+- **全流程审查**: 发现两个关键路径问题：(1) norm_stats 计算写入数据集目录但训练从
+  `assets/{config}/{asset_id}` 加载，需手动 `ln -sf` 桥接；(2) openpi DataLoader 不自动使用
+  LeRobot info.json 的 splits，需 `DataConfig.train_episodes` 显式指定。
+- **HQ 数据集上传**: 85GB `high_quality_folding` 从本地 `/storage1t` 上传至服务器
+  `/share/home/linyongjia/datasets/`。
+- **记忆系统更新**: 新增 `hq-training-workflow` 记忆和 `deployment.md` HQ 训练章节。
+
 ## 2026-06-24
 
 - **Context OS 记忆系统初始化**: 建立四层 Context OS 记忆架构 (CLAUDE.md → cache/ → memory/ → CHANGELOG)，将服务器地址、远端路径、GCS 模型位置等核心事实固化到跨会话记忆中。

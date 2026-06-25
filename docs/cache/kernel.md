@@ -10,11 +10,15 @@ New sessions: read `AGENTS.md` + this file first, then `context_index.md` to sel
 - Remote datasets: `/share/home/linyongjia/datasets/`
 - Remote checkpoints/output: `/share/home/linyongjia/output/openpi`
 - Remote cache base: `/share/home/linyongjia/.cache/openpi`
-- Default training target: `pi05_piper_dual`
-- Default env: `pi-conda` (conda, Python 3.11, CUDA 12)
+- Default training targets: `pi05_openarms_dual` (v002 165ep), `pi05_openarms_dual_hq` (HQ 1200ep)
+- Default env: `pi-conda` (conda, Python 3.11, CUDA 12), server conda at `/share/home/linyongjia/miniconda3/bin/conda`
 - Default entry: `scripts/train.py` (JAX), `scripts/train_pytorch.py` (PyTorch)
 - Model checkpoints (GCS): `gs://openpi-assets/checkpoints/` (pi0_base, pi05_base, pi0_fast_base, etc.)
-- Default pipeline: 数据 → 归一化统计 → 训练 (conda run -n pi-conda python scripts/train.py <config> --exp-name=<name>)
+- Default pipeline: 数据上传→分割+正则化→桥接norm_stats路径→训练→离线评估
+- ⚠️ norm_stats 路径桥接: assets/{config}/{asset_id} → 数据集目录 (需手动 ln -sf)
+- ⚠️ openpi 不自动读取 LeRobot info.json splits，需 DataConfig.train_episodes 显式指定
+- 验证脚本: `split_and_norm_relative.py` (分割+正则化), `evaluate_checkpoint.py` (离线泛化性评估)
+- HQ 数据集相机 key 为 `observation.images.base` (非 top_rgb)
 
 ## Security Kernel
 - 训练服务器 172.31.11.108 是核心资产，不要在 commit 中暴露敏感凭证
