@@ -101,6 +101,7 @@ def evaluate_episode(
     episode_frames: list[dict],
     action_dim: int,
     rollout_depth: int = 10,
+    tasks: dict[int, str] | None = None,
 ) -> EvalMetrics:
     """Evaluate a single episode.
 
@@ -109,6 +110,7 @@ def evaluate_episode(
         episode_frames: list of raw dataset frames for one episode.
         action_dim: expected action dimension.
         rollout_depth: how many steps to autoregress for drift measurement.
+        tasks: mapping from task_index to task description string.
     """
     mae_accum = np.zeros(action_dim)
     mae_count = 0
@@ -117,7 +119,7 @@ def evaluate_episode(
 
     for t, frame in enumerate(episode_frames):
         # Extract observation
-        obs = _build_observation(frame)
+        obs = _build_observation(frame, tasks=tasks)
         if obs is None:
             continue
 
@@ -166,10 +168,40 @@ def evaluate_episode(
     )
 
 
-def _build_observation(frame: dict) -> dict | None:
+# Supported base camera key names — order = detection priority
+_BASE_CAMERA_CANDIDATES = [
+    "observation.images.top_rgb",
+    "observation.images.base",
+]
+
+
+def _detect_image_keys(frame: dict) -> dict[str, str]:
+    """Detect which camera keys are present in the dataset frame.
+
+    Returns a mapping {src_key: dst_key} for all image keys found.
+    The base camera is auto-detected from known candidates.
+    """
+    mappings: dict[str, str] = {}
+
+    # Detect base camera
+    for candidate in _BASE_CAMERA_CANDIDATES:
+        if candidate in frame:
+            mappings[candidate] = candidate
+            break
+
+    # Wrist cameras (same naming across all known datasets)
+    for key in ("observation.images.left_wrist", "observation.images.right_wrist"):
+        if key in frame:
+            mappings[key] = key
+
+    return mappings
+
+
+def _build_observation(frame: dict, tasks: dict[int, str] | None = None) -> dict | None:
     """Build an observation dict from a raw dataset frame.
 
-    Maps the dataset keys to the keys expected by the piper policy.
+    Auto-detects camera keys (supports both top_rgb and base naming).
+    Converts task_index to prompt string using dataset task metadata.
     """
     try:
         obs = {}
@@ -177,19 +209,19 @@ def _build_observation(frame: dict) -> dict | None:
         if "observation.state" in frame:
             obs["observation.state"] = np.asarray(frame["observation.state"], dtype=np.float32)
 
-        # Images - top_rgb
-        for src_key, dst_key in [
-            ("observation.images.top_rgb", "observation.images.top_rgb"),
-            ("observation.images.left_wrist", "observation.images.left_wrist"),
-            ("observation.images.right_wrist", "observation.images.right_wrist"),
-        ]:
-            if src_key in frame:
-                img = np.asarray(frame[src_key])
-                if img.ndim == 3 and img.shape[-1] == 3:
-                    obs[dst_key] = img.astype(np.uint8)
+        # Images — auto-detect which camera keys are present
+        for src_key, dst_key in _detect_image_keys(frame).items():
+            img = np.asarray(frame[src_key])
+            if img.ndim == 3 and img.shape[-1] == 3:
+                obs[dst_key] = img.astype(np.uint8)
 
-        # Prompt from task
-        if "task" in frame:
+        # Prompt: prefer explicit prompt field, then task_index + metadata, then task
+        if "prompt" in frame:
+            obs["prompt"] = str(frame["prompt"])
+        elif "task_index" in frame and tasks is not None:
+            task_idx = int(frame["task_index"])
+            obs["prompt"] = tasks.get(task_idx, "fold the t-shirt")
+        elif "task" in frame:
             obs["prompt"] = str(frame["task"])
 
         if "observation.state" not in obs:
@@ -202,18 +234,22 @@ def _build_observation(frame: dict) -> dict | None:
 def load_val_dataset(
     repo_id: str,
     val_indices: list[int],
-    action_sequence_keys: Sequence[str] = ("action",),
-) -> tuple[list[dict], int]:
+    action_horizon: int = 50,
+) -> tuple[list[dict], int, dict[int, str]]:
     """Load the validation portion of a LeRobot dataset.
 
     Returns:
         val_frames: list of frames belonging to val episodes.
         action_dim: dimension of action space.
+        tasks: mapping from task_index to task description string.
     """
     dataset_meta = lerobot_dataset.LeRobotDatasetMetadata(repo_id)
+    # Use delta_timestamps to get action chunks for ground-truth comparison
     dataset = lerobot_dataset.LeRobotDataset(
         repo_id,
-        delta_timestamps=None,
+        delta_timestamps={
+            "action": [t / dataset_meta.fps for t in range(action_horizon)],
+        },
     )
 
     action_dim = dataset_meta.features["action"]["shape"][0]
@@ -226,7 +262,7 @@ def load_val_dataset(
             # Convert keys: lerobot stores as observation.state, action, etc.
             val_frames.append(dict(frame))
 
-    return val_frames, action_dim
+    return val_frames, action_dim, dataset_meta.tasks
 
 
 def main():
@@ -255,7 +291,9 @@ def main():
     # Load dataset and split
     val_indices = list(range(*map(int, args.val_split.split(":"))))
     logger.info(f"Loading dataset from {args.dataset}")
-    val_frames, action_dim = load_val_dataset(args.dataset, val_indices)
+    val_frames, action_dim, tasks = load_val_dataset(
+        args.dataset, val_indices, action_horizon=train_config.model.action_horizon
+    )
 
     # Group by episode
     from collections import defaultdict
@@ -274,7 +312,7 @@ def main():
     all_metrics: list[EvalMetrics] = []
     for ep_idx in sorted(episodes.keys()):
         frames = episodes[ep_idx]
-        metrics = evaluate_episode(policy, frames, action_dim, args.rollout_depth)
+        metrics = evaluate_episode(policy, frames, action_dim, args.rollout_depth, tasks=tasks)
         metrics.episode_idx = ep_idx
         all_metrics.append(metrics)
 
