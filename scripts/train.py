@@ -213,6 +213,18 @@ def train_step(
 def main(config: _config.TrainConfig):
     init_logging()
     logging.info(f"Running on: {platform.node()}")
+
+    # Multi-node JAX distributed initialization.
+    # Set JAX_COORDINATOR_ADDRESS, JAX_NUM_PROCESSES, JAX_PROCESS_ID on each node.
+    coordinator = os.environ.get("JAX_COORDINATOR_ADDRESS", "")
+    if coordinator:
+        num_processes = int(os.environ.get("JAX_NUM_PROCESSES", "1"))
+        process_id = int(os.environ.get("JAX_PROCESS_ID", "0"))
+        logging.info(f"Initializing JAX distributed: coordinator={coordinator}, "
+                      f"num_processes={num_processes}, process_id={process_id}")
+        jax.distributed.initialize(coordinator, num_processes, process_id)
+        logging.info(f"JAX distributed initialized. Total devices: {jax.device_count()}")
+
     _configure_offline_wandb(config)
 
     if config.batch_size % jax.device_count() != 0:
