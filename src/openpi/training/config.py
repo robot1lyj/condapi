@@ -926,6 +926,24 @@ _CONFIGS = [
         wandb_enabled=True,
         num_train_steps=20_000,
     ),
+    TrainConfig(
+        name="pi05_openarms_dual_hq",
+        model=pi0_config.Pi0Config(pi05=True, discrete_state_input=True),
+        data=LeRobotPiperDataConfig(
+            repo_id="/share/home/linyongjia/datasets/high_quality_folding",
+            base_config=DataConfig(prompt_from_task=True),
+            base_image_key="observation.images.base",  # HQ dataset uses "base" (not "top_rgb")
+            robot_action_dim=16,
+            delta_action_mask=_transforms.make_bool_mask(7, -1, 7, -1),
+            use_delta_joint_actions=True,
+            action_style="relative",  # UMI-style, validated in blog experiments — required for π0.5
+            swap_left_right=False,
+        ),
+        weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi05_base/params"),
+        log_interval=20,
+        wandb_enabled=True,
+        num_train_steps=100_000,  # 100k fine-tuning steps on HQ data (matching blog recipe)
+    ),
     #
     # Fine-tuning Aloha configs.
     #
