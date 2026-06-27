@@ -12,6 +12,8 @@ Design decisions → `docs/decisions/`. Architecture → `docs/ARCHITECTURE.md`.
 - **记忆系统接管**: 将仓库记忆统一为 `AGENTS.md` + `docs/cache/` 的单一 Context OS 入口，补齐
   `docs/decisions/README.md` 与 `docs/reference/00_reference_index.md`，清理 `.agents`/`.codex`
   空占位，并将当前远端训练默认链路收敛到 `/share/home/linyongjia/data` + `local/<alias>`。
+- **训练节点记忆修正**: 补充 gpu12 (`172.31.11.112`) 为可访问训练节点；当前默认集群为 gpu08 +
+  gpu12，两节点共 4 张 A800。HQ 训练状态检查需同时查看两个节点。
 
 ## 2026-06-25
 

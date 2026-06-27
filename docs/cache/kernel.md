@@ -6,7 +6,7 @@ New sessions: read `AGENTS.md` + this file first, then `context_index.md` to sel
 - Default product: OpenPI VLA fine-tuning and inference for Piper/OpenArm dual-arm workflows.
 - Local workspace: `/home/lyj/lyj/openpi`
 - Default training access: shared cluster through jump host `linyongjia@172.31.11.122:12222`.
-- Current training node: `linyongjia@172.31.11.108` (SSH port 12222 unless using jump routing).
+- Training nodes: `linyongjia@172.31.11.108` (gpu08) and `linyongjia@172.31.11.112` (gpu12), 2x A800 each, 4 GPUs total.
 - Remote code path: `/share/home/linyongjia/conda-pi/openpi`
 - Remote datasets: `/share/home/linyongjia/data/`; legacy docs may mention `/share/home/linyongjia/datasets/`.
 - Remote checkpoints/output: `/share/home/linyongjia/output/openpi`
@@ -15,7 +15,7 @@ New sessions: read `AGENTS.md` + this file first, then `context_index.md` to sel
 - Default env: `pi-conda` (conda, Python 3.11, CUDA 12), server conda at `/share/home/linyongjia/miniconda3/bin/conda`
 - Default entry: `scripts/train.py` (JAX), `scripts/train_pytorch.py` (PyTorch)
 - Model checkpoints (GCS): `gs://openpi-assets/checkpoints/` (pi0_base, pi05_base, pi0_fast_base, etc.)
-- Default pipeline: dataset under remote data root -> `local/<alias>` symlink -> norm stats -> training -> offline evaluation.
+- Default pipeline: choose gpu08/gpu12 -> dataset under remote data root -> `local/<alias>` symlink -> norm stats -> training -> offline evaluation.
 - `norm_stats.json` must exist under `assets/<config>/local/<alias>/` before training.
 - OpenPI does not auto-read LeRobot `info.json` splits; set `DataConfig.train_episodes` explicitly when a split matters.
 

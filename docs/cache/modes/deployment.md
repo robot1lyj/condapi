@@ -2,7 +2,7 @@
 
 ## Defaults
 - Training access: jump host `linyongjia@172.31.11.122:12222`
-- Current training node: `linyongjia@172.31.11.108`
+- Training nodes: `linyongjia@172.31.11.108` (gpu08) and `linyongjia@172.31.11.112` (gpu12), 2x A800 each, 4 GPUs total
 - Remote code: `/share/home/linyongjia/conda-pi/openpi`
 - Remote data root: `/share/home/linyongjia/data`
 - Remote output: `/share/home/linyongjia/output/openpi`
@@ -60,6 +60,7 @@ bash ~/.codex/skills/openpi-conda-remote-train/scripts/start_remote_train.sh \
   --config pi05_piper_dual \
   --exp-name <name>
 ```
+Use `--node 172.31.11.112` for gpu12.
 
 ## Serve (推理服务)
 ```bash
@@ -74,5 +75,6 @@ Older docs and OpenArm configs may use `/share/home/linyongjia/datasets/<dataset
 
 ## Pre-flight Checks
 - 确认节点可达: `ssh -J linyongjia@172.31.11.122:12222 -p 12222 linyongjia@172.31.11.108 echo ok`
+- gpu12 同理: `ssh -J linyongjia@172.31.11.122:12222 -p 12222 linyongjia@172.31.11.112 echo ok`
 - 确认 conda 环境存在: `conda run -n pi-conda python -c "import openpi"`
 - 确认 GPU 可用: `conda run -n pi-conda python -c "import jax; print(jax.devices())"`
