@@ -10,23 +10,23 @@
 
 ## 2. 目录布局
 
-推荐统一放在：
+默认训练链路统一放在：
 
 ```text
-/share/home/linyongjia/datasets/
+/share/home/linyongjia/data/
 ```
 
 单个版本目录示例：
 
 ```text
-/share/home/linyongjia/datasets/piper_pen_v002/
+/share/home/linyongjia/data/piper_pen_v002/
   meta/
   data/
   videos/
   norm_stats.json
   manifest.yaml
 
-/share/home/linyongjia/datasets/openarms_folding_v001/
+/share/home/linyongjia/data/openarms_folding_v001/
   meta/
   data/
   videos/
@@ -78,8 +78,8 @@ norm_stats: ./norm_stats.json
 
 ## 6. 训练规范
 
-- 训练命令一律显式传 `--data.repo_id /abs/path/to/dataset`
-- 不再使用 `local/<alias>`
+- 训练命令默认显式传 `--data.repo_id local/<alias>`
+- `/share/home/linyongjia/data/local/<alias>` 指向 `../<dataset_version_dir>`
 - 不再通过修改服务器上的 `config.py` 切换数据集
 
 ## 7. 发布前检查
@@ -108,7 +108,7 @@ norm_stats: ./norm_stats.json
 
 ```bash
 python scripts/repair_lerobot_subset.py \
-  --dataset-dir /share/home/linyongjia/datasets/openarms_folding_v001
+  --dataset-dir /share/home/linyongjia/data/openarms_folding_v001
 ```
 
 这个脚本会：
@@ -124,7 +124,7 @@ python scripts/repair_lerobot_subset.py \
 
 ```bash
 python scripts/repair_lerobot_subset.py \
-  --dataset-dir /share/home/linyongjia/datasets/openarms_folding_v001 \
+  --dataset-dir /share/home/linyongjia/data/openarms_folding_v001 \
   --dry-run
 ```
 

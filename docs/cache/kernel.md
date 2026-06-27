@@ -1,50 +1,48 @@
 # Context Kernel
 
-New sessions: read `AGENTS.md` + this file first, then `context_index.md` to select ≤1 mode pack.
+New sessions: read `AGENTS.md` + this file first, then `context_index.md` to select <=1 mode pack.
 
 ## Default Facts
-- Default product: openpi VLA 模型微调与推理 (Piper 双臂)
+- Default product: OpenPI VLA fine-tuning and inference for Piper/OpenArm dual-arm workflows.
 - Local workspace: `/home/lyj/lyj/openpi`
-- Training server: `linyongjia@172.31.11.108` (SSH port 12222)
+- Default training access: shared cluster through jump host `linyongjia@172.31.11.122:12222`.
+- Current training node: `linyongjia@172.31.11.108` (SSH port 12222 unless using jump routing).
 - Remote code path: `/share/home/linyongjia/conda-pi/openpi`
-- Remote datasets: `/share/home/linyongjia/datasets/`
+- Remote datasets: `/share/home/linyongjia/data/`; legacy docs may mention `/share/home/linyongjia/datasets/`.
 - Remote checkpoints/output: `/share/home/linyongjia/output/openpi`
 - Remote cache base: `/share/home/linyongjia/.cache/openpi`
-- Default training targets: `pi05_openarms_dual` (v002 165ep), `pi05_openarms_dual_hq` (HQ 1200ep)
+- Default training target: `pi05_piper_dual`; current OpenArm configs include `pi05_openarms_dual` and `pi05_openarms_dual_hq`.
 - Default env: `pi-conda` (conda, Python 3.11, CUDA 12), server conda at `/share/home/linyongjia/miniconda3/bin/conda`
 - Default entry: `scripts/train.py` (JAX), `scripts/train_pytorch.py` (PyTorch)
 - Model checkpoints (GCS): `gs://openpi-assets/checkpoints/` (pi0_base, pi05_base, pi0_fast_base, etc.)
-- Default pipeline: 数据上传→分割+正则化→桥接norm_stats路径→训练→离线评估
-- ⚠️ norm_stats 路径桥接: assets/{config}/{asset_id} → 数据集目录 (需手动 ln -sf)
-- ⚠️ openpi 不自动读取 LeRobot info.json splits，需 DataConfig.train_episodes 显式指定
-- 验证脚本: `split_and_norm_relative.py` (分割+正则化), `evaluate_checkpoint.py` (离线泛化性评估)
-- HQ 数据集相机 key 为 `observation.images.base` (非 top_rgb)
+- Default pipeline: dataset under remote data root -> `local/<alias>` symlink -> norm stats -> training -> offline evaluation.
+- `norm_stats.json` must exist under `assets/<config>/local/<alias>/` before training.
+- OpenPI does not auto-read LeRobot `info.json` splits; set `DataConfig.train_episodes` explicitly when a split matters.
 
 ## Security Kernel
-- 训练服务器 172.31.11.108 是核心资产，不要在 commit 中暴露敏感凭证
-- 离线 WandB 模式不得绕过 (WANDB_MODE=offline)
-- HF/HuggingFace 强制离线 (HF_HUB_OFFLINE=1)
-- 不要删除远端服务器的 checkpoint 目录或数据集目录
+- Do not commit credentials, tokens, private host keys, or server passwords.
+- Training runs use offline W&B (`WANDB_MODE=offline`) and Hugging Face offline mode.
+- Do not delete remote checkpoint, output, cache, or dataset directories unless the user explicitly asks.
 
 ## Context Loading
 - Default: `AGENTS.md` + this file
 - Route: open `context_index.md` only when selecting task context
-- Mode pack: open ≤1 `docs/cache/modes/*.md`; only add a second if the task truly spans modes
+- Mode pack: open <=1 `docs/cache/modes/*.md`; only add a second if the task truly spans modes
 
 ## Budget & Anti-Proliferation
-- `kernel.md`: ≤80 lines
-- `context_index.md`: ≤100 lines
-- Each mode pack: ≤80 lines
+- `kernel.md`: <=80 lines
+- `context_index.md`: <=100 lines
+- Each mode pack: <=80 lines
 - No new cache/memory file unless no existing owner can hold the fact
 - Before adding hot context: compress or demote to cold docs first
-- One stable fact → one primary owner
+- One stable fact -> one primary owner
 
 ## Writeback Classes
-- `critical`: default chain, entry points, package boundaries, public interfaces, security boundaries, deployment baseline, context loading strategy. ← Update owner docs same turn.
-- `incident`: training failures, deploy errors, hardware warnings. ← Write to CHANGELOG.
-- `batch`: repeated training runs, verification results. ← Condensed single line in history after sequence ends.
-- `ephemeral`: status reads, one-off manual actions, temporary exploration. ← Default: don't update memory.
-- `artifact`: checkpoints, norm stats, metrics plots, wandb logs. ← Store in output dir; reference from cold docs only if useful.
+- `critical`: default chain, entry points, package boundaries, public interfaces, security boundaries, deployment baseline, context loading strategy. Update owner docs same turn.
+- `incident`: training failures, deploy errors, hardware warnings. Write to CHANGELOG.
+- `batch`: repeated training runs, verification results. Condense into one history entry after sequence ends.
+- `ephemeral`: status reads, one-off manual actions, temporary exploration. Default: don't update memory.
+- `artifact`: checkpoints, norm stats, metrics plots, wandb logs. Store in output dir; reference from cold docs only if useful.
 
 ## Memory Audit (before saving)
 1. Has a stable default fact changed?

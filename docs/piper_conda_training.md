@@ -9,7 +9,9 @@
 - 改成在训练服务器的非容器 `conda` 环境中直接运行 `openpi`
 - 所有 Python 依赖先在本地下载好，再离线传到服务器安装
 
-当前训练目标仍然是 `Piper` / `pi05_piper_dual` 这条链路。
+当前训练目标仍然是 `Piper` / `pi05_piper_dual` 这条链路。默认数据根目录为
+`/share/home/linyongjia/data`，训练时使用 `local/<alias>` 指向具体版本目录；旧文档中的
+`/share/home/linyongjia/datasets` 属于兼容路径。
 
 ## 1. 目录和脚本
 
@@ -99,17 +101,22 @@ export HF_HOME=/share/home/linyongjia/.cache/huggingface
 export HUGGINGFACE_HUB_CACHE=$HF_HOME/hub
 export HF_DATASETS_CACHE=$HF_HOME/datasets
 export TRANSFORMERS_CACHE=$HF_HOME/transformers
-export HF_LEROBOT_HOME=/share/home/linyongjia/datasets
+export HF_LEROBOT_HOME=/share/home/linyongjia/data
 ```
 
 ## 5. 训练命令
 
-先算归一化统计。当前推荐直接传版本化数据集目录绝对路径，统计默认写回数据集根目录：
+先算归一化统计。当前推荐为版本化数据集创建 `local/<alias>` 软链，再用 `repo_id=local/<alias>`：
+
+```bash
+mkdir -p /share/home/linyongjia/data/local
+ln -sfn ../piper_dish_v001 /share/home/linyongjia/data/local/dish
+```
 
 ```bash
 conda run -n pi-conda python scripts/compute_norm_stats.py \
   --config-name pi05_piper_dual \
-  --repo-id /share/home/linyongjia/datasets/piper_dish_v001
+  --repo-id local/dish
 ```
 
 再启动训练：
@@ -119,7 +126,7 @@ XLA_PYTHON_CLIENT_MEM_FRACTION=0.9 \
 conda run -n pi-conda python scripts/train.py pi05_piper_dual \
   --exp-name piper_ft_pi05_dish \
   --checkpoint-base-dir /share/home/linyongjia/output/openpi \
-  --data.repo_id /share/home/linyongjia/datasets/piper_dish_v001 \
+  --data.repo_id local/dish \
   --log-interval 20
 ```
 

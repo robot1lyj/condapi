@@ -1,5 +1,15 @@
 # Repository Guidelines
 
+## Project Memory System
+- This repository uses one project memory system only: Context OS in `AGENTS.md` and `docs/cache/`.
+- Startup context is `AGENTS.md` + `docs/cache/kernel.md`; load `docs/cache/context_index.md` only to route the task, then load at most one relevant `docs/cache/modes/*.md` file.
+- `AGENTS.md` owns repository-wide operating constraints and automation rules.
+- `docs/cache/kernel.md` owns hot defaults, context budget, compact/resume recovery, write-back classes, and answer protocol.
+- `docs/cache/context_index.md` owns routing only; it must not duplicate commands, metrics, history, or architecture detail.
+- `docs/cache/modes/*.md` owns task-scoped operational memory; canonical docs in `docs/` own detailed stable truth.
+- Do not create parallel memory systems under `.agents`, `.codex`, ad hoc cache folders, or assistant-specific notes.
+- Before adding new memory, compress or update the single owning file. One stable fact should have one primary owner.
+
 ## Project Structure & Module Organization
 - `src/openpi/`: core library code (models, policies, training, shared utilities).
 - `packages/openpi-client/`: client package for robot-side inference and IO helpers.
