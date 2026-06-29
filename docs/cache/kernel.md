@@ -5,7 +5,7 @@ New sessions: read `AGENTS.md` + this file first, then `context_index.md` to sel
 ## Default Facts
 - Default product: OpenPI VLA fine-tuning and inference for Piper/OpenArm dual-arm workflows.
 - Local workspace: `/home/lyj/lyj/openpi`
-- Default training access: shared cluster through jump host `linyongjia@172.31.11.122:12222`.
+- Default training access: mu01 jump `linyongjia@172.31.11.100:12222`, then `ssh -p 12222 gpu12/gpu14`; legacy docs may mention `172.31.11.122`.
 - Training nodes: gpu08 (`172.31.11.108`), gpu12 (`172.31.11.112`), and gpu14 (`172.31.11.114` via mu01 `172.31.11.100`), 2x A800 each, 6 GPUs total.
 - Remote code path: `/share/home/linyongjia/conda-pi/openpi`
 - Remote datasets: `/share/home/linyongjia/data/`; legacy docs may mention `/share/home/linyongjia/datasets/`.

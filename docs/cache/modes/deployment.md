@@ -1,7 +1,7 @@
 # Mode: Deployment
 
 ## Defaults
-- Training access: jump host `linyongjia@172.31.11.122:12222`
+- Training access: mu01 jump `linyongjia@172.31.11.100:12222`
 - Training nodes: gpu08 (`172.31.11.108`), gpu12 (`172.31.11.112`), gpu14 (`172.31.11.114` via mu01 `172.31.11.100`), 2x A800 each
 - Remote code: `/share/home/linyongjia/conda-pi/openpi`
 - Remote data root: `/share/home/linyongjia/data`
@@ -74,7 +74,6 @@ conda run -n pi-conda python scripts/serve_policy.py --port 6666 policy:checkpoi
 Older docs and OpenArm configs may use `/share/home/linyongjia/datasets/<dataset>` directly. Treat that as compatibility context unless the user explicitly asks for that path.
 
 ## Pre-flight Checks
-- 确认 gpu08/gpu12 可达: `ssh -J linyongjia@172.31.11.122:12222 -p 12222 linyongjia@172.31.11.108 echo ok`（gpu12 改 IP 为 `.112`）
-- gpu14: `ssh -p 12222 linyongjia@172.31.11.100`, then `ssh -p 12222 gpu14`; JAX sees 2 CUDA devices.
+- 确认 gpu12/gpu14 可达: `ssh -p 12222 linyongjia@172.31.11.100`, then `ssh -p 12222 gpu12` or `gpu14`; gpu14 JAX sees 2 CUDA devices.
 - 确认 conda 环境存在: `conda run -n pi-conda python -c "import openpi"`
 - 确认 GPU 可用: `conda run -n pi-conda python -c "import jax; print(jax.devices())"`
