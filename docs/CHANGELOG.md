@@ -14,6 +14,12 @@ Design decisions → `docs/decisions/`. Architecture → `docs/ARCHITECTURE.md`.
   空占位，并将当前远端训练默认链路收敛到 `/share/home/linyongjia/data` + `local/<alias>`。
 - **训练节点记忆修正**: 补充 gpu12 (`172.31.11.112`) 为可访问训练节点；当前默认集群为 gpu08 +
   gpu12，两节点共 4 张 A800。HQ 训练状态检查需同时查看两个节点。
+- **gpu14 节点验证**: 确认 gpu14 (`172.31.11.114`) 需经 mu01 (`172.31.11.100`) 二跳进入；
+  `nvidia-smi` 和 JAX 均识别 2 张 A800，可作为 OpenPI/JAX 训练候选节点。
+- **JAX 4 卡多节点适配**: `scripts/train.py` 支持早期 JAX distributed 初始化、coordinator bind address、
+  非主进程跳过 wandb/metrics 写入；Torch/LeRobot JAX loader 按 `jax.process_count()` 分片并使用
+  `DistributedSampler`；checkpoint resume 显式按当前 sharding restore，避免 2 卡旧 checkpoint 在 4 卡拓扑
+  上读取旧 sharding 文件时报 `no addressable shards`。
 
 ## 2026-06-25
 

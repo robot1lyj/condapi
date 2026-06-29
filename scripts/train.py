@@ -1,15 +1,48 @@
 import dataclasses
 import functools
 import logging
+import multiprocessing as mp
 import os
 import platform
 from typing import Any
+
+import jax
+
+
+def _maybe_initialize_jax_distributed() -> bool:
+    coordinator = os.environ.get("JAX_COORDINATOR_ADDRESS", "")
+    if not coordinator:
+        return False
+    if __name__ != "__main__" or mp.parent_process() is not None:
+        return False
+
+    num_processes = int(os.environ.get("JAX_NUM_PROCESSES", "1"))
+    process_id = int(os.environ.get("JAX_PROCESS_ID", "0"))
+    bind_address = os.environ.get("JAX_COORDINATOR_BIND_ADDRESS")
+    init_timeout = int(os.environ.get("JAX_DISTRIBUTED_INITIALIZATION_TIMEOUT", "300"))
+    print(
+        "Initializing JAX distributed early: "
+        f"coordinator={coordinator}, num_processes={num_processes}, process_id={process_id}, bind={bind_address}",
+        flush=True,
+    )
+    initialize_kwargs = {"initialization_timeout": init_timeout}
+    if bind_address:
+        initialize_kwargs["coordinator_bind_address"] = bind_address
+    jax.distributed.initialize(coordinator, num_processes, process_id, **initialize_kwargs)
+    print(f"JAX distributed initialized early. Total devices: {jax.device_count()}", flush=True)
+    return True
+
+
+_JAX_DISTRIBUTED_INITIALIZED = _maybe_initialize_jax_distributed()
+if dump_after := int(os.environ.get("OPENPI_DUMP_TRACEBACK_AFTER", "0")):
+    import faulthandler
+
+    faulthandler.dump_traceback_later(dump_after, repeat=True)
 
 import etils.epath as epath
 import flax.nnx as nnx
 from flax.training import common_utils
 import flax.traverse_util as traverse_util
-import jax
 import jax.experimental
 import jax.numpy as jnp
 import numpy as np
@@ -214,15 +247,7 @@ def main(config: _config.TrainConfig):
     init_logging()
     logging.info(f"Running on: {platform.node()}")
 
-    # Multi-node JAX distributed initialization.
-    # Set JAX_COORDINATOR_ADDRESS, JAX_NUM_PROCESSES, JAX_PROCESS_ID on each node.
-    coordinator = os.environ.get("JAX_COORDINATOR_ADDRESS", "")
-    if coordinator:
-        num_processes = int(os.environ.get("JAX_NUM_PROCESSES", "1"))
-        process_id = int(os.environ.get("JAX_PROCESS_ID", "0"))
-        logging.info(f"Initializing JAX distributed: coordinator={coordinator}, "
-                      f"num_processes={num_processes}, process_id={process_id}")
-        jax.distributed.initialize(coordinator, num_processes, process_id)
+    if _JAX_DISTRIBUTED_INITIALIZED:
         logging.info(f"JAX distributed initialized. Total devices: {jax.device_count()}")
 
     _configure_offline_wandb(config)
@@ -247,7 +272,8 @@ def main(config: _config.TrainConfig):
         overwrite=config.overwrite,
         resume=config.resume,
     )
-    init_wandb(config, resuming=resuming, enabled=config.wandb_enabled)
+    is_primary_process = jax.process_index() == 0
+    init_wandb(config, resuming=resuming, enabled=config.wandb_enabled and is_primary_process)
 
     data_loader = _data_loader.create_data_loader(
         config,
@@ -263,14 +289,15 @@ def main(config: _config.TrainConfig):
         wandb.Image(np.concatenate([np.array(img[i]) for img in batch[0].images.values()], axis=1))
         for i in range(min(5, len(next(iter(batch[0].images.values())))))
     ]
-    wandb.log({"camera_views": images_to_log}, step=0)
+    if is_primary_process:
+        wandb.log({"camera_views": images_to_log}, step=0)
 
     train_state, train_state_sharding = init_train_state(config, init_rng, mesh, resume=resuming)
     jax.block_until_ready(train_state)
     logging.info(f"Initialized train state:\n{training_utils.array_tree_to_info(train_state.params)}")
 
     if resuming:
-        train_state = _checkpoints.restore_state(checkpoint_manager, train_state, data_loader)
+        train_state = _checkpoints.restore_state(checkpoint_manager, train_state, train_state_sharding, data_loader)
 
     ptrain_step = jax.jit(
         functools.partial(train_step, config),
@@ -280,12 +307,16 @@ def main(config: _config.TrainConfig):
     )
 
     start_step = int(train_state.step)
-    metric_logger = _metrics.LocalMetricLogger(config.checkpoint_dir, resume_step=start_step if resuming else None)
-    pbar = tqdm.tqdm(
-        range(start_step, config.num_train_steps),
-        initial=start_step,
-        total=config.num_train_steps,
-        dynamic_ncols=True,
+    metric_logger = (
+        _metrics.LocalMetricLogger(config.checkpoint_dir, resume_step=start_step if resuming else None)
+        if is_primary_process
+        else None
+    )
+    step_range = range(start_step, config.num_train_steps)
+    pbar = (
+        tqdm.tqdm(step_range, initial=start_step, total=config.num_train_steps, dynamic_ncols=True)
+        if is_primary_process
+        else step_range
     )
 
     infos = []
@@ -298,19 +329,22 @@ def main(config: _config.TrainConfig):
             reduced_info = jax.device_get(jax.tree.map(jnp.mean, stacked_infos))
             reduced_info["learning_rate"] = _learning_rate(config, step)
             info_str = ", ".join(f"{k}={v:.4f}" for k, v in reduced_info.items())
-            pbar.write(f"Step {step}: {info_str}")
-            wandb.log(reduced_info, step=step)
-            metric_logger.log(step, reduced_info)
+            if is_primary_process:
+                pbar.write(f"Step {step}: {info_str}")
+                wandb.log(reduced_info, step=step)
+                assert metric_logger is not None
+                metric_logger.log(step, reduced_info)
             infos = []
         batch = next(data_iter)
 
         if (step % config.save_interval == 0 and step > start_step) or step == config.num_train_steps - 1:
             _checkpoints.save_state(checkpoint_manager, train_state, data_loader, step)
 
-    metric_logger.flush()
+    if metric_logger is not None:
+        metric_logger.flush()
     logging.info("Waiting for checkpoint manager to finish")
     checkpoint_manager.wait_until_finished()
-    if config.wandb_enabled:
+    if config.wandb_enabled and is_primary_process:
         wandb.finish()
 
 

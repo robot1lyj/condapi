@@ -323,7 +323,18 @@ def create_torch_data_loader(
         else:
             local_batch_size = batch_size
     else:
-        local_batch_size = batch_size // jax.process_count()
+        process_count = jax.process_count()
+        if batch_size % process_count != 0:
+            raise ValueError(f"Batch size {batch_size} must be divisible by JAX process count {process_count}.")
+        local_batch_size = batch_size // process_count
+        if process_count > 1:
+            sampler = torch.utils.data.distributed.DistributedSampler(
+                dataset,
+                num_replicas=process_count,
+                rank=jax.process_index(),
+                shuffle=shuffle,
+                drop_last=True,
+            )
 
     logging.info(f"local_batch_size: {local_batch_size}")
     data_loader = TorchDataLoader(
@@ -413,9 +424,6 @@ class TorchDataLoader:
                 execute in the main process.
             seed: The seed to use for shuffling the data.
         """
-        if jax.process_count() > 1:
-            raise NotImplementedError("Data loading with multiple processes is not supported.")
-
         if len(dataset) < local_batch_size:
             raise ValueError(f"Local batch size ({local_batch_size}) is larger than the dataset size ({len(dataset)}).")
 
