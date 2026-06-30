@@ -6,7 +6,7 @@
 
 ## 0. 当前结论
 
-最后更新：2026-06-30 15:42 CST
+最后更新：2026-06-30 16:54 CST
 
 ### 0.1 本轮决策
 
@@ -59,7 +59,7 @@ server infer_ms: about 86-100ms
 | B. 客户端 TDA smooth | 阶段完成 | `tda_smooth` 真机可运行；急停链路可用 | 相机对齐后做 FIFO vs TDA A/B | OpenArm commit `cab9865`；IPC tmux `openpi_estop_test` |
 | C. TDA 数据增强/重训 | 增强完成，待 norm/smoke | `openarm_hq_tda_aug_v1` 已生成并验收通过：parquet 2298、mp4 6894、约 62G；16D、time-scaling、mirror 互换和抽样视频帧数检查通过 | 重算 norm stats，做 smoke/probe；不直接开纯增强 88k | `/share/home/linyongjia/datasets/openarm_hq_tda_aug_v1` |
 | D. HIL / DAgger 采集格式 | 客户端补丁完成 | HIL mux/record/inspect 已在工控机 targeted build/test 通过 | 停当前推理后录 1 条真实短 episode 并 inspect | OpenArm commit `232af15`；`openarm_hil_raw_hdf5_v3` |
-| E. Stage Advantage | 待启动 v1 | 计划中的 5 阶段是 OpenArm 诊断拆分；SA v1 改为论文 Task A 对齐的 2 阶段：flatten / fold | 做轻量三路视频标注工具；先标 20-50 条成功 episode，生成 `stage_progress_gt` smoke 数据 | KAI0 Stage Advantage README |
+| E. Stage Advantage | 工具完成，待人工标注 | 计划中的 5 阶段是 OpenArm 诊断拆分；SA v1 改为论文 Task A 对齐的 2 阶段：flatten / fold；本地已准备 200 集 v2.1 子集 | 用标注工具先标 20-50 条成功 episode，生成 `stage_progress_gt` smoke 数据 | `scripts/openarm_stage_annotator.py`；`/home/lyj/storage1t/datasets/high_quality_folding_v2p1_200` |
 | F. Model Arithmetic | 暂缓 | 需要多个互补 checkpoint 后再评估 | 等 HQ/TDA/Recovery/AWBC 至少两个模型可比较后再开 | KAI0 `model_arithmetic/README.md` |
 | G. 现场数据集 v1 | P0，立即启动 | 如果现场相机/布局长期不同，约 200 条现场数据是必要投入 | 先采 20 条 smoke 验格式，再扩到 180 train + 20 holdout | 待产出 |
 
@@ -72,6 +72,14 @@ server infer_ms: about 86-100ms
 - KAI0 README：`/home/lyj/kai0/README.md`
 - TDA：`/home/lyj/kai0/train_deploy_alignment/`
 - Stage Advantage：`/home/lyj/kai0/stage_advantage/README.md`
+
+版本核对：
+
+```text
+GitHub OpenDriveLab/kai0 main: 9d93078c757840f50e75248c5c5a94ab7b41e13a
+local /home/lyj/kai0 HEAD:       9d93078c757840f50e75248c5c5a94ab7b41e13a
+result: local kai0 is aligned with current upstream main as of 2026-06-30
+```
 
 KAI0 的核心是处理三种分布不一致：
 
@@ -437,6 +445,9 @@ grasp_flatten -> align -> fold_finish
 `stage_progress_gt` 生成规则：
 
 ```text
+stage 0 = episode_start 到 fold_start - 1
+stage 1 = fold_start 到 episode_end
+flatten_done 作为诊断事件保留，不单独切出一个 stage
 stage_progress_gt = k / K + (1 / K) * frame_position_within_stage / segment_length
 range: [0, 1]
 monotonic: true within an episode
@@ -472,6 +483,68 @@ stage_progress_gt 转换脚本或转换报告
 stage_progress_gt 单调且范围 [0,1]
 Advantage Estimator smoke train 可启动
 AWBC 前 tasks.jsonl 中存在 "fold the cloth, Advantage: positive"
+```
+
+当前已落地工具：
+
+```text
+subset tool: scripts/subset_lerobot_v21.py
+annotation server: scripts/openarm_stage_annotator.py
+stage_progress writer: scripts/openarm_stage_progress.py
+tests: scripts/openarm_stage_progress_test.py
+tests: scripts/subset_lerobot_v21_test.py
+```
+
+当前本地 200 集标注子集：
+
+```text
+dataset: /home/lyj/storage1t/datasets/high_quality_folding_v2p1_200
+source: /share/home/linyongjia/datasets/high_quality_folding
+format: LeRobot v2.1
+episodes: 200
+frames: 470491
+parquet: 200
+videos: 600
+split: train 0:180, val 180:200
+camera keys: observation.images.base / observation.images.left_wrist / observation.images.right_wrist
+state/action: 16D
+```
+
+本地标注命令：
+
+```bash
+conda run -n lerobot-pi0 python scripts/openarm_stage_annotator.py \
+  --dataset /home/lyj/storage1t/datasets/high_quality_folding_v2p1_200 \
+  --port 8765
+```
+
+标注输出：
+
+```text
+/home/lyj/storage1t/datasets/high_quality_folding_v2p1_200/annotations/openarm_stage_v1.jsonl
+```
+
+生成 `stage_progress_gt`：
+
+```bash
+conda run -n lerobot-pi0 python scripts/openarm_stage_progress.py \
+  --dataset /home/lyj/storage1t/datasets/high_quality_folding_v2p1_200 \
+  --dry-run
+```
+
+验收后去掉 `--dry-run` 写回 parquet。写回后脚本会在 `meta/info.json` 增加：
+
+```text
+stage_progress_gt: float32[1]
+stage_id: int64[1]
+```
+
+环境说明：
+
+```text
+本机当前没有 pi-conda 环境；本轮本地校验使用已有 conda env lerobot-pi0。
+后续如需与远端训练完全一致，应在本机补建 pi-conda 后重跑同一组测试。
+不要使用 uv。
 ```
 
 ### F. Model Arithmetic 后置实验
@@ -674,6 +747,38 @@ test output summary
 ```
 
 ## 8. 历史日志
+
+### 2026-06-30 16:54 CST - Agent E - Stage Advantage 标注工具和 200 集子集
+
+状态：工具完成，进入人工标注前 smoke 阶段。
+
+已完成：
+
+- 核对 KAI0 upstream，`OpenDriveLab/kai0` main 与本地 `/home/lyj/kai0` 都是 `9d93078c757840f50e75248c5c5a94ab7b41e13a`，没有发现新的上游 Stage Advantage 标注工具需要同步。
+- 从远端 HQ v2.1 数据集拉取前 200 集相关文件到本地，不做全量拉取。
+- 生成规范本地子集 `/home/lyj/storage1t/datasets/high_quality_folding_v2p1_200`，保留三路视频和 16D state/action。
+- 新增 LeRobot v2.1 子集工具、三路视频 Stage Advantage 标注服务、sidecar 到 `stage_progress_gt` 写回脚本和对应测试。
+
+证据：
+
+```text
+source dataset: /share/home/linyongjia/datasets/high_quality_folding
+local dataset: /home/lyj/storage1t/datasets/high_quality_folding_v2p1_200
+total_episodes: 200
+total_frames: 470491
+parquet: 200
+videos: 600
+split: train 0:180, val 180:200
+scripts/subset_lerobot_v21.py
+scripts/openarm_stage_annotator.py
+scripts/openarm_stage_progress.py
+```
+
+下一步：
+
+- 用标注服务先标 20 条成功 episode，检查边界一致性。
+- 用 `scripts/openarm_stage_progress.py --dry-run` 验证单调性和范围。
+- 通过后去掉 `--dry-run` 写回 parquet，再启动 Advantage Estimator smoke train。
 
 ### 2026-06-30 15:42 CST - Plan Owner - 修正 Stage Advantage v1 阶段划分
 
