@@ -57,7 +57,7 @@ server infer_ms: about 86-100ms
 |---|---|---|---|---|
 | A. HQ baseline 真机推理 | 阶段完成，视觉分布阻塞 | `ws://172.31.11.125:6666` 已跑通；机械臂起身正常；抓取失败指向主摄像头分布偏移 | 做主摄像头分布审计；对齐后复测 FIFO baseline | `/tmp/openarm_remote_policy_20260630_150301.log` |
 | B. 客户端 TDA smooth | 阶段完成 | `tda_smooth` 真机可运行；急停链路可用 | 相机对齐后做 FIFO vs TDA A/B | OpenArm commit `cab9865`；IPC tmux `openpi_estop_test` |
-| C. TDA 数据增强/重训 | 增强完成，待 norm/smoke | `openarm_hq_tda_aug_v1` 已生成并验收通过：parquet 2298、mp4 6894、约 62G；16D、time-scaling、mirror 互换和抽样视频帧数检查通过 | 重算 norm stats，做 smoke/probe；不直接开纯增强 88k | `/share/home/linyongjia/datasets/openarm_hq_tda_aug_v1` |
+| C. TDA 数据增强/重训 | norm/smoke 完成，ready 等现场数据/策略决策 | `openarm_hq_tda_aug_v1` 已生成并验收通过：parquet 2298、mp4 6894、约 62G；16D、time-scaling、mirror 互换和抽样视频帧数检查通过；`norm_stats.json` 与 tiny smoke checkpoint 已产出 | 暂不直接开纯增强 88k；等现场数据集 v1 冻结后决定 TDA-only probe 或 `hq_tda_site_v1` | `/share/home/linyongjia/datasets/openarm_hq_tda_aug_v1`；`openarm_hq_tda_aug_smoke_tiny_20260630/2` |
 | D. HIL / DAgger 采集格式 | 客户端补丁完成 | HIL mux/record/inspect 已在工控机 targeted build/test 通过 | 停当前推理后录 1 条真实短 episode 并 inspect | OpenArm commit `232af15`；`openarm_hil_raw_hdf5_v3` |
 | E. Stage Advantage | 已标 20 条，待写回 smoke | 计划中的 5 阶段是 OpenArm 诊断拆分；SA v1 改为论文 Task A 对齐的 2 阶段：flatten / fold；精修 HQ 子集只需人工点一次 `flatten_done` | 继续按单点模式扩标；20 条 dry-run 通过后可写回 `stage_progress_gt` 做 smoke | `scripts/openarm_stage_annotator.py`；`/home/lyj/storage1t/datasets/high_quality_folding_v2p1_200` |
 | F. Model Arithmetic | 暂缓 | 需要多个互补 checkpoint 后再评估 | 等 HQ/TDA/Recovery/AWBC 至少两个模型可比较后再开 | KAI0 `model_arithmetic/README.md` |
@@ -297,7 +297,7 @@ targeted unit tests 通过
 
 ```text
 node: gpu28
-tmux: openarm_tda_aug_20260630
+tmux: openarm_tda_aug_20260630 (completed)
 dataset_src: /share/home/linyongjia/datasets/high_quality_folding
 dataset_dst: /share/home/linyongjia/datasets/openarm_hq_tda_aug_v1
 log: /share/home/linyongjia/output/openpi/logs/openarm_tda_aug/augment_20260630_gpu28.log
@@ -307,6 +307,8 @@ encoder: libx264
 decode: cuda decode where available
 config: pi05_openarms_dual_hq_tda_aug
 warm_start: /share/home/linyongjia/output/openpi/pi05_openarms_dual_hq/openarms_hq_bs32/99999/params
+norm_log: /share/home/linyongjia/output/openpi/logs/openarm_tda_aug/norm_20260630_gpu28.log
+smoke_log: /share/home/linyongjia/output/openpi/logs/openarm_tda_aug/smoke_tiny_20260630_gpu28.log
 ```
 
 完成后必须检查：
@@ -330,6 +332,21 @@ gripper 只互换，不做 rad/degree 转换
 3. 相机分布决策完成后，再决定是否直接 full train 88000 steps。
 4. 如果决定补采现场 200 条数据，则 TDA 增强先停在 smoke/ready 状态，等现场数据集 v1 冻结后再启动 full finetune。
 5. full train 输出 checkpoint 后，与 HQ baseline 做同场景复测。
+
+2026-06-30 smoke 结果：
+
+```text
+norm_stats: /share/home/linyongjia/datasets/openarm_hq_tda_aug_v1/norm_stats.json
+norm_stats_check: state/actions mean/std/q01/q99 are all 16D
+norm_script: scripts/compute_openarm_parquet_norm_stats.py
+probe_exp: openarm_hq_tda_aug_smoke_20260630
+probe_result: 500-step probe entered training and logged step 0, then stopped to avoid long decode/checkpoint cost
+tiny_exp: openarm_hq_tda_aug_smoke_tiny_20260630
+tiny_result: 3/3 steps completed; metrics logged for steps 0,1,2; checkpoint finalized at step 2
+tiny_checkpoint: /share/home/linyongjia/output/openpi/pi05_openarms_dual_hq_tda_aug/openarm_hq_tda_aug_smoke_tiny_20260630/2
+tiny_metrics: loss step0=0.122777, step1=0.165189, step2=0.129028
+decision: do not launch pure TDA 88000-step full train before site dataset / camera strategy is frozen
+```
 
 禁止：
 
@@ -698,7 +715,7 @@ site_v1_ft smoke train 通过
 | 2 | Client deployment hygiene | 冷启动不被 ping timeout 断开；metadata/shape 校验不误判 |
 | 3 | FIFO baseline retest | 相机对齐或现场采集规范冻结后，HQ FIFO 低速真机日志完整 |
 | 4 | Site dataset v1 freeze | 约 200 条现场 episode 可读，20 条 holdout 固定，metadata 完整 |
-| 5 | TDA augmented data freeze | 数据、视频、manifest、16D、norm stats 全部通过 |
+| 5 | TDA augmented data freeze | 数据、视频、manifest、16D、norm stats 全部通过；tiny smoke checkpoint 已产出 |
 | 6 | Site finetune smoke | `site_v1_ft` smoke train 通过，并与 HQ baseline 做现场复测 |
 | 7 | TDA/site full train | `hq_tda_site_v1` 或同等主力候选输出 checkpoint |
 | 8 | TDA A/B retest | 同场景下 FIFO vs TDA smooth 对比完成 |
@@ -1100,7 +1117,7 @@ pid: 547844
 
 ### 2026-06-30 - Agent C - HQ TDA 增强进度
 
-状态：增强数据集生成完成；norm stats 和 smoke train 待做。
+状态：增强数据集生成完成；norm stats 和 tiny smoke train 已完成。
 
 已完成：
 
@@ -1155,7 +1172,26 @@ sample parquet: state/action are 16D
 sample mirror: right/left 8D swap is correct for state/action
 ```
 
+- 已完成 parquet-only norm stats，避开官方视频解码慢路径：
+
+```text
+script: scripts/compute_openarm_parquet_norm_stats.py
+output: /share/home/linyongjia/datasets/openarm_hq_tda_aug_v1/norm_stats.json
+check: state/actions mean/std/q01/q99 are all 16D
+log: /share/home/linyongjia/output/openpi/logs/openarm_tda_aug/norm_20260630_gpu28.log
+```
+
+- 已完成训练链路 smoke：
+
+```text
+probe: openarm_hq_tda_aug_smoke_20260630 reached step 0 and logged loss, then stopped to avoid long decode/checkpoint cost
+tiny_smoke: openarm_hq_tda_aug_smoke_tiny_20260630 completed 3/3 steps
+metrics: loss step0=0.122777, step1=0.165189, step2=0.129028
+checkpoint: /share/home/linyongjia/output/openpi/pi05_openarms_dual_hq_tda_aug/openarm_hq_tda_aug_smoke_tiny_20260630/2
+log: /share/home/linyongjia/output/openpi/logs/openarm_tda_aug/smoke_tiny_20260630_gpu28.log
+```
+
 下一步：
 
-- 重新生成 `norm_stats.json`。
-- smoke train 通过后再决定 full train 是否直接 88000 steps，或先合入当前相机分布数据。
+- 暂不直接启动纯增强 88000 steps full train。
+- 等现场数据集 v1 / 相机策略冻结后，再决定做 TDA-only probe 还是合并为 `hq_tda_site_v1`。
