@@ -14,14 +14,14 @@ Stage Advantage 标注和 AWBC 训练
 
 ## 0. 实时进度看板
 
-最后更新：2026-06-30 14:54 CST
+最后更新：2026-06-30 15:10 CST
 
 ### 0.1 Agent 状态
 
 | Agent | 当前状态 | 最近进展 | 下一步 | 证据/产物 |
 |---|---|---|---|---|
-| A - HQ Baseline 真机推理 | 进行中 | `gpu25:6666` 已重启；本机 WebSocket 通信和延迟测试通过，稳定端到端约 130ms | 用 OpenArm 客户端连 `ws://172.31.11.125:6666` 做真实 baseline | 日志 `/share/home/linyongjia/output/openpi/logs/serve/openarm_hq_gpu25_6666.log` |
-| B - 客户端 TDA Chunk 平滑 | 已完成客户端实现 | OpenArm 客户端已支持 `fifo/tda_smooth`，默认仍为 FIFO；OpenPI 入口默认连 `ws://172.31.11.125:6666` | 等现场 OpenArm 真机 A/B 验证 baseline vs TDA smooth | OpenArm commit `a78b52c`；工控机 targeted build/test 通过 |
+| A - HQ Baseline 真机推理 | 已完成首轮真机验证，阻塞于主摄像头分布偏移 | IPC 端 OpenPI 推理入口已连 `ws://172.31.11.125:6666` 跑通；机械臂起身到桌面阶段表现好，但因当前主摄像头与 HQ 数据集差异较大，夹爪抓取不准，未完成第一阶段展开 | 先对齐/修正主摄像头视角、安装位、裁剪和光照，或补采当前主摄像头分布的数据后再复测 | `/tmp/openarm_remote_policy_20260630_150301.log`；`/openarm/joint_target` 单 writer；现场反馈 |
+| B - 客户端 TDA Chunk 平滑 | 已完成首轮 TDA 真机试跑 | OpenArm 客户端使用 `tda_smooth`、`prefetch_threshold=12`、`tda_drop_max=12`、`tda_min_overlap=3`、`linear alpha=0.5` 运行；急停路径验证可用 | 暂不继续调 TDA 参数，先解决主摄像头分布偏移，再做 baseline vs TDA A/B | OpenArm commit `cab9865`；IPC tmux `openpi_estop_test`；safety state 验证 |
 | C - HQ 数据增强和重训 | 进行中 | 已新增 OpenArm 16D 增强脚本和 `pi05_openarms_dual_hq_tda_aug` 配置；gpu28 环境/数据集已确认 | 在 gpu28 生成增强数据集，随后重算 norm stats | `scripts/augment_openarm_hq_tda.py`, `pi05_openarms_dual_hq_tda_aug` |
 | D - Recovery / Heuristic DAgger 采集格式 | 已完成客户端字段补丁 | OpenArm optional HIL mux/record/inspect 已提交并通过工控机 targeted build/test；fake HDF5 episode 字段闭环通过 | 现场协调停止当前推理后，录 1 条真实短 HIL episode 并 inspect | OpenArm commit `232af15`；`openarm_hil_raw_hdf5_v3` |
 | E - Stage Advantage 标注和训练方案 | 等待回写 | 多 Agent 已开始工作，当前文档尚未收到 stage schema 版本 | 回填 stage schema、标注格式、首批标注计划 | 待填 |
@@ -860,6 +860,39 @@ AWBC finetuned
 才有必要评估 KAI0 的 Model Arithmetic。单个任务、单个 checkpoint 阶段不需要模型路由。
 
 ## 9. 进度日志
+
+### 2026-06-30 15:10 CST - Agent A/B - OpenPI HQ + TDA 真机首轮推理反馈
+
+状态：阶段性完成，阻塞于主摄像头分布偏移。
+
+已完成：
+
+- 在 IPC 上运行 OpenArm OpenPI 推理入口，服务端为 `ws://172.31.11.125:6666`，`remote_policy` 为 `/openarm/joint_target` 唯一 publisher。
+- 实际运行模式为 `policy_type=openpi`、`action_unit=degrees`、`fps=30`、`chunk_merge_mode=tda_smooth`、`prefetch_threshold=12`、`tda_drop_max=12`、`tda_min_overlap=3`、`tda_blend_mode=linear`、`tda_blend_alpha=0.5`。
+- 急停路径已验证：脚本运行中通过 `e+Enter` 触发 `/openarm/safety/set_soft_estop`，`/openarm/safety/state` 进入 `soft_estop_latched`，左右 `mode_state` 显示 `soft_estop_engaged=true`、`effort_model=soft_estop_latched`，输出 effort/KP/KD 为 0。
+- 现场效果反馈：机械臂从启动起身到桌面这一阶段表现好。
+- 当前失败点：主摄像头与 HQ 训练数据集的视角/安装位/画面分布差异较大，导致夹爪无法准确夹到目标，未完成第一阶段展开操作。
+
+判断：
+
+- 本轮主要问题不是 OpenPI 服务连通、action shape、单位转换或 TDA chunk 平滑参数，而是主摄像头 observation 分布偏移导致抓取定位失败。
+- 当前 TDA smooth 已实际启用；在主摄像头分布未对齐前，继续微调 TDA 参数不是第一优先级。
+
+证据：
+
+```text
+IPC tmux: openpi_estop_test
+policy log: /tmp/openarm_remote_policy_20260630_150301.log
+server_uri: ws://172.31.11.125:6666
+chunk mode: tda_smooth
+prefetch_threshold: 12
+```
+
+下一步：
+
+- 采集当前 IPC 三路相机样例图，尤其是 `base` 主摄像头，与 HQ 数据集样例逐项比对视角、FOV、安装高度、桌面占比、目标尺度、光照和裁剪。
+- 优先把主摄像头恢复到训练数据分布；如果硬件视角无法恢复，则补采当前主摄像头分布的数据并进入 TDA 增强/重训或小批量微调。
+- 主摄像头对齐后，再复测 `fifo` baseline 与当前 `tda_smooth` 参数的 A/B。
 
 ### 2026-06-30 14:47 CST - Agent D - HIL/DAgger 客户端字段补丁
 
