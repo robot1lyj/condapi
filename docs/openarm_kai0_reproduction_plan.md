@@ -6,7 +6,7 @@
 
 ## 0. 当前结论
 
-最后更新：2026-06-30 15:20 CST
+最后更新：2026-06-30 15:28 CST
 
 ### 0.1 本轮决策
 
@@ -17,6 +17,7 @@
 5. Heuristic DAgger / Recovery 采集格式已经具备客户端基础，可以先做真实短 episode 验证；但高价值 recovery 数据应在相机分布对齐或现场数据采集规范冻结后采。
 6. Stage Advantage 现在可以启动 schema 和小批量标注，不等重训完成；AWBC 训练必须等 `stage_progress_gt` 和 advantage 数据链路闭环后再做。
 7. Model Arithmetic 暂缓。它是多个 checkpoint 的权重空间合并，不是运行时模型路由；单任务、单模型阶段收益不高。
+8. 2026-06-30 15:28 的执行决策：现在不三选一，而是两条主线并行。现场数据集 v1 立刻启动采集；TDA 增强完成后只做数据校验、norm stats、smoke/probe train，不直接开纯增强 88k full train。
 
 ### 0.2 活跃 HQ 推理服务
 
@@ -56,11 +57,11 @@ server infer_ms: about 86-100ms
 |---|---|---|---|---|
 | A. HQ baseline 真机推理 | 阶段完成，视觉分布阻塞 | `ws://172.31.11.125:6666` 已跑通；机械臂起身正常；抓取失败指向主摄像头分布偏移 | 做主摄像头分布审计；对齐后复测 FIFO baseline | `/tmp/openarm_remote_policy_20260630_150301.log` |
 | B. 客户端 TDA smooth | 阶段完成 | `tda_smooth` 真机可运行；急停链路可用 | 相机对齐后做 FIFO vs TDA A/B | OpenArm commit `cab9865`；IPC tmux `openpi_estop_test` |
-| C. TDA 数据增强/重训 | 进行中 | gpu28 正在生成 `openarm_hq_tda_aug_v1`；parquet 已 2298；目标视频 6894 | 等增强完成，检查 manifest/report/16D，重算 norm stats，先 smoke train | `/share/home/linyongjia/output/openpi/logs/openarm_tda_aug/augment_20260630_gpu28.log` |
+| C. TDA 数据增强/重训 | 进行中 | gpu28 正在生成 `openarm_hq_tda_aug_v1`；15:28 检查为 parquet 2298、video 5011/6894、report 未生成 | 等增强完成，检查 manifest/report/16D，重算 norm stats，做 smoke/probe；不直接开纯增强 88k | `/share/home/linyongjia/output/openpi/logs/openarm_tda_aug/augment_20260630_gpu28.log` |
 | D. HIL / DAgger 采集格式 | 客户端补丁完成 | HIL mux/record/inspect 已在工控机 targeted build/test 通过 | 停当前推理后录 1 条真实短 episode 并 inspect | OpenArm commit `232af15`；`openarm_hil_raw_hdf5_v3` |
 | E. Stage Advantage | 待启动 v1 | 需要先定 OpenArm stage schema 和 sidecar 标注格式 | 标注 20-50 条 HQ 成功 episode，生成 `stage_progress_gt` smoke 数据 | 待产出 |
 | F. Model Arithmetic | 暂缓 | 需要多个互补 checkpoint 后再评估 | 等 HQ/TDA/Recovery/AWBC 至少两个模型可比较后再开 | KAI0 `model_arithmetic/README.md` |
-| G. 现场数据集 v1 | 新增，待采集 | 如果现场相机/布局长期不同，约 200 条现场数据是必要投入 | 冻结现场相机与采集规范；采 180 train + 20 val 左右的高质量现场 episode | 待产出 |
+| G. 现场数据集 v1 | P0，立即启动 | 如果现场相机/布局长期不同，约 200 条现场数据是必要投入 | 先采 20 条 smoke 验格式，再扩到 180 train + 20 holdout | 待产出 |
 
 ## 1. KAI0 对齐原则
 
@@ -652,6 +653,40 @@ test output summary
 ```
 
 ## 8. 历史日志
+
+### 2026-06-30 15:28 CST - Plan Owner - 下一步执行决策
+
+状态：完成。
+
+已完成：
+
+- 确认下一步不是“增强训练”和“现场采集”二选一，而是并行推进。
+- 现场数据集 v1 作为 P0 立刻启动：先采 20 条 smoke 验证格式，再扩到约 200 条。
+- TDA 增强数据完成后只进入校验、norm stats、500-1000 step smoke 和短 probe train；暂不直接启动纯增强 88000 step full train。
+- 纯增强模型只作为 ablation/probe，不作为下一阶段主力模型。主力候选应是 `site_v1_ft` 或 `hq_tda_site_v1`。
+
+远端状态：
+
+```text
+node: gpu28
+process: augment_openarm_hq_tda.py still running
+dataset: /share/home/linyongjia/datasets/openarm_hq_tda_aug_v1
+parquet: 2298
+videos: 5011 / 6894
+augment_report.json: missing
+log file: /share/home/linyongjia/output/openpi/logs/openarm_tda_aug/augment_20260630_gpu28.log
+```
+
+判断：
+
+- 现场 200 条数据耗时几天，必须现在启动，否则会拖住真正能解决相机/布局分布偏移的训练。
+- 增强数据还没完成，即使完成也主要验证 TDA pipeline 和训练管线；它不能替代现场相机型号、安装位和桌面布局的数据。
+
+下一步：
+
+- 采集 Agent：冻结现场 camera/layout，先采 20 条 smoke episode。
+- 数据 Agent：等 gpu28 增强完成后检查 report/video/16D，然后重算 norm stats。
+- 训练 Agent：先准备 `site_v1_ft` 配置和数据合并策略；等现场数据 smoke 通过后再开始小微调。
 
 ### 2026-06-30 15:20 CST - Plan Owner - 纳入现场 200 条数据策略
 
