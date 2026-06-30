@@ -14,7 +14,7 @@ Stage Advantage 标注和 AWBC 训练
 
 ## 0. 实时进度看板
 
-最后更新：2026-06-30 14:47 CST
+最后更新：2026-06-30 14:54 CST
 
 ### 0.1 Agent 状态
 
@@ -23,7 +23,7 @@ Stage Advantage 标注和 AWBC 训练
 | A - HQ Baseline 真机推理 | 进行中 | `gpu25:6666` 已重启；本机 WebSocket 通信和延迟测试通过，稳定端到端约 130ms | 用 OpenArm 客户端连 `ws://172.31.11.125:6666` 做真实 baseline | 日志 `/share/home/linyongjia/output/openpi/logs/serve/openarm_hq_gpu25_6666.log` |
 | B - 客户端 TDA Chunk 平滑 | 已完成客户端实现 | OpenArm 客户端已支持 `fifo/tda_smooth`，默认仍为 FIFO；OpenPI 入口默认连 `ws://172.31.11.125:6666` | 等现场 OpenArm 真机 A/B 验证 baseline vs TDA smooth | OpenArm commit `a78b52c`；工控机 targeted build/test 通过 |
 | C - HQ 数据增强和重训 | 进行中 | 已新增 OpenArm 16D 增强脚本和 `pi05_openarms_dual_hq_tda_aug` 配置；gpu28 环境/数据集已确认 | 在 gpu28 生成增强数据集，随后重算 norm stats | `scripts/augment_openarm_hq_tda.py`, `pi05_openarms_dual_hq_tda_aug` |
-| D - Recovery / Heuristic DAgger 采集格式 | 进行中 | 已在 OpenArm 客户端侧新增 optional HIL mux/record/inspect，fake HDF5 episode 字段闭环通过 | 跑工控机 targeted build/test，提交后再做真实短 episode | OpenArm `openarm_hil_rl`；`openarm_hil_raw_hdf5_v3` |
+| D - Recovery / Heuristic DAgger 采集格式 | 已完成客户端字段补丁 | OpenArm optional HIL mux/record/inspect 已提交并通过工控机 targeted build/test；fake HDF5 episode 字段闭环通过 | 现场协调停止当前推理后，录 1 条真实短 HIL episode 并 inspect | OpenArm commit `232af15`；`openarm_hil_raw_hdf5_v3` |
 | E - Stage Advantage 标注和训练方案 | 等待回写 | 多 Agent 已开始工作，当前文档尚未收到 stage schema 版本 | 回填 stage schema、标注格式、首批标注计划 | 待填 |
 
 ### 0.2 当前 HQ 推理服务
@@ -881,6 +881,32 @@ AWBC finetuned
 - 在 OpenArm 工控机容器跑 targeted build/test。
 - 提交 OpenArm 客户端改造。
 - 真机短 episode 需要现场停止当前推理后再协调运行。
+
+### 2026-06-30 14:54 CST - Agent D - HIL/DAgger 客户端远端验证
+
+状态：已完成客户端字段补丁。
+
+已完成：
+
+- OpenArm 客户端提交：`232af15 新增OpenPI HIL采集客户端`。
+- 已推送并在工控机 `/home/test/openarm_ros2_docker` 快进到 `232af15f`。
+- 工控机容器 targeted build 通过：
+  - `openarm_hil_rl`
+  - `openarm_remote_policy`
+  - `openarm_bringup`
+- 工控机容器 targeted tests 通过：
+  - `openarm_hil_rl`: 5 tests, 0 failures。
+  - `openarm_remote_policy`: 6 tests, 0 failures。
+- 远端宿主 `scripts/test_runtime_guard.sh` 通过。
+- 入口检查通过：
+  - `openarm.bimanual.launch.py --show-args` 包含 `mink_joint_target_topic`。
+  - `openarm-hil-inspect --help` 可运行。
+  - `start_real_hil_dagger_openpi.sh --help` 可运行。
+
+下一步：
+
+- 真机短 episode 需要现场先停当前推理，再运行 `start_real_hil_dagger_openpi.sh --openpi-mode fifo` 或 `--openpi-mode tda_smooth`。
+- 真实样例 episode 采集后，用 `openarm-hil-inspect` 记录字段报告。
 
 ### 2026-06-30 14:12 CST - Agent A - HQ policy server 启动
 
