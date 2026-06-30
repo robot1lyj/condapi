@@ -12,6 +12,64 @@ Recovery / Heuristic DAgger 可用采集格式
 Stage Advantage 标注和 AWBC 训练
 ```
 
+## 0. 实时进度看板
+
+最后更新：2026-06-30 14:12 CST
+
+### 0.1 Agent 状态
+
+| Agent | 当前状态 | 最近进展 | 下一步 | 证据/产物 |
+|---|---|---|---|---|
+| A - HQ Baseline 真机推理 | 进行中 | 已在 `gpu25` 启动 HQ policy server，health 和 dry-run 推理通过 | 用 OpenArm 客户端连 `ws://172.31.11.125:6666` 做真实 baseline | 日志 `/share/home/linyongjia/output/openpi/logs/serve/openarm_hq_gpu25_6666.log` |
+| B - 客户端 TDA Chunk 平滑 | 等待回写 | 多 Agent 已开始工作，当前文档尚未收到实现状态 | 回填 `fifo/tda_smooth` 设计、测试状态、分支/提交 | 待填 |
+| C - HQ 数据增强和重训 | 等待回写 | 多 Agent 已开始工作，当前文档尚未收到数据增强状态 | 回填数据集审计、增强脚本、norm stats、训练状态 | 待填 |
+| D - Recovery / Heuristic DAgger 采集格式 | 等待回写 | 多 Agent 已开始工作，当前文档尚未收到字段审计结果 | 回填样例 episode、字段列表、缺失字段 | 待填 |
+| E - Stage Advantage 标注和训练方案 | 等待回写 | 多 Agent 已开始工作，当前文档尚未收到 stage schema 版本 | 回填 stage schema、标注格式、首批标注计划 | 待填 |
+
+### 0.2 当前 HQ 推理服务
+
+```text
+node: gpu25
+node_ip: 172.31.11.125
+gpu: GPU0 / A800 80GB
+port: 6666
+server_uri: ws://172.31.11.125:6666
+config: pi05_openarms_dual_hq
+checkpoint: /share/home/linyongjia/output/openpi/pi05_openarms_dual_hq/openarms_hq_bs32/99999
+pid: 547844
+log: /share/home/linyongjia/output/openpi/logs/serve/openarm_hq_gpu25_6666.log
+```
+
+验证记录：
+
+```text
+healthz: OK
+listen: 0.0.0.0:6666
+GPU memory: about 69GB / 80GB
+metadata: {'action_horizon': 50, 'action_dim': 32, 'rtc_mode': 'off'}
+dry-run actual output: actions shape = (50, 16)
+first dry-run latency: 38.7s
+```
+
+注意：metadata 里的 `action_dim=32` 是模型内部动作维度；经过 OpenArm output transform 后，实际返回给客户端的 `actions` 是 `(50, 16)`。当前 baseline 可以先使用；后续做 RTC/TDA metadata 严格校验时需要把 metadata 修成 16，避免客户端误判。
+
+### 0.3 进度更新规则
+
+多 Agent 并行时，每个 Agent 回写本文档只更新两个位置：
+
+1. `0.1 Agent 状态` 表中自己的行。
+2. 文末 `9. 进度日志` 增加一条带时间戳的记录。
+
+每条进度必须包含：
+
+```text
+时间
+Agent
+状态: 未开始 / 进行中 / 阻塞 / 已完成
+证据: 日志、commit、数据集路径、checkpoint、样例 episode 或测试输出
+下一步
+```
+
 ## 1. 参考依据
 
 ### 1.1 主要参考项目
@@ -764,3 +822,38 @@ AWBC finetuned
 ```
 
 才有必要评估 KAI0 的 Model Arithmetic。单个任务、单个 checkpoint 阶段不需要模型路由。
+
+## 9. 进度日志
+
+### 2026-06-30 14:12 CST - Agent A - HQ policy server 启动
+
+状态：进行中。
+
+已完成：
+
+- 通过 `mu01` 二跳确认 `gpu25` 可访问。
+- 确认 `gpu25` 有 1 张 A800 80GB，启动前无 compute app。
+- 在 `gpu25` GPU0 启动 `pi05_openarms_dual_hq` policy server，端口 `6666`。
+- 验证 `/healthz` 返回 `OK`。
+- 验证 WebSocket 握手成功。
+- dry-run 推理返回 `actions (50, 16)`。
+
+服务信息：
+
+```text
+server_uri: ws://172.31.11.125:6666
+checkpoint: /share/home/linyongjia/output/openpi/pi05_openarms_dual_hq/openarms_hq_bs32/99999
+log: /share/home/linyongjia/output/openpi/logs/serve/openarm_hq_gpu25_6666.log
+pid: 547844
+```
+
+观察：
+
+- 首次 dry-run 推理耗时约 38.7s，包含 JAX 首次编译。
+- metadata 当前显示 `action_dim=32`，但实际输出 transform 后是 16D。
+
+下一步：
+
+- OpenArm 客户端连接 `ws://172.31.11.125:6666`，做真实 baseline。
+- 记录真实客户端 latency、action range、publish rate 和是否抖动。
+- 后续修正 metadata action_dim，供 TDA/RTC 严格校验使用。
