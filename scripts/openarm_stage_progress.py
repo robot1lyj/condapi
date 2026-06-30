@@ -58,13 +58,36 @@ def _event_frame(annotation: dict[str, Any], *names: str) -> int | None:
 def normalize_boundaries(annotation: dict[str, Any], episode_length: int) -> list[dict[str, int | str]]:
     """Return two Task-A boundaries from sidecar annotation data."""
 
+    max_frame = episode_length - 1
+
+    start = _event_frame(annotation, "episode_start", "start")
+    flatten_done = _event_frame(annotation, "flatten_done")
+    end = _event_frame(annotation, "episode_end", "end")
+    if flatten_done is not None:
+        start = 0 if start is None else min(max(0, int(start)), max_frame)
+        end = max_frame if end is None else min(max(0, int(end)), max_frame)
+        boundary = min(max(start, int(flatten_done)), end - 1)
+        return [
+            {"stage_id": 0, "name": "flattening", "start_frame": start, "end_frame": boundary},
+            {"stage_id": 1, "name": "folding", "start_frame": boundary + 1, "end_frame": end},
+        ]
+
     if annotation.get("stage_boundaries"):
+        first_boundary_end = int(annotation["stage_boundaries"][0]["end_frame"])
+        inferred_start = min(max(0, int(annotation["stage_boundaries"][0]["start_frame"])), max_frame)
+        inferred_end = min(max(0, int(annotation["stage_boundaries"][-1]["end_frame"])), max_frame)
+        boundary = min(max(inferred_start, first_boundary_end), inferred_end - 1)
+        if len(annotation["stage_boundaries"]) == len(STAGES):
+            return [
+                {"stage_id": 0, "name": "flattening", "start_frame": inferred_start, "end_frame": boundary},
+                {"stage_id": 1, "name": "folding", "start_frame": boundary + 1, "end_frame": inferred_end},
+            ]
         boundaries = [
             {
                 "stage_id": int(boundary["stage_id"]),
                 "name": str(boundary.get("name", STAGES[int(boundary["stage_id"])])),
-                "start_frame": int(boundary["start_frame"]),
-                "end_frame": int(boundary["end_frame"]),
+                "start_frame": min(max(0, int(boundary["start_frame"])), max_frame),
+                "end_frame": min(max(0, int(boundary["end_frame"])), max_frame),
             }
             for boundary in annotation["stage_boundaries"]
         ]
@@ -72,19 +95,21 @@ def normalize_boundaries(annotation: dict[str, Any], episode_length: int) -> lis
         return boundaries
 
     start = _event_frame(annotation, "episode_start", "start")
-    flatten_done = _event_frame(annotation, "flatten_done")
     fold_start = _event_frame(annotation, "fold_start")
     end = _event_frame(annotation, "episode_end", "end")
     if start is None:
         start = 0
     if end is None:
-        end = episode_length - 1
+        end = max_frame
+    start = min(max(0, int(start)), max_frame)
+    end = min(max(0, int(end)), max_frame)
     if flatten_done is None and fold_start is None:
         raise ValueError(f"Episode {annotation.get('episode_index')} missing flatten_done/fold_start")
     if fold_start is None:
         fold_start = min(int(flatten_done) + 1, end)
     if flatten_done is None:
         flatten_done = max(start, int(fold_start) - 1)
+    fold_start = min(max(start + 1, int(fold_start)), end)
 
     return [
         {"stage_id": 0, "name": "flattening", "start_frame": start, "end_frame": int(fold_start) - 1},

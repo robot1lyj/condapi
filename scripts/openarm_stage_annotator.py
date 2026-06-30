@@ -92,16 +92,10 @@ INDEX_HTML = r"""<!doctype html>
         <span class="status">当前帧 <strong id="currentFrame">0</strong></span>
       </div>
       <div class="row">
-        <button onclick="mark('episode_start')">S 开始</button>
-        <button onclick="mark('flatten_done')">F 展开完成</button>
-        <button onclick="mark('fold_start')">G 开始折叠</button>
-        <button onclick="mark('episode_end')">E 结束</button>
+        <button onclick="mark('flatten_done')">F 展平完成</button>
       </div>
       <div class="row">
-        <label>start</label><input id="episode_start" type="number" min="0" />
         <label>flatten_done</label><input id="flatten_done" type="number" min="0" />
-        <label>fold_start</label><input id="fold_start" type="number" min="0" />
-        <label>end</label><input id="episode_end" type="number" min="0" />
         <label>quality</label>
         <select id="quality">
           <option value="success">success</option>
@@ -170,9 +164,17 @@ function renderVideos() {
 
 function videos() { return Array.from(document.querySelectorAll("video")); }
 function primaryVideo() { return videos()[0]; }
+function selectedEpisode() { return state.episodes.find(ep => ep.episode_index === state.selected); }
+function maxFrame() {
+  const episode = selectedEpisode();
+  return episode ? Math.max(0, episode.length - 1) : Number.MAX_SAFE_INTEGER;
+}
+function clampFrame(frame) {
+  return Math.max(0, Math.min(maxFrame(), Number(frame)));
+}
 function currentFrame() {
   const v = primaryVideo();
-  return Math.max(0, Math.round((v ? v.currentTime : 0) * state.fps));
+  return clampFrame(Math.round((v ? v.currentTime : 0) * state.fps));
 }
 function updateCurrentFrame() { document.getElementById("currentFrame").textContent = currentFrame(); }
 function syncAll(time) {
@@ -195,7 +197,7 @@ function mark(name) {
   validateForm();
 }
 function clearForm() {
-  for (const id of ["episode_start", "flatten_done", "fold_start", "episode_end", "notes"]) {
+  for (const id of ["flatten_done", "notes"]) {
     document.getElementById(id).value = "";
   }
   document.getElementById("quality").value = "success";
@@ -214,21 +216,19 @@ function loadAnnotation() {
 }
 function value(id) {
   const raw = document.getElementById(id).value;
-  return raw === "" ? null : Number(raw);
+  return raw === "" ? null : clampFrame(raw);
 }
 function validateForm() {
-  const start = value("episode_start");
   const flat = value("flatten_done");
-  const fold = value("fold_start");
-  const end = value("episode_end");
+  const end = maxFrame();
   const label = document.getElementById("validation");
-  if ([start, flat, fold, end].some(v => v === null)) {
+  if (flat === null) {
     label.textContent = "未完成";
     label.className = "status";
     return false;
   }
-  if (!(start <= flat && flat < fold && fold <= end)) {
-    label.textContent = "边界顺序错误";
+  if (!(0 <= flat && flat < end)) {
+    label.textContent = "边界错误";
     label.className = "status error";
     return false;
   }
@@ -238,6 +238,8 @@ function validateForm() {
 }
 async function saveAnnotation() {
   if (!validateForm()) return;
+  const flat = value("flatten_done");
+  const foldStart = Math.min(flat + 1, maxFrame());
   const payload = {
     schema_version: "openarm_stage_v1",
     episode_index: state.selected,
@@ -245,14 +247,14 @@ async function saveAnnotation() {
     task: "Fold the T-shirt properly",
     quality: document.getElementById("quality").value,
     events: [
-      {name: "episode_start", frame: value("episode_start")},
-      {name: "flatten_done", frame: value("flatten_done")},
-      {name: "fold_start", frame: value("fold_start")},
-      {name: "episode_end", frame: value("episode_end")}
+      {name: "episode_start", frame: 0},
+      {name: "flatten_done", frame: flat},
+      {name: "fold_start", frame: foldStart},
+      {name: "episode_end", frame: maxFrame()}
     ],
     stage_boundaries: [
-      {stage_id: 0, name: "flattening", start_frame: value("episode_start"), end_frame: value("fold_start") - 1},
-      {stage_id: 1, name: "folding", start_frame: value("fold_start"), end_frame: value("episode_end")}
+      {stage_id: 0, name: "flattening", start_frame: 0, end_frame: flat},
+      {stage_id: 1, name: "folding", start_frame: foldStart, end_frame: maxFrame()}
     ],
     notes: document.getElementById("notes").value
   };
@@ -275,12 +277,9 @@ document.addEventListener("keydown", (event) => {
   if (event.key === " ") { event.preventDefault(); togglePlay(); }
   if (event.key === "ArrowLeft") syncSeek(-1);
   if (event.key === "ArrowRight") syncSeek(1);
-  if (event.key.toLowerCase() === "s") mark("episode_start");
   if (event.key.toLowerCase() === "f") mark("flatten_done");
-  if (event.key.toLowerCase() === "g") mark("fold_start");
-  if (event.key.toLowerCase() === "e") mark("episode_end");
 });
-for (const id of ["episode_start", "flatten_done", "fold_start", "episode_end"]) {
+for (const id of ["flatten_done"]) {
   document.addEventListener("input", (event) => { if (event.target.id === id) validateForm(); });
 }
 loadState();

@@ -6,7 +6,7 @@
 
 ## 0. 当前结论
 
-最后更新：2026-06-30 16:54 CST
+最后更新：2026-06-30 20:54 CST
 
 ### 0.1 本轮决策
 
@@ -59,7 +59,7 @@ server infer_ms: about 86-100ms
 | B. 客户端 TDA smooth | 阶段完成 | `tda_smooth` 真机可运行；急停链路可用 | 相机对齐后做 FIFO vs TDA A/B | OpenArm commit `cab9865`；IPC tmux `openpi_estop_test` |
 | C. TDA 数据增强/重训 | 增强完成，待 norm/smoke | `openarm_hq_tda_aug_v1` 已生成并验收通过：parquet 2298、mp4 6894、约 62G；16D、time-scaling、mirror 互换和抽样视频帧数检查通过 | 重算 norm stats，做 smoke/probe；不直接开纯增强 88k | `/share/home/linyongjia/datasets/openarm_hq_tda_aug_v1` |
 | D. HIL / DAgger 采集格式 | 客户端补丁完成 | HIL mux/record/inspect 已在工控机 targeted build/test 通过 | 停当前推理后录 1 条真实短 episode 并 inspect | OpenArm commit `232af15`；`openarm_hil_raw_hdf5_v3` |
-| E. Stage Advantage | 工具完成，待人工标注 | 计划中的 5 阶段是 OpenArm 诊断拆分；SA v1 改为论文 Task A 对齐的 2 阶段：flatten / fold；本地已准备 200 集 v2.1 子集 | 用标注工具先标 20-50 条成功 episode，生成 `stage_progress_gt` smoke 数据 | `scripts/openarm_stage_annotator.py`；`/home/lyj/storage1t/datasets/high_quality_folding_v2p1_200` |
+| E. Stage Advantage | 已标 20 条，待写回 smoke | 计划中的 5 阶段是 OpenArm 诊断拆分；SA v1 改为论文 Task A 对齐的 2 阶段：flatten / fold；精修 HQ 子集只需人工点一次 `flatten_done` | 继续按单点模式扩标；20 条 dry-run 通过后可写回 `stage_progress_gt` 做 smoke | `scripts/openarm_stage_annotator.py`；`/home/lyj/storage1t/datasets/high_quality_folding_v2p1_200` |
 | F. Model Arithmetic | 暂缓 | 需要多个互补 checkpoint 后再评估 | 等 HQ/TDA/Recovery/AWBC 至少两个模型可比较后再开 | KAI0 `model_arithmetic/README.md` |
 | G. 现场数据集 v1 | P0，立即启动 | 如果现场相机/布局长期不同，约 200 条现场数据是必要投入 | 先采 20 条 smoke 验格式，再扩到 180 train + 20 holdout | 待产出 |
 
@@ -447,7 +447,8 @@ grasp_flatten -> align -> fold_finish
 ```text
 stage 0 = episode_start 到 fold_start - 1
 stage 1 = fold_start 到 episode_end
-flatten_done 作为诊断事件保留，不单独切出一个 stage
+Task A 两阶段最小人工标注只需要 flatten_done 一个分界点
+fold_start = flatten_done + 1，由工具自动生成
 stage_progress_gt = k / K + (1 / K) * frame_position_within_stage / segment_length
 range: [0, 1]
 monotonic: true within an episode
@@ -466,9 +467,9 @@ monotonic: true within an episode
 
 ```text
 三路视频同步显示：base / left_wrist / right_wrist
-按键标注：start、flatten_done、fold_start、end、quality、notes
+按键标注：flatten_done、quality、notes
 输出 sidecar JSONL，不直接改 parquet
-自动校验：start <= flatten_done < fold_start <= end
+自动推断：start=0, fold_start=flatten_done+1, end=episode_length-1
 自动生成 stage_progress_gt，并抽样回放检查
 ```
 
@@ -747,6 +748,33 @@ test output summary
 ```
 
 ## 8. 历史日志
+
+### 2026-06-30 20:54 CST - Agent E - Stage Advantage 改为单点标注
+
+状态：完成工具修正，20 条已标注数据 dry-run 通过。
+
+已完成：
+
+- 确认当前 200 集 HQ 子集是精修数据：第一帧就是开始，最后一帧就是结束。
+- 将人工标注从 4 个时间点收敛为 Task A 两阶段所需的单点标注：只点 `flatten_done`。
+- `start=0`、`fold_start=flatten_done+1`、`end=episode_length-1` 由工具自动生成。
+- 兼容已保存的 20 条旧格式标注，不需要重标。
+
+证据：
+
+```text
+annotation file: /home/lyj/storage1t/datasets/high_quality_folding_v2p1_200/annotations/openarm_stage_v1.jsonl
+count: 20
+episodes: 0-19
+quality: success 20
+dry-run: processed_count 20, skipped_count 0
+stage_progress range: [0, 1]
+```
+
+下一步：
+
+- 用单点 UI 继续扩标。
+- 若先做 smoke，可直接对这 20 条去掉 `--dry-run` 写回 `stage_progress_gt`。
 
 ### 2026-06-30 16:54 CST - Agent E - Stage Advantage 标注工具和 200 集子集
 
