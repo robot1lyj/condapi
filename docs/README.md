@@ -5,6 +5,7 @@
 - Normalization stats reload: norm_stats.md
 - Piper dual-arm training: piper_dual_arm_training.md
 - Piper dual-arm fine-tuning: piper_dual_arm_finetune.md
+- OpenArm KAI0 reproduction plan: openarm_kai0_reproduction_plan.md
 
 ## Serving (Server-side)
 - Remote policy server: remote_inference.md
