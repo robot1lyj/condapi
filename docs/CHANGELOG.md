@@ -7,13 +7,29 @@ Design decisions → `docs/decisions/`. Architecture → `docs/ARCHITECTURE.md`.
 
 ---
 
+## 2026-06-30
+
+- **OpenArm HQ TDA 数据增强**: 新增 `scripts/augment_openarm_hq_tda.py`，面向服务器上已转换好的
+  LeRobot v2.1 HQ 数据集生成 `openarm_hq_tda_aug_v1`，显式适配 OpenArm 16D 左右臂互换，并优先使用
+  ffmpeg CUDA/NVENC 处理 time-scaling 与镜像视频；当节点 NVENC 不可用时会提前报错，或在显式允许时改用
+  CPU encode + GPU decode。
+- **`pi05_openarms_dual_hq_tda_aug` 训练配置**: 新增 TDA 增强数据集训练配置，目标数据集为
+  `/share/home/linyongjia/datasets/openarm_hq_tda_aug_v1`，默认从 HQ `99999/params` checkpoint warm start。
+
+## 2026-06-29
+
+- **训练服务器链路收敛**: 当前默认入口统一为 mu01 (`172.31.11.100:12222`) 二跳到 gpu12/gpu14；
+  gpu08 (`172.31.11.108`) 标记为 Slurm 受限历史节点，不再作为默认训练入口。
+- **本地/训练服务器代码同步**: `conda-pi` 本地、origin 与训练服务器共享目录已按最新提交同步；远端未提交的
+  多节点训练改动已先保存为 stash 后 fast-forward，避免覆盖服务器现场改动。
+
 ## 2026-06-27
 
 - **记忆系统接管**: 将仓库记忆统一为 `AGENTS.md` + `docs/cache/` 的单一 Context OS 入口，补齐
   `docs/decisions/README.md` 与 `docs/reference/00_reference_index.md`，清理 `.agents`/`.codex`
   空占位，并将当前远端训练默认链路收敛到 `/share/home/linyongjia/data` + `local/<alias>`。
-- **训练节点记忆修正**: 补充 gpu12 (`172.31.11.112`) 为可访问训练节点；当前默认集群为 gpu08 +
-  gpu12，两节点共 4 张 A800。HQ 训练状态检查需同时查看两个节点。
+- **训练节点记忆修正**: 补充 gpu12 (`172.31.11.112`) 为可访问训练节点；当时默认集群记录为 gpu08 +
+  gpu12，两节点共 4 张 A800。
 - **gpu14 节点验证**: 确认 gpu14 (`172.31.11.114`) 需经 mu01 (`172.31.11.100`) 二跳进入；
   `nvidia-smi` 和 JAX 均识别 2 张 A800，可作为 OpenPI/JAX 训练候选节点。
 - **JAX 4 卡多节点适配**: `scripts/train.py` 支持早期 JAX distributed 初始化、coordinator bind address、
@@ -40,7 +56,7 @@ Design decisions → `docs/decisions/`. Architecture → `docs/ARCHITECTURE.md`.
 ## 2026-06-24
 
 - **Context OS 记忆系统初始化**: 建立四层 Context OS 记忆架构 (CLAUDE.md → cache/ → memory/ → CHANGELOG)，将服务器地址、远端路径、GCS 模型位置等核心事实固化到跨会话记忆中。
-- **训练服务器 IP 更新**: `172.31.11.122` → `172.31.11.108` (gpu08)，所有引用已同步更新。
+- **训练服务器 IP 更新（历史）**: 当时从 `172.31.11.122` 改为 `172.31.11.108` (gpu08)；当前默认以最新条目为准。
 
 ## 2026-06 (近期)
 

@@ -2,7 +2,7 @@
 
 ## Defaults
 - Training access: mu01 jump `linyongjia@172.31.11.100:12222`
-- Training nodes: gpu08 (`172.31.11.108`), gpu12 (`172.31.11.112`), gpu14 (`172.31.11.114` via mu01 `172.31.11.100`), 2x A800 each
+- Training nodes: gpu12 (`172.31.11.112`) and gpu14 (`172.31.11.114`) via mu01; gpu08 (`172.31.11.108`) is Slurm-gated/historical
 - Remote code: `/share/home/linyongjia/conda-pi/openpi`
 - Remote data root: `/share/home/linyongjia/data`
 - Remote output: `/share/home/linyongjia/output/openpi`
@@ -14,12 +14,13 @@
 ```bash
 bash scripts/conda/build_offline_bundle.sh artifacts/pi-conda-offline-bundle
 tar -C artifacts -cf pi-conda-offline-bundle.tar pi-conda-offline-bundle
-scp -P 12222 pi-conda-offline-bundle.tar linyongjia@172.31.11.108:/share/home/linyongjia/
+scp -P 12222 pi-conda-offline-bundle.tar linyongjia@172.31.11.100:/share/home/linyongjia/
 ```
 
 ## Install on Server
 ```bash
-ssh -p 12222 linyongjia@172.31.11.108
+ssh -p 12222 linyongjia@172.31.11.100
+ssh -p 12222 gpu12
 cd /share/home/linyongjia
 tar -xf pi-conda-offline-bundle.tar
 cd /share/home/linyongjia/conda-pi/openpi
@@ -51,16 +52,16 @@ conda run -n pi-conda python scripts/train.py pi05_piper_dual \
 
 ## Remote Train Helper
 Use the shared helper for norm-stats-then-train runs:
-
 ```bash
 bash ~/.codex/skills/openpi-conda-remote-train/scripts/start_remote_train.sh \
-  --node 172.31.11.108 \
+  --jump-host 172.31.11.100 \
+  --node gpu12 \
   --dataset-name <dataset_dir_under_data> \
   --repo-alias <alias> \
   --config pi05_piper_dual \
   --exp-name <name>
 ```
-Use `--node 172.31.11.112` for gpu12. For gpu14, enter through `ssh -p 12222 linyongjia@172.31.11.100` then `ssh -p 12222 gpu14`.
+Use gpu12 by default. For gpu14, enter through `ssh -p 12222 linyongjia@172.31.11.100` then `ssh -p 12222 gpu14`.
 
 ## Serve (推理服务)
 ```bash
@@ -74,6 +75,6 @@ conda run -n pi-conda python scripts/serve_policy.py --port 6666 policy:checkpoi
 Older docs and OpenArm configs may use `/share/home/linyongjia/datasets/<dataset>` directly. Treat that as compatibility context unless the user explicitly asks for that path.
 
 ## Pre-flight Checks
-- 确认 gpu12/gpu14 可达: `ssh -p 12222 linyongjia@172.31.11.100`, then `ssh -p 12222 gpu12` or `gpu14`; gpu14 JAX sees 2 CUDA devices.
+- 确认 gpu12/gpu14 可达: `ssh -p 12222 linyongjia@172.31.11.100`, then `ssh -p 12222 gpu12` or `gpu14`; both expose 2x A800.
 - 确认 conda 环境存在: `conda run -n pi-conda python -c "import openpi"`
 - 确认 GPU 可用: `conda run -n pi-conda python -c "import jax; print(jax.devices())"`

@@ -5,8 +5,8 @@ New sessions: read `AGENTS.md` + this file first, then `context_index.md` to sel
 ## Default Facts
 - Default product: OpenPI VLA fine-tuning and inference for Piper/OpenArm dual-arm workflows.
 - Local workspace: `/home/lyj/lyj/openpi`
-- Default training access: mu01 jump `linyongjia@172.31.11.100:12222`, then `ssh -p 12222 gpu12/gpu14`; legacy docs may mention `172.31.11.122`.
-- Training nodes: gpu08 (`172.31.11.108`), gpu12 (`172.31.11.112`), and gpu14 (`172.31.11.114` via mu01 `172.31.11.100`), 2x A800 each, 6 GPUs total.
+- Default training access: mu01 jump `linyongjia@172.31.11.100:12222`, then `ssh -p 12222 gpu12` or `gpu14`.
+- Default training nodes: gpu12 (`172.31.11.112`) and gpu14 (`172.31.11.114`), 2x A800 each; gpu08 (`172.31.11.108`) is Slurm-gated/historical.
 - Remote code path: `/share/home/linyongjia/conda-pi/openpi`
 - Remote datasets: `/share/home/linyongjia/data/`; legacy docs may mention `/share/home/linyongjia/datasets/`.
 - Remote checkpoints/output: `/share/home/linyongjia/output/openpi`
@@ -16,7 +16,7 @@ New sessions: read `AGENTS.md` + this file first, then `context_index.md` to sel
 - Default entry: `scripts/train.py` (JAX), `scripts/train_pytorch.py` (PyTorch)
 - Multi-node JAX training requires early env init: `JAX_COORDINATOR_ADDRESS`, coordinator `JAX_COORDINATOR_BIND_ADDRESS`, `JAX_NUM_PROCESSES`, `JAX_PROCESS_ID`; only process 0 writes wandb/metrics.
 - Model checkpoints (GCS): `gs://openpi-assets/checkpoints/` (pi0_base, pi05_base, pi0_fast_base, etc.)
-- Default pipeline: choose gpu08/gpu12/gpu14 -> dataset under remote data root -> `local/<alias>` symlink -> norm stats -> training -> offline evaluation.
+- Default pipeline: choose gpu12/gpu14 -> dataset under remote data root -> `local/<alias>` symlink -> norm stats -> training -> offline evaluation.
 - `norm_stats.json` must exist under `assets/<config>/local/<alias>/` before training.
 - OpenPI does not auto-read LeRobot `info.json` splits; set `DataConfig.train_episodes` explicitly when a split matters.
 

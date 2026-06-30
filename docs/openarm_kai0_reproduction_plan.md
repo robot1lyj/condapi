@@ -14,16 +14,16 @@ Stage Advantage 标注和 AWBC 训练
 
 ## 0. 实时进度看板
 
-最后更新：2026-06-30 14:40 CST
+最后更新：2026-06-30 14:47 CST
 
 ### 0.1 Agent 状态
 
 | Agent | 当前状态 | 最近进展 | 下一步 | 证据/产物 |
 |---|---|---|---|---|
 | A - HQ Baseline 真机推理 | 进行中 | `gpu25:6666` 已重启；本机 WebSocket 通信和延迟测试通过，稳定端到端约 130ms | 用 OpenArm 客户端连 `ws://172.31.11.125:6666` 做真实 baseline | 日志 `/share/home/linyongjia/output/openpi/logs/serve/openarm_hq_gpu25_6666.log` |
-| B - 客户端 TDA Chunk 平滑 | 等待回写 | 多 Agent 已开始工作，当前文档尚未收到实现状态 | 回填 `fifo/tda_smooth` 设计、测试状态、分支/提交 | 待填 |
+| B - 客户端 TDA Chunk 平滑 | 已完成客户端实现 | OpenArm 客户端已支持 `fifo/tda_smooth`，默认仍为 FIFO；OpenPI 入口默认连 `ws://172.31.11.125:6666` | 等现场 OpenArm 真机 A/B 验证 baseline vs TDA smooth | OpenArm commit `a78b52c`；工控机 targeted build/test 通过 |
 | C - HQ 数据增强和重训 | 进行中 | 已新增 OpenArm 16D 增强脚本和 `pi05_openarms_dual_hq_tda_aug` 配置；gpu28 环境/数据集已确认 | 在 gpu28 生成增强数据集，随后重算 norm stats | `scripts/augment_openarm_hq_tda.py`, `pi05_openarms_dual_hq_tda_aug` |
-| D - Recovery / Heuristic DAgger 采集格式 | 等待回写 | 多 Agent 已开始工作，当前文档尚未收到字段审计结果 | 回填样例 episode、字段列表、缺失字段 | 待填 |
+| D - Recovery / Heuristic DAgger 采集格式 | 进行中 | 已在 OpenArm 客户端侧新增 optional HIL mux/record/inspect，fake HDF5 episode 字段闭环通过 | 跑工控机 targeted build/test，提交后再做真实短 episode | OpenArm `openarm_hil_rl`；`openarm_hil_raw_hdf5_v3` |
 | E - Stage Advantage 标注和训练方案 | 等待回写 | 多 Agent 已开始工作，当前文档尚未收到 stage schema 版本 | 回填 stage schema、标注格式、首批标注计划 | 待填 |
 
 ### 0.2 当前 HQ 推理服务
@@ -354,8 +354,9 @@ dry-run 日志
 - [x] 已新增 OpenArm 16D 专用增强脚本：`scripts/augment_openarm_hq_tda.py`。
 - [x] 视频增强默认使用 conda env 内的 ffmpeg：`/share/home/linyongjia/miniconda3/envs/pi-conda/bin/ffmpeg`，会先实测 NVENC；gpu28 上 NVENC encoder 实际不可用，因此全量运行需显式 `--video-encoder libx264 --no-require-gpu-video --use-gpu-decode`，尽量保留 CUDA 解码，编码不可避免走 CPU。
 - [x] 已新增训练配置：`pi05_openarms_dual_hq_tda_aug`，目标数据集为 `/share/home/linyongjia/datasets/openarm_hq_tda_aug_v1`，默认从 HQ `99999/params` warm start。
-- [ ] 增强数据集生成中：建议在 gpu28 tmux 中运行，完成后检查 `manifest.yaml`、`augment_report.json`、三路视频数量和 16D shape。
-- [ ] `norm_stats.json` 待增强完成后重新计算。
+- [x] 已在 gpu28 tmux 启动全量增强：`openarm_tda_aug_20260630`，日志为 `/share/home/linyongjia/output/openpi/logs/openarm_tda_aug/augment_20260630_gpu28.log`。
+- [ ] 增强数据集生成中：parquet 已生成 2298 个；视频目标数量为 6894 个，完成后检查 `manifest.yaml`、`augment_report.json`、三路视频数量和 16D shape。
+- [ ] `norm_stats.json` 待增强完成后重新计算；训练配置会从数据集目录 `/share/home/linyongjia/datasets/openarm_hq_tda_aug_v1/norm_stats.json` 读取。
 - [ ] smoke train / full train 待 `norm_stats.json` 完成后启动。
 
 推荐 gpu28 运行命令：
@@ -859,6 +860,27 @@ AWBC finetuned
 才有必要评估 KAI0 的 Model Arithmetic。单个任务、单个 checkpoint 阶段不需要模型路由。
 
 ## 9. 进度日志
+
+### 2026-06-30 14:47 CST - Agent D - HIL/DAgger 客户端字段补丁
+
+状态：进行中。
+
+已完成：
+
+- 不改 OpenPI 服务端，只在 OpenArm 客户端侧新增 optional HIL/DAgger 入口。
+- `openarm_remote_policy` 新增可选 runtime trace topic，记录 `infer_ms`、`queue_size`、`remote_fetch_count`、`drop_count`、`blend_length` 和 `max_abs_action_delta`。
+- 新增 `openarm_hil_rl`：
+  - `openarm-hil-mux`: policy/human candidate 单点 mux 到 `/openarm/joint_target`。
+  - `openarm-hil-record`: 写 `openarm_hil_raw_hdf5_v3`。
+  - `openarm-hil-inspect`: 校验 DAgger/recovery 必需字段。
+- 新增 `start_real_hil_dagger_openpi.sh`，支持 `--openpi-mode fifo|tda_smooth`。
+- 本地 fake 测试生成并 inspect 临时 HDF5 episode，确认 policy/human/executed、intervention、checkpoint/prompt 和 runtime 字段存在。
+
+下一步：
+
+- 在 OpenArm 工控机容器跑 targeted build/test。
+- 提交 OpenArm 客户端改造。
+- 真机短 episode 需要现场停止当前推理后再协调运行。
 
 ### 2026-06-30 14:12 CST - Agent A - HQ policy server 启动
 

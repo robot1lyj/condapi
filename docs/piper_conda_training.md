@@ -13,6 +13,9 @@
 `/share/home/linyongjia/data`，训练时使用 `local/<alias>` 指向具体版本目录；旧文档中的
 `/share/home/linyongjia/datasets` 属于兼容路径。
 
+当前训练入口为 `linyongjia@172.31.11.100:12222` (`mu01`)，再二跳到 `gpu12` 或 `gpu14`。
+`gpu08` 是 Slurm 受限历史节点，不作为默认训练入口。
+
 ## 1. 目录和脚本
 
 本分支新增了这几份文件：
@@ -58,7 +61,7 @@ artifacts/pi-conda-offline-bundle/
 
 ```bash
 tar -C artifacts -cf pi-conda-offline-bundle.tar pi-conda-offline-bundle
-scp -P 12222 pi-conda-offline-bundle.tar linyongjia@172.31.11.108:/share/home/linyongjia/
+scp -P 12222 pi-conda-offline-bundle.tar linyongjia@172.31.11.100:/share/home/linyongjia/
 ```
 
 ## 3. 服务器离线安装
@@ -67,6 +70,8 @@ scp -P 12222 pi-conda-offline-bundle.tar linyongjia@172.31.11.108:/share/home/li
 `/share/home/linyongjia/conda-pi/openpi`
 
 ```bash
+ssh -p 12222 linyongjia@172.31.11.100
+ssh -p 12222 gpu12
 cd /share/home/linyongjia
 tar -xf pi-conda-offline-bundle.tar
 cd /share/home/linyongjia/conda-pi/openpi
