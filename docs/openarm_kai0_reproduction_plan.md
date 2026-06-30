@@ -6,7 +6,7 @@
 
 ## 0. 当前结论
 
-最后更新：2026-06-30 15:28 CST
+最后更新：2026-06-30 15:42 CST
 
 ### 0.1 本轮决策
 
@@ -59,7 +59,7 @@ server infer_ms: about 86-100ms
 | B. 客户端 TDA smooth | 阶段完成 | `tda_smooth` 真机可运行；急停链路可用 | 相机对齐后做 FIFO vs TDA A/B | OpenArm commit `cab9865`；IPC tmux `openpi_estop_test` |
 | C. TDA 数据增强/重训 | 进行中 | gpu28 正在生成 `openarm_hq_tda_aug_v1`；15:28 检查为 parquet 2298、video 5011/6894、report 未生成 | 等增强完成，检查 manifest/report/16D，重算 norm stats，做 smoke/probe；不直接开纯增强 88k | `/share/home/linyongjia/output/openpi/logs/openarm_tda_aug/augment_20260630_gpu28.log` |
 | D. HIL / DAgger 采集格式 | 客户端补丁完成 | HIL mux/record/inspect 已在工控机 targeted build/test 通过 | 停当前推理后录 1 条真实短 episode 并 inspect | OpenArm commit `232af15`；`openarm_hil_raw_hdf5_v3` |
-| E. Stage Advantage | 待启动 v1 | 需要先定 OpenArm stage schema 和 sidecar 标注格式 | 标注 20-50 条 HQ 成功 episode，生成 `stage_progress_gt` smoke 数据 | 待产出 |
+| E. Stage Advantage | 待启动 v1 | 计划中的 5 阶段是 OpenArm 诊断拆分；SA v1 改为论文 Task A 对齐的 2 阶段：flatten / fold | 做轻量三路视频标注工具；先标 20-50 条成功 episode，生成 `stage_progress_gt` smoke 数据 | KAI0 Stage Advantage README |
 | F. Model Arithmetic | 暂缓 | 需要多个互补 checkpoint 后再评估 | 等 HQ/TDA/Recovery/AWBC 至少两个模型可比较后再开 | KAI0 `model_arithmetic/README.md` |
 | G. 现场数据集 v1 | P0，立即启动 | 如果现场相机/布局长期不同，约 200 条现场数据是必要投入 | 先采 20 条 smoke 验格式，再扩到 180 train + 20 holdout | 待产出 |
 
@@ -386,23 +386,30 @@ Step 3: discretize advantage into task_index / tasks.jsonl
 Step 4: AWBC training
 ```
 
-OpenArm v1 stage taxonomy：
+OpenArm SA v1 stage taxonomy：
 
 | stage_id | 名称 | 判定标准 |
 |---:|---|---|
-| 0 | approach_grasp | 双臂接近衣物并建立有效抓取 |
-| 1 | spread_flatten | 展开或拉平衣物，减少皱折 |
-| 2 | align | 对齐关键边缘或折叠线 |
-| 3 | fold | 执行主要折叠动作 |
-| 4 | release_finish | 放置、松爪、结束姿态稳定 |
+| 0 | flatten | 从 episode 起点到衣物被展开/拉平/对齐，已经进入可折叠状态 |
+| 1 | fold | 从第一次明确折叠动作开始，到松爪和最终状态稳定 |
 
-如果现场任务视频阶段边界不稳定，可先降级为 3 阶段：
+说明：
 
 ```text
-grasp -> fold -> finish
+此前文档中的 5 阶段 approach_grasp / spread_flatten / align / fold / release_finish
+是 OpenArm 诊断拆分，不是 KAI0 论文的固定 Stage Advantage taxonomy。
+
+SA v1 训练只使用 2 阶段，和 KAI0 Task A flatten-fold 思路对齐。
+5 个细粒度事件可以作为可选诊断标签保留，但不要写入第一版 stage_progress_gt。
 ```
 
-但 schema 一旦进入训练数据，不要频繁改。
+如果后续发现 2 阶段在 OpenArm 上不足，再升级为 3 阶段：
+
+```text
+grasp_flatten -> align -> fold_finish
+```
+
+但第一版不要直接上 5 阶段；阶段越多，人工边界越难一致，Advantage Estimator 的监督也更容易噪。
 
 推荐先用 sidecar JSONL，不直接手改 parquet：
 
@@ -414,11 +421,14 @@ grasp -> fold -> finish
   "task": "fold the cloth",
   "quality": "success",
   "stage_boundaries": [
-    {"stage_id": 0, "start_frame": 0, "end_frame": 85},
-    {"stage_id": 1, "start_frame": 86, "end_frame": 180},
-    {"stage_id": 2, "start_frame": 181, "end_frame": 240},
-    {"stage_id": 3, "start_frame": 241, "end_frame": 330},
-    {"stage_id": 4, "start_frame": 331, "end_frame": 380}
+    {"stage_id": 0, "name": "flatten", "start_frame": 0, "end_frame": 180},
+    {"stage_id": 1, "name": "fold", "start_frame": 181, "end_frame": 380}
+  ],
+  "events": [
+    {"name": "first_contact", "frame": 42},
+    {"name": "flatten_done", "frame": 180},
+    {"name": "fold_start", "frame": 181},
+    {"name": "release", "frame": 350}
   ],
   "notes": ""
 }
@@ -441,11 +451,22 @@ monotonic: true within an episode
 失败 episode: 先用于分析，不混入 AWBC 正样本
 ```
 
+标注工具要求：
+
+```text
+三路视频同步显示：base / left_wrist / right_wrist
+按键标注：start、flatten_done、fold_start、end、quality、notes
+输出 sidecar JSONL，不直接改 parquet
+自动校验：start <= flatten_done < fold_start <= end
+自动生成 stage_progress_gt，并抽样回放检查
+```
+
 验收：
 
 ```text
 stage_schema.md
 annotation sidecar JSONL
+轻量标注工具或脚本
 stage_progress_gt 转换脚本或转换报告
 至少 20 条 episode smoke 标注
 stage_progress_gt 单调且范围 [0,1]
@@ -653,6 +674,27 @@ test output summary
 ```
 
 ## 8. 历史日志
+
+### 2026-06-30 15:42 CST - Plan Owner - 修正 Stage Advantage v1 阶段划分
+
+状态：完成。
+
+已完成：
+
+- 明确此前 5 阶段划分是 OpenArm 诊断拆分，不是 KAI0 论文原始 Stage Advantage taxonomy。
+- 将 SA v1 训练阶段改为论文 Task A 思路对齐的 2 阶段：`flatten` 和 `fold`。
+- 保留 `first_contact`、`flatten_done`、`fold_start`、`release` 等细粒度事件作为诊断标签，但不进入第一版 `stage_progress_gt`。
+- 增加轻量标注工具要求：三路视频同步、按键标边界、输出 sidecar JSONL、自动校验和自动生成 `stage_progress_gt`。
+
+判断：
+
+- 第一版 SA 不应直接使用 5 阶段。阶段越细，人工标注一致性越差，Advantage Estimator 的监督噪声越高。
+- 对 OpenArm 折叠任务，先用 2 阶段足够跑通 KAI0 的 Stage Advantage 闭环；后续只有在 2 阶段无法区分关键失败模式时，再升级为 3 阶段。
+
+下一步：
+
+- 做一个轻量三路视频标注工具，先标 20-50 条成功 episode。
+- 从 sidecar JSONL 生成 parquet 里的 `stage_progress_gt`，并用脚本验证单调性和范围。
 
 ### 2026-06-30 15:28 CST - Plan Owner - 下一步执行决策
 
