@@ -14,15 +14,15 @@ Stage Advantage 标注和 AWBC 训练
 
 ## 0. 实时进度看板
 
-最后更新：2026-06-30 14:12 CST
+最后更新：2026-06-30 14:40 CST
 
 ### 0.1 Agent 状态
 
 | Agent | 当前状态 | 最近进展 | 下一步 | 证据/产物 |
 |---|---|---|---|---|
-| A - HQ Baseline 真机推理 | 进行中 | 已在 `gpu25` 启动 HQ policy server，health 和 dry-run 推理通过 | 用 OpenArm 客户端连 `ws://172.31.11.125:6666` 做真实 baseline | 日志 `/share/home/linyongjia/output/openpi/logs/serve/openarm_hq_gpu25_6666.log` |
+| A - HQ Baseline 真机推理 | 进行中 | `gpu25:6666` 已重启；本机 WebSocket 通信和延迟测试通过，稳定端到端约 130ms | 用 OpenArm 客户端连 `ws://172.31.11.125:6666` 做真实 baseline | 日志 `/share/home/linyongjia/output/openpi/logs/serve/openarm_hq_gpu25_6666.log` |
 | B - 客户端 TDA Chunk 平滑 | 等待回写 | 多 Agent 已开始工作，当前文档尚未收到实现状态 | 回填 `fifo/tda_smooth` 设计、测试状态、分支/提交 | 待填 |
-| C - HQ 数据增强和重训 | 等待回写 | 多 Agent 已开始工作，当前文档尚未收到数据增强状态 | 回填数据集审计、增强脚本、norm stats、训练状态 | 待填 |
+| C - HQ 数据增强和重训 | 进行中 | 已新增 OpenArm 16D 增强脚本和 `pi05_openarms_dual_hq_tda_aug` 配置；gpu28 环境/数据集已确认 | 在 gpu28 生成增强数据集，随后重算 norm stats | `scripts/augment_openarm_hq_tda.py`, `pi05_openarms_dual_hq_tda_aug` |
 | D - Recovery / Heuristic DAgger 采集格式 | 等待回写 | 多 Agent 已开始工作，当前文档尚未收到字段审计结果 | 回填样例 episode、字段列表、缺失字段 | 待填 |
 | E - Stage Advantage 标注和训练方案 | 等待回写 | 多 Agent 已开始工作，当前文档尚未收到 stage schema 版本 | 回填 stage schema、标注格式、首批标注计划 | 待填 |
 
@@ -36,7 +36,7 @@ port: 6666
 server_uri: ws://172.31.11.125:6666
 config: pi05_openarms_dual_hq
 checkpoint: /share/home/linyongjia/output/openpi/pi05_openarms_dual_hq/openarms_hq_bs32/99999
-pid: 547844
+pid: 887483
 log: /share/home/linyongjia/output/openpi/logs/serve/openarm_hq_gpu25_6666.log
 ```
 
@@ -48,10 +48,12 @@ listen: 0.0.0.0:6666
 GPU memory: about 69GB / 80GB
 metadata: {'action_horizon': 50, 'action_dim': 32, 'rtc_mode': 'off'}
 dry-run actual output: actions shape = (50, 16)
-first dry-run latency: 38.7s
+local websocket connect: 0.0084s
+local stable latency: mean 0.1333s, median 0.1331s, min 0.1299s, max 0.1387s
+server infer_ms: about 86-100ms
 ```
 
-注意：metadata 里的 `action_dim=32` 是模型内部动作维度；经过 OpenArm output transform 后，实际返回给客户端的 `actions` 是 `(50, 16)`。当前 baseline 可以先使用；后续做 RTC/TDA metadata 严格校验时需要把 metadata 修成 16，避免客户端误判。
+注意：metadata 里的 `action_dim=32` 是模型内部动作维度；经过 OpenArm output transform 后，实际返回给客户端的 `actions` 是 `(50, 16)`。当前 baseline 可以先使用；后续做 RTC/TDA metadata 严格校验时需要把 metadata 修成 16，避免客户端误判。若服务冷启动后第一个请求触发 JAX 编译，普通 `websockets` 默认 ping timeout 可能断开；本地延迟测试已使用 `ping_interval=None` 规避该问题，稳定推理阶段没有超时。
 
 ### 0.3 进度更新规则
 
@@ -344,6 +346,39 @@ dry-run 日志
 ```
 
 ### Agent C - HQ 数据增强和重训
+
+进度（2026-06-30）：
+
+- [x] 已确认 gpu28 可经 mu01 进入，节点为 2x A800 80GB。
+- [x] 已确认服务器存在 HQ v2.1 数据集：`/share/home/linyongjia/datasets/high_quality_folding`，当前 split 为 `train=0:999`, `val=999:1199`。
+- [x] 已新增 OpenArm 16D 专用增强脚本：`scripts/augment_openarm_hq_tda.py`。
+- [x] 视频增强默认使用 conda env 内的 ffmpeg：`/share/home/linyongjia/miniconda3/envs/pi-conda/bin/ffmpeg`，会先实测 NVENC；gpu28 上 NVENC encoder 实际不可用，因此全量运行需显式 `--video-encoder libx264 --no-require-gpu-video --use-gpu-decode`，尽量保留 CUDA 解码，编码不可避免走 CPU。
+- [x] 已新增训练配置：`pi05_openarms_dual_hq_tda_aug`，目标数据集为 `/share/home/linyongjia/datasets/openarm_hq_tda_aug_v1`，默认从 HQ `99999/params` warm start。
+- [ ] 增强数据集生成中：建议在 gpu28 tmux 中运行，完成后检查 `manifest.yaml`、`augment_report.json`、三路视频数量和 16D shape。
+- [ ] `norm_stats.json` 待增强完成后重新计算。
+- [ ] smoke train / full train 待 `norm_stats.json` 完成后启动。
+
+推荐 gpu28 运行命令：
+
+```bash
+ssh -p 12222 linyongjia@172.31.11.100
+ssh -p 12222 gpu28
+cd /share/home/linyongjia/conda-pi/openpi
+tmux new -s openarm_tda_aug
+export HF_HUB_OFFLINE=1 HUGGINGFACE_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 HF_DATASETS_OFFLINE=1
+export OPENPI_DATA_HOME=/share/home/linyongjia/.cache/openpi
+/share/home/linyongjia/miniconda3/bin/conda run -n pi-conda python scripts/augment_openarm_hq_tda.py \
+  --src /share/home/linyongjia/datasets/high_quality_folding \
+  --dst /share/home/linyongjia/datasets/openarm_hq_tda_aug_v1 \
+  --source-split train \
+  --time-split-ratio 0.3 \
+  --extraction-factor 2 \
+  --video-encoder libx264 \
+  --no-require-gpu-video \
+  --use-gpu-decode \
+  --gpu-ids 0,1 \
+  --num-video-workers 4
+```
 
 #### 目标
 
@@ -857,3 +892,46 @@ pid: 547844
 - OpenArm 客户端连接 `ws://172.31.11.125:6666`，做真实 baseline。
 - 记录真实客户端 latency、action range、publish rate 和是否抖动。
 - 后续修正 metadata action_dim，供 TDA/RTC 严格校验使用。
+
+### 2026-06-30 14:40 CST - Agent A - gpu25 推理服务重启与本地延迟测试
+
+状态：进行中。
+
+已完成：
+
+- 管理员放开 `gpu25:6666` 后，停止旧服务并重新启动同一 HQ checkpoint。
+- 当前服务监听 `0.0.0.0:6666`，本机可直接访问 `http://172.31.11.125:6666/healthz`，返回 `OK`。
+- 本机构造 OpenArm payload：
+  - `observation.images.base`: `uint8[224,224,3]`
+  - `observation.images.left_wrist`: `uint8[224,224,3]`
+  - `observation.images.right_wrist`: `uint8[224,224,3]`
+  - `observation.state`: `float32[16]`
+  - `prompt`: `fold the cloth`
+- 本机 WebSocket 握手成功，metadata 为 `{'action_horizon': 50, 'action_dim': 32, 'rtc_mode': 'off'}`。
+- 推理返回 `actions (50, 16)`。
+
+延迟结果：
+
+```text
+connect: 0.0084s
+warmup: 0.1401s
+timed_1: 0.1299s
+timed_2: 0.1387s
+timed_3: 0.1331s
+timed_4: 0.1331s
+timed_5: 0.1316s
+mean: 0.1333s
+median: 0.1331s
+min/max: 0.1299s / 0.1387s
+server_infer_ms: about 86-100ms
+```
+
+观察：
+
+- 默认 `openpi_client.WebsocketClientPolicy` 在首次冷编译阶段可能被 `websockets` ping timeout 断开；自定义测试客户端关闭 `ping_interval/ping_timeout` 后通信稳定。
+- 当前服务已完成编译缓存，后续本机稳定推理约 130ms 端到端。
+
+下一步：
+
+- OpenArm 工控机客户端直接连接 `ws://172.31.11.125:6666` 进行真实 baseline。
+- 如客户端冷启动首次请求仍遇到 ping timeout，应在 OpenArm `WebsocketPolicyClient` 里显式设置 `ping_interval=None` 或增大 `ping_timeout`。
