@@ -57,7 +57,7 @@ server infer_ms: about 86-100ms
 |---|---|---|---|---|
 | A. HQ baseline 真机推理 | 阶段完成，视觉分布阻塞 | `ws://172.31.11.125:6666` 已跑通；机械臂起身正常；抓取失败指向主摄像头分布偏移 | 做主摄像头分布审计；对齐后复测 FIFO baseline | `/tmp/openarm_remote_policy_20260630_150301.log` |
 | B. 客户端 TDA smooth | 阶段完成 | `tda_smooth` 真机可运行；急停链路可用 | 相机对齐后做 FIFO vs TDA A/B | OpenArm commit `cab9865`；IPC tmux `openpi_estop_test` |
-| C. TDA 数据增强/重训 | 进行中 | gpu28 正在生成 `openarm_hq_tda_aug_v1`；15:28 检查为 parquet 2298、video 5011/6894、report 未生成 | 等增强完成，检查 manifest/report/16D，重算 norm stats，做 smoke/probe；不直接开纯增强 88k | `/share/home/linyongjia/output/openpi/logs/openarm_tda_aug/augment_20260630_gpu28.log` |
+| C. TDA 数据增强/重训 | 增强完成，待 norm/smoke | `openarm_hq_tda_aug_v1` 已生成并验收通过：parquet 2298、mp4 6894、约 62G；16D、time-scaling、mirror 互换和抽样视频帧数检查通过 | 重算 norm stats，做 smoke/probe；不直接开纯增强 88k | `/share/home/linyongjia/datasets/openarm_hq_tda_aug_v1` |
 | D. HIL / DAgger 采集格式 | 客户端补丁完成 | HIL mux/record/inspect 已在工控机 targeted build/test 通过 | 停当前推理后录 1 条真实短 episode 并 inspect | OpenArm commit `232af15`；`openarm_hil_raw_hdf5_v3` |
 | E. Stage Advantage | 待启动 v1 | 计划中的 5 阶段是 OpenArm 诊断拆分；SA v1 改为论文 Task A 对齐的 2 阶段：flatten / fold | 做轻量三路视频标注工具；先标 20-50 条成功 episode，生成 `stage_progress_gt` smoke 数据 | KAI0 Stage Advantage README |
 | F. Model Arithmetic | 暂缓 | 需要多个互补 checkpoint 后再评估 | 等 HQ/TDA/Recovery/AWBC 至少两个模型可比较后再开 | KAI0 `model_arithmetic/README.md` |
@@ -967,7 +967,7 @@ pid: 547844
 
 ### 2026-06-30 - Agent C - HQ TDA 增强进度
 
-状态：进行中。
+状态：增强数据集生成完成；norm stats 和 smoke train 待做。
 
 已完成：
 
@@ -1001,17 +1001,28 @@ warm start: HQ 99999/params
 --use-gpu-decode
 ```
 
-- 已在 gpu28 tmux 启动全量增强：
+- 已在 gpu28 tmux 完成全量增强：
 
 ```text
 tmux: openarm_tda_aug_20260630
 log: /share/home/linyongjia/output/openpi/logs/openarm_tda_aug/augment_20260630_gpu28.log
 parquet_done: 2298
-video_target: 6894
+video_done: 6894
+dataset_size: about 62G
+```
+
+- 验收已通过：
+
+```text
+meta/episodes.jsonl: 2298 lines
+meta/episodes_stats.jsonl: 2298 lines
+videos per camera: 2298
+sample ffprobe: video frames match parquet rows for original/time-scaled/mirror/last episodes
+sample parquet: state/action are 16D
+sample mirror: right/left 8D swap is correct for state/action
 ```
 
 下一步：
 
-- 增强完成后检查 `manifest.yaml`、`augment_report.json`、三路视频数量和 16D shape。
 - 重新生成 `norm_stats.json`。
 - smoke train 通过后再决定 full train 是否直接 88000 steps，或先合入当前相机分布数据。
