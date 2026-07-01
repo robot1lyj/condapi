@@ -464,3 +464,132 @@ class PI0Pytorch(nn.Module):
         suffix_out = suffix_out[:, -self.config.action_horizon :]
         suffix_out = suffix_out.to(dtype=torch.float32)
         return self.action_out_proj(suffix_out)
+
+
+class AdvantageEstimator(PI0Pytorch):
+    """PI0/PI05 backbone with a scalar Stage Advantage value head."""
+
+    def __init__(self, config):
+        super().__init__(config)
+        self.loss_action_weight = getattr(config, "loss_action_weight", 1.0)
+        self.loss_value_weight = getattr(config, "loss_value_weight", 1.0)
+
+        action_expert_config = _gemma.get_config(config.action_expert_variant)
+        self.value_head = nn.Sequential(
+            nn.Linear(action_expert_config.width, action_expert_config.width),
+            nn.SiLU(),
+            nn.Linear(action_expert_config.width, action_expert_config.width),
+            nn.SiLU(),
+            nn.Linear(action_expert_config.width, 1),
+            nn.Tanh(),
+        )
+
+    def _preprocess_observation(self, observation, *, train=True, return_full_obs=False):
+        observation = _preprocessing.preprocess_observation_pytorch_custom(
+            observation,
+            train=train,
+            return_full_obs=return_full_obs,
+            apply_aug=False,
+        )
+        full_obs = (
+            list(observation.images.values()),
+            list(observation.image_masks.values()),
+            observation.tokenized_prompt,
+            observation.tokenized_prompt_mask,
+            observation.state,
+            observation,
+        )
+        return full_obs if return_full_obs else full_obs[:-1]
+
+    def forward(self, observation, actions, noise=None, time=None) -> Tensor:
+        images, img_masks, lang_tokens, lang_masks, state, obs_full = self._preprocess_observation(
+            observation, train=self.training, return_full_obs=True
+        )
+        if obs_full.progress is None:
+            raise ValueError("AdvantageEstimator requires observation.progress labels.")
+
+        if noise is None:
+            noise = self.sample_noise(actions.shape, actions.device)
+        if time is None:
+            time = self.sample_time(actions.shape[0], actions.device)
+
+        time_expanded = time[:, None, None]
+        x_t = time_expanded * noise + (1 - time_expanded) * actions
+        u_t = noise - actions
+
+        prefix_embs, prefix_pad_masks, prefix_att_masks = self.embed_prefix(images, img_masks, lang_tokens, lang_masks)
+        suffix_embs, suffix_pad_masks, suffix_att_masks, adarms_cond = self.embed_suffix(state, x_t, time)
+        if (
+            self.paligemma_with_expert.paligemma.language_model.layers[0].self_attn.q_proj.weight.dtype
+            == torch.bfloat16
+        ):
+            suffix_embs = suffix_embs.to(dtype=torch.bfloat16)
+            prefix_embs = prefix_embs.to(dtype=torch.bfloat16)
+
+        pad_masks = torch.cat([prefix_pad_masks, suffix_pad_masks], dim=1)
+        att_masks = torch.cat([prefix_att_masks, suffix_att_masks], dim=1)
+
+        att_2d_masks = make_att_2d_masks(pad_masks, att_masks)
+        position_ids = torch.cumsum(pad_masks, dim=1) - 1
+        att_2d_masks_4d = self._prepare_attention_masks_4d(att_2d_masks)
+
+        def forward_func(prefix_embs, suffix_embs, att_2d_masks_4d, position_ids, adarms_cond):
+            (_, suffix_out), _ = self.paligemma_with_expert.forward(
+                attention_mask=att_2d_masks_4d,
+                position_ids=position_ids,
+                past_key_values=None,
+                inputs_embeds=[prefix_embs, suffix_embs],
+                use_cache=False,
+                adarms_cond=[None, adarms_cond],
+            )
+            return suffix_out
+
+        suffix_out_full = self._apply_checkpoint(
+            forward_func, prefix_embs, suffix_embs, att_2d_masks_4d, position_ids, adarms_cond
+        )
+
+        suffix_out_actions = suffix_out_full[:, -self.config.action_horizon :].to(dtype=torch.float32)
+        v_t = self._apply_checkpoint(self.action_out_proj, suffix_out_actions)
+
+        action_loss = F.mse_loss(u_t, v_t, reduction="none").mean(dim=-1) * self.loss_action_weight
+
+        value_rep = suffix_out_full[:, 0, :].to(dtype=torch.float32)
+        value_pred = self.value_head(value_rep)
+        progress_target = torch.clamp(obs_full.progress.float(), -1.0, 1.0).unsqueeze(1)
+        value_loss = F.mse_loss(value_pred, progress_target, reduction="none") * self.loss_value_weight
+
+        return action_loss + value_loss
+
+    @torch.no_grad()
+    def sample_values(self, device, observation) -> Tensor:
+        images, img_masks, lang_tokens, lang_masks, state = self._preprocess_observation(observation, train=False)
+        batch_size = state.shape[0]
+        actions_shape = (batch_size, self.config.action_horizon, self.config.action_dim)
+        noise_action = self.sample_noise(actions_shape, device)
+        time = self.sample_time(batch_size, device)
+
+        prefix_embs, prefix_pad_masks, prefix_att_masks = self.embed_prefix(images, img_masks, lang_tokens, lang_masks)
+        suffix_embs, suffix_pad_masks, suffix_att_masks, adarms_cond = self.embed_suffix(state, noise_action, time)
+        if (
+            self.paligemma_with_expert.paligemma.language_model.layers[0].self_attn.q_proj.weight.dtype
+            == torch.bfloat16
+        ):
+            suffix_embs = suffix_embs.to(dtype=torch.bfloat16)
+            prefix_embs = prefix_embs.to(dtype=torch.bfloat16)
+
+        pad_masks = torch.cat([prefix_pad_masks, suffix_pad_masks], dim=1)
+        att_masks = torch.cat([prefix_att_masks, suffix_att_masks], dim=1)
+        att_2d_masks = make_att_2d_masks(pad_masks, att_masks)
+        position_ids = torch.cumsum(pad_masks, dim=1) - 1
+        att_2d_masks_4d = self._prepare_attention_masks_4d(att_2d_masks)
+
+        (_, suffix_out), _ = self.paligemma_with_expert.forward(
+            attention_mask=att_2d_masks_4d,
+            position_ids=position_ids,
+            past_key_values=None,
+            inputs_embeds=[prefix_embs, suffix_embs],
+            use_cache=False,
+            adarms_cond=[None, adarms_cond],
+        )
+        value_rep = suffix_out[:, 0, :].to(dtype=torch.float32)
+        return self.value_head(value_rep)

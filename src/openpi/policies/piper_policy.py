@@ -71,7 +71,17 @@ class PiperInputs(transforms.DataTransformFn):
             "right_wrist_0_rgb": np.True_ if right_exists else np.False_,
         }
         if self.model_type == _model.ModelType.PI0_FAST:
-            image_mask = {key: np.True_ for key in image_mask}
+            image_mask = dict.fromkeys(image_mask, np.True_)
+
+        history_image_keys = {
+            "base_-100_rgb": f"his_-100_{self.base_image_key}",
+            "left_wrist_-100_rgb": f"his_-100_{self.left_wrist_image_key}",
+            "right_wrist_-100_rgb": f"his_-100_{self.right_wrist_image_key}",
+        }
+        for output_key, input_key in history_image_keys.items():
+            if input_key in data:
+                images[output_key] = _parse_image(data[input_key])
+                image_mask[output_key] = np.True_
 
         inputs = {
             "state": state,
@@ -87,6 +97,10 @@ class PiperInputs(transforms.DataTransformFn):
 
         if self.prompt_key in data:
             inputs["prompt"] = data[self.prompt_key]
+
+        for key in ("episode_index", "frame_index", "episode_length", "stage_progress_gt", "progress"):
+            if key in data:
+                inputs[key] = data[key]
 
         return inputs
 

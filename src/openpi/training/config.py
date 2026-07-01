@@ -395,23 +395,33 @@ class LeRobotPiperDataConfig(DataConfigFactory):
     action_style: str = "relative"
     swap_left_right: bool = False
     default_prompt: str | None = None
+    include_advantage_fields: bool = False
 
     @override
     def create(self, assets_dirs: pathlib.Path, model_config: _model.BaseModelConfig) -> DataConfig:
-        repack_transform = _transforms.Group(
-            inputs=[
-                _transforms.RepackTransform(
-                    {
-                        self.base_image_key: self.base_image_key,
-                        self.left_wrist_image_key: self.left_wrist_image_key,
-                        self.right_wrist_image_key: self.right_wrist_image_key,
-                        self.state_key: self.state_key,
-                        self.action_key: self.action_key,
-                        self.prompt_key: self.prompt_key,
-                    }
-                )
-            ]
-        )
+        repack_structure = {
+            self.base_image_key: self.base_image_key,
+            self.left_wrist_image_key: self.left_wrist_image_key,
+            self.right_wrist_image_key: self.right_wrist_image_key,
+            self.state_key: self.state_key,
+            self.action_key: self.action_key,
+            self.prompt_key: self.prompt_key,
+        }
+        if self.include_advantage_fields:
+            repack_structure.update(
+                {
+                    f"his_-100_{self.base_image_key}": f"his_-100_{self.base_image_key}",
+                    f"his_-100_{self.left_wrist_image_key}": f"his_-100_{self.left_wrist_image_key}",
+                    f"his_-100_{self.right_wrist_image_key}": f"his_-100_{self.right_wrist_image_key}",
+                    "episode_length": "episode_length",
+                    "frame_index": "frame_index",
+                    "episode_index": "episode_index",
+                    "stage_progress_gt": "stage_progress_gt",
+                    "progress": "progress",
+                }
+            )
+
+        repack_transform = _transforms.Group(inputs=[_transforms.RepackTransform(repack_structure)])
 
         data_transforms = _transforms.Group(
             inputs=[
@@ -587,6 +597,11 @@ class TrainConfig:
 
     # Precision for PyTorch training.
     pytorch_training_precision: Literal["bfloat16", "float32"] = "bfloat16"
+
+    # If true, train the PyTorch Stage Advantage estimator instead of the policy head.
+    advantage_estimator: bool = False
+    # If true, bypass OpenPI norm stats. KAI0 Stage Advantage training uses raw labels and skips stats.
+    skip_norm_stats: bool = False
 
     lr_schedule: _optimizer.LRScheduleConfig = dataclasses.field(default_factory=_optimizer.CosineDecaySchedule)
     optimizer: _optimizer.OptimizerConfig = dataclasses.field(default_factory=_optimizer.AdamW)
@@ -967,6 +982,35 @@ _CONFIGS = [
         log_interval=20,
         wandb_enabled=True,
         num_train_steps=88_000,
+    ),
+    TrainConfig(
+        name="ADVANTAGE_TORCH_OPENARM_FLATTEN_FOLD",
+        advantage_estimator=True,
+        skip_norm_stats=True,
+        model=pi0_config.AdvantageEstimatorConfig(
+            pi05=True,
+            discrete_state_input=False,
+            loss_action_weight=0.0,
+            loss_value_weight=1.0,
+        ),
+        data=LeRobotPiperDataConfig(
+            repo_id="/share/home/linyongjia/data/high_quality_folding_v2p1_stage_train180",
+            base_config=DataConfig(prompt_from_task=True),
+            base_image_key="observation.images.base",
+            robot_action_dim=16,
+            delta_action_mask=_transforms.make_bool_mask(7, -1, 7, -1),
+            use_delta_joint_actions=True,
+            action_style="relative",
+            swap_left_right=False,
+            include_advantage_fields=True,
+        ),
+        log_interval=20,
+        save_interval=1000,
+        keep_period=5000,
+        wandb_enabled=True,
+        num_train_steps=20_000,
+        num_workers=4,
+        batch_size=16,
     ),
     #
     # Fine-tuning Aloha configs.

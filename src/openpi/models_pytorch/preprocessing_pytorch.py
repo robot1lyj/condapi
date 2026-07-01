@@ -171,3 +171,42 @@ def preprocess_observation_pytorch(
         token_ar_mask=observation.token_ar_mask,
         token_loss_mask=observation.token_loss_mask,
     )
+
+
+def _stage_image_sort_key(key: str) -> tuple[int, int, str]:
+    camera_order = {"base": 0, "left_wrist": 1, "right_wrist": 2}
+    try:
+        camera, timestep, _ = key.rsplit("_", 2)
+        return int(timestep), camera_order.get(camera, 99), key
+    except ValueError:
+        return 0, 99, key
+
+
+def preprocess_observation_pytorch_custom(
+    observation,
+    *,
+    train: bool = False,
+    image_keys: Sequence[str] | None = None,
+    image_resolution: tuple[int, int] = IMAGE_RESOLUTION,
+    return_full_obs: bool = False,
+    apply_aug: bool = True,
+):
+    """Preprocess all observation images and preserve Stage Advantage labels."""
+    if image_keys is None:
+        image_keys = sorted(observation.images.keys(), key=_stage_image_sort_key)
+
+    processed = preprocess_observation_pytorch(
+        observation,
+        train=train and apply_aug,
+        image_keys=image_keys,
+        image_resolution=image_resolution,
+    )
+
+    if return_full_obs:
+        processed.episode_index = getattr(observation, "episode_index", None)
+        processed.frame_index = getattr(observation, "frame_index", None)
+        processed.episode_length = getattr(observation, "episode_length", None)
+        processed.stage_progress_gt = getattr(observation, "stage_progress_gt", None)
+        processed.progress = getattr(observation, "progress", None)
+
+    return processed

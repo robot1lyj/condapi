@@ -59,7 +59,7 @@ server infer_ms: about 86-100ms
 | B. 客户端 TDA smooth | 阶段完成 | `tda_smooth` 真机可运行；急停链路可用 | 相机对齐后做 FIFO vs TDA A/B | OpenArm commit `cab9865`；IPC tmux `openpi_estop_test` |
 | C. TDA 数据增强/重训 | norm/smoke 完成，ready 等现场数据/策略决策 | `openarm_hq_tda_aug_v1` 已生成并验收通过：parquet 2298、mp4 6894、约 62G；16D、time-scaling、mirror 互换和抽样视频帧数检查通过；`norm_stats.json` 与 tiny smoke checkpoint 已产出 | 暂不直接开纯增强 88k；等现场数据集 v1 冻结后决定 TDA-only probe 或 `hq_tda_site_v1` | `/share/home/linyongjia/datasets/openarm_hq_tda_aug_v1`；`openarm_hq_tda_aug_smoke_tiny_20260630/2` |
 | D. HIL / DAgger 采集格式 | 客户端补丁完成 | HIL mux/record/inspect 已在工控机 targeted build/test 通过 | 停当前推理后录 1 条真实短 episode 并 inspect | OpenArm commit `232af15`；`openarm_hil_raw_hdf5_v3` |
-| E. Stage Advantage | 已标 20 条，待写回 smoke | 计划中的 5 阶段是 OpenArm 诊断拆分；SA v1 改为论文 Task A 对齐的 2 阶段：flatten / fold；精修 HQ 子集只需人工点一次 `flatten_done` | 继续按单点模式扩标；20 条 dry-run 通过后可写回 `stage_progress_gt` 做 smoke | `scripts/openarm_stage_annotator.py`；`/home/lyj/storage1t/datasets/high_quality_folding_v2p1_200` |
+| E. Stage Advantage | 训练中 | 200 条已完成单点标注并写回 `stage_progress_gt`；按离散抽样留出 20 条验证，180 条训练；KAI0 AdvantageEstimator 已移植到 OpenPI 并在 gpu28 2 卡启动 | 等 step1000 checkpoint；随后对 val20 做 stage progress / pairwise advantage 评估，再进入 advantage 预测与 AWBC 数据离散化 | `ADVANTAGE_TORCH_OPENARM_FLATTEN_FOLD`；gpu28 tmux `openarm_stage_v1_20260701` |
 | F. Model Arithmetic | 暂缓 | 需要多个互补 checkpoint 后再评估 | 等 HQ/TDA/Recovery/AWBC 至少两个模型可比较后再开 | KAI0 `model_arithmetic/README.md` |
 | G. 现场数据集 v1 | P0，立即启动 | 如果现场相机/布局长期不同，约 200 条现场数据是必要投入 | 先采 20 条 smoke 验格式，再扩到 180 train + 20 holdout | 待产出 |
 
@@ -523,9 +523,21 @@ episodes: 200
 frames: 470491
 parquet: 200
 videos: 600
-split: train 0:180, val 180:200
+split: train180 / val20, val uses discrete holdout episodes 9,19,...,199 from original 200 episodes
 camera keys: observation.images.base / observation.images.left_wrist / observation.images.right_wrist
 state/action: 16D
+```
+
+当前训练/验证子集：
+
+```text
+train: /home/lyj/storage1t/datasets/high_quality_folding_v2p1_stage_train180
+val:   /home/lyj/storage1t/datasets/high_quality_folding_v2p1_stage_val20
+remote train: /share/home/linyongjia/data/high_quality_folding_v2p1_stage_train180
+remote val:   /share/home/linyongjia/data/high_quality_folding_v2p1_stage_val20
+train episodes: 180, frames: 417933
+val episodes: 20, frames: 52558
+val selection: every 10th original episode's last item, [9, 19, ..., 199]
 ```
 
 本地标注命令：
@@ -555,6 +567,18 @@ conda run -n lerobot-pi0 python scripts/openarm_stage_progress.py \
 ```text
 stage_progress_gt: float32[1]
 stage_id: int64[1]
+```
+
+当前 Stage Advantage 训练配置：
+
+```text
+config: ADVANTAGE_TORCH_OPENARM_FLATTEN_FOLD
+model: AdvantageEstimatorConfig(pi05=True, discrete_state_input=False)
+loss: loss_action_weight=0.0, loss_value_weight=1.0
+init: /share/home/linyongjia/data/pi05_base/model.safetensors
+input images: base/left_wrist/right_wrist current frame + same-episode random history frame
+label: progress = current stage_progress_gt - history stage_progress_gt
+skip_norm_stats: true, matching KAI0 Stage Advantage recipe
 ```
 
 环境说明：
@@ -765,6 +789,46 @@ test output summary
 ```
 
 ## 8. 历史日志
+
+### 2026-07-01 11:19 CST - Agent E - Stage Advantage 200 条训练启动
+
+状态：训练中。
+
+已完成：
+
+- 200 条 OpenArm HQ 子集标注已完成，并用 `--quality all` 写回 `stage_progress_gt` / `stage_id`。
+- 离散抽出 20 条验证集，验证集为原始 200 条中的 `[9, 19, ..., 199]`；其余 180 条作为训练集。
+- 训练/验证子集已同步到 gpu28。
+- 将 KAI0 Stage Advantage 最小训练链路移植到当前 OpenPI：
+  - `AdvantageLeRobotDataset`
+  - `AdvantageEstimatorConfig`
+  - `AdvantageEstimator(PI0Pytorch)`
+  - `ADVANTAGE_TORCH_OPENARM_FLATTEN_FOLD`
+- gpu28 远端 1 batch 数据链路通过，输入包含当前三相机 + 同 episode 随机历史三相机，`progress` 标签可进入模型。
+- gpu28 1 step smoke 通过，`/share/home/linyongjia/data/pi05_base/model.safetensors` 可用作初始化。
+- gpu28 两卡 DDP 正式训练已启动。
+
+证据：
+
+```text
+train dataset local: /home/lyj/storage1t/datasets/high_quality_folding_v2p1_stage_train180
+val dataset local: /home/lyj/storage1t/datasets/high_quality_folding_v2p1_stage_val20
+train dataset remote: /share/home/linyongjia/data/high_quality_folding_v2p1_stage_train180
+val dataset remote: /share/home/linyongjia/data/high_quality_folding_v2p1_stage_val20
+config: ADVANTAGE_TORCH_OPENARM_FLATTEN_FOLD
+tmux: gpu28 openarm_stage_v1_20260701
+log: /share/home/linyongjia/output/openpi/logs/ADVANTAGE_TORCH_OPENARM_FLATTEN_FOLD/openarm_stage_v1_train180_20260701.log
+checkpoint dir: /share/home/linyongjia/output/openpi/ADVANTAGE_TORCH_OPENARM_FLATTEN_FOLD/openarm_stage_v1_train180_20260701
+launch: torchrun --nproc_per_node=2, batch_size=16, num_train_steps=20000
+observed speed: about 3.1 sec/step after warmup, ETA about 17 hours
+observed memory: about 34GB / 80GB per A800 after warmup
+```
+
+下一步：
+
+- 等 step1000 checkpoint 产出。
+- 用 val20 做 Stage Advantage v1 评估：`stage_progress_gt` 拟合、pairwise progress sign accuracy、按 episode 的进度曲线平滑性。
+- 评估通过后进入 KAI0 Step 2/3：预测 advantage，离散化到 AWBC 所需任务标签。
 
 ### 2026-06-30 20:54 CST - Agent E - Stage Advantage 改为单点标注
 

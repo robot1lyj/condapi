@@ -137,7 +137,12 @@ def set_seed(seed: int, local_rank: int):
 
 def build_datasets(config: _config.TrainConfig):
     # Use the unified data loader with PyTorch framework
-    data_loader = _data.create_data_loader(config, framework="pytorch", shuffle=True)
+    data_loader = _data.create_data_loader(
+        config,
+        framework="pytorch",
+        shuffle=True,
+        skip_norm_stats=config.skip_norm_stats,
+    )
     return data_loader, data_loader.data_config()
 
 
@@ -372,10 +377,20 @@ def train_loop(config: _config.TrainConfig):
     # Pass the original batch size to data loader - it will handle DDP splitting internally
     loader, data_config = build_datasets(config)
 
+    if config.advantage_estimator:
+        if not isinstance(config.model, openpi.models.pi0_config.AdvantageEstimatorConfig):
+            raise TypeError("config.model must be AdvantageEstimatorConfig when advantage_estimator=True")
+        logging.info("Training mode: Stage Advantage estimator")
+
     # Log sample images to wandb on first batch
     if is_main and config.wandb_enabled and not resuming:
         # Create a separate data loader for sample batch to avoid consuming the main loader
-        sample_data_loader = _data.create_data_loader(config, framework="pytorch", shuffle=False)
+        sample_data_loader = _data.create_data_loader(
+            config,
+            framework="pytorch",
+            shuffle=False,
+            skip_norm_stats=config.skip_norm_stats,
+        )
         sample_batch = next(iter(sample_data_loader))
         # Convert observation and actions to torch tensors
         observation, actions = sample_batch
@@ -420,7 +435,10 @@ def train_loop(config: _config.TrainConfig):
         # Update dtype to match pytorch_training_precision
         object.__setattr__(model_cfg, "dtype", config.pytorch_training_precision)
 
-    model = openpi.models_pytorch.pi0_pytorch.PI0Pytorch(model_cfg).to(device)
+    if config.advantage_estimator:
+        model = openpi.models_pytorch.pi0_pytorch.AdvantageEstimator(model_cfg).to(device)
+    else:
+        model = openpi.models_pytorch.pi0_pytorch.PI0Pytorch(model_cfg).to(device)
 
     if hasattr(model, "gradient_checkpointing_enable"):
         enable_gradient_checkpointing = True
@@ -458,7 +476,9 @@ def train_loop(config: _config.TrainConfig):
 
         model_path = os.path.join(config.pytorch_weight_path, "model.safetensors")
         safetensors.torch.load_model(
-            (model.module if isinstance(model, torch.nn.parallel.DistributedDataParallel) else model), model_path
+            (model.module if isinstance(model, torch.nn.parallel.DistributedDataParallel) else model),
+            model_path,
+            strict=not config.advantage_estimator,
         )
         logging.info(f"Loaded PyTorch weights from {config.pytorch_weight_path}")
 
