@@ -6,7 +6,7 @@
 
 ## 0. 当前结论
 
-最后更新：2026-07-01 12:06 CST
+最后更新：2026-07-01 19:06 CST
 
 ### 0.1 本轮决策
 
@@ -18,6 +18,7 @@
 6. Stage Advantage 现在可以启动 schema 和小批量标注，不等重训完成；AWBC 训练必须等 `stage_progress_gt` 和 advantage 数据链路闭环后再做。
 7. Model Arithmetic 暂缓。它是多个 checkpoint 的权重空间合并，不是运行时模型路由；单任务、单模型阶段收益不高。
 8. 2026-06-30 15:28 的执行决策：现在不三选一，而是两条主线并行。现场数据集 v1 立刻启动采集；TDA 增强完成后只做数据校验、norm stats、smoke/probe train，不直接开纯增强 88k full train。
+9. `openarms_folding_v001` / `openarms_folding_v002` 不是现场数据集 v1；不要把这些既有 OpenArms 折叠数据目录当作 site 数据或 `site_v1_ft` 的输入。
 
 ### 0.2 活跃 HQ 推理服务
 
@@ -61,7 +62,7 @@ server infer_ms: about 86-100ms
 | D. HIL / DAgger 采集格式 | 客户端补丁完成 | HIL mux/record/inspect 已在工控机 targeted build/test 通过 | 停当前推理后录 1 条真实短 episode 并 inspect | OpenArm commit `232af15`；`openarm_hil_raw_hdf5_v3` |
 | E. Stage Advantage | 训练中 | 200 条已完成单点标注并写回 `stage_progress_gt`；按离散抽样留出 20 条验证，180 条训练；KAI0 AdvantageEstimator 已移植到 OpenPI；gpu28 2 卡正式 run 已改为 batch32、关闭梯度检查点，峰值约 67GB/卡 | 等 step1000 checkpoint；随后对 val20 做 stage progress / pairwise advantage 评估，再进入 advantage 预测与 AWBC 数据离散化 | `ADVANTAGE_TORCH_OPENARM_FLATTEN_FOLD`；gpu28 tmux `openarm_stage_v1_bs32_no_ckpt_20260701` |
 | F. Model Arithmetic | 暂缓 | 需要多个互补 checkpoint 后再评估 | 等 HQ/TDA/Recovery/AWBC 至少两个模型可比较后再开 | KAI0 `model_arithmetic/README.md` |
-| G. 现场数据集 v1 | P0，立即启动 | 如果现场相机/布局长期不同，约 200 条现场数据是必要投入 | 先采 20 条 smoke 验格式，再扩到 180 train + 20 holdout | 待产出 |
+| G. 现场数据集 v1 | P0，立即启动 | 如果现场相机/布局长期不同，约 200 条现场数据是必要投入；当前尚未登记现场数据集路径，`openarms_folding_v001/v002` 不属于现场数据集 v1 | 先采 20 条 smoke 验格式，再扩到 180 train + 20 holdout | 待产出 |
 
 ## 1. KAI0 对齐原则
 
@@ -210,6 +211,13 @@ camera_alignment_report 存在
 ### G. 现场数据集 v1 采集
 
 目标：如果现场相机型号、安装位、桌面布局和 HQ 数据集长期不同，就补一批当前现场分布数据，把模型训练分布拉到真实部署分布。
+
+命名澄清：
+
+```text
+openarms_folding_v001 / openarms_folding_v002: 既有 OpenArms 折叠数据，不是现场数据集 v1
+现场数据集 v1: 尚未登记冻结路径；冻结后必须使用单独、明确的 dataset_id/path
+```
 
 建议规模：
 
