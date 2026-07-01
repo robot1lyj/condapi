@@ -597,6 +597,8 @@ class TrainConfig:
 
     # Precision for PyTorch training.
     pytorch_training_precision: Literal["bfloat16", "float32"] = "bfloat16"
+    # If true, PyTorch models enable gradient checkpointing to reduce activation memory.
+    pytorch_gradient_checkpointing: bool = True
 
     # If true, train the PyTorch Stage Advantage estimator instead of the policy head.
     advantage_estimator: bool = False

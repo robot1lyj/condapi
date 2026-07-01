@@ -6,7 +6,7 @@
 
 ## 0. 当前结论
 
-最后更新：2026-06-30 20:54 CST
+最后更新：2026-07-01 12:06 CST
 
 ### 0.1 本轮决策
 
@@ -59,7 +59,7 @@ server infer_ms: about 86-100ms
 | B. 客户端 TDA smooth | 阶段完成 | `tda_smooth` 真机可运行；急停链路可用 | 相机对齐后做 FIFO vs TDA A/B | OpenArm commit `cab9865`；IPC tmux `openpi_estop_test` |
 | C. TDA 数据增强/重训 | norm/smoke 完成，ready 等现场数据/策略决策 | `openarm_hq_tda_aug_v1` 已生成并验收通过：parquet 2298、mp4 6894、约 62G；16D、time-scaling、mirror 互换和抽样视频帧数检查通过；`norm_stats.json` 与 tiny smoke checkpoint 已产出 | 暂不直接开纯增强 88k；等现场数据集 v1 冻结后决定 TDA-only probe 或 `hq_tda_site_v1` | `/share/home/linyongjia/datasets/openarm_hq_tda_aug_v1`；`openarm_hq_tda_aug_smoke_tiny_20260630/2` |
 | D. HIL / DAgger 采集格式 | 客户端补丁完成 | HIL mux/record/inspect 已在工控机 targeted build/test 通过 | 停当前推理后录 1 条真实短 episode 并 inspect | OpenArm commit `232af15`；`openarm_hil_raw_hdf5_v3` |
-| E. Stage Advantage | 训练中 | 200 条已完成单点标注并写回 `stage_progress_gt`；按离散抽样留出 20 条验证，180 条训练；KAI0 AdvantageEstimator 已移植到 OpenPI 并在 gpu28 2 卡启动 | 等 step1000 checkpoint；随后对 val20 做 stage progress / pairwise advantage 评估，再进入 advantage 预测与 AWBC 数据离散化 | `ADVANTAGE_TORCH_OPENARM_FLATTEN_FOLD`；gpu28 tmux `openarm_stage_v1_20260701` |
+| E. Stage Advantage | 训练中 | 200 条已完成单点标注并写回 `stage_progress_gt`；按离散抽样留出 20 条验证，180 条训练；KAI0 AdvantageEstimator 已移植到 OpenPI；gpu28 2 卡正式 run 已改为 batch32、关闭梯度检查点，峰值约 67GB/卡 | 等 step1000 checkpoint；随后对 val20 做 stage progress / pairwise advantage 评估，再进入 advantage 预测与 AWBC 数据离散化 | `ADVANTAGE_TORCH_OPENARM_FLATTEN_FOLD`；gpu28 tmux `openarm_stage_v1_bs32_no_ckpt_20260701` |
 | F. Model Arithmetic | 暂缓 | 需要多个互补 checkpoint 后再评估 | 等 HQ/TDA/Recovery/AWBC 至少两个模型可比较后再开 | KAI0 `model_arithmetic/README.md` |
 | G. 现场数据集 v1 | P0，立即启动 | 如果现场相机/布局长期不同，约 200 条现场数据是必要投入 | 先采 20 条 smoke 验格式，再扩到 180 train + 20 holdout | 待产出 |
 
@@ -581,6 +581,19 @@ label: progress = current stage_progress_gt - history stage_progress_gt
 skip_norm_stats: true, matching KAI0 Stage Advantage recipe
 ```
 
+当前远端正式训练：
+
+```text
+node: gpu28
+tmux: openarm_stage_v1_bs32_no_ckpt_20260701
+exp: openarm_stage_v1_train180_bs32_no_ckpt_10k_20260701
+log: /share/home/linyongjia/output/openpi/logs/ADVANTAGE_TORCH_OPENARM_FLATTEN_FOLD/openarm_stage_v1_train180_bs32_no_ckpt_10k_20260701.log
+checkpoint dir: /share/home/linyongjia/output/openpi/ADVANTAGE_TORCH_OPENARM_FLATTEN_FOLD/openarm_stage_v1_train180_bs32_no_ckpt_10k_20260701
+launch: torchrun --nproc_per_node=2, batch_size=32, num_train_steps=10000, pytorch_gradient_checkpointing=false
+observed memory: about 64.5GB nvidia-smi / 66.9GB torch reserved per A800
+observed stable speed: about 4.34 sec/step after warmup, ETA about 12 hours from 2026-07-01 12:06 CST
+```
+
 环境说明：
 
 ```text
@@ -789,6 +802,37 @@ test output summary
 ```
 
 ## 8. 历史日志
+
+### 2026-07-01 12:06 CST - Agent E - Stage Advantage batch 调参与正式训练重启
+
+状态：训练中。
+
+结论：
+
+- 原 `batch_size=16`、每卡 8、梯度检查点开启的 run 只占约 34GB/卡，稳定约 3.1 秒/步，20k steps ETA 约 17 小时，偏保守。
+- 新增 `TrainConfig.pytorch_gradient_checkpointing` 开关，默认保持开启；本次正式 run 显式传 `--no-pytorch-gradient-checkpointing`。
+- 短测结果：
+  - `batch32 + checkpoint`: 约 41GB/卡，约 5.35 秒/步，吞吐约 6.0 samples/s。
+  - `batch32 + no checkpoint`: 约 66.9GB/卡，约 4.6-5.0 秒/步，吞吐约 6.4-7.0 samples/s。
+  - `batch64 + checkpoint`: 约 55GB/卡，但 step20 窗口出现约 137.6 秒/10步，吞吐不优。
+- 正式训练改为 `batch_size=32`、`num_train_steps=10000`，样本数与旧 `batch16 x 20000` 同量级，优化后预计约 12 小时级别。
+
+证据：
+
+```text
+tmux: gpu28 openarm_stage_v1_bs32_no_ckpt_20260701
+log: /share/home/linyongjia/output/openpi/logs/ADVANTAGE_TORCH_OPENARM_FLATTEN_FOLD/openarm_stage_v1_train180_bs32_no_ckpt_10k_20260701.log
+checkpoint dir: /share/home/linyongjia/output/openpi/ADVANTAGE_TORCH_OPENARM_FLATTEN_FOLD/openarm_stage_v1_train180_bs32_no_ckpt_10k_20260701
+launch: torchrun --nproc_per_node=2, batch_size=32, num_train_steps=10000, --no-pytorch-gradient-checkpointing
+step20: loss=0.1695, lr=2.87e-07, grad_norm=0.52, log window time=86.2s
+observed GPU memory: about 64.5GB / 80GB per A800 by nvidia-smi, torch reserved peak about 66.9GB
+```
+
+下一步：
+
+- 等 step1000 checkpoint 产出。
+- 用 val20 做 Stage Advantage v1 评估：`stage_progress_gt` 拟合、pairwise progress sign accuracy、按 episode 的进度曲线平滑性。
+- 评估通过后进入 KAI0 Step 2/3：预测 advantage，离散化到 AWBC 所需任务标签。
 
 ### 2026-07-01 11:19 CST - Agent E - Stage Advantage 200 条训练启动
 
