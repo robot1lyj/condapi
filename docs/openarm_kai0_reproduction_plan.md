@@ -6,7 +6,7 @@
 
 ## 0. 当前结论
 
-最后更新：2026-07-02 14:40 CST
+最后更新：2026-07-02 15:50 CST
 
 ### 0.1 本轮决策
 
@@ -84,7 +84,7 @@ server infer_ms: about 86-100ms
 | Site 数据冻结准备 | 数据 Agent | 写/跑 schema 检查、episode 统计、三路视频抽帧审计、holdout split 规则 | `openarm_site_align_v1` 实际路径冻结 | 150 条时 130/20，200 条时 180/20；16D、camera keys、prompt 全通过 |
 | Site-only probe 配置 | 训练 Agent | 已新增 `pi05_openarms_dual_site_align_v1_probe`，从 HQ `99999` warm start；norm stats 命令见 5.3 | site 数据落盘 | 500-1000 step smoke + 小步 probe 可启动 |
 | HQ/TDA/site 合并 | 数据/训练 Agent | 已新增 `scripts/merge_openarm_lerobot_v21.py`；site 默认 repeat=5 实现约 5x 采样权重 | site split 冻结 | 产出 `openarm_hq_tda_site_v1`，重新生成 norm stats |
-| Stage Advantage -> AWBC | Stage Agent | TDA 源映射脚本已在 gpu14 通过 mixed3 smoke；旧增强数据已 metadata-only 补 `source_episode_index / augmentation_type` | 等 GPU 档期跑全量 TDA AWBC；site 数据可选 | `openarm_awbc_v1_smoke_mixed3` 已出现 positive/neutral/bad 标签；全量后再跑 AWBC train smoke |
+| Stage Advantage -> AWBC | Stage Agent | TDA 源映射脚本已在 gpu14 通过 mixed3 smoke；旧增强数据已 metadata-only 补 `source_episode_index / augmentation_type`；全量 TDA AWBC 已按 6 shard 在 gpu12/gpu14/gpu28 启动 | 等 6 shard 完成后合并为 `openarm_awbc_v1`，再重算 norm stats 和跑 AWBC train smoke；site 数据可选 | `openarm_awbc_v1_smoke_mixed3` 已出现 positive/neutral/bad 标签；全量日志在 `openarm_awbc_v1_shards/` |
 | 真实部署评估基线 | Eval Agent | 固定 FIFO/TDA A/B 记录模板、成功阶段统计、失败分类、相机 metadata | site probe checkpoint | 同一现场布局下 HQ vs site probe 可复测 |
 | HIL/Recovery 管线 | HIL Agent | 准备 `openarm_hil_recovery_v1` 命名、inspect、转换和字段验收 | 首批 policy-in-loop 接管 episode | policy/human/executed/intervention 字段齐全 |
 
@@ -909,6 +909,62 @@ test output summary
 ```
 
 ## 8. 历史日志
+
+### 2026-07-02 15:50 CST - Plan Owner - 全量 TDA AWBC 6 卡分片启动
+
+状态：运行中；等待 6 个 shard 完成。
+
+启动策略：
+
+```text
+目标: 构建 /share/home/linyongjia/datasets/openarm_awbc_v1
+临时输出: /share/home/linyongjia/datasets/openarm_awbc_v1_shards/
+预测缓存: /share/home/linyongjia/datasets/openarm_awbc_v1_source_cache/
+Stage checkpoint: /tmp/openarm_stage_10000_local/model.safetensors on each node
+batch_size: 128
+nodes: gpu12, gpu14, gpu28
+gpus: 6x A800
+```
+
+分片：
+
+```text
+shard_00: gpu12 GPU0, source 000-166, augmented 501 episodes, original/time/mirror = 167/167/167
+shard_01: gpu12 GPU1, source 167-333, augmented 467 episodes, original/time/mirror = 167/133/167
+shard_02: gpu14 GPU0, source 334-500, augmented 334 episodes, original/time/mirror = 167/0/167
+shard_03: gpu14 GPU1, source 501-666, augmented 332 episodes, original/time/mirror = 166/0/166
+shard_04: gpu28 GPU0, source 667-833, augmented 334 episodes, original/time/mirror = 167/0/167
+shard_05: gpu28 GPU1, source 834-998, augmented 330 episodes, original/time/mirror = 165/0/165
+```
+
+运行日志：
+
+```text
+/share/home/linyongjia/output/openpi/logs/openarm_awbc_v1_shards/shard_00_gpu12_gpu0.log
+/share/home/linyongjia/output/openpi/logs/openarm_awbc_v1_shards/shard_01_gpu12_gpu1.log
+/share/home/linyongjia/output/openpi/logs/openarm_awbc_v1_shards/shard_02_gpu14_gpu0.log
+/share/home/linyongjia/output/openpi/logs/openarm_awbc_v1_shards/shard_03_gpu14_gpu1.log
+/share/home/linyongjia/output/openpi/logs/openarm_awbc_v1_shards/shard_04_gpu28_gpu0.log
+/share/home/linyongjia/output/openpi/logs/openarm_awbc_v1_shards/shard_05_gpu28_gpu1.log
+```
+
+当前观察：
+
+```text
+batch64: stable, about 35.7GB/GPU, but slow.
+batch128: stable so far, about 63.7GB/GPU, no OOM observed, all 6 GPUs entered prediction.
+local checkpoint copy reduced shared-storage checkpoint-load bottleneck.
+```
+
+完成后操作：
+
+```text
+1. 校验 6 个 shard 的 awbc_mapping_build_report.json。
+2. 合并 shard 为 /share/home/linyongjia/datasets/openarm_awbc_v1。
+3. 校验 total_episodes=2298，advantage features 和 task_index 0/1/2 存在。
+4. 重新生成 norm_stats。
+5. 用 pi05_openarms_dual_awbc_v1 跑 500-1000 step train smoke。
+```
 
 ### 2026-07-02 14:40 CST - Plan Owner - TDA 源映射 AWBC smoke 通过
 
