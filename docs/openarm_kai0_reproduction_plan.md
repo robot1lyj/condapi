@@ -6,7 +6,7 @@
 
 ## 0. 当前结论
 
-最后更新：2026-07-02 11:05 CST
+最后更新：2026-07-02 11:35 CST
 
 ### 0.1 本轮决策
 
@@ -81,9 +81,9 @@ server infer_ms: about 86-100ms
 | 并行任务 | 负责人类型 | 现在能做什么 | 等待什么 | 验收 |
 |---|---|---|---|---|
 | Site 数据冻结准备 | 数据 Agent | 写/跑 schema 检查、episode 统计、三路视频抽帧审计、holdout split 规则 | `openarm_site_align_v1` 实际路径冻结 | 150 条时 130/20，200 条时 180/20；16D、camera keys、prompt 全通过 |
-| Site-only probe 配置 | 训练 Agent | 准备 `pi05_openarms_dual_site_align_v1` 配置，从 HQ `99999` warm start；准备 norm stats 命令 | site 数据落盘 | 500-1000 step smoke + 小步 probe 可启动 |
-| HQ/TDA/site 合并 | 数据/训练 Agent | 准备物理复制或 manifest 合并策略；site 过采样 4-6x，TDA 不压过 site | site split 冻结 | 产出 `openarm_hq_tda_site_v1`，重新生成 norm stats |
-| Stage Advantage -> AWBC | Stage Agent | 用 `10000` checkpoint 准备批量预测脚本、advantage 离散化规则、tasks.jsonl 生成 | site 数据可选；HQ/TDA 可先跑 dry-run | 出现 positive/neutral/bad 标签，AWBC smoke 可跑 |
+| Site-only probe 配置 | 训练 Agent | 已新增 `pi05_openarms_dual_site_align_v1_probe`，从 HQ `99999` warm start；norm stats 命令见 5.3 | site 数据落盘 | 500-1000 step smoke + 小步 probe 可启动 |
+| HQ/TDA/site 合并 | 数据/训练 Agent | 已新增 `scripts/merge_openarm_lerobot_v21.py`；site 默认 repeat=5 实现约 5x 采样权重 | site split 冻结 | 产出 `openarm_hq_tda_site_v1`，重新生成 norm stats |
+| Stage Advantage -> AWBC | Stage Agent | 已新增 `scripts/openarm_stage_advantage_awbc.py` 和 `pi05_openarms_dual_awbc_v1`；本地 dry-run/离散化 smoke 通过 | 全量预测需要远端 GPU；site 数据可选 | 出现 positive/neutral/bad 标签，AWBC smoke 可跑 |
 | 真实部署评估基线 | Eval Agent | 固定 FIFO/TDA A/B 记录模板、成功阶段统计、失败分类、相机 metadata | site probe checkpoint | 同一现场布局下 HQ vs site probe 可复测 |
 | HIL/Recovery 管线 | HIL Agent | 准备 `openarm_hil_recovery_v1` 命名、inspect、转换和字段验收 | 首批 policy-in-loop 接管 episode | policy/human/executed/intervention 字段齐全 |
 
@@ -776,6 +776,59 @@ unit: model side degree, robot side rad/gripper normalized
 6. 用 Stage Advantage `10000` checkpoint 对 HQ/TDA/site 批量预测 advantage，先 dry-run 离散化，再跑 AWBC smoke。
 7. HIL 接管数据到位后另开 `recovery_v1`，不要让尚未存在的 HIL 数据阻塞 site/TDA 主线。
 
+已落地入口：
+
+```text
+site probe config: pi05_openarms_dual_site_align_v1_probe
+merged train config: pi05_openarms_dual_hq_tda_site_v1
+awbc train config: pi05_openarms_dual_awbc_v1
+merge script: scripts/merge_openarm_lerobot_v21.py
+awbc script: scripts/openarm_stage_advantage_awbc.py
+```
+
+site 数据落盘后的第一组命令：
+
+```bash
+python scripts/compute_openarm_parquet_norm_stats.py \
+  --dataset /share/home/linyongjia/datasets/openarm_site_align_v1 \
+  --episodes 0:130
+
+XLA_PYTHON_CLIENT_MEM_FRACTION=0.9 \
+python scripts/train.py pi05_openarms_dual_site_align_v1_probe \
+  --exp-name openarm_site_v1_ft_probe_smoke \
+  --checkpoint-base-dir /share/home/linyongjia/output/openpi \
+  --num-train-steps 1000 \
+  --overwrite
+```
+
+site split 冻结后的合并数据命令：
+
+```bash
+python scripts/merge_openarm_lerobot_v21.py \
+  --dst /share/home/linyongjia/datasets/openarm_hq_tda_site_v1 \
+  --source hq,/share/home/linyongjia/datasets/high_quality_folding,0:999,1 \
+  --source tda,/share/home/linyongjia/datasets/openarm_hq_tda_aug_v1,0:2298,1 \
+  --source site,/share/home/linyongjia/datasets/openarm_site_align_v1,0:130,5 \
+  --copy-mode hardlink \
+  --overwrite
+
+python scripts/compute_openarm_parquet_norm_stats.py \
+  --dataset /share/home/linyongjia/datasets/openarm_hq_tda_site_v1
+```
+
+Stage Advantage / AWBC 先行 dry-run 命令：
+
+```bash
+python scripts/openarm_stage_advantage_awbc.py \
+  --src /share/home/linyongjia/datasets/openarm_hq_tda_aug_v1 \
+  --dst /share/home/linyongjia/datasets/openarm_awbc_v1 \
+  --checkpoint /share/home/linyongjia/output/openpi/ADVANTAGE_TORCH_OPENARM_FLATTEN_FOLD/openarm_stage_v1_train180_bs32_no_ckpt_10k_20260701/10000 \
+  --episodes 0:2 \
+  --dry-run
+```
+
+全量 AWBC 构建应在远端 GPU 上运行，先用 `--episodes 0:5` 做 smoke；通过后去掉 `--episodes` 或改用合并后的 `openarm_hq_tda_site_v1` 作为 `--src`。AWBC 数据集生成后必须重新跑 norm stats，再用 `pi05_openarms_dual_awbc_v1` 启动 500-1000 step smoke。
+
 验收：
 
 ```text
@@ -847,6 +900,39 @@ test output summary
 ```
 
 ## 8. 历史日志
+
+### 2026-07-02 11:35 CST - Training/Stage Agent - 训练配置与 AWBC dry-run 工具落地
+
+状态：完成本地实现和轻量验证，等待 site 数据落盘与远端 GPU 全量跑。
+
+已完成：
+
+- 新增 `pi05_openarms_dual_site_align_v1_probe`，从 HQ `99999` warm start，默认使用 site 前 130 集训练。
+- 新增 `pi05_openarms_dual_hq_tda_site_v1`，目标数据集为物化后的 `openarm_hq_tda_site_v1`。
+- 新增 `pi05_openarms_dual_awbc_v1`，目标数据集为 Stage Advantage 离散化后的 `openarm_awbc_v1`。
+- 新增 `scripts/merge_openarm_lerobot_v21.py`，支持 `name,path,episodes,repeat` 多源合并；site 可用 repeat=5 实现约 5x 采样权重。
+- 新增 `scripts/openarm_stage_advantage_awbc.py`，支持 Stage 10000 checkpoint 批量预测 `relative_advantage / absolute_value / absolute_advantage`，并离散为 `bad / neutral / positive` 三类 prompt。
+
+证据：
+
+```text
+ruff: conda run -n lerobot-pi0 ruff check scripts/merge_openarm_lerobot_v21.py scripts/openarm_stage_advantage_awbc.py src/openpi/training/config.py -> pass
+format: conda run -n lerobot-pi0 ruff format --check ... -> pass
+py_compile: scripts/merge_openarm_lerobot_v21.py scripts/openarm_stage_advantage_awbc.py src/openpi/training/config.py -> pass
+merge smoke: /tmp/openarm_merge_smoke, 4 episodes, 7416 frames, 12 videos
+awbc dry-run: local 200-subset episodes 0:2 -> pass
+awbc discretize smoke: bad=1, neutral=2, positive=2 on fake parquet
+```
+
+阻塞：
+
+- 本机没有完整 `pi-conda` OpenPI 环境，config import / Stage full prediction 需要远端 `pi-conda` 验证。
+- 现场数据仍在录制，不能启动最终 site probe/full train。
+
+下一步：
+
+- site 数据到位后先跑 130/20 split 验收和 `pi05_openarms_dual_site_align_v1_probe` 1000 step smoke。
+- 远端 GPU 上用 AWBC 脚本先跑 `openarm_hq_tda_aug_v1 --episodes 0:5`，确认全链路后再全量。
 
 ### 2026-07-02 11:05 CST - Plan Owner - KAI0 适配计划按 Stage/site 状态重排
 

@@ -986,6 +986,78 @@ _CONFIGS = [
         num_train_steps=88_000,
     ),
     TrainConfig(
+        name="pi05_openarms_dual_site_align_v1_probe",
+        model=pi0_config.Pi0Config(pi05=True, discrete_state_input=True),
+        data=LeRobotPiperDataConfig(
+            repo_id="/share/home/linyongjia/datasets/openarm_site_align_v1",
+            assets=AssetsConfig(
+                assets_dir="/share/home/linyongjia/datasets",
+                asset_id="openarm_site_align_v1",
+            ),
+            base_config=DataConfig(prompt_from_task=True, train_episodes=list(range(130))),
+            base_image_key="observation.images.base",
+            robot_action_dim=16,
+            delta_action_mask=_transforms.make_bool_mask(7, -1, 7, -1),
+            use_delta_joint_actions=True,
+            action_style="relative",
+            swap_left_right=False,
+        ),
+        weight_loader=weight_loaders.CheckpointWeightLoader(
+            "/share/home/linyongjia/output/openpi/pi05_openarms_dual_hq/openarms_hq_bs32/99999/params"
+        ),
+        log_interval=20,
+        wandb_enabled=True,
+        num_train_steps=5_000,
+    ),
+    TrainConfig(
+        name="pi05_openarms_dual_hq_tda_site_v1",
+        model=pi0_config.Pi0Config(pi05=True, discrete_state_input=True),
+        data=LeRobotPiperDataConfig(
+            repo_id="/share/home/linyongjia/datasets/openarm_hq_tda_site_v1",
+            assets=AssetsConfig(
+                assets_dir="/share/home/linyongjia/datasets",
+                asset_id="openarm_hq_tda_site_v1",
+            ),
+            base_config=DataConfig(prompt_from_task=True),
+            base_image_key="observation.images.base",
+            robot_action_dim=16,
+            delta_action_mask=_transforms.make_bool_mask(7, -1, 7, -1),
+            use_delta_joint_actions=True,
+            action_style="relative",
+            swap_left_right=False,
+        ),
+        weight_loader=weight_loaders.CheckpointWeightLoader(
+            "/share/home/linyongjia/output/openpi/pi05_openarms_dual_hq/openarms_hq_bs32/99999/params"
+        ),
+        log_interval=20,
+        wandb_enabled=True,
+        num_train_steps=88_000,
+    ),
+    TrainConfig(
+        name="pi05_openarms_dual_awbc_v1",
+        model=pi0_config.Pi0Config(pi05=True, discrete_state_input=True),
+        data=LeRobotPiperDataConfig(
+            repo_id="/share/home/linyongjia/datasets/openarm_awbc_v1",
+            assets=AssetsConfig(
+                assets_dir="/share/home/linyongjia/datasets",
+                asset_id="openarm_awbc_v1",
+            ),
+            base_config=DataConfig(prompt_from_task=True),
+            base_image_key="observation.images.base",
+            robot_action_dim=16,
+            delta_action_mask=_transforms.make_bool_mask(7, -1, 7, -1),
+            use_delta_joint_actions=True,
+            action_style="relative",
+            swap_left_right=False,
+        ),
+        weight_loader=weight_loaders.CheckpointWeightLoader(
+            "/share/home/linyongjia/output/openpi/pi05_openarms_dual_hq/openarms_hq_bs32/99999/params"
+        ),
+        log_interval=20,
+        wandb_enabled=True,
+        num_train_steps=88_000,
+    ),
+    TrainConfig(
         name="ADVANTAGE_TORCH_OPENARM_FLATTEN_FOLD",
         advantage_estimator=True,
         skip_norm_stats=True,
