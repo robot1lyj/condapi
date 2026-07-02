@@ -9,6 +9,7 @@ rewrites remain CPU-bound because pyarrow/pandas own that path.
 from __future__ import annotations
 
 import argparse
+from collections.abc import Iterable
 import concurrent.futures
 import datetime as dt
 import json
@@ -18,12 +19,10 @@ import pathlib
 import shutil
 import subprocess
 import sys
-from collections.abc import Iterable
 from typing import Any
 
 import numpy as np
 import pandas as pd
-
 
 VIDEO_KEYS = (
     "observation.images.base",
@@ -118,26 +117,23 @@ def _prepare_episode_dataframe(
     extraction_factor: int = 1,
     mirror: bool = False,
 ) -> pd.DataFrame:
-    df = pd.read_parquet(src_path)
-    if extraction_factor > 1:
-        df = df.iloc[::extraction_factor].copy()
-    else:
-        df = df.copy()
-    df.reset_index(drop=True, inplace=True)
+    episode_frame = pd.read_parquet(src_path)
+    episode_frame = episode_frame.iloc[::extraction_factor].copy() if extraction_factor > 1 else episode_frame.copy()
+    episode_frame = episode_frame.reset_index(drop=True)
 
     if mirror:
         for key in VECTOR_KEYS:
-            df[key] = df[key].map(_swap_openarm_16d)
+            episode_frame[key] = episode_frame[key].map(_swap_openarm_16d)
 
-    n_rows = len(df)
+    n_rows = len(episode_frame)
     frame_index = np.arange(n_rows, dtype=np.int64)
-    df["episode_index"] = np.full(n_rows, new_episode_index, dtype=np.int64)
-    df["frame_index"] = frame_index
-    df["index"] = np.arange(start_global_index, start_global_index + n_rows, dtype=np.int64)
-    df["timestamp"] = (frame_index / float(fps)).astype(np.float32)
-    if "task_index" in df.columns:
-        df["task_index"] = df["task_index"].astype(np.int64)
-    return df
+    episode_frame["episode_index"] = np.full(n_rows, new_episode_index, dtype=np.int64)
+    episode_frame["frame_index"] = frame_index
+    episode_frame["index"] = np.arange(start_global_index, start_global_index + n_rows, dtype=np.int64)
+    episode_frame["timestamp"] = (frame_index / float(fps)).astype(np.float32)
+    if "task_index" in episode_frame.columns:
+        episode_frame["task_index"] = episode_frame["task_index"].astype(np.int64)
+    return episode_frame
 
 
 def _numeric_stats_from_dataframe(df: pd.DataFrame) -> dict[str, dict[str, list[float] | list[int]]]:
@@ -246,7 +242,7 @@ def _select_encoder(
     return "libx264"
 
 
-def _build_filter(extraction_factor: int, hflip: bool, fps: int) -> str:
+def _build_filter(extraction_factor: int, fps: int, *, hflip: bool) -> str:
     filters: list[str] = []
     if extraction_factor > 1:
         filters.append(f"select='not(mod(n\\,{extraction_factor}))'")
@@ -278,7 +274,7 @@ def _run_video_job(job: dict[str, Any]) -> None:
             cmd += ["-hwaccel", "cuda", "-hwaccel_device", str(job["gpu_id"])]
         cmd += ["-i", str(src)]
 
-        video_filter = _build_filter(int(job["extraction_factor"]), bool(job["hflip"]), int(job["fps"]))
+        video_filter = _build_filter(int(job["extraction_factor"]), int(job["fps"]), hflip=bool(job["hflip"]))
         if video_filter:
             cmd += ["-vf", video_filter]
 
@@ -323,7 +319,7 @@ def _write_manifest(
         "format: lerobot_v2.1",
         "robot: openarm",
         "task: Fold the T-shirt properly",
-        f"created_at: {dt.datetime.now().isoformat(timespec='seconds')}",
+        f"created_at: {dt.datetime.now(dt.UTC).isoformat(timespec='seconds')}",
         f"source: {source}",
         f"source_split: {source_split}",
         "status: generated",
@@ -463,7 +459,7 @@ def main() -> None:
             length = int(source_episodes[src_ep]["length"])
             stats = source_stats[src_ep]
         else:
-            df = _prepare_episode_dataframe(
+            episode_frame = _prepare_episode_dataframe(
                 src_data,
                 new_episode_index=target_ep,
                 start_global_index=total_frames,
@@ -471,16 +467,22 @@ def main() -> None:
                 extraction_factor=extraction_factor,
                 mirror=mirror,
             )
-            length = len(df)
+            length = len(episode_frame)
             dst_data.parent.mkdir(parents=True, exist_ok=True)
-            df.to_parquet(dst_data, index=False)
-            stats = _episode_stats_for_transformed(df, source_stats[src_ep], mirror=mirror)
+            episode_frame.to_parquet(dst_data, index=False)
+            stats = _episode_stats_for_transformed(episode_frame, source_stats[src_ep], mirror=mirror)
 
         target_episodes.append(
             {
                 "episode_index": target_ep,
                 "tasks": source_episodes[src_ep].get("tasks", []),
                 "length": length,
+                "source_dataset": str(src),
+                "source_episode_index": src_ep,
+                "augmentation_type": operation,
+                "source_frame_stride": extraction_factor,
+                "source_frame_offset": 0,
+                "mirror": mirror,
             }
         )
         target_episode_stats.append({"episode_index": target_ep, "stats": stats})
@@ -576,6 +578,7 @@ def main() -> None:
             "source_episodes": len(source_episode_ids),
             "time_scaled_episodes": len(time_episode_ids),
             "mirrored_episodes": len(source_episode_ids),
+            "time_extraction_factor": args.extraction_factor,
             "total_episodes": len(target_episodes),
             "total_frames": total_frames,
             "ffmpeg": str(ffmpeg),
