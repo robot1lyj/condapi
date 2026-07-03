@@ -994,7 +994,7 @@ _CONFIGS = [
                 assets_dir="/share/home/linyongjia/datasets",
                 asset_id="openarm_site_align_v1",
             ),
-            base_config=DataConfig(prompt_from_task=True, train_episodes=list(range(130))),
+            base_config=DataConfig(prompt_from_task=True, train_episodes=list(range(90))),
             base_image_key="observation.images.base",
             robot_action_dim=16,
             delta_action_mask=_transforms.make_bool_mask(7, -1, 7, -1),
