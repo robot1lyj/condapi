@@ -6,7 +6,7 @@
 
 ## 0. 当前结论
 
-最后更新：2026-07-06 12:32 CST
+最后更新：2026-07-06 12:38 CST
 
 ### 0.1 本轮决策
 
@@ -886,7 +886,7 @@ num_train_steps: 1000
 warm_start: /share/home/linyongjia/output/openpi/pi05_openarms_dual_hq/openarms_hq_bs32/99999/params
 checkpoint_dir: /share/home/linyongjia/output/openpi/pi05_openarms_dual_site_align_v1_probe/openarm_site_v1_probe_151e_4gpu_1k_tol005_20260706
 metrics: /share/home/linyongjia/output/openpi/pi05_openarms_dual_site_align_v1_probe/openarm_site_v1_probe_151e_4gpu_1k_tol005_20260706/metrics/metrics.jsonl
-status at 2026-07-06 12:32 CST: running; step 40 logged; 4 GPUs about 73.7GB and 100% util
+status at 2026-07-06 12:38 CST: running; step 200 logged; loss 0.052418; 4 GPUs about 73.7GB and 100% util
 ```
 
 site split 冻结后的合并数据命令：
@@ -1017,7 +1017,7 @@ remote dataset: /share/home/linyongjia/datasets/openarm_site_align_v1
 smoke checkpoint: /share/home/linyongjia/output/openpi/pi05_openarms_dual_site_align_v1_probe/openarm_site_v1_probe_151e_4gpu_smoke3_20260706/1
 active checkpoint dir: /share/home/linyongjia/output/openpi/pi05_openarms_dual_site_align_v1_probe/openarm_site_v1_probe_151e_4gpu_1k_tol005_20260706
 metrics jsonl: /share/home/linyongjia/output/openpi/pi05_openarms_dual_site_align_v1_probe/openarm_site_v1_probe_151e_4gpu_1k_tol005_20260706/metrics/metrics.jsonl
-last checked metrics: step 40, loss 0.199733, grad_norm 2.473842
+last checked metrics: step 200, loss 0.052418, grad_norm 0.310440
 gpu usage: gpu12/gpu14 all 4 GPUs about 73.7GB, 100% util
 ```
 
