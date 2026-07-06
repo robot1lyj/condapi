@@ -7,6 +7,12 @@ Design decisions → `docs/decisions/`. Architecture → `docs/ARCHITECTURE.md`.
 
 ---
 
+## 2026-07-06
+
+- **OpenArm 现场数据集 v1 本地冻结**: `/storage1t/ipc` 中 7 批 raw HDF5 已合并转换为
+  `/storage1t/datasets/openarm_site_align_v1`，共 151 条、394900 帧、141/10 split；基础校验和 merge smoke
+  通过，远端 SSH 恢复后同步到训练服务器并生成 norm stats。
+
 ## 2026-07-03
 
 - **OpenArm 现场 HDF5 转 LeRobot v2.1 清洗入口**: 新增现场 raw HDF5 到 LeRobot v2.1 的转换脚本，
