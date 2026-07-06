@@ -11,13 +11,11 @@ from __future__ import annotations
 import argparse
 import json
 import pathlib
+from dataclasses import dataclass
 
 import numpy as np
 import pandas as pd
 import tqdm
-
-from openpi.shared import normalize as _normalize
-from openpi.transforms import make_bool_mask
 
 
 def _load_json(path: pathlib.Path) -> dict:
@@ -60,6 +58,128 @@ def _stack_column(values: pd.Series, *, expected_dim: int, key: str) -> np.ndarr
     return array
 
 
+def _make_bool_mask(*dims: int) -> np.ndarray:
+    mask: list[bool] = []
+    for dim in dims:
+        mask.extend([dim > 0] * abs(dim))
+    return np.asarray(mask, dtype=bool)
+
+
+@dataclass
+class _Stats:
+    mean: np.ndarray
+    std: np.ndarray
+    q01: np.ndarray
+    q99: np.ndarray
+
+    def to_json(self) -> dict[str, list[float]]:
+        return {
+            "mean": self.mean.tolist(),
+            "std": self.std.tolist(),
+            "q01": self.q01.tolist(),
+            "q99": self.q99.tolist(),
+        }
+
+
+class _RunningStats:
+    """OpenPI-compatible running stats without importing the full OpenPI stack."""
+
+    def __init__(self, *, bins: int = 5000):
+        self._bins = bins
+        self._count = 0
+        self._mean: np.ndarray | None = None
+        self._mean_of_squares: np.ndarray | None = None
+        self._min: np.ndarray | None = None
+        self._max: np.ndarray | None = None
+        self._histograms: list[np.ndarray] | None = None
+        self._bin_edges: list[np.ndarray] | None = None
+
+    def update(self, batch: np.ndarray) -> None:
+        batch = np.asarray(batch, dtype=np.float32).reshape(-1, batch.shape[-1])
+        num_elements, vector_length = batch.shape
+        if num_elements == 0:
+            return
+
+        if self._count == 0:
+            self._mean = np.mean(batch, axis=0)
+            self._mean_of_squares = np.mean(batch**2, axis=0)
+            self._min = np.min(batch, axis=0)
+            self._max = np.max(batch, axis=0)
+            self._histograms = [np.zeros(self._bins, dtype=np.float64) for _ in range(vector_length)]
+            self._bin_edges = [
+                np.linspace(self._min[i] - 1e-10, self._max[i] + 1e-10, self._bins + 1)
+                for i in range(vector_length)
+            ]
+        else:
+            assert self._mean is not None
+            assert self._mean_of_squares is not None
+            assert self._min is not None
+            assert self._max is not None
+            if vector_length != self._mean.size:
+                raise ValueError("The length of new vectors does not match the initialized vector length.")
+
+            new_max = np.max(batch, axis=0)
+            new_min = np.min(batch, axis=0)
+            max_changed = np.any(new_max > self._max)
+            min_changed = np.any(new_min < self._min)
+            self._max = np.maximum(self._max, new_max)
+            self._min = np.minimum(self._min, new_min)
+            if max_changed or min_changed:
+                self._adjust_histograms()
+
+        self._count += num_elements
+        assert self._mean is not None
+        assert self._mean_of_squares is not None
+        batch_mean = np.mean(batch, axis=0)
+        batch_mean_of_squares = np.mean(batch**2, axis=0)
+        self._mean += (batch_mean - self._mean) * (num_elements / self._count)
+        self._mean_of_squares += (batch_mean_of_squares - self._mean_of_squares) * (num_elements / self._count)
+        self._update_histograms(batch)
+
+    def get_statistics(self) -> _Stats:
+        if self._count < 2:
+            raise ValueError("Cannot compute statistics for less than 2 vectors.")
+
+        assert self._mean is not None
+        assert self._mean_of_squares is not None
+        variance = self._mean_of_squares - self._mean**2
+        std = np.sqrt(np.maximum(0, variance))
+        q01, q99 = self._compute_quantiles([0.01, 0.99])
+        return _Stats(mean=self._mean, std=std, q01=q01, q99=q99)
+
+    def _adjust_histograms(self) -> None:
+        assert self._histograms is not None
+        assert self._bin_edges is not None
+        assert self._min is not None
+        assert self._max is not None
+        for i, hist in enumerate(self._histograms):
+            old_edges = self._bin_edges[i]
+            new_edges = np.linspace(self._min[i], self._max[i], self._bins + 1)
+            self._histograms[i], _ = np.histogram(old_edges[:-1], bins=new_edges, weights=hist)
+            self._bin_edges[i] = new_edges
+
+    def _update_histograms(self, batch: np.ndarray) -> None:
+        assert self._histograms is not None
+        assert self._bin_edges is not None
+        for i in range(batch.shape[1]):
+            hist, _ = np.histogram(batch[:, i], bins=self._bin_edges[i])
+            self._histograms[i] += hist
+
+    def _compute_quantiles(self, quantiles: list[float]) -> list[np.ndarray]:
+        assert self._histograms is not None
+        assert self._bin_edges is not None
+        results = []
+        for quantile in quantiles:
+            target_count = quantile * self._count
+            values = []
+            for hist, edges in zip(self._histograms, self._bin_edges, strict=True):
+                cumulative = np.cumsum(hist)
+                idx = min(np.searchsorted(cumulative, target_count), len(edges) - 1)
+                values.append(edges[idx])
+            results.append(np.asarray(values))
+        return results
+
+
 def _relative_action_chunks(
     actions: np.ndarray,
     states: np.ndarray,
@@ -82,10 +202,10 @@ def compute_norm_stats(
     action_dim: int,
     episodes: list[int],
     max_frames: int | None,
-) -> dict[str, _normalize.NormStats]:
-    state_stats = _normalize.RunningStats()
-    action_stats = _normalize.RunningStats()
-    mask = np.asarray(make_bool_mask(7, -1, 7, -1))
+) -> dict[str, _Stats]:
+    state_stats = _RunningStats()
+    action_stats = _RunningStats()
+    mask = _make_bool_mask(7, -1, 7, -1)
 
     total_frames = 0
     info = _load_json(dataset_dir / "meta/info.json")
@@ -115,10 +235,7 @@ def compute_norm_stats(
         raise ValueError("No frames processed")
 
     print(f"Processed {total_frames} frames from {len(episodes)} candidate episodes")
-    return {
-        "state": state_stats.get_statistics(),
-        "actions": action_stats.get_statistics(),
-    }
+    return {"state": state_stats.get_statistics(), "actions": action_stats.get_statistics()}
 
 
 def main() -> None:
@@ -147,7 +264,10 @@ def main() -> None:
     )
 
     output_dir = args.output_dir.resolve() if args.output_dir is not None else dataset_dir
-    _normalize.save(output_dir, norm_stats)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    (output_dir / "norm_stats.json").write_text(
+        json.dumps({"norm_stats": {key: stats.to_json() for key, stats in norm_stats.items()}}, indent=2)
+    )
     print(f"Wrote {output_dir / 'norm_stats.json'}")
 
 

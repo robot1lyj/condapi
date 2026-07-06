@@ -6,13 +6,13 @@
 
 ## 0. 当前结论
 
-最后更新：2026-07-03 17:20 CST
+最后更新：2026-07-06 12:32 CST
 
 ### 0.1 本轮决策
 
 1. 当前第一优先级是修正 `P_test` 视觉分布，尤其是 `base` 主摄像头。第一轮真机显示机械臂起身到桌面阶段正常，失败集中在夹爪抓取定位，现场反馈指向主摄像头视角/安装位/画面分布与 HQ 数据集不一致。
 2. 在主摄像头分布未对齐前，不继续把时间花在 TDA 参数微调上。当前 TDA smooth 已能真实运行，继续调 chunk 参数不能解决抓取目标看错的问题。
-3. 现场对齐数据本地已冻结为 `openarm_site_align_v1`：`/storage1t/datasets/openarm_site_align_v1`，共 151 条，按 141 train + 10 holdout 启动 site probe；等训练服务器 SSH 恢复后同步到 `/share/home/linyongjia/datasets/openarm_site_align_v1`。
+3. 现场对齐数据已冻结并同步到服务器：本地 `/storage1t/datasets/openarm_site_align_v1`，远端 `/share/home/linyongjia/datasets/openarm_site_align_v1`，共 151 条，按 141 train + 10 holdout 启动 site probe。
 4. Stage Advantage v1 已完成，`10000` checkpoint 是当前最优：val20 / 800 paired-frame 上 MSE 0.00295、MAE 0.04340、方向准确率 96.75%、corr 0.9859、R2 0.9715。下一步不是继续训练 Stage，而是用它批量预测 advantage 并准备 AWBC。
 5. TDA 增强数据已可作为合并数据源，但不要直接开纯增强 88k full train。当前训练优先级是 `site_v1_ft_probe` -> `hq_tda_site_v1` -> `AWBC_v1`。
 6. Heuristic DAgger / Recovery 采集格式已经具备客户端基础，但当前还没有推理 HIL 接管数据。它不阻塞下一轮 site/TDA/AWBC 准备；有首批接管数据后再进入 recovery 分支。
@@ -20,6 +20,7 @@
 8. 2026-06-30 15:28 的执行决策：现在不三选一，而是两条主线并行。现场数据集 v1 立刻启动采集；TDA 增强完成后只做数据校验、norm stats、smoke/probe train，不直接开纯增强 88k full train。
 9. `openarms_folding_v001` / `openarms_folding_v002` 不是现场数据集 v1；不要把这些既有 OpenArms 折叠数据目录当作 site 数据或 `site_v1_ft` 的输入。
 10. TDA 增强集做 AWBC 时，不直接让 Stage 模型重看镜像/抽帧视频。正式路线是：Stage 只预测原始 HQ 源 episode，再通过 `source_episode_index`、`augmentation_type`、`source_frame_stride` 映射到增强 episode，降低增强视频越域导致的误打分风险。
+11. 现场数据 LeRobot/torchcodec 视频时间戳存在约 0.01s 的 PTS 网格偏差；`pi05_openarms_dual_site_align_v1_probe` 已显式设置 `lerobot_tolerance_s=0.05`，默认不影响其他数据集。
 
 ### 0.2 活跃 HQ 推理服务
 
@@ -63,7 +64,7 @@ server infer_ms: about 86-100ms
 | D. HIL / DAgger 采集格式 | 客户端补丁完成，暂无接管数据 | HIL mux/record/inspect 已在工控机 targeted build/test 通过；当前还没有推理 HIL 接管 episode | 先准备 inspect/转换和 recovery 数据命名；首批真实接管数据到位后再训练 recovery | OpenArm commit `232af15`；建议冻结名 `openarm_hil_recovery_v1` |
 | E. Stage Advantage | 已完成，可用于 AWBC | 200 条标注子集训练完成；`10000` checkpoint 当前最优，val20 上 MSE 0.00295、MAE 0.04340、sign 96.75%、corr 0.9859、R2 0.9715 | HQ/site 可直接批量预测；TDA 增强集用源 HQ 预测后映射；离散化为 AWBC 标签；保留 `4000/6000` 作备份对照 | checkpoint `/share/home/linyongjia/output/openpi/ADVANTAGE_TORCH_OPENARM_FLATTEN_FOLD/openarm_stage_v1_train180_bs32_no_ckpt_10k_20260701/10000`；eval JSON `openarm_stage_v1_step10000_val20_gpu12_b8x100.json` |
 | F. Model Arithmetic | 暂缓 | 需要多个互补 checkpoint 后再评估 | 等 HQ/TDA/Recovery/AWBC 至少两个模型可比较后再开 | KAI0 `model_arithmetic/README.md` |
-| G. 现场数据集 v1 | 本地已冻结 | `/storage1t/ipc` 已合并转换为 `/storage1t/datasets/openarm_site_align_v1`，151 条、394900 帧、141/10 split；校验 `pass` | 等 SSH 恢复后同步到服务器，生成 norm stats，跑 `site_v1_ft_probe` | `conversion_report.json`、`validation_report.json`；远端目标 `/share/home/linyongjia/datasets/openarm_site_align_v1` |
+| G. 现场数据集 v1 | 远端 probe 运行中 | `/storage1t/ipc` 已合并转换并同步到 `/share/home/linyongjia/datasets/openarm_site_align_v1`，151 条、394900 帧、141/10 split；远端 norm stats 和 episode stats 已生成；4 卡 smoke 通过，1k probe 正在 gpu12/gpu14 运行 | 等 1k probe 出 checkpoint 后做现场复测；随后构建 `hq_tda_site_v1` 合并数据 | local/remote dataset path；`openarm_site_v1_probe_151e_4gpu_smoke3_20260706/1`；`openarm_site_v1_probe_151e_4gpu_1k_tol005_20260706` metrics |
 
 ### 0.4 数据资产与用途
 
@@ -73,7 +74,7 @@ server infer_ms: about 86-100ms
 | HQ + TDA 增强 | `openarm_hq_tda_aug_v1` | 已生成，2298 集；旧数据需补源映射元数据 | 时间扰动、镜像、部署鲁棒性；用于 `hq_tda_site_v1`；AWBC 时从原始 HQ 打分后映射 | 不能替代现场对齐数据；不要直接把镜像/抽帧视频交给 Stage 模型重新打分 |
 | Stage 标注训练集 | `high_quality_folding_v2p1_stage_train180` | 已完成 | 只用于训练 Stage Advantage | 不直接作为主 policy 数据 |
 | Stage 标注验证集 | `high_quality_folding_v2p1_stage_val20` | 已完成 | Stage Advantage 离线评估 | 不参与 Stage 训练 |
-| 现场对齐数据 | `openarm_site_align_v1` | 本地已冻结，151 条，按 141 train + 10 val | `site_v1_ft_probe` 与主力 `hq_tda_site_v1` 的关键数据 | 不要和 `openarms_folding_v001/v002` 混淆 |
+| 现场对齐数据 | `openarm_site_align_v1` | 本地/远端已冻结，151 条，按 141 train + 10 val；远端 4 卡 probe 运行中 | `site_v1_ft_probe` 与主力 `hq_tda_site_v1` 的关键数据 | 不要和 `openarms_folding_v001/v002` 混淆 |
 | HIL 接管数据 | `openarm_hil_recovery_v1` | 暂无 | recovery / Heuristic DAgger 后续分支 | 不阻塞 site/TDA/AWBC 准备 |
 | 旧 OpenArms 折叠数据 | `openarms_folding_v001/v002` | 已有 | 仅可作为待审计辅助数据 | 不是现场对齐 v1 |
 
@@ -81,8 +82,8 @@ server infer_ms: about 86-100ms
 
 | 并行任务 | 负责人类型 | 现在能做什么 | 等待什么 | 验收 |
 |---|---|---|---|---|
-| Site 数据冻结准备 | 数据 Agent | 已完成本地冻结：151 条 raw HDF5 -> LeRobot v2.1；merge smoke 通过；本地 norm smoke 因缺 `numpydantic` 阻塞 | 等 SSH 恢复后远端跑 norm stats | 141/10 split；16D、camera keys、prompt、视频抽样帧数、NaN 检查全通过 |
-| Site-only probe 配置 | 训练 Agent | 已新增 `pi05_openarms_dual_site_align_v1_probe`，从 HQ `99999` warm start；norm stats 命令见 5.3 | site 数据落盘 | 500-1000 step smoke + 小步 probe 可启动 |
+| Site 数据冻结准备 | 数据 Agent | 已完成本地冻结和远端同步；远端 norm stats、`episodes_stats.jsonl`、时间戳抽样解码验收通过 | 训练结束后保留 10 条 holdout 复测 | 141/10 split；16D、camera keys、prompt、视频抽样帧数、NaN 检查全通过 |
+| Site-only probe 配置 | 训练 Agent | 已新增 `pi05_openarms_dual_site_align_v1_probe`，从 HQ `99999` warm start；已修复多机 checkpoint 竞态和 LeRobot 视频容差；4 卡 smoke 通过 | 等 1k probe 完成 checkpoint | `openarm_site_v1_probe_151e_4gpu_smoke3_20260706/1`；`openarm_site_v1_probe_151e_4gpu_1k_tol005_20260706` |
 | HQ/TDA/site 合并 | 数据/训练 Agent | 已新增 `scripts/merge_openarm_lerobot_v21.py`；site 默认 repeat=5 实现约 5x 采样权重 | site split 冻结 | 产出 `openarm_hq_tda_site_v1`，重新生成 norm stats |
 | Stage Advantage -> AWBC | Stage Agent | TDA 源映射脚本已在 gpu14 通过 mixed3 smoke；旧增强数据已 metadata-only 补 `source_episode_index / augmentation_type`；全量 TDA AWBC 已按 batch-balanced 6 shard 在 gpu12/gpu14/gpu28 启动 | 等 6 shard 完成后合并为 `openarm_awbc_v1`，再重算 norm stats 和跑 AWBC train smoke；site 数据可选 | `openarm_awbc_v1_smoke_mixed3` 已出现 positive/neutral/bad 标签；全量日志在 `openarm_awbc_v1_shards_balanced/` |
 | 真实部署评估基线 | Eval Agent | 固定 FIFO/TDA A/B 记录模板、成功阶段统计、失败分类、相机 metadata | site probe checkpoint | 同一现场布局下 HQ vs site probe 可复测 |
@@ -776,6 +777,8 @@ state 和 actions 都必须是 16D
 
 当前现场对齐数据本地已冻结。基于已覆盖位置、姿态、皱褶、光照、轨迹波动和边界样本的前提，黑色衣服单色 v1 使用 151 条；后续不继续录大量近重复样本，只补真实失败分布。
 
+2026-07-06 更新：该数据集已同步到服务器并开始 4 卡 probe。训练侧显式使用 `lerobot_tolerance_s=0.05`，用于吸收 LeRobot/torchcodec 视频 PTS 与 parquet 时间戳之间约 0.01s 的偏差；默认不影响其他训练配置。
+
 ```text
 dataset: /share/home/linyongjia/datasets/openarm_site_align_v1
 target_total_v0: 151 episodes
@@ -817,13 +820,15 @@ merged train config: pi05_openarms_dual_hq_tda_site_v1
 awbc train config: pi05_openarms_dual_awbc_v1
 merge script: scripts/merge_openarm_lerobot_v21.py
 site hdf5 converter: scripts/convert_openarm_site_hdf5_to_lerobot_v21.py
+site episode stats backfill: scripts/write_lerobot_episode_stats.py
+site timestamp rewrite helper: scripts/rewrite_lerobot_timestamps_from_video.py
 awbc direct script: scripts/openarm_stage_advantage_awbc.py
 tda metadata repair: scripts/annotate_openarm_tda_aug_metadata.py
 tda source-mapped awbc: scripts/openarm_tda_awbc_from_source.py
 ```
 
 site raw HDF5 转 LeRobot v2.1 命令。本地已执行版本使用 `/storage1t/datasets/openarm_site_align_v1`；
-远端训练前需要同步到 `/share/home/linyongjia/datasets/openarm_site_align_v1`：
+远端已同步到 `/share/home/linyongjia/datasets/openarm_site_align_v1`：
 
 ```bash
 python scripts/convert_openarm_site_hdf5_to_lerobot_v21.py \
@@ -856,12 +861,32 @@ python scripts/compute_openarm_parquet_norm_stats.py \
   --dataset /share/home/linyongjia/datasets/openarm_site_align_v1 \
   --episodes 0:141
 
+python scripts/write_lerobot_episode_stats.py \
+  --dataset /share/home/linyongjia/datasets/openarm_site_align_v1
+
 XLA_PYTHON_CLIENT_MEM_FRACTION=0.9 \
 python scripts/train.py pi05_openarms_dual_site_align_v1_probe \
   --exp-name openarm_site_v1_ft_probe_smoke \
   --checkpoint-base-dir /share/home/linyongjia/output/openpi \
   --num-train-steps 1000 \
   --overwrite
+```
+
+2026-07-06 实际 4 卡 probe：
+
+```text
+nodes: gpu12 + gpu14
+gpus: 4 x A800 80GB
+coordinator: 172.31.11.112:12360
+exp: openarm_site_v1_probe_151e_4gpu_1k_tol005_20260706
+config: pi05_openarms_dual_site_align_v1_probe
+batch_size: 32
+fsdp_devices: 2
+num_train_steps: 1000
+warm_start: /share/home/linyongjia/output/openpi/pi05_openarms_dual_hq/openarms_hq_bs32/99999/params
+checkpoint_dir: /share/home/linyongjia/output/openpi/pi05_openarms_dual_site_align_v1_probe/openarm_site_v1_probe_151e_4gpu_1k_tol005_20260706
+metrics: /share/home/linyongjia/output/openpi/pi05_openarms_dual_site_align_v1_probe/openarm_site_v1_probe_151e_4gpu_1k_tol005_20260706/metrics/metrics.jsonl
+status at 2026-07-06 12:32 CST: running; step 40 logged; 4 GPUs about 73.7GB and 100% util
 ```
 
 site split 冻结后的合并数据命令：
@@ -906,7 +931,7 @@ python scripts/openarm_tda_awbc_from_source.py \
 raw action 的左右夹爪 NaN 已按同帧 state 夹爪补齐，并记录在 conversion_report.json
 现场 camera/layout metadata 完整
 norm_stats.json 重新生成且 state/action 为 16D
-site_v1_ft_probe smoke train 通过
+site_v1_ft_probe 4 卡 smoke train 通过；1k probe 产出 checkpoint
 同一现场布局下 HQ baseline vs site_v1_ft_probe 有复测对比
 Stage Advantage 10000 可批量预测 advantage 并生成 AWBC 标签
 ```
@@ -970,6 +995,41 @@ test output summary
 ```
 
 ## 8. 历史日志
+
+### 2026-07-06 12:32 CST - Plan Owner - Site 远端 4 卡 probe 启动
+
+状态：运行中；4 卡训练已进入 step，等待 1000 step checkpoint。
+
+已完成：
+
+- 将 `openarm_site_align_v1` 同步到 `/share/home/linyongjia/datasets/openarm_site_align_v1`。
+- 在远端生成 `norm_stats.json` 和 `meta/episodes_stats.jsonl`，训练集使用 `0:141`，holdout 固定 `141:151`。
+- 修复 JAX 多 host checkpoint 目录竞态，4 卡 smoke `openarm_site_v1_probe_151e_4gpu_smoke3_20260706` 成功保存 step 1。
+- 为 LeRobotDataset 增加可配置 `lerobot_tolerance_s` / `lerobot_video_backend`，并在 site probe config 中设置 `lerobot_tolerance_s=0.05`。
+- 抽样验证 141 个训练 episode 的开头/中间/结尾共 423 个样本，torchcodec 解码失败数为 0。
+- 启动 4 卡 1000 step probe：`openarm_site_v1_probe_151e_4gpu_1k_tol005_20260706`。
+
+证据：
+
+```text
+local dataset: /storage1t/datasets/openarm_site_align_v1
+remote dataset: /share/home/linyongjia/datasets/openarm_site_align_v1
+smoke checkpoint: /share/home/linyongjia/output/openpi/pi05_openarms_dual_site_align_v1_probe/openarm_site_v1_probe_151e_4gpu_smoke3_20260706/1
+active checkpoint dir: /share/home/linyongjia/output/openpi/pi05_openarms_dual_site_align_v1_probe/openarm_site_v1_probe_151e_4gpu_1k_tol005_20260706
+metrics jsonl: /share/home/linyongjia/output/openpi/pi05_openarms_dual_site_align_v1_probe/openarm_site_v1_probe_151e_4gpu_1k_tol005_20260706/metrics/metrics.jsonl
+last checked metrics: step 40, loss 0.199733, grad_norm 2.473842
+gpu usage: gpu12/gpu14 all 4 GPUs about 73.7GB, 100% util
+```
+
+阻塞：
+
+- 当前 tmux 启动命令使用的 `conda run` 会缓冲 stdout，实时日志文件为空；训练状态以 `metrics.jsonl`、GPU 利用率和 checkpoint 为准。后续长训建议使用 `conda run --no-capture-output`。
+
+下一步：
+
+- 监控 1k probe 是否完成并保存 checkpoint。
+- 训练完成后用 10 条 holdout 和真机同场景复测 HQ baseline vs site probe。
+- 若 site probe 有正向改善，构建 `openarm_hq_tda_site_v1` 并按 site 4-6x 过采样启动主力训练。
 
 ### 2026-07-06 10:45 CST - Plan Owner - Site 数据集 151 条本地冻结
 

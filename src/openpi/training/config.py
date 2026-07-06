@@ -95,6 +95,10 @@ class DataConfig:
     # If set, only load these episode indices for training. Useful for train/val splits.
     train_episodes: list[int] | None = None
 
+    # Optional LeRobot video decode settings. Leave unset to keep LeRobot defaults.
+    lerobot_tolerance_s: float | None = None
+    lerobot_video_backend: str | None = None
+
     # Only used for RLDS data loader (ie currently only used for DROID).
     rlds_data_dir: str | None = None
     # Action space for DROID dataset.
@@ -994,7 +998,11 @@ _CONFIGS = [
                 assets_dir="/share/home/linyongjia/datasets",
                 asset_id="openarm_site_align_v1",
             ),
-            base_config=DataConfig(prompt_from_task=True, train_episodes=list(range(141))),
+            base_config=DataConfig(
+                prompt_from_task=True,
+                train_episodes=list(range(141)),
+                lerobot_tolerance_s=0.05,
+            ),
             base_image_key="observation.images.base",
             robot_action_dim=16,
             delta_action_mask=_transforms.make_bool_mask(7, -1, 7, -1),

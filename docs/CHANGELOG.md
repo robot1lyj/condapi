@@ -12,6 +12,11 @@ Design decisions → `docs/decisions/`. Architecture → `docs/ARCHITECTURE.md`.
 - **OpenArm 现场数据集 v1 本地冻结**: `/storage1t/ipc` 中 7 批 raw HDF5 已合并转换为
   `/storage1t/datasets/openarm_site_align_v1`，共 151 条、394900 帧、141/10 split；基础校验和 merge smoke
   通过，远端 SSH 恢复后同步到训练服务器并生成 norm stats。
+- **LeRobot v2.1 现场数据训练兼容**: norm stats 计算改为纯 parquet/pandas 路径，转换脚本补写
+  `episodes_stats.jsonl`，并新增 episode stats 回填和视频时间戳辅助脚本，避免远端 OpenPI/JAX import 或
+  LeRobot 元数据缺失阻塞训练。
+- **OpenArm site 4 卡训练修复**: 修复多 host checkpoint 目录竞态；DataConfig 支持显式传入 LeRobot
+  `tolerance_s`/`video_backend`，site probe 配置使用 `0.05s` 容差以兼容 torchcodec PTS 偏差。
 
 ## 2026-07-03
 

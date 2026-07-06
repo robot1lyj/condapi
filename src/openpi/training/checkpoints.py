@@ -8,6 +8,8 @@ from typing import Protocol
 
 from etils import epath
 import jax
+from jax.experimental import multihost_utils
+import numpy as np
 import orbax.checkpoint as ocp
 import orbax.checkpoint.checkpoint_utils as checkpoint_utils
 import orbax.checkpoint.future as future
@@ -23,20 +25,33 @@ def initialize_checkpoint_dir(
 ) -> tuple[ocp.CheckpointManager, bool]:
     checkpoint_dir = epath.Path(checkpoint_dir).resolve()
     resuming = False
-    if checkpoint_dir.exists():
-        if overwrite:
-            checkpoint_dir.rmtree()
-            checkpoint_dir.mkdir(parents=True, exist_ok=True)
-            logging.info(f"Wiped checkpoint directory {checkpoint_dir}")
-        elif resume:
-            resuming = True
-        else:
-            raise FileExistsError(
-                f"Checkpoint directory {checkpoint_dir} already exists. Use --overwrite or --resume "
-                "to indicate how to handle it."
-            )
+    is_primary_process = jax.process_index() == 0
+    if is_primary_process:
+        if checkpoint_dir.exists():
+            if overwrite:
+                checkpoint_dir.rmtree()
+                checkpoint_dir.mkdir(parents=True, exist_ok=True)
+                logging.info(f"Wiped checkpoint directory {checkpoint_dir}")
+            elif resume:
+                resuming = True
+            else:
+                raise FileExistsError(
+                    f"Checkpoint directory {checkpoint_dir} already exists. Use --overwrite or --resume "
+                    "to indicate how to handle it."
+                )
 
-    checkpoint_dir.mkdir(parents=True, exist_ok=True)
+        checkpoint_dir.mkdir(parents=True, exist_ok=True)
+
+    if jax.process_count() > 1:
+        resuming = bool(
+            multihost_utils.broadcast_one_to_all(
+                np.asarray(int(resuming), dtype=np.int32),
+                is_source=is_primary_process,
+            ).item()
+        )
+        multihost_utils.sync_global_devices("openpi_checkpoint_dir_ready")
+    else:
+        checkpoint_dir.mkdir(parents=True, exist_ok=True)
 
     mngr = ocp.CheckpointManager(
         checkpoint_dir,

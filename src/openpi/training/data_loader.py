@@ -128,6 +128,17 @@ class FakeDataset(Dataset):
         return self._num_samples
 
 
+def _lerobot_dataset_kwargs(data_config: _config.DataConfig) -> dict:
+    dataset_kwargs = {}
+    if data_config.train_episodes is not None:
+        dataset_kwargs["episodes"] = list(data_config.train_episodes)
+    if data_config.lerobot_tolerance_s is not None:
+        dataset_kwargs["tolerance_s"] = data_config.lerobot_tolerance_s
+    if data_config.lerobot_video_backend is not None:
+        dataset_kwargs["video_backend"] = data_config.lerobot_video_backend
+    return dataset_kwargs
+
+
 def create_torch_dataset(
     data_config: _config.DataConfig, action_horizon: int, model_config: _model.BaseModelConfig
 ) -> Dataset:
@@ -139,9 +150,7 @@ def create_torch_dataset(
         return FakeDataset(model_config, num_samples=1024)
 
     dataset_meta = lerobot_dataset.LeRobotDatasetMetadata(repo_id)
-    dataset_kwargs = {}
-    if data_config.train_episodes is not None:
-        dataset_kwargs["episodes"] = list(data_config.train_episodes)
+    dataset_kwargs = _lerobot_dataset_kwargs(data_config)
     dataset = lerobot_dataset.LeRobotDataset(
         data_config.repo_id,
         delta_timestamps={
@@ -170,9 +179,7 @@ def create_advantage_torch_dataset(
         raise ValueError("Stage Advantage training requires a real LeRobot dataset with stage_progress_gt.")
 
     dataset_meta = lerobot_dataset.LeRobotDatasetMetadata(repo_id)
-    dataset_kwargs = {}
-    if data_config.train_episodes is not None:
-        dataset_kwargs["episodes"] = list(data_config.train_episodes)
+    dataset_kwargs = _lerobot_dataset_kwargs(data_config)
 
     dataset = AdvantageLeRobotDataset(
         repo_id,

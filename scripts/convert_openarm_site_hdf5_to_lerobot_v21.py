@@ -34,6 +34,11 @@ import h5py
 import numpy as np
 import pandas as pd
 
+try:
+    from scripts.write_lerobot_episode_stats import compute_episode_stats
+except ModuleNotFoundError:
+    from write_lerobot_episode_stats import compute_episode_stats
+
 STATE_KEY = "observation.state"
 ACTION_KEY = "action"
 VIDEO_KEYS = (
@@ -418,7 +423,16 @@ def _format_video_path(episode_index: int, chunks_size: int, video_key: str) -> 
     return pathlib.Path(f"videos/chunk-{chunk:03d}/{video_key}/episode_{episode_index:06d}.mp4")
 
 
-def _zeroed_timestamps(raw_timestamp: np.ndarray, *, fps: int, mode: str) -> np.ndarray:
+def _read_video_fps(path: pathlib.Path) -> float:
+    capture = cv2.VideoCapture(str(path))
+    actual_fps = float(capture.get(cv2.CAP_PROP_FPS))
+    capture.release()
+    if actual_fps > 0 and np.isfinite(actual_fps):
+        return actual_fps
+    return 0.0
+
+
+def _zeroed_timestamps(raw_timestamp: np.ndarray, *, fps: float, mode: str) -> np.ndarray:
     if mode == "fps":
         return (np.arange(len(raw_timestamp), dtype=np.float32) / np.float32(fps)).astype(np.float32)
     if mode != "raw_zeroed":
@@ -440,7 +454,7 @@ def _write_episode_parquet(
     fps: int,
     timestamp_mode: str,
     gripper_action_fallback: str,
-) -> pathlib.Path:
+) -> tuple[pathlib.Path, dict[str, Any]]:
     with h5py.File(inspected.candidate.hdf5_path, "r") as file:
         state = np.asarray(file[STATE_KEY], dtype=np.float32)
         action = np.asarray(file[ACTION_KEY], dtype=np.float32)
@@ -448,7 +462,8 @@ def _write_episode_parquet(
 
     length = inspected.length
     action = _fill_gripper_action(action, state, gripper_action_fallback)
-    timestamp = _zeroed_timestamps(raw_timestamp, fps=fps, mode=timestamp_mode)
+    timestamp_fps = _read_video_fps(inspected.video_paths["observation.images.base"]) if timestamp_mode == "fps" else fps
+    timestamp = _zeroed_timestamps(raw_timestamp, fps=timestamp_fps or fps, mode=timestamp_mode)
     frame = pd.DataFrame(
         {
             ACTION_KEY: [row.copy() for row in action],
@@ -463,7 +478,7 @@ def _write_episode_parquet(
     parquet_path = dst / _format_data_path(episode_index, chunks_size)
     parquet_path.parent.mkdir(parents=True, exist_ok=True)
     frame.to_parquet(parquet_path, index=False)
-    return parquet_path
+    return parquet_path, compute_episode_stats(frame)
 
 
 def _feature_schema(raw_infos: list[dict[str, Any]], *, fps: int, video_codec: str) -> dict[str, Any]:
@@ -637,8 +652,9 @@ def convert_dataset(
 
     total_frames = 0
     episode_rows: list[dict[str, Any]] = []
+    episode_stats_rows: list[dict[str, Any]] = []
     for new_episode_index, item in enumerate(inspected):
-        _write_episode_parquet(
+        _, stats = _write_episode_parquet(
             item,
             dst,
             episode_index=new_episode_index,
@@ -665,6 +681,7 @@ def convert_dataset(
                 "timestamp_end": item.timestamp_end,
             }
         )
+        episode_stats_rows.append({"episode_index": new_episode_index, "stats": stats})
         total_frames += item.length
 
     video_codec = str(sources[0].info.get("vcodec") or "h264")
@@ -681,6 +698,7 @@ def convert_dataset(
     _write_json(dst / "meta/info.json", info)
     _write_jsonl(dst / "meta/tasks.jsonl", [{"task_index": 0, "task": task}])
     _write_jsonl(dst / "meta/episodes.jsonl", episode_rows)
+    _write_jsonl(dst / "meta/episodes_stats.jsonl", episode_stats_rows)
     _write_json(dst / "conversion_report.json", report)
     print(json.dumps(report, ensure_ascii=False, indent=2, default=_json_default))
     return report
@@ -706,7 +724,7 @@ def _build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--fps", type=int, default=30)
     parser.add_argument("--chunks-size", type=int, default=1000)
     parser.add_argument("--copy-mode", choices=("copy", "hardlink", "symlink"), default="hardlink")
-    parser.add_argument("--timestamp-mode", choices=("raw_zeroed", "fps"), default="raw_zeroed")
+    parser.add_argument("--timestamp-mode", choices=("raw_zeroed", "fps"), default="fps")
     parser.add_argument(
         "--gripper-action-fallback",
         choices=("state", "zero", "error"),
