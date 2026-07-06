@@ -98,6 +98,8 @@ checkpoint: /share/home/linyongjia/output/openpi/pi05_openarms_dual_site_align_v
 | HQ baseline `99999` | 可推理，但真机抓取失败 | `/share/home/linyongjia/output/openpi/pi05_openarms_dual_hq/openarms_hq_bs32/99999` | 与 site probe 同场景 A/B |
 | HQ policy server | 可用 | `ws://172.31.11.125:6666` on gpu25 | 保留为 baseline |
 | Site align probe | 已完成 1k | `/share/home/linyongjia/output/openpi/pi05_openarms_dual_site_align_v1_probe/openarm_site_v1_probe_151e_4gpu_1k_tol005_20260706/999` | 上真机看抓取改善 |
+| Site HQ 5k | 训练中 | `/share/home/linyongjia/output/openpi/pi05_openarms_dual_site_align_v1_probe/openarm_site_v1_probe_151e_2gpu_5k_hq99999_20260706` | 完成后与 1k、base 10k 一起真机 A/B |
+| Site base 10k | 训练中 | `/share/home/linyongjia/output/openpi/pi05_openarms_dual_site_align_v1_base_10k/openarm_site_v1_base_151e_2gpu_10k_pi05base_20260706` | 验证不经过 HQ `99999` 时，原始 π0.5 + site 是否更好抓取 |
 | Stage Advantage v1 | 可用 | `/share/home/linyongjia/output/openpi/ADVANTAGE_TORCH_OPENARM_FLATTEN_FOLD/openarm_stage_v1_train180_bs32_no_ckpt_10k_20260701/10000` | 批量预测 HQ/site/TDA 映射 |
 | TDA smoke | 通过 | `openarm_hq_tda_aug_smoke_tiny_20260630/2` | 不单独作为主模型 |
 | `hq_tda_site_v1` | 配置存在，待短训 | `pi05_openarms_dual_hq_tda_site_v1` | 先 5k/10k probe，不直接 88k |
@@ -465,6 +467,7 @@ scripts/serve_policy.py
 ```text
 pi05_openarms_dual_hq
 pi05_openarms_dual_site_align_v1_probe
+pi05_openarms_dual_site_align_v1_base_10k
 pi05_openarms_dual_hq_tda_aug
 pi05_openarms_dual_hq_tda_site_v1
 pi05_openarms_dual_awbc_v1
@@ -488,3 +491,37 @@ ADVANTAGE_TORCH_OPENARM_FLATTEN_FOLD
 1. Eval/Deployment Agent 先做 HQ `99999` vs site probe `999` 同场景 A/B。
 2. Stage/AWBC Agent 复核 `openarm_awbc_v1` 是否完整、label ratio 是否合理。
 3. Data/Training Agent 准备 `hq_site_v1_probe_10k` 和 `hq_tda_site_v1_probe_10k`，但等 G1 结果再开训。
+
+### 2026-07-06 16:31 CST - Training Agent - 启动 site 5k 与 base 10k 对照训练
+
+状态：训练中。
+
+已完成：
+
+- 新增 `pi05_openarms_dual_site_align_v1_base_10k` 配置，用同一份 `openarm_site_align_v1`，训练 episodes `0:141`，保留 `141:151` holdout。
+- 在 gpu12 启动 HQ `99999` warm start 的 site 5k：
+
+```text
+tmux: openarm_site_hq5k_20260706
+config: pi05_openarms_dual_site_align_v1_probe
+exp: openarm_site_v1_probe_151e_2gpu_5k_hq99999_20260706
+checkpoint: /share/home/linyongjia/output/openpi/pi05_openarms_dual_site_align_v1_probe/openarm_site_v1_probe_151e_2gpu_5k_hq99999_20260706
+log: /share/home/linyongjia/output/openpi/logs/pi05_openarms_dual_site_align_v1_probe/openarm_site_v1_probe_151e_2gpu_5k_hq99999_20260706_gpu12.log
+startup: step 69 reached at 16:31 CST, both gpu12 cards about 73.6GB and 100% util
+```
+
+- 在 gpu14 启动原始 π0.5 base warm start 的 site 10k：
+
+```text
+tmux: openarm_site_base10k_20260706
+config: pi05_openarms_dual_site_align_v1_base_10k
+exp: openarm_site_v1_base_151e_2gpu_10k_pi05base_20260706
+checkpoint: /share/home/linyongjia/output/openpi/pi05_openarms_dual_site_align_v1_base_10k/openarm_site_v1_base_151e_2gpu_10k_pi05base_20260706
+log: /share/home/linyongjia/output/openpi/logs/pi05_openarms_dual_site_align_v1_base_10k/openarm_site_v1_base_151e_2gpu_10k_pi05base_20260706_gpu14.log
+startup: step 16 reached at 16:31 CST, both gpu14 cards about 73.6GB and 100% util
+```
+
+实验目的：
+
+- 比较 `site_align_v1_probe` 1k、HQ `99999` -> site 5k、原始 π0.5 -> site 10k 三个候选在真机抓取上的差异。
+- 重点看 grasp_contact_rate / lift_success_rate，不以 train loss 单独决定。
