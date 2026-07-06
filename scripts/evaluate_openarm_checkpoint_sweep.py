@@ -30,6 +30,7 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
+import cv2
 import lerobot.common.datasets.lerobot_dataset as lerobot_dataset
 
 import openpi.policies.policy_config as _policy_config
@@ -77,18 +78,55 @@ def _episode_parquet_path(dataset_dir: pathlib.Path, episode_index: int) -> path
     return dataset_dir / info["data_path"].format(episode_chunk=chunk, episode_index=episode_index)
 
 
+def _video_path(dataset_dir: pathlib.Path, episode_index: int, video_key: str) -> pathlib.Path:
+    info = _load_json(dataset_dir / "meta/info.json")
+    chunk = episode_index // int(info["chunks_size"])
+    return dataset_dir / info["video_path"].format(
+        episode_chunk=chunk,
+        episode_index=episode_index,
+        video_key=video_key,
+    )
+
+
+def _video_frame_count(path: pathlib.Path) -> int:
+    capture = cv2.VideoCapture(str(path))
+    count = int(capture.get(cv2.CAP_PROP_FRAME_COUNT))
+    capture.release()
+    if count <= 0:
+        raise ValueError(f"Could not read frame count from {path}")
+    return count
+
+
+def _safe_episode_length(dataset_dir: pathlib.Path, episode_index: int, parquet_length: int) -> int:
+    video_counts = [
+        _video_frame_count(_video_path(dataset_dir, episode_index, video_key))
+        for video_key in (
+            "observation.images.base",
+            "observation.images.left_wrist",
+            "observation.images.right_wrist",
+        )
+    ]
+    return min(parquet_length, *video_counts)
+
+
 def _critical_offsets(
     dataset_dir: pathlib.Path,
     episode_index: int,
     *,
     count: int,
     min_separation: int,
+    max_length: int,
 ) -> list[int]:
     if count <= 0:
         return []
     frame = pd.read_parquet(_episode_parquet_path(dataset_dir, episode_index), columns=["action", "observation.state"])
     actions = np.stack([np.asarray(value, dtype=np.float32).reshape(-1) for value in frame["action"].to_numpy()])
     states = np.stack([np.asarray(value, dtype=np.float32).reshape(-1) for value in frame["observation.state"].to_numpy()])
+    safe_length = min(max_length, len(actions))
+    actions = actions[:safe_length]
+    states = states[:safe_length]
+    if safe_length <= 0:
+        return []
 
     joint_mask = np.ones(actions.shape[1], dtype=bool)
     for dim in (7, 15):
@@ -160,7 +198,7 @@ def _make_samples(
         arr_idx = ep_to_arr[episode_index]
         start = int(starts[arr_idx])
         end = int(ends[arr_idx])
-        length = end - start
+        length = _safe_episode_length(dataset_dir, episode_index, end - start)
         if length <= 0:
             continue
 
@@ -177,6 +215,7 @@ def _make_samples(
                 episode_index,
                 count=min(critical_frames, length),
                 min_separation=min_sep,
+                max_length=length,
             )
         )
 
