@@ -7,6 +7,21 @@ Design decisions → `docs/decisions/`. Architecture → `docs/ARCHITECTURE.md`.
 
 ---
 
+## 2026-07-07
+
+- **OpenArm site 单位错配修复**: 确认 HQ 1200 集为 degree-like，而旧 `openarm_site_align_v1` 为
+  radian-like + normalized gripper；现场 OpenPI 数据合同收敛为 arm joints degrees + HQ-style gripper
+  motor degrees，转换脚本默认输出 `openarm_site_align_v1_deg`，旧 site 5k/base10k 候选不再作为可用真机模型。
+- **OpenArm HQ 数据合同入口**: 新增 `scripts/convert_openarm_hq_dataset.py` 作为现场数据清洗统一入口；
+  默认对齐 HQ task `Fold the T-shirt properly`，并将 raw gripper normalized `0.0/0.84`
+  标定到 HQ motor degrees `-66/0`，避免 task prompt 和夹爪语义再次分裂。
+- **OpenArm site deg 数据重转**: 远端 `/share/home/linyongjia/datasets/openarm_site_align_v1_deg`
+  已用 HQ contract 重转，151 episodes；`norm_stats.json` 已按 train `0:141` 生成并经 OpenPI config load 验证。
+- **OpenArm site deg 5k 重训启动**: gpu12 tmux `openarm_site_deg_5k_20260707` 已启动
+  HQ `99999` -> site deg 5k，step 0 loss `0.2434`，两张 A800 均已占用约 73.6GB。
+- **OpenArm site loader/续训诊断**: 新增 LeRobot loader 压测脚本，确认 `torchcodec+2 workers` 是当前
+  site 数据读取吞吐最优组合；原始 π0.5 base -> site 10k 训练在单位审计前暂停，避免继续消耗 GPU。
+
 ## 2026-07-06
 
 - **OpenArm 现场数据集 v1 本地冻结**: `/storage1t/ipc` 中 7 批 raw HDF5 已合并转换为

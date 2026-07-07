@@ -1,6 +1,6 @@
 # OpenArm π0.6 / KAI0 / Evo-RL 适配总计划
 
-最后更新：2026-07-06 16:09 CST
+最后更新：2026-07-07 10:55 CST
 
 本文档是 OpenArm + OpenPI 后续训练、部署、HIL、Stage/AWBC 的唯一计划文档。所有 Agent 只更新本文档，不新增分散计划文件。
 
@@ -15,34 +15,37 @@
 
 ### 0.1 不再重复的事
 
-`site_grasp_probe` 不是一个新任务。它对应已经完成的 `site_align_v1_probe`：
+`site_grasp_probe` 不是一个新任务。它对应已经完成但已作废的旧单位 `site_align_v1_probe`：
 
 ```text
 config: pi05_openarms_dual_site_align_v1_probe
-dataset: /share/home/linyongjia/datasets/openarm_site_align_v1
+dataset: /share/home/linyongjia/datasets/openarm_site_align_v1  # old radian-like site dataset
 train split: episodes 0:141
 holdout split: episodes 141:151
 checkpoint: /share/home/linyongjia/output/openpi/pi05_openarms_dual_site_align_v1_probe/openarm_site_v1_probe_151e_4gpu_1k_tol005_20260706/999
 ```
 
-后续不再重复做同一个 site-only probe。下一步是把这个 checkpoint 和 HQ baseline 放到同一现场做 A/B，重点看抓取是否改善。
+后续不再重复测试这个旧 checkpoint。下一步是重新生成 `openarm_site_align_v1_deg`，再训练新的 site-only / HQ+site 短训候选。
 
 ### 0.2 关键事实
 
 1. 用户现场反馈明确：HQ `99999` 只表现出“抬起来到桌面附近”的部分动作，没有稳定抓住衣服，因此不能把它判断成“已经学会折叠，只是现场轻微偏移”。
 2. 当前第一故障点是 **抓取接触失败**，其次才是完整折叠、动作平滑、throughput。
-3. 现场对齐数据 `openarm_site_align_v1` 已完成转换、同步和短训；它是当前判断现场分布是否能拉动模型的核心证据。
-4. Stage Advantage v1 已可用，`10000` checkpoint 是当前最优离线版本：val20 / 800 paired-frame 上 MSE 0.00295、MAE 0.04340、方向准确率 96.75%、corr 0.9859、R2 0.9715。
-5. TDA 增强数据 `openarm_hq_tda_aug_v1` 已生成并通过 smoke；但它不能替代现场数据，也不能单独证明抓取能变好。
-6. HIL/recovery 真实接管数据还没有进入训练集；没有这类数据时，不要声称已经完成 RECAP/π0.6 风格闭环。
-7. Model Arithmetic 不是模型路由。当前单任务、候选模型不足，暂缓。
+3. 现场对齐数据必须以 `openarm_site_align_v1_deg` 为准；旧 `openarm_site_align_v1` 只保留作单位事故追溯。
+4. 2026-07-07 复核发现旧 `openarm_site_align_v1` 与 HQ 单位错配：HQ 1200 集是 degree-like，site v1 是 radian-like + normalized gripper；旧 site 1k/5k/base10k 候选不再作为可用真机模型。
+5. OpenArm policy 数据合同从现在起统一为 HQ contract：task prompt 固定 `Fold the T-shirt properly`，arm joints 用 degrees，gripper 用 HQ-style motor degrees（`0` open，`-66` closed）；ROS/机器人执行仍为 radians + normalized gripper，只在客户端或转换脚本边界转换。
+6. 所有现场数据清洗统一入口为 `scripts/convert_openarm_hq_dataset.py`；默认将 raw gripper normalized `0.0` 视为全闭、`0.84` 视为全开，再映射到 HQ gripper motor degrees。
+7. Stage Advantage v1 已可用，`10000` checkpoint 是当前最优离线版本：val20 / 800 paired-frame 上 MSE 0.00295、MAE 0.04340、方向准确率 96.75%、corr 0.9859、R2 0.9715。
+8. TDA 增强数据 `openarm_hq_tda_aug_v1` 已生成并通过 smoke；但它不能替代现场数据，也不能单独证明抓取能变好。
+9. HIL/recovery 真实接管数据还没有进入训练集；没有这类数据时，不要声称已经完成 RECAP/π0.6 风格闭环。
+10. Model Arithmetic 不是模型路由。当前单任务、候选模型不足，暂缓。
 
 ### 0.3 当前总路线
 
 ```text
 现有 HQ/OpenPI 底座
-  -> site_align_v1_probe 真机 A/B
-  -> HQ + site / HQ + TDA + site 短训候选
+  -> openarm_site_align_v1_deg 生成 + norm stats
+  -> site_deg_probe / HQ + site_deg / HQ + TDA + site_deg 短训候选
   -> Stage Advantage 批量打分
   -> AWBC / ACP 训练
   -> HIL recovery 数据闭环
@@ -86,7 +89,8 @@ checkpoint: /share/home/linyongjia/output/openpi/pi05_openarms_dual_site_align_v
 | HQ + TDA | `/share/home/linyongjia/datasets/openarm_hq_tda_aug_v1` | 已生成，2298 集 | 镜像/时间扰动、部署鲁棒性 | AWBC 时优先从源 HQ 打分后映射 |
 | Stage train180 | `/share/home/linyongjia/data/high_quality_folding_v2p1_stage_train180` | 已完成 | 训练 Stage Advantage | 不作为 policy 主训练数据 |
 | Stage val20 | `/share/home/linyongjia/data/high_quality_folding_v2p1_stage_val20` | 已完成 | Stage 验证 | 离散抽样 holdout |
-| Site align v1 | `/share/home/linyongjia/datasets/openarm_site_align_v1` | 已冻结，151 集 | 现场分布对齐；site probe；合并训练高权重数据 | 141 train + 10 holdout |
+| Site align v1 old | `/share/home/linyongjia/datasets/openarm_site_align_v1` | 历史错误单位，151 集 | 仅用于追溯 | radian-like + normalized gripper，禁止继续训练/真机测试 |
+| Site align v1 deg | `/share/home/linyongjia/datasets/openarm_site_align_v1_deg` | 已重转并完成 norm stats | 现场分布对齐；site probe；合并训练高权重数据 | 默认 141 train + 10 holdout；HQ task；arm joints degrees；gripper HQ motor degrees |
 | AWBC v1 | `/share/home/linyongjia/datasets/openarm_awbc_v1` | 生成/合并状态需复核 | Stage Advantage -> AWBC policy train | 先 smoke，再短训 |
 | HIL recovery v1 | `openarm_hil_recovery_v1` | 未有真实训练数据 | RECAP/DAgger/recovery | 不阻塞当前 site/TDA/AWBC 准备 |
 | 旧 OpenArms | `openarms_folding_v001/v002` | 已有 | 待审计辅助数据 | 不是 site align v1 |
@@ -96,10 +100,10 @@ checkpoint: /share/home/linyongjia/output/openpi/pi05_openarms_dual_site_align_v
 | 名称 | 状态 | 路径 / 服务 | 下一步 |
 |---|---|---|---|
 | HQ baseline `99999` | 可推理，但真机抓取失败 | `/share/home/linyongjia/output/openpi/pi05_openarms_dual_hq/openarms_hq_bs32/99999` | 与 site probe 同场景 A/B |
-| HQ policy server | 可用 | `ws://172.31.11.125:6666` on gpu25 | 保留为 baseline |
-| Site align probe | 已完成 1k | `/share/home/linyongjia/output/openpi/pi05_openarms_dual_site_align_v1_probe/openarm_site_v1_probe_151e_4gpu_1k_tol005_20260706/999` | 上真机看抓取改善 |
-| Site HQ 5k | 已完成 | `/share/home/linyongjia/output/openpi/pi05_openarms_dual_site_align_v1_probe/openarm_site_v1_probe_151e_2gpu_5k_hq99999_20260706/4999` | 已在 gpu25:6666 启动推理服务，准备真机 A/B |
-| Site base 10k | resume 中 | `/share/home/linyongjia/output/openpi/pi05_openarms_dual_site_align_v1_base_10k/openarm_site_v1_base_151e_2gpu_10k_pi05base_20260706` | 已将 `num_workers=0`，从 step 1000 继续跑到 10k |
+| Site HQ 5k old | 停用 | `/share/home/linyongjia/output/openpi/pi05_openarms_dual_site_align_v1_probe/openarm_site_v1_probe_151e_2gpu_5k_hq99999_20260706/4999` | 训练 loss 正常但单位合同错误；gpu25:6666 已停止 |
+| Site align probe old | 停用 | `/share/home/linyongjia/output/openpi/pi05_openarms_dual_site_align_v1_probe/openarm_site_v1_probe_151e_4gpu_1k_tol005_20260706/999` | 基于旧 radians site 数据，禁止作为真机 A/B 结论 |
+| Site deg HQ 5k | 训练中 | `/share/home/linyongjia/output/openpi/pi05_openarms_dual_site_align_v1_probe/openarm_site_deg_151e_2gpu_5k_hq99999_20260707` | gpu12 tmux `openarm_site_deg_5k_20260707` |
+| Site deg base 10k | 暂停 | `pi05_openarms_dual_site_align_v1_base_10k` + `openarm_site_align_v1_deg` | 原训练已停止，等 deg 数据后再决定是否重跑 |
 | Stage Advantage v1 | 可用 | `/share/home/linyongjia/output/openpi/ADVANTAGE_TORCH_OPENARM_FLATTEN_FOLD/openarm_stage_v1_train180_bs32_no_ckpt_10k_20260701/10000` | 批量预测 HQ/site/TDA 映射 |
 | TDA smoke | 通过 | `openarm_hq_tda_aug_smoke_tiny_20260630/2` | 不单独作为主模型 |
 | `hq_tda_site_v1` | 配置存在，待短训 | `pi05_openarms_dual_hq_tda_site_v1` | 先 5k/10k probe，不直接 88k |
@@ -112,7 +116,7 @@ checkpoint: /share/home/linyongjia/output/openpi/pi05_openarms_dual_site_align_v
 | 假设 | 现象 | 验证 | 决策 |
 |---|---|---|---|
 | 现场视觉分布偏移 | 模型靠近桌面但抓点不准 | HQ vs site probe 同场景 A/B；三路相机对齐报告 | site probe 明显改善则进入合并短训 |
-| state/action 或夹爪语义有错 | site probe 仍无法接触衣物 | 检查 action 16D、gripper dim 7/15、state fallback、动作范围、真机回放 | 先修数据/控制，不开长训 |
+| state/action 或夹爪语义有错 | site probe 仍无法接触衣物或几乎不动 | 检查 action 16D、gripper dim 7/15、state fallback、动作范围、单位合同、真机回放 | 先修数据/控制，不开长训 |
 | 推理/执行时延导致错位 | 离线动作合理，真机执行抖或慢 | FIFO vs TDA smooth；记录 infer_ms、publish hz、drop_count | 调部署，不靠数据训练硬补 |
 | HQ checkpoint 过拟合或不是最佳 | 不同步数真机差异大 | HQ checkpoint sweep + 2-3 个真机 A/B | 选 warm start，不默认 `99999` 最佳 |
 | 缺恢复经验 | 抓错后无法自救 | HIL/recovery 采集失败前后片段 | 进入 RECAP/DAgger 分支 |
@@ -168,7 +172,7 @@ Advantage: positive
 |---|---|---|---|---|
 | Plan Owner | 统一计划、状态、门槛 | 维护本文档；合并多 Agent 结果；更新决策 gate | 本文档 | 每次更新写清“已完成/阻塞/下一步” |
 | Eval/Deployment Agent | 真机推理和 A/B | HQ `99999` vs site probe `999` 同场景测试 | A/B 报告、视频、失败分类 | 至少记录抓取接触率、lift 成功率、延迟、动作范围 |
-| Data Agent | 数据转换/合并/校验 | 复核 `openarm_site_align_v1`、构建 `openarm_hq_tda_site_v1` | merge report、validation report、norm stats | 16D、三路视频、episode split、NaN、task prompt 全通过 |
+| Data Agent | 数据转换/合并/校验 | 生成/复核 `openarm_site_align_v1_deg`、构建 `openarm_hq_tda_site_v1` | merge report、validation report、norm stats | 16D、三路视频、episode split、NaN、task prompt、单位合同全通过 |
 | Training Agent | GPU 训练 | 准备并运行短训候选，不直接开长训 | checkpoints、metrics、训练日志 | 5k/10k probe 完成，loss 无异常，checkpoint 可 serve |
 | Stage/AWBC Agent | Stage 打分和 AWBC | 复核 AWBC shard 是否完成；合并 `openarm_awbc_v1`；跑 smoke | AWBC dataset、tasks.jsonl、label stats | bad/neutral/positive 分布合理，能启动训练 |
 | HIL/Recovery Agent | 接管数据闭环 | 固定 HIL 字段；采首批真实接管/失败片段 | `openarm_hil_recovery_v1` | 可算 policy-human 差值，可分出 recovery segment |
@@ -239,13 +243,13 @@ norm_stats status
 ```text
 openarm_hq_site_v1_probe_data:
   HQ train 0:999 repeat 1
-  site train 0:141 repeat 6
+  site_deg train 0:141 repeat 6
   no TDA
 
 openarm_hq_tda_site_v1_probe_data:
   HQ train 0:999 repeat 1
   TDA 0:2298 repeat 1
-  site train 0:141 repeat 6
+  site_deg train 0:141 repeat 6
 ```
 
 原因：当前最大问题是抓取现场分布，不确定 TDA 是否帮助还是稀释现场梯度。两个短训候选能更快给答案。
@@ -257,7 +261,7 @@ python scripts/merge_openarm_lerobot_v21.py \
   --dst /share/home/linyongjia/datasets/openarm_hq_tda_site_v1 \
   --source hq,/share/home/linyongjia/datasets/high_quality_folding,0:999,1 \
   --source tda,/share/home/linyongjia/datasets/openarm_hq_tda_aug_v1,0:2298,1 \
-  --source site,/share/home/linyongjia/datasets/openarm_site_align_v1,0:141,6 \
+  --source site,/share/home/linyongjia/datasets/openarm_site_align_v1_deg,0:141,6 \
   --copy-mode hardlink \
   --overwrite
 ```
@@ -268,9 +272,9 @@ python scripts/merge_openarm_lerobot_v21.py \
 
 | 实验名 | 数据 | warm start | 步数 | 目的 |
 |---|---|---|---:|---|
-| `site_align_v1_probe` | site only | HQ `99999` | 已完成 1k | 已有，等真机 A/B |
-| `hq_site_v1_probe_10k` | HQ + site x6 | HQ `99999` 或 site probe | 5k/10k | 判断 HQ 先验 + site 是否更稳 |
-| `hq_tda_site_v1_probe_10k` | HQ + TDA + site x6 | HQ `99999` 或 site probe | 5k/10k | 判断 TDA 是否帮助部署鲁棒性 |
+| `site_align_v1_deg_probe` | site_deg only | HQ `99999` | 5k | 判断单位修正后现场抓取是否恢复 |
+| `hq_site_v1_deg_probe_10k` | HQ + site_deg x6 | HQ `99999` 或 site_deg probe | 5k/10k | 判断 HQ 先验 + site 是否更稳 |
+| `hq_tda_site_v1_deg_probe_10k` | HQ + TDA + site_deg x6 | HQ `99999` 或 site_deg probe | 5k/10k | 判断 TDA 是否帮助部署鲁棒性 |
 | `awbc_v1_probe_10k` | AWBC bad/neutral/positive | HQ `99999` 或 best probe | 5k/10k | 判断 Stage/AWBC 是否提升抓取/进展 |
 | `recovery_v1_probe` | best + HIL recovery | best prior | 1k/5k | 等 HIL 数据后做恢复能力 |
 
@@ -448,7 +452,7 @@ remote outputs: /share/home/linyongjia/output/openpi
 ### 11.2 关键脚本
 
 ```text
-scripts/convert_openarm_site_hdf5_to_lerobot_v21.py
+scripts/convert_openarm_hq_dataset.py
 scripts/merge_openarm_lerobot_v21.py
 scripts/augment_openarm_hq_tda.py
 scripts/annotate_openarm_tda_aug_metadata.py
@@ -498,7 +502,7 @@ ADVANTAGE_TORCH_OPENARM_FLATTEN_FOLD
 
 已完成：
 
-- 新增 `pi05_openarms_dual_site_align_v1_base_10k` 配置，用同一份 `openarm_site_align_v1`，训练 episodes `0:141`，保留 `141:151` holdout。
+- 新增 `pi05_openarms_dual_site_align_v1_base_10k` 配置；单位审计后改为等待 `openarm_site_align_v1_deg`，训练 episodes `0:141`，保留 `141:151` holdout。
 - 在 gpu12 启动 HQ `99999` warm start 的 site 5k：
 
 ```text
@@ -526,17 +530,38 @@ startup: step 16 reached at 16:31 CST, both gpu14 cards about 73.6GB and 100% ut
 - 比较 `site_align_v1_probe` 1k、HQ `99999` -> site 5k、原始 π0.5 -> site 10k 三个候选在真机抓取上的差异。
 - 重点看 grasp_contact_rate / lift_success_rate，不以 train loss 单独决定。
 
-### 2026-07-07 09:56 CST - Training/Serve Agent - 修复 base 10k 并切换 gpu25 serve
+### 2026-07-07 10:40 CST - Training/Serve Agent - 单位审计并暂停旧 site 训练/服务
 
-状态：执行中。
+状态：已暂停旧 site 训练/服务，等待 deg 数据重训。
 
 已完成：
 
 - HQ `99999` -> site 5k 已完成，最终 checkpoint `4999` 完整保存。
+- site 5k 训练指标数值正常：loss 从 step 0 的 `0.2398` 降到 step 4980 的 `0.0215`，但该 loss 是在错误单位合同上收敛，不能证明真机可用。
 - 原始 π0.5 base -> site 10k 在 step 1320 左右遇到 `DataLoader worker Segmentation fault`，可用 checkpoint 为 `1000`。
-- 将 `pi05_openarms_dual_site_align_v1_base_10k` 的 `num_workers` 改为 0，避免多进程 DataLoader worker 继续触发段错误。
+- 新增 `scripts/openarm_benchmark_loader.py`，用于压测 LeRobot loader 的视频后端和 worker 数。
+- loader 压测结论：`torchcodec+2 workers` 平均约 6.9s/batch；`torchcodec+1 worker` 约 10.1s/batch；`torchcodec+4 workers` 约 7.6s/batch；`pyav+2 workers` 约 11.0s/batch。
+- 将 `pi05_openarms_dual_site_align_v1_base_10k` 改为显式 `torchcodec+2 workers`，并将 `save_interval=200`、`keep_period=1000`，用更密的 checkpoint 降低 worker 偶发崩溃后的回退成本。
+- gpu25:6666 已切换到 site 5k `4999` 推理服务；healthz 为 `OK`，WebSocket 假输入返回 `actions` shape `(50, 16)`。
+- 单位审计结论：HQ `high_quality_folding` 全局 joint max_abs 约 `140.05`，为 degree-like；旧 site `openarm_site_align_v1` 全局 joint max_abs 约 `2.48`，为 radian-like，且 gripper 是 normalized，不是 HQ-style motor degrees。
+- 已停止 gpu14 上旧 base10k watchdog 训练，释放两张 A800。
+- 已停止 gpu25:6666 旧 site5k 推理服务，释放显存，避免现场继续误测。
+- 新增统一入口 `scripts/convert_openarm_hq_dataset.py`：默认输出 `openarm_site_align_v1_deg`，task 对齐 HQ `Fold the T-shirt properly`，arm joints rad->deg，gripper normalized 经 `0.0 closed / 0.84 open` 标定后映射到 `[-66, 0]` HQ motor degrees。
 
-执行中：
+### 2026-07-07 10:58 CST - Data/Training Agent - HQ contract 转换入口落地
 
-- 在 gpu14 从 `1000` checkpoint resume base 10k。
-- 在 gpu25 将 6666 端口从 HQ `99999` 切换到 site 5k `4999` 推理服务。
+状态：数据合同已修正，site deg 训练可启动。
+
+已完成：
+
+- 新增统一入口 `scripts/convert_openarm_hq_dataset.py`，支持 `from-hdf5` 和 `from-lerobot` 两种来源；后续现场清洗只走这个入口。
+- HQ contract 固定为：task `Fold the T-shirt properly`，arm joints degrees，gripper HQ motor degrees（`0` open，`-66` closed）。
+- 现场 raw gripper 标定为 `0.0` closed / `0.84` open，再映射到 HQ motor degrees；远端抽查 gripper 范围为 `-65.61..0`。
+- 已重转 `/share/home/linyongjia/datasets/openarm_site_align_v1_deg`，151 episodes，joint max_abs 约 `142.06`，task 已对齐 HQ。
+- 已计算 `/share/home/linyongjia/datasets/openarm_site_align_v1_deg/norm_stats.json`，训练 split `0:141`，共 374544 frames；OpenPI config 已确认能读取 `state/actions` norm stats。
+- 已在 gpu12 启动 HQ `99999` -> site deg 5k：tmux `openarm_site_deg_5k_20260707`，log `/share/home/linyongjia/output/openpi/logs/pi05_openarms_dual_site_align_v1_probe/openarm_site_deg_151e_2gpu_5k_hq99999_20260707_gpu12.log`；step 0 loss `0.2434`，两张 A800 显存约 `73.6GB`。
+
+下一步：
+
+- 监控 site deg 5k 到 checkpoint `4999`。
+- 训练完成后再开启 gpu25 推理服务，禁止继续使用旧 site5k/base10k 候选。

@@ -993,10 +993,10 @@ _CONFIGS = [
         name="pi05_openarms_dual_site_align_v1_probe",
         model=pi0_config.Pi0Config(pi05=True, discrete_state_input=True),
         data=LeRobotPiperDataConfig(
-            repo_id="/share/home/linyongjia/datasets/openarm_site_align_v1",
+            repo_id="/share/home/linyongjia/datasets/openarm_site_align_v1_deg",
             assets=AssetsConfig(
                 assets_dir="/share/home/linyongjia/datasets",
-                asset_id="openarm_site_align_v1",
+                asset_id="openarm_site_align_v1_deg",
             ),
             base_config=DataConfig(
                 prompt_from_task=True,
@@ -1021,15 +1021,16 @@ _CONFIGS = [
         name="pi05_openarms_dual_site_align_v1_base_10k",
         model=pi0_config.Pi0Config(pi05=True, discrete_state_input=True),
         data=LeRobotPiperDataConfig(
-            repo_id="/share/home/linyongjia/datasets/openarm_site_align_v1",
+            repo_id="/share/home/linyongjia/datasets/openarm_site_align_v1_deg",
             assets=AssetsConfig(
                 assets_dir="/share/home/linyongjia/datasets",
-                asset_id="openarm_site_align_v1",
+                asset_id="openarm_site_align_v1_deg",
             ),
             base_config=DataConfig(
                 prompt_from_task=True,
                 train_episodes=list(range(141)),
                 lerobot_tolerance_s=0.05,
+                lerobot_video_backend="torchcodec",
             ),
             base_image_key="observation.images.base",
             robot_action_dim=16,
@@ -1043,7 +1044,9 @@ _CONFIGS = [
         ),
         log_interval=20,
         wandb_enabled=True,
-        num_workers=0,
+        num_workers=2,
+        save_interval=200,
+        keep_period=1000,
         num_train_steps=10_000,
     ),
     TrainConfig(

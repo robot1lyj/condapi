@@ -77,7 +77,7 @@ def test_convert_site_hdf5_to_lerobot_v21(tmp_path):
         [tmp_path / "ipc"],
         dst,
         dataset_id="openarm_site_align_v1",
-        task="fold the cloth",
+        task=converter.DEFAULT_TASK,
         val_count=1,
         fps=30,
         chunks_size=1000,
@@ -101,14 +101,26 @@ def test_convert_site_hdf5_to_lerobot_v21(tmp_path):
     second = pd.read_parquet(dst / "data/chunk-000/episode_000001.parquet")
 
     assert report["valid_episodes"] == 2
+    assert report["raw_joint_unit_hint"] == "radian_like"
+    assert report["output_joint_unit_hint"] == "degree_like"
+    assert report["policy_joint_unit"] == "degrees"
+    assert report["policy_gripper_unit"] == "dataset_degrees"
     assert out_info["codebase_version"] == "v2.1"
+    assert out_info["site_conversion"]["policy_joint_unit"] == "degrees"
+    assert out_info["site_conversion"]["policy_gripper_unit"] == "dataset_degrees"
+    assert out_info["site_conversion"]["gripper_raw_open_norm"] == converter.GRIPPER_RAW_OPEN_NORM
     assert out_info["splits"] == {"train": "0:1", "val": "1:2"}
     assert out_info["features"]["observation.images.base"]["shape"] == [4, 4, 3]
-    assert episodes[0]["tasks"] == ["fold the cloth"]
+    assert episodes[0]["tasks"] == [converter.DEFAULT_TASK]
     assert episodes[1]["source_episode_index"] == 1
     assert first["episode_index"].unique().tolist() == [0]
     assert second["index"].iloc[0] == 5
-    assert np.asarray(first["observation.state"].iloc[0]).shape == (16,)
+    first_state = np.asarray(first["observation.state"].iloc[0])
+    first_action = np.asarray(first["action"].iloc[0])
+    assert first_state.shape == (16,)
+    assert np.isclose(first_action[0], 180.0 / np.pi)
+    assert np.isclose(first_state[7], -66.0)
+    assert np.isclose(first_action[7], 0.0)
     assert (dst / "videos/chunk-000/observation.images.base/episode_000001.mp4").read_bytes().startswith(b"video-")
 
 
@@ -127,7 +139,7 @@ def test_dry_run_reports_invalid_episode(tmp_path):
         [tmp_path / "ipc"],
         dst,
         dataset_id="site",
-        task="fold the cloth",
+        task=converter.DEFAULT_TASK,
         val_count=0,
         fps=30,
         chunks_size=1000,

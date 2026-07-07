@@ -8,9 +8,9 @@ does not re-encode camera data.
 Example:
     python scripts/convert_openarm_site_hdf5_to_lerobot_v21.py \
       --src /storage1t/ipc \
-      --dst /storage1t/datasets/openarm_site_align_v1 \
-      --dataset-id openarm_site_align_v1 \
-      --task "fold the cloth" \
+      --dst /storage1t/datasets/openarm_site_align_v1_deg \
+      --dataset-id openarm_site_align_v1_deg \
+      --task "Fold the T-shirt properly" \
       --val-count 10 \
       --copy-mode hardlink \
       --overwrite
@@ -48,6 +48,10 @@ VIDEO_KEYS = (
 )
 GRIPPER_INDICES = (7, 15)
 JOINT_INDICES = tuple(index for index in range(16) if index not in GRIPPER_INDICES)
+DEFAULT_TASK = "Fold the T-shirt properly"
+GRIPPER_DATASET_MAX_DEG = 66.0
+GRIPPER_RAW_CLOSED_NORM = 0.0
+GRIPPER_RAW_OPEN_NORM = 0.84
 JOINT_NAMES = [
     "right_joint_1.pos",
     "right_joint_2.pos",
@@ -252,6 +256,39 @@ def _joint_unit_hint(max_abs_joint: float) -> str:
     return "large_or_mixed"
 
 
+def _convert_policy_units(
+    state: np.ndarray,
+    action: np.ndarray,
+    *,
+    policy_joint_unit: str = "degrees",
+    policy_gripper_unit: str = "dataset_degrees",
+    gripper_closed_norm: float = GRIPPER_RAW_CLOSED_NORM,
+    gripper_open_norm: float = GRIPPER_RAW_OPEN_NORM,
+) -> tuple[np.ndarray, np.ndarray]:
+    converted_state = state.astype(np.float32, copy=True)
+    converted_action = action.astype(np.float32, copy=True)
+
+    if policy_joint_unit == "degrees":
+        converted_state[:, JOINT_INDICES] *= np.float32(180.0 / math.pi)
+        converted_action[:, JOINT_INDICES] *= np.float32(180.0 / math.pi)
+    elif policy_joint_unit != "radians":
+        raise ValueError(f"Unsupported policy joint unit: {policy_joint_unit}")
+
+    if policy_gripper_unit == "dataset_degrees":
+        if gripper_open_norm <= gripper_closed_norm:
+            raise ValueError(
+                f"gripper_open_norm must be > gripper_closed_norm, got {gripper_open_norm} <= {gripper_closed_norm}"
+            )
+        for array in (converted_state, converted_action):
+            gripper = (array[:, GRIPPER_INDICES] - gripper_closed_norm) / (gripper_open_norm - gripper_closed_norm)
+            gripper = np.clip(gripper, 0.0, 1.0)
+            array[:, GRIPPER_INDICES] = -(1.0 - gripper) * np.float32(GRIPPER_DATASET_MAX_DEG)
+    elif policy_gripper_unit != "normalized":
+        raise ValueError(f"Unsupported policy gripper unit: {policy_gripper_unit}")
+
+    return converted_state, converted_action
+
+
 def _fill_gripper_action(action: np.ndarray, state: np.ndarray, mode: str) -> np.ndarray:
     clean_action = action.astype(np.float32, copy=True)
     gripper_values = clean_action[:, GRIPPER_INDICES]
@@ -454,6 +491,10 @@ def _write_episode_parquet(
     fps: int,
     timestamp_mode: str,
     gripper_action_fallback: str,
+    policy_joint_unit: str = "degrees",
+    policy_gripper_unit: str = "dataset_degrees",
+    gripper_closed_norm: float = GRIPPER_RAW_CLOSED_NORM,
+    gripper_open_norm: float = GRIPPER_RAW_OPEN_NORM,
 ) -> tuple[pathlib.Path, dict[str, Any]]:
     with h5py.File(inspected.candidate.hdf5_path, "r") as file:
         state = np.asarray(file[STATE_KEY], dtype=np.float32)
@@ -462,7 +503,17 @@ def _write_episode_parquet(
 
     length = inspected.length
     action = _fill_gripper_action(action, state, gripper_action_fallback)
-    timestamp_fps = _read_video_fps(inspected.video_paths["observation.images.base"]) if timestamp_mode == "fps" else fps
+    state, action = _convert_policy_units(
+        state,
+        action,
+        policy_joint_unit=policy_joint_unit,
+        policy_gripper_unit=policy_gripper_unit,
+        gripper_closed_norm=gripper_closed_norm,
+        gripper_open_norm=gripper_open_norm,
+    )
+    timestamp_fps = (
+        _read_video_fps(inspected.video_paths["observation.images.base"]) if timestamp_mode == "fps" else fps
+    )
     timestamp = _zeroed_timestamps(raw_timestamp, fps=timestamp_fps or fps, mode=timestamp_mode)
     frame = pd.DataFrame(
         {
@@ -528,6 +579,10 @@ def _make_info(
     chunks_size: int,
     val_count: int,
     video_codec: str,
+    policy_joint_unit: str = "degrees",
+    policy_gripper_unit: str = "dataset_degrees",
+    gripper_closed_norm: float = GRIPPER_RAW_CLOSED_NORM,
+    gripper_open_norm: float = GRIPPER_RAW_OPEN_NORM,
 ) -> dict[str, Any]:
     total_episodes = len(inspected)
     total_frames = sum(item.length for item in inspected)
@@ -554,6 +609,11 @@ def _make_info(
         "site_conversion": {
             "dataset_id": dataset_id,
             "task": task,
+            "policy_joint_unit": policy_joint_unit,
+            "policy_gripper_unit": policy_gripper_unit,
+            "gripper_dataset_max_deg": GRIPPER_DATASET_MAX_DEG,
+            "gripper_raw_closed_norm": gripper_closed_norm,
+            "gripper_raw_open_norm": gripper_open_norm,
             "source_roots": [str(source.path) for source in sources],
             "raw_format_versions": sorted(
                 {
@@ -584,7 +644,11 @@ def convert_dataset(
     max_abs_state_action: float | None,
     timestamp_mode: str,
     gripper_action_fallback: str,
-    verify_video_frames: bool,
+    policy_joint_unit: str = "degrees",
+    policy_gripper_unit: str = "dataset_degrees",
+    gripper_closed_norm: float = GRIPPER_RAW_CLOSED_NORM,
+    gripper_open_norm: float = GRIPPER_RAW_OPEN_NORM,
+    verify_video_frames: bool = False,
     skip_invalid: bool,
     site_repeat: int,
 ) -> dict[str, Any]:
@@ -609,6 +673,9 @@ def convert_dataset(
         raise ValueError(f"--val-count {val_count} must be smaller than valid episode count {len(inspected)}")
 
     max_abs_joint = max((item.max_abs_joint for item in inspected), default=0.0)
+    raw_max_abs_state_action = max((item.max_abs_state_action for item in inspected), default=0.0)
+    output_max_abs_joint = max_abs_joint * (180.0 / math.pi if policy_joint_unit == "degrees" else 1.0)
+    output_max_abs_state_action = max(output_max_abs_joint, GRIPPER_DATASET_MAX_DEG)
     train_end = max(0, len(inspected) - val_count)
     report = {
         "destination": str(dst),
@@ -623,10 +690,21 @@ def convert_dataset(
         "copy_mode": copy_mode,
         "timestamp_mode": timestamp_mode,
         "gripper_action_fallback": gripper_action_fallback,
+        "policy_joint_unit": policy_joint_unit,
+        "policy_gripper_unit": policy_gripper_unit,
+        "gripper_dataset_max_deg": GRIPPER_DATASET_MAX_DEG,
+        "gripper_raw_closed_norm": gripper_closed_norm,
+        "gripper_raw_open_norm": gripper_open_norm,
         "splits": {"train": f"0:{train_end}", **({"val": f"{train_end}:{len(inspected)}"} if val_count else {})},
-        "joint_unit_hint": _joint_unit_hint(max_abs_joint),
-        "max_abs_joint": max_abs_joint,
-        "max_abs_state_action": max((item.max_abs_state_action for item in inspected), default=0.0),
+        "raw_joint_unit_hint": _joint_unit_hint(max_abs_joint),
+        "raw_max_abs_joint": max_abs_joint,
+        "output_joint_unit_hint": _joint_unit_hint(output_max_abs_joint),
+        "output_max_abs_joint": output_max_abs_joint,
+        "joint_unit_hint": _joint_unit_hint(output_max_abs_joint),
+        "max_abs_joint": output_max_abs_joint,
+        "raw_max_abs_state_action": raw_max_abs_state_action,
+        "output_max_abs_state_action": output_max_abs_state_action,
+        "max_abs_state_action": output_max_abs_state_action,
         "gripper_action_nan_count": sum(item.gripper_action_nan_count for item in inspected),
         "sources": [
             {
@@ -663,6 +741,10 @@ def convert_dataset(
             fps=fps,
             timestamp_mode=timestamp_mode,
             gripper_action_fallback=gripper_action_fallback,
+            policy_joint_unit=policy_joint_unit,
+            policy_gripper_unit=policy_gripper_unit,
+            gripper_closed_norm=gripper_closed_norm,
+            gripper_open_norm=gripper_open_norm,
         )
         for video_key, src_video in item.video_paths.items():
             _copy_or_link(src_video, dst / _format_video_path(new_episode_index, chunks_size, video_key), copy_mode)
@@ -694,6 +776,10 @@ def convert_dataset(
         chunks_size=chunks_size,
         val_count=val_count,
         video_codec=video_codec,
+        policy_joint_unit=policy_joint_unit,
+        policy_gripper_unit=policy_gripper_unit,
+        gripper_closed_norm=gripper_closed_norm,
+        gripper_open_norm=gripper_open_norm,
     )
     _write_json(dst / "meta/info.json", info)
     _write_jsonl(dst / "meta/tasks.jsonl", [{"task_index": 0, "task": task}])
@@ -714,8 +800,8 @@ def _build_arg_parser() -> argparse.ArgumentParser:
         help="Raw root. Can be /storage1t/ipc or an individual fold_cloth* directory. Repeatable.",
     )
     parser.add_argument("--dst", type=pathlib.Path, required=True, help="Destination LeRobot v2.1 dataset root.")
-    parser.add_argument("--dataset-id", default="openarm_site_align_v1")
-    parser.add_argument("--task", default="fold the cloth")
+    parser.add_argument("--dataset-id", default="openarm_site_align_v1_deg")
+    parser.add_argument("--task", default=DEFAULT_TASK)
     parser.add_argument("--episodes", default=None, help="Flattened candidate spec, e.g. 0:100 or 0,2,5.")
     parser.add_argument(
         "--max-episodes", type=int, default=None, help="Use first N flattened candidates after sorting."
@@ -730,6 +816,30 @@ def _build_arg_parser() -> argparse.ArgumentParser:
         choices=("state", "zero", "error"),
         default="state",
         help="How to fill NaN/Inf gripper action dimensions 7 and 15. Site raw data currently uses NaN there.",
+    )
+    parser.add_argument(
+        "--policy-joint-unit",
+        choices=("degrees", "radians"),
+        default="degrees",
+        help="Output unit for arm joint state/action dims. OpenArm policy datasets default to degrees.",
+    )
+    parser.add_argument(
+        "--policy-gripper-unit",
+        choices=("dataset_degrees", "normalized"),
+        default="dataset_degrees",
+        help="Output unit for gripper dims. dataset_degrees maps calibrated normalized gripper to HQ-style motor degrees.",
+    )
+    parser.add_argument(
+        "--gripper-closed-norm",
+        type=float,
+        default=GRIPPER_RAW_CLOSED_NORM,
+        help="Raw robot normalized gripper value treated as fully closed when outputting dataset_degrees.",
+    )
+    parser.add_argument(
+        "--gripper-open-norm",
+        type=float,
+        default=GRIPPER_RAW_OPEN_NORM,
+        help="Raw robot normalized gripper value treated as fully open when outputting dataset_degrees.",
     )
     parser.add_argument("--min-frames", type=int, default=2)
     parser.add_argument("--max-abs-state-action", type=float, default=None)
@@ -761,6 +871,10 @@ def main() -> None:
         max_abs_state_action=args.max_abs_state_action,
         timestamp_mode=args.timestamp_mode,
         gripper_action_fallback=args.gripper_action_fallback,
+        policy_joint_unit=args.policy_joint_unit,
+        policy_gripper_unit=args.policy_gripper_unit,
+        gripper_closed_norm=args.gripper_closed_norm,
+        gripper_open_norm=args.gripper_open_norm,
         verify_video_frames=args.verify_video_frames,
         skip_invalid=args.skip_invalid,
         site_repeat=args.site_repeat,
