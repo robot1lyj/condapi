@@ -100,10 +100,10 @@ checkpoint: /share/home/linyongjia/output/openpi/pi05_openarms_dual_site_align_v
 | 名称 | 状态 | 路径 / 服务 | 下一步 |
 |---|---|---|---|
 | HQ baseline `99999` | 可推理，但真机抓取失败 | `/share/home/linyongjia/output/openpi/pi05_openarms_dual_hq/openarms_hq_bs32/99999` | 与 site probe 同场景 A/B |
-| Site HQ 5k old | 停用 | `/share/home/linyongjia/output/openpi/pi05_openarms_dual_site_align_v1_probe/openarm_site_v1_probe_151e_2gpu_5k_hq99999_20260706/4999` | 训练 loss 正常但单位合同错误；gpu25:6666 已停止 |
-| Site align probe old | 停用 | `/share/home/linyongjia/output/openpi/pi05_openarms_dual_site_align_v1_probe/openarm_site_v1_probe_151e_4gpu_1k_tol005_20260706/999` | 基于旧 radians site 数据，禁止作为真机 A/B 结论 |
-| Site deg HQ 5k | 训练中 | `/share/home/linyongjia/output/openpi/pi05_openarms_dual_site_align_v1_probe/openarm_site_deg_151e_2gpu_5k_hq99999_20260707` | gpu12 tmux `openarm_site_deg_5k_20260707` |
-| Site deg base 10k | 暂停 | `pi05_openarms_dual_site_align_v1_base_10k` + `openarm_site_align_v1_deg` | 原训练已停止，等 deg 数据后再决定是否重跑 |
+| Site HQ 5k old | 已删除 | `openarm_site_v1_probe_151e_2gpu_5k_hq99999_20260706` | 旧单位合同错误；曾在 gpu25:6666 误测；2026-07-07 已清理 |
+| Site align probe old | 已删除 | `openarm_site_v1_probe_151e_4gpu_1k_tol005_20260706` | 基于旧 radians site 数据；2026-07-07 已清理 |
+| Site deg HQ 5k | 已完成 | `/share/home/linyongjia/output/openpi/pi05_openarms_dual_site_align_v1_probe/openarm_site_deg_151e_2gpu_5k_hq99999_20260707/4999` | 待开启 gpu25 推理服务和真机 A/B |
+| Site deg base 10k | 训练中 | `/share/home/linyongjia/output/openpi/pi05_openarms_dual_site_align_v1_base_10k/openarm_site_deg_base_151e_2gpu_10k_pi05base_20260707` | gpu14 tmux `openarm_site_deg_base10k_20260707` |
 | Stage Advantage v1 | 可用 | `/share/home/linyongjia/output/openpi/ADVANTAGE_TORCH_OPENARM_FLATTEN_FOLD/openarm_stage_v1_train180_bs32_no_ckpt_10k_20260701/10000` | 批量预测 HQ/site/TDA 映射 |
 | TDA smoke | 通过 | `openarm_hq_tda_aug_smoke_tiny_20260630/2` | 不单独作为主模型 |
 | `hq_tda_site_v1` | 配置存在，待短训 | `pi05_openarms_dual_hq_tda_site_v1` | 先 5k/10k probe，不直接 88k |
@@ -560,8 +560,11 @@ startup: step 16 reached at 16:31 CST, both gpu14 cards about 73.6GB and 100% ut
 - 已重转 `/share/home/linyongjia/datasets/openarm_site_align_v1_deg`，151 episodes，joint max_abs 约 `142.06`，task 已对齐 HQ。
 - 已计算 `/share/home/linyongjia/datasets/openarm_site_align_v1_deg/norm_stats.json`，训练 split `0:141`，共 374544 frames；OpenPI config 已确认能读取 `state/actions` norm stats。
 - 已在 gpu12 启动 HQ `99999` -> site deg 5k：tmux `openarm_site_deg_5k_20260707`，log `/share/home/linyongjia/output/openpi/logs/pi05_openarms_dual_site_align_v1_probe/openarm_site_deg_151e_2gpu_5k_hq99999_20260707_gpu12.log`；step 0 loss `0.2434`，两张 A800 显存约 `73.6GB`。
+- HQ `99999` -> site deg 5k 已完成 checkpoint `4999`，最终段 loss 约 `0.0216..0.0241`，最终 checkpoint 约 `42G`。
+- π0.5 base -> site deg 10k 已在 gpu14 启动：tmux `openarm_site_deg_base10k_20260707`，最新检查 step `2280/10000`，loss 约 `0.0306..0.0338`，checkpoint `2200` 已保存。
+- 已删除三个旧单位合同 checkpoint，释放约 `126G`：旧 site 5k、旧 site 1k、旧 base 1000。
 
 下一步：
 
-- 监控 site deg 5k 到 checkpoint `4999`。
-- 训练完成后再开启 gpu25 推理服务，禁止继续使用旧 site5k/base10k 候选。
+- 继续监控 π0.5 base -> site deg 10k 到 checkpoint `9999`。
+- 开启 gpu25 推理服务时只允许使用 `site_deg` 新 checkpoint，禁止继续使用旧 site5k/base10k 候选。

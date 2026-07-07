@@ -19,6 +19,8 @@ Design decisions → `docs/decisions/`. Architecture → `docs/ARCHITECTURE.md`.
   已用 HQ contract 重转，151 episodes；`norm_stats.json` 已按 train `0:141` 生成并经 OpenPI config load 验证。
 - **OpenArm site deg 5k 重训启动**: gpu12 tmux `openarm_site_deg_5k_20260707` 已启动
   HQ `99999` -> site deg 5k，step 0 loss `0.2434`，两张 A800 均已占用约 73.6GB。
+- **OpenArm 旧单位 checkpoint 清理**: 删除旧 `openarm_site_align_v1` 单位合同下的 site 5k、site 1k、
+  base 1000 三个 checkpoint 目录，共释放约 126G；后续只保留 `site_deg` 新合同候选用于推理/真机测试。
 - **OpenArm site loader/续训诊断**: 新增 LeRobot loader 压测脚本，确认 `torchcodec+2 workers` 是当前
   site 数据读取吞吐最优组合；原始 π0.5 base -> site 10k 训练在单位审计前暂停，避免继续消耗 GPU。
 
