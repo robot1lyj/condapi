@@ -98,8 +98,8 @@ checkpoint: /share/home/linyongjia/output/openpi/pi05_openarms_dual_site_align_v
 | HQ baseline `99999` | 可推理，但真机抓取失败 | `/share/home/linyongjia/output/openpi/pi05_openarms_dual_hq/openarms_hq_bs32/99999` | 与 site probe 同场景 A/B |
 | HQ policy server | 可用 | `ws://172.31.11.125:6666` on gpu25 | 保留为 baseline |
 | Site align probe | 已完成 1k | `/share/home/linyongjia/output/openpi/pi05_openarms_dual_site_align_v1_probe/openarm_site_v1_probe_151e_4gpu_1k_tol005_20260706/999` | 上真机看抓取改善 |
-| Site HQ 5k | 训练中 | `/share/home/linyongjia/output/openpi/pi05_openarms_dual_site_align_v1_probe/openarm_site_v1_probe_151e_2gpu_5k_hq99999_20260706` | 完成后与 1k、base 10k 一起真机 A/B |
-| Site base 10k | 训练中 | `/share/home/linyongjia/output/openpi/pi05_openarms_dual_site_align_v1_base_10k/openarm_site_v1_base_151e_2gpu_10k_pi05base_20260706` | 验证不经过 HQ `99999` 时，原始 π0.5 + site 是否更好抓取 |
+| Site HQ 5k | 已完成 | `/share/home/linyongjia/output/openpi/pi05_openarms_dual_site_align_v1_probe/openarm_site_v1_probe_151e_2gpu_5k_hq99999_20260706/4999` | 已在 gpu25:6666 启动推理服务，准备真机 A/B |
+| Site base 10k | resume 中 | `/share/home/linyongjia/output/openpi/pi05_openarms_dual_site_align_v1_base_10k/openarm_site_v1_base_151e_2gpu_10k_pi05base_20260706` | 已将 `num_workers=0`，从 step 1000 继续跑到 10k |
 | Stage Advantage v1 | 可用 | `/share/home/linyongjia/output/openpi/ADVANTAGE_TORCH_OPENARM_FLATTEN_FOLD/openarm_stage_v1_train180_bs32_no_ckpt_10k_20260701/10000` | 批量预测 HQ/site/TDA 映射 |
 | TDA smoke | 通过 | `openarm_hq_tda_aug_smoke_tiny_20260630/2` | 不单独作为主模型 |
 | `hq_tda_site_v1` | 配置存在，待短训 | `pi05_openarms_dual_hq_tda_site_v1` | 先 5k/10k probe，不直接 88k |
@@ -525,3 +525,18 @@ startup: step 16 reached at 16:31 CST, both gpu14 cards about 73.6GB and 100% ut
 
 - 比较 `site_align_v1_probe` 1k、HQ `99999` -> site 5k、原始 π0.5 -> site 10k 三个候选在真机抓取上的差异。
 - 重点看 grasp_contact_rate / lift_success_rate，不以 train loss 单独决定。
+
+### 2026-07-07 09:56 CST - Training/Serve Agent - 修复 base 10k 并切换 gpu25 serve
+
+状态：执行中。
+
+已完成：
+
+- HQ `99999` -> site 5k 已完成，最终 checkpoint `4999` 完整保存。
+- 原始 π0.5 base -> site 10k 在 step 1320 左右遇到 `DataLoader worker Segmentation fault`，可用 checkpoint 为 `1000`。
+- 将 `pi05_openarms_dual_site_align_v1_base_10k` 的 `num_workers` 改为 0，避免多进程 DataLoader worker 继续触发段错误。
+
+执行中：
+
+- 在 gpu14 从 `1000` checkpoint resume base 10k。
+- 在 gpu25 将 6666 端口从 HQ `99999` 切换到 site 5k `4999` 推理服务。

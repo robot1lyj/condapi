@@ -1043,6 +1043,7 @@ _CONFIGS = [
         ),
         log_interval=20,
         wandb_enabled=True,
+        num_workers=0,
         num_train_steps=10_000,
     ),
     TrainConfig(
