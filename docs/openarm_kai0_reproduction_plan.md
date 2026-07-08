@@ -1,15 +1,15 @@
-# OpenArm π0.6 / KAI0 / Evo-RL 适配总计划
+# OpenArm RECAP / Evo-RL / KAI0 适配总计划
 
-最后更新：2026-07-07 10:55 CST
+最后更新：2026-07-08 11:36 CST
 
 本文档是 OpenArm + OpenPI 后续训练、部署、HIL、Stage/AWBC 的唯一计划文档。所有 Agent 只更新本文档，不新增分散计划文件。
 
-当前路线不再是“只复现 KAI0”，而是学习三条证据链后做适合 OpenArm 的组合方案：
+当前主线不再是“只复现 KAI0”，而是先复现 **π*0.6 / RECAP + Evo-RL** 的闭环，再兼顾 KAI0 的衣物任务增强模块：
 
 - **π0.5 / OpenPI**：作为 VLA 底座，保留三路图像 + 16 维 state/action + task prompt 的训练和推理路径。
-- **π*0.6 / RECAP**：学习“演示 + 自主试错 + 人工接管纠错 + advantage 条件训练”的闭环。
-- **KAI0**：学习衣物任务里的分布对齐、Stage Advantage、TDA、Model Arithmetic。
+- **π*0.6 / RECAP**：作为主线，复现“演示 + 自主试错 + 人工接管纠错 + value/advantage 条件训练”的闭环。
 - **Evo-RL**：作为 RECAP 思路的开源工程参考，重点参考 value/advantage/indicator 回写和 ACP 训练链路。
+- **KAI0**：作为衣物任务辅助模块，复用两阶段 Stage Advantage、TDA、AWBC；Model Arithmetic 暂缓。
 
 ## 0. 当前结论
 
@@ -46,9 +46,10 @@ checkpoint: /share/home/linyongjia/output/openpi/pi05_openarms_dual_site_align_v
 现有 HQ/OpenPI 底座
   -> openarm_site_align_v1_deg 生成 + norm stats
   -> site_deg_probe / HQ + site_deg / HQ + TDA + site_deg 短训候选
-  -> Stage Advantage 批量打分
-  -> AWBC / ACP 训练
-  -> HIL recovery 数据闭环
+  -> HIL recovery 数据采集：success / failure / intervention / recovery
+  -> Evo-RL 风格 value train -> value infer -> advantage / acp_indicator 回写
+  -> ACP / AWBC policy 短训
+  -> KAI0 两阶段 Stage Advantage 批量打分作为辅助信号
   -> 多候选 checkpoint sweep + 真机 A/B
   -> 可选 Model Arithmetic
 ```
@@ -60,9 +61,9 @@ checkpoint: /share/home/linyongjia/output/openpi/pi05_openarms_dual_site_align_v
 | 来源 | 它解决什么 | 对 OpenArm 的落地方式 | 不直接照搬的部分 |
 |---|---|---|---|
 | π0.5 | 用异构数据、高层语义子任务和低层动作训练通用 VLA | 保留 OpenPI/π0.5 作为底座；把 task/stage/advantage 放进 prompt 条件 | 我们没有 PI 的大规模 web/多机器人预训练数据，不能假设靠 prompt 就能泛化 |
-| π0.6 / RECAP | 从部署经验、成功失败、人工纠错中继续变强 | 建 HIL/recovery 数据；训练 value/advantage；用 `Advantage: positive` 做 ACP/AWBC | 近期不做完整在线 PPO/SAC 训练大模型 |
-| KAI0 | 衣物任务里 `P_train / Q_model / P_test` 分布不一致 | TDA、Stage Advantage、Heuristic DAgger、后期 Model Arithmetic | 不把 Model Arithmetic 当运行时路由；不在候选不足时先做 |
-| Evo-RL | RECAP 风格工程链路 | 参考 value train -> value infer -> indicator writeback -> ACP policy train | Evo-RL 本地实现是训练侧参考，不直接替代 OpenPI 服务端 |
+| π0.6 / RECAP | 从部署经验、成功失败、人工纠错中继续变强 | 主线复现：HIL/recovery 数据 -> value/advantage -> `Advantage: positive` ACP/AWBC 训练 | 近期不做完整在线 PPO/SAC 训练大模型 |
+| Evo-RL | RECAP 风格工程链路 | 主线工程参考：value train -> value infer -> `advantage/acp_indicator` writeback -> ACP policy train | Evo-RL 本地实现是训练侧参考，不直接替代 OpenPI 服务端 |
+| KAI0 | 衣物任务里 `P_train / Q_model / P_test` 分布不一致 | 辅助模块：TDA、两阶段 Stage Advantage、AWBC prompt；后期 Model Arithmetic | 不把 Model Arithmetic 当运行时路由；不让客户端人工标复杂 failure taxonomy |
 | ProcVLM / 过程奖励 | 用过程进展模型做密集 reward | 后续可作为 Stage/Value v2 参考，尤其抓取阶段进展判断 | 先不引入大外部 VLM 标注系统 |
 
 参考链接：
@@ -121,7 +122,7 @@ checkpoint: /share/home/linyongjia/output/openpi/pi05_openarms_dual_site_align_v
 | HQ checkpoint 过拟合或不是最佳 | 不同步数真机差异大 | HQ checkpoint sweep + 2-3 个真机 A/B | 选 warm start，不默认 `99999` 最佳 |
 | 缺恢复经验 | 抓错后无法自救 | HIL/recovery 采集失败前后片段 | 进入 RECAP/DAgger 分支 |
 
-## 4. OpenArm-RECAP-KAI0 v1 方案
+## 4. OpenArm RECAP/Evo-RL 主线 + KAI0 辅助 v1 方案
 
 ### 4.1 训练数据流
 
@@ -129,14 +130,16 @@ checkpoint: /share/home/linyongjia/output/openpi/pi05_openarms_dual_site_align_v
 HQ 成功演示
   + HQ-TDA 源映射增强
   + site_align_v1 现场成功演示
-  + HIL/recovery 失败与纠错片段
+  + HIL/recovery 自主成功、失败、人工接管纠错片段
     -> norm stats / schema 校验
-    -> Stage/Value 预测 progress / advantage
-    -> 离散为 bad / neutral / positive
-    -> prompt/task 写入
-    -> OpenPI policy 短训
+    -> RECAP/Evo-RL: value train -> value infer -> advantage / acp_indicator
+    -> KAI0: 两阶段 Stage progress / advantage 辅助打分
+    -> prompt/task 写入：Advantage: bad / neutral / positive
+    -> OpenPI ACP/AWBC policy 短训
     -> 真机 A/B
 ```
+
+主线指标来自 RECAP/Evo-RL：`episode_success`、`is_intervention`、`recovery_success`、`policy_action`、`human_action`、`executed_action`。KAI0 的两阶段 `task_stage/stage_progress` 后处理生成，不要求客户端人工标复杂失败阶段。
 
 ### 4.2 Prompt 条件策略
 
@@ -165,6 +168,7 @@ Advantage: positive
 - 不把 `openarms_folding_v001/v002` 当 site 数据。
 - 不把 KAI0 Model Arithmetic 当作运行时路由。
 - 不在没有 HIL/recovery 数据时宣称完成 RECAP。
+- 不把复杂 `failure_stage` 作为 HIL 主标签；失败原因只做可选复盘字段。
 
 ## 5. Agent 分工
 
@@ -203,7 +207,8 @@ grasp_contact_rate: 夹爪是否接触/夹住衣物
 lift_success_rate: 是否能带起衣物
 flatten_entry_rate: 是否进入拉平/展开阶段
 episode_success_rate: 是否完整折叠
-failure_stage: no_contact / wrong_contact / dropped / no_progress / unsafe / timeout
+episode_outcome: success / failure / aborted
+failure_reason: grasp / manipulation / system / unknown  # optional debug only
 latency: infer_ms / publish_hz / queue_drop
 ```
 
@@ -294,30 +299,80 @@ python scripts/merge_openarm_lerobot_v21.py \
 
 ### 7.2 HIL/recovery 数据字段
 
-HIL 数据必须能支持 RECAP，不只是普通 BC。每帧至少需要：
+HIL 数据必须先支持 RECAP/Evo-RL，不只是普通 BC。v1 不做复杂 `failure_stage` 主标签；只采能训练 value/advantage/ACP 的核心信号。
+
+每帧必须记录：
 
 ```text
-policy_action
-human_action 或 teleop_action
-executed_action
-is_intervention
-authority_source
-episode_success
-failure_stage
+timestamp_ns
+episode_id
+frame_index
+
+observation.state                 # 16D，HQ contract: joints degrees, gripper HQ motor degrees
+observation.images.base
+observation.images.left_wrist
+observation.images.right_wrist
+
+policy_action_chunk               # shape (50, 16)，服务端返回的整段 chunk
+policy_action                     # 当前准备用于执行的模型动作，16D
+human_action 或 teleop_action      # 接管时的人类动作，16D；未接管可为空
+executed_action                   # 最终下发动作，16D
+
+is_intervention                   # 当前帧是否人工接管
+authority_source                  # policy / human / safety_stop / scripted
 policy_checkpoint
 prompt
-timestamp
-camera frame id
-latency / queue metadata
+
+request_send_time_ns
+response_recv_time_ns
+server_infer_ms
+round_trip_ms
+action_chunk_id
+step_in_chunk
+publish_hz
+drop_count
+safety_clipped
+clip_reason
+```
+
+每条 episode 结束时必须记录：
+
+```text
+episode_success                   # 最终是否完成
+episode_outcome                   # success / failure / aborted
+recovery_success                  # 人工接管后是否救回；无接管时为 null
+intervention_count
+intervention_start_frame
+intervention_end_frame
+collector_policy_id
+model_metadata                    # action_dim=32, robot_action_dim=16, action_horizon=50, rtc_mode 等
+```
+
+KAI0 / Stage 辅助字段由后处理生成，不要求客户端人工标：
+
+```text
+task_stage                        # 0 flatten / 1 fold
+stage_progress
+relative_advantage
+absolute_value
+absolute_advantage
+acp_indicator
+```
+
+可选复盘字段，只用于 debug 和采集分布统计，不作为 v1 主训练标签：
+
+```text
+failure_reason                    # grasp / manipulation / system / unknown
+operator_note
 ```
 
 推荐首批规模：
 
 ```text
-20-30 条 missed grasp recovery
-10-20 条 dropped / wrong contact recovery
-10 条 autonomous failure without intervention
-10 条 autonomous success or near-success
+20-30 条自主失败 + 人工接管救回
+10-20 条自主失败 + 接管后仍失败或中止
+10 条自主失败且不接管
+10 条自主成功或接近成功
 ```
 
 用途：
@@ -326,6 +381,7 @@ latency / queue metadata
 - 接管前 policy 动作：negative/neutral 候选。
 - 自主成功：value/advantage 标定。
 - 自主失败：防止 value model 把“看起来接近完成”的失败状态误判为好。
+- 两阶段 task_stage：只服务 KAI0 Stage Advantage，不替代 RECAP/Evo-RL 的 success/intervention/recovery 主线。
 
 ## 8. Stage / AWBC 计划
 
@@ -413,7 +469,8 @@ v2 目标不是增加概念，而是解决当前抓取失败：让 value/advanta
 | retry_cost | 平均重试次数 | 越低越好 |
 | throughput | 单位时间完成数 | 成功稳定后再优化 |
 | intervention_rate | HIL 中接管比例 | 迭代后应下降 |
-| failure_stage_histogram | 失败分布 | 指导下一轮采集 |
+| recovery_success_rate | 接管后是否救回 | RECAP/Evo-RL 主指标 |
+| failure_reason_histogram | 可选失败原因分布 | 只指导下一轮采集，不作为 v1 主训练标签 |
 
 ### 9.3 checkpoint 选择
 
@@ -595,3 +652,20 @@ startup: step 16 reached at 16:31 CST, both gpu14 cards about 73.6GB and 100% ut
 2. 本地或客户端假输入 smoke：`actions` shape 应为 `(50, 16)`，关节输出应是 degree-like，夹爪应落在约 `[-66, 0]` 合同内。
 3. 低速真机执行，先看抓取接触率和 lift 成功率，不用 train loss 判优。
 4. 若 `4999` 抓取仍差，再切 `Site deg base 10k / 9999` 做同场景 A/B。
+
+### 2026-07-08 11:36 CST - Plan Owner - 主线收敛为 RECAP/Evo-RL 优先
+
+状态：HIL 客户端合同已收敛，复杂失败阶段不进入 v1 主标签。
+
+决策：
+
+- 主线优先复现 π*0.6 / RECAP 与 Evo-RL：真实部署数据 -> value/advantage -> `acp_indicator` -> ACP/AWBC policy 训练。
+- KAI0 作为衣物任务辅助模块：保留 TDA、两阶段 Stage Advantage、AWBC prompt，不把 Model Arithmetic 或复杂 failure taxonomy 作为当前主线。
+- HIL v1 不要求客户端人工标复杂 `failure_stage`；每帧必须采 `policy_action/human_action/executed_action/is_intervention`，每条 episode 只标 `episode_success/recovery_success/episode_outcome`。
+- `task_stage` 固定为两阶段：`0 flatten`、`1 fold`，由 Stage 模型或后处理生成；不作为客户端实时人工标注负担。
+- `failure_reason` 只保留可选复盘字段：`grasp/manipulation/system/unknown`，用于分析采集分布，不作为 v1 主训练标签。
+
+下一步：
+
+- 客户端按第 7.2 节实现 HIL recorder；先采自主成功、自主失败、人工接管救回、接管后仍失败四类数据。
+- Data Agent 将 HIL raw 转成 LeRobot v2.1，并保留 RECAP/Evo-RL 字段以便 value train / value infer / ACP writeback。

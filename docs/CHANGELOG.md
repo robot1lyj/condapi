@@ -13,6 +13,9 @@ Design decisions → `docs/decisions/`. Architecture → `docs/ARCHITECTURE.md`.
   原始 π0.5 base -> site_deg 10k 已保存 checkpoint `9999`，后续按 gpu25 smoke 后真机 A/B 验证。
 - **OpenArm site_deg 数据审计**: 远端全量复核 151 episodes / 394900 frames，train/val 为
   `0:141` / `141:151`，state/action 16D，关节 degree-like，夹爪 HQ motor degrees `[-66, 0]`。
+- **OpenArm HIL 主线收敛**: 后续优先复现 π*0.6 / RECAP 与 Evo-RL 的
+  success/intervention/recovery -> value/advantage -> ACP 闭环；KAI0 保留两阶段 Stage/AWBC
+  辅助，不把复杂 failure stage 作为 v1 主标签。
 
 ## 2026-07-07
 
