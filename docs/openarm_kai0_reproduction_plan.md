@@ -397,9 +397,11 @@ policy 帧:
   complementary_info.is_intervention = 0
   complementary_info.teleop_action = NaN
 
-hold 接管对齐帧:
+hold 切换等待帧:
+  不进入严格 Evo-RL 训练 dataset
+  如果 raw debug 保留，则 authority_source = hold
   action = hold 的最终下发动作
-  complementary_info.is_intervention = 1
+  complementary_info.is_intervention = 0
   complementary_info.teleop_action = NaN
 
 human VR 帧:
@@ -408,9 +410,11 @@ human VR 帧:
   complementary_info.teleop_action = 人的 16D 动作
 ```
 
-这个帧语义可以接受：Evo-RL/LeRobot policy 训练始终读 `action` 作为最终执行动作；`is_intervention` 告诉 value/ACP 这帧处于人工接管上下文；`authority_source` 负责区分 policy、hold 和真实 human VR 动作。
+严格复刻 Evo-RL 时，`is_intervention=1` 只表示“人类动作已经实际控制机器人”。按下 hold 到 VR 动作真正生效之间的切换等待，不是 Evo-RL 的 intervention 正样本。
 
-关键约束：后处理不能简单把所有 `is_intervention=1` 都当成 positive ACP 样本。真实人类纠正样本应优先用 `authority_source=human_vr` 或 `teleop_action` 有效值筛选；`authority_source=hold` 的对齐帧保留时间连续性，但在 ACP/value 正样本构造时要单独 mask、降权或跳过。
+关键约束：Evo-RL `lerobot-value-infer` 默认可用 `force_intervention_positive=true` 把 intervention 帧强制设为 positive ACP。若 hold 切换等待帧被写成 `is_intervention=1`，会把“停住/等待/切换”的动作误标成正样本，污染 ACP 训练。因此客户端如果保留 hold raw debug，也必须在导出 Evo-RL 训练数据时删除这些帧，或至少保证它们不会进入 `acp.intervention_field`。
+
+落地建议：客户端最好直接把训练导出的 `complementary_info.is_intervention` 定义为“真实 human VR 控制中”。如果 raw debug 需要记录 hold 切换等待帧，则额外用 `authority_source=hold` 保留在 raw 层，转换到 LeRobot/Evo-RL 训练集时丢弃；不要为了兼容把 hold 塞进训练数据。
 
 KAI0 侧需要三路视频键名。转换成 KAI0 pipeline 时按项目已有命名映射，不要求客户端直接改名：
 
@@ -423,8 +427,8 @@ OpenArm observation.images.right_wrist -> KAI0 observation.images.hand_right
 Evo-RL 复刻必须记录：
 
 ```text
-complementary_info.is_intervention # 0/1，当前帧是否人工接管
-authority_source                  # 必须能区分 policy / hold / human_vr
+complementary_info.is_intervention # 0/1，真实 human VR 是否正在控制机器人
+authority_source                  # raw debug 若保留 hold，则必须能区分 policy / hold / human_vr
 episode_success                   # episode 级 success / failure；value train 上游监督
 ```
 
@@ -434,12 +438,11 @@ episode 级 metadata 已确认可记录：
 episode_success
 episode_outcome                   # success / failure / aborted
 recovery_success
-intervention_count
-intervention_start_frames
-intervention_end_frames
 collector_policy_id
 model_metadata
 ```
+
+接管切换起止时间不属于 Evo-RL value/ACP 训练硬依赖。`intervention_count`、`intervention_start_frames`、`intervention_end_frames` 可以不落 episode metadata；需要复盘时可由逐帧 `complementary_info.is_intervention`、`authority_source` 和 `frame_index/timestamp` 重建。保留它们只属于 raw debug 便捷索引，不应成为客户端阻塞项。
 
 KAI0 Step0 必须能产生的标注信息：
 
@@ -838,7 +841,7 @@ startup: step 16 reached at 16:31 CST, both gpu14 cards about 73.6GB and 100% ut
 决策：
 
 - HIL 默认目录固定为 `/tmp/openarm_hil/openarm_hil_dagger`，每集有 `episodes/episode_000000.hdf5`，三路 mp4 视频和 `meta/info.json`、`meta/episodes.jsonl`。
-- 每帧记录 `timestamp/timestamp_ns`、`episode_index/frame_index`、`task/prompt`、16D `observation.state`、16D `action`、三路图像键、`complementary_info.is_intervention` 和 `authority_source`。
+- 每帧记录 `timestamp/timestamp_ns`、`episode_index/frame_index`、`task/prompt`、16D `observation.state`、16D `action`、三路图像键、`complementary_info.is_intervention`；如果 raw debug 保留 hold 切换等待帧，还必须记录 `authority_source`。
 - 单位确认：关节 degrees；夹爪 HQ motor degrees，`0` 张开，`-66` 闭合；16D 顺序为 `[右臂7关节, 右夹爪, 左臂7关节, 左夹爪]`。
-- 帧语义确认：policy 帧 `action=policy` 且 `is_intervention=0`；hold 对齐帧 `action=hold` 且 `is_intervention=1`；human VR 帧 `action=human` 且 `teleop_action=human`。
-- episode metadata 确认包含 `episode_success`、`episode_outcome`、`recovery_success`、接管段、`collector_policy_id` 和 `model_metadata`。
+- 帧语义确认：policy 帧 `action=policy` 且 `is_intervention=0`；hold 切换等待帧不是 Evo-RL intervention，严格训练集应丢弃；human VR 帧 `action=human` 且 `is_intervention=1`、`teleop_action=human`。
+- episode metadata 确认包含 `episode_success`、`episode_outcome`、`recovery_success`、`collector_policy_id` 和 `model_metadata`；接管起止段可选，可由逐帧字段重建。
