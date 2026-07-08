@@ -18,6 +18,10 @@ Design decisions → `docs/decisions/`. Architecture → `docs/ARCHITECTURE.md`.
   辅助，不把复杂 failure stage 作为 v1 主标签。
 - **OpenArm HIL window BC 删除**: 删除独立 `recovery_v1_probe` 思路；HIL 接管数据保留完整
   episode，只通过 value/advantage/`acp_indicator` 回写后进入 ACP/AWBC 训练。
+- **OpenArm Evo-RL/KAI0 并行规划收敛**: 计划调整为 Evo-RL value/ACP 与 KAI0 Stage/AWBC 双线并行；
+  当前 site_deg 真机测试未完整成功但动作明显改善，作为 HIL/rollout collector。客户端同一份原始记录同时保留
+  Evo-RL 与 KAI0 所需信号；KAI0 专属 `stage_progress_gt`、advantage 和 `task_index/tasks.jsonl`
+  由后处理生成，不再引入自研 `failure_stage` 或三分类主标签。
 
 ## 2026-07-07
 
