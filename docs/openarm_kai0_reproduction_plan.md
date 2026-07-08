@@ -347,6 +347,20 @@ python scripts/merge_openarm_lerobot_v21.py \
 
 客户端目标：同一份 HIL 记录同时满足 Evo-RL 复刻和 KAI0 后续接入。只记录两边项目明确需要的原始信号；训练派生字段全部由后处理生成。
 
+客户端已确认可采集的 HIL 原始格式：
+
+```text
+root: /tmp/openarm_hil/openarm_hil_dagger
+episode hdf5: episodes/episode_000000.hdf5
+videos:
+  videos/observation.images.base/episode_000000.mp4
+  videos/observation.images.left_wrist/episode_000000.mp4
+  videos/observation.images.right_wrist/episode_000000.mp4
+sidecar:
+  meta/info.json
+  meta/episodes.jsonl
+```
+
 每帧必须记录，作为 Evo-RL 和 KAI0 的共同 LeRobot 基础：
 
 ```text
@@ -356,12 +370,47 @@ frame_index
 task / prompt
 
 observation.state                 # 16D，HQ contract: joints degrees, gripper HQ motor degrees
-action                            # 16D，最终实际执行动作；Evo-RL/LeRobot/KAI0 policy 训练都读这个
+action                            # 16D，最终实际执行动作；等于 action.executed
 
 observation.images.base           # OpenArm 原始主视角
 observation.images.left_wrist     # OpenArm 原始左腕视角
 observation.images.right_wrist    # OpenArm 原始右腕视角
+
+complementary_info.is_intervention # 0/1，当前帧是否人工接管
+authority_source                   # policy / hold / human_vr / safety_stop 等；用于区分 hold 与真实人类动作
 ```
+
+state/action 维度和单位固定为：
+
+```text
+shape: 16D
+layout: [右臂7关节, 右夹爪, 左臂7关节, 左夹爪]
+arm joints: degrees
+gripper: HQ motor degrees，0 = 张开，-66 = 闭合
+```
+
+帧语义固定为：
+
+```text
+policy 帧:
+  action = policy 实际下发动作
+  complementary_info.is_intervention = 0
+  complementary_info.teleop_action = NaN
+
+hold 接管对齐帧:
+  action = hold 的最终下发动作
+  complementary_info.is_intervention = 1
+  complementary_info.teleop_action = NaN
+
+human VR 帧:
+  action = 人实际执行动作
+  complementary_info.is_intervention = 1
+  complementary_info.teleop_action = 人的 16D 动作
+```
+
+这个帧语义可以接受：Evo-RL/LeRobot policy 训练始终读 `action` 作为最终执行动作；`is_intervention` 告诉 value/ACP 这帧处于人工接管上下文；`authority_source` 负责区分 policy、hold 和真实 human VR 动作。
+
+关键约束：后处理不能简单把所有 `is_intervention=1` 都当成 positive ACP 样本。真实人类纠正样本应优先用 `authority_source=human_vr` 或 `teleop_action` 有效值筛选；`authority_source=hold` 的对齐帧保留时间连续性，但在 ACP/value 正样本构造时要单独 mask、降权或跳过。
 
 KAI0 侧需要三路视频键名。转换成 KAI0 pipeline 时按项目已有命名映射，不要求客户端直接改名：
 
@@ -375,7 +424,21 @@ Evo-RL 复刻必须记录：
 
 ```text
 complementary_info.is_intervention # 0/1，当前帧是否人工接管
+authority_source                  # 必须能区分 policy / hold / human_vr
 episode_success                   # episode 级 success / failure；value train 上游监督
+```
+
+episode 级 metadata 已确认可记录：
+
+```text
+episode_success
+episode_outcome                   # success / failure / aborted
+recovery_success
+intervention_count
+intervention_start_frames
+intervention_end_frames
+collector_policy_id
+model_metadata
 ```
 
 KAI0 Step0 必须能产生的标注信息：
@@ -406,14 +469,15 @@ meta/tasks.jsonl                   # KAI0 AWBC prompt mapping
 
 ```text
 complementary_info.policy_action   # 模型本来要执行的当前动作，16D
-complementary_info.teleop_action   # 人工接管动作，16D；未接管可为空
+complementary_info.policy_action_chunk # OpenPI chunk，shape (50,16)
+complementary_info.teleop_action   # 人工接管动作，16D；未接管或 hold 对齐帧可为 NaN
+executed_action                    # 与 action 同义，用于审计
 collector_policy_id                # policy checkpoint 或 human
 ```
 
 只作为部署 debug，可选保存，不进入 Evo-RL/KAI0 复刻字段合同：
 
 ```text
-policy_action_chunk
 action_chunk_id
 step_in_chunk
 request_send_time_ns / response_recv_time_ns / server_infer_ms / round_trip_ms
@@ -766,3 +830,15 @@ startup: step 16 reached at 16:31 CST, both gpu14 cards about 73.6GB and 100% ut
 - KAI0 专属训练列不由客户端实时生成：`stage_progress_gt/stage_id` 由 `scripts/openarm_stage_annotator.py` + `scripts/openarm_stage_progress.py` 后处理写入；`absolute_value/absolute_advantage/relative_advantage/task_index/meta/tasks.jsonl` 由 KAI0 eval/discretize 后处理生成。
 - Evo-RL 和 KAI0 不再排队：同一批 HIL/rollout 数据分流到 value/ACP 与 Stage/AWBC 两条链路，每 2 天同步字段、训练 smoke 和真机 A/B 结果。
 - 复刻阶段禁止自研 `failure_stage` 或额外三分类主标签；KAI0 AWBC 先按项目已有 `fold the cloth, Advantage: negative/positive`。
+
+### 2026-07-08 16:42 CST - Plan Owner - 客户端 HIL 原始格式确认
+
+状态：客户端可采格式满足 Evo-RL Track A 与 KAI0 Track B 的共同输入要求。
+
+决策：
+
+- HIL 默认目录固定为 `/tmp/openarm_hil/openarm_hil_dagger`，每集有 `episodes/episode_000000.hdf5`，三路 mp4 视频和 `meta/info.json`、`meta/episodes.jsonl`。
+- 每帧记录 `timestamp/timestamp_ns`、`episode_index/frame_index`、`task/prompt`、16D `observation.state`、16D `action`、三路图像键、`complementary_info.is_intervention` 和 `authority_source`。
+- 单位确认：关节 degrees；夹爪 HQ motor degrees，`0` 张开，`-66` 闭合；16D 顺序为 `[右臂7关节, 右夹爪, 左臂7关节, 左夹爪]`。
+- 帧语义确认：policy 帧 `action=policy` 且 `is_intervention=0`；hold 对齐帧 `action=hold` 且 `is_intervention=1`；human VR 帧 `action=human` 且 `teleop_action=human`。
+- episode metadata 确认包含 `episode_success`、`episode_outcome`、`recovery_success`、接管段、`collector_policy_id` 和 `model_metadata`。

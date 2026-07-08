@@ -22,6 +22,9 @@ Design decisions → `docs/decisions/`. Architecture → `docs/ARCHITECTURE.md`.
   当前 site_deg 真机测试未完整成功但动作明显改善，作为 HIL/rollout collector。客户端同一份原始记录同时保留
   Evo-RL 与 KAI0 所需信号；KAI0 专属 `stage_progress_gt`、advantage 和 `task_index/tasks.jsonl`
   由后处理生成，不再引入自研 `failure_stage` 或三分类主标签。
+- **OpenArm HIL 客户端格式确认**: 客户端 HIL 输出固定为 HDF5 episode + 三路 mp4 + `meta/info.json`
+  + `meta/episodes.jsonl`；每帧记录 16D HQ 合同 state/action、`is_intervention`、`authority_source`、
+  policy/human/hold 帧语义和延迟队列字段，episode 级记录 success/outcome/recovery/intervention spans。
 
 ## 2026-07-07
 
