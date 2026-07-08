@@ -7,6 +7,13 @@ Design decisions → `docs/decisions/`. Architecture → `docs/ARCHITECTURE.md`.
 
 ---
 
+## 2026-07-08
+
+- **OpenArm site_deg 训练完成**: HQ `99999` -> site_deg 5k 已保存 checkpoint `4999`；
+  原始 π0.5 base -> site_deg 10k 已保存 checkpoint `9999`，后续按 gpu25 smoke 后真机 A/B 验证。
+- **OpenArm site_deg 数据审计**: 远端全量复核 151 episodes / 394900 frames，train/val 为
+  `0:141` / `141:151`，state/action 16D，关节 degree-like，夹爪 HQ motor degrees `[-66, 0]`。
+
 ## 2026-07-07
 
 - **OpenArm site 单位错配修复**: 确认 HQ 1200 集为 degree-like，而旧 `openarm_site_align_v1` 为

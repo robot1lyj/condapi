@@ -103,7 +103,7 @@ checkpoint: /share/home/linyongjia/output/openpi/pi05_openarms_dual_site_align_v
 | Site HQ 5k old | 已删除 | `openarm_site_v1_probe_151e_2gpu_5k_hq99999_20260706` | 旧单位合同错误；曾在 gpu25:6666 误测；2026-07-07 已清理 |
 | Site align probe old | 已删除 | `openarm_site_v1_probe_151e_4gpu_1k_tol005_20260706` | 基于旧 radians site 数据；2026-07-07 已清理 |
 | Site deg HQ 5k | 已完成 | `/share/home/linyongjia/output/openpi/pi05_openarms_dual_site_align_v1_probe/openarm_site_deg_151e_2gpu_5k_hq99999_20260707/4999` | 待开启 gpu25 推理服务和真机 A/B |
-| Site deg base 10k | 训练中 | `/share/home/linyongjia/output/openpi/pi05_openarms_dual_site_align_v1_base_10k/openarm_site_deg_base_151e_2gpu_10k_pi05base_20260707` | gpu14 tmux `openarm_site_deg_base10k_20260707` |
+| Site deg base 10k | 已完成 | `/share/home/linyongjia/output/openpi/pi05_openarms_dual_site_align_v1_base_10k/openarm_site_deg_base_151e_2gpu_10k_pi05base_20260707/9999` | 第二 A/B 候选；loss 更低但不单独判优 |
 | Stage Advantage v1 | 可用 | `/share/home/linyongjia/output/openpi/ADVANTAGE_TORCH_OPENARM_FLATTEN_FOLD/openarm_stage_v1_train180_bs32_no_ckpt_10k_20260701/10000` | 批量预测 HQ/site/TDA 映射 |
 | TDA smoke | 通过 | `openarm_hq_tda_aug_smoke_tiny_20260630/2` | 不单独作为主模型 |
 | `hq_tda_site_v1` | 配置存在，待短训 | `pi05_openarms_dual_hq_tda_site_v1` | 先 5k/10k probe，不直接 88k |
@@ -550,21 +550,48 @@ startup: step 16 reached at 16:31 CST, both gpu14 cards about 73.6GB and 100% ut
 
 ### 2026-07-07 10:58 CST - Data/Training Agent - HQ contract 转换入口落地
 
-状态：数据合同已修正，site deg 训练可启动。
+状态：数据合同已修正，site deg 训练已完成，可进入 gpu25 推理 smoke。
 
 已完成：
 
 - 新增统一入口 `scripts/convert_openarm_hq_dataset.py`，支持 `from-hdf5` 和 `from-lerobot` 两种来源；后续现场清洗只走这个入口。
 - HQ contract 固定为：task `Fold the T-shirt properly`，arm joints degrees，gripper HQ motor degrees（`0` open，`-66` closed）。
-- 现场 raw gripper 标定为 `0.0` closed / `0.84` open，再映射到 HQ motor degrees；远端抽查 gripper 范围为 `-65.61..0`。
+- 现场 raw gripper 标定为 `0.0` closed / `0.84` open，再映射到 HQ motor degrees；远端全量抽查 gripper 范围为 `-66..0`。
 - 已重转 `/share/home/linyongjia/datasets/openarm_site_align_v1_deg`，151 episodes，joint max_abs 约 `142.06`，task 已对齐 HQ。
 - 已计算 `/share/home/linyongjia/datasets/openarm_site_align_v1_deg/norm_stats.json`，训练 split `0:141`，共 374544 frames；OpenPI config 已确认能读取 `state/actions` norm stats。
 - 已在 gpu12 启动 HQ `99999` -> site deg 5k：tmux `openarm_site_deg_5k_20260707`，log `/share/home/linyongjia/output/openpi/logs/pi05_openarms_dual_site_align_v1_probe/openarm_site_deg_151e_2gpu_5k_hq99999_20260707_gpu12.log`；step 0 loss `0.2434`，两张 A800 显存约 `73.6GB`。
-- HQ `99999` -> site deg 5k 已完成 checkpoint `4999`，最终段 loss 约 `0.0216..0.0241`，最终 checkpoint 约 `42G`。
-- π0.5 base -> site deg 10k 已在 gpu14 启动：tmux `openarm_site_deg_base10k_20260707`，最新检查 step `2280/10000`，loss 约 `0.0306..0.0338`，checkpoint `2200` 已保存。
+- HQ `99999` -> site deg 5k 已完成 checkpoint `4999`，metrics `250` rows，step `0..4980`，loss `0.2434 -> 0.0218`，tail20 mean `0.0226`，grad_norm tail20 mean `0.1023`，最终 checkpoint 约 `42G`。
+- π0.5 base -> site deg 10k 已完成 checkpoint `9999`，metrics `500` rows，step `0..9980`，loss `0.1602 -> 0.0156`，tail20 mean `0.0163`，grad_norm tail20 mean `0.0849`，checkpoint 约 `417G`。
 - 已删除三个旧单位合同 checkpoint，释放约 `126G`：旧 site 5k、旧 site 1k、旧 base 1000。
 
 下一步：
 
-- 继续监控 π0.5 base -> site deg 10k 到 checkpoint `9999`。
-- 开启 gpu25 推理服务时只允许使用 `site_deg` 新 checkpoint，禁止继续使用旧 site5k/base10k 候选。
+- 在 gpu25 先 serve `Site deg HQ 5k / 4999`，做 WebSocket health、假观测 action shape、动作范围和夹爪范围 smoke；不直接上真机执行。
+- smoke 通过后做低速真机 A/B，第一候选是 `Site deg HQ 5k / 4999`，第二候选是 `Site deg base 10k / 9999`。
+- 执行端夹爪建议先用防抖二值化：model gripper `<= -30` 发闭合，`>= -10` 发张开，中间保持上一次命令。
+- 禁止继续使用旧 `openarm_site_align_v1` 单位合同下的 site5k/base10k 候选。
+
+### 2026-07-08 10:43 CST - Training Agent - site_deg 两个候选完成并审计训练数据
+
+状态：可以开始第一阶段推理测试，但顺序必须是 gpu25 smoke -> 动作范围检查 -> 低速真机 A/B。
+
+训练完成：
+
+- HQ `99999` warm start -> site_deg 5k：gpu12 无活跃训练进程，最终 checkpoint `/share/home/linyongjia/output/openpi/pi05_openarms_dual_site_align_v1_probe/openarm_site_deg_151e_2gpu_5k_hq99999_20260707/4999`。
+- 原始 π0.5 base -> site_deg 10k：gpu14 无活跃训练进程，最终 checkpoint `/share/home/linyongjia/output/openpi/pi05_openarms_dual_site_align_v1_base_10k/openarm_site_deg_base_151e_2gpu_10k_pi05base_20260707/9999`。
+
+训练数据审计：
+
+- `/share/home/linyongjia/datasets/openarm_site_align_v1_deg`：151 episodes，394900 frames，split `train=0:141`、`val=141:151`。
+- task prompt 为 `Fold the T-shirt properly`。
+- `observation.state` 和 `action` 都是 16 维。
+- 关节范围：state arm abs max `142.06`，action arm abs max `140.0`，与 HQ degree-like 合同一致。
+- 夹爪范围：state/action gripper `[-66, 0]`，与 HQ motor degrees 合同一致；`0` open，`-66` closed。
+- 数据列名仍是 LeRobot 原始列 `observation.images.base/left_wrist/right_wrist`；训练配置用 `base_image_key="observation.images.base"`，`PiperInputs` 在训练/推理 transform 中重打包成模型需要的 `base_0_rgb/left_wrist_0_rgb/right_wrist_0_rgb`。
+
+推理测试顺序：
+
+1. gpu25 serve `Site deg HQ 5k / 4999`。
+2. 本地或客户端假输入 smoke：`actions` shape 应为 `(50, 16)`，关节输出应是 degree-like，夹爪应落在约 `[-66, 0]` 合同内。
+3. 低速真机执行，先看抓取接触率和 lift 成功率，不用 train loss 判优。
+4. 若 `4999` 抓取仍差，再切 `Site deg base 10k / 9999` 做同场景 A/B。
