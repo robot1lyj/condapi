@@ -139,7 +139,7 @@ HQ 成功演示
     -> 真机 A/B
 ```
 
-主线指标来自 RECAP/Evo-RL：`episode_success`、`is_intervention`、`recovery_success`、`policy_action`、`human_action`、`executed_action`。KAI0 的两阶段 `task_stage/stage_progress` 后处理生成，不要求客户端人工标复杂失败阶段。
+按 π*0.6 / RECAP 公开材料与本地 Evo-RL 代码重新归类：训练链路明确依赖的是 `observation/action/task`、episode 级 `episode_success`、frame 级 `complementary_info.is_intervention`，后处理再写回 `complementary_info.value/advantage/acp_indicator`。`policy_action`、`teleop_action/human_action`、`executed_action`、`collector_policy_id` 是 OpenArm HIL 为复现接管、追踪动作来源和排查部署问题保留的工程字段；`recovery_success` 可由 `episode_success + intervention spans` 派生，不作为 Evo-RL 当前代码硬依赖。KAI0 的两阶段 `task_stage/stage_progress` 后处理生成，不要求客户端人工标复杂失败阶段。
 
 ### 4.2 Prompt 条件策略
 
@@ -300,56 +300,62 @@ python scripts/merge_openarm_lerobot_v21.py \
 
 ### 7.2 HIL/recovery 数据字段
 
-HIL 数据必须先支持 RECAP/Evo-RL，不只是普通 BC。v1 不做复杂 `failure_stage` 主标签；只采能训练 value/advantage/ACP 的核心信号。
+HIL 数据必须先支持 RECAP/Evo-RL，不只是普通 BC。v1 不做复杂 `failure_stage` 主标签；字段按来源分级，避免把工程调试字段误说成论文或 Evo-RL 代码硬要求。
 
-每帧必须记录：
+训练最小闭环必须能转成 LeRobot：
 
 ```text
-timestamp_ns
-episode_id
+timestamp / timestamp_ns
+episode_index / episode_id
 frame_index
+task / prompt
 
 observation.state                 # 16D，HQ contract: joints degrees, gripper HQ motor degrees
 observation.images.base
 observation.images.left_wrist
 observation.images.right_wrist
 
-policy_action_chunk               # shape (50, 16)，服务端返回的整段 chunk
-policy_action                     # 当前准备用于执行的模型动作，16D
-human_action 或 teleop_action      # 接管时的人类动作，16D；未接管可为空
-executed_action                   # 最终下发动作，16D
+action                            # 最终实际执行动作，16D；Evo-RL/LeRobot policy 训练读这个
+complementary_info.is_intervention # 当前帧是否人工接管
+```
 
-is_intervention                   # 当前帧是否人工接管
+每条 episode 结束时必须有：
+
+```text
+episode_success                   # success / failure；value train 和 value infer 的上游监督
+episode_outcome                   # success / failure / aborted；转换时归一到 episode_success
+```
+
+OpenArm 强烈建议额外保留，方便复现接管和排查动作来源：
+
+```text
+complementary_info.policy_action  # 当前帧模型原本准备执行的动作，16D
+complementary_info.teleop_action  # 接管时的人类动作，16D；未接管可为空
+executed_action                   # 若 action 已是最终执行动作，可与 action 相同；用于显式审计
 authority_source                  # policy / human / safety_stop / scripted
+collector_policy_id               # policy checkpoint 或 human
 policy_checkpoint
-prompt
 
-request_send_time_ns
-response_recv_time_ns
-server_infer_ms
-round_trip_ms
+policy_action_chunk               # OpenPI 服务端返回的整段 chunk，shape (50, 16)；工程字段
 action_chunk_id
 step_in_chunk
-publish_hz
-drop_count
+model_metadata                    # action_dim=32, robot_action_dim=16, action_horizon=50, rtc_mode 等
 safety_clipped
 clip_reason
 ```
 
-每条 episode 结束时必须记录：
+只作为部署 debug，可选保存：
 
 ```text
-episode_success                   # 最终是否完成
-episode_outcome                   # success / failure / aborted
-recovery_success                  # 人工接管后是否救回；无接管时为 null
-intervention_count
-intervention_start_frame
-intervention_end_frame
-collector_policy_id
-model_metadata                    # action_dim=32, robot_action_dim=16, action_horizon=50, rtc_mode 等
+request_send_time_ns
+response_recv_time_ns
+server_infer_ms
+round_trip_ms
+publish_hz
+drop_count
 ```
 
-KAI0 / Stage 辅助字段由后处理生成，不要求客户端人工标：
+后处理生成，不要求客户端人工标：
 
 ```text
 task_stage                        # 0 flatten / 1 fold
@@ -685,3 +691,14 @@ startup: step 16 reached at 16:31 CST, both gpu14 cards about 73.6GB and 100% ut
 下一步：
 
 - HIL 到齐后先构建 `openarm_hil_recap_v1`，再跑 value/advantage/ACP smoke；不启动独立 window BC 微调。
+
+### 2026-07-08 12:22 CST - Plan Owner - HIL 字段按 Evo-RL 代码重新归类
+
+状态：已修正第 4.1 和 7.2 节，避免把工程扩展字段误标为 π*0.6/RECAP 或 Evo-RL 硬要求。
+
+代码审计结论：
+
+- Evo-RL 当前训练硬依赖：LeRobot 基础 `observation/action/task`，episode 级 `episode_success`，ACP/value 后处理字段 `complementary_info.value/advantage/acp_indicator`。
+- Evo-RL 当前 HIL processor 明确使用：`teleop_action`、`is_intervention`、`success/terminate/rerecord`；接管时用 `teleop_action` 覆盖 policy action。
+- `policy_action_chunk`、网络延迟、`action_chunk_id/step_in_chunk`、`model_metadata` 是 OpenArm/OpenPI 工程审计字段，不是论文或 Evo-RL 代码必需字段。
+- `policy_action`、`executed_action`、`collector_policy_id` 对我们复现 RECAP 接管数据很有价值，但在当前 Evo-RL 代码里不是 value/ACP 训练硬依赖；客户端能采就采，最小闭环不能被这些字段阻塞。
