@@ -16,6 +16,8 @@ Design decisions → `docs/decisions/`. Architecture → `docs/ARCHITECTURE.md`.
 - **OpenArm HIL 主线收敛**: 后续优先复现 π*0.6 / RECAP 与 Evo-RL 的
   success/intervention/recovery -> value/advantage -> ACP 闭环；KAI0 保留两阶段 Stage/AWBC
   辅助，不把复杂 failure stage 作为 v1 主标签。
+- **OpenArm HIL window BC 删除**: 删除独立 `recovery_v1_probe` 思路；HIL 接管数据保留完整
+  episode，只通过 value/advantage/`acp_indicator` 回写后进入 ACP/AWBC 训练。
 
 ## 2026-07-07
 

@@ -93,7 +93,7 @@ checkpoint: /share/home/linyongjia/output/openpi/pi05_openarms_dual_site_align_v
 | Site align v1 old | `/share/home/linyongjia/datasets/openarm_site_align_v1` | 历史错误单位，151 集 | 仅用于追溯 | radian-like + normalized gripper，禁止继续训练/真机测试 |
 | Site align v1 deg | `/share/home/linyongjia/datasets/openarm_site_align_v1_deg` | 已重转并完成 norm stats | 现场分布对齐；site probe；合并训练高权重数据 | 默认 141 train + 10 holdout；HQ task；arm joints degrees；gripper HQ motor degrees |
 | AWBC v1 | `/share/home/linyongjia/datasets/openarm_awbc_v1` | 生成/合并状态需复核 | Stage Advantage -> AWBC policy train | 先 smoke，再短训 |
-| HIL recovery v1 | `openarm_hil_recovery_v1` | 未有真实训练数据 | RECAP/DAgger/recovery | 不阻塞当前 site/TDA/AWBC 准备 |
+| HIL / RECAP v1 | `openarm_hil_recap_v1` | 未有真实训练数据 | RECAP/Evo-RL value/advantage/ACP | 不作为独立 window BC 训练集 |
 | 旧 OpenArms | `openarms_folding_v001/v002` | 已有 | 待审计辅助数据 | 不是 site align v1 |
 
 ### 2.2 模型与服务
@@ -169,6 +169,7 @@ Advantage: positive
 - 不把 KAI0 Model Arithmetic 当作运行时路由。
 - 不在没有 HIL/recovery 数据时宣称完成 RECAP。
 - 不把复杂 `failure_stage` 作为 HIL 主标签；失败原因只做可选复盘字段。
+- 不做独立的 HIL window BC / `recovery_v1_probe`；接管数据必须进入完整 episode 的 value/advantage/ACP 链路。
 
 ## 5. Agent 分工
 
@@ -218,7 +219,7 @@ latency: infer_ms / publish_hz / queue_drop
 |---|---|
 | site probe 抓取明显改善 | 构建并短训 `hq_tda_site_v1` |
 | site probe 无改善 | 暂停合并长训，检查数据转换、夹爪/action、推理执行 |
-| site probe 改善但折叠不稳 | 进入 AWBC + HIL recovery |
+| site probe 改善但折叠不稳 | 进入 AWBC + HIL RECAP/ACP |
 
 ### P0. 复核 AWBC 生成状态
 
@@ -281,7 +282,7 @@ python scripts/merge_openarm_lerobot_v21.py \
 | `hq_site_v1_deg_probe_10k` | HQ + site_deg x6 | HQ `99999` 或 site_deg probe | 5k/10k | 判断 HQ 先验 + site 是否更稳 |
 | `hq_tda_site_v1_deg_probe_10k` | HQ + TDA + site_deg x6 | HQ `99999` 或 site_deg probe | 5k/10k | 判断 TDA 是否帮助部署鲁棒性 |
 | `awbc_v1_probe_10k` | AWBC bad/neutral/positive | HQ `99999` 或 best probe | 5k/10k | 判断 Stage/AWBC 是否提升抓取/进展 |
-| `recovery_v1_probe` | best + HIL recovery | best prior | 1k/5k | 等 HIL 数据后做恢复能力 |
+| `recap_acp_hil_v1_probe` | HIL full episodes + value/advantage/acp_indicator | best prior | 5k/10k | 复现 RECAP/Evo-RL 主线，不做窗口 BC |
 
 ## 7. 数据策略
 
@@ -488,7 +489,7 @@ v2 目标不是增加概念，而是解决当前抓取失败：让 value/advanta
 | G1 site probe | site probe 真机抓取优于 HQ | 做 HQ/site/TDA 短训 | 查数据转换/夹爪/控制 |
 | G2 combined short train | 5k/10k 候选离线和真机均不退化 | 扩到 20k/40k 或进入 AWBC | 调数据比例，不开 88k |
 | G3 AWBC | AWBC smoke + 真机进展优于 SFT | 继续 AWBC/ACP | 回查 Stage 打分和 label ratio |
-| G4 HIL recovery | 接管数据字段完整且能提取 recovery | 训练 recovery branch | 先修采集客户端 |
+| G4 HIL RECAP/ACP | HIL 字段完整，能训练 value 并回写 `advantage/acp_indicator` | 跑 `recap_acp_hil_v1_probe` | 先修采集客户端或 value 标注链路 |
 | G5 Model Arithmetic | 至少 3 个互补 checkpoint + OOD validation | 做权重合并 | 暂缓 |
 
 ## 11. 远端与命令索引
@@ -669,3 +670,18 @@ startup: step 16 reached at 16:31 CST, both gpu14 cards about 73.6GB and 100% ut
 
 - 客户端按第 7.2 节实现 HIL recorder；先采自主成功、自主失败、人工接管救回、接管后仍失败四类数据。
 - Data Agent 将 HIL raw 转成 LeRobot v2.1，并保留 RECAP/Evo-RL 字段以便 value train / value infer / ACP writeback。
+
+### 2026-07-08 11:45 CST - Plan Owner - 删除独立 HIL window BC 思路
+
+状态：`recovery_v1_probe` 已从训练候选中删除。
+
+决策：
+
+- 不再设计“只截接管窗口做 BC”的独立实验。该做法会破坏长时序上下文，也不是 RECAP/π0.6、Evo-RL 或 KAI0 的主线。
+- HIL 数据保留完整 episode：policy 控制、人类接管、恢复、失败/成功结果都不删不拼。
+- 接管数据只通过 RECAP/Evo-RL 链路使用：训练 value，回写 `advantage/acp_indicator`，再做 ACP/AWBC policy 短训。
+- KAI0 的两阶段 Stage Advantage 继续作为辅助 progress 信号，但不替代完整 HIL episode 的 value/advantage 训练。
+
+下一步：
+
+- HIL 到齐后先构建 `openarm_hil_recap_v1`，再跑 value/advantage/ACP smoke；不启动独立 window BC 微调。
