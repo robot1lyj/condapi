@@ -1,80 +1,54 @@
 # Mode: Deployment
 
+Use for SSH, conda env, remote train/serve, GPU status, logs, and artifact promotion.
+
 ## Defaults
-- Training access: mu01 jump `linyongjia@172.31.11.100:12222`
-- Training nodes: gpu12 (`172.31.11.112`) and gpu14 (`172.31.11.114`) via mu01; gpu08 (`172.31.11.108`) is Slurm-gated/historical
-- Remote code: `/share/home/linyongjia/conda-pi/openpi`
-- Remote data root: `/share/home/linyongjia/data`
-- Remote output: `/share/home/linyongjia/output/openpi`
-- Conda env: `pi-conda`
-- Remote cache: `OPENPI_DATA_HOME=/share/home/linyongjia/.cache/openpi`
-- Default dataset addressing: `/share/home/linyongjia/data/local/<alias> -> ../<dataset>` and `--data.repo_id local/<alias>`.
+- Jump: `ssh -p 12222 linyongjia@172.31.11.100`
+- Nodes: `gpu12`, `gpu14` for training; `gpu25` for serve; `gpu28` for eval/aux.
+- Remote repo: `/share/home/linyongjia/conda-pi/openpi`
+- Remote env: `/share/home/linyongjia/miniconda3/envs/pi-conda`
+- Dataset root: `/share/home/linyongjia/datasets`
+- Output root: `/share/home/linyongjia/output/openpi`
+- Cache: `OPENPI_DATA_HOME=/share/home/linyongjia/.cache/openpi`
 
-## Build Offline Bundle (本地)
-```bash
-bash scripts/conda/build_offline_bundle.sh artifacts/pi-conda-offline-bundle
-tar -C artifacts -cf pi-conda-offline-bundle.tar pi-conda-offline-bundle
-scp -P 12222 pi-conda-offline-bundle.tar linyongjia@172.31.11.100:/share/home/linyongjia/
-```
+## Remote Train
+Prefer the project skill helper for norm-stats-then-train runs:
 
-## Install on Server
-```bash
-ssh -p 12222 linyongjia@172.31.11.100
-ssh -p 12222 gpu12
-cd /share/home/linyongjia
-tar -xf pi-conda-offline-bundle.tar
-cd /share/home/linyongjia/conda-pi/openpi
-bash scripts/conda/install_offline_bundle.sh \
-  --bundle-dir /share/home/linyongjia/pi-conda-offline-bundle \
-  --openpi-dir /share/home/linyongjia/conda-pi/openpi \
-  --env-name pi-conda
-```
-
-## Sync Code
-代码通过 `git push/pull` 在 `conda-pi` 分支同步。本地的 commit 推到远端后，在服务器 `git pull` 即可。
-
-## Runtime (on Server)
-```bash
-# 环境变量
-unset WANDB_DISABLED
-export WANDB_MODE=offline
-export HF_HUB_OFFLINE=1 HUGGINGFACE_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 HF_DATASETS_OFFLINE=1
-export OPENPI_DATA_HOME=/share/home/linyongjia/.cache/openpi
-export HF_LEROBOT_HOME=/share/home/linyongjia/data
-
-# 训练
-XLA_PYTHON_CLIENT_MEM_FRACTION=0.9 \
-conda run -n pi-conda python scripts/train.py pi05_piper_dual \
-  --exp-name <name> \
-  --checkpoint-base-dir /share/home/linyongjia/output/openpi \
-  --data.repo_id local/<alias>
-```
-
-## Remote Train Helper
-Use the shared helper for norm-stats-then-train runs:
 ```bash
 bash ~/.codex/skills/openpi-conda-remote-train/scripts/start_remote_train.sh \
-  --jump-host 172.31.11.100 \
   --node gpu12 \
-  --dataset-name <dataset_dir_under_data> \
-  --repo-alias <alias> \
-  --config pi05_piper_dual \
-  --exp-name <name>
+  --dataset-name <dataset_dir_under_datasets> \
+  --config <openpi_config> \
+  --exp-name <run_name> \
+  --num-train-steps <steps>
 ```
-Use gpu12 by default. For gpu14, enter through `ssh -p 12222 linyongjia@172.31.11.100` then `ssh -p 12222 gpu14`.
 
-## Serve (推理服务)
+Rules:
+
+- Use tmux for long runs.
+- Use `pi-conda`; do not use uv.
+- Verify dataset `meta/info.json` and `norm_stats.json` before policy training.
+- For OpenArm LeRobot v2.1, prefer `scripts/compute_openarm_parquet_norm_stats.py`.
+- Use gpu12/gpu14 for training; avoid stealing gpu25 if it is serving.
+
+## Serve
+
 ```bash
-# ⚠️ --port 必须在 policy:checkpoint 之前
+cd /share/home/linyongjia/conda-pi/openpi
 XLA_PYTHON_CLIENT_MEM_FRACTION=0.9 \
-conda run -n pi-conda python scripts/serve_policy.py --port 6666 policy:checkpoint \
-  --policy.config=<config> --policy.dir=<dir>
+/share/home/linyongjia/miniconda3/envs/pi-conda/bin/python scripts/serve_policy.py \
+  --port 6666 policy:checkpoint \
+  --policy.config=<config> \
+  --policy.dir=<checkpoint_dir>
 ```
 
-## Legacy Absolute-Path Training
-Older docs and OpenArm configs may use `/share/home/linyongjia/datasets/<dataset>` directly. Treat that as compatibility context unless the user explicitly asks for that path.
+`--port` must appear before `policy:checkpoint`.
 
-## Pre-flight Checks
-- 确认 gpu12/gpu14 可达: `ssh -p 12222 linyongjia@172.31.11.100`, then `ssh -p 12222 gpu12` or `gpu14`; both expose 2x A800.
-- 确认 conda 环境存在: `conda run -n pi-conda python -c "import openpi"`
-- 确认 GPU 可用: `conda run -n pi-conda python -c "import jax; print(jax.devices())"`
+## Local Env
+
+Local validation env is `pi-conda`. If missing, create with conda from `environment.pi-conda.yml`; install project editable; use CPU torch wheels locally if CUDA runtime libraries are absent. Keep `pip check` clean.
+
+## Writeback
+- Default node/path/env changes -> `docs/cache/kernel.md`.
+- New current training/serve workflow -> this file and, if OpenArm-specific, `docs/openarm_kai0_reproduction_plan.md`.
+- Incidents or meaningful failures -> `docs/CHANGELOG.md`.

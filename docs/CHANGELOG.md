@@ -9,6 +9,8 @@ Design decisions → `docs/decisions/`. Architecture → `docs/ARCHITECTURE.md`.
 
 ## 2026-07-09
 
+- **Context OS 记忆瘦身**: 压缩 `docs/cache` 热记忆默认值和部署模式，重写
+  `docs/openarm_kai0_reproduction_plan.md` 为当前 OpenArm Evo-RL/KAI0 执行计划；旧训练流水和事故细节不再放在热路径。
 - **OpenArm/Piper 数据链路拆分**: 新增 `OpenArmInputs/OpenArmOutputs` 与
   `LeRobotOpenArmDataConfig`，OpenArm 训练配置不再复用 Piper transform；OpenArm 路径固定校验
   HQ 16D state/action，并禁止使用旧 Piper 14D `swap_left_right` 逻辑。

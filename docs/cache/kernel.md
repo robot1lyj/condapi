@@ -1,65 +1,50 @@
 # Context Kernel
 
-New sessions: read `AGENTS.md` + this file first, then `context_index.md` to select <=1 mode pack.
+New sessions load `AGENTS.md` + this file first, then `context_index.md` and at most one mode pack.
 
-## Default Facts
-- Default product: OpenPI VLA fine-tuning and inference for Piper/OpenArm dual-arm workflows.
+## Defaults
+- Product: OpenPI VLA fine-tuning/inference for OpenArm cloth folding; Piper configs remain separate legacy/support paths.
 - Local workspace: `/home/lyj/lyj/openpi`
-- Default training access: mu01 jump `linyongjia@172.31.11.100:12222`, then `ssh -p 12222 gpu12` or `gpu14`.
-- Default training nodes: gpu12 (`172.31.11.112`) and gpu14 (`172.31.11.114`), 2x A800 each; gpu08 (`172.31.11.108`) is Slurm-gated/historical.
-- Remote code path: `/share/home/linyongjia/conda-pi/openpi`
-- Remote datasets: `/share/home/linyongjia/data/`; legacy docs may mention `/share/home/linyongjia/datasets/`.
-- Remote checkpoints/output: `/share/home/linyongjia/output/openpi`
-- Remote cache base: `/share/home/linyongjia/.cache/openpi`
-- Default training target: `pi05_piper_dual`; current OpenArm configs include `pi05_openarms_dual` and `pi05_openarms_dual_hq`.
-- Default env: `pi-conda` (conda, Python 3.11, CUDA 12), server conda at `/share/home/linyongjia/miniconda3/bin/conda`
-- Default entry: `scripts/train.py` (JAX), `scripts/train_pytorch.py` (PyTorch)
-- Multi-node JAX training requires early env init: `JAX_COORDINATOR_ADDRESS`, coordinator `JAX_COORDINATOR_BIND_ADDRESS`, `JAX_NUM_PROCESSES`, `JAX_PROCESS_ID`; only process 0 writes wandb/metrics.
-- Model checkpoints (GCS): `gs://openpi-assets/checkpoints/` (pi0_base, pi05_base, pi0_fast_base, etc.)
-- Default pipeline: choose gpu12/gpu14 -> dataset under remote data root -> `local/<alias>` symlink -> norm stats -> training -> offline evaluation.
-- `norm_stats.json` must exist under `assets/<config>/local/<alias>/` before training.
-- OpenPI does not auto-read LeRobot `info.json` splits; set `DataConfig.train_episodes` explicitly when a split matters.
-- OpenArm policy data must follow the HQ contract: task prompt `Fold the T-shirt properly`, arm joints in degrees, grippers as HQ motor degrees (`0` open, `-66` closed); robot/ROS remains radians + normalized gripper.
-- OpenArm training configs use `LeRobotOpenArmDataConfig` with `OpenArmInputs/OpenArmOutputs`; do not route OpenArm through Piper transforms or 14D `swap_left_right`.
-- New OpenArm site cleaning must use `scripts/convert_openarm_hq_dataset.py`; default gripper calibration maps raw normalized `0.0` closed and `0.84` open into HQ motor degrees.
-- OpenArm HIL raw cleaning must use `scripts/convert_openarm_hq_dataset.py from-hil-hdf5`.
-- Evo-RL clean HIL export drops hold frames, rewrites videos, and marks only real human VR as intervention.
-- OpenArm JAX ACP training uses `ACPPromptTransform` on `complementary_info.acp_indicator`; clean HIL dataset name is `openarm_hil_evo_v1`.
+- Remote access: `ssh -p 12222 linyongjia@172.31.11.100`, then `ssh gpu12/gpu14/gpu25/gpu28`.
+- Main training nodes: gpu12/gpu14, each 2x A800 80GB. gpu25 usually serves policy on port `6666`; gpu28 is eval/aux.
+- Remote repo/env/output: `/share/home/linyongjia/conda-pi/openpi`, env `pi-conda`, output `/share/home/linyongjia/output/openpi`.
+- Remote datasets: policy datasets under `/share/home/linyongjia/datasets`; some Stage/reference data may live under `/share/home/linyongjia/data`.
+- Main OpenArm configs: `pi05_openarms_dual_site_align_v1_probe`, `pi05_openarms_dual_site_align_v1_base_10k`, `pi05_openarms_dual_evo_acp_hil_v1_probe`, `pi05_openarms_dual_awbc_v1`.
 
-## Security Kernel
+## OpenArm Contract
+- Task prompt: `Fold the T-shirt properly`.
+- State/action: 16D `[右臂7关节, 右夹爪, 左臂7关节, 左夹爪]`.
+- Units: arm joints degrees; gripper HQ motor degrees, `0=open`, `-66=closed`. ROS/runtime conversion stays at client boundary.
+- OpenArm configs use `LeRobotOpenArmDataConfig` with `OpenArmInputs/OpenArmOutputs`; never route OpenArm through Piper transforms or Piper 14D `swap_left_right`.
+- Clean site/HIL data only through `scripts/convert_openarm_hq_dataset.py`; HIL clean export drops hold frames and marks only real human VR as intervention.
+- Evo-RL ACP uses `ACPPromptTransform` on `complementary_info.acp_indicator`; clean HIL dataset name is `openarm_hil_evo_v1`.
+
+## Safety Kernel
 - Do not commit credentials, tokens, private host keys, or server passwords.
-- Training runs use offline W&B (`WANDB_MODE=offline`) and Hugging Face offline mode.
-- Do not delete remote checkpoint, output, cache, or dataset directories unless the user explicitly asks.
+- Do not delete remote datasets/checkpoints/caches unless the user explicitly asks.
+- Training/serve runs use tmux and offline-friendly W&B/Hugging Face settings.
+- OpenPI does not auto-use LeRobot split intent; set `DataConfig.train_episodes` when a split matters.
 
 ## Context Loading
-- Default: `AGENTS.md` + this file
-- Route: open `context_index.md` only when selecting task context
-- Mode pack: open <=1 `docs/cache/modes/*.md`; only add a second if the task truly spans modes
+- `docs/cache/context_index.md` routes only; it must not store facts.
+- `docs/cache/modes/code_change.md`: code/config/docs changes, tests, commits.
+- `docs/cache/modes/deployment.md`: SSH, conda, remote train/serve, artifacts.
+- Current OpenArm plan: `docs/openarm_kai0_reproduction_plan.md`.
 
-## Budget & Anti-Proliferation
-- `kernel.md`: <=80 lines
-- `context_index.md`: <=100 lines
-- Each mode pack: <=80 lines
-- No new cache/memory file unless no existing owner can hold the fact
-- Before adding hot context: compress or demote to cold docs first
-- One stable fact -> one primary owner
+## Budget And Writeback
+- Budgets: `kernel.md` <=80 lines, `context_index.md` <=100, each mode <=80.
+- One stable fact has one owner; compress or demote before adding memory.
+- `critical`: default machine/env/model/data contract/boundary changed -> update owning hot/canonical doc same turn.
+- `incident`: training/deploy/hardware failure -> `docs/CHANGELOG.md` or a short canonical note.
+- `batch`: repeated runs/validations -> one concise history entry after sequence ends.
+- `ephemeral`: status reads and one-off checks -> no memory update.
 
-## Writeback Classes
-- `critical`: default chain, entry points, package boundaries, public interfaces, security boundaries, deployment baseline, context loading strategy. Update owner docs same turn.
-- `incident`: training failures, deploy errors, hardware warnings. Write to CHANGELOG.
-- `batch`: repeated training runs, verification results. Condense into one history entry after sequence ends.
-- `ephemeral`: status reads, one-off manual actions, temporary exploration. Default: don't update memory.
-- `artifact`: checkpoints, norm stats, metrics plots, wandb logs. Store in output dir; reference from cold docs only if useful.
+## Resume Audit
+- After compact/resume/interruption: confirm latest user request, `pwd`, git root, `AGENTS.md`, this file, `git status --short`, `git log --oneline -5`, and the relevant mode pack.
+- Trust committed files, artifacts, explicit checkpoints, and current repo docs over conversation memory.
 
-## Memory Audit (before saving)
-1. Has a stable default fact changed?
-2. Which file uniquely owns this fact?
-3. Which writeback class applies?
-4. Is any cache file over budget?
-5. Should this be compressed, demoted, or not written?
-
-## Response Protocol
-1. Give the default conclusion first.
-2. Note context ownership when relevant.
-3. Distinguish: implemented / optional / historical / not-implemented behavior.
-4. Provide precise file entry points, commands, verification, and memory writeback conclusions.
+## Answer Protocol
+- Lead with the current conclusion.
+- Distinguish implemented, planned, historical, and forbidden behavior.
+- Give precise files/commands/verification when relevant.
+- End with memory writeback/verification status for substantial work.
