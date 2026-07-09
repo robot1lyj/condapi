@@ -21,6 +21,8 @@ New sessions: read `AGENTS.md` + this file first, then `context_index.md` to sel
 - OpenPI does not auto-read LeRobot `info.json` splits; set `DataConfig.train_episodes` explicitly when a split matters.
 - OpenArm policy data must follow the HQ contract: task prompt `Fold the T-shirt properly`, arm joints in degrees, grippers as HQ motor degrees (`0` open, `-66` closed); robot/ROS remains radians + normalized gripper.
 - New OpenArm site cleaning must use `scripts/convert_openarm_hq_dataset.py`; default gripper calibration maps raw normalized `0.0` closed and `0.84` open into HQ motor degrees.
+- OpenArm HIL raw cleaning must use `scripts/convert_openarm_hq_dataset.py from-hil-hdf5`.
+- Evo-RL clean HIL export drops hold frames, rewrites videos, and marks only real human VR as intervention.
 
 ## Security Kernel
 - Do not commit credentials, tokens, private host keys, or server passwords.

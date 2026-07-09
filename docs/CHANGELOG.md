@@ -7,6 +7,13 @@ Design decisions → `docs/decisions/`. Architecture → `docs/ARCHITECTURE.md`.
 
 ---
 
+## 2026-07-09
+
+- **OpenArm HIL raw 转 Evo-RL clean 数据入口**: 新增 HIL HDF5 -> LeRobot v2.1 转换脚本，并接入
+  `scripts/convert_openarm_hq_dataset.py from-hil-hdf5`；训练端按 `session_state/selected_source/authority_source`
+  过滤 policy/human/hold，丢弃 `intervention_hold`/`hold` 帧并重写视频，确保 Evo-RL 的
+  `is_intervention=1` 只表示真实 human VR 控制。
+
 ## 2026-07-08
 
 - **OpenArm site_deg 训练完成**: HQ `99999` -> site_deg 5k 已保存 checkpoint `4999`；

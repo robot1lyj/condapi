@@ -18,6 +18,12 @@ Examples:
       --dst /share/home/linyongjia/datasets/openarm_site_align_v1_deg \
       --dataset-id openarm_site_align_v1_deg \
       --overwrite
+
+    python scripts/convert_openarm_hq_dataset.py from-hil-hdf5 \
+      --src /tmp/openarm_hil/openarm_hil_dagger \
+      --dst /storage1t/datasets/openarm_hil_evo_v1 \
+      --dataset-id openarm_hil_evo_v1 \
+      --overwrite
 """
 
 from __future__ import annotations
@@ -32,6 +38,7 @@ if str(_REPO_ROOT) not in sys.path:
 
 DEFAULT_TASK = "Fold the T-shirt properly"
 DEFAULT_DATASET_ID = "openarm_site_align_v1_deg"
+DEFAULT_HIL_DATASET_ID = "openarm_hil_evo_v1"
 DEFAULT_GRIPPER_CLOSED_NORM = 0.0
 DEFAULT_GRIPPER_OPEN_NORM = 0.84
 
@@ -98,6 +105,31 @@ def _run_from_lerobot(args: argparse.Namespace) -> None:
     )
 
 
+def _run_from_hil_hdf5(args: argparse.Namespace) -> None:
+    from scripts import convert_openarm_hil_hdf5_to_lerobot_v21  # noqa: PLC0415
+
+    src_paths = args.src or [pathlib.Path("/tmp/openarm_hil/openarm_hil_dagger")]
+    convert_openarm_hil_hdf5_to_lerobot_v21.convert_dataset(
+        src_paths,
+        args.dst,
+        dataset_id=args.dataset_id,
+        task=args.task,
+        val_count=args.val_count,
+        fps=args.fps,
+        chunks_size=args.chunks_size,
+        video_codec=args.video_codec,
+        overwrite=args.overwrite,
+        dry_run=args.dry_run,
+        episodes=args.episodes,
+        max_episodes=args.max_episodes,
+        min_frames=args.min_frames,
+        timestamp_mode=args.timestamp_mode,
+        verify_video_frames=args.verify_video_frames,
+        skip_invalid=args.skip_invalid,
+        default_success=args.default_success,
+    )
+
+
 def _build_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -128,6 +160,29 @@ def _build_arg_parser() -> argparse.ArgumentParser:
     _add_hq_contract_args(lerobot)
     _add_common_copy_args(lerobot)
     lerobot.set_defaults(func=_run_from_lerobot)
+
+    hil = subparsers.add_parser(
+        "from-hil-hdf5",
+        help="Convert raw OpenArm HIL HDF5 episodes to Evo-RL-clean LeRobot v2.1.",
+    )
+    hil.add_argument("--src", type=pathlib.Path, action="append", default=[])
+    hil.add_argument("--dst", type=pathlib.Path, required=True)
+    hil.add_argument("--dataset-id", default=DEFAULT_HIL_DATASET_ID)
+    hil.add_argument("--task", default=DEFAULT_TASK)
+    hil.add_argument("--overwrite", action="store_true")
+    hil.add_argument("--episodes", default=None)
+    hil.add_argument("--max-episodes", type=int, default=None)
+    hil.add_argument("--val-count", type=int, default=0)
+    hil.add_argument("--fps", type=int, default=30)
+    hil.add_argument("--chunks-size", type=int, default=1000)
+    hil.add_argument("--video-codec", default="mp4v")
+    hil.add_argument("--timestamp-mode", choices=("raw_zeroed", "fps"), default="fps")
+    hil.add_argument("--min-frames", type=int, default=2)
+    hil.add_argument("--verify-video-frames", action="store_true")
+    hil.add_argument("--skip-invalid", action="store_true")
+    hil.add_argument("--default-success", choices=("success", "failure"), default="failure")
+    hil.add_argument("--dry-run", action="store_true")
+    hil.set_defaults(func=_run_from_hil_hdf5)
 
     return parser
 

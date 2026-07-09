@@ -214,6 +214,38 @@ fold the cloth, Advantage: positive
 - 不做独立的 HIL window BC / `recovery_v1_probe`；接管数据必须进入完整 episode 的 value/advantage/ACP 链路。
 - 不要求客户端实时标 KAI0 stage；KAI0 的 `stage_progress_gt` 通过已有标注工具和 `openarm_stage_progress.py` 后处理写入。
 
+### 4.4 Evo-RL 复刻代码状态
+
+已具备：
+
+```text
+scripts/convert_openarm_hq_dataset.py from-hil-hdf5
+  -> raw HDF5/mp4
+  -> openarm_hil_evo_v1 LeRobot v2.1
+  -> hold frames filtered
+  -> videos rewritten and aligned
+```
+
+Evo-RL 本地项目已有通用入口：
+
+```text
+lerobot-value-train
+lerobot-value-infer
+lerobot-train --acp.enable=true
+```
+
+OpenArm 侧尚未落地的专用胶水：
+
+```text
+1. openarm_hil_evo_v1 dataset smoke / report 脚本
+2. OpenArm value-train 固定配置和命令模板
+3. value-infer 回写 value / advantage / acp_indicator 的命令模板
+4. ACP policy train 的 OpenPI/OpenArm 配置或桥接脚本
+5. 真机 A/B 评价脚本和指标汇总
+```
+
+所以“训练一个判断进展/好坏的模型”不是从零写模型；Evo-RL 里已有 value model 训练入口。我们缺的是把 OpenArm clean HIL 数据、三路图像、16D HQ state/action 和这些命令稳定接起来。
+
 ## 5. Agent 分工
 
 | Agent | 负责人边界 | 现在要做 | 产物 | 验收 |
@@ -376,8 +408,15 @@ observation.images.base           # OpenArm 原始主视角
 observation.images.left_wrist     # OpenArm 原始左腕视角
 observation.images.right_wrist    # OpenArm 原始右腕视角
 
-complementary_info.is_intervention # 0/1，当前帧是否人工接管
-authority_source                   # policy / hold / human_vr / safety_stop 等；用于区分 hold 与真实人类动作
+policy_action / action.policy      # 16D，模型本来要执行的动作
+policy_action_chunk                # 50x16，OpenPI chunk
+teleop_action / human_action / action.human # 16D，human 有效；policy/hold 为 NaN
+
+authority_source                   # policy / human / scripted
+selected_source                    # policy / human / hold
+session_state                      # policy / human / intervention_hold
+
+is_intervention / control.is_intervention / complementary_info.is_intervention
 ```
 
 state/action 维度和单位固定为：
@@ -399,7 +438,7 @@ policy 帧:
 
 hold 切换等待帧:
   不进入严格 Evo-RL 训练 dataset
-  如果 raw debug 保留，则 authority_source = hold
+  raw debug 保留 session_state = intervention_hold 或 selected_source = hold
   action = hold 的最终下发动作
   complementary_info.is_intervention = 0
   complementary_info.teleop_action = NaN
@@ -412,9 +451,32 @@ human VR 帧:
 
 严格复刻 Evo-RL 时，`is_intervention=1` 只表示“人类动作已经实际控制机器人”。按下 hold 到 VR 动作真正生效之间的切换等待，不是 Evo-RL 的 intervention 正样本。
 
-关键约束：Evo-RL `lerobot-value-infer` 默认可用 `force_intervention_positive=true` 把 intervention 帧强制设为 positive ACP。若 hold 切换等待帧被写成 `is_intervention=1`，会把“停住/等待/切换”的动作误标成正样本，污染 ACP 训练。因此客户端如果保留 hold raw debug，也必须在导出 Evo-RL 训练数据时删除这些帧，或至少保证它们不会进入 `acp.intervention_field`。
+关键约束：Evo-RL `lerobot-value-infer` 默认可用 `force_intervention_positive=true` 把 intervention 帧强制设为 positive ACP。若 hold 切换等待帧被写成 `is_intervention=1`，会把“停住/等待/切换”的动作误标成正样本，污染 ACP 训练。因此 raw debug 可以全保留，但导出 Evo-RL 训练数据时必须删除 `session_state=intervention_hold` 或 `selected_source=hold` 的帧。
 
-落地建议：客户端最好直接把训练导出的 `complementary_info.is_intervention` 定义为“真实 human VR 控制中”。如果 raw debug 需要记录 hold 切换等待帧，则额外用 `authority_source=hold` 保留在 raw 层，转换到 LeRobot/Evo-RL 训练集时丢弃；不要为了兼容把 hold 塞进训练数据。
+落地实现：客户端只负责写 raw HDF5，不需要转 LeRobot；训练端用 `scripts/convert_openarm_hq_dataset.py from-hil-hdf5` 生成 Evo-RL-clean LeRobot 数据。转换器按下面规则过滤并重写视频，保证 parquet 和 mp4 帧对齐：
+
+```text
+policy clean:
+  keep if session_state == "policy" and authority_source == "policy" and selected_source == "policy"
+  output complementary_info.is_intervention = 0
+
+hold / 对齐等待:
+  drop if session_state == "intervention_hold" or selected_source == "hold"
+
+human_vr clean:
+  keep if session_state == "human" and authority_source == "human" and selected_source == "human" and teleop_action finite
+  output complementary_info.is_intervention = 1
+```
+
+推荐命令：
+
+```bash
+python scripts/convert_openarm_hq_dataset.py from-hil-hdf5 \
+  --src /tmp/openarm_hil/openarm_hil_dagger \
+  --dst /storage1t/datasets/openarm_hil_evo_v1 \
+  --dataset-id openarm_hil_evo_v1 \
+  --overwrite
+```
 
 KAI0 侧需要三路视频键名。转换成 KAI0 pipeline 时按项目已有命名映射，不要求客户端直接改名：
 
@@ -428,7 +490,7 @@ Evo-RL 复刻必须记录：
 
 ```text
 complementary_info.is_intervention # 0/1，真实 human VR 是否正在控制机器人
-authority_source                  # raw debug 若保留 hold，则必须能区分 policy / hold / human_vr
+session_state / selected_source / authority_source # raw debug 用于稳定过滤 policy/hold/human
 episode_success                   # episode 级 success / failure；value train 上游监督
 ```
 
@@ -442,7 +504,7 @@ collector_policy_id
 model_metadata
 ```
 
-接管切换起止时间不属于 Evo-RL value/ACP 训练硬依赖。`intervention_count`、`intervention_start_frames`、`intervention_end_frames` 可以不落 episode metadata；需要复盘时可由逐帧 `complementary_info.is_intervention`、`authority_source` 和 `frame_index/timestamp` 重建。保留它们只属于 raw debug 便捷索引，不应成为客户端阻塞项。
+接管切换起止时间不属于 Evo-RL value/ACP 训练硬依赖。`intervention_count`、`intervention_start_frames`、`intervention_end_frames` 可以保留在 episode metadata，方便复盘；训练清洗以逐帧 `session_state/selected_source/authority_source` 为准，不靠 episode 起止段推断 hold。
 
 KAI0 Step0 必须能产生的标注信息：
 
@@ -841,7 +903,19 @@ startup: step 16 reached at 16:31 CST, both gpu14 cards about 73.6GB and 100% ut
 决策：
 
 - HIL 默认目录固定为 `/tmp/openarm_hil/openarm_hil_dagger`，每集有 `episodes/episode_000000.hdf5`，三路 mp4 视频和 `meta/info.json`、`meta/episodes.jsonl`。
-- 每帧记录 `timestamp/timestamp_ns`、`episode_index/frame_index`、`task/prompt`、16D `observation.state`、16D `action`、三路图像键、`complementary_info.is_intervention`；如果 raw debug 保留 hold 切换等待帧，还必须记录 `authority_source`。
+- 每帧记录 `timestamp/timestamp_ns`、`episode_index/frame_index`、`task/prompt`、16D `observation.state`、16D `action`、三路图像键、`complementary_info.is_intervention`；raw debug 保留 `session_state/selected_source/authority_source`。
 - 单位确认：关节 degrees；夹爪 HQ motor degrees，`0` 张开，`-66` 闭合；16D 顺序为 `[右臂7关节, 右夹爪, 左臂7关节, 左夹爪]`。
 - 帧语义确认：policy 帧 `action=policy` 且 `is_intervention=0`；hold 切换等待帧不是 Evo-RL intervention，严格训练集应丢弃；human VR 帧 `action=human` 且 `is_intervention=1`、`teleop_action=human`。
 - episode metadata 确认包含 `episode_success`、`episode_outcome`、`recovery_success`、`collector_policy_id` 和 `model_metadata`；接管起止段可选，可由逐帧字段重建。
+
+### 2026-07-09 09:43 CST - Plan Owner - HIL raw 到 Evo-RL clean 转换入口落地
+
+状态：客户端只负责录 HDF5/mp4 raw；训练端负责清洗成 LeRobot v2.1。
+
+决策：
+
+- HIL raw 合同锚定为 `session_state=policy/human/intervention_hold`、`selected_source=policy/human/hold`、`authority_source=policy/human/scripted`。
+- 不再靠 `teleop_action=NaN` 或 `authority_source=scripted` 反推 hold；训练清洗显式丢弃 `session_state=intervention_hold` 或 `selected_source=hold`。
+- 新增 `scripts/convert_openarm_hil_hdf5_to_lerobot_v21.py`，并接入统一入口 `scripts/convert_openarm_hq_dataset.py from-hil-hdf5`。
+- 转换器会重写过滤后视频，不硬链接原视频，保证 parquet 行与 mp4 帧对齐。
+- Evo-RL clean 输出中 `complementary_info.is_intervention=1` 只表示真实 human VR 控制帧。
