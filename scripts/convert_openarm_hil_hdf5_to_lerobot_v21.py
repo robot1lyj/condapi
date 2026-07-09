@@ -19,7 +19,6 @@ from collections.abc import Iterable
 import dataclasses
 import json
 import math
-import os
 import pathlib
 import re
 import shutil
@@ -277,10 +276,7 @@ def _read_string_feature(
     dataset = _first_existing_dataset(file, aliases)
     if dataset is None:
         return [default] * length
-    if h5py.check_string_dtype(dataset.dtype) is not None:
-        values = dataset.asstr()[()]
-    else:
-        values = dataset[()]
+    values = dataset.asstr()[()] if h5py.check_string_dtype(dataset.dtype) is not None else dataset[()]
     values = np.asarray(values)
     if values.ndim == 0:
         return [_decode_string(values.item())] * length

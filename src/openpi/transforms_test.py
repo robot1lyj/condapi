@@ -103,6 +103,61 @@ def test_tokenize_no_prompt():
         transform({})
 
 
+def test_acp_prompt_transform_injects_positive_and_negative_tags():
+    transform = _transforms.ACPPromptTransform()
+
+    positive = transform(
+        {
+            "prompt": np.asarray("Fold the T-shirt properly"),
+            "complementary_info.acp_indicator": np.asarray([1], dtype=np.int64),
+        }
+    )
+    assert positive["prompt"] == "Fold the T-shirt properly\nAdvantage: positive"
+
+    negative = transform(
+        {
+            "prompt": "Fold the T-shirt properly",
+            "complementary_info.acp_indicator": np.asarray(0, dtype=np.int64),
+        }
+    )
+    assert negative["prompt"] == "Fold the T-shirt properly\nAdvantage: negative"
+
+
+def test_acp_prompt_transform_validates_indicator():
+    transform = _transforms.ACPPromptTransform()
+
+    with pytest.raises(KeyError, match="acp_indicator"):
+        transform({"prompt": "fold"})
+
+    with pytest.raises(TypeError, match="integer 0/1"):
+        transform(
+            {
+                "prompt": "fold",
+                "complementary_info.acp_indicator": np.asarray(1.0, dtype=np.float32),
+            }
+        )
+
+    with pytest.raises(ValueError, match="must be 0 or 1"):
+        transform(
+            {
+                "prompt": "fold",
+                "complementary_info.acp_indicator": np.asarray(2, dtype=np.int64),
+            }
+        )
+
+
+def test_acp_prompt_transform_dropout_keeps_original_prompt():
+    transform = _transforms.ACPPromptTransform(indicator_dropout_prob=1.0)
+    data = transform(
+        {
+            "prompt": "Fold the T-shirt properly",
+            "complementary_info.acp_indicator": np.asarray(1, dtype=np.int64),
+        }
+    )
+
+    assert data["prompt"] == "Fold the T-shirt properly"
+
+
 def test_transform_dict():
     # Rename and remove keys.
     input = {"a": {"b": 1, "c": 2}}

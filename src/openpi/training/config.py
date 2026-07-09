@@ -400,6 +400,8 @@ class LeRobotPiperDataConfig(DataConfigFactory):
     swap_left_right: bool = False
     default_prompt: str | None = None
     include_advantage_fields: bool = False
+    acp_indicator_key: str | None = None
+    acp_indicator_dropout_prob: float = 0.0
 
     @override
     def create(self, assets_dirs: pathlib.Path, model_config: _model.BaseModelConfig) -> DataConfig:
@@ -424,6 +426,8 @@ class LeRobotPiperDataConfig(DataConfigFactory):
                     "progress": "progress",
                 }
             )
+        if self.acp_indicator_key is not None:
+            repack_structure[self.acp_indicator_key] = self.acp_indicator_key
 
         repack_transform = _transforms.Group(inputs=[_transforms.RepackTransform(repack_structure)])
 
@@ -462,6 +466,17 @@ class LeRobotPiperDataConfig(DataConfigFactory):
             )
 
         model_transforms = ModelTransformFactory(default_prompt=self.default_prompt)(model_config)
+        if self.acp_indicator_key is not None:
+            model_inputs = list(model_transforms.inputs)
+            model_inputs.insert(
+                1,
+                _transforms.ACPPromptTransform(
+                    indicator_key=self.acp_indicator_key,
+                    prompt_key="prompt",
+                    indicator_dropout_prob=self.acp_indicator_dropout_prob,
+                ),
+            )
+            model_transforms = _transforms.Group(inputs=tuple(model_inputs), outputs=model_transforms.outputs)
 
         return dataclasses.replace(
             self.create_base_config(assets_dirs, model_config),
@@ -1096,6 +1111,40 @@ _CONFIGS = [
         log_interval=20,
         wandb_enabled=True,
         num_train_steps=88_000,
+    ),
+    TrainConfig(
+        name="pi05_openarms_dual_evo_acp_hil_v1_probe",
+        model=pi0_config.Pi0Config(pi05=True, discrete_state_input=True),
+        data=LeRobotPiperDataConfig(
+            repo_id="/share/home/linyongjia/datasets/openarm_hil_evo_v1",
+            assets=AssetsConfig(
+                assets_dir="/share/home/linyongjia/datasets",
+                asset_id="openarm_hil_evo_v1",
+            ),
+            base_config=DataConfig(
+                prompt_from_task=True,
+                lerobot_tolerance_s=0.05,
+                lerobot_video_backend="torchcodec",
+            ),
+            base_image_key="observation.images.base",
+            robot_action_dim=16,
+            delta_action_mask=_transforms.make_bool_mask(7, -1, 7, -1),
+            use_delta_joint_actions=True,
+            action_style="relative",
+            swap_left_right=False,
+            acp_indicator_key="complementary_info.acp_indicator",
+            acp_indicator_dropout_prob=0.0,
+        ),
+        weight_loader=weight_loaders.CheckpointWeightLoader(
+            "/share/home/linyongjia/output/openpi/pi05_openarms_dual_site_align_v1_probe/"
+            "openarm_site_deg_151e_2gpu_5k_hq99999_20260707/4999/params"
+        ),
+        log_interval=20,
+        wandb_enabled=True,
+        num_workers=2,
+        save_interval=200,
+        keep_period=1000,
+        num_train_steps=5_000,
     ),
     TrainConfig(
         name="ADVANTAGE_TORCH_OPENARM_FLATTEN_FOLD",

@@ -23,6 +23,7 @@ New sessions: read `AGENTS.md` + this file first, then `context_index.md` to sel
 - New OpenArm site cleaning must use `scripts/convert_openarm_hq_dataset.py`; default gripper calibration maps raw normalized `0.0` closed and `0.84` open into HQ motor degrees.
 - OpenArm HIL raw cleaning must use `scripts/convert_openarm_hq_dataset.py from-hil-hdf5`.
 - Evo-RL clean HIL export drops hold frames, rewrites videos, and marks only real human VR as intervention.
+- OpenArm JAX ACP training uses `ACPPromptTransform` on `complementary_info.acp_indicator`; clean HIL dataset name is `openarm_hil_evo_v1`.
 
 ## Security Kernel
 - Do not commit credentials, tokens, private host keys, or server passwords.

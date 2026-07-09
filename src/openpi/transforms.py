@@ -111,6 +111,66 @@ class InjectDefaultPrompt(DataTransformFn):
         return data
 
 
+def _scalar_string(value) -> str:
+    if isinstance(value, str):
+        return value
+    value = np.asarray(value)
+    if value.shape == ():
+        return str(value.item())
+    if value.size == 1:
+        return str(value.reshape(-1)[0].item())
+    raise ValueError(f"Expected a scalar string prompt, got shape={value.shape}.")
+
+
+def _scalar_binary_indicator(value) -> bool:
+    value = np.asarray(value)
+    if value.shape != () and value.size != 1:
+        raise ValueError(f"ACP indicator must be a scalar 0/1 value, got shape={value.shape}.")
+    if np.issubdtype(value.dtype, np.bool_):
+        raise TypeError(f"ACP indicator must be integer 0/1, got boolean dtype={value.dtype}.")
+    if np.issubdtype(value.dtype, np.floating):
+        raise TypeError(f"ACP indicator must be integer 0/1, got floating dtype={value.dtype}.")
+
+    parsed = int(value.reshape(-1)[0].item())
+    if parsed not in (0, 1):
+        raise ValueError(f"ACP indicator must be 0 or 1, got {parsed}.")
+    return parsed == 1
+
+
+@dataclasses.dataclass(frozen=True)
+class ACPPromptTransform(DataTransformFn):
+    """Append Evo-RL ACP advantage tags to the prompt before tokenization."""
+
+    indicator_key: str = "complementary_info.acp_indicator"
+    prompt_key: str = "prompt"
+    positive_tag: str = "Advantage: positive"
+    negative_tag: str = "Advantage: negative"
+    separator: str = "\n"
+    indicator_dropout_prob: float = 0.0
+
+    def __post_init__(self):
+        if not 0.0 <= self.indicator_dropout_prob <= 1.0:
+            raise ValueError("indicator_dropout_prob must be within [0, 1].")
+        if not self.indicator_key:
+            raise ValueError("indicator_key must be non-empty.")
+        if not self.prompt_key:
+            raise ValueError("prompt_key must be non-empty.")
+
+    def __call__(self, data: DataDict) -> DataDict:
+        if self.indicator_key not in data:
+            raise KeyError(f"ACP indicator field '{self.indicator_key}' is missing from data.")
+        if self.prompt_key not in data:
+            raise KeyError(f"ACP prompt field '{self.prompt_key}' is missing from data.")
+
+        prompt = _scalar_string(data[self.prompt_key])
+        if self.indicator_dropout_prob > 0.0 and np.random.random() < self.indicator_dropout_prob:
+            return {**data, self.prompt_key: prompt}
+
+        tag = self.positive_tag if _scalar_binary_indicator(data[self.indicator_key]) else self.negative_tag
+        conditioned_prompt = tag if not prompt else f"{prompt}{self.separator}{tag}"
+        return {**data, self.prompt_key: conditioned_prompt}
+
+
 @dataclasses.dataclass(frozen=True)
 class Normalize(DataTransformFn):
     norm_stats: at.PyTree[NormStats] | None
@@ -321,9 +381,7 @@ class AbsoluteChainedDeltaActions(DataTransformFn):
 
         # First action: add state back (must happen before cumulative sum since
         # subsequent steps chain from the recovered absolute action)
-        actions[..., 0, :dims] = np.where(
-            mask, actions[..., 0, :dims] + state[..., :dims], actions[..., 0, :dims]
-        )
+        actions[..., 0, :dims] = np.where(mask, actions[..., 0, :dims] + state[..., :dims], actions[..., 0, :dims])
         # Cumulatively add deltas: a[i] = d[i] + a[i-1]
         for i in range(1, actions.shape[-2]):
             actions[..., i, :dims] = np.where(

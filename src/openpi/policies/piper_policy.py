@@ -101,6 +101,7 @@ class PiperInputs(transforms.DataTransformFn):
         for key in ("episode_index", "frame_index", "episode_length", "stage_progress_gt", "progress"):
             if key in data:
                 inputs[key] = data[key]
+        inputs.update({key: value for key, value in data.items() if key.startswith("complementary_info.")})
 
         return inputs
 

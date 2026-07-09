@@ -120,7 +120,7 @@ Track B: KAI0 复刻
 | Site align v1 old | `/share/home/linyongjia/datasets/openarm_site_align_v1` | 历史错误单位，151 集 | 仅用于追溯 | radian-like + normalized gripper，禁止继续训练/真机测试 |
 | Site align v1 deg | `/share/home/linyongjia/datasets/openarm_site_align_v1_deg` | 已重转并完成 norm stats | 现场分布对齐；site probe；合并训练高权重数据 | 默认 141 train + 10 holdout；HQ task；arm joints degrees；gripper HQ motor degrees |
 | AWBC v1 | `/share/home/linyongjia/datasets/openarm_awbc_v1` | 生成/合并状态需复核 | Stage Advantage -> AWBC policy train | 先 smoke，再短训 |
-| HIL / RECAP v1 | `openarm_hil_recap_v1` | 未有真实训练数据 | RECAP/Evo-RL value/advantage/ACP | 不作为独立 window BC 训练集 |
+| HIL / Evo-RL v1 | `openarm_hil_evo_v1` | 未有真实训练数据 | RECAP/Evo-RL value/advantage/ACP | 不作为独立 window BC 训练集 |
 | 旧 OpenArms | `openarms_folding_v001/v002` | 已有 | 待审计辅助数据 | 不是 site align v1 |
 
 ### 2.2 模型与服务
@@ -194,6 +194,10 @@ Advantage: positive
 Advantage: negative
 ```
 
+OpenPI/JAX 中不引入 PyTorch pi 模型，也不新增 policy head。当前实现是在 JAX 数据 transform 中读取
+`complementary_info.acp_indicator`，在 `TokenizePrompt` 之前动态修改 `prompt`；普通 HQ/site 数据不启用该
+transform，HIL ACP 数据通过 `pi05_openarms_dual_evo_acp_hil_v1_probe` 启用。
+
 KAI0 AWBC 使用 `discretize_advantage.py` 写 `meta/tasks.jsonl`，二分类格式来自 KAI0 代码：
 
 ```text
@@ -234,14 +238,19 @@ lerobot-value-infer
 lerobot-train --acp.enable=true
 ```
 
-OpenArm 侧尚未落地的专用胶水：
+OpenArm 侧代码状态：
 
 ```text
+已落地:
+1. HIL raw -> openarm_hil_evo_v1 clean LeRobot v2.1 转换入口
+2. JAX OpenPI ACP prompt transform：读取 complementary_info.acp_indicator 并注入 Advantage positive/negative
+3. ACP policy train 配置 pi05_openarms_dual_evo_acp_hil_v1_probe
+
+仍需落地:
 1. openarm_hil_evo_v1 dataset smoke / report 脚本
 2. OpenArm value-train 固定配置和命令模板
 3. value-infer 回写 value / advantage / acp_indicator 的命令模板
-4. ACP policy train 的 OpenPI/OpenArm 配置或桥接脚本
-5. 真机 A/B 评价脚本和指标汇总
+4. 真机 A/B 评价脚本和指标汇总
 ```
 
 所以“训练一个判断进展/好坏的模型”不是从零写模型；Evo-RL 里已有 value model 训练入口。我们缺的是把 OpenArm clean HIL 数据、三路图像、16D HQ state/action 和这些命令稳定接起来。
@@ -676,7 +685,7 @@ v2 目标不是增加概念，而是解决当前抓取失败：让 value/advanta
 | G1 site probe | site probe 真机抓取优于 HQ | 做 HQ/site/TDA 短训 | 查数据转换/夹爪/控制 |
 | G2 combined short train | 5k/10k 候选离线和真机均不退化 | 扩到 20k/40k 或进入 AWBC | 调数据比例，不开 88k |
 | G3 AWBC | AWBC smoke + 真机进展优于 SFT | 继续 AWBC/ACP | 回查 Stage 打分和 label ratio |
-| G4 HIL RECAP/ACP | HIL 字段完整，能训练 value 并回写 `advantage/acp_indicator` | 跑 `recap_acp_hil_v1_probe` | 先修采集客户端或 value 标注链路 |
+| G4 HIL RECAP/ACP | HIL 字段完整，能训练 value 并回写 `advantage/acp_indicator` | 跑 `pi05_openarms_dual_evo_acp_hil_v1_probe` | 先修采集客户端或 value 标注链路 |
 | G5 Model Arithmetic | 至少 3 个互补 checkpoint + OOD validation | 做权重合并 | 暂缓 |
 
 ## 11. 远端与命令索引
@@ -871,7 +880,7 @@ startup: step 16 reached at 16:31 CST, both gpu14 cards about 73.6GB and 100% ut
 
 下一步：
 
-- HIL 到齐后先构建 `openarm_hil_recap_v1`，再跑 value/advantage/ACP smoke；不启动独立 window BC 微调。
+- HIL 到齐后先构建 `openarm_hil_evo_v1`，再跑 value/advantage/ACP smoke；不启动独立 window BC 微调。
 
 ### 2026-07-08 12:22 CST - Plan Owner - HIL 字段按 Evo-RL 代码重新归类
 
@@ -919,3 +928,17 @@ startup: step 16 reached at 16:31 CST, both gpu14 cards about 73.6GB and 100% ut
 - 新增 `scripts/convert_openarm_hil_hdf5_to_lerobot_v21.py`，并接入统一入口 `scripts/convert_openarm_hq_dataset.py from-hil-hdf5`。
 - 转换器会重写过滤后视频，不硬链接原视频，保证 parquet 行与 mp4 帧对齐。
 - Evo-RL clean 输出中 `complementary_info.is_intervention=1` 只表示真实 human VR 控制帧。
+
+### 2026-07-09 10:52 CST - Plan Owner - JAX ACP prompt 训练适配落地
+
+状态：Evo-RL 的 ACP 思路已按 OpenPI/JAX 方式接入，不迁移 Evo-RL PyTorch pi 模型。
+
+决策：
+
+- 新增 JAX 数据 transform：读取 `complementary_info.acp_indicator`，在 tokenizer 前把 prompt 动态改成
+  `<task>\nAdvantage: positive/negative`。
+- 新增训练配置 `pi05_openarms_dual_evo_acp_hil_v1_probe`，默认从 site_deg HQ 5k checkpoint `4999`
+  warm start，输入数据集统一为 `openarm_hil_evo_v1`。
+- RECAP/Evo-RL 是方法路线，clean HIL 数据集名固定为 `openarm_hil_evo_v1`。
+- KAI0 AWBC 仍走 `task_index/tasks.jsonl`；不要把 KAI0 的离线 task 重写和 Evo-RL 的动态 ACP prompt
+  混成一套机制。
