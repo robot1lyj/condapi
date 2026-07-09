@@ -1,8 +1,8 @@
-# OpenArm Evo-RL + KAI0 当前计划
+# OpenArm RECAP 复现当前计划
 
 最后更新：2026-07-09
 
-本文档是 OpenArm 后续训练、HIL、Evo-RL、KAI0 的唯一当前计划。它只保留现在要执行和不能忘的稳定事实；旧训练流水、事故细节和长解释查 `docs/CHANGELOG.md`、git log 或远端日志。
+本文档是 OpenArm 后续训练、HIL、RECAP/Evo-RL 复现和 KAI0 辅助分支的唯一当前计划。它只保留现在要执行和不能忘的稳定事实；旧训练流水、事故细节和长解释查 `docs/CHANGELOG.md`、git log 或远端日志。
 
 ## 1. 当前判断
 

@@ -50,5 +50,5 @@ Local validation env is `pi-conda`. If missing, create with conda from `environm
 
 ## Writeback
 - Default node/path/env changes -> `docs/cache/kernel.md`.
-- New current training/serve workflow -> this file and, if OpenArm-specific, `docs/openarm_kai0_reproduction_plan.md`.
+- New current training/serve workflow -> this file and, if OpenArm-specific, `docs/openarm_recap_reproduction_plan.md`.
 - Incidents or meaningful failures -> `docs/CHANGELOG.md`.
