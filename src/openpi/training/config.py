@@ -21,6 +21,7 @@ import openpi.models.tokenizer as _tokenizer
 import openpi.policies.aloha_policy as aloha_policy
 import openpi.policies.droid_policy as droid_policy
 import openpi.policies.libero_policy as libero_policy
+import openpi.policies.openarm_policy as openarm_policy
 import openpi.policies.piper_policy as piper_policy
 import openpi.shared.download as _download
 import openpi.shared.normalize as _normalize
@@ -399,9 +400,6 @@ class LeRobotPiperDataConfig(DataConfigFactory):
     action_style: str = "relative"
     swap_left_right: bool = False
     default_prompt: str | None = None
-    include_advantage_fields: bool = False
-    acp_indicator_key: str | None = None
-    acp_indicator_dropout_prob: float = 0.0
 
     @override
     def create(self, assets_dirs: pathlib.Path, model_config: _model.BaseModelConfig) -> DataConfig:
@@ -413,21 +411,6 @@ class LeRobotPiperDataConfig(DataConfigFactory):
             self.action_key: self.action_key,
             self.prompt_key: self.prompt_key,
         }
-        if self.include_advantage_fields:
-            repack_structure.update(
-                {
-                    f"his_-100_{self.base_image_key}": f"his_-100_{self.base_image_key}",
-                    f"his_-100_{self.left_wrist_image_key}": f"his_-100_{self.left_wrist_image_key}",
-                    f"his_-100_{self.right_wrist_image_key}": f"his_-100_{self.right_wrist_image_key}",
-                    "episode_length": "episode_length",
-                    "frame_index": "frame_index",
-                    "episode_index": "episode_index",
-                    "stage_progress_gt": "stage_progress_gt",
-                    "progress": "progress",
-                }
-            )
-        if self.acp_indicator_key is not None:
-            repack_structure[self.acp_indicator_key] = self.acp_indicator_key
 
         repack_transform = _transforms.Group(inputs=[_transforms.RepackTransform(repack_structure)])
 
@@ -459,6 +442,104 @@ class LeRobotPiperDataConfig(DataConfigFactory):
                 action_out_cls = _transforms.AbsoluteChainedDeltaActions
             else:
                 action_cls = _transforms.DeltaActions  # UMI-style relative
+                action_out_cls = _transforms.AbsoluteActions
+            data_transforms = data_transforms.push(
+                inputs=[action_cls(self.delta_action_mask)],
+                outputs=[action_out_cls(self.delta_action_mask)],
+            )
+
+        model_transforms = ModelTransformFactory(default_prompt=self.default_prompt)(model_config)
+
+        return dataclasses.replace(
+            self.create_base_config(assets_dirs, model_config),
+            repack_transforms=repack_transform,
+            data_transforms=data_transforms,
+            model_transforms=model_transforms,
+            action_sequence_keys=self.action_sequence_keys,
+        )
+
+
+@dataclasses.dataclass(frozen=True)
+class LeRobotOpenArmDataConfig(DataConfigFactory):
+    """
+    Data config for OpenArm LeRobot datasets using the HQ 16D state/action contract.
+    This intentionally does not reuse Piper transforms or Piper left/right swap logic.
+    """
+
+    base_image_key: str = "observation.images.base"
+    left_wrist_image_key: str = "observation.images.left_wrist"
+    right_wrist_image_key: str = "observation.images.right_wrist"
+    state_key: str = "observation.state"
+    action_key: str = "action"
+    prompt_key: str = "prompt"
+    action_sequence_keys: Sequence[str] = ("action",)
+    delta_action_mask: Sequence[bool] | None = dataclasses.field(
+        default_factory=lambda: _transforms.make_bool_mask(7, -1, 7, -1)
+    )
+    use_delta_joint_actions: bool = True
+    # "relative": UMI-style, all actions relative to current state (matches π0.5 pretraining)
+    # "chained_delta": each action = diff from previous action (error accumulates)
+    action_style: str = "relative"
+    default_prompt: str | None = None
+    include_advantage_fields: bool = False
+    acp_indicator_key: str | None = None
+    acp_indicator_dropout_prob: float = 0.0
+
+    @override
+    def create(self, assets_dirs: pathlib.Path, model_config: _model.BaseModelConfig) -> DataConfig:
+        if model_config.action_dim < openarm_policy.OPENARM_STATE_ACTION_DIM:
+            raise ValueError(
+                f"OpenArm requires model action_dim >= {openarm_policy.OPENARM_STATE_ACTION_DIM}, "
+                f"got {model_config.action_dim}."
+            )
+
+        repack_structure = {
+            self.base_image_key: self.base_image_key,
+            self.left_wrist_image_key: self.left_wrist_image_key,
+            self.right_wrist_image_key: self.right_wrist_image_key,
+            self.state_key: self.state_key,
+            self.action_key: self.action_key,
+            self.prompt_key: self.prompt_key,
+        }
+        if self.include_advantage_fields:
+            repack_structure.update(
+                {
+                    f"his_-100_{self.base_image_key}": f"his_-100_{self.base_image_key}",
+                    f"his_-100_{self.left_wrist_image_key}": f"his_-100_{self.left_wrist_image_key}",
+                    f"his_-100_{self.right_wrist_image_key}": f"his_-100_{self.right_wrist_image_key}",
+                    "episode_length": "episode_length",
+                    "frame_index": "frame_index",
+                    "episode_index": "episode_index",
+                    "stage_progress_gt": "stage_progress_gt",
+                    "progress": "progress",
+                }
+            )
+        if self.acp_indicator_key is not None:
+            repack_structure[self.acp_indicator_key] = self.acp_indicator_key
+
+        repack_transform = _transforms.Group(inputs=[_transforms.RepackTransform(repack_structure)])
+
+        data_transforms = _transforms.Group(
+            inputs=[
+                openarm_policy.OpenArmInputs(
+                    model_type=model_config.model_type,
+                    base_image_key=self.base_image_key,
+                    left_wrist_image_key=self.left_wrist_image_key,
+                    right_wrist_image_key=self.right_wrist_image_key,
+                    state_key=self.state_key,
+                    action_key=self.action_key,
+                    prompt_key=self.prompt_key,
+                )
+            ],
+            outputs=[openarm_policy.OpenArmOutputs()],
+        )
+
+        if self.use_delta_joint_actions and self.delta_action_mask is not None:
+            if self.action_style == "chained_delta":
+                action_cls = _transforms.ChainedDeltaActions
+                action_out_cls = _transforms.AbsoluteChainedDeltaActions
+            else:
+                action_cls = _transforms.DeltaActions
                 action_out_cls = _transforms.AbsoluteActions
             data_transforms = data_transforms.push(
                 inputs=[action_cls(self.delta_action_mask)],
@@ -933,13 +1014,12 @@ _CONFIGS = [
     TrainConfig(
         name="pi0_openarms_dual",
         model=pi0_config.Pi0Config(),
-        data=LeRobotPiperDataConfig(
+        data=LeRobotOpenArmDataConfig(
             repo_id="/share/home/linyongjia/datasets/openarms_folding_v001",
             base_config=DataConfig(prompt_from_task=True),
-            robot_action_dim=16,
+            base_image_key="observation.images.top_rgb",
             delta_action_mask=_transforms.make_bool_mask(7, -1, 7, -1),
             use_delta_joint_actions=True,
-            swap_left_right=False,
         ),
         weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi0_base/params"),
         log_interval=20,
@@ -949,13 +1029,12 @@ _CONFIGS = [
     TrainConfig(
         name="pi05_openarms_dual",
         model=pi0_config.Pi0Config(pi05=True, discrete_state_input=True),
-        data=LeRobotPiperDataConfig(
+        data=LeRobotOpenArmDataConfig(
             repo_id="/share/home/linyongjia/datasets/openarms_folding_v001",
             base_config=DataConfig(prompt_from_task=True),
-            robot_action_dim=16,
+            base_image_key="observation.images.top_rgb",
             delta_action_mask=_transforms.make_bool_mask(7, -1, 7, -1),
             use_delta_joint_actions=True,
-            swap_left_right=False,
         ),
         weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi05_base/params"),
         log_interval=20,
@@ -965,15 +1044,13 @@ _CONFIGS = [
     TrainConfig(
         name="pi05_openarms_dual_hq",
         model=pi0_config.Pi0Config(pi05=True, discrete_state_input=True),
-        data=LeRobotPiperDataConfig(
+        data=LeRobotOpenArmDataConfig(
             repo_id="/share/home/linyongjia/datasets/high_quality_folding",
             base_config=DataConfig(prompt_from_task=True, train_episodes=list(range(999))),
             base_image_key="observation.images.base",  # HQ dataset uses "base" (not "top_rgb")
-            robot_action_dim=16,
             delta_action_mask=_transforms.make_bool_mask(7, -1, 7, -1),
             use_delta_joint_actions=True,
             action_style="relative",  # UMI-style, validated in blog experiments — required for π0.5
-            swap_left_right=False,
         ),
         weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi05_base/params"),
         log_interval=20,
@@ -983,7 +1060,7 @@ _CONFIGS = [
     TrainConfig(
         name="pi05_openarms_dual_hq_tda_aug",
         model=pi0_config.Pi0Config(pi05=True, discrete_state_input=True),
-        data=LeRobotPiperDataConfig(
+        data=LeRobotOpenArmDataConfig(
             repo_id="/share/home/linyongjia/datasets/openarm_hq_tda_aug_v1",
             assets=AssetsConfig(
                 assets_dir="/share/home/linyongjia/datasets",
@@ -991,11 +1068,9 @@ _CONFIGS = [
             ),
             base_config=DataConfig(prompt_from_task=True, train_episodes=list(range(2298))),
             base_image_key="observation.images.base",
-            robot_action_dim=16,
             delta_action_mask=_transforms.make_bool_mask(7, -1, 7, -1),
             use_delta_joint_actions=True,
             action_style="relative",
-            swap_left_right=False,
         ),
         weight_loader=weight_loaders.CheckpointWeightLoader(
             "/share/home/linyongjia/output/openpi/pi05_openarms_dual_hq/openarms_hq_bs32/99999/params"
@@ -1007,7 +1082,7 @@ _CONFIGS = [
     TrainConfig(
         name="pi05_openarms_dual_site_align_v1_probe",
         model=pi0_config.Pi0Config(pi05=True, discrete_state_input=True),
-        data=LeRobotPiperDataConfig(
+        data=LeRobotOpenArmDataConfig(
             repo_id="/share/home/linyongjia/datasets/openarm_site_align_v1_deg",
             assets=AssetsConfig(
                 assets_dir="/share/home/linyongjia/datasets",
@@ -1019,11 +1094,9 @@ _CONFIGS = [
                 lerobot_tolerance_s=0.05,
             ),
             base_image_key="observation.images.base",
-            robot_action_dim=16,
             delta_action_mask=_transforms.make_bool_mask(7, -1, 7, -1),
             use_delta_joint_actions=True,
             action_style="relative",
-            swap_left_right=False,
         ),
         weight_loader=weight_loaders.CheckpointWeightLoader(
             "/share/home/linyongjia/output/openpi/pi05_openarms_dual_hq/openarms_hq_bs32/99999/params"
@@ -1035,7 +1108,7 @@ _CONFIGS = [
     TrainConfig(
         name="pi05_openarms_dual_site_align_v1_base_10k",
         model=pi0_config.Pi0Config(pi05=True, discrete_state_input=True),
-        data=LeRobotPiperDataConfig(
+        data=LeRobotOpenArmDataConfig(
             repo_id="/share/home/linyongjia/datasets/openarm_site_align_v1_deg",
             assets=AssetsConfig(
                 assets_dir="/share/home/linyongjia/datasets",
@@ -1048,11 +1121,9 @@ _CONFIGS = [
                 lerobot_video_backend="torchcodec",
             ),
             base_image_key="observation.images.base",
-            robot_action_dim=16,
             delta_action_mask=_transforms.make_bool_mask(7, -1, 7, -1),
             use_delta_joint_actions=True,
             action_style="relative",
-            swap_left_right=False,
         ),
         weight_loader=weight_loaders.CheckpointWeightLoader(
             "/share/home/linyongjia/.cache/openpi/openpi-assets/checkpoints/pi05_base/params"
@@ -1067,7 +1138,7 @@ _CONFIGS = [
     TrainConfig(
         name="pi05_openarms_dual_hq_tda_site_v1",
         model=pi0_config.Pi0Config(pi05=True, discrete_state_input=True),
-        data=LeRobotPiperDataConfig(
+        data=LeRobotOpenArmDataConfig(
             repo_id="/share/home/linyongjia/datasets/openarm_hq_tda_site_v1",
             assets=AssetsConfig(
                 assets_dir="/share/home/linyongjia/datasets",
@@ -1075,11 +1146,9 @@ _CONFIGS = [
             ),
             base_config=DataConfig(prompt_from_task=True),
             base_image_key="observation.images.base",
-            robot_action_dim=16,
             delta_action_mask=_transforms.make_bool_mask(7, -1, 7, -1),
             use_delta_joint_actions=True,
             action_style="relative",
-            swap_left_right=False,
         ),
         weight_loader=weight_loaders.CheckpointWeightLoader(
             "/share/home/linyongjia/output/openpi/pi05_openarms_dual_hq/openarms_hq_bs32/99999/params"
@@ -1091,7 +1160,7 @@ _CONFIGS = [
     TrainConfig(
         name="pi05_openarms_dual_awbc_v1",
         model=pi0_config.Pi0Config(pi05=True, discrete_state_input=True),
-        data=LeRobotPiperDataConfig(
+        data=LeRobotOpenArmDataConfig(
             repo_id="/share/home/linyongjia/datasets/openarm_awbc_v1",
             assets=AssetsConfig(
                 assets_dir="/share/home/linyongjia/datasets",
@@ -1099,11 +1168,9 @@ _CONFIGS = [
             ),
             base_config=DataConfig(prompt_from_task=True),
             base_image_key="observation.images.base",
-            robot_action_dim=16,
             delta_action_mask=_transforms.make_bool_mask(7, -1, 7, -1),
             use_delta_joint_actions=True,
             action_style="relative",
-            swap_left_right=False,
         ),
         weight_loader=weight_loaders.CheckpointWeightLoader(
             "/share/home/linyongjia/output/openpi/pi05_openarms_dual_hq/openarms_hq_bs32/99999/params"
@@ -1115,7 +1182,7 @@ _CONFIGS = [
     TrainConfig(
         name="pi05_openarms_dual_evo_acp_hil_v1_probe",
         model=pi0_config.Pi0Config(pi05=True, discrete_state_input=True),
-        data=LeRobotPiperDataConfig(
+        data=LeRobotOpenArmDataConfig(
             repo_id="/share/home/linyongjia/datasets/openarm_hil_evo_v1",
             assets=AssetsConfig(
                 assets_dir="/share/home/linyongjia/datasets",
@@ -1127,11 +1194,9 @@ _CONFIGS = [
                 lerobot_video_backend="torchcodec",
             ),
             base_image_key="observation.images.base",
-            robot_action_dim=16,
             delta_action_mask=_transforms.make_bool_mask(7, -1, 7, -1),
             use_delta_joint_actions=True,
             action_style="relative",
-            swap_left_right=False,
             acp_indicator_key="complementary_info.acp_indicator",
             acp_indicator_dropout_prob=0.0,
         ),
@@ -1156,15 +1221,13 @@ _CONFIGS = [
             loss_action_weight=0.0,
             loss_value_weight=1.0,
         ),
-        data=LeRobotPiperDataConfig(
+        data=LeRobotOpenArmDataConfig(
             repo_id="/share/home/linyongjia/data/high_quality_folding_v2p1_stage_train180",
             base_config=DataConfig(prompt_from_task=True),
             base_image_key="observation.images.base",
-            robot_action_dim=16,
             delta_action_mask=_transforms.make_bool_mask(7, -1, 7, -1),
             use_delta_joint_actions=True,
             action_style="relative",
-            swap_left_right=False,
             include_advantage_fields=True,
         ),
         log_interval=20,

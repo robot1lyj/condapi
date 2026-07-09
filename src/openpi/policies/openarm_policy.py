@@ -6,16 +6,8 @@ import numpy as np
 from openpi import transforms
 from openpi.models import model as _model
 
-
-def make_piper_example() -> dict:
-    """Creates a random input example for the Piper policy."""
-    return {
-        "observation.state": np.random.rand(14),
-        "observation.images.top_rgb": np.random.randint(256, size=(480, 640, 3), dtype=np.uint8),
-        "observation.images.left_wrist": np.random.randint(256, size=(480, 640, 3), dtype=np.uint8),
-        "observation.images.right_wrist": np.random.randint(256, size=(480, 640, 3), dtype=np.uint8),
-        "prompt": "put the pen into the box",
-    }
+OPENARM_STATE_ACTION_DIM = 16
+OPENARM_METADATA_KEYS = ("episode_index", "frame_index", "episode_length", "stage_progress_gt", "progress")
 
 
 def _parse_image(image) -> np.ndarray:
@@ -27,31 +19,30 @@ def _parse_image(image) -> np.ndarray:
     return image
 
 
-def _swap_left_right(values: np.ndarray) -> np.ndarray:
-    if values.shape[-1] < 14:
-        return values
-    right = values[..., :7]
-    left = values[..., 7:14]
-    rest = values[..., 14:]
-    return np.concatenate([left, right, rest], axis=-1)
+def _validate_openarm_dim(name: str, value: np.ndarray) -> None:
+    if value.shape[-1] != OPENARM_STATE_ACTION_DIM:
+        raise ValueError(f"OpenArm {name} must be {OPENARM_STATE_ACTION_DIM}D, got shape={value.shape}.")
 
 
 @dataclasses.dataclass(frozen=True)
-class PiperInputs(transforms.DataTransformFn):
-    action_dim: int
+class OpenArmInputs(transforms.DataTransformFn):
+    """Convert OpenArm LeRobot rows into OpenPI model inputs.
+
+    OpenArm uses the HQ 16D contract:
+    [right arm 7 joints deg, right gripper motor deg, left arm 7 joints deg, left gripper motor deg].
+    """
+
     model_type: _model.ModelType
-    base_image_key: str = "observation.images.top_rgb"
+    base_image_key: str = "observation.images.base"
     left_wrist_image_key: str = "observation.images.left_wrist"
     right_wrist_image_key: str = "observation.images.right_wrist"
     state_key: str = "observation.state"
     action_key: str = "action"
     prompt_key: str = "prompt"
-    swap_left_right: bool = False
 
     def __call__(self, data: dict) -> dict:
         state = np.asarray(data[self.state_key])
-        if self.swap_left_right:
-            state = _swap_left_right(state)
+        _validate_openarm_dim("state", state)
 
         base_image = _parse_image(data[self.base_image_key])
 
@@ -91,27 +82,28 @@ class PiperInputs(transforms.DataTransformFn):
 
         if self.action_key in data:
             actions = np.asarray(data[self.action_key])
-            if self.swap_left_right:
-                actions = _swap_left_right(actions)
+            _validate_openarm_dim("actions", actions)
             inputs["actions"] = actions
 
         if self.prompt_key in data:
             inputs["prompt"] = data[self.prompt_key]
 
-        for key in ("episode_index", "frame_index", "episode_length", "stage_progress_gt", "progress"):
+        for key in OPENARM_METADATA_KEYS:
             if key in data:
                 inputs[key] = data[key]
+        inputs.update({key: value for key, value in data.items() if key.startswith("complementary_info.")})
 
         return inputs
 
 
 @dataclasses.dataclass(frozen=True)
-class PiperOutputs(transforms.DataTransformFn):
-    action_dim: int = 14
-    swap_left_right: bool = False
+class OpenArmOutputs(transforms.DataTransformFn):
+    """Convert model 32D action chunks back to OpenArm 16D robot commands."""
 
     def __call__(self, data: dict) -> dict:
-        actions = np.asarray(data["actions"][:, : self.action_dim])
-        if self.swap_left_right:
-            actions = _swap_left_right(actions)
-        return {"actions": actions}
+        actions = np.asarray(data["actions"])
+        if actions.shape[-1] < OPENARM_STATE_ACTION_DIM:
+            raise ValueError(
+                f"OpenArm model actions must have at least {OPENARM_STATE_ACTION_DIM} dims, got shape={actions.shape}."
+            )
+        return {"actions": actions[..., :OPENARM_STATE_ACTION_DIM]}

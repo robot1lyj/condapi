@@ -841,7 +841,8 @@ startup: step 16 reached at 16:31 CST, both gpu14 cards about 73.6GB and 100% ut
 - `observation.state` 和 `action` 都是 16 维。
 - 关节范围：state arm abs max `142.06`，action arm abs max `140.0`，与 HQ degree-like 合同一致。
 - 夹爪范围：state/action gripper `[-66, 0]`，与 HQ motor degrees 合同一致；`0` open，`-66` closed。
-- 数据列名仍是 LeRobot 原始列 `observation.images.base/left_wrist/right_wrist`；训练配置用 `base_image_key="observation.images.base"`，`PiperInputs` 在训练/推理 transform 中重打包成模型需要的 `base_0_rgb/left_wrist_0_rgb/right_wrist_0_rgb`。
+- 数据列名仍是 LeRobot 原始列 `observation.images.base/left_wrist/right_wrist`；训练配置用 `base_image_key="observation.images.base"`，`OpenArmInputs` 在训练/推理 transform 中重打包成模型需要的 `base_0_rgb/left_wrist_0_rgb/right_wrist_0_rgb`。
+- OpenArm 训练配置固定走 `LeRobotOpenArmDataConfig` 与 `OpenArmInputs/OpenArmOutputs`；不再复用 Piper transform，也不允许使用旧 Piper 14D `swap_left_right` 逻辑。
 
 推理测试顺序：
 
@@ -942,3 +943,14 @@ startup: step 16 reached at 16:31 CST, both gpu14 cards about 73.6GB and 100% ut
 - RECAP/Evo-RL 是方法路线，clean HIL 数据集名固定为 `openarm_hil_evo_v1`。
 - KAI0 AWBC 仍走 `task_index/tasks.jsonl`；不要把 KAI0 的离线 task 重写和 Evo-RL 的动态 ACP prompt
   混成一套机制。
+
+### 2026-07-09 11:57 CST - Plan Owner - OpenArm 与 Piper 数据链路拆分
+
+状态：OpenArm policy 数据入口已从 Piper 路径拆出。
+
+决策：
+
+- 新增 `src/openpi/policies/openarm_policy.py`，OpenArm 输入输出只接受 HQ 16D state/action 合同。
+- 新增 `LeRobotOpenArmDataConfig`，所有 `openarms/openarm` policy、AWBC、Stage Advantage、HIL ACP 配置均切到该类。
+- `LeRobotPiperDataConfig` 只保留给 `pi0_piper_dual/pi05_piper_dual` 等 Piper 配置；OpenArm 不使用 Piper 的
+  14D `swap_left_right`。

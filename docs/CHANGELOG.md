@@ -9,6 +9,9 @@ Design decisions → `docs/decisions/`. Architecture → `docs/ARCHITECTURE.md`.
 
 ## 2026-07-09
 
+- **OpenArm/Piper 数据链路拆分**: 新增 `OpenArmInputs/OpenArmOutputs` 与
+  `LeRobotOpenArmDataConfig`，OpenArm 训练配置不再复用 Piper transform；OpenArm 路径固定校验
+  HQ 16D state/action，并禁止使用旧 Piper 14D `swap_left_right` 逻辑。
 - **OpenArm JAX ACP prompt 适配**: 新增 JAX 数据 transform，按 `complementary_info.acp_indicator`
   在 tokenizer 前注入 `Advantage: positive/negative` prompt；新增
   `pi05_openarms_dual_evo_acp_hil_v1_probe` 训练配置，HIL clean 数据集名统一为 `openarm_hil_evo_v1`。
