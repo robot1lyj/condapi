@@ -9,6 +9,11 @@ Design decisions → `docs/decisions/`. Architecture → `docs/ARCHITECTURE.md`.
 
 ## 2026-07-10
 
+- **Stage 六卡评分预处理加速**: 三路当前/历史图像由逐帧 GPU resize 改为整批 resize，数值等价测试
+  逐元素一致；HQ 单分片实测由约 8.5 降至 5.4 秒/batch，六路按 episode 原子断点恢复继续评分。
+- **K-Data loader 预检修复**: 新增正式 1719 集结构审计和 positive/negative 真实 OpenPI loader smoke；预检
+  发现构建器遗漏 LeRobot v2.1 必需的 `episodes_stats.jsonl`，现继承源统计并重算所有改写索引、二值标签
+  和 Stage 分数字段，避免 norm 完成后才在四卡训练初始化阶段失败。
 - **Site150 Stage 自动链路准备完成**: 150 条 success（排除 episode 95）按帧数均衡成 6 个 25 集分片；
   `kai0_site_score_monitor` 会在对应 HQ GPU 槽位释放后自动评分、恢复、审计并生成 Site 报告。另生成独立
   `openarm_site_stage_v1`（140 train + 10 val），只作迁移评估和条件 Site-Stage 监督，不作为最终分数。

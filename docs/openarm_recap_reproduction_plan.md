@@ -367,6 +367,8 @@ HQ-Score：
 
 - 输入：`high_quality_folding` 的 policy train `0:999`；holdout `999:1199` 不参与策略数据构建。
 - scorer：HQ-Stage checkpoint `10000`；`batch_size=32`、`relative_interval=50`、`samples_per_batch=1`。
+- 三路相机预处理已从逐帧 GPU resize 改为 batch resize，逐元素等价测试通过；单分片实测约从
+  `8.5 s/batch` 降至 `5.4 s/batch`，六路均已从完整 episode 断点恢复，不改变 scorer 或评分超参数。
 - 六个 score-only 分片：gpu12 `0:167`/`167:334`，gpu14 `334:501`/`501:668`，gpu28 `668:835`/`835:999`。
 - tmux：`kai0_hq_s0` 至 `kai0_hq_s5`；分片输出前缀为 `openarm_kai0_stage_scores_hq_v1_s*`。
 - score-only 阶段只落盘 `relative_advantage/absolute_value/absolute_advantage` 和源 episode 映射，不生成三档标签，也不在各分片内计算阈值。
