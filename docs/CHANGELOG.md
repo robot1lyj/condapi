@@ -9,6 +9,11 @@ Design decisions → `docs/decisions/`. Architecture → `docs/ARCHITECTURE.md`.
 
 ## 2026-07-10
 
+- **Site150 Stage 自动链路准备完成**: 150 条 success（排除 episode 95）按帧数均衡成 6 个 25 集分片；
+  `kai0_site_score_monitor` 会在对应 HQ GPU 槽位释放后自动评分、恢复、审计并生成 Site 报告。另生成独立
+  `openarm_site_stage_v1`（140 train + 10 val），只作迁移评估和条件 Site-Stage 监督，不作为最终分数。
+- **正式二值 K-Data 构建器**: 新增 HQ999 + Site140×3 + 小预算 TDA300 的统一 AWBC 构建器；使用 KAI0
+  逗号提示词和每阶段 top-30% 二值标签，并在落盘前检查完整 episode 集合、全局比例及各来源比例。
 - **Stage 评分无人值守加固与报告重构**: score-only 数据集支持逐 episode 校验、原子 parquet 落盘和
   `--resume`；HQ watchdog 检测停止/日志停滞后最多自动恢复 3 次，并在 999 集完成后自动刷新最终报告。
   Stage 报告改为可复用渲染器，按相机原始宽高比在视频上叠加 progress/advantage、当前帧和正负状态。

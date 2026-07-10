@@ -391,7 +391,7 @@ class LeRobotPiperDataConfig(DataConfigFactory):
     prompt_key: str = "prompt"
     action_sequence_keys: Sequence[str] = ("action",)
     robot_action_dim: int = 14
-    delta_action_mask: Sequence[bool] | None = dataclasses.field(
+    delta_action_mask: tuple[bool, ...] | None = dataclasses.field(
         default_factory=lambda: _transforms.make_bool_mask(6, -1, 6, -1)
     )
     use_delta_joint_actions: bool = True
@@ -473,7 +473,7 @@ class LeRobotOpenArmDataConfig(DataConfigFactory):
     action_key: str = "action"
     prompt_key: str = "prompt"
     action_sequence_keys: Sequence[str] = ("action",)
-    delta_action_mask: Sequence[bool] | None = dataclasses.field(
+    delta_action_mask: tuple[bool, ...] | None = dataclasses.field(
         default_factory=lambda: _transforms.make_bool_mask(7, -1, 7, -1)
     )
     use_delta_joint_actions: bool = True
@@ -1180,6 +1180,32 @@ _CONFIGS = [
         num_train_steps=88_000,
     ),
     TrainConfig(
+        name="pi05_openarm_kai0_awbc_v1",
+        model=pi0_config.Pi0Config(pi05=True, discrete_state_input=True),
+        data=LeRobotOpenArmDataConfig(
+            repo_id="/share/home/linyongjia/datasets/openarm_kai0_awbc_v1",
+            assets=AssetsConfig(
+                assets_dir="/share/home/linyongjia/datasets",
+                asset_id="openarm_kai0_awbc_v1",
+            ),
+            base_config=DataConfig(prompt_from_task=True, train_episodes=list(range(1719))),
+            base_image_key="observation.images.base",
+            delta_action_mask=_transforms.make_bool_mask(7, -1, 7, -1),
+            use_delta_joint_actions=True,
+            action_style="relative",
+        ),
+        weight_loader=weight_loaders.CheckpointWeightLoader(
+            "/share/home/linyongjia/.cache/openpi/openpi-assets/checkpoints/pi05_base/params"
+        ),
+        log_interval=20,
+        wandb_enabled=True,
+        num_workers=2,
+        save_interval=5_000,
+        keep_period=5_000,
+        num_train_steps=80_000,
+        batch_size=128,
+    ),
+    TrainConfig(
         name="pi05_openarms_dual_evo_acp_hil_v1_probe",
         model=pi0_config.Pi0Config(pi05=True, discrete_state_input=True),
         data=LeRobotOpenArmDataConfig(
@@ -1237,6 +1263,44 @@ _CONFIGS = [
         num_train_steps=20_000,
         num_workers=4,
         batch_size=16,
+    ),
+    TrainConfig(
+        name="ADVANTAGE_TORCH_OPENARM_SITE_FOLD",
+        advantage_estimator=True,
+        skip_norm_stats=True,
+        model=pi0_config.AdvantageEstimatorConfig(
+            pi05=True,
+            discrete_state_input=False,
+            loss_action_weight=0.0,
+            loss_value_weight=1.0,
+        ),
+        data=LeRobotOpenArmDataConfig(
+            repo_id="/share/home/linyongjia/data/openarm_stage_mix_site_v1",
+            base_config=DataConfig(prompt_from_task=True, train_episodes=list(range(600))),
+            base_image_key="observation.images.base",
+            delta_action_mask=_transforms.make_bool_mask(7, -1, 7, -1),
+            use_delta_joint_actions=True,
+            action_style="relative",
+            include_advantage_fields=True,
+        ),
+        pytorch_weight_path=(
+            "/share/home/linyongjia/output/openpi/ADVANTAGE_TORCH_OPENARM_FLATTEN_FOLD/"
+            "openarm_stage_v1_train180_bs32_no_ckpt_10k_20260701/10000"
+        ),
+        pytorch_gradient_checkpointing=False,
+        lr_schedule=_optimizer.CosineDecaySchedule(
+            warmup_steps=100,
+            peak_lr=5e-6,
+            decay_steps=5_000,
+            decay_lr=5e-7,
+        ),
+        log_interval=20,
+        save_interval=500,
+        keep_period=500,
+        wandb_enabled=True,
+        num_train_steps=5_000,
+        num_workers=2,
+        batch_size=64,
     ),
     #
     # Fine-tuning Aloha configs.

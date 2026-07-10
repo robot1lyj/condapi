@@ -173,8 +173,8 @@ Site-A150 -> HQ-Stage 直接推理 -> Site-DirectScore -> 迁移审计
 只允许：
 
 ```text
-task_index=0 -> Fold the T-shirt properly\nAdvantage: negative
-task_index=1 -> Fold the T-shirt properly\nAdvantage: positive
+task_index=0 -> Fold the T-shirt properly, Advantage: negative
+task_index=1 -> Fold the T-shirt properly, Advantage: positive
 ```
 
 - `[论文]` 按 advantage 排序，最高 30% 为 positive，其余为 negative。
@@ -182,6 +182,9 @@ task_index=1 -> Fold the T-shirt properly\nAdvantage: positive
 - `[官方代码]` `stage_nums=2` 时，每个阶段分别计算 percentile。
 - HQ-Score、Site-Score 和 TDA-S 合并后统一计算阈值；禁止三档和分片独立阈值。
 - 报告必须按 `HQ/Site/TDA × flattening/folding` 分别列出 positive/negative 数量，确保 Site 没被 HQ 淹没。
+- 正式构建器为 `scripts/build_openarm_kai0_awbc_dataset.py`：先审计完整的 HQ999、Site140 和 TDA-S，
+  再按预测 `absolute_value` 的 `0.5` 边界分阶段、对论文主分支 `relative_advantage` 分别取最高 30%；
+  任一来源的正样本比例超出 `15%-45%` 即停止，不生成正式目录。
 
 官方 README 的 `--threshold 30`、脚本实现的 `100-threshold` 和帮助文字存在表述歧义。OpenArm 报告必须直接写最终 positive 实际比例，验收目标是论文定义的约 30%，不能只记录 CLI 参数。
 
@@ -334,7 +337,12 @@ Site-A151 / Site-Score：
 - 权威输入：`annotations/openarm_stage_v1.jsonl`。
 - episode 95 为 Site-F1；当前 Site-Stage 可用监督为 Site-A150，即 140 train + 10 val。
 - 已否决并删除 `openarm_site_gt_v1` 和 8766 报告服务；源 Site 和 Site-A151 均保持完整。
-- 下一步先用 HQ-Stage 生成 Site-DirectScore，并用人工边界做迁移审计；尚未启动 Site-Stage 训练。
+- Site-A150 已按真实帧数均衡成 6 个分片，每片 25 集、约 6.55 万帧；`kai0_site_score_monitor` 在对应
+  HQ GPU 槽位释放后自动启动 Site-DirectScore，并在结束后执行曲线指标和 val10 随机帧对双重闸门。
+- 独立 `openarm_site_stage_v1` 已生成并验证为 150 episodes / 394008 frames / 450 videos，顺序固定为
+  Site140 train + Site10 validation；它只作迁移评估和条件 Site-Stage 监督，不进入最终 K-Data。
+- 条件配置 `ADVANTAGE_TORCH_OPENARM_SITE_FOLD` 固定从 HQ-Stage 10000 初始化，Site140×3 + HQ-A180
+  形成 70/30 replay，batch64、5k steps、peak LR `5e-6`；只有直接迁移闸门失败才启动。
 
 HQ-Score：
 

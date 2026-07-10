@@ -7,6 +7,10 @@ EPISODES=""
 SHARD_NAME=""
 BATCH_SIZE="32"
 RESUME=false
+SOURCE="/share/home/linyongjia/datasets/high_quality_folding"
+DESTINATION_PREFIX="/share/home/linyongjia/datasets/openarm_kai0_stage_scores_hq_v1"
+CHECKPOINT="/share/home/linyongjia/output/openpi/ADVANTAGE_TORCH_OPENARM_FLATTEN_FOLD/openarm_stage_v1_train180_bs32_no_ckpt_10k_20260701/10000"
+CONFIG_NAME="ADVANTAGE_TORCH_OPENARM_FLATTEN_FOLD"
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -30,6 +34,22 @@ while [[ $# -gt 0 ]]; do
             RESUME=true
             shift
             ;;
+        --source)
+            SOURCE="$2"
+            shift 2
+            ;;
+        --destination-prefix)
+            DESTINATION_PREFIX="$2"
+            shift 2
+            ;;
+        --checkpoint)
+            CHECKPOINT="$2"
+            shift 2
+            ;;
+        --config-name)
+            CONFIG_NAME="$2"
+            shift 2
+            ;;
         *)
             echo "Unknown argument: $1" >&2
             exit 2
@@ -38,15 +58,13 @@ while [[ $# -gt 0 ]]; do
 done
 
 if [[ -z "$GPU_ID" || -z "$EPISODES" || -z "$SHARD_NAME" ]]; then
-    echo "Usage: $0 --gpu-id N --episodes START:END --shard-name NAME [--batch-size N] [--resume]" >&2
+    echo "Usage: $0 --gpu-id N --episodes SPEC --shard-name NAME [--batch-size N] [--resume]" >&2
     exit 2
 fi
 
 REPO_ROOT="/share/home/linyongjia/conda-pi/openpi"
 PYTHON="/share/home/linyongjia/miniconda3/envs/pi-conda/bin/python"
-SOURCE="/share/home/linyongjia/datasets/high_quality_folding"
-DESTINATION="/share/home/linyongjia/datasets/openarm_kai0_stage_scores_hq_v1_${SHARD_NAME}"
-CHECKPOINT="/share/home/linyongjia/output/openpi/ADVANTAGE_TORCH_OPENARM_FLATTEN_FOLD/openarm_stage_v1_train180_bs32_no_ckpt_10k_20260701/10000"
+DESTINATION="${DESTINATION_PREFIX}_${SHARD_NAME}"
 
 cd "$REPO_ROOT"
 export CUDA_VISIBLE_DEVICES="$GPU_ID"
@@ -61,6 +79,7 @@ args=(
     --src "$SOURCE"
     --dst "$DESTINATION"
     --checkpoint "$CHECKPOINT"
+    --config-name "$CONFIG_NAME"
     --episodes "$EPISODES"
     --task "Fold the T-shirt properly"
     --batch-size "$BATCH_SIZE"

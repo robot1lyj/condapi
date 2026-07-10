@@ -273,6 +273,7 @@ HTML_TEMPLATE = r"""<!doctype html>
     .legend-line { width: 17px; height: 3px; border-radius: 2px; background: var(--blue); }
     .legend-line.positive { background: var(--positive); }
     .legend-line.negative { background: var(--negative); }
+    .legend-line.reference { background: var(--stage); }
     .metric-strip {
       display: grid;
       grid-template-columns: repeat(6, minmax(0, 1fr));
@@ -381,6 +382,7 @@ HTML_TEMPLATE = r"""<!doctype html>
         </div>
         <div class="legend">
           <span class="legend-key"><span class="legend-line"></span>Progress</span>
+          <span class="legend-key" id="referenceLegend" hidden><span class="legend-line reference"></span>Human reference</span>
           <span class="legend-key"><span class="legend-line positive"></span>Forward</span>
           <span class="legend-key"><span class="legend-line negative"></span>Regression</span>
         </div>
@@ -501,6 +503,7 @@ HTML_TEMPLATE = r"""<!doctype html>
         `${current.source_dataset || 'OpenArm'} / source episode ${current.source_episode_index ?? current.episode_index}`;
       document.getElementById('qualityText').textContent =
         `${current.score_source || CONFIG.score_source} / ${current.quality || 'predicted'}`;
+      document.getElementById('referenceLegend').hidden = !Array.isArray(current.reference_progress);
       document.getElementById('mMean').textContent = Number(current.advantage_mean).toFixed(4);
       const negativeFraction = Number.isFinite(Number(current.negative_fraction))
         ? Number(current.negative_fraction)
@@ -596,6 +599,19 @@ HTML_TEMPLATE = r"""<!doctype html>
         ctx.beginPath();
         ctx.moveTo(boundaryX, pad.top);
         ctx.lineTo(boundaryX, height - pad.bottom);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      if (mode === 'progress' && Array.isArray(current.reference_progress)) {
+        ctx.save();
+        ctx.strokeStyle = 'rgba(241,184,75,.86)';
+        ctx.lineWidth = compact ? 1.4 : 2;
+        ctx.setLineDash([7, 5]);
+        ctx.beginPath();
+        current.reference_progress.forEach((value, index) => {
+          if (index === 0) ctx.moveTo(x(index), y(value)); else ctx.lineTo(x(index), y(value));
+        });
         ctx.stroke();
         ctx.restore();
       }

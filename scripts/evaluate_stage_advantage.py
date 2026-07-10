@@ -1,5 +1,7 @@
 """Evaluate a PyTorch Stage Advantage checkpoint on a labeled LeRobot dataset."""
 
+# ruff: noqa: E402
+
 from __future__ import annotations
 
 import argparse
@@ -45,6 +47,7 @@ def _parse_args() -> argparse.Namespace:
         help="Labeled validation LeRobot dataset path or repo_id",
     )
     parser.add_argument("--batch-size", type=int, default=4)
+    parser.add_argument("--episodes", default=None, help="Optional episode spec, for example 140:150 or 0,2,5")
     parser.add_argument("--num-workers", type=int, default=0)
     parser.add_argument("--max-batches", type=int, default=50, help="Finite validation batches to evaluate")
     parser.add_argument(
@@ -62,7 +65,19 @@ def _parse_args() -> argparse.Namespace:
 
 def _build_config(args: argparse.Namespace) -> _config.TrainConfig:
     config = _config.get_config(args.config_name)
-    data = dataclasses.replace(config.data, repo_id=args.dataset)
+    train_episodes = None
+    if args.episodes:
+        if ":" in args.episodes:
+            start_text, end_text = args.episodes.split(":", 1)
+            train_episodes = list(range(int(start_text or 0), int(end_text)))
+        else:
+            train_episodes = [int(part.strip()) for part in args.episodes.split(",") if part.strip()]
+    base_config = config.data.base_config or _config.DataConfig()
+    data = dataclasses.replace(
+        config.data,
+        repo_id=args.dataset,
+        base_config=dataclasses.replace(base_config, train_episodes=train_episodes),
+    )
     model = dataclasses.replace(config.model, dtype=config.pytorch_training_precision)
     return dataclasses.replace(
         config,
@@ -130,13 +145,13 @@ def evaluate(args: argparse.Namespace) -> dict:
     with torch.inference_mode():
         for batch_idx, (observation, actions) in enumerate(tqdm.tqdm(loader, total=args.max_batches, desc="Eval")):
             del actions
-            observation = jax.tree.map(lambda x: x.to(device), observation)
-            target = observation.progress.to(device=device, dtype=torch.float32).reshape(-1)
+            device_observation = jax.tree.map(lambda x: x.to(device), observation)
+            target = device_observation.progress.to(device=device, dtype=torch.float32).reshape(-1)
 
             pred_accum = torch.zeros_like(target)
             for sample_idx in range(args.samples_per_batch):
                 torch.manual_seed(args.seed + batch_idx * args.samples_per_batch + sample_idx)
-                pred_accum += model.sample_values(device, observation).to(torch.float32).reshape(-1)
+                pred_accum += model.sample_values(device, device_observation).to(torch.float32).reshape(-1)
             pred = pred_accum / args.samples_per_batch
 
             error = pred - target
@@ -159,10 +174,11 @@ def evaluate(args: argparse.Namespace) -> dict:
     ss_res = float(torch.sum((preds - targets).square()).item())
     ss_tot = float(torch.sum((targets - targets.mean()).square()).item())
 
-    report = {
+    return {
         "checkpoint": str(args.checkpoint),
         "config_name": args.config_name,
         "dataset": args.dataset,
+        "episodes": args.episodes,
         "batch_size": args.batch_size,
         "max_batches": args.max_batches,
         "samples_per_batch": args.samples_per_batch,
@@ -181,7 +197,6 @@ def evaluate(args: argparse.Namespace) -> dict:
         "elapsed_sec": time.time() - start,
         "device": str(device),
     }
-    return report
 
 
 def main() -> None:
