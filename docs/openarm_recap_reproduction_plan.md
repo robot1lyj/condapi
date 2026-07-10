@@ -2,7 +2,7 @@
 
 最后更新：2026-07-10
 
-状态：**待用户确认；未启动新的 HQ Stage 全量评分、Site 标注服务或策略训练。**
+状态：**执行中；Site 单边界标注已开放，HQ `0:999` 正在六张 GPU 上做 Stage 原始评分，尚未开始 AWBC 策略训练。**
 
 本文档是 OpenArm 后续 KAI0、Evo-RL 和二者组合实验的唯一当前计划。它区分论文事实、官方代码事实和 OpenArm 适配，不能把工程建议写成论文结论。
 
@@ -232,8 +232,6 @@ HIL raw HDF5/mp4
 
 ## 9. 执行顺序和 GPU
 
-计划确认后：
-
 1. 修正旧三档脚本为“分片只评分 + 合并后官方二值化”，增加论文/官方参数报告。
 2. HQ `0:999` 按空闲 GPU 分片评分；现有 HIL 现场采集不停止。
 3. 同时启动 Site 151 条单边界标注服务。
@@ -244,6 +242,25 @@ HIL raw HDF5/mp4
 8. 路线 K 和 E 都通过各自 smoke 后，路线 H 只替换初始化做组合实验。
 
 六张 GPU 的用途是并行评分和独立路线实验，不在没有多机等价性验证时声称单个训练已经使用官方 8-GPU 配置。
+
+### 9.1 当前执行状态（2026-07-10）
+
+Site 标注：
+
+- 数据集：`/share/home/linyongjia/datasets/openarm_site_align_v1_deg`，151 episodes。
+- 标注内容：每集只点一次 `flatten_done`；起点和终点直接使用精修后的首尾帧。
+- 服务：gpu28 tmux `openarm_site_stage_annotator_v1`，本机入口 `http://127.0.0.1:8765`。
+- 权威输出：`annotations/openarm_stage_v1.jsonl`；完成后先审计 val `141:151`，不直接进入 AWBC。
+
+HQ Stage 原始评分：
+
+- 输入：`high_quality_folding` 的 policy train `0:999`；holdout `999:1199` 不参与策略数据构建。
+- scorer：Stage v1 checkpoint `10000`；`batch_size=32`、`relative_interval=50`、`samples_per_batch=1`。
+- 六个 score-only 分片：gpu12 `0:167`/`167:334`，gpu14 `334:501`/`501:668`，gpu28 `668:835`/`835:999`。
+- tmux：`kai0_hq_s0` 至 `kai0_hq_s5`；分片输出前缀为 `openarm_kai0_stage_scores_hq_v1_s*`。
+- score-only 阶段只落盘 `relative_advantage/absolute_value/absolute_advantage` 和源 episode 映射，不生成三档标签，也不在各分片内计算阈值。
+
+当前批次结束后的固定顺序：合并六个分片并校验覆盖/重复 -> Site val10 审计 -> 必要时训练 Site-aware Stage -> 评分 Site -> 构建小预算 TDA 映射 -> 全局按 KAI0 二值规则生成 AWBC 数据集。人工标注与 HQ 自动评分可以并行，但在这些审计完成前不得启动 AWBC 策略训练。
 
 ## 10. 禁止项
 
@@ -272,4 +289,4 @@ src/openpi/training/config.py
 src/openpi/transforms.py
 ```
 
-当前旧 `pi05_openarms_dual_awbc_v1` 和三档 AWBC 输出只作历史追溯；用户确认本计划后再修改代码和启动远端任务。
+当前旧 `pi05_openarms_dual_awbc_v1` 和三档 AWBC 输出只作历史追溯；当前运行只生成原始 Stage 分数，正式二值 AWBC 由合并后的独立步骤生成。

@@ -4,8 +4,9 @@ This is the OpenArm equivalent of KAI0 Stage Advantage Step 2 + Step 3:
 
 1. Use a trained Stage Advantage estimator to append advantage columns:
    relative_advantage, absolute_value, absolute_advantage.
-2. Discretize absolute_advantage into task_index labels:
-   0 = bad, 1 = neutral, 2 = positive.
+2. In legacy one-shot mode, discretize the scores into task labels.
+   ``--score-only`` skips this step so parallel shards can be merged before
+   the official binary threshold is computed once over the full dataset.
 3. Write meta/tasks.jsonl prompts consumed by prompt_from_task=True.
 
 The source dataset is never modified. Videos are copied/linked into the output
@@ -356,6 +357,10 @@ def _write_tasks(dst: pathlib.Path, task: str) -> None:
     _write_jsonl(dst / "meta/tasks.jsonl", rows)
 
 
+def _write_base_task(dst: pathlib.Path, task: str) -> None:
+    _write_jsonl(dst / "meta/tasks.jsonl", [{"task_index": 0, "task": task}])
+
+
 def _assign_awbc_labels(
     dst: pathlib.Path, parquets: list[pathlib.Path], *, bad_percentile: float, positive_percentile: float
 ) -> dict:
@@ -412,6 +417,7 @@ def build_awbc_dataset(args: argparse.Namespace) -> dict[str, Any]:
             "checkpoint": str(args.checkpoint),
             "config_name": args.config_name,
             "task": args.task,
+            "score_only": args.score_only,
         }
         print(json.dumps(report, ensure_ascii=False, indent=2))
         return report
@@ -469,11 +475,15 @@ def build_awbc_dataset(args: argparse.Namespace) -> dict[str, Any]:
 
         episode_row = dict(episodes_meta[old_episode_index])
         episode_row["episode_index"] = new_episode_index
-        episode_row["tasks"] = [
-            f"{args.task}, Advantage: bad",
-            f"{args.task}, Advantage: neutral",
-            f"{args.task}, Advantage: positive",
-        ]
+        episode_row["tasks"] = (
+            [args.task]
+            if args.score_only
+            else [
+                f"{args.task}, Advantage: bad",
+                f"{args.task}, Advantage: neutral",
+                f"{args.task}, Advantage: positive",
+            ]
+        )
         episode_row["length"] = length
         episode_row["source_episode_index"] = old_episode_index
         new_episode_rows.append(episode_row)
@@ -491,12 +501,14 @@ def build_awbc_dataset(args: argparse.Namespace) -> dict[str, Any]:
 
         total_frames += length
 
-    discretize_report = _assign_awbc_labels(
-        dst,
-        output_parquets,
-        bad_percentile=args.bad_percentile,
-        positive_percentile=args.positive_percentile,
-    )
+    discretize_report = None
+    if not args.score_only:
+        discretize_report = _assign_awbc_labels(
+            dst,
+            output_parquets,
+            bad_percentile=args.bad_percentile,
+            positive_percentile=args.positive_percentile,
+        )
 
     new_info = _add_awbc_features(info)
     new_info["total_episodes"] = len(episodes)
@@ -504,8 +516,12 @@ def build_awbc_dataset(args: argparse.Namespace) -> dict[str, Any]:
     new_info["total_videos"] = total_videos
     new_info["total_chunks"] = max(1, math.ceil(len(episodes) / int(info["chunks_size"])))
     new_info["splits"] = {"train": f"0:{len(episodes)}"}
+    new_info["total_tasks"] = 1 if args.score_only else len(AWBC_TASKS)
     _write_json(dst / "meta/info.json", new_info)
-    _write_tasks(dst, args.task)
+    if args.score_only:
+        _write_base_task(dst, args.task)
+    else:
+        _write_tasks(dst, args.task)
     _write_jsonl(dst / "meta/episodes.jsonl", new_episode_rows)
     if new_stats_rows:
         _write_jsonl(dst / "meta/episodes_stats.jsonl", new_stats_rows)
@@ -521,6 +537,7 @@ def build_awbc_dataset(args: argparse.Namespace) -> dict[str, Any]:
         "total_videos": total_videos,
         "relative_interval": args.relative_interval,
         "samples_per_batch": args.samples_per_batch,
+        "score_only": args.score_only,
         "discretize": discretize_report,
     }
     _write_json(dst / "awbc_build_report.json", report)
@@ -534,7 +551,7 @@ def _build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--checkpoint", type=pathlib.Path, required=True, help="Stage Advantage checkpoint directory")
     parser.add_argument("--config-name", default="ADVANTAGE_TORCH_OPENARM_FLATTEN_FOLD")
     parser.add_argument("--episodes", default=None, help="Episode spec, e.g. 0:10 or 0,2,5")
-    parser.add_argument("--task", default="fold the cloth")
+    parser.add_argument("--task", default="Fold the T-shirt properly")
     parser.add_argument("--relative-interval", type=int, default=50)
     parser.add_argument("--batch-size", type=int, default=8)
     parser.add_argument("--samples-per-batch", type=int, default=1)
@@ -543,6 +560,11 @@ def _build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--copy-mode", choices=("copy", "hardlink", "symlink"), default="hardlink")
     parser.add_argument("--device", default=None)
     parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument(
+        "--score-only",
+        action="store_true",
+        help="Write raw Stage predictions without assigning task labels; intended for parallel shards.",
+    )
     parser.add_argument("--overwrite", action="store_true")
     parser.add_argument("--dry-run", action="store_true")
     return parser

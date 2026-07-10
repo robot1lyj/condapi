@@ -9,6 +9,9 @@ Design decisions → `docs/decisions/`. Architecture → `docs/ARCHITECTURE.md`.
 
 ## 2026-07-10
 
+- **KAI0 Stage 评分拆分为 score-only 与全局二值化**: 分片任务只生成原始 relative/absolute advantage，
+  避免各 GPU 独立分桶造成阈值不一致；Site 151 集单边界标注和 HQ train `0:999` 六分片评分已并行启动，
+  正式 AWBC 标签必须等待分片合并和 Site scorer 审计。
 - **OpenArm 三路线复现计划**: 当前计划拆分为 KAI0、Evo-RL 和 KAI0+Evo-RL 组合三条独立路线；
   Stage v1 经代码和数据审计确认对齐 KAI0 Task A 的 flattening/folding 双阶段核心实现，同时显式记录
   10k 训练规模、旧三档 AWBC、relative/absolute advantage 等尚未完成或存在论文/官方代码差异的部分；
