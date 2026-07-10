@@ -9,6 +9,9 @@ Design decisions → `docs/decisions/`. Architecture → `docs/ARCHITECTURE.md`.
 
 ## 2026-07-10
 
+- **Site-GT 与动态审计报告**: Site-A151 已确定性生成独立 `openarm_site_gt_v1`，逐帧保留人工进度、阶段和
+  50 帧 GT advantage，明确不调用 HQ-Stage；新增 KAI0 Figure 4 风格三路视频/曲线同步 HTML，并为六卡
+  HQ-Score 增加只监控不自动重启的 watchdog。
 - **KAI0 HQ/Site 评分边界收敛**: 现有 Stage v1 固定命名为 HQ-Stage，只自动评分 HQ；Site 151 条完整人工边界
   固定命名为 Site-A151，并直接生成逐帧 Site-GT progress/advantage，不再评估、微调或复用 HQ-Stage 处理 Site。
 - **KAI0 Stage 评分拆分为 score-only 与全局二值化**: 分片任务只生成原始 relative/absolute advantage，

@@ -124,10 +124,13 @@ Site-A151 人工边界 -> 确定性逐帧计算 -> Site-GT
 - `[论文]` Task A 只有 flattening、folding 两个阶段。
 - Site 151 条已经精修首尾，并全部人工点击一次 `flatten_done`；权威标注简称 **Site-A151**。
 - Site-A151 直接生成逐帧 `stage_progress_gt/stage_id`，再按同一个 `relative_interval=50` 计算
-  `advantage_gt[t] = stage_progress_gt[min(t+50, end)] - stage_progress_gt[t]`。
+  `advantage_gt[t] = stage_progress_gt[min(t+50, end)] - stage_progress_gt[t]`；末尾不足 50 帧的窗口按
+  `50 / 实际间隔` 归一化，与 HQ-Score 的尾段定义一致。
 - 标准列映射固定为 `absolute_value=stage_progress_gt`、`relative_advantage=advantage_gt`、
   `absolute_advantage=advantage_gt`；原始 GT 列继续保留。
 - Site-GT 不加载、不评估、不微调 HQ-Stage，也不训练新的 Site Stage 模型。
+- Site-A151 当前有 150 条 `success` 和 episode 95 一条 `failure`；Site-GT 保留全部用于审计，但 K-Data
+  默认只接收 `eligible_for_k_data=true` 的 150 条 success，除非 episode 95 经人工重标。
 - 为便于后续合并，Site-GT 落盘时把 GT 进度和增量映射到标准 advantage 列，同时在 metadata 明确
   `advantage_source=site_gt`，不能伪装成模型预测。
 
@@ -305,7 +308,11 @@ Site-A151 / Site-GT：
 - 标注内容：每集只点一次 `flatten_done`；起点和终点直接使用精修后的首尾帧。
 - Site-A151 已完成 151/151，已检查 episode 唯一性、缺失项和边界合法性。
 - 权威输入：`annotations/openarm_stage_v1.jsonl`。
-- 下一步直接生成 Site-GT；不做 Site Stage 推理、验证或训练。
+- Site-GT 已生成：`/share/home/linyongjia/datasets/openarm_site_gt_v1`，151 episodes / 394900 frames，
+  源 Site 未修改，453 个视频均为硬链接，新增数值列无 NaN 且进度全部单调。
+- episode 95 为人工 `failure`，保留审计但 `eligible_for_k_data=false`；K-Data 当前可用 Site 为 150 条 success。
+- KAI0 Figure 4 风格动态报告位于 `Site-GT/site_gt_report/index.html`，三路视频与进度/advantage 曲线同步。
+- 不做 Site Stage 推理、验证或训练。
 
 HQ-Score：
 
@@ -314,6 +321,7 @@ HQ-Score：
 - 六个 score-only 分片：gpu12 `0:167`/`167:334`，gpu14 `334:501`/`501:668`，gpu28 `668:835`/`835:999`。
 - tmux：`kai0_hq_s0` 至 `kai0_hq_s5`；分片输出前缀为 `openarm_kai0_stage_scores_hq_v1_s*`。
 - score-only 阶段只落盘 `relative_advantage/absolute_value/absolute_advantage` 和源 episode 映射，不生成三档标签，也不在各分片内计算阈值。
+- watchdog：`kai0_hq_score_monitor` 每 5 分钟写入 `monitor_latest.txt`/`monitor.log`，发现分片提前停止时写入 `monitor_alerts.log`，不自动重启或覆盖输出。
 
 当前固定顺序：HQ-Score 与 Site-GT 并行生成 -> 构建 TDA-S -> 合并并审计三种来源 -> 全局按 KAI0 二值规则生成 K-Data -> 训练 K-Policy/K-BC。在 K-Data 审计完成前不得启动 AWBC 策略训练。
 
@@ -333,6 +341,10 @@ HQ-Score：
 ```text
 scripts/openarm_stage_annotator.py
 scripts/openarm_stage_progress.py
+scripts/build_openarm_site_gt.py
+scripts/build_openarm_site_gt_report.py
+scripts/serve_openarm_site_gt_report.py
+scripts/monitor_openarm_hq_stage_scores.sh
 scripts/evaluate_stage_advantage.py
 scripts/openarm_stage_advantage_awbc.py
 scripts/openarm_tda_awbc_from_source.py
