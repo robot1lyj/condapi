@@ -391,8 +391,8 @@ HQ-Score：
    `task_index`、连续索引，并分别取一条 positive/negative 样本走真实 OpenPI loader；原始 16D 必须经
    `OpenArmInputs` 变为模型 `(50,32)` action，且禁止出现 Piper transform。
 5. 20-step 4 卡 smoke 成功后才启动 80k；训练异常时两节点成对停止，并从最近 5k checkpoint 恢复。
-6. 80k 后对 `4999/9999/.../79999` 全部 16 个 5k checkpoint 在 HQ holdout 与 Site val10 上使用固定
-   positive prompt 做 sampled sweep；
+6. 80k 后对 `5000/10000/.../75000/79999` 全部 16 个 checkpoint 在 HQ holdout 与 Site val10 上使用
+   固定 positive prompt 做 sampled sweep；
    选择权重为 Site 关键帧30%、Site MAE25%、HQ关键帧20%、HQ MAE15%、Site chunk overlap10%，优先
    保留 HQ val/train MAE 比不超过2.0的 checkpoint，最后部署到 gpu25:6666。服务端使用 `--force-prompt`
    覆盖客户端普通 task，保证真实推理和离线 sweep 同样走 `Advantage: positive` 条件；普通/RTC 服务默认不覆盖。

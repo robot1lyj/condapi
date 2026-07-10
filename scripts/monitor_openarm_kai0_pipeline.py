@@ -646,7 +646,7 @@ def _policy_checkpoint_steps() -> list[int]:
 
 
 def _is_policy_sweep_step(step: int) -> bool:
-    return (step + 1) % 5_000 == 0 or step == 79_999
+    return step % 5_000 == 0 or step == 79_999
 
 
 def _sweep_command() -> str:

@@ -32,7 +32,8 @@ def test_policy_selection_prefers_site_and_hq_joint_rank(tmp_path) -> None:
 
 
 def test_policy_sweep_selects_every_openpi_5k_checkpoint() -> None:
-    selected = [step for step in range(4_999, 80_000, 5_000) if pipeline._is_policy_sweep_step(step)]  # noqa: SLF001
+    candidates = [*range(5_000, 80_000, 5_000), 79_999]
+    selected = [step for step in candidates if pipeline._is_policy_sweep_step(step)]  # noqa: SLF001
 
-    assert selected == list(range(4_999, 80_000, 5_000))
-    assert not pipeline._is_policy_sweep_step(5_000)  # noqa: SLF001
+    assert selected == candidates
+    assert not pipeline._is_policy_sweep_step(4_999)  # noqa: SLF001
