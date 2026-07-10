@@ -52,3 +52,9 @@ Local validation env is `pi-conda`. If missing, create with conda from `environm
 - Default node/path/env changes -> `docs/cache/kernel.md`.
 - New current training/serve workflow -> this file and, if OpenArm-specific, `docs/openarm_recap_reproduction_plan.md`.
 - Incidents or meaningful failures -> `docs/CHANGELOG.md`.
+
+## Stage Scoring
+
+- Long HQ/Site score-only runs must use episode-atomic outputs and `--resume`; never restart with `--overwrite` after progress exists.
+- HQ watchdog session is `kai0_hq_score_monitor`; it may recover a stopped/stalled worker up to three times and writes status under `output/openpi/logs/openarm_kai0_stage_scores_hq_v1`.
+- The reusable report server supports byte ranges; current HQ report is `openarm_hq_score_review_v1/hq_score_report/index.html` on gpu28 port 8767.

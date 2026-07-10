@@ -16,9 +16,11 @@ import pandas as pd
 import tqdm
 
 try:
-    from scripts.openarm_advantage_report import HTML_TEMPLATE
+    from scripts.openarm_advantage_report import StageReportConfig
+    from scripts.openarm_advantage_report import write_stage_report
 except ModuleNotFoundError:
-    from openarm_advantage_report import HTML_TEMPLATE
+    from openarm_advantage_report import StageReportConfig
+    from openarm_advantage_report import write_stage_report
 
 
 VIDEO_KEYS = (
@@ -88,8 +90,7 @@ def build_hq_score_report(
             raise FileExistsError(f"{output_root} already exists; pass --overwrite to replace it")
         shutil.rmtree(output_root)
     report_dir = output_root / "hq_score_report"
-    data_dir = report_dir / "data"
-    data_dir.mkdir(parents=True)
+    report_dir.mkdir(parents=True)
 
     payloads = []
     shard_counts = {}
@@ -112,12 +113,16 @@ def build_hq_score_report(
             crossings = np.flatnonzero(stage_ids == 1)
             boundary = int(crossings[0]) if crossings.size else None
             video_paths = {}
+            video_aspect_ratios = {}
             for video_key in VIDEO_KEYS:
                 source_video = source / _format_video_path(source_info, source_episode, video_key)
                 camera_name = video_key.removeprefix("observation.images.")
                 destination_video = output_root / "videos" / camera_name / f"episode_{source_episode:06d}.mp4"
                 _link_video(source_video, destination_video)
                 video_paths[camera_name] = f"../videos/{camera_name}/episode_{source_episode:06d}.mp4"
+                shape = source_info["features"][video_key].get("shape", [])
+                if len(shape) >= 2 and int(shape[0]) > 0:
+                    video_aspect_ratios[camera_name] = float(shape[1]) / float(shape[0])
 
             source_row = source_rows[source_episode]
             payload = {
@@ -139,6 +144,7 @@ def build_hq_score_report(
                 "advantage_max": float(relative_advantage.max()),
                 "negative_fraction": float(np.mean(relative_advantage < 0)),
                 "videos": video_paths,
+                "video_aspect_ratios": video_aspect_ratios,
                 "score_source": "HQ-Stage",
                 "score_shard": shard_name,
             }
@@ -147,31 +153,6 @@ def build_hq_score_report(
     payloads.sort(key=lambda payload: int(payload["episode_index"]))
     if not payloads:
         raise ValueError("No completed HQ-Score episode parquets found")
-    episode_index_rows = []
-    for payload in payloads:
-        episode_index = int(payload["episode_index"])
-        (data_dir / f"episode_{episode_index:06d}.json").write_text(
-            json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
-        )
-        episode_index_rows.append(
-            {
-                key: payload[key]
-                for key in (
-                    "episode_index",
-                    "length",
-                    "duration_s",
-                    "quality",
-                    "eligible_for_k_data",
-                    "flatten_done_frame",
-                    "source_dataset",
-                    "source_episode_index",
-                    "advantage_mean",
-                    "advantage_max",
-                    "negative_fraction",
-                )
-            }
-        )
-
     summary = {
         "generated_at": dt.datetime.now().astimezone().isoformat(),
         "score_source": "HQ-Stage",
@@ -187,15 +168,18 @@ def build_hq_score_report(
             )
         ),
     }
-    page = HTML_TEMPLATE.replace("__EPISODES_JSON__", json.dumps(episode_index_rows, ensure_ascii=False))
-    page = page.replace("__SUMMARY_JSON__", json.dumps(summary, ensure_ascii=False))
-    page = page.replace("__FIRST_EPISODE_JSON__", json.dumps(payloads[0], ensure_ascii=False))
-    page = page.replace("__REPORT_TITLE__", "HQ-Stage Prediction Review")
-    page = page.replace("__REPORT_SUBTITLE__", "Direct paired-frame predictions from completed HQ-Score episodes")
-    page = page.replace("__PROGRESS_TITLE__", "Start-anchored progress: HQ-Stage(frame 0, frame t)")
-    page = page.replace("__ADVANTAGE_LABEL__", "Direct advantage: HQ-Stage(frame t, frame t+50)")
-    index_path = report_dir / "index.html"
-    index_path.write_text(page)
+    index_path = write_stage_report(
+        report_dir,
+        payloads,
+        summary,
+        StageReportConfig(
+            title="HQ-Stage Trajectory Review",
+            subtitle="Video-aligned progress and direct paired-frame advantage from completed HQ episodes.",
+            score_source="HQ-Stage / checkpoint 10000",
+            progress_title="Start-anchored progress / Stage(frame 0, frame t)",
+            advantage_title="Direct advantage / Stage(frame t, frame t+50)",
+        ),
+    )
     (output_root / "hq_score_report.json").write_text(json.dumps(summary, ensure_ascii=False, indent=2) + "\n")
     return index_path
 

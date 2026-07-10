@@ -101,6 +101,7 @@ def test_score_only_writes_raw_scores_without_discretizing(tmp_path, monkeypatch
         seed=42,
         score_only=True,
         overwrite=False,
+        resume=False,
         dry_run=False,
     )
 
@@ -120,3 +121,13 @@ def test_score_only_writes_raw_scores_without_discretizing(tmp_path, monkeypatch
     assert output["task_index"].tolist() == [0, 0]
     np.testing.assert_allclose(output["relative_advantage"].to_numpy(), [0.1, 0.2])
     assert not (destination / "awbc_discretize_report.json").exists()
+
+    args.resume = True
+    monkeypatch.setattr(
+        awbc,
+        "_predict_episode",
+        lambda **_kwargs: (_ for _ in ()).throw(AssertionError("valid completed episode must be skipped")),
+    )
+    resumed_report = awbc.build_awbc_dataset(args)
+    assert resumed_report["resumed_episodes"] == 1
+    assert resumed_report["newly_scored_episodes"] == 0

@@ -6,6 +6,7 @@ GPU_ID=""
 EPISODES=""
 SHARD_NAME=""
 BATCH_SIZE="32"
+RESUME=false
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -25,6 +26,10 @@ while [[ $# -gt 0 ]]; do
             BATCH_SIZE="$2"
             shift 2
             ;;
+        --resume)
+            RESUME=true
+            shift
+            ;;
         *)
             echo "Unknown argument: $1" >&2
             exit 2
@@ -33,7 +38,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 if [[ -z "$GPU_ID" || -z "$EPISODES" || -z "$SHARD_NAME" ]]; then
-    echo "Usage: $0 --gpu-id N --episodes START:END --shard-name NAME [--batch-size N]" >&2
+    echo "Usage: $0 --gpu-id N --episodes START:END --shard-name NAME [--batch-size N] [--resume]" >&2
     exit 2
 fi
 
@@ -51,14 +56,22 @@ export WANDB_MODE=offline
 export PYTHONUNBUFFERED=1
 export XLA_PYTHON_CLIENT_PREALLOCATE=false
 
-exec "$PYTHON" -u scripts/openarm_stage_advantage_awbc.py \
-    --src "$SOURCE" \
-    --dst "$DESTINATION" \
-    --checkpoint "$CHECKPOINT" \
-    --episodes "$EPISODES" \
-    --task "Fold the T-shirt properly" \
-    --batch-size "$BATCH_SIZE" \
-    --device cuda:0 \
-    --score-only \
-    --copy-mode hardlink \
-    --overwrite
+args=(
+    scripts/openarm_stage_advantage_awbc.py
+    --src "$SOURCE"
+    --dst "$DESTINATION"
+    --checkpoint "$CHECKPOINT"
+    --episodes "$EPISODES"
+    --task "Fold the T-shirt properly"
+    --batch-size "$BATCH_SIZE"
+    --device cuda:0
+    --score-only
+    --copy-mode hardlink
+)
+if $RESUME; then
+    args+=(--resume)
+else
+    args+=(--overwrite)
+fi
+
+exec "$PYTHON" -u "${args[@]}"

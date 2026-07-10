@@ -51,6 +51,7 @@ AWBC_TASKS = (
     (1, "neutral"),
     (2, "positive"),
 )
+SCORE_COLUMNS = ("relative_advantage", "absolute_value", "absolute_advantage")
 
 
 def _load_json(path: pathlib.Path) -> dict[str, Any]:
@@ -59,7 +60,9 @@ def _load_json(path: pathlib.Path) -> dict[str, Any]:
 
 def _write_json(path: pathlib.Path, data: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n")
+    temporary = path.with_name(f".{path.name}.tmp-{os.getpid()}")
+    temporary.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n")
+    os.replace(temporary, path)
 
 
 def _load_jsonl(path: pathlib.Path) -> list[dict[str, Any]]:
@@ -69,9 +72,11 @@ def _load_jsonl(path: pathlib.Path) -> list[dict[str, Any]]:
 
 def _write_jsonl(path: pathlib.Path, rows: Iterable[dict[str, Any]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("w") as f:
+    temporary = path.with_name(f".{path.name}.tmp-{os.getpid()}")
+    with temporary.open("w") as f:
         for row in rows:
             f.write(json.dumps(row, ensure_ascii=False) + "\n")
+    os.replace(temporary, path)
 
 
 def parse_episodes(spec: str | None, total_episodes: int) -> list[int]:
@@ -122,6 +127,46 @@ def _copy_or_link(src: pathlib.Path, dst: pathlib.Path, mode: str) -> None:
         dst.symlink_to(src.resolve())
     else:
         raise ValueError(f"Unsupported copy mode: {mode}")
+
+
+def _write_parquet_atomic(frame: pd.DataFrame, path: pathlib.Path) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_name(f".{path.name}.tmp-{os.getpid()}")
+    try:
+        frame.to_parquet(temporary, index=False)
+        os.replace(temporary, path)
+    finally:
+        temporary.unlink(missing_ok=True)
+
+
+def _scored_episode_is_complete(
+    path: pathlib.Path,
+    *,
+    expected_length: int,
+    expected_episode_index: int,
+    expected_start_index: int,
+) -> bool:
+    if not path.exists():
+        return False
+    required_columns = (*SCORE_COLUMNS, "episode_index", "frame_index", "index")
+    try:
+        frame = pd.read_parquet(path, columns=list(required_columns))
+    except Exception:
+        return False
+    if len(frame) != expected_length:
+        return False
+    if expected_length == 0:
+        return False
+    if not all(np.isfinite(frame[column].to_numpy(dtype=np.float32)).all() for column in SCORE_COLUMNS):
+        return False
+    return bool(
+        np.all(frame["episode_index"].to_numpy(dtype=np.int64) == expected_episode_index)
+        and np.array_equal(frame["frame_index"].to_numpy(dtype=np.int64), np.arange(expected_length))
+        and np.array_equal(
+            frame["index"].to_numpy(dtype=np.int64),
+            np.arange(expected_start_index, expected_start_index + expected_length),
+        )
+    )
 
 
 class VideoFrameReader:
@@ -408,6 +453,10 @@ def build_awbc_dataset(args: argparse.Namespace) -> dict[str, Any]:
         if video_key not in info["features"]:
             raise ValueError(f"Source dataset missing video key: {video_key}")
 
+    resume = bool(getattr(args, "resume", False))
+    if args.overwrite and resume:
+        raise ValueError("--overwrite and --resume are mutually exclusive")
+
     if args.dry_run:
         report = {
             "source": str(src),
@@ -418,15 +467,16 @@ def build_awbc_dataset(args: argparse.Namespace) -> dict[str, Any]:
             "config_name": args.config_name,
             "task": args.task,
             "score_only": args.score_only,
+            "resume": resume,
         }
         print(json.dumps(report, ensure_ascii=False, indent=2))
         return report
 
-    if dst.exists():
-        if not args.overwrite:
-            raise FileExistsError(f"{dst} already exists; pass --overwrite to replace it")
+    if dst.exists() and args.overwrite:
         shutil.rmtree(dst)
-    dst.mkdir(parents=True)
+    elif dst.exists() and not resume:
+        raise FileExistsError(f"{dst} already exists; pass --overwrite to replace it or --resume to continue it")
+    dst.mkdir(parents=True, exist_ok=True)
 
     import torch  # noqa: PLC0415
 
@@ -443,34 +493,44 @@ def build_awbc_dataset(args: argparse.Namespace) -> dict[str, Any]:
     output_parquets: list[pathlib.Path] = []
     total_frames = 0
     total_videos = 0
+    resumed_episodes = 0
+    newly_scored_episodes = 0
 
     for new_episode_index, old_episode_index in enumerate(episodes):
         old_parquet = src / _format_data_path(info, old_episode_index)
         new_parquet = dst / _format_data_path(info, new_episode_index)
         episode_frame = pd.read_parquet(old_parquet).copy()
-        predictions = _predict_episode(
-            src=src,
-            info=info,
-            episode_index=old_episode_index,
-            df=episode_frame,
-            config=config,
-            model=model,
-            device=device,
-            prompt=args.task,
-            batch_size=args.batch_size,
-            relative_interval=args.relative_interval,
-            samples_per_batch=args.samples_per_batch,
-            seed=args.seed,
-        )
-
         length = len(episode_frame)
-        episode_frame["episode_index"] = np.full(length, new_episode_index, dtype=np.int64)
-        episode_frame["frame_index"] = np.arange(length, dtype=np.int64)
-        episode_frame["index"] = np.arange(total_frames, total_frames + length, dtype=np.int64)
-        for key, value in predictions.items():
-            episode_frame[key] = value
-        new_parquet.parent.mkdir(parents=True, exist_ok=True)
-        episode_frame.to_parquet(new_parquet, index=False)
+        already_complete = resume and _scored_episode_is_complete(
+            new_parquet,
+            expected_length=length,
+            expected_episode_index=new_episode_index,
+            expected_start_index=total_frames,
+        )
+        if already_complete:
+            resumed_episodes += 1
+        else:
+            predictions = _predict_episode(
+                src=src,
+                info=info,
+                episode_index=old_episode_index,
+                df=episode_frame,
+                config=config,
+                model=model,
+                device=device,
+                prompt=args.task,
+                batch_size=args.batch_size,
+                relative_interval=args.relative_interval,
+                samples_per_batch=args.samples_per_batch,
+                seed=args.seed,
+            )
+            episode_frame["episode_index"] = np.full(length, new_episode_index, dtype=np.int64)
+            episode_frame["frame_index"] = np.arange(length, dtype=np.int64)
+            episode_frame["index"] = np.arange(total_frames, total_frames + length, dtype=np.int64)
+            for key, value in predictions.items():
+                episode_frame[key] = value
+            _write_parquet_atomic(episode_frame, new_parquet)
+            newly_scored_episodes += 1
         output_parquets.append(new_parquet)
 
         episode_row = dict(episodes_meta[old_episode_index])
@@ -538,6 +598,9 @@ def build_awbc_dataset(args: argparse.Namespace) -> dict[str, Any]:
         "relative_interval": args.relative_interval,
         "samples_per_batch": args.samples_per_batch,
         "score_only": args.score_only,
+        "resume": resume,
+        "resumed_episodes": resumed_episodes,
+        "newly_scored_episodes": newly_scored_episodes,
         "discretize": discretize_report,
     }
     _write_json(dst / "awbc_build_report.json", report)
@@ -566,6 +629,7 @@ def _build_arg_parser() -> argparse.ArgumentParser:
         help="Write raw Stage predictions without assigning task labels; intended for parallel shards.",
     )
     parser.add_argument("--overwrite", action="store_true")
+    parser.add_argument("--resume", action="store_true", help="Keep valid completed episodes and continue the rest")
     parser.add_argument("--dry-run", action="store_true")
     return parser
 

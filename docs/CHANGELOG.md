@@ -9,6 +9,9 @@ Design decisions → `docs/decisions/`. Architecture → `docs/ARCHITECTURE.md`.
 
 ## 2026-07-10
 
+- **Stage 评分无人值守加固与报告重构**: score-only 数据集支持逐 episode 校验、原子 parquet 落盘和
+  `--resume`；HQ watchdog 检测停止/日志停滞后最多自动恢复 3 次，并在 999 集完成后自动刷新最终报告。
+  Stage 报告改为可复用渲染器，按相机原始宽高比在视频上叠加 progress/advantage、当前帧和正负状态。
 - **Site-GT 删除并切换到模型评分**: 删除远端 `openarm_site_gt_v1` 与 8766 服务，保留 Site-A151；
   现场成功标注固定为 Site-A150，episode 95 固定为 Site-F1。先审计 HQ-Stage 对 Site 的直接迁移，只有
   迁移不合格才按 140 train + 10 val 适配 Site-Stage，最终 Site-Score 一律来自模型预测。

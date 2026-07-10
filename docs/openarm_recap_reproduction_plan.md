@@ -2,7 +2,7 @@
 
 最后更新：2026-07-10
 
-状态：**执行中；派生 Site-GT 已删除，HQ `0:999` 继续六卡评分；下一步先用 HQ-Stage 直接推理 Site-A150 并对照人工边界做迁移审计，只有迁移不合格才训练 Site-Stage。**
+状态：**执行中；派生 Site-GT 已删除，HQ `0:999` 继续六卡可恢复评分；下一步自动推理 Site-A150 并对照人工边界做迁移审计，只有迁移不合格才训练 Site-Stage。**
 
 本文档是 OpenArm 后续 KAI0、Evo-RL 和二者组合实验的唯一当前计划。它区分论文事实、官方代码事实和 OpenArm 适配，不能把工程建议写成论文结论。
 
@@ -343,9 +343,11 @@ HQ-Score：
 - 六个 score-only 分片：gpu12 `0:167`/`167:334`，gpu14 `334:501`/`501:668`，gpu28 `668:835`/`835:999`。
 - tmux：`kai0_hq_s0` 至 `kai0_hq_s5`；分片输出前缀为 `openarm_kai0_stage_scores_hq_v1_s*`。
 - score-only 阶段只落盘 `relative_advantage/absolute_value/absolute_advantage` 和源 episode 映射，不生成三档标签，也不在各分片内计算阈值。
-- watchdog：`kai0_hq_score_monitor` 每 5 分钟写入 `monitor_latest.txt`/`monitor.log`，发现分片提前停止时写入 `monitor_alerts.log`，不自动重启或覆盖输出。
+- scorer 按 episode 校验并原子落盘，`--resume` 只跳过完整且有限值的结果；不得用 `--overwrite` 重启已有进度。
+- watchdog：`kai0_hq_score_monitor` 每 5 分钟写入 `monitor_latest.txt`/`monitor.log`；发现进程停止或日志停滞时最多自动恢复 3 次，进度前进后重置失败计数，999 集完成后自动刷新最终报告。
 - HQ-Stage 动态报告快照位于 `openarm_hq_score_review_v1/hq_score_report/index.html`，展示当前已完成
-  episode 的 `absolute_value` 与论文主分支 `relative_advantage`；该报告显示明显非线性和正负波动。
+  episode 的 `absolute_value` 与论文主分支 `relative_advantage`；通用渲染器按 Base/wrist 原始宽高比把
+  曲线、当前帧和正负状态直接叠在视频上，供后续 Site/HIL 报告复用。
 
 当前固定顺序：HQ-Score 继续生成；并行生成/审计 Site-DirectScore，必要时才适配 Site-Stage -> 构建 TDA-S -> 合并并审计三种来源 -> K-Data -> K-Policy/K-BC。在 Site-Score 和 K-Data 审计完成前不得启动 AWBC 策略训练。
 
