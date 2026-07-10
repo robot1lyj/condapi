@@ -147,3 +147,57 @@ def test_image_batch_matches_per_frame_resize():
         expected.append(image_tools.resize_with_pad_torch(tensor, 224, 224).permute(2, 0, 1))
 
     torch.testing.assert_close(actual, torch.stack(expected), rtol=0.0, atol=0.0)
+
+
+class _FakeCapture:
+    def __init__(self, *, opened=True, reads=()):
+        self.opened = opened
+        self.reads = iter(reads)
+        self.released = False
+        self.positions = []
+
+    def isOpened(self):  # noqa: N802 - OpenCV compatibility surface.
+        return self.opened
+
+    def read(self):
+        return next(self.reads)
+
+    def release(self):
+        self.released = True
+
+    def set(self, _property, value):
+        self.positions.append(value)
+        return True
+
+
+def test_video_reader_retries_transient_open_failure(tmp_path, monkeypatch):
+    failed = _FakeCapture(opened=False)
+    opened = _FakeCapture()
+    captures = iter((failed, opened))
+    sleeps = []
+    monkeypatch.setattr(awbc.cv2, "VideoCapture", lambda _path: next(captures))
+    monkeypatch.setattr(awbc.time, "sleep", sleeps.append)
+
+    reader = awbc.VideoFrameReader(tmp_path / "episode.mp4", io_attempts=2, retry_delay_seconds=0.25)
+    reader.close()
+
+    assert failed.released
+    assert opened.released
+    assert sleeps == [0.25]
+
+
+def test_video_reader_reopens_after_transient_read_failure(tmp_path, monkeypatch):
+    frame = np.zeros((2, 3, 3), dtype=np.uint8)
+    failed = _FakeCapture(reads=((False, None),))
+    recovered = _FakeCapture(reads=((True, frame),))
+    captures = iter((failed, recovered))
+    monkeypatch.setattr(awbc.cv2, "VideoCapture", lambda _path: next(captures))
+    monkeypatch.setattr(awbc.time, "sleep", lambda _seconds: None)
+
+    reader = awbc.VideoFrameReader(tmp_path / "episode.mp4", io_attempts=2, retry_delay_seconds=0.0)
+    actual = reader.read(7)
+    reader.close()
+
+    np.testing.assert_array_equal(actual, frame)
+    assert failed.released
+    assert recovered.positions == [7]

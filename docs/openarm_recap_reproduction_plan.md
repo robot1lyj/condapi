@@ -375,6 +375,8 @@ HQ-Score：
 - tmux：`kai0_hq_s0` 至 `kai0_hq_s5`；分片输出前缀为 `openarm_kai0_stage_scores_hq_v1_s*`。
 - score-only 阶段只落盘 `relative_advantage/absolute_value/absolute_advantage` 和源 episode 映射，不生成三档标签，也不在各分片内计算阈值。
 - scorer 按 episode 校验并原子落盘，`--resume` 只跳过完整且有限值的结果；不得用 `--overwrite` 重启已有进度。
+- 共享盘视频打开/单帧读取若瞬时超时，reader 最多退避重试 3 次；持续失败才退出当前 shard，再由 watchdog
+  从最后一个完整 episode 恢复，禁止跳过坏 episode 伪造完整评分。
 - watchdog：`kai0_hq_score_monitor` 每 5 分钟写入 `monitor_latest.txt`/`monitor.log`；发现进程停止或日志停滞时最多自动恢复 3 次，进度前进后重置失败计数，999 集完成后自动刷新最终报告。
 - HQ-Stage 动态报告快照位于 `openarm_hq_score_review_v1/hq_score_report/index.html`，展示当前已完成
   episode 的 `absolute_value` 与直接双帧 `relative_advantage` 诊断；通用渲染器按 Base/wrist 原始宽高比把

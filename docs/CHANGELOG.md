@@ -9,6 +9,9 @@ Design decisions → `docs/decisions/`. Architecture → `docs/ARCHITECTURE.md`.
 
 ## 2026-07-10
 
+- **Stage 视频瞬时 I/O 恢复**: HQ 六路评分遇到共享盘 MP4 的 OpenCV 临时打开超时后，视频读取器现对
+  打开和单帧读取执行有限退避重试；持续失败仍明确报错并由 episode 级 watchdog 续跑，避免瞬时 NFS
+  抖动每次都终止整个 shard。
 - **JAX 长训采样与断点恢复修复**: Torch/LeRobot JAX loader 改为按 epoch 确定性重洗牌，多机分片保留
   rank 互斥并支持批次偏移；`train.py` 恢复权重后按 `train_state.step` 定位下一批，避免 80k 每轮重复
   固定顺序，以及从 5k checkpoint 恢复时重新读取 batch zero。

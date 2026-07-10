@@ -19,10 +19,12 @@ import argparse
 from collections.abc import Iterable
 import dataclasses
 import json
+import logging
 import math
 import os
 import pathlib
 import shutil
+import time
 from types import SimpleNamespace
 from typing import TYPE_CHECKING, Any
 
@@ -52,6 +54,8 @@ AWBC_TASKS = (
     (2, "positive"),
 )
 SCORE_COLUMNS = ("relative_advantage", "absolute_value", "absolute_advantage")
+VIDEO_IO_ATTEMPTS = 3
+VIDEO_IO_RETRY_DELAY_SECONDS = 2.0
 
 
 def _load_json(path: pathlib.Path) -> dict[str, Any]:
@@ -170,24 +174,69 @@ def _scored_episode_is_complete(
 
 
 class VideoFrameReader:
-    def __init__(self, video_path: pathlib.Path):
+    def __init__(
+        self,
+        video_path: pathlib.Path,
+        *,
+        io_attempts: int = VIDEO_IO_ATTEMPTS,
+        retry_delay_seconds: float = VIDEO_IO_RETRY_DELAY_SECONDS,
+    ):
+        if io_attempts < 1:
+            raise ValueError("Video I/O attempts must be positive")
         self._cv2 = cv2
         self._video_path = video_path
-        self._cap = cv2.VideoCapture(str(video_path))
+        self._io_attempts = io_attempts
+        self._retry_delay_seconds = retry_delay_seconds
+        self._cap = self._open_capture()
         self._next_index = 0
         self._cache: dict[int, np.ndarray] = {}
-        if not self._cap.isOpened():
-            raise RuntimeError(f"Could not open video: {video_path}")
+
+    def _open_capture(self):
+        for attempt in range(1, self._io_attempts + 1):
+            capture = self._cv2.VideoCapture(str(self._video_path))
+            if capture.isOpened():
+                return capture
+            capture.release()
+            if attempt < self._io_attempts:
+                logging.warning(
+                    "Could not open video %s (attempt %d/%d); retrying",
+                    self._video_path,
+                    attempt,
+                    self._io_attempts,
+                )
+                time.sleep(self._retry_delay_seconds)
+        raise RuntimeError(f"Could not open video after {self._io_attempts} attempts: {self._video_path}")
+
+    def _reopen(self) -> None:
+        self._cap.release()
+        time.sleep(self._retry_delay_seconds)
+        self._cap = self._open_capture()
+        self._next_index = 0
 
     def read(self, frame_index: int) -> np.ndarray:
         if frame_index in self._cache:
             return self._cache[frame_index]
-        if frame_index != self._next_index:
-            self._cap.set(self._cv2.CAP_PROP_POS_FRAMES, frame_index)
-            self._next_index = frame_index
-        ok, frame = self._cap.read()
-        if not ok:
-            raise RuntimeError(f"Could not read frame {frame_index} from {self._video_path}")
+        frame = None
+        for attempt in range(1, self._io_attempts + 1):
+            if frame_index != self._next_index:
+                self._cap.set(self._cv2.CAP_PROP_POS_FRAMES, frame_index)
+                self._next_index = frame_index
+            ok, frame = self._cap.read()
+            if ok:
+                break
+            if attempt < self._io_attempts:
+                logging.warning(
+                    "Could not read frame %d from %s (attempt %d/%d); reopening",
+                    frame_index,
+                    self._video_path,
+                    attempt,
+                    self._io_attempts,
+                )
+                self._reopen()
+        else:
+            raise RuntimeError(
+                f"Could not read frame {frame_index} after {self._io_attempts} attempts from {self._video_path}"
+            )
         self._next_index = frame_index + 1
         rgb = self._cv2.cvtColor(frame, self._cv2.COLOR_BGR2RGB)
         if len(self._cache) > 128:
