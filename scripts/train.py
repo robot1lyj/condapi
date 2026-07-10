@@ -280,17 +280,6 @@ def main(config: _config.TrainConfig):
         sharding=data_sharding,
         shuffle=True,
     )
-    data_iter = iter(data_loader)
-    batch = next(data_iter)
-    logging.info(f"Initialized data loader:\n{training_utils.array_tree_to_info(batch)}")
-
-    # Log images from first batch to sanity check.
-    images_to_log = [
-        wandb.Image(np.concatenate([np.array(img[i]) for img in batch[0].images.values()], axis=1))
-        for i in range(min(5, len(next(iter(batch[0].images.values())))))
-    ]
-    if is_primary_process:
-        wandb.log({"camera_views": images_to_log}, step=0)
 
     train_state, train_state_sharding = init_train_state(config, init_rng, mesh, resume=resuming)
     jax.block_until_ready(train_state)
@@ -299,6 +288,20 @@ def main(config: _config.TrainConfig):
     if resuming:
         train_state = _checkpoints.restore_state(checkpoint_manager, train_state, train_state_sharding, data_loader)
 
+    start_step = int(train_state.step)
+    data_loader.set_start_step(start_step if resuming else 0)
+    data_iter = iter(data_loader)
+    batch = next(data_iter)
+    logging.info(f"Initialized data loader at training step {start_step}:\n{training_utils.array_tree_to_info(batch)}")
+
+    # Log images from the actual first/resumed batch to sanity check the positioned loader.
+    images_to_log = [
+        wandb.Image(np.concatenate([np.array(img[i]) for img in batch[0].images.values()], axis=1))
+        for i in range(min(5, len(next(iter(batch[0].images.values())))))
+    ]
+    if is_primary_process:
+        wandb.log({"camera_views": images_to_log}, step=start_step)
+
     ptrain_step = jax.jit(
         functools.partial(train_step, config),
         in_shardings=(replicated_sharding, train_state_sharding, data_sharding),
@@ -306,7 +309,6 @@ def main(config: _config.TrainConfig):
         donate_argnums=(1,),
     )
 
-    start_step = int(train_state.step)
     metric_logger = (
         _metrics.LocalMetricLogger(config.checkpoint_dir, resume_step=start_step if resuming else None)
         if is_primary_process

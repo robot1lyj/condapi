@@ -63,6 +63,7 @@ Local validation env is `pi-conda`. If missing, create with conda from `environm
 - Before the 4-GPU smoke, formal K-Data must pass `scripts/audit_openarm_kai0_training_data.py`; this checks all binary labels/source counts and real positive/negative OpenPI loader samples.
 - OpenArm parquet norm stats are written through an atomic temporary file; never treat a partially written JSON as recoverable training input.
 - Formal K-Policy multi-node sessions are paired: `kai0_k_smoke_gpu12/gpu14` and `kai0_k_full_gpu12/gpu14`. Never restart only one JAX process.
+- Formal JAX loaders reshuffle deterministically per dataset epoch and derive the resume epoch/batch offset from restored `train_state.step`; do not replace this with a fixed `DistributedSampler` epoch or restart data at batch zero.
 - Treat a JAX checkpoint as ready only when Orbax `_CHECKPOINT_METADATA` and `params/_METADATA` exist; a numeric directory or `params/` alone may still be an asynchronous partial save.
 - Formal K-Policy deployment uses `serve_policy.py --force-prompt 'Fold the T-shirt properly, Advantage: positive'`; this intentionally overrides client prompts only for this conditioned policy.
 - HQ/Site policy sweep runs with `--resume`; reuse is allowed only for atomic v2 reports with identical checkpoint, dataset, sampled episodes/settings, config, and forced positive prompt.

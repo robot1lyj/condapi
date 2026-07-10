@@ -1,10 +1,22 @@
 import dataclasses
 
 import jax
+import numpy as np
 
 from openpi.models import pi0_config
 from openpi.training import config as _config
 from openpi.training import data_loader as _data_loader
+
+
+class _IndexDataset:
+    def __init__(self, size: int):
+        self._size = size
+
+    def __getitem__(self, index):
+        return {"index": np.asarray(index, dtype=np.int64)}
+
+    def __len__(self):
+        return self._size
 
 
 def test_torch_data_loader():
@@ -45,6 +57,58 @@ def test_torch_data_loader_parallel():
 
     for batch in batches:
         assert all(x.shape[0] == 4 for x in jax.tree.leaves(batch))
+
+
+def test_torch_data_loader_resume_position_and_epoch_shuffle():
+    dataset = _IndexDataset(10)
+    sampler = _data_loader.EpochRandomSampler(dataset, seed=7)
+    loader = _data_loader.TorchDataLoader(
+        dataset,
+        local_batch_size=2,
+        sampler=sampler,
+        num_batches=4,
+        framework="pytorch",
+    )
+    loader.set_start_step(2)
+
+    batches = [batch["index"].numpy().tolist() for batch in loader]
+    epoch0 = list(_data_loader.EpochRandomSampler(dataset, seed=7))
+    epoch1_sampler = _data_loader.EpochRandomSampler(dataset, seed=7)
+    epoch1_sampler.set_epoch(1)
+    epoch1 = list(epoch1_sampler)
+
+    assert batches == [epoch0[4:6], epoch0[6:8], epoch0[8:10], epoch1[0:2]]
+    assert epoch0 != epoch1
+
+
+def test_distributed_sampler_resume_is_rank_disjoint():
+    dataset = _IndexDataset(12)
+    rank0 = _data_loader.ResumableDistributedSampler(
+        dataset, num_replicas=2, rank=0, shuffle=True, seed=11, drop_last=True
+    )
+    rank1 = _data_loader.ResumableDistributedSampler(
+        dataset, num_replicas=2, rank=1, shuffle=True, seed=11, drop_last=True
+    )
+    full_rank0 = list(rank0)
+    full_rank1 = list(rank1)
+    assert set(full_rank0).isdisjoint(full_rank1)
+    assert set(full_rank0) | set(full_rank1) == set(range(12))
+
+    loader = _data_loader.TorchDataLoader(
+        dataset,
+        local_batch_size=2,
+        sampler=rank0,
+        num_batches=2,
+        framework="pytorch",
+    )
+    loader.set_start_step(2)
+    batches = [batch["index"].numpy().tolist() for batch in loader]
+    epoch1 = _data_loader.ResumableDistributedSampler(
+        dataset, num_replicas=2, rank=0, shuffle=True, seed=11, drop_last=True
+    )
+    epoch1.set_epoch(1)
+
+    assert batches == [full_rank0[4:6], list(epoch1)[0:2]]
 
 
 def test_with_fake_dataset():

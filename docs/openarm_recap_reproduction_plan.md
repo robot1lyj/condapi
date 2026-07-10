@@ -395,7 +395,9 @@ HQ-Score：
    中断时不得留下可被总控误读的截断 JSON。
 5. 20-step 4 卡 smoke 成功后才启动 80k；训练异常时两节点成对停止，并从最近 5k checkpoint 恢复。
    总控只认含 Orbax `_CHECKPOINT_METADATA` 与 `params/_METADATA` 的完整 checkpoint，不以数字目录或
-   `params/` 提前出现作为保存完成，避免异步保存期间误启动 sweep。
+   `params/` 提前出现作为保存完成，避免异步保存期间误启动 sweep。JAX loader 每个完整数据轮次按
+   `seed + epoch` 确定性重洗牌，多机 rank 分片互斥；断点恢复按 checkpoint 内的 `train_state.step`
+   计算 epoch 和 batch offset，继续读取下一批，禁止每轮重复同一顺序或从 batch zero 重放。
 6. 80k 后对 `5000/10000/.../75000/79999` 全部 16 个 checkpoint 在 HQ holdout 与 Site val10 上使用
    固定 positive prompt 做 sampled sweep；
    选择权重为 Site 关键帧30%、Site MAE25%、HQ关键帧20%、HQ MAE15%、Site chunk overlap10%，优先

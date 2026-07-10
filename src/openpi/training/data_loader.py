@@ -1,4 +1,5 @@
 from collections.abc import Iterator, Sequence
+import itertools
 import logging
 import multiprocessing
 import os
@@ -49,6 +50,10 @@ class DataLoader(Protocol[T_co]):
 
     def __iter__(self) -> Iterator[T_co]:
         raise NotImplementedError("Subclasses of DataLoader should implement __iter__.")
+
+    def set_start_step(self, step: int) -> None:
+        """Position deterministic training samplers at a global batch step."""
+        raise NotImplementedError("This data loader does not support positioning by training step.")
 
 
 class TransformedDataset(Dataset[T_co]):
@@ -126,6 +131,52 @@ class FakeDataset(Dataset):
 
     def __len__(self) -> int:
         return self._num_samples
+
+
+class EpochRandomSampler(torch.utils.data.Sampler[int]):
+    """Deterministic random sampler with explicit epoch and resume offset."""
+
+    def __init__(self, data_source: Dataset, *, seed: int):
+        self._size = len(data_source)
+        self._seed = seed
+        self._epoch = 0
+        self._start_offset = 0
+
+    def set_epoch(self, epoch: int) -> None:
+        self._epoch = epoch
+
+    def set_start_offset(self, offset: int) -> None:
+        if not 0 <= offset <= self._size:
+            raise ValueError(f"Sampler offset {offset} is outside [0, {self._size}]")
+        self._start_offset = offset
+
+    def __iter__(self) -> Iterator[int]:
+        generator = torch.Generator()
+        generator.manual_seed(self._seed + self._epoch)
+        indices = torch.randperm(self._size, generator=generator).tolist()
+        return iter(indices[self._start_offset :])
+
+    def __len__(self) -> int:
+        return self._size - self._start_offset
+
+
+class ResumableDistributedSampler(torch.utils.data.distributed.DistributedSampler):
+    """DistributedSampler variant that can begin an epoch at a sample offset."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._start_offset = 0
+
+    def set_start_offset(self, offset: int) -> None:
+        if not 0 <= offset <= self.num_samples:
+            raise ValueError(f"Sampler offset {offset} is outside [0, {self.num_samples}]")
+        self._start_offset = offset
+
+    def __iter__(self) -> Iterator[int]:
+        return itertools.islice(super().__iter__(), self._start_offset, None)
+
+    def __len__(self) -> int:
+        return self.num_samples - self._start_offset
 
 
 def _lerobot_dataset_kwargs(data_config: _config.DataConfig) -> dict:
@@ -373,13 +424,16 @@ def create_torch_data_loader(
             raise ValueError(f"Batch size {batch_size} must be divisible by JAX process count {process_count}.")
         local_batch_size = batch_size // process_count
         if process_count > 1:
-            sampler = torch.utils.data.distributed.DistributedSampler(
+            sampler = ResumableDistributedSampler(
                 dataset,
                 num_replicas=process_count,
                 rank=jax.process_index(),
                 shuffle=shuffle,
                 drop_last=True,
+                seed=seed,
             )
+        elif shuffle:
+            sampler = EpochRandomSampler(dataset, seed=seed)
 
     logging.info(f"local_batch_size: {local_batch_size}")
     data_loader = TorchDataLoader(
@@ -481,6 +535,14 @@ class TorchDataLoader:
                 jax.sharding.PartitionSpec("B"),
             )
         self._num_batches = num_batches
+        self._sampler = sampler
+        self._local_batch_size = local_batch_size
+        self._start_step = 0
+        self._batches_per_epoch = (
+            len(sampler) // local_batch_size if sampler is not None else len(dataset) // local_batch_size
+        )
+        if self._batches_per_epoch <= 0:
+            raise ValueError("Data loader must contain at least one complete batch per epoch")
 
         mp_context = None
         if num_workers > 0:
@@ -491,7 +553,7 @@ class TorchDataLoader:
         self._data_loader = torch.utils.data.DataLoader(
             typing.cast(torch.utils.data.Dataset, dataset),
             batch_size=local_batch_size,
-            shuffle=(sampler is None and shuffle),  # Don't shuffle if using sampler
+            shuffle=False if sampler is not None else shuffle,
             sampler=sampler,
             num_workers=num_workers,
             multiprocessing_context=mp_context,
@@ -506,9 +568,31 @@ class TorchDataLoader:
     def torch_loader(self) -> torch.utils.data.DataLoader:
         return self._data_loader
 
+    def set_start_step(self, step: int) -> None:
+        if step < 0:
+            raise ValueError("Training start step must be non-negative")
+        if step > 0 and self._sampler is None:
+            raise ValueError("Cannot resume a data loader without a positionable sampler")
+        self._start_step = step
+
+    def _position_sampler(self, epoch: int, batch_offset: int) -> None:
+        if self._sampler is None:
+            return
+        set_epoch = getattr(self._sampler, "set_epoch", None)
+        if set_epoch is not None:
+            set_epoch(epoch)
+        set_start_offset = getattr(self._sampler, "set_start_offset", None)
+        if set_start_offset is None:
+            if batch_offset:
+                raise ValueError("Sampler does not support resume offsets")
+            return
+        set_start_offset(batch_offset * self._local_batch_size)
+
     def __iter__(self):
         num_items = 0
+        epoch, first_batch_offset = divmod(self._start_step, self._batches_per_epoch)
         while True:
+            self._position_sampler(epoch, first_batch_offset)
             data_iter = iter(self._data_loader)
             while True:
                 if self._num_batches is not None and num_items >= self._num_batches:
@@ -523,6 +607,8 @@ class TorchDataLoader:
                     yield jax.tree.map(lambda x: jax.make_array_from_process_local_data(self._sharding, x), batch)
                 else:
                     yield jax.tree.map(torch.as_tensor, batch)
+            epoch += 1
+            first_batch_offset = 0
 
 
 def _collate_fn(items):
@@ -583,6 +669,10 @@ class RLDSDataLoader:
                 num_items += 1
                 yield jax.tree.map(lambda x: jax.make_array_from_process_local_data(self._sharding, x), batch)
 
+    def set_start_step(self, step: int) -> None:
+        if step > 0:
+            logging.warning("RLDS loader does not support exact batch positioning; resume starts a fresh data stream.")
+
 
 class DataLoaderImpl(DataLoader):
     def __init__(self, data_config: _config.DataConfig, data_loader: TorchDataLoader | RLDSDataLoader):
@@ -595,3 +685,9 @@ class DataLoaderImpl(DataLoader):
     def __iter__(self):
         for batch in self._data_loader:
             yield _model.Observation.from_dict(batch), batch["actions"]
+
+    def set_start_step(self, step: int) -> None:
+        set_start_step = getattr(self._data_loader, "set_start_step", None)
+        if set_start_step is None:
+            raise ValueError("Underlying data loader does not support positioning by training step")
+        set_start_step(step)

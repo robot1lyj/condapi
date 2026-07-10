@@ -9,6 +9,9 @@ Design decisions → `docs/decisions/`. Architecture → `docs/ARCHITECTURE.md`.
 
 ## 2026-07-10
 
+- **JAX 长训采样与断点恢复修复**: Torch/LeRobot JAX loader 改为按 epoch 确定性重洗牌，多机分片保留
+  rank 互斥并支持批次偏移；`train.py` 恢复权重后按 `train_state.step` 定位下一批，避免 80k 每轮重复
+  固定顺序，以及从 5k checkpoint 恢复时重新读取 batch zero。
 - **K-Policy 综合训练报告**: 新增自包含响应式 HTML，汇总训练曲线、16-checkpoint 双域指标、K-Data
   标签分布、质量闸门、选中权重和部署合同；桌面/移动 Playwright 渲染通过，最终由 gpu28:8769 服务。
 - **16-checkpoint sweep 可恢复化**: HQ/Site sampled sweep 逐 checkpoint 原子写 v2 报告并严格续跑；缓存
