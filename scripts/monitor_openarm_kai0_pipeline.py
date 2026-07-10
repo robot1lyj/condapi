@@ -645,10 +645,14 @@ def _policy_checkpoint_steps() -> list[int]:
     return sorted(int(path.name) for path in K_FULL_ROOT.glob("*") if path.is_dir() and path.name.isdigit())
 
 
+def _is_policy_sweep_step(step: int) -> bool:
+    return (step + 1) % 5_000 == 0 or step == 79_999
+
+
 def _sweep_command() -> str:
     K_SWEEP_ROOT.mkdir(parents=True, exist_ok=True)
     steps = _policy_checkpoint_steps()
-    checkpoints = [K_FULL_ROOT / str(step) for step in steps if step % 5000 == 0 or step == 79999]
+    checkpoints = [K_FULL_ROOT / str(step) for step in steps if _is_policy_sweep_step(step)]
     if not checkpoints:
         raise RuntimeError("No policy checkpoints found for sweep")
 
@@ -761,7 +765,7 @@ def _rank_policy_checkpoints() -> dict[str, Any]:
     site_reports = {
         int(path.stem.split("_")[-1]): _load_json(path) for path in (K_SWEEP_ROOT / "site").glob("checkpoint_*.json")
     }
-    expected = [step for step in _policy_checkpoint_steps() if step % 5000 == 0 or step == 79999]
+    expected = [step for step in _policy_checkpoint_steps() if _is_policy_sweep_step(step)]
     return _select_policy_reports(hq_reports, site_reports, expected, K_FULL_ROOT)
 
 
@@ -798,7 +802,7 @@ def _ensure_gpu25_deployment(selection: dict[str, Any]) -> bool:
         f"cd {shlex.quote(str(REPO_ROOT))} && export XLA_PYTHON_CLIENT_MEM_FRACTION=0.9 "
         "HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 && "
         f"CUDA_VISIBLE_DEVICES=0 {shlex.quote(str(PYTHON))} scripts/serve_policy.py --port 6666 "
-        f"--default-prompt {shlex.quote(POSITIVE_PROMPT)} policy:checkpoint "
+        f"--force-prompt {shlex.quote(POSITIVE_PROMPT)} policy:checkpoint "
         f"--policy.config={K_CONFIG} --policy.dir={shlex.quote(str(checkpoint))} "
         f">>{shlex.quote(str(log))} 2>&1"
     )

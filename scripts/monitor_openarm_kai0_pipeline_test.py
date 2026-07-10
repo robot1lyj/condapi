@@ -29,3 +29,10 @@ def test_policy_selection_prefers_site_and_hq_joint_rank(tmp_path) -> None:
 
     assert result["selected_step"] == 5000
     assert result["positive_prompt"] == "Fold the T-shirt properly, Advantage: positive"
+
+
+def test_policy_sweep_selects_every_openpi_5k_checkpoint() -> None:
+    selected = [step for step in range(4_999, 80_000, 5_000) if pipeline._is_policy_sweep_step(step)]  # noqa: SLF001
+
+    assert selected == list(range(4_999, 80_000, 5_000))
+    assert not pipeline._is_policy_sweep_step(5_000)  # noqa: SLF001

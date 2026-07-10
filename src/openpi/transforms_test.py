@@ -85,6 +85,14 @@ def test_make_bool_mask():
     )
 
 
+def test_force_prompt_overrides_client_prompt():
+    transform = _transforms.ForcePrompt("Fold the T-shirt properly, Advantage: positive")
+
+    output = transform({"prompt": "Fold the T-shirt properly"})
+
+    assert output["prompt"] == "Fold the T-shirt properly, Advantage: positive"
+
+
 def test_tokenize_prompt():
     tokenizer = _tokenizer.PaligemmaTokenizer(max_len=12)
     transform = _transforms.TokenizePrompt(tokenizer)

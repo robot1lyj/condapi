@@ -9,6 +9,9 @@ Design decisions → `docs/decisions/`. Architecture → `docs/ARCHITECTURE.md`.
 
 ## 2026-07-10
 
+- **K-Policy 选模与部署语义修复**: checkpoint sweep 按 OpenPI 实际 `4999/9999/.../79999` 目录选择全部
+  16 个候选，不再误筛到只剩末步；新增可选 `--force-prompt`，正式 K-Policy 服务强制 positive 条件，
+  避免客户端普通 task 覆盖 AWBC 推理语义，默认和 RTC 旧路径保持不变。
 - **Stage 六卡评分预处理加速**: 三路当前/历史图像由逐帧 GPU resize 改为整批 resize，数值等价测试
   逐元素一致；HQ 单分片实测由约 8.5 降至 5.4 秒/batch，六路按 episode 原子断点恢复继续评分。
 - **K-Data loader 预检修复**: 新增正式 1719 集结构审计和 positive/negative 真实 OpenPI loader smoke；预检

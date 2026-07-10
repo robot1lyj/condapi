@@ -111,6 +111,16 @@ class InjectDefaultPrompt(DataTransformFn):
         return data
 
 
+@dataclasses.dataclass(frozen=True)
+class ForcePrompt(DataTransformFn):
+    prompt: str | None
+
+    def __call__(self, data: DataDict) -> DataDict:
+        if self.prompt is not None:
+            data["prompt"] = np.asarray(self.prompt)
+        return data
+
+
 def _scalar_string(value) -> str:
     if isinstance(value, str):
         return value
