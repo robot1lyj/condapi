@@ -12,6 +12,8 @@ Design decisions → `docs/decisions/`. Architecture → `docs/ARCHITECTURE.md`.
 - **远端 supervisor SSH 参数边界修复**: Site scorer 自动接棒暴露 OpenSSH 会把 trailing argv 重新拼成
   远端 shell 字符串，未转义的 `&&`/重定向导致 tmux 只收到 `cd`、实际命令在 home 下失败；Site
   supervisor、KAI0 总控和 4 卡 JAX launcher 现统一用 `shlex.join` 保留远端 argv 边界，并补齐回归测试。
+- **Site watchdog 重试上限修复**: 远端启动抛异常时也计入连续重试，达到三次后显式进入
+  `restart_exhausted`，不再每五分钟无限刷同一错误；任一完整 episode 产生进度后仍自动清零重试计数。
 
 ## 2026-07-10
 

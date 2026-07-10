@@ -278,17 +278,20 @@ def monitor_once(*, max_restarts: int, stall_seconds: int, auto_start: bool) -> 
         should_start = remote_state == "ready" or remote_state in {"stalled", "unreachable"}
         if remote_state == "unreachable":
             should_start = False
-        if should_start and auto_start and int(job_state["restarts"]) < max_restarts:
-            try:
-                _start_job(slot, shard, resume=True)
+        if should_start and auto_start:
+            if int(job_state["restarts"]) >= max_restarts:
+                remote_state = "restart_exhausted"
+            else:
                 job_state["restarts"] = int(job_state["restarts"]) + 1
-                remote_state = "started" if remote_state == "ready" else "restarted"
-            except (subprocess.SubprocessError, OSError) as error:
-                remote_state = "start_failed"
-                _append_jsonl(
-                    ALERT_LOG,
-                    {"timestamp": status["timestamp"], "shard": shard_name, "error": str(error)},
-                )
+                try:
+                    _start_job(slot, shard, resume=True)
+                    remote_state = "started" if remote_state == "ready" else "restarted"
+                except (subprocess.SubprocessError, OSError) as error:
+                    remote_state = "start_failed"
+                    _append_jsonl(
+                        ALERT_LOG,
+                        {"timestamp": status["timestamp"], "shard": shard_name, "error": str(error)},
+                    )
         if remote_state != "complete":
             all_complete = False
         job_state["last_completed"] = int(remote["completed"])
