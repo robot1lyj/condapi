@@ -403,6 +403,9 @@ HQ-Score：
    覆盖客户端普通 task，保证真实推理和离线 sweep 同样走 `Advantage: positive` 条件；普通/RTC 服务默认不覆盖。
    sweep 逐 checkpoint 原子写 v2 报告并支持严格续跑，只有 checkpoint、数据集、采样 episode/参数、配置和
    positive prompt 全部相同才复用；最终选模再次拒绝旧 schema 或非 positive 报告。
+7. 部署后由 `build_openarm_kai0_policy_report.py` 生成单文件综合 HTML，包含 80k loss/grad 曲线、16 个
+   checkpoint 的 HQ/Site 指标、来源/标签分布、质量闸门、选中权重和 gpu25 服务合同；gpu28:8769
+   报告服务监听成功后总控才标记 complete。
 
 ## 10. 禁止项
 

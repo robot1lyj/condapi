@@ -73,6 +73,8 @@ K_FULL_CHECKPOINT = K_FULL_ROOT / "79999"
 K_SWEEP_ROOT = PIPELINE_ROOT / "checkpoint_sweep"
 K_POLICY_SELECTION = K_SWEEP_ROOT / "selection.json"
 K_DEPLOYMENT = PIPELINE_ROOT / "gpu25_deployment.json"
+K_POLICY_REPORT = PIPELINE_ROOT / "policy_report/index.html"
+K_POLICY_REPORT_PAYLOAD = PIPELINE_ROOT / "policy_report/report.json"
 POSITIVE_PROMPT = "Fold the T-shirt properly, Advantage: positive"
 SWEEP_SCHEMA_VERSION = "openarm_checkpoint_sweep_v2"
 
@@ -849,6 +851,60 @@ def _ensure_gpu25_deployment(selection: dict[str, Any]) -> bool:
     return True
 
 
+def _ensure_policy_report(selection: dict[str, Any]) -> bool:
+    payload = _load_json(K_POLICY_REPORT_PAYLOAD, {})
+    selected_checkpoint = selection["selected_checkpoint"]
+    report_current = (
+        K_POLICY_REPORT.exists()
+        and payload.get("selection", {}).get("selected_checkpoint") == selected_checkpoint
+        and payload.get("deployment", {}).get("checkpoint") == selected_checkpoint
+    )
+    if not report_current:
+        command = [
+            str(PYTHON),
+            "scripts/build_openarm_kai0_policy_report.py",
+            "--metrics",
+            str(K_FULL_ROOT / "metrics/metrics.jsonl"),
+            "--selection",
+            str(K_POLICY_SELECTION),
+            "--deployment",
+            str(K_DEPLOYMENT),
+            "--hq-audit",
+            str(HQ_SCORE_AUDIT),
+            "--site-selection",
+            str(SITE_SELECTION),
+            "--k-data-report",
+            str(K_DATA_REPORT),
+            "--k-data-audit",
+            str(K_DATA_AUDIT),
+            "--output",
+            str(K_POLICY_REPORT),
+        ]
+        _ssh("gpu28", ["bash", "-lc", f"cd {shlex.quote(str(REPO_ROOT))} && {shlex.join(command)}"], timeout=300)
+        payload = _load_json(K_POLICY_REPORT_PAYLOAD, {})
+        if payload.get("selection", {}).get("selected_checkpoint") != selected_checkpoint:
+            raise RuntimeError("K-Policy report did not capture the selected checkpoint")
+
+    session = "openarm_kai0_policy_report_v1"
+    if not _session_exists("gpu28", session):
+        _ssh("gpu28", ["bash", "-lc", "fuser -k 8769/tcp >/dev/null 2>&1 || true"])
+        serve = (
+            f"cd {shlex.quote(str(REPO_ROOT))} && {shlex.quote(str(PYTHON))} "
+            "scripts/serve_openarm_advantage_report.py "
+            f"--dataset {shlex.quote(str(PIPELINE_ROOT))} --index-path policy_report/index.html "
+            "--host 0.0.0.0 --port 8769"
+        )
+        _start_tmux("gpu28", session, serve, PIPELINE_ROOT / "policy_report_server.exit")
+    for _ in range(30):
+        listening = _ssh("gpu28", ["bash", "-lc", "if ss -ltn | grep -q ':8769 '; then echo yes; fi"])
+        if listening == "yes":
+            return True
+        if not _session_exists("gpu28", session):
+            raise RuntimeError("K-Policy report server exited during startup")
+        time.sleep(1)
+    raise RuntimeError("K-Policy report server did not listen on port 8769")
+
+
 def monitor_once(state: dict[str, Any]) -> dict[str, Any]:
     status: dict[str, Any] = {"timestamp": time.strftime("%Y-%m-%d %H:%M:%S %Z")}
     selection = _ensure_site_selection(state)
@@ -890,9 +946,15 @@ def monitor_once(state: dict[str, Any]) -> dict[str, Any]:
             status["phase"] = "sweeping_k_policy_checkpoints"
         elif not _ensure_gpu25_deployment(policy_selection):
             status["phase"] = "deploying_gpu25"
+        elif not _ensure_policy_report(policy_selection):
+            status["phase"] = "building_k_policy_report"
         else:
             status["phase"] = "complete"
             status["deployment"] = _load_json(K_DEPLOYMENT)
+            status["policy_report"] = {
+                "path": str(K_POLICY_REPORT),
+                "url": "http://gpu28:8769/policy_report/index.html",
+            }
     status["site_selection"] = _load_json(SITE_SELECTION)
     status["hq_score_audit_passed"] = bool((_load_json(HQ_SCORE_AUDIT, {}) or {}).get("passed"))
     status["k_data_ready"] = K_DATA_REPORT.exists()

@@ -9,6 +9,8 @@ Design decisions → `docs/decisions/`. Architecture → `docs/ARCHITECTURE.md`.
 
 ## 2026-07-10
 
+- **K-Policy 综合训练报告**: 新增自包含响应式 HTML，汇总训练曲线、16-checkpoint 双域指标、K-Data
+  标签分布、质量闸门、选中权重和部署合同；桌面/移动 Playwright 渲染通过，最终由 gpu28:8769 服务。
 - **16-checkpoint sweep 可恢复化**: HQ/Site sampled sweep 逐 checkpoint 原子写 v2 报告并严格续跑；缓存
   只有在权重、数据、采样配置和 positive prompt 全匹配时复用，选模端再次拒绝旧 schema/错误 prompt。
 - **KAI0 正式 advantage 源对齐**: 对照官方主 README、AWBC README 和离散脚本后，正式 K-Data 改为
