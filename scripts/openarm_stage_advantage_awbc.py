@@ -204,13 +204,10 @@ def _image_batch(frames: list[np.ndarray], device: torch.device) -> torch.Tensor
 
     from openpi.shared import image_tools  # noqa: PLC0415
 
-    tensors = []
-    for frame in frames:
-        tensor = torch.from_numpy(frame).to(device=device, dtype=torch.float32) / 255.0
-        tensor = tensor * 2.0 - 1.0
-        tensor = image_tools.resize_with_pad_torch(tensor, 224, 224)
-        tensors.append(tensor.permute(2, 0, 1))
-    return torch.stack(tensors, dim=0)
+    tensor = torch.from_numpy(np.stack(frames)).to(device=device, dtype=torch.float32) / 255.0
+    tensor = tensor * 2.0 - 1.0
+    tensor = image_tools.resize_with_pad_torch(tensor, 224, 224)
+    return tensor.permute(0, 3, 1, 2)
 
 
 def _stack_column(values: pd.Series, *, expected_dim: int, key: str) -> np.ndarray:

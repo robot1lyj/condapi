@@ -3,7 +3,9 @@ from types import SimpleNamespace
 
 import numpy as np
 import pandas as pd
+import torch
 
+from openpi.shared import image_tools
 from scripts import openarm_stage_advantage_awbc as awbc
 
 
@@ -131,3 +133,17 @@ def test_score_only_writes_raw_scores_without_discretizing(tmp_path, monkeypatch
     resumed_report = awbc.build_awbc_dataset(args)
     assert resumed_report["resumed_episodes"] == 1
     assert resumed_report["newly_scored_episodes"] == 0
+
+
+def test_image_batch_matches_per_frame_resize():
+    rng = np.random.default_rng(7)
+    frames = [rng.integers(0, 256, size=(24, 32, 3), dtype=np.uint8) for _ in range(4)]
+
+    actual = awbc._image_batch(frames, torch.device("cpu"))  # noqa: SLF001
+    expected = []
+    for frame in frames:
+        tensor = torch.from_numpy(frame).to(dtype=torch.float32) / 255.0
+        tensor = tensor * 2.0 - 1.0
+        expected.append(image_tools.resize_with_pad_torch(tensor, 224, 224).permute(2, 0, 1))
+
+    torch.testing.assert_close(actual, torch.stack(expected), rtol=0.0, atol=0.0)
