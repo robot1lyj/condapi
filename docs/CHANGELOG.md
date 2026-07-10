@@ -9,6 +9,8 @@ Design decisions → `docs/decisions/`. Architecture → `docs/ARCHITECTURE.md`.
 
 ## 2026-07-10
 
+- **KAI0 HQ/Site 评分边界收敛**: 现有 Stage v1 固定命名为 HQ-Stage，只自动评分 HQ；Site 151 条完整人工边界
+  固定命名为 Site-A151，并直接生成逐帧 Site-GT progress/advantage，不再评估、微调或复用 HQ-Stage 处理 Site。
 - **KAI0 Stage 评分拆分为 score-only 与全局二值化**: 分片任务只生成原始 relative/absolute advantage，
   避免各 GPU 独立分桶造成阈值不一致；Site 151 集单边界标注和 HQ train `0:999` 六分片评分已并行启动，
   正式 AWBC 标签必须等待分片合并和 Site scorer 审计。
