@@ -149,6 +149,14 @@ def test_image_batch_matches_per_frame_resize():
     torch.testing.assert_close(actual, torch.stack(expected), rtol=0.0, atol=0.0)
 
 
+def test_image_batch_preserves_singleton_batch_dimension():
+    frame = np.zeros((24, 32, 3), dtype=np.uint8)
+
+    actual = awbc._image_batch([frame], torch.device("cpu"))  # noqa: SLF001
+
+    assert actual.shape == (1, 3, 224, 224)
+
+
 class _FakeCapture:
     def __init__(self, *, opened=True, reads=()):
         self.opened = opened

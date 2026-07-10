@@ -9,6 +9,9 @@ Design decisions → `docs/decisions/`. Architecture → `docs/ARCHITECTURE.md`.
 
 ## 2026-07-10
 
+- **Stage 单样本尾批修复**: 修正 PyTorch `resize_with_pad` 将输入为 `(1,H,W,C)` 的真实 batch 误当作
+  临时扩维并 squeeze 的问题；Stage 评分在 episode 尾批只有一个 pair 时现保持 4D，避免 shard 中途
+  因 `permute` 维数错误退出，同时补齐 channels-first/last 的批量与非批量形状测试。
 - **Stage 视频瞬时 I/O 恢复**: HQ 六路评分遇到共享盘 MP4 的 OpenCV 临时打开超时后，视频读取器现对
   打开和单帧读取执行有限退避重试；持续失败仍明确报错并由 episode 级 watchdog 续跑，避免瞬时 NFS
   抖动每次都终止整个 shard。
