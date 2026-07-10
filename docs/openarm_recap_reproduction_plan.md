@@ -385,8 +385,11 @@ HQ-Score：
 2. Site-Stage 使用 HQ180×1 + Site140×3、batch64、2 卡 DDP、5k steps、peak LR `5e-6`；评估
    1000/2000/3000/4000/4999，同时要求 Site 质量和 HQ 遗忘保护全部通过，再按最低 Site MSE 选择。
 3. K-Data 必须正好 1719 集，完成每阶段 top-30% 及来源比例审计，并生成全量 16D relative-action norm stats。
-4. 20-step 4 卡 smoke 成功后才启动 80k；训练异常时两节点成对停止，并从最近 5k checkpoint 恢复。
-5. 80k 后对全部 5k checkpoint 在 HQ holdout 与 Site val10 上使用固定 positive prompt 做 sampled sweep；
+4. norm stats 完成后运行 `audit_openarm_kai0_training_data.py`：全量核对 999 HQ + 420 Site + 300 TDA、二值逐帧
+   `task_index`、连续索引，并分别取一条 positive/negative 样本走真实 OpenPI loader；原始 16D 必须经
+   `OpenArmInputs` 变为模型 `(50,32)` action，且禁止出现 Piper transform。
+5. 20-step 4 卡 smoke 成功后才启动 80k；训练异常时两节点成对停止，并从最近 5k checkpoint 恢复。
+6. 80k 后对全部 5k checkpoint 在 HQ holdout 与 Site val10 上使用固定 positive prompt 做 sampled sweep；
    选择权重为 Site 关键帧30%、Site MAE25%、HQ关键帧20%、HQ MAE15%、Site chunk overlap10%，优先
    保留 HQ val/train MAE 比不超过2.0的 checkpoint，最后部署到 gpu25:6666。
 

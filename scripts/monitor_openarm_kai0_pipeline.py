@@ -63,6 +63,7 @@ HQ_SCORE_AUDIT = PIPELINE_ROOT / "hq999_stage_audit.json"
 TDA_DATA = DATASETS / "openarm_hq_tda_aug_v1"
 K_DATA = DATASETS / "openarm_kai0_awbc_v1"
 K_DATA_REPORT = K_DATA / "kai0_awbc_build_report.json"
+K_DATA_AUDIT = PIPELINE_ROOT / "k_data_training_audit.json"
 K_CONFIG = "pi05_openarm_kai0_awbc_v1"
 K_SMOKE_EXP = "openarm_kai0_awbc_v1_4gpu_smoke20_20260710"
 K_FULL_EXP = "openarm_kai0_awbc_v1_4gpu_80k_20260710"
@@ -552,6 +553,37 @@ def _ensure_norm_stats(state: dict[str, Any]) -> bool:
     return False
 
 
+def _ensure_k_data_audit() -> bool:
+    report = _load_json(K_DATA_AUDIT)
+    if report:
+        if not report.get("passed"):
+            raise RuntimeError("K-Data failed the formal OpenPI training-data audit")
+        return True
+    command = [
+        str(PYTHON),
+        "scripts/audit_openarm_kai0_training_data.py",
+        "--dataset",
+        str(K_DATA),
+        "--config",
+        K_CONFIG,
+        "--expected-episodes",
+        "1719",
+        "--expected-hq",
+        "999",
+        "--expected-site",
+        "420",
+        "--expected-tda",
+        "300",
+        "--output",
+        str(K_DATA_AUDIT),
+    ]
+    _ssh("gpu28", ["bash", "-lc", f"cd {shlex.quote(str(REPO_ROOT))} && {shlex.join(command)}"], timeout=7200)
+    report = _load_json(K_DATA_AUDIT, {})
+    if not report.get("passed"):
+        raise RuntimeError("K-Data audit did not produce a passing report")
+    return True
+
+
 def _jax_job_state(exp_name: str, session_prefix: str, final_checkpoint: pathlib.Path) -> dict[str, Any]:
     sessions = {host: _session_exists(host, f"{session_prefix}_{host}") for host in ("gpu12", "gpu14")}
     exits = {host: _exit_code(OUTPUT / "logs" / K_CONFIG / f"{exp_name}_{host}.exit") for host in ("gpu12", "gpu14")}
@@ -809,6 +841,8 @@ def monitor_once(state: dict[str, Any]) -> dict[str, Any]:
         status["phase"] = "building_k_data"
     elif not _ensure_norm_stats(state):
         status["phase"] = "computing_k_data_norm_stats"
+    elif not _ensure_k_data_audit():
+        status["phase"] = "auditing_k_data_loader"
     elif not _ensure_jax_job(
         state,
         key="k_smoke",
@@ -844,6 +878,7 @@ def monitor_once(state: dict[str, Any]) -> dict[str, Any]:
     status["hq_score_audit_passed"] = bool((_load_json(HQ_SCORE_AUDIT, {}) or {}).get("passed"))
     status["k_data_ready"] = K_DATA_REPORT.exists()
     status["norm_stats_ready"] = (K_DATA / "norm_stats.json").exists()
+    status["k_data_audit_passed"] = bool(_load_json(K_DATA_AUDIT, {}).get("passed"))
     status["smoke_checkpoint_ready"] = _checkpoint_ready(K_SMOKE_CHECKPOINT)
     status["full_latest_checkpoint"] = _policy_checkpoint_steps()[-1] if _policy_checkpoint_steps() else None
     status["state"] = state
