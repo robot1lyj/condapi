@@ -62,9 +62,14 @@ def _append_jsonl(path: pathlib.Path, value: Any) -> None:
         file.write(json.dumps(value, ensure_ascii=False) + "\n")
 
 
+def _ssh_argv(host: str, remote_args: list[str]) -> list[str]:
+    # OpenSSH joins trailing argv with spaces before invoking the remote shell, so quote the remote argv ourselves.
+    return ["ssh", "-o", "BatchMode=yes", "-o", "ConnectTimeout=10", host, shlex.join(remote_args)]
+
+
 def _ssh(host: str, remote_args: list[str], *, input_text: str | None = None, timeout: int = 30) -> str:
     result = subprocess.run(
-        ["ssh", "-o", "BatchMode=yes", "-o", "ConnectTimeout=10", host, *remote_args],
+        _ssh_argv(host, remote_args),
         input=input_text,
         text=True,
         capture_output=True,

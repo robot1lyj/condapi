@@ -1,6 +1,17 @@
+import shlex
+
 import pytest
 
 from scripts import launch_openarm_jax_multinode as launcher
+
+
+def test_ssh_argv_preserves_multiline_tmux_command() -> None:
+    remote_args = ["bash", "-s", "--", "session", "cd /shared/repo\npython scripts/train.py"]
+
+    argv = launcher._ssh_argv("gpu12", remote_args)  # noqa: SLF001
+
+    assert argv[-2] == "gpu12"
+    assert shlex.split(argv[-1]) == remote_args
 
 
 def test_builds_two_process_four_gpu_command() -> None:

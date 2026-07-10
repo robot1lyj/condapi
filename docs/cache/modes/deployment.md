@@ -30,6 +30,7 @@ Rules:
 - Verify dataset `meta/info.json` and `norm_stats.json` before policy training.
 - For OpenArm LeRobot v2.1, prefer `scripts/compute_openarm_parquet_norm_stats.py`.
 - Use gpu12/gpu14 for training; avoid stealing gpu25 if it is serving.
+- Python SSH launchers must pass one `shlex.join(remote_argv)` command string to OpenSSH; raw trailing argv does not preserve boundaries through the remote login shell when arguments contain `&&`, redirects, spaces, or newlines.
 
 ## Serve
 

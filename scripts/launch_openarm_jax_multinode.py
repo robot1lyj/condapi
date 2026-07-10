@@ -29,9 +29,14 @@ NODES = (
 )
 
 
+def _ssh_argv(host: str, args: list[str]) -> list[str]:
+    # OpenSSH joins trailing argv with spaces before invoking the remote shell, so quote the remote argv ourselves.
+    return ["ssh", "-o", "BatchMode=yes", "-o", "ConnectTimeout=10", host, shlex.join(args)]
+
+
 def _ssh(host: str, args: list[str], *, input_text: str | None = None) -> str:
     result = subprocess.run(
-        ["ssh", "-o", "BatchMode=yes", "-o", "ConnectTimeout=10", host, *args],
+        _ssh_argv(host, args),
         input=input_text,
         text=True,
         capture_output=True,

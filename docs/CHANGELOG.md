@@ -7,6 +7,12 @@ Design decisions → `docs/decisions/`. Architecture → `docs/ARCHITECTURE.md`.
 
 ---
 
+## 2026-07-11
+
+- **远端 supervisor SSH 参数边界修复**: Site scorer 自动接棒暴露 OpenSSH 会把 trailing argv 重新拼成
+  远端 shell 字符串，未转义的 `&&`/重定向导致 tmux 只收到 `cd`、实际命令在 home 下失败；Site
+  supervisor、KAI0 总控和 4 卡 JAX launcher 现统一用 `shlex.join` 保留远端 argv 边界，并补齐回归测试。
+
 ## 2026-07-10
 
 - **Stage 单样本尾批修复**: 修正 PyTorch `resize_with_pad` 将输入为 `(1,H,W,C)` 的真实 batch 误当作

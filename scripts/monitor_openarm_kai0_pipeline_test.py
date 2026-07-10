@@ -1,6 +1,17 @@
+import shlex
+
 import pytest
 
 from scripts import monitor_openarm_kai0_pipeline as pipeline
+
+
+def test_ssh_argv_preserves_remote_shell_argument_boundaries() -> None:
+    remote_args = ["bash", "-s", "--", "session", "cd /shared/repo && echo 'ready now'"]
+
+    argv = pipeline._ssh_argv("gpu28", remote_args)  # noqa: SLF001
+
+    assert argv[-2] == "gpu28"
+    assert shlex.split(argv[-1]) == remote_args
 
 
 def _report(mae: float, critical: float, overlap: float, gap: float = 1.2) -> dict:

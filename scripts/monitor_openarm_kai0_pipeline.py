@@ -107,9 +107,14 @@ def _append_jsonl(path: pathlib.Path, value: Any) -> None:
         file.write(json.dumps(value, ensure_ascii=False) + "\n")
 
 
+def _ssh_argv(host: str, args: list[str]) -> list[str]:
+    # OpenSSH joins trailing argv with spaces before invoking the remote shell, so quote the remote argv ourselves.
+    return ["ssh", "-o", "BatchMode=yes", "-o", "ConnectTimeout=10", host, shlex.join(args)]
+
+
 def _ssh(host: str, args: list[str], *, input_text: str | None = None, timeout: int = 30) -> str:
     result = subprocess.run(
-        ["ssh", "-o", "BatchMode=yes", "-o", "ConnectTimeout=10", host, *args],
+        _ssh_argv(host, args),
         input=input_text,
         text=True,
         capture_output=True,
@@ -148,11 +153,7 @@ def _exit_code(path: pathlib.Path) -> int | None:
 
 
 def _checkpoint_ready(path: pathlib.Path) -> bool:
-    return (
-        path.is_dir()
-        and (path / "_CHECKPOINT_METADATA").is_file()
-        and (path / "params/_METADATA").is_file()
-    )
+    return path.is_dir() and (path / "_CHECKPOINT_METADATA").is_file() and (path / "params/_METADATA").is_file()
 
 
 def _start_tmux(host: str, session: str, command: str, exit_marker: pathlib.Path) -> None:
@@ -649,11 +650,7 @@ def _ensure_jax_job(
 
 
 def _policy_checkpoint_steps() -> list[int]:
-    return sorted(
-        int(path.name)
-        for path in K_FULL_ROOT.glob("*")
-        if path.name.isdigit() and _checkpoint_ready(path)
-    )
+    return sorted(int(path.name) for path in K_FULL_ROOT.glob("*") if path.name.isdigit() and _checkpoint_ready(path))
 
 
 def _is_policy_sweep_step(step: int) -> bool:
