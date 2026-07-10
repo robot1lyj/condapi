@@ -7,6 +7,13 @@ Design decisions → `docs/decisions/`. Architecture → `docs/ARCHITECTURE.md`.
 
 ---
 
+## 2026-07-10
+
+- **OpenArm 三路线复现计划**: 当前计划拆分为 KAI0、Evo-RL 和 KAI0+Evo-RL 组合三条独立路线；
+  Stage v1 经代码和数据审计确认对齐 KAI0 Task A 的 flattening/folding 双阶段核心实现，同时显式记录
+  10k 训练规模、旧三档 AWBC、relative/absolute advantage 等尚未完成或存在论文/官方代码差异的部分；
+  KAI0 第一版保留小预算 TDA，禁止直接混入全部 2298 条增强数据。
+
 ## 2026-07-09
 
 - **Context OS 记忆瘦身**: 压缩 `docs/cache` 热记忆默认值和部署模式，重写

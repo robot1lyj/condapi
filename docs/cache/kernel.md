@@ -29,7 +29,7 @@ New sessions load `AGENTS.md` + this file first, then `context_index.md` and at 
 - `docs/cache/context_index.md` routes only; it must not store facts.
 - `docs/cache/modes/code_change.md`: code/config/docs changes, tests, commits.
 - `docs/cache/modes/deployment.md`: SSH, conda, remote train/serve, artifacts.
-- Current OpenArm RECAP plan: `docs/openarm_recap_reproduction_plan.md`.
+- Current OpenArm KAI0 / Evo-RL / hybrid plan: `docs/openarm_recap_reproduction_plan.md`.
 
 ## Budget And Writeback
 - Budgets: `kernel.md` <=80 lines, `context_index.md` <=100, each mode <=80.

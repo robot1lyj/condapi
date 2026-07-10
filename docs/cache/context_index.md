@@ -14,7 +14,7 @@ Router only. No facts, commands, metrics, or architecture details.
 ## Canonical Docs
 - Product baseline: `README.md`
 - Documentation index: `docs/README.md`
-- Current OpenArm RECAP plan: `docs/openarm_recap_reproduction_plan.md`
+- Current OpenArm KAI0 / Evo-RL / hybrid plan: `docs/openarm_recap_reproduction_plan.md`
 - Change history: `docs/CHANGELOG.md`
 - Dataset versioning: `docs/dataset_versioning.md`
 - Remote inference: `docs/remote_inference.md`
@@ -26,6 +26,6 @@ Router only. No facts, commands, metrics, or architecture details.
 ## Quick Route
 - 代码修改 / 配置 / 训练 / 测试 / 提交 -> `modes/code_change.md`
 - 服务器部署 / 离线包 / conda 环境 / 远端训练 -> `modes/deployment.md`
-- OpenArm RECAP 复现 / HIL / Evo-RL / KAI0 / AWBC -> `docs/openarm_recap_reproduction_plan.md`
+- OpenArm KAI0 / Evo-RL / hybrid / HIL / AWBC -> `docs/openarm_recap_reproduction_plan.md`
 - 远端推理服务 -> `docs/remote_inference.md`
 - Piper 双臂历史流程 -> `docs/piper_conda_training.md`

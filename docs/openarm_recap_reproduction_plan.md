@@ -1,32 +1,43 @@
-# OpenArm RECAP 复现当前计划
+# OpenArm KAI0 / Evo-RL / 组合复现计划
 
 最后更新：2026-07-10
 
-状态：**待用户确认，尚未启动 HQ Stage 全量评分和新策略训练。**
+状态：**待用户确认；未启动新的 HQ Stage 全量评分、Site 标注服务或策略训练。**
 
-本文档是 OpenArm 后续 Stage-AWBC、HIL 和 RECAP/Evo-RL 复现的唯一当前计划。旧训练流水和事故细节查 `docs/CHANGELOG.md`、git log 或远端日志。
+本文档是 OpenArm 后续 KAI0、Evo-RL 和二者组合实验的唯一当前计划。它区分论文事实、官方代码事实和 OpenArm 适配，不能把工程建议写成论文结论。
 
-## 1. 当前主线
+## 1. 事实来源规则
 
-两条任务并行，不互相等待：
+计划中的结论按以下标签管理：
+
+- `[论文]`：来自 KAI0 或 π*0.6/RECAP 论文。
+- `[官方代码]`：来自 OpenDriveLab/kai0 或 MINT-SJTU/Evo-RL 发布代码。
+- `[OpenArm适配]`：机器人维度、单位、相机键、数据路径等不得不做的适配。
+- `[待确认实验]`：论文没有规定、由本项目提出的实验变量；用户确认前不得启动。
+
+参考：
+
+- KAI0 论文：`arXiv:2602.09021`
+- KAI0 官方代码：`https://github.com/OpenDriveLab/kai0`
+- π*0.6 / RECAP 论文：`arXiv:2511.14759`
+- Evo-RL 官方代码：`https://github.com/MINT-SJTU/Evo-RL`
+
+## 2. 三条并行路线
 
 ```text
-Track A：KAI0 离线优势底座
-HQ 自动 Stage 评分 + Site 人工阶段标注/校准
-  -> 二值 Advantage 数据集
-  -> π0.5 base 全参数训练
-  -> OpenArm Stage-AWBC 候选
+路线 K：KAI0 复现
+Stage Advantage + 小规模 TDA + 二值 AWBC
 
-Track B：Evo-RL / RECAP 现实闭环
-现有 Site HQ 5k collector 持续采 HIL
-  -> success/failure/intervention 数据
-  -> value / advantage / ACP
-  -> RECAP 第 1 轮策略
+路线 E：Evo-RL 复现
+HIL episode -> value -> n-step advantage -> ACP -> policy
+
+路线 H：组合实验
+KAI0 离线优势策略作为 Evo-RL 的初始化，再跑同一套 HIL/ACP
 ```
 
-Track A 先利用空闲 GPU 做离线计算；Track B 继续现场采集，不因 Track A 暂停。
+三条路线必须有独立数据集名、配置名和 checkpoint，不允许用同一个结果同时宣称三条路线成功。
 
-## 2. 硬合同
+## 3. OpenArm 硬合同
 
 ```text
 task: Fold the T-shirt properly
@@ -37,197 +48,228 @@ gripper: HQ motor degrees, 0=open, -66=closed
 robot/ROS boundary: radians + normalized gripper only at client/runtime edge
 ```
 
-- OpenArm 只走 `LeRobotOpenArmDataConfig`、`OpenArmInputs`、`OpenArmOutputs`。
-- 现场/HIL 清洗只走 `scripts/convert_openarm_hq_dataset.py`。
-- 旧单位数据集 `openarm_site_align_v1` 禁止训练；只用 `openarm_site_align_v1_deg`。
-- HIL clean 必须丢弃 `session_state=intervention_hold` / `selected_source=hold`。
+- `[OpenArm适配]` OpenArm 只走 `LeRobotOpenArmDataConfig`、`OpenArmInputs`、`OpenArmOutputs`。
+- `[OpenArm适配]` 现场/HIL 清洗只走 `scripts/convert_openarm_hq_dataset.py`。
+- `[OpenArm适配]` 旧单位 `openarm_site_align_v1` 禁止训练；只用 `openarm_site_align_v1_deg`。
+- `[官方代码]` HIL hold 等待帧不是人工动作；clean 导出必须丢弃。
 
-## 3. 数据和现有模型
+## 4. Stage v1 与 KAI0 官方一致性审计
 
-| 资产 | 路径 / 名称 | 用途 |
-|---|---|---|
-| HQ | `/share/home/linyongjia/datasets/high_quality_folding` | Stage 自动评分、旧域动作先验 |
-| HQ train | episode `0:999` | 新 Stage-AWBC 训练 |
-| HQ holdout | episode `999:1199` | 不进入新策略训练 |
-| Site deg | `/share/home/linyongjia/datasets/openarm_site_align_v1_deg` | 现场阶段标注、现场动作 |
-| HIL clean | `openarm_hil_evo_v1` | Evo-RL value/ACP，等持续采集 |
-| Stage v1 | `ADVANTAGE_TORCH_OPENARM_FLATTEN_FOLD/.../10000` | HQ 自动评分起点 |
-| HQ baseline | `pi05_openarms_dual_hq/openarms_hq_bs32/99999` | 历史真机基线，不删除 |
-| HIL collector | `pi05_openarms_dual_site_align_v1_probe/.../4999` | 继续现场 HIL 采集 |
+### 4.1 已对齐
 
-## 4. Track A：KAI0 Stage-AWBC
+| 项目 | KAI0 论文/官方代码 | OpenArm 当前实现 | 结论 |
+|---|---|---|---|
+| Task A 阶段 | flattening、folding 两阶段 | `flattening`、`folding` | 对齐 |
+| 人工标注 | episode 起止 + 一个子任务分界 | 数据集已精修起止，只点 `flatten_done` | 等价适配 |
+| 进度构造 | 每阶段线性插值，整体 0→1 | stage 0 为 0→0.5，stage 1 为 0.5→1 | 对齐 |
+| 训练样本 | 同 episode 任意随机双帧 | 同 episode 随机双帧 | 对齐 |
+| 监督目标 | 两帧 `stage_progress_gt` 之差 | `current - history` | 对齐 |
+| 模型 | π0.5 backbone + 三层 MLP value head + tanh | 相同 | 对齐 |
+| 损失 | action=0，value=1，MSE | 相同 | 对齐 |
+| 输入 | 三路当前图 + 三路历史图 + state + prompt | OpenArm 三路相机键映射后相同 | 对齐 |
 
-### 4.1 Site 人工标注的含义
+已有 200 条 HQ 标注审计结果：
 
-Site 共 151 条，每条只人工点击一次：
+- 200/200 都是两阶段 `flattening -> folding`。
+- parquet 中 `stage_id` 只在 `flatten_done` 后从 0 切换到 1。
+- 旧 sidecar 中个别 `fold_start` 与 `flatten_done` 有间隔，但 Stage parquet 的实际生成逻辑以 `flatten_done` 为准；后续 sidecar 统一只保留一个权威分界。
+- Stage v1 `10000` 在 HQ val20 上已有 800 个随机帧对结果：MSE 0.0122、MAE 0.0875、方向准确率 91%、相关系数 0.951、R² 0.882。
 
-```text
-flatten_done = 展开结束 / 折叠开始
-```
+### 4.2 尚未达到“完整官方复现”
 
-程序自动补齐：
+- `[官方代码]` 官方 Stage config 是从 π0.5 checkpoint 初始化，示例训练到 100k；当前 Stage v1 只训练到 10k。
+- `[OpenArm适配]` 当前 Stage v1 只用 HQ train180，尚未验证 Site 相机域。
+- `[官方代码]` 正式 AWBC 是 `negative/positive` 二值；当前 OpenArm 旧构建脚本仍是三档。
+- `[论文/官方代码差异]` 论文强调直接双帧 `relative_advantage`；官方发布离散脚本默认 `absolute_advantage`，但允许选择 `relative_advantage`。
+- `[论文/官方代码差异]` 论文写显式 stage goal `g`；官方发布实现没有单独输入 `stage_id/g`，而是通过阶段进度监督和双帧视觉学习。OpenArm 当前实现与官方发布代码一致，不自行增加新 stage embedding。
 
-```text
-episode_start -> flatten_done -> episode_end
-stage 0 = flatten / 展开
-stage 1 = fold / 折叠
-stage_progress_gt: 0 -> 1
-stage_id: 0 / 1
-```
+因此 Stage v1 可以作为现有 HQ 自动评分器，但路线 K 的结果必须注明是 OpenArm 适配复现，不能宣称参数级完全复刻 KAI0。
 
-人工阶段边界是 Stage 模型的监督和校准信号，**不是直接把每帧标成 positive/negative**。直接按时间差生成好坏会把动作速度误当成动作质量，禁止这样做。
+## 5. 路线 K：KAI0 复现
 
-Site 标注完成后离散抽 20 条作为 Stage 验证，其余 131 条用于现场 Stage 校准。验证集索引写入 sidecar，不能按连续尾部切分。
+### K0. 复现范围
 
-### 4.2 HQ 和 Site 评分
+第一版复现：
 
-HQ：
+- Stage Advantage。
+- 二值 AWBC。
+- 小规模时间缩放和空间镜像 TDA。
+- 相同数据上的普通 π0.5 BC 对照。
 
-1. Stage v1 `10000` 对 HQ train `0:999` 做全量推理。
-2. 保存原始 `relative_advantage`、`absolute_value`、`absolute_advantage`，此时不分桶。
-3. 评分任务按 episode 分片，多 GPU 只写各自 shard，最后统一合并。
+暂不混入：
 
-Site：
+- Evo-RL value/ACP。
+- Model Arithmetic。
+- 新的自定义 failure stage。
 
-1. 完成 151 条单边界人工标注。
-2. 从 Stage v1 出发，用 Site train 131 做短校准，在离散 val20 上验收。
-3. Site Stage 验收通过后，给 Site train 131 生成原始优势分。
+Model Arithmetic、DAgger 和 temporal smoothing 属于完整 KAI0 的其他模块，后续单列，不能把 K0 第一版称为“完整 χ0 复现”。
 
-HQ 和 Site 可以使用各自校准后的 Stage scorer，但必须分别按“域 × 阶段”计算阈值，避免两个相机域的数值尺度互相污染。
+### K1. Site 阶段标注
 
-### 4.3 正式标签只有两类
+- `[论文]` Task A 只有两个阶段：flattening、folding。
+- `[OpenArm适配]` Site 151 条已经精修起止，每条只点一次 `flatten_done`。
+- `[OpenArm适配]` 沿用现有 Site split：train `0:141`，val `141:151`；不再自行改成 131/20。
+- 人工标注生成 `stage_progress_gt/stage_id`，用途是训练和验证 Stage scorer，不直接等同 positive/negative。
 
-正式策略训练只允许：
+执行顺序：先用 Stage v1 在 Site val10 上评估；若跨域明显退化，再按官方 Stage 训练方式将 Site train141 加入 Stage 训练。论文没有给出 OpenArm 跨相机阈值，因此不写自定义 85% 等硬门槛，只完整报告同一组 MSE/MAE/方向准确率/相关系数/R²，并与 HQ val20 对照。
+
+### K2. HQ / Site / TDA 原始优势
+
+- HQ policy train 只用 `0:999`；`999:1199` 保持 policy holdout。
+- 多 GPU 评分先只写 `relative_advantage/absolute_value/absolute_advantage`，不允许每个 shard 单独分桶。
+- Site 使用通过 Site val10 审计的 Stage checkpoint 评分。
+- TDA 不重新过 Stage 模型；按 `source_episode_index/source_frame_stride/mirror` 从原 episode 映射优势，保持官方 Train-Deploy Alignment 语义。
+
+优势源处理：
+
+- `[论文主分支]` 使用直接双帧 `relative_advantage`。
+- `[官方代码核对]` 同时保留 `absolute_advantage` 统计，用于和官方发布脚本默认值核对，但第一版不据此再训练一套策略。
+- 如果官方后续澄清论文实验实际使用 `absolute_advantage`，再修改主分支并留下决策记录。
+
+### K3. 正式二值化
+
+只允许：
 
 ```text
 task_index=0 -> Fold the T-shirt properly\nAdvantage: negative
 task_index=1 -> Fold the T-shirt properly\nAdvantage: positive
 ```
 
-规则：
+- `[论文]` 按 advantage 排序，最高 30% 为 positive，其余为 negative。
+- `[论文]` Task A 是两个阶段。
+- `[官方代码]` `stage_nums=2` 时，每个阶段分别计算 percentile。
+- 全部 shard 合并后统一计算阈值；禁止三档和分片独立阈值。
 
-- 使用 Stage 模型直接输出的 `relative_advantage` 作为主评分。
-- 分别在 `HQ/Site × flatten/fold` 四个组内排序。
-- 每组约最高 30% 标为 positive，其余标为 negative。
-- 不使用旧的 `bad/neutral/positive` 三档方案。
-- 不以 `absolute_value[t+50] - absolute_value[t]` 取代直接相对优势作为主标签。
+官方 README 的 `--threshold 30`、脚本实现的 `100-threshold` 和帮助文字存在表述歧义。OpenArm 报告必须直接写最终 positive 实际比例，验收目标是论文定义的约 30%，不能只记录 CLI 参数。
 
-### 4.4 合并数据集
+### K4. 第一版 TDA 小预算
 
-目标数据集：
+KAI0 官方 TDA 类型保持不变：
 
-```text
-/share/home/linyongjia/datasets/openarm_stage_awbc_hq_site_v1
-```
+- `[官方代码]` time scaling：`extraction_factor=2`。
+- `[官方代码]` time split 示例：30% episode 做抽帧、其余保持原始。
+- `[官方代码]` space mirroring：视频水平翻转，同时左右臂 state/action 交换。
 
-组成：
+`[待确认实验]` 为满足“第一版加入 TDA、但不要加入过多”的要求：
 
-- HQ train `0:999`：1 倍。
-- Site train 131：按实际 frame 数重复，使 Site 占最终训练帧的约 35%～40%。
-- v1 不加入 TDA，避免同时引入 Stage、现场域和增强三个变量。
-- HQ/Site 各自完成二值化后再合并；合并后必须保持 source dataset / source episode 映射。
+- HQ 原始 999 条全部保留。
+- 额外 TDA episode 总数上限暂定为原始 HQ 的 30%，约 300 条。
+- 约 150 条 time scaling、150 条 mirroring；来源 episode 离散抽取。
+- 不直接使用现有 2298 条 TDA 全量加入训练。
+- Site 第一版不做 TDA，避免现场真实数据被增强样本淹没。
 
-合并验收：
+这 30% 总预算是 OpenArm 第一版实验预算，不是 KAI0 论文参数；用户确认后才执行。
 
-- 16D、degree、HQ gripper 合同不变。
-- 三路视频、parquet、episode/frame index 对齐。
-- 四个“域 × 阶段”组的 positive 比例约为 30%，不得塌缩。
-- 抽查至少 20 条 HQ 和 20 条 Site 的优势曲线与视频。
-- 重新生成该合并数据集自己的 `norm_stats.json`。
+### K5. AWBC 策略训练
 
-### 4.5 从 π0.5 base 训练
+- `[论文/官方代码]` 从原始 π0.5 base 开始全参数训练，不从 HQ99999 warm start。
+- `[论文]` policy 训练表给出 80k steps、batch 128。
+- `[官方代码]` 发布的 AWBC config 给出 100k steps、batch 256。
+- 第一轮以论文 80k/batch128 为复现目标；如果硬件无法直接满足，只调整并行/梯度累积，不静默修改有效 global batch。
+- 保存周期按官方 config 使用 5k/10k 级别 checkpoint，不预先指定哪个最好。
 
-主模型必须从原始 π0.5 base 开始，不从 HQ `99999` warm start：
+必须有普通 π0.5 BC 对照：相同 HQ + Site + 小预算 TDA、相同训练样本数，只去掉 Advantage prompt。该对照对应 KAI0 的 normal π0.5 baseline，不是额外自研路线。
 
-```text
-pi05_base
-  -> openarm_stage_awbc_hq_site_v1
-  -> pi05_openarms_dual_stage_awbc_hq_site_v1
-```
+## 6. 路线 E：Evo-RL 复现
 
-同数据并行跑三个实验，避免把“加入 Site”误判成“Stage 有效”：
-
-| 节点 | 实验 | 作用 |
-|---|---|---|
-| gpu12 | Stage-AWBC，seed 1 | 主候选 |
-| gpu14 | 普通 BC，相同 HQ/Site 组成 | Stage 因果对照 |
-| gpu28 | Stage-AWBC，seed 2 | 稳定性复验 |
-
-训练约束：
-
-- 先做 100～1000 step smoke，再正式长训。
-- 目标 global batch 64；先测显存，OOM 时回退 32，并按总训练样本数调整步数。
-- 第一轮保存 `10k/30k/60k`，根据离线指标和真机 A/B 决定是否继续，不预设 `88k/100k` 最优。
-- HQ `99999`、Site HQ 5k、Site base 10k 全部保留为对照，不提前宣布新模型替代旧模型。
-
-## 5. Track B：HIL / Evo-RL / RECAP
-
-该路线保持原计划并继续采集：
+数据仍由现有 Site HQ 5k / `4999` collector 持续采集：
 
 ```text
-Site HQ 5k / 4999 collector
-  -> HIL raw HDF5 + mp4
+HIL raw HDF5/mp4
   -> openarm_hil_evo_v1 clean
-  -> value train / value infer
-  -> complementary_info.value / advantage / acp_indicator
-  -> JAX ACP policy train
+  -> value train
+  -> value infer
+  -> n-step advantage / acp_indicator
+  -> ACP policy train
 ```
 
-- 当前 HIL collector 不等待 Stage-AWBC 新模型。
-- HIL 记录完整自主成功、失败、人工接管和接管后结果。
-- human VR 动作在 RECAP 中强制 positive；policy 动作由 value advantage 决定。
-- KAI0 Stage 标签和 Evo-RL `acp_indicator` 是两套不同语义字段，不能相互覆盖。
-- HIL 数据不加入本轮 Stage-AWBC v1；等 value/ACP 链路完成后再进入 RECAP 第 1 轮。
-- RECAP 每轮使用累计数据，并从选定的固定预训练锚点重新微调，避免连续续训漂移。
+固定对齐项：
 
-## 6. 执行顺序
+- `[官方代码]` episode 必须有 `episode_success`。
+- `[官方代码]` 保留真实 policy action、human action 和 `is_intervention`。
+- `[官方代码]` `n_step=50`。
+- `[官方代码]` `positive_ratio=0.3`。
+- `[官方代码]` policy 训练 `indicator_dropout_prob=0.3`。
+- `[官方代码/RECAP]` human correction 强制 positive；hold 不作为 human correction。
 
-计划确认后按以下顺序执行：
+当前实现状态：
 
-| 顺序 | 任务 | GPU/人员 | 完成条件 |
-|---|---|---|---|
-| 1 | 修正 Stage 脚本为“只评分 + 统一二值分桶” | 本地 | 单测通过，不再出现三档正式标签 |
-| 2 | HQ `0:999` 多卡分片评分 | gpu12/gpu14/gpu28 | 999 条都有原始优势列，分片可合并 |
-| 3 | 启动 Site 标注服务 | 人工 + CPU | 151 条均有一个有效 `flatten_done` |
-| 4 | Site Stage 校准与 val20 验证 | 空闲 2 GPU | 方向准确率 >=85%，相关系数 >=0.8 |
-| 5 | Site 评分、二值化、HQ/Site 合并 | GPU + CPU | 数据合同和标签比例验收通过 |
-| 6 | 三个策略实验并行训练 | 三节点各 2 GPU | smoke 正常并保存 10k/30k/60k |
-| 7 | 离线检查 + 真机 A/B | gpu25 + 现场 | Stage-AWBC 胜过普通 BC 和历史基线 |
+- HIL raw -> clean 转换已实现。
+- JAX `ACPPromptTransform` 已实现。
+- 当前 OpenArm ACP config 的 dropout 仍是 0.0，正式路线 E 前必须改成 0.3。
+- OpenArm value-train/value-infer 固定入口仍未完成，不能绕过 value 模型直接把 intervention 当全部标签。
 
-gpu12 若被他人占用，不抢占；先用 gpu14/gpu28，释放后再补分片。
+`[OpenArm适配/实验控制]` 路线 E 的策略初始化固定使用当前 Site HQ 5k collector 对应 checkpoint；这不是 Evo-RL 论文指定的 OpenArm 模型，而是为了只测 Evo-RL 带来的增量。
 
-## 7. Gate
+## 7. 路线 H：KAI0 + Evo-RL 组合
 
-| Gate | Go | No-Go |
+路线 H 只改变 Evo-RL 的策略初始化：
+
+```text
+路线 K 胜出的 KAI0 Stage-AWBC checkpoint
+  -> 使用与路线 E 完全相同的 HIL 数据
+  -> 使用同一个 value checkpoint
+  -> 使用同样的 n_step / positive_ratio / dropout / steps
+  -> Hybrid policy
+```
+
+- 不把 Stage label 和 Evo `acp_indicator` 合成第三种标签。
+- 不重新解释 HIL success/failure。
+- 不改变路线 E 的数据和超参数。
+- 只有初始化 checkpoint 不同，才能回答“KAI0 离线底座是否帮助 Evo-RL”。
+
+## 8. 数据集和模型命名
+
+| 路线 | 数据集/模型建议名 | 含义 |
 |---|---|---|
-| Site 标注 | 151/151 边界有效 | 修标注，不训练 Site Stage |
-| Site Stage | val20 方向准确率 >=85%、相关系数 >=0.8 | 增加校准数据或停止 Site 自动评分 |
-| AWBC 标签 | 每域每阶段约 30% positive，视频抽查合理 | 修 scorer/阈值，不训练 policy |
-| 训练 smoke | loss 有限、显存稳定、checkpoint 可加载 | 修数据/config，不开长训 |
-| 模型晋升 | 真机抓取、抬起、展开、成功率和重试综合胜出 | 保留为实验，不替代 HQ99999 |
+| K | `openarm_kai0_stage_scores_hq_v1` | HQ 原始 Stage 输出，未分桶 |
+| K | `openarm_kai0_awbc_hq_site_tda_v1` | 二值 KAI0 训练集 |
+| K | `pi05_openarm_kai0_awbc_v1` | π0.5 base -> KAI0 AWBC |
+| K control | `pi05_openarm_kai0_bc_control_v1` | 同数据普通 BC |
+| E | `openarm_hil_evo_v1` | Evo-RL clean + value/ACP 字段 |
+| E | `pi05_openarm_evo_acp_v1` | Site HQ 5k -> Evo-RL |
+| H | `pi05_openarm_kai0_evo_hybrid_v1` | KAI0 checkpoint -> 同一 Evo-RL 数据 |
 
-## 8. 当前禁止项
+## 9. 执行顺序和 GPU
 
-- 不使用三档 `bad/neutral/positive` 作为正式 KAI0/RECAP 标签。
-- 不在 HQ 评分完成前启动新策略训练。
-- 不把 Site 人工阶段进度直接当动作好坏。
-- 不让 TDA 进入第一版 HQ+Site Stage-AWBC 对照。
-- 不把 train loss 当作最终模型选择标准。
+计划确认后：
+
+1. 修正旧三档脚本为“分片只评分 + 合并后官方二值化”，增加论文/官方参数报告。
+2. HQ `0:999` 按空闲 GPU 分片评分；现有 HIL 现场采集不停止。
+3. 同时启动 Site 151 条单边界标注服务。
+4. Site val10 审计 Stage v1，必要时按官方方式训练 Site-aware Stage checkpoint。
+5. 构建小预算 TDA、映射优势、统一二值化并完成数据审计。
+6. 路线 K 跑 KAI0 AWBC 与普通 BC 对照。
+7. HIL 数据达到可用规模后，路线 E 跑 Evo-RL。
+8. 路线 K 和 E 都通过各自 smoke 后，路线 H 只替换初始化做组合实验。
+
+六张 GPU 的用途是并行评分和独立路线实验，不在没有多机等价性验证时声称单个训练已经使用官方 8-GPU 配置。
+
+## 10. 禁止项
+
+- 不把三档 `bad/neutral/positive` 当 KAI0 正式复现。
+- 不把当前 Stage 10k 宣称为训练参数级完整复现。
+- 不隐藏论文与官方代码在 `relative/absolute advantage`、80k/100k、batch128/256 上的差异。
+- 不把路线 K、E、H 合成一个无法归因的训练。
+- 不把 TDA 2298 条全量直接灌入第一版。
+- 不用自定义阈值替代论文/官方没有给出的指标。
 - 不停止正在进行的 HIL 采集。
 
-## 9. 关键入口
+## 11. 关键入口
 
 ```text
 scripts/openarm_stage_annotator.py
 scripts/openarm_stage_progress.py
+scripts/evaluate_stage_advantage.py
 scripts/openarm_stage_advantage_awbc.py
+scripts/openarm_tda_awbc_from_source.py
+scripts/augment_openarm_hq_tda.py
 scripts/merge_openarm_lerobot_v21.py
-scripts/compute_openarm_parquet_norm_stats.py
 scripts/convert_openarm_hq_dataset.py
+src/openpi/training/advantage_dataset.py
+src/openpi/models_pytorch/pi0_pytorch.py
 src/openpi/training/config.py
 src/openpi/transforms.py
-scripts/train.py
-scripts/serve_policy.py
 ```
 
-当前旧 `pi05_openarms_dual_awbc_v1` 和三档 AWBC 构建逻辑只视为历史实现；计划确认后再修改或新增正式 v1 配置，不直接复用旧输出。
+当前旧 `pi05_openarms_dual_awbc_v1` 和三档 AWBC 输出只作历史追溯；用户确认本计划后再修改代码和启动远端任务。
