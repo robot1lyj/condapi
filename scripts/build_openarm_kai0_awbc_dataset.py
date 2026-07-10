@@ -18,10 +18,12 @@ import pandas as pd
 
 try:
     from scripts.openarm_kai0_contract import HQ_FOLDING_ONLY_START
+    from scripts.openarm_kai0_contract import HQ_LAYOUT_TASK_START
     from scripts.openarm_stage_progress import build_stage_arrays
     from scripts.openarm_stage_progress import normalize_boundaries
 except ImportError:
     from openarm_kai0_contract import HQ_FOLDING_ONLY_START
+    from openarm_kai0_contract import HQ_LAYOUT_TASK_START
     from openarm_stage_progress import build_stage_arrays
     from openarm_stage_progress import normalize_boundaries
 
@@ -194,6 +196,31 @@ def _validate_source_episode_ids(indexed: dict[int, EpisodeSource], expected: se
         f"{kind} score episode IDs do not match the expected split: "
         f"missing={missing[:20]}, unexpected={unexpected[:20]}"
     )
+
+
+def _validate_hq_task_scope(
+    indexed: dict[int, EpisodeSource],
+    *,
+    layout_task_start: int | None,
+    folding_only_start: int,
+) -> None:
+    if layout_task_start is None:
+        return
+    mismatches = []
+    for episode, source in indexed.items():
+        task_text = " ".join(str(task) for task in source.metadata.get("tasks", [])).lower()
+        has_layout_prompt = "layout the t-shirt" in task_text
+        expected_layout_prompt = layout_task_start <= episode < folding_only_start
+        if has_layout_prompt != expected_layout_prompt:
+            mismatches.append(
+                {
+                    "episode": episode,
+                    "expected_layout_prompt": expected_layout_prompt,
+                    "tasks": source.metadata.get("tasks", []),
+                }
+            )
+    if mismatches:
+        raise ValueError(f"HQ task scope metadata does not match the configured ranges: {mismatches[:20]}")
 
 
 def _evenly_select(rows: list[dict[str, Any]], count: int) -> list[dict[str, Any]]:
@@ -381,6 +408,7 @@ def build_kai0_awbc_dataset(
     ratio_tolerance: float = 0.01,
     source_ratio_bounds: tuple[float, float] = (0.15, 0.45),
     hq_folding_only_start: int = HQ_FOLDING_ONLY_START,
+    hq_layout_task_start: int | None = HQ_LAYOUT_TASK_START,
     site_annotations_path: pathlib.Path | None = None,
 ) -> dict[str, Any]:
     if not 0.0 < positive_ratio < 1.0:
@@ -393,6 +421,8 @@ def build_kai0_awbc_dataset(
         raise ValueError("Expected episode counts must be positive")
     if not 0 < hq_folding_only_start <= expected_hq_episodes:
         raise ValueError("hq_folding_only_start must lie within the HQ episode range")
+    if hq_layout_task_start is not None and not 0 <= hq_layout_task_start < hq_folding_only_start:
+        raise ValueError("hq_layout_task_start must precede hq_folding_only_start")
     if ratio_tolerance < 0.0:
         raise ValueError("ratio_tolerance must be non-negative")
     if not 0.0 <= source_ratio_bounds[0] <= source_ratio_bounds[1] <= 1.0:
@@ -406,6 +436,11 @@ def build_kai0_awbc_dataset(
     hq_scores = _index_score_roots(hq_score_roots, "HQ")
     site_scores_all = _index_score_roots(site_score_roots, "Site")
     _validate_source_episode_ids(hq_scores, set(range(expected_hq_episodes)), "HQ")
+    _validate_hq_task_scope(
+        hq_scores,
+        layout_task_start=hq_layout_task_start,
+        folding_only_start=hq_folding_only_start,
+    )
     expected_site_ids = set(range(site_train_source_end)) - set(excluded_site_source_episodes)
     site_scores = {episode: source for episode, source in site_scores_all.items() if episode in expected_site_ids}
     _validate_source_episode_ids(site_scores, expected_site_ids, "Site train")
@@ -578,6 +613,7 @@ def build_kai0_awbc_dataset(
             "TDA": "mapped from source HQ stage",
         },
         "hq_folding_only_start": hq_folding_only_start,
+        "hq_layout_task_start": hq_layout_task_start,
         "site_annotations": str(site_annotations_path.resolve()) if site_annotations_path is not None else None,
         "positive_ratio_target": positive_ratio,
         "thresholds": {str(key): value for key, value in thresholds.items()},
@@ -621,6 +657,7 @@ def main() -> None:
     parser.add_argument("--positive-ratio", type=float, default=0.30)
     parser.add_argument("--relative-interval", type=int, default=50)
     parser.add_argument("--hq-folding-only-start", type=int, default=HQ_FOLDING_ONLY_START)
+    parser.add_argument("--hq-layout-task-start", type=int, default=HQ_LAYOUT_TASK_START)
     parser.add_argument(
         "--site-annotations",
         type=pathlib.Path,
@@ -641,6 +678,7 @@ def main() -> None:
         relative_interval=args.relative_interval,
         overwrite=args.overwrite,
         hq_folding_only_start=args.hq_folding_only_start,
+        hq_layout_task_start=args.hq_layout_task_start,
         site_annotations_path=args.site_annotations,
     )
     print(json.dumps(report, ensure_ascii=False, indent=2))

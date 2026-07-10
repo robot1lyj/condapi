@@ -24,6 +24,8 @@ Design decisions → `docs/decisions/`. Architecture → `docs/ARCHITECTURE.md`.
   folding、Site 人工边界、TDA 源映射生成 `stage_id_awbc`，advantage 仍全部来自模型预测。
 - **HQ999 Stage 正式质量闸门**: 新增完整 ID/有限值/分数范围、完整任务 crossing、folding-only 增量和
   relative advantage 非塌缩审计；HQ 动态报告对 folding-only 显示0.5阶段偏移并同时保留 raw 进度。
+- **HQ 阶段范围合同与 Site 平衡审计**: K-Data 构建时强制验证 HQ `360:536` 连续 layout prompt 元数据；
+  Site150 人工阶段帧比例确认为43.4%/56.6%，train/val 均无空阶段。
 - **Stage 评分无人值守加固与报告重构**: score-only 数据集支持逐 episode 校验、原子 parquet 落盘和
   `--resume`；HQ watchdog 检测停止/日志停滞后最多自动恢复 3 次，并在 999 集完成后自动刷新最终报告。
   Stage 报告改为可复用渲染器，按相机原始宽高比在视频上叠加 progress/advantage、当前帧和正负状态。

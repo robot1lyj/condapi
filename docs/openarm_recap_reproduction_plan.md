@@ -170,6 +170,8 @@ Site-A150 -> HQ-Stage 直接推理 -> Site-DirectScore -> 迁移审计
 - HQ `meta/episodes.jsonl` 与首帧视觉审计确认 `0:360` 为完整任务、`360:536` 为明确
   layout+fold 完整任务、`536:999` 从首帧已完全平铺而只录 folding。HQ `0:536` 暂用 HQ-Stage
   `absolute_value>=0.5` 判阶段，`536:999` 固定为 folding；TDA-S 继承源 HQ 的阶段。
+- 构建器会强制核对 `360:536` metadata 中连续的 layout prompt；范围与 metadata 不一致时停止，避免
+  更换数据版本后静默沿用536边界。
 - 若某一来源或阶段在二值化后 positive 比例异常，停止构建，不用静默重采样掩盖问题。
 
 优势源处理：
@@ -358,6 +360,8 @@ Site-A151 / Site-Score：
   Site140 train + Site10 validation；它只作迁移评估和条件 Site-Stage 监督，不进入最终 K-Data。
 - 条件配置 `ADVANTAGE_TORCH_OPENARM_SITE_FOLD` 固定从 HQ-Stage 10000 初始化，Site140×3 + HQ-A180
   形成 70/30 replay，batch64、5k steps、peak LR `5e-6`；只有直接迁移闸门失败才启动。
+- Site-A150 人工阶段共394008帧，stage0/stage1 为171100/222908（43.4%/56.6%）；train 与 val
+  均覆盖两阶段，单集 stage0 比例20.96%-70.05%，可用于官方 stage-aware percentile 分组。
 
 HQ-Score：
 

@@ -1,3 +1,4 @@
+import dataclasses
 import json
 import pathlib
 
@@ -164,6 +165,7 @@ def test_builds_binary_awbc_dataset_with_source_audit(tmp_path: pathlib.Path) ->
         site_train_source_end=1,
         excluded_site_source_episodes=(),
         hq_folding_only_start=1,
+        hq_layout_task_start=None,
         site_annotations_path=site_annotations,
     )
 
@@ -213,5 +215,29 @@ def test_rejects_incomplete_hq_scores_before_creating_destination(tmp_path: path
             site_train_source_end=1,
             excluded_site_source_episodes=(),
             hq_folding_only_start=2,
+            hq_layout_task_start=None,
         )
     assert not destination.exists()
+
+
+def test_hq_scope_contract_validates_layout_prompt_run(tmp_path: pathlib.Path) -> None:
+    indexed = {
+        episode: _builder.EpisodeSource(
+            kind="HQ",
+            dataset=tmp_path,
+            info={},
+            episode_index=episode,
+            source_episode_index=episode,
+            metadata={"tasks": [task]},
+        )
+        for episode, task in (
+            (0, "Fold the T-shirt properly"),
+            (1, "Layout the t-shirt on the table, then fold it"),
+            (2, "Fold the T-shirt properly"),
+        )
+    }
+
+    _builder._validate_hq_task_scope(indexed, layout_task_start=1, folding_only_start=2)  # noqa: SLF001
+    indexed[1] = dataclasses.replace(indexed[1], metadata={"tasks": ["Fold the T-shirt properly"]})
+    with pytest.raises(ValueError, match="task scope metadata"):
+        _builder._validate_hq_task_scope(indexed, layout_task_start=1, folding_only_start=2)  # noqa: SLF001

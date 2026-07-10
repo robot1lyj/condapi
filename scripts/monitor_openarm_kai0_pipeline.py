@@ -15,9 +15,11 @@ try:
     from scripts import launch_openarm_jax_multinode as jax_launcher
     from scripts import select_openarm_site_stage_checkpoint as stage_selector
     from scripts.openarm_kai0_contract import HQ_FOLDING_ONLY_START
+    from scripts.openarm_kai0_contract import HQ_LAYOUT_TASK_START
 except ImportError:
     import launch_openarm_jax_multinode as jax_launcher
     from openarm_kai0_contract import HQ_FOLDING_ONLY_START
+    from openarm_kai0_contract import HQ_LAYOUT_TASK_START
     import select_openarm_site_stage_checkpoint as stage_selector
 
 
@@ -471,6 +473,8 @@ def _build_k_data_command(selection: dict[str, Any]) -> str:
         "50",
         "--hq-folding-only-start",
         str(HQ_FOLDING_ONLY_START),
+        "--hq-layout-task-start",
+        str(HQ_LAYOUT_TASK_START),
         "--site-annotations",
         str(SITE_ANNOTATIONS),
         "--overwrite",
