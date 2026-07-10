@@ -80,6 +80,7 @@ def _write_dataset(root: pathlib.Path, source_episode_ids: list[int], *, scored:
     info = _info(len(source_episode_ids))
     _write_json(root / "meta/info.json", info)
     rows = []
+    stats_rows = []
     for local_episode, source_episode in enumerate(source_episode_ids):
         parquet = _data_path(root, local_episode)
         parquet.parent.mkdir(parents=True, exist_ok=True)
@@ -104,7 +105,9 @@ def _write_dataset(root: pathlib.Path, source_episode_ids: list[int], *, scored:
                 }
             )
         rows.append(row)
+        stats_rows.append({"episode_index": local_episode, "stats": {"task_index": {"count": [20]}}})
     _write_jsonl(root / "meta/episodes.jsonl", rows)
+    _write_jsonl(root / "meta/episodes_stats.jsonl", stats_rows)
     _write_jsonl(root / "meta/tasks.jsonl", [{"task_index": 0, "task": "Fold the T-shirt properly"}])
 
 
@@ -112,6 +115,7 @@ def _write_tda_dataset(root: pathlib.Path) -> None:
     info = _info(2)
     _write_json(root / "meta/info.json", info)
     rows = []
+    stats_rows = []
     for episode_index, (source_episode, kind) in enumerate(((0, "time"), (1, "mirror"))):
         parquet = _data_path(root, episode_index)
         parquet.parent.mkdir(parents=True, exist_ok=True)
@@ -132,7 +136,9 @@ def _write_tda_dataset(root: pathlib.Path) -> None:
                 "mirror": kind == "mirror",
             }
         )
+        stats_rows.append({"episode_index": episode_index, "stats": {"task_index": {"count": [20]}}})
     _write_jsonl(root / "meta/episodes.jsonl", rows)
+    _write_jsonl(root / "meta/episodes_stats.jsonl", stats_rows)
     _write_jsonl(root / "meta/tasks.jsonl", [{"task_index": 0, "task": "Fold the T-shirt properly"}])
 
 
@@ -186,6 +192,11 @@ def test_builds_binary_awbc_dataset_with_source_audit(tmp_path: pathlib.Path) ->
     assert set(folding_only["stage_id_awbc"].unique()) == {1}
     site_output = pd.read_parquet(destination / "data/chunk-000/episode_000002.parquet")
     assert site_output["stage_id_awbc"].tolist() == [0] * 10 + [1] * 10
+    stats = [json.loads(line) for line in (destination / "meta/episodes_stats.jsonl").read_text().splitlines()]
+    assert len(stats) == 4
+    assert stats[0]["stats"]["task_index"]["min"] == [0.0]
+    assert stats[0]["stats"]["task_index"]["max"] == [1.0]
+    assert stats[1]["stats"]["episode_index"]["mean"] == [1.0]
     assert (destination / "kai0_awbc_build_report.json").exists()
     assert not list(tmp_path.glob(".awbc.building-*"))
 

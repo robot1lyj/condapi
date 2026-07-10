@@ -36,6 +36,10 @@ def test_audit_dataset_structure_accepts_binary_k_data(tmp_path):
             {"episode_index": 1, "source_kind": "Site"},
         ],
     )
+    _write_jsonl(
+        tmp_path / "meta/episodes_stats.jsonl",
+        [{"episode_index": 0, "stats": {}}, {"episode_index": 1, "stats": {}}],
+    )
     _write_json(tmp_path / "kai0_awbc_build_report.json", {"total_episodes": 2, "tasks": list(audit.TASKS)})
     for episode_index, labels in enumerate(((0, 1), (1, 0))):
         path = _data_path(tmp_path, info, episode_index)
@@ -70,6 +74,7 @@ def test_audit_dataset_structure_rejects_non_binary_label(tmp_path):
     _write_json(tmp_path / "meta/info.json", info)
     _write_jsonl(tmp_path / "meta/tasks.jsonl", audit.TASKS)
     _write_jsonl(tmp_path / "meta/episodes.jsonl", [{"episode_index": 0, "source_kind": "HQ"}])
+    _write_jsonl(tmp_path / "meta/episodes_stats.jsonl", [{"episode_index": 0, "stats": {}}])
     _write_json(tmp_path / "kai0_awbc_build_report.json", {"total_episodes": 1, "tasks": list(audit.TASKS)})
     path = _data_path(tmp_path, info, 0)
     path.parent.mkdir(parents=True, exist_ok=True)

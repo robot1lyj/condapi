@@ -46,6 +46,7 @@ def audit_dataset_structure(
     info = _load_json(dataset / "meta/info.json")
     tasks = _load_jsonl(dataset / "meta/tasks.jsonl")
     episodes = _load_jsonl(dataset / "meta/episodes.jsonl")
+    episode_stats = _load_jsonl(dataset / "meta/episodes_stats.jsonl")
     build_report = _load_json(dataset / "kai0_awbc_build_report.json")
 
     if tasks != list(TASKS):
@@ -58,6 +59,9 @@ def audit_dataset_structure(
     episode_ids = [int(row["episode_index"]) for row in episodes]
     if episode_ids != list(range(expected_episodes)):
         raise ValueError("K-Data episode indices must be contiguous from zero")
+    stats_episode_ids = [int(row["episode_index"]) for row in episode_stats]
+    if stats_episode_ids != episode_ids:
+        raise ValueError("K-Data episode stats must cover every contiguous episode")
 
     source_counts = Counter(str(row.get("source_kind")) for row in episodes)
     if dict(source_counts) != expected_source_counts:

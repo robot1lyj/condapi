@@ -48,6 +48,7 @@ class EpisodeSource:
     episode_index: int
     source_episode_index: int
     metadata: dict[str, Any]
+    stats: dict[str, Any] | None = None
     scores: dict[str, np.ndarray] | None = None
     stage_ids: np.ndarray | None = None
 
@@ -170,11 +171,17 @@ def _index_score_roots(roots: list[pathlib.Path], kind: str) -> dict[int, Episod
     for root_path in roots:
         root = root_path.resolve()
         info = _load_json(root / "meta/info.json")
+        stats_path = root / "meta/episodes_stats.jsonl"
+        if not stats_path.exists():
+            raise FileNotFoundError(f"{kind} score dataset is missing {stats_path}")
+        stats = {int(row["episode_index"]): row for row in _load_jsonl(stats_path)}
         for row in _load_jsonl(root / "meta/episodes.jsonl"):
             local_episode = int(row["episode_index"])
             source_episode = int(row["source_episode_index"])
             if source_episode in indexed:
                 raise ValueError(f"Duplicate {kind} source episode {source_episode}")
+            if local_episode not in stats:
+                raise ValueError(f"{kind} score episode {local_episode} is missing episode stats")
             indexed[source_episode] = EpisodeSource(
                 kind=kind,
                 dataset=root,
@@ -182,6 +189,7 @@ def _index_score_roots(roots: list[pathlib.Path], kind: str) -> dict[int, Episod
                 episode_index=local_episode,
                 source_episode_index=source_episode,
                 metadata=row,
+                stats=stats[local_episode],
             )
     return indexed
 
@@ -282,6 +290,10 @@ def _build_tda_sources(
     augmented = augmented.resolve()
     info = _load_json(augmented / "meta/info.json")
     rows = _load_jsonl(augmented / "meta/episodes.jsonl")
+    stats_path = augmented / "meta/episodes_stats.jsonl"
+    if not stats_path.exists():
+        raise FileNotFoundError(f"TDA dataset is missing {stats_path}")
+    stats = {int(row["episode_index"]): row for row in _load_jsonl(stats_path)}
     time_rows = _evenly_select([row for row in rows if row.get("augmentation_type") == "time"], time_count)
     mirror_rows = _evenly_select([row for row in rows if row.get("augmentation_type") == "mirror"], mirror_count)
     selected = time_rows + mirror_rows
@@ -291,6 +303,8 @@ def _build_tda_sources(
         source_episode = int(row["source_episode_index"])
         if source_episode not in hq_scores:
             raise ValueError(f"TDA episode maps to missing HQ score {source_episode}")
+        if local_episode not in stats:
+            raise ValueError(f"TDA episode {local_episode} is missing episode stats")
         target_frame = pd.read_parquet(
             augmented / _format_data_path(info, local_episode),
             columns=["frame_index"],
@@ -317,6 +331,7 @@ def _build_tda_sources(
                 episode_index=local_episode,
                 source_episode_index=source_episode,
                 metadata=row,
+                stats=stats[local_episode],
                 scores=mapped,
                 stage_ids=mapped_stage_ids,
             )
@@ -388,6 +403,50 @@ def _audit_label_ratios(
             f"{source_ratio_bounds}: {json.dumps(source_ratio_violations, ensure_ascii=False)}"
         )
     return overall
+
+
+def _scalar_stats(values: np.ndarray) -> dict[str, list[float | int]]:
+    values = np.asarray(values, dtype=np.float64).reshape(-1)
+    return {
+        "min": [float(values.min())],
+        "max": [float(values.max())],
+        "mean": [float(values.mean())],
+        "std": [float(values.std())],
+        "count": [len(values)],
+        "q01": [float(np.quantile(values, 0.01))],
+        "q10": [float(np.quantile(values, 0.10))],
+        "q50": [float(np.quantile(values, 0.50))],
+        "q90": [float(np.quantile(values, 0.90))],
+        "q99": [float(np.quantile(values, 0.99))],
+    }
+
+
+def _materialized_episode_stats(
+    source: EpisodeSource,
+    *,
+    episode_index: int,
+    start_index: int,
+    labels: np.ndarray,
+    scores: dict[str, np.ndarray],
+    stages: np.ndarray,
+) -> dict[str, Any]:
+    if source.stats is None or "stats" not in source.stats:
+        raise ValueError(f"{source.kind} source episode {source.source_episode_index} is missing episode stats")
+    length = len(labels)
+    stats = dict(source.stats["stats"])
+    stats.update(
+        {
+            "episode_index": _scalar_stats(np.full(length, episode_index, dtype=np.int64)),
+            "frame_index": _scalar_stats(np.arange(length, dtype=np.int64)),
+            "index": _scalar_stats(np.arange(start_index, start_index + length, dtype=np.int64)),
+            "task_index": _scalar_stats(labels),
+            "relative_advantage": _scalar_stats(scores["relative_advantage"]),
+            "absolute_value": _scalar_stats(scores["absolute_value"]),
+            "absolute_advantage": _scalar_stats(scores["absolute_advantage"]),
+            "stage_id_awbc": _scalar_stats(stages),
+        }
+    )
+    return {"episode_index": episode_index, "stats": stats}
 
 
 def build_kai0_awbc_dataset(
@@ -518,6 +577,7 @@ def build_kai0_awbc_dataset(
     staging_destination.mkdir(parents=True)
 
     output_episode_rows = []
+    output_stats_rows = []
     materialized_label_counts = {kind: {0: Counter(), 1: Counter()} for kind in ("HQ", "Site", "TDA")}
     total_frames = 0
     total_videos = 0
@@ -569,6 +629,16 @@ def build_kai0_awbc_dataset(
                 }
             )
             output_episode_rows.append(episode_row)
+            output_stats_rows.append(
+                _materialized_episode_stats(
+                    source,
+                    episode_index=new_episode_index,
+                    start_index=total_frames,
+                    labels=labels,
+                    scores=scores,
+                    stages=stages,
+                )
+            )
             for stage_index in (0, 1):
                 materialized_label_counts[source.kind][stage_index].update(labels[stages == stage_index].tolist())
 
@@ -601,6 +671,7 @@ def build_kai0_awbc_dataset(
     _write_json_atomic(staging_destination / "meta/info.json", output_info)
     _write_jsonl_atomic(staging_destination / "meta/tasks.jsonl", TASKS)
     _write_jsonl_atomic(staging_destination / "meta/episodes.jsonl", output_episode_rows)
+    _write_jsonl_atomic(staging_destination / "meta/episodes_stats.jsonl", output_stats_rows)
 
     report = {
         "schema_version": "openarm_kai0_awbc_v1",
