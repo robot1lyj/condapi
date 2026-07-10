@@ -16,6 +16,8 @@ possible memorization.
 from __future__ import annotations
 
 import argparse
+from collections import defaultdict
+from collections.abc import Iterable
 import csv
 import dataclasses
 import gc
@@ -23,19 +25,15 @@ import json
 import logging
 import pathlib
 import re
-from collections import defaultdict
-from collections.abc import Iterable
 from typing import Any
-
-import numpy as np
-import pandas as pd
 
 import cv2
 import lerobot.common.datasets.lerobot_dataset as lerobot_dataset
+import numpy as np
+import pandas as pd
 
 import openpi.policies.policy_config as _policy_config
 import openpi.training.config as _config
-
 
 LOGGER = logging.getLogger("openarm_checkpoint_sweep")
 
@@ -121,7 +119,9 @@ def _critical_offsets(
         return []
     frame = pd.read_parquet(_episode_parquet_path(dataset_dir, episode_index), columns=["action", "observation.state"])
     actions = np.stack([np.asarray(value, dtype=np.float32).reshape(-1) for value in frame["action"].to_numpy()])
-    states = np.stack([np.asarray(value, dtype=np.float32).reshape(-1) for value in frame["observation.state"].to_numpy()])
+    states = np.stack(
+        [np.asarray(value, dtype=np.float32).reshape(-1) for value in frame["observation.state"].to_numpy()]
+    )
     safe_length = min(max_length, len(actions))
     actions = actions[:safe_length]
     states = states[:safe_length]
@@ -148,8 +148,8 @@ def _critical_offsets(
     score = normalize(action_score) + normalize(gripper_score)
     order = np.argsort(-score)
     selected: list[int] = []
-    for offset in order:
-        offset = int(offset)
+    for offset_value in order:
+        offset = int(offset_value)
         if all(abs(offset - prev) >= min_separation for prev in selected):
             selected.append(offset)
             if len(selected) >= count:
@@ -224,9 +224,7 @@ def _make_samples(
 
         for offset, kind in offsets:
             key = (episode_index, offset)
-            if key not in samples:
-                samples[key] = SampleSpec(episode_index, offset, start + offset, kind)
-            elif samples[key].kind != "critical" and kind == "critical":
+            if key not in samples or (samples[key].kind != "critical" and kind == "critical"):
                 samples[key] = SampleSpec(episode_index, offset, start + offset, kind)
 
     return sorted(samples.values(), key=lambda item: (item.episode_index, item.frame_offset))
@@ -248,7 +246,7 @@ def _image_to_hwc_uint8(value: Any) -> np.ndarray:
     return image
 
 
-def _build_observation(item: dict[str, Any], tasks: dict[int, str]) -> dict[str, Any]:
+def _build_observation(item: dict[str, Any], tasks: dict[int, str], prompt_override: str | None) -> dict[str, Any]:
     obs: dict[str, Any] = {
         "observation.state": _to_numpy(item["observation.state"]).astype(np.float32),
     }
@@ -260,7 +258,7 @@ def _build_observation(item: dict[str, Any], tasks: dict[int, str]) -> dict[str,
         if key in item:
             obs[key] = _image_to_hwc_uint8(item[key])
     task_idx = int(_to_numpy(item.get("task_index", 0)).reshape(-1)[0])
-    obs["prompt"] = tasks.get(task_idx, "fold the cloth")
+    obs["prompt"] = prompt_override or tasks.get(task_idx, "fold the cloth")
     return obs
 
 
@@ -337,6 +335,7 @@ def _evaluate_split(
     tasks: dict[int, str],
     samples: list[SampleSpec],
     action_horizon: int,
+    prompt_override: str | None,
 ) -> dict[str, Any]:
     by_kind = defaultdict(_empty_accumulator)
     overall = _empty_accumulator()
@@ -346,7 +345,7 @@ def _evaluate_split(
 
     for sample in samples:
         item = dataset[sample.dataset_index]
-        obs = _build_observation(item, tasks)
+        obs = _build_observation(item, tasks, prompt_override)
         pred = np.asarray(policy.infer(obs)["actions"], dtype=np.float32)
         truth = _action_chunk(
             dataset_dir,
@@ -366,10 +365,7 @@ def _evaluate_split(
 
         prev_pred_by_episode[sample.episode_index] = (sample.frame_offset, pred)
 
-    episode_metrics = {
-        str(ep): _finalize(acc)
-        for ep, acc in sorted(per_episode.items(), key=lambda item: item[0])
-    }
+    episode_metrics = {str(ep): _finalize(acc) for ep, acc in sorted(per_episode.items(), key=lambda item: item[0])}
     worst = sorted(
         ((int(ep), values["mae"]) for ep, values in episode_metrics.items()),
         key=lambda item: item[1],
@@ -443,6 +439,7 @@ def _evaluate_checkpoint(
         dataset_meta.tasks,
         train_samples,
         train_config.model.action_horizon,
+        args.prompt,
     )
     LOGGER.info("Evaluating val samples: %s", len(val_samples))
     val_result = _evaluate_split(
@@ -452,6 +449,7 @@ def _evaluate_checkpoint(
         dataset_meta.tasks,
         val_samples,
         train_config.model.action_horizon,
+        args.prompt,
     )
 
     train_mae = float(train_result["overall"]["mae"])
@@ -472,6 +470,7 @@ def _evaluate_checkpoint(
             "include_adjacent": args.include_adjacent,
             "train_max_episodes": args.train_max_episodes,
             "val_max_episodes": args.val_max_episodes,
+            "prompt_override": args.prompt,
         },
         "train": train_result,
         "val": val_result,
@@ -485,26 +484,25 @@ def _evaluate_checkpoint(
 
 
 def _write_summary_csv(path: pathlib.Path, reports: Iterable[dict[str, Any]]) -> None:
-    rows = []
-    for report in reports:
-        rows.append(
-            {
-                "step": report["step"],
-                "checkpoint": report["checkpoint"],
-                "train_mae": report["train"]["overall"]["mae"],
-                "val_mae": report["val"]["overall"]["mae"],
-                "gap_mae": report["gaps"]["mae_val_minus_train"],
-                "gap_ratio": report["gaps"]["mae_val_over_train"],
-                "train_critical_mae": report["train"]["by_kind"].get("critical", {}).get("mae", 0.0),
-                "val_critical_mae": report["val"]["by_kind"].get("critical", {}).get("mae", 0.0),
-                "gap_critical_mae": report["gaps"]["critical_mae_val_minus_train"],
-                "val_overlap_mae": report["val"]["overall"]["overlap_consistency_mae"],
-                "val_gripper_mae": report["val"]["overall"]["gripper_mae"],
-                "val_joint_mae": report["val"]["overall"]["joint_mae"],
-                "val_samples": report["val"]["overall"]["samples"],
-                "train_samples": report["train"]["overall"]["samples"],
-            }
-        )
+    rows = [
+        {
+            "step": report["step"],
+            "checkpoint": report["checkpoint"],
+            "train_mae": report["train"]["overall"]["mae"],
+            "val_mae": report["val"]["overall"]["mae"],
+            "gap_mae": report["gaps"]["mae_val_minus_train"],
+            "gap_ratio": report["gaps"]["mae_val_over_train"],
+            "train_critical_mae": report["train"]["by_kind"].get("critical", {}).get("mae", 0.0),
+            "val_critical_mae": report["val"]["by_kind"].get("critical", {}).get("mae", 0.0),
+            "gap_critical_mae": report["gaps"]["critical_mae_val_minus_train"],
+            "val_overlap_mae": report["val"]["overall"]["overlap_consistency_mae"],
+            "val_gripper_mae": report["val"]["overall"]["gripper_mae"],
+            "val_joint_mae": report["val"]["overall"]["joint_mae"],
+            "val_samples": report["val"]["overall"]["samples"],
+            "train_samples": report["train"]["overall"]["samples"],
+        }
+        for report in reports
+    ]
     rows.sort(key=lambda row: int(row["step"]))
     fieldnames = list(rows[0].keys()) if rows else []
     with path.open("w", newline="") as f:
@@ -516,7 +514,9 @@ def _write_summary_csv(path: pathlib.Path, reports: Iterable[dict[str, Any]]) ->
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", default="pi05_openarms_dual_hq")
-    parser.add_argument("--dataset", type=pathlib.Path, default=pathlib.Path("/share/home/linyongjia/datasets/high_quality_folding"))
+    parser.add_argument(
+        "--dataset", type=pathlib.Path, default=pathlib.Path("/share/home/linyongjia/datasets/high_quality_folding")
+    )
     parser.add_argument("--checkpoint", type=pathlib.Path, action="append", required=True)
     parser.add_argument("--train-split", default="0:999")
     parser.add_argument("--val-split", default="999:1199")
@@ -527,6 +527,7 @@ def main() -> None:
     parser.add_argument("--include-adjacent", action=argparse.BooleanOptionalAction, default=True)
     parser.add_argument("--seed", type=int, default=20260706)
     parser.add_argument("--lerobot-tolerance-s", type=float, default=0.05)
+    parser.add_argument("--prompt", default=None, help="Override every sampled frame prompt, e.g. AWBC positive mode.")
     parser.add_argument("--output", type=pathlib.Path, required=True)
     args = parser.parse_args()
 

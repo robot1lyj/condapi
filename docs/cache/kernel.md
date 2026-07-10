@@ -9,7 +9,7 @@ New sessions load `AGENTS.md` + this file first, then `context_index.md` and at 
 - Main training nodes: gpu12/gpu14, each 2x A800 80GB. gpu25 usually serves policy on port `6666`; gpu28 is eval/aux.
 - Remote repo/env/output: `/share/home/linyongjia/conda-pi/openpi`, env `pi-conda`, output `/share/home/linyongjia/output/openpi`.
 - Remote datasets: policy datasets under `/share/home/linyongjia/datasets`; some Stage/reference data may live under `/share/home/linyongjia/data`.
-- Main OpenArm configs: `pi05_openarms_dual_site_align_v1_probe`, `pi05_openarms_dual_site_align_v1_base_10k`, and `pi05_openarms_dual_evo_acp_hil_v1_probe`; formal K-Policy must not reuse legacy `pi05_openarms_dual_awbc_v1`.
+- Main OpenArm configs: `pi05_openarms_dual_site_align_v1_probe`, `pi05_openarms_dual_evo_acp_hil_v1_probe`, and formal KAI0 `pi05_openarm_kai0_awbc_v1`; formal K-Policy must not reuse legacy `pi05_openarms_dual_awbc_v1`.
 
 ## OpenArm Contract
 - Task prompt: `Fold the T-shirt properly`.
@@ -19,6 +19,7 @@ New sessions load `AGENTS.md` + this file first, then `context_index.md` and at 
 - Clean site/HIL data only through `scripts/convert_openarm_hq_dataset.py`; HIL clean export drops hold frames and marks only real human VR as intervention.
 - Evo-RL ACP uses `ACPPromptTransform` on `complementary_info.acp_indicator`; clean HIL dataset name is `openarm_hil_evo_v1`.
 - KAI0 Stage boundary: HQ-Stage scores HQ, then directly scores Site-A150 for a transfer audit; only if that fails do 140 train + 10 val annotations adapt Site-Stage. Site-F1 is excluded, final Site-Score must be model-predicted, and linear Site-GT was deleted.
+- KAI0 pipeline controller is jump-host tmux `kai0_pipeline_v1`; canonical status is `output/openpi/logs/openarm_kai0_pipeline_v1/status.json`.
 
 ## Safety Kernel
 - Do not commit credentials, tokens, private host keys, or server passwords.

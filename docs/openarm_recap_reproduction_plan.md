@@ -213,6 +213,10 @@ KAI0 官方 TDA 类型保持不变：
 - `[官方代码]` 发布的 AWBC config 给出 100k steps、batch 256。
 - 第一轮以论文 80k/batch128 为复现目标；如果硬件无法直接满足，只调整并行/梯度累积，不静默修改有效 global batch。
 - 保存周期按官方 config 使用 5k/10k 级别 checkpoint，不预先指定哪个最好。
+- 正式配置固定为 `pi05_openarm_kai0_awbc_v1`，从原始 P05 初始化；gpu12+gpu14 组成 4 卡 JAX
+  多节点作业，全局 batch128（每节点 64、每卡 32），workers2，80k steps，5k 保存一次。
+- 正式训练前必须先以同一配置、同一全局 batch 和同一 4 卡启动器跑 20-step smoke；smoke 使用 workers0
+  排除 DataLoader 子进程干扰，正式训练才恢复 workers2。
 
 必须有普通 π0.5 BC 对照：相同 HQ + Site + 小预算 TDA、相同训练样本数，只去掉 Advantage prompt。该对照对应 KAI0 的 normal π0.5 baseline，不是额外自研路线。
 
@@ -358,6 +362,18 @@ HQ-Score：
   曲线、当前帧和正负状态直接叠在视频上，供后续 Site/HIL 报告复用。
 
 当前固定顺序：HQ-Score 继续生成；并行生成/审计 Site-DirectScore，必要时才适配 Site-Stage -> 构建 TDA-S -> 合并并审计三种来源 -> K-Data -> K-Policy/K-BC。在 Site-Score 和 K-Data 审计完成前不得启动 AWBC 策略训练。
+
+无人值守总控为 `scripts/monitor_openarm_kai0_pipeline.py`，跳板机 tmux 固定为 `kai0_pipeline_v1`，状态写到
+`output/openpi/logs/openarm_kai0_pipeline_v1/status.json`。它只按以下闸门推进：
+
+1. Site-DirectScore 的曲线闸门和 val10 随机帧对闸门都通过，才直接选择 HQ-Stage；否则训练 Site-Stage。
+2. Site-Stage 使用 HQ180×1 + Site140×3、batch64、2 卡 DDP、5k steps、peak LR `5e-6`；评估
+   1000/2000/3000/4000/4999，同时要求 Site 质量和 HQ 遗忘保护全部通过，再按最低 Site MSE 选择。
+3. K-Data 必须正好 1719 集，完成每阶段 top-30% 及来源比例审计，并生成全量 16D relative-action norm stats。
+4. 20-step 4 卡 smoke 成功后才启动 80k；训练异常时两节点成对停止，并从最近 5k checkpoint 恢复。
+5. 80k 后对全部 5k checkpoint 在 HQ holdout 与 Site val10 上使用固定 positive prompt 做 sampled sweep；
+   选择权重为 Site 关键帧30%、Site MAE25%、HQ关键帧20%、HQ MAE15%、Site chunk overlap10%，优先
+   保留 HQ val/train MAE 比不超过2.0的 checkpoint，最后部署到 gpu25:6666。
 
 ## 10. 禁止项
 
