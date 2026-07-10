@@ -143,6 +143,11 @@ def test_builds_binary_awbc_dataset_with_source_audit(tmp_path: pathlib.Path) ->
     _write_dataset(hq, [0, 1], scored=True, kind="HQ")
     _write_dataset(site, [0], scored=True, kind="Site")
     _write_tda_dataset(tda)
+    site_frame = pd.read_parquet(_data_path(site, 0))
+    site_frame["absolute_value"] = np.zeros(len(site_frame), dtype=np.float32)
+    site_frame.to_parquet(_data_path(site, 0), index=False)
+    site_annotations = site / "annotations/openarm_stage_v1.jsonl"
+    _write_jsonl(site_annotations, [{"episode_index": 0, "flatten_done": 9, "quality": "success"}])
 
     report = _builder.build_kai0_awbc_dataset(
         [hq],
@@ -158,6 +163,8 @@ def test_builds_binary_awbc_dataset_with_source_audit(tmp_path: pathlib.Path) ->
         expected_hq_episodes=2,
         site_train_source_end=1,
         excluded_site_source_episodes=(),
+        hq_folding_only_start=1,
+        site_annotations_path=site_annotations,
     )
 
     assert report["total_episodes"] == 4
@@ -172,7 +179,11 @@ def test_builds_binary_awbc_dataset_with_source_audit(tmp_path: pathlib.Path) ->
     ]
     first = pd.read_parquet(destination / "data/chunk-000/episode_000000.parquet")
     assert set(first["task_index"].unique()) == {0, 1}
-    assert set(first["stage_id_pred"].unique()) == {0, 1}
+    assert set(first["stage_id_awbc"].unique()) == {0, 1}
+    folding_only = pd.read_parquet(destination / "data/chunk-000/episode_000001.parquet")
+    assert set(folding_only["stage_id_awbc"].unique()) == {1}
+    site_output = pd.read_parquet(destination / "data/chunk-000/episode_000002.parquet")
+    assert site_output["stage_id_awbc"].tolist() == [0] * 10 + [1] * 10
     assert (destination / "kai0_awbc_build_report.json").exists()
     assert not list(tmp_path.glob(".awbc.building-*"))
 
@@ -201,5 +212,6 @@ def test_rejects_incomplete_hq_scores_before_creating_destination(tmp_path: path
             expected_hq_episodes=2,
             site_train_source_end=1,
             excluded_site_source_episodes=(),
+            hq_folding_only_start=2,
         )
     assert not destination.exists()

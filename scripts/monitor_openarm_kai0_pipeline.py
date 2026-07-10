@@ -14,8 +14,10 @@ from typing import Any
 try:
     from scripts import launch_openarm_jax_multinode as jax_launcher
     from scripts import select_openarm_site_stage_checkpoint as stage_selector
+    from scripts.openarm_kai0_contract import HQ_FOLDING_ONLY_START
 except ImportError:
     import launch_openarm_jax_multinode as jax_launcher
+    from openarm_kai0_contract import HQ_FOLDING_ONLY_START
     import select_openarm_site_stage_checkpoint as stage_selector
 
 
@@ -55,6 +57,7 @@ HQ_SCORE_ROOTS = tuple(
     DATASETS / f"openarm_kai0_stage_scores_hq_v1_{name}"
     for name in ("s0_000_167", "s1_167_334", "s2_334_501", "s3_501_668", "s4_668_835", "s5_835_999")
 )
+HQ_SCORE_AUDIT = PIPELINE_ROOT / "hq999_stage_audit.json"
 TDA_DATA = DATASETS / "openarm_hq_tda_aug_v1"
 K_DATA = DATASETS / "openarm_kai0_awbc_v1"
 K_DATA_REPORT = K_DATA / "kai0_awbc_build_report.json"
@@ -466,6 +469,10 @@ def _build_k_data_command(selection: dict[str, Any]) -> str:
         "0.30",
         "--relative-interval",
         "50",
+        "--hq-folding-only-start",
+        str(HQ_FOLDING_ONLY_START),
+        "--site-annotations",
+        str(SITE_ANNOTATIONS),
         "--overwrite",
     ]
     for root in HQ_SCORE_ROOTS:
@@ -474,6 +481,31 @@ def _build_k_data_command(selection: dict[str, Any]) -> str:
         command.extend(("--site-score-root", str(root)))
     log = PIPELINE_ROOT / "build_k_data.log"
     return f"cd {shlex.quote(str(REPO_ROOT))} && {shlex.join(command)} >>{shlex.quote(str(log))} 2>&1"
+
+
+def _ensure_hq_score_audit() -> bool:
+    report = _load_json(HQ_SCORE_AUDIT)
+    if report:
+        if not report.get("passed"):
+            raise RuntimeError("HQ999 Stage scores failed the final quality gate")
+        return True
+    command = [
+        str(PYTHON),
+        "scripts/audit_openarm_hq_stage_scores.py",
+        "--expected-episodes",
+        "999",
+        "--folding-only-start",
+        str(HQ_FOLDING_ONLY_START),
+        "--output",
+        str(HQ_SCORE_AUDIT),
+    ]
+    for root in HQ_SCORE_ROOTS:
+        command.extend(("--score-root", str(root)))
+    _ssh("gpu25", ["bash", "-lc", f"cd {shlex.quote(str(REPO_ROOT))} && {shlex.join(command)}"], timeout=7200)
+    report = _load_json(HQ_SCORE_AUDIT, {})
+    if not report.get("passed"):
+        raise RuntimeError("HQ999 Stage audit did not produce a passing report")
+    return True
 
 
 def _ensure_k_data(selection: dict[str, Any], state: dict[str, Any]) -> bool:
@@ -767,6 +799,8 @@ def monitor_once(state: dict[str, Any]) -> dict[str, Any]:
     selection = _ensure_site_selection(state)
     if selection is None:
         status["phase"] = "waiting_site_score_selection"
+    elif not _ensure_hq_score_audit():
+        status["phase"] = "auditing_hq999_stage_scores"
     elif not _ensure_k_data(selection, state):
         status["phase"] = "building_k_data"
     elif not _ensure_norm_stats(state):
@@ -803,6 +837,7 @@ def monitor_once(state: dict[str, Any]) -> dict[str, Any]:
             status["phase"] = "complete"
             status["deployment"] = _load_json(K_DEPLOYMENT)
     status["site_selection"] = _load_json(SITE_SELECTION)
+    status["hq_score_audit_passed"] = bool((_load_json(HQ_SCORE_AUDIT, {}) or {}).get("passed"))
     status["k_data_ready"] = K_DATA_REPORT.exists()
     status["norm_stats_ready"] = (K_DATA / "norm_stats.json").exists()
     status["smoke_checkpoint_ready"] = _checkpoint_ready(K_SMOKE_CHECKPOINT)

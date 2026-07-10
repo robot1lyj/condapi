@@ -16,6 +16,15 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
+try:
+    from scripts.openarm_kai0_contract import HQ_FOLDING_ONLY_START
+    from scripts.openarm_stage_progress import build_stage_arrays
+    from scripts.openarm_stage_progress import normalize_boundaries
+except ImportError:
+    from openarm_kai0_contract import HQ_FOLDING_ONLY_START
+    from openarm_stage_progress import build_stage_arrays
+    from openarm_stage_progress import normalize_boundaries
+
 VIDEO_KEYS = (
     "observation.images.base",
     "observation.images.left_wrist",
@@ -38,6 +47,7 @@ class EpisodeSource:
     source_episode_index: int
     metadata: dict[str, Any]
     scores: dict[str, np.ndarray] | None = None
+    stage_ids: np.ndarray | None = None
 
 
 def _load_json(path: pathlib.Path) -> dict[str, Any]:
@@ -110,6 +120,47 @@ def _read_scores(source: EpisodeSource) -> dict[str, np.ndarray]:
     if not all(np.isfinite(values).all() for values in result.values()):
         raise ValueError(f"Non-finite score in {source.kind} source episode {source.source_episode_index}")
     return result
+
+
+def _predicted_stage_ids(scores: dict[str, np.ndarray]) -> np.ndarray:
+    return (scores["absolute_value"] >= 0.5).astype(np.int64)
+
+
+def _hq_stage_ids(source: EpisodeSource, scores: dict[str, np.ndarray], folding_only_start: int) -> np.ndarray:
+    if source.source_episode_index >= folding_only_start:
+        return np.ones(len(scores["absolute_value"]), dtype=np.int64)
+    return _predicted_stage_ids(scores)
+
+
+def _site_stage_ids(
+    source: EpisodeSource,
+    scores: dict[str, np.ndarray],
+    annotations: dict[int, dict[str, Any]] | None,
+) -> np.ndarray:
+    if annotations is None:
+        return _predicted_stage_ids(scores)
+    annotation = annotations.get(source.source_episode_index)
+    if annotation is None:
+        raise ValueError(f"Missing Site stage annotation for source episode {source.source_episode_index}")
+    boundaries = normalize_boundaries(annotation, len(scores["absolute_value"]))
+    _, stage_ids = build_stage_arrays(len(scores["absolute_value"]), boundaries)
+    return stage_ids
+
+
+def _read_stage_ids(
+    source: EpisodeSource,
+    scores: dict[str, np.ndarray],
+    *,
+    hq_folding_only_start: int,
+    site_annotations: dict[int, dict[str, Any]] | None,
+) -> np.ndarray:
+    if source.stage_ids is not None:
+        return source.stage_ids
+    if source.kind == "HQ":
+        return _hq_stage_ids(source, scores, hq_folding_only_start)
+    if source.kind == "Site":
+        return _site_stage_ids(source, scores, site_annotations)
+    raise ValueError(f"Missing explicit stage IDs for source kind {source.kind}")
 
 
 def _index_score_roots(roots: list[pathlib.Path], kind: str) -> dict[int, EpisodeSource]:
@@ -199,6 +250,7 @@ def _build_tda_sources(
     time_count: int,
     mirror_count: int,
     relative_interval: int,
+    hq_folding_only_start: int,
 ) -> list[EpisodeSource]:
     augmented = augmented.resolve()
     info = _load_json(augmented / "meta/info.json")
@@ -216,13 +268,20 @@ def _build_tda_sources(
             augmented / _format_data_path(info, local_episode),
             columns=["frame_index"],
         )
+        source_score = _read_scores(hq_scores[source_episode])
         mapped = _map_tda_scores(
-            _read_scores(hq_scores[source_episode]),
+            source_score,
             target_length=len(target_frame),
             stride=int(row.get("source_frame_stride", 1)),
             offset=int(row.get("source_frame_offset", 0)),
             relative_interval=relative_interval,
         )
+        source_indices = np.minimum(
+            int(row.get("source_frame_offset", 0))
+            + np.arange(len(target_frame), dtype=np.int64) * int(row.get("source_frame_stride", 1)),
+            len(source_score["absolute_value"]) - 1,
+        )
+        mapped_stage_ids = _hq_stage_ids(hq_scores[source_episode], source_score, hq_folding_only_start)[source_indices]
         result.append(
             EpisodeSource(
                 kind="TDA",
@@ -232,6 +291,7 @@ def _build_tda_sources(
                 source_episode_index=source_episode,
                 metadata=row,
                 scores=mapped,
+                stage_ids=mapped_stage_ids,
             )
         )
     return result
@@ -320,6 +380,8 @@ def build_kai0_awbc_dataset(
     excluded_site_source_episodes: tuple[int, ...] = (95,),
     ratio_tolerance: float = 0.01,
     source_ratio_bounds: tuple[float, float] = (0.15, 0.45),
+    hq_folding_only_start: int = HQ_FOLDING_ONLY_START,
+    site_annotations_path: pathlib.Path | None = None,
 ) -> dict[str, Any]:
     if not 0.0 < positive_ratio < 1.0:
         raise ValueError("positive_ratio must be in (0, 1)")
@@ -329,6 +391,8 @@ def build_kai0_awbc_dataset(
         raise ValueError("relative_interval must be positive")
     if expected_hq_episodes <= 0 or site_train_source_end <= 0:
         raise ValueError("Expected episode counts must be positive")
+    if not 0 < hq_folding_only_start <= expected_hq_episodes:
+        raise ValueError("hq_folding_only_start must lie within the HQ episode range")
     if ratio_tolerance < 0.0:
         raise ValueError("ratio_tolerance must be non-negative")
     if not 0.0 <= source_ratio_bounds[0] <= source_ratio_bounds[1] <= 1.0:
@@ -345,6 +409,12 @@ def build_kai0_awbc_dataset(
     expected_site_ids = set(range(site_train_source_end)) - set(excluded_site_source_episodes)
     site_scores = {episode: source for episode, source in site_scores_all.items() if episode in expected_site_ids}
     _validate_source_episode_ids(site_scores, expected_site_ids, "Site train")
+    site_annotations = None
+    if site_annotations_path is not None:
+        site_annotations = {int(row["episode_index"]): row for row in _load_jsonl(site_annotations_path.resolve())}
+        missing_site_annotations = sorted(expected_site_ids - set(site_annotations))
+        if missing_site_annotations:
+            raise ValueError(f"Missing Site annotations: {missing_site_annotations[:20]}")
 
     tda_sources = _build_tda_sources(
         tda_augmented,
@@ -352,6 +422,7 @@ def build_kai0_awbc_dataset(
         time_count=tda_time_count,
         mirror_count=tda_mirror_count,
         relative_interval=relative_interval,
+        hq_folding_only_start=hq_folding_only_start,
     )
     unique_sources = [*hq_scores.values(), *site_scores.values(), *tda_sources]
     base_info = unique_sources[0].info
@@ -361,7 +432,12 @@ def build_kai0_awbc_dataset(
     values_by_stage = {0: [], 1: []}
     for source in unique_sources:
         scores = _read_scores(source)
-        stages = (scores["absolute_value"] >= 0.5).astype(np.int64)
+        stages = _read_stage_ids(
+            source,
+            scores,
+            hq_folding_only_start=hq_folding_only_start,
+            site_annotations=site_annotations,
+        )
         for stage_index in (0, 1):
             values_by_stage[stage_index].append(scores["relative_advantage"][stages == stage_index])
     stage_values = {stage_index: np.concatenate(values) for stage_index, values in values_by_stage.items()}
@@ -375,7 +451,12 @@ def build_kai0_awbc_dataset(
     unique_label_counts = {kind: {0: Counter(), 1: Counter()} for kind in ("HQ", "Site", "TDA")}
     for source in unique_sources:
         scores = _read_scores(source)
-        stages = (scores["absolute_value"] >= 0.5).astype(np.int64)
+        stages = _read_stage_ids(
+            source,
+            scores,
+            hq_folding_only_start=hq_folding_only_start,
+            site_annotations=site_annotations,
+        )
         labels = np.asarray(
             [
                 int(value >= thresholds[int(stage)])
@@ -412,7 +493,12 @@ def build_kai0_awbc_dataset(
         scores = _read_scores(source)
         if len(raw_frame) != len(scores["relative_advantage"]):
             raise ValueError(f"Score length mismatch for {source.kind} episode {source.source_episode_index}")
-        stages = (scores["absolute_value"] >= 0.5).astype(np.int64)
+        stages = _read_stage_ids(
+            source,
+            scores,
+            hq_folding_only_start=hq_folding_only_start,
+            site_annotations=site_annotations,
+        )
         labels = np.asarray(
             [
                 int(value >= thresholds[int(stage)])
@@ -430,7 +516,7 @@ def build_kai0_awbc_dataset(
             frame["task_index"] = labels
             for column in SCORE_COLUMNS:
                 frame[column] = scores[column]
-            frame["stage_id_pred"] = stages
+            frame["stage_id_awbc"] = stages
             output_parquet = staging_destination / _format_data_path(base_info, new_episode_index)
             _write_parquet_atomic(frame, output_parquet)
 
@@ -469,7 +555,7 @@ def build_kai0_awbc_dataset(
     features = dict(output_info["features"])
     for column in SCORE_COLUMNS:
         features[column] = {"dtype": "float32", "shape": [1], "names": None}
-    features["stage_id_pred"] = {"dtype": "int64", "shape": [1], "names": None}
+    features["stage_id_awbc"] = {"dtype": "int64", "shape": [1], "names": None}
     output_info["features"] = features
     output_info["total_episodes"] = new_episode_index
     output_info["total_frames"] = total_frames
@@ -485,7 +571,14 @@ def build_kai0_awbc_dataset(
         "schema_version": "openarm_kai0_awbc_v1",
         "destination": str(destination),
         "advantage_source": "relative_advantage",
-        "stage_source": "absolute_value>=0.5",
+        "stage_source": {
+            "HQ_before_folding_only": "HQ-Stage absolute_value>=0.5",
+            "HQ_folding_only": f"source_episode_index>={hq_folding_only_start} -> folding",
+            "Site": "manual stage boundary" if site_annotations is not None else "HQ/Site-Stage absolute_value>=0.5",
+            "TDA": "mapped from source HQ stage",
+        },
+        "hq_folding_only_start": hq_folding_only_start,
+        "site_annotations": str(site_annotations_path.resolve()) if site_annotations_path is not None else None,
         "positive_ratio_target": positive_ratio,
         "thresholds": {str(key): value for key, value in thresholds.items()},
         "relative_interval": relative_interval,
@@ -527,6 +620,13 @@ def main() -> None:
     parser.add_argument("--tda-mirror-count", type=int, default=150)
     parser.add_argument("--positive-ratio", type=float, default=0.30)
     parser.add_argument("--relative-interval", type=int, default=50)
+    parser.add_argument("--hq-folding-only-start", type=int, default=HQ_FOLDING_ONLY_START)
+    parser.add_argument(
+        "--site-annotations",
+        type=pathlib.Path,
+        required=True,
+        help="Manual two-stage Site annotation JSONL; used only for stage-aware threshold groups.",
+    )
     parser.add_argument("--overwrite", action="store_true")
     args = parser.parse_args()
     report = build_kai0_awbc_dataset(
@@ -540,6 +640,8 @@ def main() -> None:
         positive_ratio=args.positive_ratio,
         relative_interval=args.relative_interval,
         overwrite=args.overwrite,
+        hq_folding_only_start=args.hq_folding_only_start,
+        site_annotations_path=args.site_annotations,
     )
     print(json.dumps(report, ensure_ascii=False, indent=2))
 

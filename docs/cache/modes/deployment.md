@@ -56,6 +56,7 @@ Local validation env is `pi-conda`. If missing, create with conda from `environm
 ## Stage Scoring
 
 - Long HQ/Site score-only runs must use episode-atomic outputs and `--resume`; never restart with `--overwrite` after progress exists.
+- HQ finalization must pass `scripts/audit_openarm_hq_stage_scores.py`; K-Data must not rely only on parquet counts or report visuals.
 - HQ watchdog session is `kai0_hq_score_monitor`; it may recover a stopped/stalled worker up to three times and writes status under `output/openpi/logs/openarm_kai0_stage_scores_hq_v1`.
 - Site supervisor session is `kai0_site_score_monitor`; it starts a balanced Site shard when the matching HQ GPU slot is free, then writes the transfer audit under `datasets/openarm_site_score_review_v1`.
 - End-to-end KAI0 supervisor is `kai0_pipeline_v1` on the jump host; status is `output/openpi/logs/openarm_kai0_pipeline_v1/status.json`. It may start Site-Stage only after a failed direct-transfer gate, then K-Data, norm, 4-GPU smoke, 80k, sweep, and gpu25 deployment in order.

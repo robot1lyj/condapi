@@ -18,9 +18,11 @@ import tqdm
 try:
     from scripts.openarm_advantage_report import StageReportConfig
     from scripts.openarm_advantage_report import write_stage_report
+    from scripts.openarm_kai0_contract import HQ_FOLDING_ONLY_START
 except ModuleNotFoundError:
     from openarm_advantage_report import StageReportConfig
     from openarm_advantage_report import write_stage_report
+    from openarm_kai0_contract import HQ_FOLDING_ONLY_START
 
 
 VIDEO_KEYS = (
@@ -74,6 +76,18 @@ def _local_episode_index(path: pathlib.Path) -> int:
     return int(match.group(1))
 
 
+def _stage_aware_progress(raw_progress: np.ndarray, source_episode: int) -> tuple[np.ndarray, np.ndarray, int | None]:
+    if source_episode >= HQ_FOLDING_ONLY_START:
+        progress = np.clip(0.5 + raw_progress, 0.5, 1.0).astype(np.float32)
+        stage_ids = np.ones(len(progress), dtype=np.int64)
+        return progress, stage_ids, 0
+    progress = np.clip(raw_progress, 0.0, 1.0).astype(np.float32)
+    stage_ids = (progress >= 0.5).astype(np.int64)
+    crossings = np.flatnonzero(stage_ids == 1)
+    boundary = int(crossings[0]) if crossings.size else None
+    return progress, stage_ids, boundary
+
+
 def build_hq_score_report(
     datasets_root: pathlib.Path,
     output_root: pathlib.Path,
@@ -107,11 +121,9 @@ def build_hq_score_report(
                 parquet_path,
                 columns=["relative_advantage", "absolute_value", "absolute_advantage"],
             )
-            progress = frame["absolute_value"].to_numpy(dtype=np.float32)
+            raw_progress = frame["absolute_value"].to_numpy(dtype=np.float32)
             relative_advantage = frame["relative_advantage"].to_numpy(dtype=np.float32)
-            stage_ids = (progress >= 0.5).astype(np.int64)
-            crossings = np.flatnonzero(stage_ids == 1)
-            boundary = int(crossings[0]) if crossings.size else None
+            progress, stage_ids, boundary = _stage_aware_progress(raw_progress, source_episode)
             video_paths = {}
             video_aspect_ratios = {}
             for video_key in VIDEO_KEYS:
@@ -137,6 +149,7 @@ def build_hq_score_report(
                 "source_episode_index": source_episode,
                 "source_tasks": source_row.get("tasks", []),
                 "progress": np.round(progress, 6).tolist(),
+                "episode_relative_progress": np.round(raw_progress, 6).tolist(),
                 "stage_id": stage_ids.tolist(),
                 "advantage": np.round(relative_advantage, 6).tolist(),
                 "advantage_min": float(relative_advantage.min()),
@@ -157,7 +170,8 @@ def build_hq_score_report(
         "generated_at": dt.datetime.now().astimezone().isoformat(),
         "score_source": "HQ-Stage",
         "advantage_source": "relative_advantage",
-        "progress_source": "absolute_value",
+        "progress_source": "absolute_value with a 0.5 folding-only stage offset for HQ 536:999",
+        "hq_folding_only_start": HQ_FOLDING_ONLY_START,
         "completed_episodes": len(payloads),
         "completed_frames": sum(int(payload["length"]) for payload in payloads),
         "shard_counts": shard_counts,
@@ -174,9 +188,9 @@ def build_hq_score_report(
         summary,
         StageReportConfig(
             title="HQ-Stage Trajectory Review",
-            subtitle="Video-aligned progress and direct paired-frame advantage from completed HQ episodes.",
+            subtitle="Stage-aware task progress and direct paired-frame advantage from completed HQ episodes.",
             score_source="HQ-Stage / checkpoint 10000",
-            progress_title="Start-anchored progress / Stage(frame 0, frame t)",
+            progress_title="Task progress / folding-only episodes start at 0.5",
             advantage_title="Direct advantage / Stage(frame t, frame t+50)",
         ),
     )

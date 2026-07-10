@@ -19,6 +19,11 @@ Design decisions → `docs/decisions/`. Architecture → `docs/ARCHITECTURE.md`.
   positive prompt，避免用普通任务提示评估条件策略。
 - **远端代码同步完整性修复**: 修复共享仓库只同步 `config.py`、遗漏新 `openarm_policy.py` 导致恢复任务导入
   失败的问题；远端现按完整 tracked file 集合同步，并明确共享 conda 导入校验必须在计算节点执行。
+- **KAI0 混合任务阶段分桶修正**: 中途审计确认 HQ `536:999` 首帧已平铺、只包含 folding，低于0.5的
+  episode-relative value 不是 scorer 崩坏；K-Data 改为 HQ `0:536` 模型 crossing、`536:999` 固定
+  folding、Site 人工边界、TDA 源映射生成 `stage_id_awbc`，advantage 仍全部来自模型预测。
+- **HQ999 Stage 正式质量闸门**: 新增完整 ID/有限值/分数范围、完整任务 crossing、folding-only 增量和
+  relative advantage 非塌缩审计；HQ 动态报告对 folding-only 显示0.5阶段偏移并同时保留 raw 进度。
 - **Stage 评分无人值守加固与报告重构**: score-only 数据集支持逐 episode 校验、原子 parquet 落盘和
   `--resume`；HQ watchdog 检测停止/日志停滞后最多自动恢复 3 次，并在 999 集完成后自动刷新最终报告。
   Stage 报告改为可复用渲染器，按相机原始宽高比在视频上叠加 progress/advantage、当前帧和正负状态。

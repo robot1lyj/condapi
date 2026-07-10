@@ -19,6 +19,7 @@ New sessions load `AGENTS.md` + this file first, then `context_index.md` and at 
 - Clean site/HIL data only through `scripts/convert_openarm_hq_dataset.py`; HIL clean export drops hold frames and marks only real human VR as intervention.
 - Evo-RL ACP uses `ACPPromptTransform` on `complementary_info.acp_indicator`; clean HIL dataset name is `openarm_hil_evo_v1`.
 - KAI0 Stage boundary: HQ-Stage scores HQ, then directly scores Site-A150 for a transfer audit; only if that fails do 140 train + 10 val annotations adapt Site-Stage. Site-F1 is excluded, final Site-Score must be model-predicted, and linear Site-GT was deleted.
+- KAI0 AWBC stage groups do not replace model advantage: Site uses manual `flatten_done`; HQ `0:536` uses model crossing and folding-only `536:999` is stage 1; TDA inherits its HQ source stage.
 - KAI0 pipeline controller is jump-host tmux `kai0_pipeline_v1`; canonical status is `output/openpi/logs/openarm_kai0_pipeline_v1/status.json`.
 
 ## Safety Kernel

@@ -125,6 +125,11 @@ Site-A150 -> HQ-Stage 直接推理 -> Site-DirectScore -> 迁移审计
   `absolute_value[t] = Stage(frame_0, frame_t)`；下图不是上图差分，而是模型直接比较未来 50 帧得到的
   `relative_advantage[t] = Stage(frame_t, frame_{t+50})`。正值表示未来更接近完成，负值表示退步，接近 0
   表示停滞；尾部不足 50 帧的值会按实际间隔缩放，必须单独审计。
+- 对 folding-only `536:999`，报告显示值会在 raw `absolute_value` 上加阶段起点0.5并裁剪到 `[0.5,1]`；
+  raw 值仍保留为 `episode_relative_progress`，不会篡改 scorer 输出。
+- HQ999 完成后必须通过 `audit_openarm_hq_stage_scores.py`：ID/有限值/范围完整，完整任务峰值 crossing
+  比例至少95%、峰值P10至少0.60，folding-only episode-relative 峰值P10至少0.25，且 relative
+  advantage 的P90/P10与近零比例不能塌缩。失败则停止 K-Data。
 
 **Site-DirectScore / Site-StageData / Site-Stage / Site-Score：**
 
@@ -159,7 +164,12 @@ Site-A150 -> HQ-Stage 直接推理 -> Site-DirectScore -> 迁移审计
 
 - HQ-Score 与 Site-Score 使用同一个进度范围 `[0,1]`、同一个 50 帧间隔和同一个裁剪规则。
 - 合并前分别报告 HQ/Site 的 advantage 最小值、均值、最大值、分位数以及两个阶段的帧数。
-- Site/HQ 的最终阶段都按各自 Stage 模型累计进度确定；人工 `stage_id` 只用于训练和验证。
+- advantage 数值始终来自 Stage 模型；但 `[官方代码]` 两阶段分桶本来就读取 `stage_progress_gt`。
+  因此 Site 使用已人工标注的 `flatten_done` 生成 `stage_id_awbc`，只决定“在哪个阶段计算30%阈值”，
+  不把人工线性进度写成 advantage。
+- HQ `meta/episodes.jsonl` 与首帧视觉审计确认 `0:360` 为完整任务、`360:536` 为明确
+  layout+fold 完整任务、`536:999` 从首帧已完全平铺而只录 folding。HQ `0:536` 暂用 HQ-Stage
+  `absolute_value>=0.5` 判阶段，`536:999` 固定为 folding；TDA-S 继承源 HQ 的阶段。
 - 若某一来源或阶段在二值化后 positive 比例异常，停止构建，不用静默重采样掩盖问题。
 
 优势源处理：
@@ -183,7 +193,8 @@ task_index=1 -> Fold the T-shirt properly, Advantage: positive
 - HQ-Score、Site-Score 和 TDA-S 合并后统一计算阈值；禁止三档和分片独立阈值。
 - 报告必须按 `HQ/Site/TDA × flattening/folding` 分别列出 positive/negative 数量，确保 Site 没被 HQ 淹没。
 - 正式构建器为 `scripts/build_openarm_kai0_awbc_dataset.py`：先审计完整的 HQ999、Site140 和 TDA-S，
-  再按预测 `absolute_value` 的 `0.5` 边界分阶段、对论文主分支 `relative_advantage` 分别取最高 30%；
+  再按 HQ 任务范围/预测 crossing、Site 人工边界和 TDA 源映射得到 `stage_id_awbc`，对论文主分支
+  `relative_advantage` 分别取最高 30%；
   任一来源的正样本比例超出 `15%-45%` 即停止，不生成正式目录。
 
 官方 README 的 `--threshold 30`、脚本实现的 `100-threshold` 和帮助文字存在表述歧义。OpenArm 报告必须直接写最终 positive 实际比例，验收目标是论文定义的约 30%，不能只记录 CLI 参数。
