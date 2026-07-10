@@ -9,6 +9,8 @@ Design decisions → `docs/decisions/`. Architecture → `docs/ARCHITECTURE.md`.
 
 ## 2026-07-10
 
+- **K-Data norm 原子落盘**: parquet norm stats 改为临时文件完成后原子替换，避免长时间全量统计在最终
+  JSON 写入瞬间中断后留下截断文件，使无人值守总控能够安全重试。
 - **JAX 异步 checkpoint 完整性闸门**: K-Policy smoke/full 与 sweep 只认含 Orbax 顶层及 params
   完成 metadata 的 checkpoint，忽略异步保存中的半成品数字目录；成对恢复会回到最近完整的 5k 权重。
 - **K-Policy 选模与部署语义修复**: checkpoint sweep 明确按 80k 主循环实际

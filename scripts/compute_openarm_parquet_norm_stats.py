@@ -9,9 +9,10 @@ state and gripper dimensions are left unchanged.
 from __future__ import annotations
 
 import argparse
-import json
-import pathlib
 from dataclasses import dataclass
+import json
+import os
+import pathlib
 
 import numpy as np
 import pandas as pd
@@ -25,6 +26,15 @@ def _load_json(path: pathlib.Path) -> dict:
 def _load_jsonl(path: pathlib.Path) -> list[dict]:
     with path.open() as f:
         return [json.loads(line) for line in f if line.strip()]
+
+
+def _write_json_atomic(path: pathlib.Path, value: dict) -> None:
+    temporary = path.with_name(f".{path.name}.tmp-{os.getpid()}")
+    try:
+        temporary.write_text(json.dumps(value, indent=2) + "\n")
+        os.replace(temporary, path)
+    finally:
+        temporary.unlink(missing_ok=True)
 
 
 def _episode_path(dataset_dir: pathlib.Path, info: dict, episode_index: int) -> pathlib.Path:
@@ -265,10 +275,12 @@ def main() -> None:
 
     output_dir = args.output_dir.resolve() if args.output_dir is not None else dataset_dir
     output_dir.mkdir(parents=True, exist_ok=True)
-    (output_dir / "norm_stats.json").write_text(
-        json.dumps({"norm_stats": {key: stats.to_json() for key, stats in norm_stats.items()}}, indent=2)
+    norm_path = output_dir / "norm_stats.json"
+    _write_json_atomic(
+        norm_path,
+        {"norm_stats": {key: stats.to_json() for key, stats in norm_stats.items()}},
     )
-    print(f"Wrote {output_dir / 'norm_stats.json'}")
+    print(f"Wrote {norm_path}")
 
 
 if __name__ == "__main__":

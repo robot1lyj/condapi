@@ -389,7 +389,8 @@ HQ-Score：
 3. K-Data 必须正好 1719 集，完成每阶段 top-30% 及来源比例审计，并生成全量 16D relative-action norm stats。
 4. norm stats 完成后运行 `audit_openarm_kai0_training_data.py`：全量核对 999 HQ + 420 Site + 300 TDA、二值逐帧
    `task_index`、连续索引，并分别取一条 positive/negative 样本走真实 OpenPI loader；原始 16D 必须经
-   `OpenArmInputs` 变为模型 `(50,32)` action，且禁止出现 Piper transform。
+   `OpenArmInputs` 变为模型 `(50,32)` action，且禁止出现 Piper transform。`norm_stats.json` 使用原子替换，
+   中断时不得留下可被总控误读的截断 JSON。
 5. 20-step 4 卡 smoke 成功后才启动 80k；训练异常时两节点成对停止，并从最近 5k checkpoint 恢复。
    总控只认含 Orbax `_CHECKPOINT_METADATA` 与 `params/_METADATA` 的完整 checkpoint，不以数字目录或
    `params/` 提前出现作为保存完成，避免异步保存期间误启动 sweep。
