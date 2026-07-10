@@ -72,7 +72,7 @@ def _frame(episode_index: int, *, scored: bool) -> pd.DataFrame:
         frame["absolute_value"] = np.concatenate(
             [np.full(10, 0.25, dtype=np.float32), np.full(10, 0.75, dtype=np.float32)]
         )
-        frame["absolute_advantage"] = np.zeros(length, dtype=np.float32)
+        frame["absolute_advantage"] = np.tile(np.arange(10, dtype=np.float32) / 9.0, 2)
     return frame
 
 
@@ -176,6 +176,7 @@ def test_builds_binary_awbc_dataset_with_source_audit(tmp_path: pathlib.Path) ->
     )
 
     assert report["total_episodes"] == 4
+    assert report["advantage_source"] == "absolute_advantage"
     assert report["total_frames"] == 80
     assert report["materialized_episode_counts"] == {"HQ": 2, "Site": 2, "TDA": 0}
     assert report["overall_unique_label_counts"]["0"]["positive_ratio"] == 0.3

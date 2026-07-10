@@ -40,7 +40,10 @@ def test_audit_dataset_structure_accepts_binary_k_data(tmp_path):
         tmp_path / "meta/episodes_stats.jsonl",
         [{"episode_index": 0, "stats": {}}, {"episode_index": 1, "stats": {}}],
     )
-    _write_json(tmp_path / "kai0_awbc_build_report.json", {"total_episodes": 2, "tasks": list(audit.TASKS)})
+    _write_json(
+        tmp_path / "kai0_awbc_build_report.json",
+        {"total_episodes": 2, "tasks": list(audit.TASKS), "advantage_source": "absolute_advantage"},
+    )
     for episode_index, labels in enumerate(((0, 1), (1, 0))):
         path = _data_path(tmp_path, info, episode_index)
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -75,7 +78,10 @@ def test_audit_dataset_structure_rejects_non_binary_label(tmp_path):
     _write_jsonl(tmp_path / "meta/tasks.jsonl", audit.TASKS)
     _write_jsonl(tmp_path / "meta/episodes.jsonl", [{"episode_index": 0, "source_kind": "HQ"}])
     _write_jsonl(tmp_path / "meta/episodes_stats.jsonl", [{"episode_index": 0, "stats": {}}])
-    _write_json(tmp_path / "kai0_awbc_build_report.json", {"total_episodes": 1, "tasks": list(audit.TASKS)})
+    _write_json(
+        tmp_path / "kai0_awbc_build_report.json",
+        {"total_episodes": 1, "tasks": list(audit.TASKS), "advantage_source": "absolute_advantage"},
+    )
     path = _data_path(tmp_path, info, 0)
     path.parent.mkdir(parents=True, exist_ok=True)
     pd.DataFrame({"index": [0, 1], "episode_index": [0, 0], "frame_index": [0, 1], "task_index": [0, 2]}).to_parquet(
@@ -83,4 +89,26 @@ def test_audit_dataset_structure_rejects_non_binary_label(tmp_path):
     )
 
     with pytest.raises(ValueError, match="non-binary"):
+        audit.audit_dataset_structure(tmp_path, expected_episodes=1, expected_source_counts={"HQ": 1})
+
+
+def test_audit_dataset_structure_rejects_relative_advantage_contract(tmp_path):
+    _write_json(
+        tmp_path / "meta/info.json",
+        {
+            "chunks_size": 1000,
+            "data_path": "data/chunk-{episode_chunk:03d}/episode_{episode_index:06d}.parquet",
+            "total_episodes": 1,
+            "total_frames": 2,
+        },
+    )
+    _write_jsonl(tmp_path / "meta/tasks.jsonl", audit.TASKS)
+    _write_jsonl(tmp_path / "meta/episodes.jsonl", [{"episode_index": 0, "source_kind": "HQ"}])
+    _write_jsonl(tmp_path / "meta/episodes_stats.jsonl", [{"episode_index": 0, "stats": {}}])
+    _write_json(
+        tmp_path / "kai0_awbc_build_report.json",
+        {"total_episodes": 1, "tasks": list(audit.TASKS), "advantage_source": "relative_advantage"},
+    )
+
+    with pytest.raises(ValueError, match="absolute_advantage"):
         audit.audit_dataset_structure(tmp_path, expected_episodes=1, expected_source_counts={"HQ": 1})

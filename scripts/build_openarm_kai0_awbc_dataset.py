@@ -33,6 +33,7 @@ VIDEO_KEYS = (
     "observation.images.right_wrist",
 )
 SCORE_COLUMNS = ("relative_advantage", "absolute_value", "absolute_advantage")
+AWBC_ADVANTAGE_SOURCE = "absolute_advantage"
 TASK = "Fold the T-shirt properly"
 TASKS = (
     {"task_index": 0, "task": f"{TASK}, Advantage: negative"},
@@ -533,7 +534,7 @@ def build_kai0_awbc_dataset(
             site_annotations=site_annotations,
         )
         for stage_index in (0, 1):
-            values_by_stage[stage_index].append(scores["relative_advantage"][stages == stage_index])
+            values_by_stage[stage_index].append(scores[AWBC_ADVANTAGE_SOURCE][stages == stage_index])
     stage_values = {stage_index: np.concatenate(values) for stage_index, values in values_by_stage.items()}
     if any(len(values) == 0 for values in stage_values.values()):
         raise ValueError("Both predicted stages must contain frames before discretization")
@@ -554,7 +555,7 @@ def build_kai0_awbc_dataset(
         labels = np.asarray(
             [
                 int(value >= thresholds[int(stage)])
-                for value, stage in zip(scores["relative_advantage"], stages, strict=True)
+                for value, stage in zip(scores[AWBC_ADVANTAGE_SOURCE], stages, strict=True)
             ],
             dtype=np.int64,
         )
@@ -597,7 +598,7 @@ def build_kai0_awbc_dataset(
         labels = np.asarray(
             [
                 int(value >= thresholds[int(stage)])
-                for value, stage in zip(scores["relative_advantage"], stages, strict=True)
+                for value, stage in zip(scores[AWBC_ADVANTAGE_SOURCE], stages, strict=True)
             ],
             dtype=np.int64,
         )
@@ -676,7 +677,7 @@ def build_kai0_awbc_dataset(
     report = {
         "schema_version": "openarm_kai0_awbc_v1",
         "destination": str(destination),
-        "advantage_source": "relative_advantage",
+        "advantage_source": AWBC_ADVANTAGE_SOURCE,
         "stage_source": {
             "HQ_before_folding_only": "HQ-Stage absolute_value>=0.5",
             "HQ_folding_only": f"source_episode_index>={hq_folding_only_start} -> folding",

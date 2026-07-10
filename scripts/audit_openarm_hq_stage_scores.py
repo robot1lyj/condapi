@@ -50,29 +50,37 @@ def _percentiles(values: np.ndarray) -> dict[str, float]:
 
 
 def audit_curves(
-    curves: list[tuple[int, np.ndarray, np.ndarray]],
+    curves: list[tuple[int, np.ndarray, np.ndarray, np.ndarray]],
     *,
     expected_episodes: int,
     folding_only_start: int,
 ) -> dict[str, Any]:
-    actual_ids = {episode for episode, _, _ in curves}
+    actual_ids = {episode for episode, _, _, _ in curves}
     expected_ids = set(range(expected_episodes))
     missing = sorted(expected_ids - actual_ids)
     unexpected = sorted(actual_ids - expected_ids)
     duplicate_count = len(curves) - len(actual_ids)
-    finite = all(np.isfinite(value).all() and np.isfinite(relative).all() for _, value, relative in curves)
+    finite = all(
+        np.isfinite(value).all() and np.isfinite(relative).all() and np.isfinite(absolute).all()
+        for _, value, relative, absolute in curves
+    )
     in_range = all(
-        np.all((value >= -1.0001) & (value <= 1.0001)) and np.all((relative >= -1.0001) & (relative <= 1.0001))
-        for _, value, relative in curves
+        np.all((value >= -1.0001) & (value <= 1.0001))
+        and np.all((relative >= -1.0001) & (relative <= 1.0001))
+        and np.all((absolute >= -1.0001) & (absolute <= 1.0001))
+        for _, value, relative, absolute in curves
     )
 
-    full = [(value, relative) for episode, value, relative in curves if episode < folding_only_start]
-    folding = [(value, relative) for episode, value, relative in curves if episode >= folding_only_start]
+    full = [(value, relative, absolute) for episode, value, relative, absolute in curves if episode < folding_only_start]
+    folding = [
+        (value, relative, absolute) for episode, value, relative, absolute in curves if episode >= folding_only_start
+    ]
     if not full or not folding:
         raise ValueError("Both full-task and folding-only HQ groups must contain episodes")
-    full_peaks = np.asarray([np.percentile(value, 95) for value, _ in full], dtype=np.float32)
-    folding_peaks = np.asarray([np.percentile(value, 95) for value, _ in folding], dtype=np.float32)
-    relative = np.concatenate([values for _, _, values in curves]).astype(np.float32)
+    full_peaks = np.asarray([np.percentile(value, 95) for value, _, _ in full], dtype=np.float32)
+    folding_peaks = np.asarray([np.percentile(value, 95) for value, _, _ in folding], dtype=np.float32)
+    relative = np.concatenate([values for _, _, values, _ in curves]).astype(np.float32)
+    absolute = np.concatenate([values for _, _, _, values in curves]).astype(np.float32)
     gates = {
         "episode_ids_exact": not missing and not unexpected and duplicate_count == 0,
         "all_scores_finite": finite,
@@ -85,6 +93,9 @@ def audit_curves(
         "relative_advantage_p90>=0.02": float(np.percentile(relative, 90)) >= 0.02,
         "relative_advantage_p10<=-0.005": float(np.percentile(relative, 10)) <= -0.005,
         "relative_near_zero_fraction<=0.60": float(np.mean(np.abs(relative) < 0.01)) <= 0.60,
+        "absolute_advantage_p90>=0.02": float(np.percentile(absolute, 90)) >= 0.02,
+        "absolute_advantage_p10<=-0.005": float(np.percentile(absolute, 10)) <= -0.005,
+        "absolute_near_zero_fraction<=0.60": float(np.mean(np.abs(absolute) < 0.01)) <= 0.60,
     }
     return {
         "schema_version": "openarm_hq_stage_audit_v1",
@@ -111,6 +122,12 @@ def audit_curves(
             "negative_fraction": float(np.mean(relative < 0)),
             "near_zero_fraction": float(np.mean(np.abs(relative) < 0.01)),
         },
+        "absolute_advantage": {
+            "frames": len(absolute),
+            "percentiles": _percentiles(absolute),
+            "negative_fraction": float(np.mean(absolute < 0)),
+            "near_zero_fraction": float(np.mean(np.abs(absolute) < 0.01)),
+        },
         "gates": gates,
     }
 
@@ -130,15 +147,17 @@ def audit_score_roots(
             local_episode = int(row["episode_index"])
             source_episode = int(row["source_episode_index"])
             if source_episode in seen:
-                curves.append((source_episode, np.asarray([np.nan]), np.asarray([np.nan])))
+                nan = np.asarray([np.nan])
+                curves.append((source_episode, nan, nan, nan))
                 continue
             seen.add(source_episode)
             frame = pd.read_parquet(root / _data_path(info, local_episode), columns=list(SCORE_COLUMNS))
             value = frame["absolute_value"].to_numpy(dtype=np.float32)
             relative = frame["relative_advantage"].to_numpy(dtype=np.float32)
+            absolute = frame["absolute_advantage"].to_numpy(dtype=np.float32)
             if len(value) == 0:
                 raise ValueError(f"Empty score episode: {root} local={local_episode}")
-            curves.append((source_episode, value, relative))
+            curves.append((source_episode, value, relative, absolute))
     return audit_curves(curves, expected_episodes=expected_episodes, folding_only_start=folding_only_start)
 
 

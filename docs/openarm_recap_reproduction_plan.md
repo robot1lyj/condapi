@@ -80,7 +80,9 @@ robot/ROS boundary: radians + normalized gripper only at client/runtime edge
 - `[官方代码]` 官方 Stage config 是从 π0.5 checkpoint 初始化，示例训练到 100k；当前 Stage v1 只训练到 10k。
 - `[OpenArm适配]` 当前 Stage v1 只用 HQ train180，因此领域定义固定为 HQ；按当前数据边界不用于 Site。
 - `[官方代码]` 正式 AWBC 是 `negative/positive` 二值；当前 OpenArm 旧构建脚本仍是三档。
-- `[论文/官方代码差异]` 论文强调直接双帧 `relative_advantage`；官方发布离散脚本默认 `absolute_advantage`，但允许选择 `relative_advantage`。
+- `[论文/官方代码差异]` 论文强调直接双帧 `relative_advantage`；官方 README、AWBC README、脚本默认值和
+  Task A 二阶段示例均用 `absolute_advantage` 离散，脚本仍允许选择 `relative_advantage`。正式路线 K
+  跟随发布代码使用 absolute，relative 只保留为 scorer 诊断。
 - `[论文/官方代码差异]` 论文写显式 stage goal `g`；官方发布实现没有单独输入 `stage_id/g`，而是通过阶段进度监督和双帧视觉学习。OpenArm 当前实现与官方发布代码一致，不自行增加新 stage embedding。
 
 因此 Stage v1 的固定讨论名为 **HQ-Stage**：它负责 HQ 自动评分，也先作为 Site 的零样本迁移模型；若 Site
@@ -176,9 +178,9 @@ Site-A150 -> HQ-Stage 直接推理 -> Site-DirectScore -> 迁移审计
 
 优势源处理：
 
-- `[论文主分支]` 使用直接双帧 `relative_advantage`。
-- `[官方代码核对]` 同时保留 `absolute_advantage` 统计，用于和官方发布脚本默认值核对，但第一版不据此再训练一套策略。
-- 如果官方后续澄清论文实验实际使用 `absolute_advantage`，再修改主分支并留下决策记录。
+- `[正式复现]` 使用官方发布流程默认的 `absolute_advantage = absolute_value[t+50]-absolute_value[t]`。
+- `[诊断保留]` 直接双帧 `relative_advantage` 继续落盘并通过非塌缩闸门，用于解释论文方法和检查 scorer，
+  但不决定第一版 K-Data 的 positive/negative。
 
 ### K3. 正式二值化
 
@@ -195,8 +197,8 @@ task_index=1 -> Fold the T-shirt properly, Advantage: positive
 - HQ-Score、Site-Score 和 TDA-S 合并后统一计算阈值；禁止三档和分片独立阈值。
 - 报告必须按 `HQ/Site/TDA × flattening/folding` 分别列出 positive/negative 数量，确保 Site 没被 HQ 淹没。
 - 正式构建器为 `scripts/build_openarm_kai0_awbc_dataset.py`：先审计完整的 HQ999、Site140 和 TDA-S，
-  再按 HQ 任务范围/预测 crossing、Site 人工边界和 TDA 源映射得到 `stage_id_awbc`，对论文主分支
-  `relative_advantage` 分别取最高 30%；
+  再按 HQ 任务范围/预测 crossing、Site 人工边界和 TDA 源映射得到 `stage_id_awbc`，对官方默认的
+  `absolute_advantage` 分别取最高 30%；
   任一来源的正样本比例超出 `15%-45%` 即停止，不生成正式目录。
 
 官方 README 的 `--threshold 30`、脚本实现的 `100-threshold` 和帮助文字存在表述歧义。OpenArm 报告必须直接写最终 positive 实际比例，验收目标是论文定义的约 30%，不能只记录 CLI 参数。
@@ -375,7 +377,7 @@ HQ-Score：
 - scorer 按 episode 校验并原子落盘，`--resume` 只跳过完整且有限值的结果；不得用 `--overwrite` 重启已有进度。
 - watchdog：`kai0_hq_score_monitor` 每 5 分钟写入 `monitor_latest.txt`/`monitor.log`；发现进程停止或日志停滞时最多自动恢复 3 次，进度前进后重置失败计数，999 集完成后自动刷新最终报告。
 - HQ-Stage 动态报告快照位于 `openarm_hq_score_review_v1/hq_score_report/index.html`，展示当前已完成
-  episode 的 `absolute_value` 与论文主分支 `relative_advantage`；通用渲染器按 Base/wrist 原始宽高比把
+  episode 的 `absolute_value` 与直接双帧 `relative_advantage` 诊断；通用渲染器按 Base/wrist 原始宽高比把
   曲线、当前帧和正负状态直接叠在视频上，供后续 Site/HIL 报告复用。
 
 当前固定顺序：HQ-Score 继续生成；并行生成/审计 Site-DirectScore，必要时才适配 Site-Stage -> 构建 TDA-S -> 合并并审计三种来源 -> K-Data -> K-Policy/K-BC。在 Site-Score 和 K-Data 审计完成前不得启动 AWBC 策略训练。

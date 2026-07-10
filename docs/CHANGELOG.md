@@ -9,6 +9,8 @@ Design decisions → `docs/decisions/`. Architecture → `docs/ARCHITECTURE.md`.
 
 ## 2026-07-10
 
+- **KAI0 正式 advantage 源对齐**: 对照官方主 README、AWBC README 和离散脚本后，正式 K-Data 改为
+  每阶段按 `absolute_advantage` 取 top-30%；`relative_advantage` 继续落盘并做非塌缩诊断，但不再决定二值标签。
 - **K-Data norm 原子落盘**: parquet norm stats 改为临时文件完成后原子替换，避免长时间全量统计在最终
   JSON 写入瞬间中断后留下截断文件，使无人值守总控能够安全重试。
 - **JAX 异步 checkpoint 完整性闸门**: K-Policy smoke/full 与 sweep 只认含 Orbax 顶层及 params

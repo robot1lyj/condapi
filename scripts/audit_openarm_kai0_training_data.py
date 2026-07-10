@@ -70,6 +70,8 @@ def audit_dataset_structure(
         raise ValueError("K-Data build report does not match the expected episode count")
     if build_report.get("tasks") != list(TASKS):
         raise ValueError("K-Data build report does not contain the formal binary prompts")
+    if build_report.get("advantage_source") != "absolute_advantage":
+        raise ValueError("K-Data must discretize the official KAI0 absolute_advantage source")
 
     label_counts: Counter[int] = Counter()
     selected_indices: dict[int, int] = {}

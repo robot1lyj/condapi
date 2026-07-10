@@ -8,7 +8,7 @@ def test_hq_stage_quality_gate_distinguishes_full_and_folding_only() -> None:
     relative = np.linspace(-0.1, 0.1, 100, dtype=np.float32)
     for episode in range(4):
         peak = 0.9 if episode < 2 else 0.4
-        curves.append((episode, np.linspace(0.0, peak, 100, dtype=np.float32), relative))
+        curves.append((episode, np.linspace(0.0, peak, 100, dtype=np.float32), relative, relative))
 
     result = audit.audit_curves(curves, expected_episodes=4, folding_only_start=2)
 
@@ -20,10 +20,10 @@ def test_hq_stage_quality_gate_distinguishes_full_and_folding_only() -> None:
 def test_hq_stage_quality_gate_rejects_collapsed_folding_scores() -> None:
     relative = np.linspace(-0.1, 0.1, 100, dtype=np.float32)
     curves = [
-        (0, np.linspace(0.0, 0.9, 100, dtype=np.float32), relative),
-        (1, np.linspace(0.0, 0.9, 100, dtype=np.float32), relative),
-        (2, np.linspace(0.0, 0.05, 100, dtype=np.float32), relative),
-        (3, np.linspace(0.0, 0.05, 100, dtype=np.float32), relative),
+        (0, np.linspace(0.0, 0.9, 100, dtype=np.float32), relative, relative),
+        (1, np.linspace(0.0, 0.9, 100, dtype=np.float32), relative, relative),
+        (2, np.linspace(0.0, 0.05, 100, dtype=np.float32), relative, relative),
+        (3, np.linspace(0.0, 0.05, 100, dtype=np.float32), relative, relative),
     ]
 
     result = audit.audit_curves(curves, expected_episodes=4, folding_only_start=2)
