@@ -1,138 +1,11 @@
-"""Generate an interactive KAI0-style HTML review for an OpenArm Site-GT dataset."""
-
-from __future__ import annotations
-
-import argparse
-import json
-import pathlib
-import shutil
-from typing import Any
-
-import numpy as np
-import pandas as pd
-import tqdm
-
-VIDEO_KEYS = (
-    "observation.images.base",
-    "observation.images.left_wrist",
-    "observation.images.right_wrist",
-)
-
-
-def _load_json(path: pathlib.Path) -> dict[str, Any]:
-    return json.loads(path.read_text())
-
-
-def _load_jsonl(path: pathlib.Path) -> list[dict[str, Any]]:
-    with path.open() as file:
-        return [json.loads(line) for line in file if line.strip()]
-
-
-def _episode_chunk(episode_index: int, chunks_size: int) -> int:
-    return episode_index // chunks_size
-
-
-def _format_data_path(info: dict[str, Any], episode_index: int) -> pathlib.Path:
-    chunk = _episode_chunk(episode_index, int(info["chunks_size"]))
-    return pathlib.Path(info["data_path"].format(episode_chunk=chunk, episode_index=episode_index))
-
-
-def _format_video_path(info: dict[str, Any], episode_index: int, video_key: str) -> pathlib.Path:
-    chunk = _episode_chunk(episode_index, int(info["chunks_size"]))
-    return pathlib.Path(
-        info["video_path"].format(episode_chunk=chunk, episode_index=episode_index, video_key=video_key)
-    )
-
-
-def _episode_payload(dataset: pathlib.Path, info: dict[str, Any], row: dict[str, Any]) -> dict[str, Any]:
-    episode_index = int(row["episode_index"])
-    frame = pd.read_parquet(
-        dataset / _format_data_path(info, episode_index),
-        columns=["stage_progress_gt", "stage_id", "advantage_gt"],
-    )
-    progress = frame["stage_progress_gt"].to_numpy(dtype=np.float32)
-    advantage = frame["advantage_gt"].to_numpy(dtype=np.float32)
-    stage_ids = frame["stage_id"].to_numpy(dtype=np.int64)
-    videos = {
-        key.removeprefix("observation.images."): "../" + _format_video_path(info, episode_index, key).as_posix()
-        for key in VIDEO_KEYS
-    }
-    return {
-        "episode_index": episode_index,
-        "length": len(frame),
-        "fps": int(info.get("fps", 30)),
-        "duration_s": (len(frame) - 1) / float(info.get("fps", 30)),
-        "quality": row.get("annotation_quality", "success"),
-        "eligible_for_k_data": bool(row.get("eligible_for_k_data", True)),
-        "flatten_done_frame": int(row["flatten_done_frame"]),
-        "source_dataset": row.get("source_dataset"),
-        "source_episode_index": row.get("source_episode_index"),
-        "progress": np.round(progress, 6).tolist(),
-        "stage_id": stage_ids.tolist(),
-        "advantage": np.round(advantage, 6).tolist(),
-        "advantage_min": float(advantage.min()),
-        "advantage_mean": float(advantage.mean()),
-        "advantage_max": float(advantage.max()),
-        "videos": videos,
-    }
-
-
-def build_html_report(dataset: pathlib.Path, output_dir: pathlib.Path, *, overwrite: bool) -> pathlib.Path:
-    dataset = dataset.resolve()
-    output_dir = output_dir.resolve()
-    info = _load_json(dataset / "meta/info.json")
-    rows = _load_jsonl(dataset / "meta/episodes.jsonl")
-    if output_dir.exists():
-        if not overwrite:
-            raise FileExistsError(f"{output_dir} already exists; pass --overwrite to replace it")
-        shutil.rmtree(output_dir)
-    data_dir = output_dir / "data"
-    data_dir.mkdir(parents=True)
-
-    episode_index_rows = []
-    first_episode_payload = None
-    for row in tqdm.tqdm(rows, desc="Writing report data"):
-        payload = _episode_payload(dataset, info, row)
-        if first_episode_payload is None:
-            first_episode_payload = payload
-        episode_index = int(payload["episode_index"])
-        (data_dir / f"episode_{episode_index:06d}.json").write_text(
-            json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
-        )
-        episode_index_rows.append(
-            {
-                key: payload[key]
-                for key in (
-                    "episode_index",
-                    "length",
-                    "duration_s",
-                    "quality",
-                    "eligible_for_k_data",
-                    "flatten_done_frame",
-                    "source_dataset",
-                    "source_episode_index",
-                    "advantage_mean",
-                    "advantage_max",
-                )
-            }
-        )
-
-    build_report_path = dataset / "site_gt_build_report.json"
-    build_report = _load_json(build_report_path) if build_report_path.exists() else {}
-    page = HTML_TEMPLATE.replace("__EPISODES_JSON__", json.dumps(episode_index_rows, ensure_ascii=False))
-    page = page.replace("__SUMMARY_JSON__", json.dumps(build_report, ensure_ascii=False))
-    page = page.replace("__FIRST_EPISODE_JSON__", json.dumps(first_episode_payload, ensure_ascii=False))
-    index_path = output_dir / "index.html"
-    index_path.write_text(page)
-    return index_path
-
+"""Shared KAI0-style HTML template for model-predicted OpenArm advantage reports."""
 
 HTML_TEMPLATE = r"""<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Site-GT Stage Advantage Review</title>
+  <title>__REPORT_TITLE__</title>
   <style>
     :root {
       color-scheme: light;
@@ -195,8 +68,8 @@ HTML_TEMPLATE = r"""<!doctype html>
   <header>
     <div class="header-inner">
       <div>
-        <h1>Site-GT Stage Advantage Review</h1>
-        <div class="subtitle">KAI0-style cumulative progress and frame-wise advantage</div>
+        <h1>__REPORT_TITLE__</h1>
+        <div class="subtitle">__REPORT_SUBTITLE__</div>
       </div>
       <div class="toolbar">
         <button id="prev" title="Previous episode">Prev</button>
@@ -223,7 +96,7 @@ HTML_TEMPLATE = r"""<!doctype html>
 
     <section class="plot-band">
       <div class="plot-header">
-        <div class="plot-title">Cumulative progress based on Site-GT</div>
+        <div class="plot-title">__PROGRESS_TITLE__</div>
         <div class="legend">
           <span class="key"><span class="swatch" style="background:var(--stage-a)"></span>Flattening</span>
           <span class="key"><span class="swatch" style="background:var(--stage-b)"></span>Folding</span>
@@ -284,7 +157,7 @@ HTML_TEMPLATE = r"""<!doctype html>
       quality.textContent = current.quality;
       quality.className = `metric-value quality-${current.quality}`;
       document.getElementById('sourceText').textContent =
-        `${current.source_dataset || 'Site'} / source episode ${current.source_episode_index ?? current.episode_index}`;
+        `${current.source_dataset || 'OpenArm'} / source episode ${current.source_episode_index ?? current.episode_index}`;
       document.getElementById('summaryText').textContent =
         `Mean advantage ${current.advantage_mean.toFixed(4)} | Max ${current.advantage_max.toFixed(4)} | K-Data ${current.eligible_for_k_data ? 'eligible' : 'excluded'}`;
     }
@@ -368,7 +241,7 @@ HTML_TEMPLATE = r"""<!doctype html>
       ctx.fillText(maxValue.toFixed(3), 10, pad.top + 4);
       ctx.fillText('0.000', 10, y(0) + 4);
       ctx.fillText(minValue.toFixed(3), 10, pad.top + plotH);
-      ctx.fillStyle = '#1c232b'; ctx.font = '12px Arial'; ctx.fillText('50-frame advantage', pad.left + 8, pad.top + 15);
+      ctx.fillStyle = '#1c232b'; ctx.font = '12px Arial'; ctx.fillText('__ADVANTAGE_LABEL__', pad.left + 8, pad.top + 15);
       drawPlayhead(ctx, x(frame), pad.top, plotH);
       drawXAxis(ctx, pad, width, height, current.length);
     }
@@ -418,17 +291,3 @@ HTML_TEMPLATE = r"""<!doctype html>
 </body>
 </html>
 """
-
-
-def main() -> None:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--dataset", required=True, type=pathlib.Path)
-    parser.add_argument("--output-dir", type=pathlib.Path)
-    parser.add_argument("--overwrite", action="store_true")
-    args = parser.parse_args()
-    output_dir = args.output_dir or args.dataset / "site_gt_report"
-    print(build_html_report(args.dataset, output_dir, overwrite=args.overwrite))
-
-
-if __name__ == "__main__":
-    main()

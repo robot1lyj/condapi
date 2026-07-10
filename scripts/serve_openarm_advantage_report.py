@@ -1,4 +1,4 @@
-"""Serve a Site-GT report with HTTP byte-range support for responsive video seeking."""
+"""Serve an advantage report with HTTP byte-range support for responsive video seeking."""
 
 from __future__ import annotations
 
@@ -77,7 +77,7 @@ class RangeRequestHandler(http.server.SimpleHTTPRequestHandler):
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--dataset", required=True, type=pathlib.Path)
-    parser.add_argument("--index-path", default="site_gt_report/index.html")
+    parser.add_argument("--index-path", default="advantage_report/index.html")
     parser.add_argument("--host", default="0.0.0.0")
     parser.add_argument("--port", type=int, default=8766)
     args = parser.parse_args()

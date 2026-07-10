@@ -9,6 +9,9 @@ Design decisions → `docs/decisions/`. Architecture → `docs/ARCHITECTURE.md`.
 
 ## 2026-07-10
 
+- **Site-GT 删除并切换到模型评分**: 删除远端 `openarm_site_gt_v1` 与 8766 服务，保留 Site-A151；
+  现场成功标注固定为 Site-A150，episode 95 固定为 Site-F1。先审计 HQ-Stage 对 Site 的直接迁移，只有
+  迁移不合格才按 140 train + 10 val 适配 Site-Stage，最终 Site-Score 一律来自模型预测。
 - **Site-GT/HQ-Stage 可视化对比**: 新增 HQ-Stage 已完成分片的 KAI0 Figure 4 风格动态报告；对比确认
   人工单边界 Site-GT 只能产生分段线性进度和近常数 advantage，因此暂停其直接进入 K-Data，等待确认
   Site 最终评分方案。

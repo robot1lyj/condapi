@@ -16,9 +16,9 @@ import pandas as pd
 import tqdm
 
 try:
-    from scripts.build_openarm_site_gt_report import HTML_TEMPLATE
+    from scripts.openarm_advantage_report import HTML_TEMPLATE
 except ModuleNotFoundError:
-    from build_openarm_site_gt_report import HTML_TEMPLATE
+    from openarm_advantage_report import HTML_TEMPLATE
 
 
 VIDEO_KEYS = (
@@ -190,13 +190,10 @@ def build_hq_score_report(
     page = HTML_TEMPLATE.replace("__EPISODES_JSON__", json.dumps(episode_index_rows, ensure_ascii=False))
     page = page.replace("__SUMMARY_JSON__", json.dumps(summary, ensure_ascii=False))
     page = page.replace("__FIRST_EPISODE_JSON__", json.dumps(payloads[0], ensure_ascii=False))
-    page = page.replace("Site-GT Stage Advantage Review", "HQ-Stage Prediction Review")
-    page = page.replace(
-        "KAI0-style cumulative progress and frame-wise advantage",
-        "KAI0 Figure 4 comparison from completed HQ-Score episodes",
-    )
-    page = page.replace("Cumulative progress based on Site-GT", "Cumulative value predicted by HQ-Stage")
-    page = page.replace("50-frame advantage", "50-frame relative advantage")
+    page = page.replace("__REPORT_TITLE__", "HQ-Stage Prediction Review")
+    page = page.replace("__REPORT_SUBTITLE__", "Direct paired-frame predictions from completed HQ-Score episodes")
+    page = page.replace("__PROGRESS_TITLE__", "Start-anchored progress: HQ-Stage(frame 0, frame t)")
+    page = page.replace("__ADVANTAGE_LABEL__", "Direct advantage: HQ-Stage(frame t, frame t+50)")
     index_path = report_dir / "index.html"
     index_path.write_text(page)
     (output_root / "hq_score_report.json").write_text(json.dumps(summary, ensure_ascii=False, indent=2) + "\n")
