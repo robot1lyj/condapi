@@ -254,7 +254,7 @@ HTML_TEMPLATE = r"""<!doctype html>
     for (const episode of EPISODES) {
       const option = document.createElement('option');
       option.value = episode.episode_index;
-      const qualityMark = episode.quality === 'success' ? '' : ' [failure]';
+      const qualityMark = episode.quality === 'failure' ? ' [failure]' : '';
       option.textContent = `Episode ${String(episode.episode_index).padStart(3, '0')}${qualityMark}`;
       select.appendChild(option);
     }
@@ -323,8 +323,10 @@ HTML_TEMPLATE = r"""<!doctype html>
       const x = value => pad.left + (value / Math.max(1, current.length - 1)) * plotW;
       const y = value => pad.top + (1 - value) * plotH;
       ctx.clearRect(0, 0, width, height);
-      ctx.fillStyle = '#dcebf3'; ctx.fillRect(pad.left, pad.top, x(current.flatten_done_frame) - pad.left, plotH);
-      ctx.fillStyle = '#dfeadb'; ctx.fillRect(x(current.flatten_done_frame), pad.top, width - pad.right - x(current.flatten_done_frame), plotH);
+      const hasBoundary = current.flatten_done_frame !== null;
+      const boundaryX = hasBoundary ? x(current.flatten_done_frame) : width - pad.right;
+      ctx.fillStyle = '#dcebf3'; ctx.fillRect(pad.left, pad.top, boundaryX - pad.left, plotH);
+      if (hasBoundary) { ctx.fillStyle = '#dfeadb'; ctx.fillRect(boundaryX, pad.top, width - pad.right - boundaryX, plotH); }
       ctx.strokeStyle = '#c7ced3'; ctx.lineWidth = 1;
       ctx.fillStyle = '#65717d'; ctx.font = '11px Arial';
       for (let i = 0; i <= 4; i++) {
@@ -338,7 +340,8 @@ HTML_TEMPLATE = r"""<!doctype html>
       drawPlayhead(ctx, x(frame), pad.top, plotH);
       ctx.fillStyle = '#315f7c'; ctx.font = '12px Arial';
       ctx.fillText('Flattening', pad.left + 8, pad.top + 17);
-      ctx.fillStyle = '#247a52'; ctx.fillText('Folding', x(current.flatten_done_frame) + 8, pad.top + 17);
+      if (hasBoundary) { ctx.fillStyle = '#247a52'; ctx.fillText('Folding', boundaryX + 8, pad.top + 17); }
+      else { ctx.fillStyle = '#b44337'; ctx.fillText('No 0.5 crossing', width - pad.right - 108, pad.top + 17); }
       drawXAxis(ctx, pad, width, height, current.length);
     }
 

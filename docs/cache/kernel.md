@@ -18,7 +18,7 @@ New sessions load `AGENTS.md` + this file first, then `context_index.md` and at 
 - OpenArm configs use `LeRobotOpenArmDataConfig` with `OpenArmInputs/OpenArmOutputs`; never route OpenArm through Piper transforms or Piper 14D `swap_left_right`.
 - Clean site/HIL data only through `scripts/convert_openarm_hq_dataset.py`; HIL clean export drops hold frames and marks only real human VR as intervention.
 - Evo-RL ACP uses `ACPPromptTransform` on `complementary_info.acp_indicator`; clean HIL dataset name is `openarm_hil_evo_v1`.
-- KAI0 source boundary: HQ-Stage only scores HQ; completed Site-A151 annotations deterministically produce Site-GT and never pass through a Stage model.
+- KAI0 source boundary: HQ-Stage only scores HQ; Site-A151 produces diagnostic Site-GT, but direct K-Data use is paused because its interpolated advantage is piecewise constant; Site scoring is pending user confirmation.
 
 ## Safety Kernel
 - Do not commit credentials, tokens, private host keys, or server passwords.

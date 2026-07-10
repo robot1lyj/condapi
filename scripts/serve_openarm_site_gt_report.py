@@ -77,12 +77,14 @@ class RangeRequestHandler(http.server.SimpleHTTPRequestHandler):
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--dataset", required=True, type=pathlib.Path)
+    parser.add_argument("--index-path", default="site_gt_report/index.html")
     parser.add_argument("--host", default="0.0.0.0")
     parser.add_argument("--port", type=int, default=8766)
     args = parser.parse_args()
     dataset = args.dataset.resolve()
-    if not (dataset / "site_gt_report/index.html").exists():
-        raise FileNotFoundError(f"Missing Site-GT report under {dataset}")
+    index_path = dataset / args.index_path
+    if not index_path.exists():
+        raise FileNotFoundError(f"Missing report index: {index_path}")
 
     handler = lambda *handler_args, **handler_kwargs: RangeRequestHandler(  # noqa: E731
         *handler_args,
@@ -90,7 +92,7 @@ def main() -> None:
         **handler_kwargs,
     )
     server = http.server.ThreadingHTTPServer((args.host, args.port), handler)
-    print(f"Serving {dataset} on http://{args.host}:{args.port}/site_gt_report/index.html", flush=True)
+    print(f"Serving {dataset} on http://{args.host}:{args.port}/{args.index_path}", flush=True)
     server.serve_forever()
 
 

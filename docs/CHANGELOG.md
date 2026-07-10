@@ -9,6 +9,9 @@ Design decisions → `docs/decisions/`. Architecture → `docs/ARCHITECTURE.md`.
 
 ## 2026-07-10
 
+- **Site-GT/HQ-Stage 可视化对比**: 新增 HQ-Stage 已完成分片的 KAI0 Figure 4 风格动态报告；对比确认
+  人工单边界 Site-GT 只能产生分段线性进度和近常数 advantage，因此暂停其直接进入 K-Data，等待确认
+  Site 最终评分方案。
 - **Site-GT 与动态审计报告**: Site-A151 已确定性生成独立 `openarm_site_gt_v1`，逐帧保留人工进度、阶段和
   50 帧 GT advantage，明确不调用 HQ-Stage；新增 KAI0 Figure 4 风格三路视频/曲线同步 HTML，并为六卡
   HQ-Score 增加只监控不自动重启的 watchdog。

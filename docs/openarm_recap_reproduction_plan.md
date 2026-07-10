@@ -2,7 +2,7 @@
 
 最后更新：2026-07-10
 
-状态：**执行中；Site 151/151 已标注完成并将直接生成 Site-GT，HQ `0:999` 正由 HQ-Stage 在六张 GPU 上评分；尚未生成 K-Data 或开始 AWBC 策略训练。**
+状态：**执行中；Site-GT 与 HQ-Stage 动态对比已揭示 Site-GT 的分段线性局限，Site 最终评分方案待用户确认；HQ `0:999` 继续六卡评分，K-Data/AWBC 暂停。**
 
 本文档是 OpenArm 后续 KAI0、Evo-RL 和二者组合实验的唯一当前计划。它区分论文事实、官方代码事实和 OpenArm 适配，不能把工程建议写成论文结论。
 
@@ -133,6 +133,11 @@ Site-A151 人工边界 -> 确定性逐帧计算 -> Site-GT
   默认只接收 `eligible_for_k_data=true` 的 150 条 success，除非 episode 95 经人工重标。
 - 为便于后续合并，Site-GT 落盘时把 GT 进度和增量映射到标准 advantage 列，同时在 metadata 明确
   `advantage_source=site_gt`，不能伪装成模型预测。
+
+**2026-07-10 可视化诊断：** Site-GT 由一个人工分界做分段线性插值，因此累计进度必然接近两段直线，
+50 帧 advantage 必然接近两段常数；它可以作为阶段监督和审计真值，但直接用于 AWBC 排序会主要反映阶段
+时长，而不是图像中的停滞、退步和恢复。与 HQ-Stage 非线性预测曲线对比后，Site-GT 直接进入 K-Data 的
+步骤已暂停；在用户确认 Site 最终评分方式前不得继续二值化或 AWBC 训练。
 
 **TDA-S：**
 
@@ -322,6 +327,8 @@ HQ-Score：
 - tmux：`kai0_hq_s0` 至 `kai0_hq_s5`；分片输出前缀为 `openarm_kai0_stage_scores_hq_v1_s*`。
 - score-only 阶段只落盘 `relative_advantage/absolute_value/absolute_advantage` 和源 episode 映射，不生成三档标签，也不在各分片内计算阈值。
 - watchdog：`kai0_hq_score_monitor` 每 5 分钟写入 `monitor_latest.txt`/`monitor.log`，发现分片提前停止时写入 `monitor_alerts.log`，不自动重启或覆盖输出。
+- HQ-Stage 动态报告快照位于 `openarm_hq_score_review_v1/hq_score_report/index.html`，展示当前已完成
+  episode 的 `absolute_value` 与论文主分支 `relative_advantage`；该报告显示明显非线性和正负波动。
 
 当前固定顺序：HQ-Score 与 Site-GT 并行生成 -> 构建 TDA-S -> 合并并审计三种来源 -> 全局按 KAI0 二值规则生成 K-Data -> 训练 K-Policy/K-BC。在 K-Data 审计完成前不得启动 AWBC 策略训练。
 
@@ -343,6 +350,7 @@ scripts/openarm_stage_annotator.py
 scripts/openarm_stage_progress.py
 scripts/build_openarm_site_gt.py
 scripts/build_openarm_site_gt_report.py
+scripts/build_openarm_hq_score_report.py
 scripts/serve_openarm_site_gt_report.py
 scripts/monitor_openarm_hq_stage_scores.sh
 scripts/evaluate_stage_advantage.py
