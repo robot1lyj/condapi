@@ -391,6 +391,8 @@ HQ-Score：
    `task_index`、连续索引，并分别取一条 positive/negative 样本走真实 OpenPI loader；原始 16D 必须经
    `OpenArmInputs` 变为模型 `(50,32)` action，且禁止出现 Piper transform。
 5. 20-step 4 卡 smoke 成功后才启动 80k；训练异常时两节点成对停止，并从最近 5k checkpoint 恢复。
+   总控只认含 Orbax `_CHECKPOINT_METADATA` 与 `params/_METADATA` 的完整 checkpoint，不以数字目录或
+   `params/` 提前出现作为保存完成，避免异步保存期间误启动 sweep。
 6. 80k 后对 `5000/10000/.../75000/79999` 全部 16 个 checkpoint 在 HQ holdout 与 Site val10 上使用
    固定 positive prompt 做 sampled sweep；
    选择权重为 Site 关键帧30%、Site MAE25%、HQ关键帧20%、HQ MAE15%、Site chunk overlap10%，优先

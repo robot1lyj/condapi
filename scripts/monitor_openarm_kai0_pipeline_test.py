@@ -37,3 +37,15 @@ def test_policy_sweep_selects_every_openpi_5k_checkpoint() -> None:
 
     assert selected == candidates
     assert not pipeline._is_policy_sweep_step(4_999)  # noqa: SLF001
+
+
+def test_checkpoint_ready_requires_orbax_completion_metadata(tmp_path) -> None:
+    checkpoint = tmp_path / "79999"
+    (checkpoint / "params").mkdir(parents=True)
+
+    assert not pipeline._checkpoint_ready(checkpoint)  # noqa: SLF001
+
+    (checkpoint / "_CHECKPOINT_METADATA").write_text("{}")
+    (checkpoint / "params/_METADATA").write_text("{}")
+
+    assert pipeline._checkpoint_ready(checkpoint)  # noqa: SLF001

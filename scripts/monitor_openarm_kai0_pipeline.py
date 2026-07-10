@@ -145,7 +145,11 @@ def _exit_code(path: pathlib.Path) -> int | None:
 
 
 def _checkpoint_ready(path: pathlib.Path) -> bool:
-    return path.is_dir() and (path / "params").exists()
+    return (
+        path.is_dir()
+        and (path / "_CHECKPOINT_METADATA").is_file()
+        and (path / "params/_METADATA").is_file()
+    )
 
 
 def _start_tmux(host: str, session: str, command: str, exit_marker: pathlib.Path) -> None:
@@ -642,7 +646,11 @@ def _ensure_jax_job(
 
 
 def _policy_checkpoint_steps() -> list[int]:
-    return sorted(int(path.name) for path in K_FULL_ROOT.glob("*") if path.is_dir() and path.name.isdigit())
+    return sorted(
+        int(path.name)
+        for path in K_FULL_ROOT.glob("*")
+        if path.name.isdigit() and _checkpoint_ready(path)
+    )
 
 
 def _is_policy_sweep_step(step: int) -> bool:

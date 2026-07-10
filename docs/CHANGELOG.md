@@ -9,6 +9,8 @@ Design decisions → `docs/decisions/`. Architecture → `docs/ARCHITECTURE.md`.
 
 ## 2026-07-10
 
+- **JAX 异步 checkpoint 完整性闸门**: K-Policy smoke/full 与 sweep 只认含 Orbax 顶层及 params
+  完成 metadata 的 checkpoint，忽略异步保存中的半成品数字目录；成对恢复会回到最近完整的 5k 权重。
 - **K-Policy 选模与部署语义修复**: checkpoint sweep 明确按 80k 主循环实际
   `5000/10000/.../75000/79999` 目录选择全部16个候选；新增可选 `--force-prompt`，正式 K-Policy 服务强制 positive 条件，
   避免客户端普通 task 覆盖 AWBC 推理语义，默认和 RTC 旧路径保持不变。
