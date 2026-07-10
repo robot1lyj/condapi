@@ -23,6 +23,7 @@ import dataclasses
 import gc
 import json
 import logging
+import os
 import pathlib
 import re
 from typing import Any
@@ -36,6 +37,7 @@ import openpi.policies.policy_config as _policy_config
 import openpi.training.config as _config
 
 LOGGER = logging.getLogger("openarm_checkpoint_sweep")
+REPORT_SCHEMA_VERSION = "openarm_checkpoint_sweep_v2"
 
 
 @dataclasses.dataclass(frozen=True)
@@ -68,6 +70,15 @@ def _subsample_episodes(episodes: list[int], max_episodes: int, *, seed: int) ->
 
 def _load_json(path: pathlib.Path) -> dict[str, Any]:
     return json.loads(path.read_text())
+
+
+def _write_json_atomic(path: pathlib.Path, value: dict[str, Any]) -> None:
+    temporary = path.with_name(f".{path.name}.tmp-{os.getpid()}")
+    try:
+        temporary.write_text(json.dumps(value, ensure_ascii=False, indent=2) + "\n")
+        os.replace(temporary, path)
+    finally:
+        temporary.unlink(missing_ok=True)
 
 
 def _episode_parquet_path(dataset_dir: pathlib.Path, episode_index: int) -> pathlib.Path:
@@ -387,6 +398,59 @@ def _checkpoint_step(checkpoint_dir: pathlib.Path) -> int:
     return int(match.group(1))
 
 
+def _load_cached_report(
+    report_path: pathlib.Path,
+    *,
+    checkpoint_dir: pathlib.Path,
+    config_name: str,
+    dataset_dir: pathlib.Path,
+    train_episodes: list[int],
+    val_episodes: list[int],
+    sampling: dict[str, Any],
+) -> dict[str, Any] | None:
+    if not report_path.exists():
+        return None
+    try:
+        report = _load_json(report_path)
+    except (OSError, json.JSONDecodeError):
+        return None
+    expected = {
+        "checkpoint": checkpoint_dir.resolve(),
+        "config": config_name,
+        "dataset": dataset_dir.resolve(),
+        "step": _checkpoint_step(checkpoint_dir),
+        "train_episodes": train_episodes,
+        "val_episodes": val_episodes,
+        "sampling": sampling,
+        "schema_version": REPORT_SCHEMA_VERSION,
+    }
+    try:
+        actual = {
+            "checkpoint": pathlib.Path(report["checkpoint"]).resolve(),
+            "config": report["config"],
+            "dataset": pathlib.Path(report["dataset"]).resolve(),
+            "step": int(report["step"]),
+            "train_episodes": report["train_episodes"],
+            "val_episodes": report["val_episodes"],
+            "sampling": report["sampling"],
+            "schema_version": report["schema_version"],
+        }
+    except (KeyError, TypeError, ValueError):
+        return None
+    return report if actual == expected else None
+
+
+def _sampling_signature(args: argparse.Namespace) -> dict[str, Any]:
+    return {
+        "uniform_frames": args.uniform_frames,
+        "critical_frames": args.critical_frames,
+        "include_adjacent": args.include_adjacent,
+        "train_max_episodes": args.train_max_episodes,
+        "val_max_episodes": args.val_max_episodes,
+        "prompt_override": args.prompt,
+    }
+
+
 def _evaluate_checkpoint(
     *,
     config_name: str,
@@ -458,20 +522,14 @@ def _evaluate_checkpoint(
     val_critical = float(val_result["by_kind"].get("critical", {}).get("mae", 0.0))
 
     return {
+        "schema_version": REPORT_SCHEMA_VERSION,
         "checkpoint": str(checkpoint_dir),
         "step": _checkpoint_step(checkpoint_dir),
         "config": config_name,
         "dataset": str(dataset_dir),
         "train_episodes": train_episodes,
         "val_episodes": val_episodes,
-        "sampling": {
-            "uniform_frames": args.uniform_frames,
-            "critical_frames": args.critical_frames,
-            "include_adjacent": args.include_adjacent,
-            "train_max_episodes": args.train_max_episodes,
-            "val_max_episodes": args.val_max_episodes,
-            "prompt_override": args.prompt,
-        },
+        "sampling": _sampling_signature(args),
         "train": train_result,
         "val": val_result,
         "gaps": {
@@ -505,10 +563,15 @@ def _write_summary_csv(path: pathlib.Path, reports: Iterable[dict[str, Any]]) ->
     ]
     rows.sort(key=lambda row: int(row["step"]))
     fieldnames = list(rows[0].keys()) if rows else []
-    with path.open("w", newline="") as f:
-        writer = csv.DictWriter(f, fieldnames=fieldnames)
-        writer.writeheader()
-        writer.writerows(rows)
+    temporary = path.with_name(f".{path.name}.tmp-{os.getpid()}")
+    try:
+        with temporary.open("w", newline="") as f:
+            writer = csv.DictWriter(f, fieldnames=fieldnames)
+            writer.writeheader()
+            writer.writerows(rows)
+        os.replace(temporary, path)
+    finally:
+        temporary.unlink(missing_ok=True)
 
 
 def main() -> None:
@@ -528,6 +591,7 @@ def main() -> None:
     parser.add_argument("--seed", type=int, default=20260706)
     parser.add_argument("--lerobot-tolerance-s", type=float, default=0.05)
     parser.add_argument("--prompt", default=None, help="Override every sampled frame prompt, e.g. AWBC positive mode.")
+    parser.add_argument("--resume", action="store_true", help="Reuse complete per-checkpoint reports that match inputs.")
     parser.add_argument("--output", type=pathlib.Path, required=True)
     args = parser.parse_args()
 
@@ -538,18 +602,35 @@ def main() -> None:
     val_episodes = _subsample_episodes(_parse_range(args.val_split), args.val_max_episodes, seed=args.seed + 1)
 
     reports = []
+    sampling = _sampling_signature(args)
     for checkpoint_dir in args.checkpoint:
-        report = _evaluate_checkpoint(
-            config_name=args.config,
-            checkpoint_dir=checkpoint_dir,
-            dataset_dir=args.dataset,
-            train_episodes=train_episodes,
-            val_episodes=val_episodes,
-            args=args,
+        report_path = args.output / f"checkpoint_{_checkpoint_step(checkpoint_dir)}.json"
+        report = (
+            _load_cached_report(
+                report_path,
+                checkpoint_dir=checkpoint_dir,
+                config_name=args.config,
+                dataset_dir=args.dataset,
+                train_episodes=train_episodes,
+                val_episodes=val_episodes,
+                sampling=sampling,
+            )
+            if args.resume
+            else None
         )
-        report_path = args.output / f"checkpoint_{report['step']}.json"
-        report_path.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n")
-        LOGGER.info("Wrote %s", report_path)
+        if report is None:
+            report = _evaluate_checkpoint(
+                config_name=args.config,
+                checkpoint_dir=checkpoint_dir,
+                dataset_dir=args.dataset,
+                train_episodes=train_episodes,
+                val_episodes=val_episodes,
+                args=args,
+            )
+            _write_json_atomic(report_path, report)
+            LOGGER.info("Wrote %s", report_path)
+        else:
+            LOGGER.info("Reusing complete checkpoint report: %s", report_path)
         reports.append(report)
         gc.collect()
 

@@ -1,8 +1,12 @@
+import pytest
+
 from scripts import monitor_openarm_kai0_pipeline as pipeline
 
 
 def _report(mae: float, critical: float, overlap: float, gap: float = 1.2) -> dict:
     return {
+        "schema_version": pipeline.SWEEP_SCHEMA_VERSION,
+        "sampling": {"prompt_override": pipeline.POSITIVE_PROMPT},
         "val": {
             "overall": {
                 "mae": mae,
@@ -49,3 +53,12 @@ def test_checkpoint_ready_requires_orbax_completion_metadata(tmp_path) -> None:
     (checkpoint / "params/_METADATA").write_text("{}")
 
     assert pipeline._checkpoint_ready(checkpoint)  # noqa: SLF001
+
+
+def test_policy_selection_rejects_non_positive_sweep_prompt(tmp_path) -> None:
+    hq = {5_000: _report(0.1, 0.1, 0.1)}
+    site_report = _report(0.1, 0.1, 0.1)
+    site_report["sampling"]["prompt_override"] = "Fold the T-shirt properly"
+
+    with pytest.raises(RuntimeError, match="positive AWBC prompt"):
+        pipeline._select_policy_reports(hq, {5_000: site_report}, [5_000], tmp_path)  # noqa: SLF001

@@ -401,6 +401,8 @@ HQ-Score：
    选择权重为 Site 关键帧30%、Site MAE25%、HQ关键帧20%、HQ MAE15%、Site chunk overlap10%，优先
    保留 HQ val/train MAE 比不超过2.0的 checkpoint，最后部署到 gpu25:6666。服务端使用 `--force-prompt`
    覆盖客户端普通 task，保证真实推理和离线 sweep 同样走 `Advantage: positive` 条件；普通/RTC 服务默认不覆盖。
+   sweep 逐 checkpoint 原子写 v2 报告并支持严格续跑，只有 checkpoint、数据集、采样 episode/参数、配置和
+   positive prompt 全部相同才复用；最终选模再次拒绝旧 schema 或非 positive 报告。
 
 ## 10. 禁止项
 

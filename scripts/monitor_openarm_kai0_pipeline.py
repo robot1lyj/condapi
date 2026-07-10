@@ -74,6 +74,7 @@ K_SWEEP_ROOT = PIPELINE_ROOT / "checkpoint_sweep"
 K_POLICY_SELECTION = K_SWEEP_ROOT / "selection.json"
 K_DEPLOYMENT = PIPELINE_ROOT / "gpu25_deployment.json"
 POSITIVE_PROMPT = "Fold the T-shirt properly, Advantage: positive"
+SWEEP_SCHEMA_VERSION = "openarm_checkpoint_sweep_v2"
 
 SLOTS = (
     ("gpu12", 0),
@@ -689,6 +690,7 @@ def _sweep_command() -> str:
             "--include-adjacent",
             "--prompt",
             POSITIVE_PROMPT,
+            "--resume",
             "--output",
             str(output),
         ]
@@ -728,6 +730,11 @@ def _select_policy_reports(
     for step in steps:
         hq = hq_reports[step]
         site = site_reports[step]
+        for domain, report in (("HQ", hq), ("Site", site)):
+            if report.get("schema_version") != SWEEP_SCHEMA_VERSION:
+                raise RuntimeError(f"{domain} checkpoint {step} uses an incompatible sweep report schema")
+            if report.get("sampling", {}).get("prompt_override") != POSITIVE_PROMPT:
+                raise RuntimeError(f"{domain} checkpoint {step} was not evaluated with the positive AWBC prompt")
         rows.append(
             {
                 "step": step,

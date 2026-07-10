@@ -9,6 +9,8 @@ Design decisions → `docs/decisions/`. Architecture → `docs/ARCHITECTURE.md`.
 
 ## 2026-07-10
 
+- **16-checkpoint sweep 可恢复化**: HQ/Site sampled sweep 逐 checkpoint 原子写 v2 报告并严格续跑；缓存
+  只有在权重、数据、采样配置和 positive prompt 全匹配时复用，选模端再次拒绝旧 schema/错误 prompt。
 - **KAI0 正式 advantage 源对齐**: 对照官方主 README、AWBC README 和离散脚本后，正式 K-Data 改为
   每阶段按 `absolute_advantage` 取 top-30%；`relative_advantage` 继续落盘并做非塌缩诊断，但不再决定二值标签。
 - **K-Data norm 原子落盘**: parquet norm stats 改为临时文件完成后原子替换，避免长时间全量统计在最终

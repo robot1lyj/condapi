@@ -65,5 +65,6 @@ Local validation env is `pi-conda`. If missing, create with conda from `environm
 - Formal K-Policy multi-node sessions are paired: `kai0_k_smoke_gpu12/gpu14` and `kai0_k_full_gpu12/gpu14`. Never restart only one JAX process.
 - Treat a JAX checkpoint as ready only when Orbax `_CHECKPOINT_METADATA` and `params/_METADATA` exist; a numeric directory or `params/` alone may still be an asynchronous partial save.
 - Formal K-Policy deployment uses `serve_policy.py --force-prompt 'Fold the T-shirt properly, Advantage: positive'`; this intentionally overrides client prompts only for this conditioned policy.
+- HQ/Site policy sweep runs with `--resume`; reuse is allowed only for atomic v2 reports with identical checkpoint, dataset, sampled episodes/settings, config, and forced positive prompt.
 - When remote code is behind local commits, sync the full `git ls-files` set; selectively copying `training/config.py` can omit new policy/transform dependencies. Validate Torch/OpenPI imports inside gpu12/gpu14/gpu28, not on the older-glibc jump host.
 - The reusable report server supports byte ranges; current HQ report is `openarm_hq_score_review_v1/hq_score_report/index.html` on gpu28 port 8767.
