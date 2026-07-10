@@ -17,6 +17,8 @@ Design decisions → `docs/decisions/`. Architecture → `docs/ARCHITECTURE.md`.
 - **KAI0 无人值守训练总控**: 新增 Site 迁移失败后的条件 Stage 重训/双域 checkpoint 筛选、K-Data/norm、
   4 卡 JAX smoke/80k 自动恢复、HQ+Site checkpoint sweep 和 gpu25 部署状态机；AWBC sweep 支持强制
   positive prompt，避免用普通任务提示评估条件策略。
+- **远端代码同步完整性修复**: 修复共享仓库只同步 `config.py`、遗漏新 `openarm_policy.py` 导致恢复任务导入
+  失败的问题；远端现按完整 tracked file 集合同步，并明确共享 conda 导入校验必须在计算节点执行。
 - **Stage 评分无人值守加固与报告重构**: score-only 数据集支持逐 episode 校验、原子 parquet 落盘和
   `--resume`；HQ watchdog 检测停止/日志停滞后最多自动恢复 3 次，并在 999 集完成后自动刷新最终报告。
   Stage 报告改为可复用渲染器，按相机原始宽高比在视频上叠加 progress/advantage、当前帧和正负状态。

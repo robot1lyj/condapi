@@ -60,4 +60,5 @@ Local validation env is `pi-conda`. If missing, create with conda from `environm
 - Site supervisor session is `kai0_site_score_monitor`; it starts a balanced Site shard when the matching HQ GPU slot is free, then writes the transfer audit under `datasets/openarm_site_score_review_v1`.
 - End-to-end KAI0 supervisor is `kai0_pipeline_v1` on the jump host; status is `output/openpi/logs/openarm_kai0_pipeline_v1/status.json`. It may start Site-Stage only after a failed direct-transfer gate, then K-Data, norm, 4-GPU smoke, 80k, sweep, and gpu25 deployment in order.
 - Formal K-Policy multi-node sessions are paired: `kai0_k_smoke_gpu12/gpu14` and `kai0_k_full_gpu12/gpu14`. Never restart only one JAX process.
+- When remote code is behind local commits, sync the full `git ls-files` set; selectively copying `training/config.py` can omit new policy/transform dependencies. Validate Torch/OpenPI imports inside gpu12/gpu14/gpu28, not on the older-glibc jump host.
 - The reusable report server supports byte ranges; current HQ report is `openarm_hq_score_review_v1/hq_score_report/index.html` on gpu28 port 8767.
