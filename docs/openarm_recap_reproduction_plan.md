@@ -392,6 +392,9 @@ HQ-Score：
 1. Site-DirectScore 的曲线闸门和 val10 随机帧对闸门都通过，才直接选择 HQ-Stage；否则训练 Site-Stage。
 2. Site-Stage 使用 HQ180×1 + Site140×3、global batch32、2 卡 DDP、5k steps、peak LR `5e-6`；评估
    1000/2000/3000/4000/4999，同时要求 Site 质量和 HQ 遗忘保护全部通过，再按最低 Site MSE 选择。
+   适配后的整曲线硬门禁只覆盖正式 K-Data 使用的绝对进度/`absolute_advantage` 基础质量（MSE、MAE、
+   correlation、R²）；局部 `relative_advantage` 方向和预测 0.5 crossing 继续报告但不否决，因为 Site
+   AWBC 分阶段使用人工 `flatten_done`，正式标签也不使用 `relative_advantage`。
 3. K-Data 必须正好 1719 集，完成每阶段 top-30% 及来源比例审计，并生成全量 16D relative-action norm stats。
 4. norm stats 完成后运行 `audit_openarm_kai0_training_data.py`：全量核对 999 HQ + 420 Site + 300 TDA、二值逐帧
    `task_index`、连续索引，并分别取一条 positive/negative 样本走真实 OpenPI loader；原始 16D 必须经

@@ -410,7 +410,8 @@ def _ensure_adapted_site_scores(checkpoint: pathlib.Path, state: dict[str, Any])
         return None
 
     audit_path = SITE_ADAPTED_AUDIT / "site_stage_audit.json"
-    if not audit_path.exists():
+    audit = _load_json(audit_path, {})
+    if audit.get("gate_profile") != "adapted":
         command = [
             str(PYTHON),
             "scripts/audit_openarm_site_stage_scores.py",
@@ -424,6 +425,8 @@ def _ensure_adapted_site_scores(checkpoint: pathlib.Path, state: dict[str, Any])
             "150",
             "--relative-interval",
             "50",
+            "--gate-profile",
+            "adapted",
             "--overwrite",
         ]
         for root in roots:

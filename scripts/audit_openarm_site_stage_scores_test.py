@@ -79,3 +79,20 @@ def test_audit_site_scores_passes_exact_stage_predictions(tmp_path):
     assert result["metrics"]["absolute_mse"] == 0.0
     assert result["metrics"]["boundary_error_median"] == 0.0
     assert (tmp_path / "review/site_score_report/index.html").exists()
+
+
+def test_adapted_profile_keeps_relative_and_boundary_metrics_diagnostic_only():
+    metrics = {
+        "absolute_mse": 0.0155,
+        "absolute_mae": 0.0830,
+        "relative_mse": 0.0089,
+        "relative_mae": 0.0543,
+        "direction_accuracy": 0.668,
+        "corrcoef": 0.908,
+        "r2": 0.811,
+        "boundary_error_median": 0.271,
+        "boundary_error_p90": 0.498,
+    }
+
+    assert all(audit._quality_gates(metrics, "adapted").values())  # noqa: SLF001
+    assert not all(audit._quality_gates(metrics, "direct").values())  # noqa: SLF001

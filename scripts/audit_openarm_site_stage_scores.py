@@ -92,6 +92,25 @@ def _reference_relative(progress: np.ndarray, interval: int) -> np.ndarray:
     return result
 
 
+def _quality_gates(metrics: dict[str, float], gate_profile: str) -> dict[str, bool]:
+    common = {
+        "absolute_mse<=0.020": metrics["absolute_mse"] <= 0.020,
+        "absolute_mae<=0.110": metrics["absolute_mae"] <= 0.110,
+        "r2>=0.80": metrics["r2"] >= 0.80,
+    }
+    if gate_profile == "adapted":
+        return {**common, "corrcoef>=0.90": metrics["corrcoef"] >= 0.90}
+    if gate_profile != "direct":
+        raise ValueError(f"Unsupported gate profile: {gate_profile}")
+    return {
+        **common,
+        "direction_accuracy>=0.88": metrics["direction_accuracy"] >= 0.88,
+        "corrcoef>=0.92": metrics["corrcoef"] >= 0.92,
+        "boundary_error_median<=0.05": metrics["boundary_error_median"] <= 0.05,
+        "boundary_error_p90<=0.12": metrics["boundary_error_p90"] <= 0.12,
+    }
+
+
 def audit_site_scores(
     source: pathlib.Path,
     annotations_path: pathlib.Path,
@@ -101,6 +120,7 @@ def audit_site_scores(
     expected_episodes: int,
     relative_interval: int,
     overwrite: bool,
+    gate_profile: str = "direct",
 ) -> dict[str, Any]:
     source = source.resolve()
     output_root = output_root.resolve()
@@ -216,7 +236,7 @@ def audit_site_scores(
                     "negative_fraction": float(np.mean(predicted_relative < 0)),
                     "videos": video_paths,
                     "video_aspect_ratios": video_aspect_ratios,
-                    "score_source": "HQ-Stage direct transfer",
+                    "score_source": "Site-Stage adapted" if gate_profile == "adapted" else "HQ-Stage direct transfer",
                 }
             )
 
@@ -252,19 +272,12 @@ def audit_site_scores(
         "episode_count": len(seen_sources),
         "frame_count": int(absolute_prediction.size),
     }
-    gates = {
-        "absolute_mse<=0.020": metrics["absolute_mse"] <= 0.020,
-        "absolute_mae<=0.110": metrics["absolute_mae"] <= 0.110,
-        "direction_accuracy>=0.88": metrics["direction_accuracy"] >= 0.88,
-        "corrcoef>=0.92": metrics["corrcoef"] >= 0.92,
-        "r2>=0.80": metrics["r2"] >= 0.80,
-        "boundary_error_median<=0.05": metrics["boundary_error_median"] <= 0.05,
-        "boundary_error_p90<=0.12": metrics["boundary_error_p90"] <= 0.12,
-    }
+    gates = _quality_gates(metrics, gate_profile)
     passed = all(gates.values())
+    score_source = "Site-Stage adapted" if gate_profile == "adapted" else "HQ-Stage direct transfer"
     summary = {
         "generated_at": dt.datetime.now().astimezone().isoformat(),
-        "score_source": "HQ-Stage direct transfer",
+        "score_source": score_source,
         "completed_episodes": len(seen_sources),
         "completed_frames": int(absolute_prediction.size),
         "negative_frame_fraction": float(np.mean(relative_prediction < 0)),
@@ -278,14 +291,20 @@ def audit_site_scores(
         payloads,
         summary,
         StageReportConfig(
-            title="Site Stage Transfer Review",
-            subtitle="HQ-Stage predictions over Site-A150 with the human two-stage reference shown in amber.",
-            score_source="HQ-Stage direct transfer",
+            title="Site Stage Adaptation Review" if gate_profile == "adapted" else "Site Stage Transfer Review",
+            subtitle=(
+                "Site-Stage predictions over Site-A150 with the human two-stage reference shown in amber."
+                if gate_profile == "adapted"
+                else "HQ-Stage predictions over Site-A150 with the human two-stage reference shown in amber."
+            ),
+            score_source=score_source,
             progress_title="Predicted progress / amber is human stage reference",
             advantage_title="Direct advantage / Stage(frame t, frame t+50)",
         ),
     )
     result = {
+        "gate_profile": gate_profile,
+        "score_source": score_source,
         "source": str(source),
         "annotations": str(annotations_path),
         "score_roots": [str(path) for path in score_roots],
@@ -307,6 +326,7 @@ def main() -> None:
     parser.add_argument("--output-root", required=True, type=pathlib.Path)
     parser.add_argument("--expected-episodes", type=int, default=150)
     parser.add_argument("--relative-interval", type=int, default=50)
+    parser.add_argument("--gate-profile", choices=("direct", "adapted"), default="direct")
     parser.add_argument("--overwrite", action="store_true")
     args = parser.parse_args()
     result = audit_site_scores(
@@ -317,6 +337,7 @@ def main() -> None:
         expected_episodes=args.expected_episodes,
         relative_interval=args.relative_interval,
         overwrite=args.overwrite,
+        gate_profile=args.gate_profile,
     )
     print(json.dumps({key: result[key] for key in ("passed", "metrics", "gates", "report_index")}, indent=2))
 
