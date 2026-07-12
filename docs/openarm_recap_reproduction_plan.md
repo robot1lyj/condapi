@@ -386,6 +386,12 @@ HQ-Score：
 
 当前固定顺序：HQ-Score 继续生成；并行生成/审计 Site-DirectScore，必要时才适配 Site-Stage -> 构建 TDA-S -> 合并并审计三种来源 -> K-Data -> K-Policy/K-BC。在 Site-Score 和 K-Data 审计完成前不得启动 AWBC 策略训练。
 
+截至 2026-07-13，HQ999 正式评分及质量审计已通过；Site-DirectScore 未通过迁移闸门，条件 Site-Stage
+已完成 5k 并从双域验证中选择 checkpoint 4000，适配后的 Site150 评分通过 absolute curve 闸门。流水线
+正在构建 K-Data。HQ `360:536` 的任务范围合同必须读取原始 `high_quality_folding/meta/episodes.jsonl`；
+评分派生集已统一训练提示词，不能用其 `tasks` 字段反推原始任务范围。构建时同时核对原始 HQ 与评分集的
+episode ID 和逐集长度，防止混入错误数据版本。
+
 无人值守总控为 `scripts/monitor_openarm_kai0_pipeline.py`，跳板机 tmux 固定为 `kai0_pipeline_v1`，状态写到
 `output/openpi/logs/openarm_kai0_pipeline_v1/status.json`。它只按以下闸门推进：
 

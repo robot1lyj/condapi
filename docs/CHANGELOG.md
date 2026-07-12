@@ -7,6 +7,15 @@ Design decisions → `docs/decisions/`. Architecture → `docs/ARCHITECTURE.md`.
 
 ---
 
+## 2026-07-13
+
+- **K-Data HQ 范围校验修复**: Stage 评分派生集会统一训练提示词，无法保留原始 HQ `360:536` 的 layout
+  任务证据；正式构建现从原始 HQ episode metadata 校验固定任务范围，并同步核对评分与源数据的 episode ID
+  和逐集长度，避免误拒绝正确评分或静默混入错误数据版本。
+- **Site-Stage 适配门禁修正**: 适配后 Site 分阶段使用人工边界、正式标签使用 `absolute_advantage`，因此硬门禁
+  改为绝对进度 MSE/MAE/correlation/R²；局部相对方向和模型 crossing 保留为诊断，避免用未进入正式
+  K-Data 的指标阻塞已经通过双域 paired-frame 验证的 checkpoint。
+
 ## 2026-07-12
 
 - **Site-Stage 自动衔接修复**: Site150 评分完成后，监督器因派生数据缺少 `episodes_stats.jsonl` 和现场

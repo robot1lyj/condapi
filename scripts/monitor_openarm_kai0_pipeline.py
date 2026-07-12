@@ -60,6 +60,7 @@ HQ_SCORE_ROOTS = tuple(
     for name in ("s0_000_167", "s1_167_334", "s2_334_501", "s3_501_668", "s4_668_835", "s5_835_999")
 )
 HQ_SCORE_AUDIT = PIPELINE_ROOT / "hq999_stage_audit.json"
+HQ_SOURCE = DATASETS / "high_quality_folding"
 TDA_DATA = DATASETS / "openarm_hq_tda_aug_v1"
 K_DATA = DATASETS / "openarm_kai0_awbc_v1"
 K_DATA_REPORT = K_DATA / "kai0_awbc_build_report.json"
@@ -471,6 +472,8 @@ def _build_k_data_command(selection: dict[str, Any]) -> str:
         "scripts/build_openarm_kai0_awbc_dataset.py",
         "--tda-augmented",
         str(TDA_DATA),
+        "--hq-source",
+        str(HQ_SOURCE),
         "--destination",
         str(K_DATA),
         "--site-repeat",

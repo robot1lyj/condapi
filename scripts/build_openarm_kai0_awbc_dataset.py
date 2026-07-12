@@ -232,6 +232,39 @@ def _validate_hq_task_scope(
         raise ValueError(f"HQ task scope metadata does not match the configured ranges: {mismatches[:20]}")
 
 
+def _load_hq_source_metadata(
+    source_root: pathlib.Path,
+    indexed_scores: dict[int, EpisodeSource],
+    expected_episodes: int,
+) -> dict[int, EpisodeSource]:
+    episodes_path = source_root.resolve() / "meta/episodes.jsonl"
+    if not episodes_path.exists():
+        raise FileNotFoundError(f"HQ source metadata does not exist: {episodes_path}")
+
+    rows = _load_jsonl(episodes_path)
+    by_episode = {int(row["episode_index"]): row for row in rows}
+    expected_ids = set(range(expected_episodes))
+    actual_ids = set(by_episode) & expected_ids
+    if actual_ids != expected_ids:
+        missing = sorted(expected_ids - actual_ids)
+        raise ValueError(f"HQ source metadata is missing expected episodes: {missing[:20]}")
+
+    mismatched_lengths = []
+    result = {}
+    for episode in range(expected_episodes):
+        row = by_episode[episode]
+        score_length = int(indexed_scores[episode].metadata["length"])
+        source_length = int(row["length"])
+        if score_length != source_length:
+            mismatched_lengths.append(
+                {"episode": episode, "score_length": score_length, "source_length": source_length}
+            )
+        result[episode] = dataclasses.replace(indexed_scores[episode], metadata=row)
+    if mismatched_lengths:
+        raise ValueError(f"HQ score/source episode lengths do not match: {mismatched_lengths[:20]}")
+    return result
+
+
 def _evenly_select(rows: list[dict[str, Any]], count: int) -> list[dict[str, Any]]:
     if count < 0 or count > len(rows):
         raise ValueError(f"Cannot select {count} rows from {len(rows)}")
@@ -469,6 +502,7 @@ def build_kai0_awbc_dataset(
     source_ratio_bounds: tuple[float, float] = (0.15, 0.45),
     hq_folding_only_start: int = HQ_FOLDING_ONLY_START,
     hq_layout_task_start: int | None = HQ_LAYOUT_TASK_START,
+    hq_source: pathlib.Path | None = None,
     site_annotations_path: pathlib.Path | None = None,
 ) -> dict[str, Any]:
     if not 0.0 < positive_ratio < 1.0:
@@ -496,8 +530,11 @@ def build_kai0_awbc_dataset(
     hq_scores = _index_score_roots(hq_score_roots, "HQ")
     site_scores_all = _index_score_roots(site_score_roots, "Site")
     _validate_source_episode_ids(hq_scores, set(range(expected_hq_episodes)), "HQ")
+    hq_scope_metadata = (
+        _load_hq_source_metadata(hq_source, hq_scores, expected_hq_episodes) if hq_source is not None else hq_scores
+    )
     _validate_hq_task_scope(
-        hq_scores,
+        hq_scope_metadata,
         layout_task_start=hq_layout_task_start,
         folding_only_start=hq_folding_only_start,
     )
@@ -686,6 +723,7 @@ def build_kai0_awbc_dataset(
         },
         "hq_folding_only_start": hq_folding_only_start,
         "hq_layout_task_start": hq_layout_task_start,
+        "hq_scope_metadata_source": str(hq_source.resolve()) if hq_source is not None else "score metadata",
         "site_annotations": str(site_annotations_path.resolve()) if site_annotations_path is not None else None,
         "positive_ratio_target": positive_ratio,
         "thresholds": {str(key): value for key, value in thresholds.items()},
@@ -731,6 +769,12 @@ def main() -> None:
     parser.add_argument("--hq-folding-only-start", type=int, default=HQ_FOLDING_ONLY_START)
     parser.add_argument("--hq-layout-task-start", type=int, default=HQ_LAYOUT_TASK_START)
     parser.add_argument(
+        "--hq-source",
+        required=True,
+        type=pathlib.Path,
+        help="Original HQ dataset whose episode metadata defines the fixed task-scope ranges.",
+    )
+    parser.add_argument(
         "--site-annotations",
         type=pathlib.Path,
         required=True,
@@ -751,6 +795,7 @@ def main() -> None:
         overwrite=args.overwrite,
         hq_folding_only_start=args.hq_folding_only_start,
         hq_layout_task_start=args.hq_layout_task_start,
+        hq_source=args.hq_source,
         site_annotations_path=args.site_annotations,
     )
     print(json.dumps(report, ensure_ascii=False, indent=2))

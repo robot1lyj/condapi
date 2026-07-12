@@ -253,3 +253,32 @@ def test_hq_scope_contract_validates_layout_prompt_run(tmp_path: pathlib.Path) -
     indexed[1] = dataclasses.replace(indexed[1], metadata={"tasks": ["Fold the T-shirt properly"]})
     with pytest.raises(ValueError, match="task scope metadata"):
         _builder._validate_hq_task_scope(indexed, layout_task_start=1, folding_only_start=2)  # noqa: SLF001
+
+
+def test_hq_scope_uses_original_source_metadata(tmp_path: pathlib.Path) -> None:
+    source = tmp_path / "hq"
+    (source / "meta").mkdir(parents=True)
+    rows = (
+        {"episode_index": 0, "tasks": ["Fold the T-shirt properly"], "length": 10},
+        {"episode_index": 1, "tasks": ["Layout the t-shirt, then fold it"], "length": 20},
+        {"episode_index": 2, "tasks": ["Fold the T-shirt properly"], "length": 30},
+    )
+    (source / "meta/episodes.jsonl").write_text("".join(json.dumps(row) + "\n" for row in rows))
+    scores = {
+        episode: _builder.EpisodeSource(
+            kind="HQ",
+            dataset=tmp_path,
+            info={},
+            episode_index=episode,
+            source_episode_index=episode,
+            metadata={"tasks": ["Fold the T-shirt properly"], "length": (episode + 1) * 10},
+        )
+        for episode in range(3)
+    }
+
+    scope = _builder._load_hq_source_metadata(source, scores, 3)  # noqa: SLF001
+    _builder._validate_hq_task_scope(scope, layout_task_start=1, folding_only_start=2)  # noqa: SLF001
+
+    scores[1] = dataclasses.replace(scores[1], metadata={"tasks": [], "length": 21})
+    with pytest.raises(ValueError, match="lengths do not match"):
+        _builder._load_hq_source_metadata(source, scores, 3)  # noqa: SLF001
