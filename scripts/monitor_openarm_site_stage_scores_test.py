@@ -1,3 +1,4 @@
+import json
 import shlex
 import subprocess
 
@@ -43,6 +44,7 @@ def test_finalize_backfills_site_stage_episode_stats(monkeypatch, tmp_path) -> N
     assert "write_lerobot_episode_stats.py" in audit_script
     assert str(stage_data / "meta/episodes_stats.jsonl") in audit_script
     assert result["action"] == "train_site_stage"
+    assert json.loads(monitor.PAIR_EVAL_PATH.read_text())["reason"] == "site_curve_audit_failed"
     assert monitor.DECISION_PATH.exists()
 
 

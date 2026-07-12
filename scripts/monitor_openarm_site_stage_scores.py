@@ -224,9 +224,26 @@ def _finalize_site_audit() -> dict[str, Any]:
         f"cd {shlex.quote(str(REPO_ROOT))}\n"
         f"test -f {shlex.quote(str(stats_path))} || {shlex.join(stats_command)}\n"
         f"{shlex.join(command)}\n"
-        f"CUDA_VISIBLE_DEVICES=0 {shlex.join(pair_command)}\n"
     )
     output = _ssh("gpu28", ["bash", "-s"], input_text=audit_script, timeout=7200)
+
+    audit = _load_json(AUDIT_ROOT / "site_stage_audit.json", {})
+    if audit.get("passed"):
+        pair_output = _ssh(
+            "gpu28",
+            ["bash", "-lc", f"cd {shlex.quote(str(REPO_ROOT))} && CUDA_VISIBLE_DEVICES=0 {shlex.join(pair_command)}"],
+            timeout=7200,
+        )
+        output = "\n".join(part for part in (output, pair_output) if part)
+    else:
+        _write_json_atomic(
+            PAIR_EVAL_PATH,
+            {
+                "skipped": True,
+                "reason": "site_curve_audit_failed",
+                "upstream_report": str(AUDIT_ROOT / "site_stage_audit.json"),
+            },
+        )
 
     serve_command = (
         f"cd {shlex.quote(str(REPO_ROOT))} && exec {shlex.quote(PYTHON)} "
@@ -240,7 +257,6 @@ def _finalize_site_audit() -> dict[str, Any]:
         ["bash", "-s", "--", "openarm_site_score_report_v1", serve_command],
         input_text=serve_script,
     )
-    audit = _load_json(AUDIT_ROOT / "site_stage_audit.json", {})
     pair_eval = _load_json(PAIR_EVAL_PATH, {})
 
     def metric(name: str, default: float) -> float:

@@ -1249,7 +1249,7 @@ _CONFIGS = [
         ),
         data=LeRobotOpenArmDataConfig(
             repo_id="/share/home/linyongjia/data/high_quality_folding_v2p1_stage_train180",
-            base_config=DataConfig(prompt_from_task=True),
+            base_config=DataConfig(prompt_from_task=True, lerobot_tolerance_s=0.05),
             base_image_key="observation.images.base",
             delta_action_mask=_transforms.make_bool_mask(7, -1, 7, -1),
             use_delta_joint_actions=True,
@@ -1276,7 +1276,11 @@ _CONFIGS = [
         ),
         data=LeRobotOpenArmDataConfig(
             repo_id="/share/home/linyongjia/data/openarm_stage_mix_site_v1",
-            base_config=DataConfig(prompt_from_task=True, train_episodes=list(range(600))),
+            base_config=DataConfig(
+                prompt_from_task=True,
+                train_episodes=list(range(600)),
+                lerobot_tolerance_s=0.05,
+            ),
             base_image_key="observation.images.base",
             delta_action_mask=_transforms.make_bool_mask(7, -1, 7, -1),
             use_delta_joint_actions=True,
