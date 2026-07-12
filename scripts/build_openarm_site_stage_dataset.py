@@ -16,9 +16,11 @@ import pandas as pd
 try:
     from scripts.openarm_stage_progress import build_stage_arrays
     from scripts.openarm_stage_progress import normalize_boundaries
+    from scripts.write_lerobot_episode_stats import compute_episode_stats
 except ModuleNotFoundError:
     from openarm_stage_progress import build_stage_arrays
     from openarm_stage_progress import normalize_boundaries
+    from write_lerobot_episode_stats import compute_episode_stats
 
 
 def _load_json(path: pathlib.Path) -> dict[str, Any]:
@@ -42,7 +44,14 @@ def _write_jsonl_atomic(path: pathlib.Path, rows: list[dict[str, Any]]) -> None:
     temporary = path.with_name(f".{path.name}.tmp-{os.getpid()}")
     with temporary.open("w") as file:
         for row in rows:
-            file.write(json.dumps(row, ensure_ascii=False) + "\n")
+            file.write(
+                json.dumps(
+                    row,
+                    ensure_ascii=False,
+                    default=lambda value: value.item() if isinstance(value, np.generic) else value.tolist(),
+                )
+                + "\n"
+            )
     os.replace(temporary, path)
 
 
@@ -116,6 +125,7 @@ def build_site_stage_dataset(
     ordered_sources = train_sources + validation_sources
     video_keys = [key for key, feature in info["features"].items() if feature.get("dtype") == "video"]
     output_episode_rows = []
+    output_episode_stats_rows = []
     output_annotation_rows = []
     total_frames = 0
     total_videos = 0
@@ -142,6 +152,7 @@ def build_site_stage_dataset(
         episode_row["length"] = len(frame)
         episode_row["split"] = "train" if new_episode_index < len(train_sources) else "validation"
         output_episode_rows.append(episode_row)
+        output_episode_stats_rows.append({"episode_index": new_episode_index, "stats": compute_episode_stats(frame)})
 
         annotation_row = dict(annotations[source_episode_index])
         annotation_row["episode_index"] = new_episode_index
@@ -175,6 +186,7 @@ def build_site_stage_dataset(
         [{"task_index": 0, "task": "Fold the T-shirt properly"}],
     )
     _write_jsonl_atomic(destination / "meta/episodes.jsonl", output_episode_rows)
+    _write_jsonl_atomic(destination / "meta/episodes_stats.jsonl", output_episode_stats_rows)
     _write_jsonl_atomic(destination / "annotations/openarm_stage_v1.jsonl", output_annotation_rows)
 
     report = {

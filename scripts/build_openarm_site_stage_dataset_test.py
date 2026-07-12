@@ -90,12 +90,15 @@ def test_build_site_stage_dataset_filters_failure_and_keeps_validation(tmp_path)
 
     info = json.loads((destination / "meta/info.json").read_text())
     episodes = [json.loads(line) for line in (destination / "meta/episodes.jsonl").read_text().splitlines()]
+    episode_stats = [json.loads(line) for line in (destination / "meta/episodes_stats.jsonl").read_text().splitlines()]
     train_frame = pd.read_parquet(destination / "data/chunk-000/episode_000000.parquet")
     val_frame = pd.read_parquet(destination / "data/chunk-000/episode_000001.parquet")
     assert report["source_train_episode_indices"] == [0]
     assert report["source_validation_episode_indices"] == [2]
     assert info["splits"] == {"train": "0:1", "validation": "1:2"}
     assert [row["source_episode_index"] for row in episodes] == [0, 2]
+    assert [row["episode_index"] for row in episode_stats] == [0, 1]
+    assert "stage_progress_gt" in episode_stats[0]["stats"]
     assert train_frame["stage_progress_gt"].tolist() == [0.0, 0.5, 0.5, 1.0]
     assert val_frame["stage_id"].tolist() == [0, 0, 1, 1]
     assert "stage_progress_gt" not in pd.read_parquet(source / "data/chunk-000/episode_000000.parquet").columns

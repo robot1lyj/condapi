@@ -74,8 +74,13 @@ def _ssh(host: str, remote_args: list[str], *, input_text: str | None = None, ti
         text=True,
         capture_output=True,
         timeout=timeout,
-        check=True,
+        check=False,
     )
+    if result.returncode != 0:
+        raise RuntimeError(
+            f"Remote command failed on {host} with exit code {result.returncode}: "
+            f"stdout={result.stdout[-4000:]!r}, stderr={result.stderr[-4000:]!r}"
+        )
     return result.stdout.strip()
 
 
@@ -208,8 +213,18 @@ def _finalize_site_audit() -> dict[str, Any]:
         "--output",
         str(PAIR_EVAL_PATH),
     ]
+    stats_path = SITE_STAGE_DATA / "meta/episodes_stats.jsonl"
+    stats_command = [
+        PYTHON,
+        "scripts/write_lerobot_episode_stats.py",
+        "--dataset",
+        str(SITE_STAGE_DATA),
+    ]
     audit_script = (
-        f"cd {shlex.quote(str(REPO_ROOT))}\n{shlex.join(command)}\nCUDA_VISIBLE_DEVICES=0 {shlex.join(pair_command)}\n"
+        f"cd {shlex.quote(str(REPO_ROOT))}\n"
+        f"test -f {shlex.quote(str(stats_path))} || {shlex.join(stats_command)}\n"
+        f"{shlex.join(command)}\n"
+        f"CUDA_VISIBLE_DEVICES=0 {shlex.join(pair_command)}\n"
     )
     output = _ssh("gpu28", ["bash", "-s"], input_text=audit_script, timeout=7200)
 

@@ -13,6 +13,39 @@ def test_ssh_argv_preserves_site_tmux_command() -> None:
     assert shlex.split(argv[-1]) == remote_args
 
 
+def test_finalize_backfills_site_stage_episode_stats(monkeypatch, tmp_path) -> None:
+    commands = []
+    audit_root = tmp_path / "review"
+    stage_data = tmp_path / "stage"
+    checkpoint = tmp_path / "checkpoint"
+    audit_root.mkdir()
+    (audit_root / "site_stage_audit.json").write_text('{"passed": false, "metrics": {}}')
+    (audit_root / "hq_stage_site_val10_pairs.json").write_text(
+        '{"mse": 1, "mae": 1, "sign_accuracy": 0, "corrcoef": 0, "r2": 0}'
+    )
+
+    monkeypatch.setattr(monitor, "AUDIT_ROOT", audit_root)
+    monkeypatch.setattr(monitor, "SITE_STAGE_DATA", stage_data)
+    monkeypatch.setattr(monitor, "PAIR_EVAL_PATH", audit_root / "hq_stage_site_val10_pairs.json")
+    monkeypatch.setattr(monitor, "DECISION_PATH", audit_root / "site_stage_decision.json")
+    monkeypatch.setattr(monitor, "COMPLETE_MARKER", tmp_path / "complete")
+    monkeypatch.setattr(monitor, "CHECKPOINT", checkpoint)
+
+    def fake_ssh(_host, remote_args, *, input_text=None, timeout=30):
+        commands.append((remote_args, input_text, timeout))
+        return ""
+
+    monkeypatch.setattr(monitor, "_ssh", fake_ssh)
+
+    result = monitor._finalize_site_audit()  # noqa: SLF001
+
+    audit_script = commands[0][1]
+    assert "write_lerobot_episode_stats.py" in audit_script
+    assert str(stage_data / "meta/episodes_stats.jsonl") in audit_script
+    assert result["action"] == "train_site_stage"
+    assert monitor.DECISION_PATH.exists()
+
+
 def test_monitor_counts_failed_starts_and_stops_after_limit(monkeypatch) -> None:
     slot = {"host": "gpu28", "gpu_id": 0, "hq_shard": "hq", "hq_expected": 1}
     shard = {"shard_index": 0, "episode_count": 1, "total_frames": 10}
