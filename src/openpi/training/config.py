@@ -1188,7 +1188,12 @@ _CONFIGS = [
                 assets_dir="/share/home/linyongjia/datasets",
                 asset_id="openarm_kai0_awbc_v1",
             ),
-            base_config=DataConfig(prompt_from_task=True, train_episodes=list(range(1719))),
+            base_config=DataConfig(
+                prompt_from_task=True,
+                train_episodes=list(range(1719)),
+                lerobot_tolerance_s=0.05,
+                lerobot_video_backend="torchcodec",
+            ),
             base_image_key="observation.images.base",
             delta_action_mask=_transforms.make_bool_mask(7, -1, 7, -1),
             use_delta_joint_actions=True,

@@ -75,6 +75,14 @@ def audit_dataset_structure(
 
     label_counts: Counter[int] = Counter()
     selected_indices: dict[int, int] = {}
+    episodes_by_source: dict[str, list[int]] = {}
+    for row in episodes:
+        episodes_by_source.setdefault(str(row["source_kind"]), []).append(int(row["episode_index"]))
+    source_sample_episodes = {
+        source: {episode_ids[0], episode_ids[len(episode_ids) // 2], episode_ids[-1]}
+        for source, episode_ids in episodes_by_source.items()
+    }
+    selected_source_indices: dict[str, list[int]] = {source: [] for source in episodes_by_source}
     expected_global_index = 0
     total_frames = 0
     for episode_index in range(expected_episodes):
@@ -106,6 +114,9 @@ def audit_dataset_structure(
                 positions = np.flatnonzero(labels == label)
                 if len(positions):
                     selected_indices[label] = expected_global_index + int(positions[0])
+        source = str(episodes[episode_index]["source_kind"])
+        if episode_index in source_sample_episodes[source]:
+            selected_source_indices[source].append(expected_global_index + length // 2)
         expected_global_index += length
         total_frames += length
 
@@ -122,6 +133,7 @@ def audit_dataset_structure(
         "label_counts": {str(key): int(value) for key, value in sorted(label_counts.items())},
         "positive_ratio": label_counts[1] / total_frames,
         "selected_global_indices": {str(key): value for key, value in selected_indices.items()},
+        "selected_source_global_indices": selected_source_indices,
     }
 
 
@@ -131,6 +143,7 @@ def run_openpi_loader_smoke(
     config_name: str,
     expected_episodes: int,
     selected_global_indices: dict[str, int],
+    selected_source_global_indices: dict[str, list[int]],
 ) -> dict[str, Any]:
     train_config = _config.get_config(config_name)
     base_data_config = train_config.data.base_config or _config.DataConfig()
@@ -192,11 +205,23 @@ def run_openpi_loader_smoke(
     if np.array_equal(token_sequences[0], token_sequences[1]):
         raise ValueError("Positive and negative AWBC prompts produced identical token sequences")
 
+    source_video_samples = {}
+    for source, indices in selected_source_global_indices.items():
+        source_video_samples[source] = []
+        for index in indices:
+            transformed = transformed_dataset[int(index)]
+            images = transformed["image"]
+            image_shapes = {key: list(np.asarray(value).shape) for key, value in images.items()}
+            if not all(np.isfinite(np.asarray(value)).all() for value in images.values()):
+                raise ValueError(f"{source} video sample {index} contains non-finite pixels")
+            source_video_samples[source].append({"global_index": int(index), "image_shapes": image_shapes})
+
     return {
         "config": config_name,
         "data_transforms": data_transform_names,
         "model_transforms": [type(transform).__name__ for transform in data_config.model_transforms.inputs],
         "samples": samples,
+        "source_video_samples": source_video_samples,
     }
 
 
@@ -221,6 +246,7 @@ def main() -> None:
         config_name=args.config,
         expected_episodes=args.expected_episodes,
         selected_global_indices=structure["selected_global_indices"],
+        selected_source_global_indices=structure["selected_source_global_indices"],
     )
     report = {"passed": True, "structure": structure, "loader": loader}
     args.output.parent.mkdir(parents=True, exist_ok=True)

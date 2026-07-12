@@ -15,6 +15,9 @@ Design decisions → `docs/decisions/`. Architecture → `docs/ARCHITECTURE.md`.
 - **Site-Stage 适配门禁修正**: 适配后 Site 分阶段使用人工边界、正式标签使用 `absolute_advantage`，因此硬门禁
   改为绝对进度 MSE/MAE/correlation/R²；局部相对方向和模型 crossing 保留为诊断，避免用未进入正式
   K-Data 的指标阻塞已经通过双域 paired-frame 验证的 checkpoint。
+- **K-Data 混合视频预检修复**: 四卡 smoke 随机命中 Site 视频后暴露毫秒级时间戳偏差；K-Policy 现使用
+  与现场数据一致的 LeRobot 容差，正式 loader 审计扩展为解码 HQ/Site/TDA 各自首、中、尾样本，避免
+  只验证数据集开头的 HQ 视频而漏过混合来源问题。
 
 ## 2026-07-12
 
