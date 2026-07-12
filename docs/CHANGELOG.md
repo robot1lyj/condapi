@@ -7,6 +7,14 @@ Design decisions → `docs/decisions/`. Architecture → `docs/ARCHITECTURE.md`.
 
 ---
 
+## 2026-07-12
+
+- **Site-Stage 自动衔接修复**: Site150 评分完成后，监督器因派生数据缺少 `episodes_stats.jsonl` 和现场
+  视频毫秒级时间戳偏差未写迁移决策；构建器现生成逐集统计，旧产物可自动回填，曲线闸门失败时短路进入
+  Site-Stage，Stage loader 显式使用现场容差。直接迁移确认不合格后已自动启动条件适配。
+- **Site-Stage 显存配置修复**: 双卡 global batch64、关闭梯度检查点时峰值约 78.7 GiB/卡并 OOM；条件
+  适配改为 global batch32 并使用新实验目录，首步双卡约 67.9 GiB/卡，保留后续自动评估和重试链路。
+
 ## 2026-07-11
 
 - **远端 supervisor SSH 参数边界修复**: Site scorer 自动接棒暴露 OpenSSH 会把 trailing argv 重新拼成
