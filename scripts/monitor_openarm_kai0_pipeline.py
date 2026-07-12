@@ -48,7 +48,7 @@ HQ_STAGE_CHECKPOINT = (
     OUTPUT / "ADVANTAGE_TORCH_OPENARM_FLATTEN_FOLD" / "openarm_stage_v1_train180_bs32_no_ckpt_10k_20260701" / "10000"
 )
 SITE_STAGE_CONFIG = "ADVANTAGE_TORCH_OPENARM_SITE_FOLD"
-SITE_STAGE_EXP = "openarm_site_stage_v1_hq180_site140x3_bs64_5k_20260710"
+SITE_STAGE_EXP = "openarm_site_stage_v1_hq180_site140x3_bs32_5k_20260712"
 SITE_STAGE_CHECKPOINT_ROOT = OUTPUT / SITE_STAGE_CONFIG / SITE_STAGE_EXP
 SITE_STAGE_FINAL = SITE_STAGE_CHECKPOINT_ROOT / "4999/model.safetensors"
 SITE_STAGE_EVAL = PIPELINE_ROOT / "site_stage_eval"
@@ -906,7 +906,12 @@ def monitor_once(state: dict[str, Any]) -> dict[str, Any]:
     status: dict[str, Any] = {"timestamp": time.strftime("%Y-%m-%d %H:%M:%S %Z")}
     selection = _ensure_site_selection(state)
     if selection is None:
-        status["phase"] = "waiting_site_score_selection"
+        direct_decision = _load_json(SITE_DECISION, {})
+        status["phase"] = (
+            "training_or_evaluating_site_stage"
+            if direct_decision and not direct_decision.get("direct_transfer_passed")
+            else "waiting_site_score_selection"
+        )
     elif not _ensure_hq_score_audit():
         status["phase"] = "auditing_hq999_stage_scores"
     elif not _ensure_k_data(selection, state):

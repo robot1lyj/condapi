@@ -1304,7 +1304,7 @@ _CONFIGS = [
         wandb_enabled=True,
         num_train_steps=5_000,
         num_workers=2,
-        batch_size=64,
+        batch_size=32,
     ),
     #
     # Fine-tuning Aloha configs.

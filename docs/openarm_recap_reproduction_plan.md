@@ -346,7 +346,7 @@ HIL raw HDF5/mp4
 
 六张 GPU 的用途是并行评分和独立路线实验，不在没有多机等价性验证时声称单个训练已经使用官方 8-GPU 配置。
 
-### 9.1 当前执行状态（2026-07-10）
+### 9.1 当前执行状态（2026-07-12）
 
 Site-A151 / Site-Score：
 
@@ -361,7 +361,9 @@ Site-A151 / Site-Score：
 - 独立 `openarm_site_stage_v1` 已生成并验证为 150 episodes / 394008 frames / 450 videos，顺序固定为
   Site140 train + Site10 validation；它只作迁移评估和条件 Site-Stage 监督，不进入最终 K-Data。
 - 条件配置 `ADVANTAGE_TORCH_OPENARM_SITE_FOLD` 固定从 HQ-Stage 10000 初始化，Site140×3 + HQ-A180
-  形成 70/30 replay，batch64、5k steps、peak LR `5e-6`；只有直接迁移闸门失败才启动。
+  形成 70/30 replay，global batch32（每卡16）、5k steps、peak LR `5e-6`；只有直接迁移闸门失败才启动。
+  直接迁移已在 150/150 集上失败（corrcoef `0.592`、R² `-0.222`），因此已进入 Site-Stage 适配；最初
+  global batch64 且关闭梯度检查点实测峰值约 `78.7 GiB/卡` 并 OOM，正式重启配置降为 global batch32。
 - Site-A150 人工阶段共394008帧，stage0/stage1 为171100/222908（43.4%/56.6%）；train 与 val
   均覆盖两阶段，单集 stage0 比例20.96%-70.05%，可用于官方 stage-aware percentile 分组。
 
@@ -388,7 +390,7 @@ HQ-Score：
 `output/openpi/logs/openarm_kai0_pipeline_v1/status.json`。它只按以下闸门推进：
 
 1. Site-DirectScore 的曲线闸门和 val10 随机帧对闸门都通过，才直接选择 HQ-Stage；否则训练 Site-Stage。
-2. Site-Stage 使用 HQ180×1 + Site140×3、batch64、2 卡 DDP、5k steps、peak LR `5e-6`；评估
+2. Site-Stage 使用 HQ180×1 + Site140×3、global batch32、2 卡 DDP、5k steps、peak LR `5e-6`；评估
    1000/2000/3000/4000/4999，同时要求 Site 质量和 HQ 遗忘保护全部通过，再按最低 Site MSE 选择。
 3. K-Data 必须正好 1719 集，完成每阶段 top-30% 及来源比例审计，并生成全量 16D relative-action norm stats。
 4. norm stats 完成后运行 `audit_openarm_kai0_training_data.py`：全量核对 999 HQ + 420 Site + 300 TDA、二值逐帧
