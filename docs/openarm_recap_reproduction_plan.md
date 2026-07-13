@@ -388,7 +388,8 @@ HQ-Score：
 
 截至 2026-07-13，HQ999 正式评分及质量审计已通过；Site-DirectScore 未通过迁移闸门，条件 Site-Stage
 已完成 5k 并从双域验证中选择 checkpoint 4000，适配后的 Site150 评分通过 absolute curve 闸门。正式
-K-Data 已完成 1719 集构建、全量 norm 和跨来源 loader/video 审计，四卡 smoke 正在运行。HQ `360:536`
+K-Data 已完成 1719 集构建、全量 norm 和跨来源 loader/video 审计，四卡 smoke 已通过，80k 主训练已启动；
+早期 loss 从 step 0 的 0.1200 降至 step 240 的 0.04348，四卡利用率 100%。HQ `360:536`
 的任务范围合同必须读取原始 `high_quality_folding/meta/episodes.jsonl`；
 评分派生集已统一训练提示词，不能用其 `tasks` 字段反推原始任务范围。构建时同时核对原始 HQ 与评分集的
 episode ID 和逐集长度，防止混入错误数据版本。
