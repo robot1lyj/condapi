@@ -19,6 +19,41 @@ class _IndexDataset:
         return self._size
 
 
+class _ShortVideoDataset:
+    def __init__(self, *, error: str = "Requested next frame while there are no more frames left to decode"):
+        self.video_backend = "torchcodec"
+        self.error = error
+        self.calls = []
+
+    def __getitem__(self, index):
+        self.calls.append((index, self.video_backend))
+        if self.video_backend == "torchcodec":
+            raise RuntimeError(self.error)
+        return {"index": index}
+
+    def __len__(self):
+        return 1
+
+
+def test_torchcodec_tail_fallback_retries_only_end_of_stream_with_pyav():
+    dataset = _ShortVideoDataset()
+    wrapped = _data_loader.TorchCodecTailFallbackDataset(dataset)
+
+    assert wrapped[7] == {"index": 7}
+    assert dataset.calls == [(7, "torchcodec"), (7, "pyav")]
+    assert dataset.video_backend == "torchcodec"
+
+
+def test_torchcodec_tail_fallback_does_not_hide_other_decode_failures():
+    dataset = _ShortVideoDataset(error="corrupt video stream")
+    wrapped = _data_loader.TorchCodecTailFallbackDataset(dataset)
+
+    with np.testing.assert_raises_regex(RuntimeError, "corrupt video stream"):
+        wrapped[3]
+    assert dataset.calls == [(3, "torchcodec")]
+    assert dataset.video_backend == "torchcodec"
+
+
 def test_torch_data_loader():
     config = pi0_config.Pi0Config(action_dim=24, action_horizon=50, max_token_len=48)
     dataset = _data_loader.FakeDataset(config, 16)

@@ -22,8 +22,9 @@ Design decisions → `docs/decisions/`. Architecture → `docs/ARCHITECTURE.md`.
 ## 2026-07-16
 
 - **K-Policy TDA 尾帧解码修复**: 四卡主训练五次在固定 step 984 后命中同一 TDA 样本；其 MP4 容器头比
-  实际内容多一帧，TorchCodec 严格索引越界。正式混合数据改用已验证可在 0.05s 内回退的 PyAV，审计新增
-  HQ/Site/TDA 首中尾抽查，并强制解码全部 300 集 TDA 的尾帧。
+  实际内容多一帧，TorchCodec 严格索引越界。全量 PyAV 虽正确但实测约 25 秒/step，不适合 80k；正式
+  loader 改为 TorchCodec 快路径，仅在明确的 end-of-stream 尾帧异常时对当前样本回退 PyAV。审计强制
+  解码全部 300 集 TDA 的尾帧。
 - **K-Policy 六卡训练适配**: 当前空闲同构节点为 gpu12/gpu14/gpu28，启动器支持可配置双卡节点集合；
   默认 smoke/80k 为三节点六卡、global batch126，并将全部远端会话作为不可拆分的生命周期单元；监督器
   支持通过环境变量覆盖节点、批量和实验标签，节点临时被占用时可退回空闲双节点四卡/global batch128。

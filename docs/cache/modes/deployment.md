@@ -61,10 +61,11 @@ Local validation env is `pi-conda`. If missing, create with conda from `environm
 - HQ watchdog session is `kai0_hq_score_monitor`; it may recover a stopped/stalled worker up to three times and writes status under `output/openpi/logs/openarm_kai0_stage_scores_hq_v1`.
 - Site supervisor session is `kai0_site_score_monitor`; it starts a balanced Site shard when the matching HQ GPU slot is free, then writes the transfer audit under `datasets/openarm_site_score_review_v1`.
 - End-to-end KAI0 supervisor is `kai0_pipeline_v1` on the jump host; status is `output/openpi/logs/openarm_kai0_pipeline_v1/status.json`. It may start Site-Stage only after a failed direct-transfer gate, then K-Data, norm, six-GPU smoke, 80k, sweep, and gpu25 deployment in order.
-- Before the six-GPU smoke, formal K-Data must pass `scripts/audit_openarm_kai0_training_data.py`; this checks all binary labels/source counts, real positive/negative OpenPI loader samples, and every TDA episode tail.
+- Before the six-GPU smoke, formal K-Data must pass `scripts/audit_openarm_kai0_training_data.py`; this checks all binary labels/source counts, real positive/negative OpenPI loader samples, and every TDA episode tail through the TorchCodec-to-PyAV fallback.
 - OpenArm parquet norm stats are written through an atomic temporary file; never treat a partially written JSON as recoverable training input.
 - Formal K-Policy sessions are a three-node unit on gpu12/gpu14/gpu28. Never restart only part of a JAX job.
 - Formal JAX loaders reshuffle deterministically per dataset epoch and derive the resume epoch/batch offset from restored `train_state.step`; do not replace this with a fixed `DistributedSampler` epoch or restart data at batch zero.
+- Formal K-Policy video loading uses TorchCodec normally and retries only its explicit end-of-stream tail error with PyAV/0.05s; full-dataset PyAV is correct but too slow for 80k.
 - Treat a JAX checkpoint as ready only when Orbax `_CHECKPOINT_METADATA` and `params/_METADATA` exist; a numeric directory or `params/` alone may still be an asynchronous partial save.
 - Formal K-Policy deployment uses `serve_policy.py --force-prompt 'Fold the T-shirt properly, Advantage: positive'`; this intentionally overrides client prompts only for this conditioned policy.
 - HQ/Site policy sweep runs with `--resume`; reuse is allowed only for atomic v2 reports with identical checkpoint, dataset, sampled episodes/settings, config, and forced positive prompt.

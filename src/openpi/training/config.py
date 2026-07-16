@@ -99,6 +99,9 @@ class DataConfig:
     # Optional LeRobot video decode settings. Leave unset to keep LeRobot defaults.
     lerobot_tolerance_s: float | None = None
     lerobot_video_backend: str | None = None
+    # Retry only TorchCodec end-of-stream failures with PyAV. This keeps the fast path
+    # while tolerating regenerated videos whose container advertises one extra tail frame.
+    lerobot_torchcodec_tail_fallback: bool = False
 
     # Only used for RLDS data loader (ie currently only used for DROID).
     rlds_data_dir: str | None = None
@@ -1192,7 +1195,8 @@ _CONFIGS = [
                 prompt_from_task=True,
                 train_episodes=list(range(1719)),
                 lerobot_tolerance_s=0.05,
-                lerobot_video_backend="pyav",
+                lerobot_video_backend="torchcodec",
+                lerobot_torchcodec_tail_fallback=True,
             ),
             base_image_key="observation.images.base",
             delta_action_mask=_transforms.make_bool_mask(7, -1, 7, -1),

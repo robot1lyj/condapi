@@ -165,10 +165,16 @@ def run_openpi_loader_smoke(
     data_config = data_factory.create(train_config.assets_dirs, train_config.model)
     if data_config.norm_stats is None:
         raise ValueError(f"K-Data norm stats were not loaded from {dataset / 'norm_stats.json'}")
-    if data_config.lerobot_video_backend != "pyav" or data_config.lerobot_tolerance_s != 0.05:
+    if (
+        data_config.lerobot_video_backend != "torchcodec"
+        or not data_config.lerobot_torchcodec_tail_fallback
+        or data_config.lerobot_tolerance_s != 0.05
+    ):
         raise ValueError(
-            "K-Data must use the validated PyAV/0.05s mixed-source video contract, got "
-            f"backend={data_config.lerobot_video_backend!r}, tolerance={data_config.lerobot_tolerance_s!r}"
+            "K-Data must use the validated TorchCodec-to-PyAV tail fallback contract, got "
+            f"backend={data_config.lerobot_video_backend!r}, "
+            f"tail_fallback={data_config.lerobot_torchcodec_tail_fallback!r}, "
+            f"tolerance={data_config.lerobot_tolerance_s!r}"
         )
 
     data_transform_names = [type(transform).__name__ for transform in data_config.data_transforms.inputs]
@@ -240,6 +246,7 @@ def run_openpi_loader_smoke(
     return {
         "config": config_name,
         "video_backend": data_config.lerobot_video_backend,
+        "torchcodec_tail_fallback": data_config.lerobot_torchcodec_tail_fallback,
         "video_tolerance_s": data_config.lerobot_tolerance_s,
         "data_transforms": data_transform_names,
         "model_transforms": [type(transform).__name__ for transform in data_config.model_transforms.inputs],

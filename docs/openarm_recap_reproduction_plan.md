@@ -390,7 +390,8 @@ HQ-Score：
 已完成 5k 并从双域验证中选择 checkpoint 4000，适配后的 Site150 评分通过 absolute curve 闸门。正式
 K-Data 已完成 1719 集构建和全量 norm；旧四卡 smoke 曾通过，旧 80k 主训练随后暴露 TDA 尾帧问题；
 旧四卡任务早期 loss 从 step 0 的 0.1200 降至 step 980 的 0.03205，但五次在固定 TDA 尾帧处失败且未到
-首个 checkpoint；已切换 PyAV/0.05s 尾帧合同。启动器默认支持 gpu12+gpu14+gpu28 六卡/global batch126；
+首个 checkpoint；全量 PyAV/0.05s 可避开错误，但正式 80k 实测约 25 秒/step，已改为 TorchCodec 快路径且
+仅对明确 end-of-stream 的短视频尾帧回退 PyAV。启动器默认支持 gpu12+gpu14+gpu28 六卡/global batch126；
 2026-07-16 实际复核时 gpu14 被其他用户占用，因此本轮通过运行时覆盖使用 gpu12+gpu28 四卡/global batch128。HQ `360:536`
 的任务范围合同必须读取原始 `high_quality_folding/meta/episodes.jsonl`；
 评分派生集已统一训练提示词，不能用其 `tasks` 字段反推原始任务范围。构建时同时核对原始 HQ 与评分集的

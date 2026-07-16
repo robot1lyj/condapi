@@ -68,6 +68,33 @@ class TransformedDataset(Dataset[T_co]):
         return len(self._dataset)
 
 
+class TorchCodecTailFallbackDataset(Dataset[T_co]):
+    """Retry only short-video tail failures through PyAV."""
+
+    _END_OF_STREAM_ERROR = "no more frames left to decode"
+
+    def __init__(self, dataset: Dataset[T_co]):
+        if getattr(dataset, "video_backend", None) != "torchcodec":
+            raise ValueError("TorchCodec tail fallback requires a LeRobot dataset using the torchcodec backend")
+        self._dataset = dataset
+
+    def __getitem__(self, index: SupportsIndex) -> T_co:
+        try:
+            return self._dataset[index]
+        except RuntimeError as error:
+            if self._END_OF_STREAM_ERROR not in str(error):
+                raise
+            logging.warning("TorchCodec reached a short video tail at dataset index %s; retrying with PyAV", index)
+            self._dataset.video_backend = "pyav"
+            try:
+                return self._dataset[index]
+            finally:
+                self._dataset.video_backend = "torchcodec"
+
+    def __len__(self) -> int:
+        return len(self._dataset)
+
+
 class IterableTransformedDataset(IterableDataset[T_co]):
     def __init__(
         self,
@@ -209,6 +236,8 @@ def create_torch_dataset(
         },
         **dataset_kwargs,
     )
+    if data_config.lerobot_torchcodec_tail_fallback:
+        dataset = TorchCodecTailFallbackDataset(dataset)
 
     if data_config.prompt_from_task:
         dataset = TransformedDataset(dataset, [_transforms.PromptFromLeRobotTask(dataset_meta.tasks)])
