@@ -94,7 +94,7 @@ footer{{padding-top:20px;color:var(--muted);font-size:12px}} @media(max-width:90
 </style>
 </head>
 <body><main>
-<header><h1>OpenArm K-Policy 训练报告</h1><p>路线 K: Stage Advantage 二值 AWBC, 从 pi0.5 base 训练、双域离线选模并部署。</p><div class="chips"><span class="chip" id="generated"></span><span class="chip">absolute_advantage · stage top-30%</span><span class="chip">global batch 128 · 80k</span></div></header>
+<header><h1>OpenArm K-Policy 训练报告</h1><p>路线 K: Stage Advantage 二值 AWBC, 从 pi0.5 base 训练、双域离线选模并部署。</p><div class="chips"><span class="chip" id="generated"></span><span class="chip">absolute_advantage · stage top-30%</span><span class="chip">global batch 126 · 6 GPU · 80k</span></div></header>
 <section><div class="summary">
 <div class="card"><div class="label">选中 checkpoint</div><div class="value" id="selected-step"></div><div class="detail" id="selected-score"></div></div>
 <div class="card"><div class="label">正式 K-Data</div><div class="value" id="data-count"></div><div class="detail" id="source-count"></div></div>

@@ -19,6 +19,14 @@ Design decisions → `docs/decisions/`. Architecture → `docs/ARCHITECTURE.md`.
   与现场数据一致的 LeRobot 容差，正式 loader 审计扩展为解码 HQ/Site/TDA 各自首、中、尾样本，避免
   只验证数据集开头的 HQ 视频而漏过混合来源问题。
 
+## 2026-07-16
+
+- **K-Policy TDA 尾帧解码修复**: 四卡主训练五次在固定 step 984 后命中同一 TDA 样本；其 MP4 容器头比
+  实际内容多一帧，TorchCodec 严格索引越界。正式混合数据改用已验证可在 0.05s 内回退的 PyAV，审计新增
+  HQ/Site/TDA 首中尾抽查，并强制解码全部 300 集 TDA 的尾帧。
+- **K-Policy 六卡训练适配**: 当前空闲同构节点为 gpu12/gpu14/gpu28，启动器支持可配置双卡节点集合；
+  正式 smoke/80k 改为三节点六卡、global batch126，并将三个远端会话作为不可拆分的生命周期单元。
+
 ## 2026-07-12
 
 - **Site-Stage 自动衔接修复**: Site150 评分完成后，监督器因派生数据缺少 `episodes_stats.jsonl` 和现场

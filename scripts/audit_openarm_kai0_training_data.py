@@ -1,4 +1,4 @@
-"""Audit formal OpenArm KAI0 AWBC data and run two real OpenPI loader samples."""
+"""Audit formal OpenArm KAI0 AWBC data with real OpenPI loader and video samples."""
 
 from __future__ import annotations
 
@@ -83,6 +83,7 @@ def audit_dataset_structure(
         for source, episode_ids in episodes_by_source.items()
     }
     selected_source_indices: dict[str, list[int]] = {source: [] for source in episodes_by_source}
+    tda_tail_indices: list[int] = []
     expected_global_index = 0
     total_frames = 0
     for episode_index in range(expected_episodes):
@@ -115,8 +116,13 @@ def audit_dataset_structure(
                 if len(positions):
                     selected_indices[label] = expected_global_index + int(positions[0])
         source = str(episodes[episode_index]["source_kind"])
+        if source == "TDA":
+            tda_tail_indices.append(expected_global_index + length - 1)
         if episode_index in source_sample_episodes[source]:
-            selected_source_indices[source].append(expected_global_index + length // 2)
+            for frame_offset in (length // 2, length - 1):
+                global_index = expected_global_index + frame_offset
+                if global_index not in selected_source_indices[source]:
+                    selected_source_indices[source].append(global_index)
         expected_global_index += length
         total_frames += length
 
@@ -134,6 +140,7 @@ def audit_dataset_structure(
         "positive_ratio": label_counts[1] / total_frames,
         "selected_global_indices": {str(key): value for key, value in selected_indices.items()},
         "selected_source_global_indices": selected_source_indices,
+        "tda_tail_global_indices": tda_tail_indices,
     }
 
 
@@ -144,6 +151,7 @@ def run_openpi_loader_smoke(
     expected_episodes: int,
     selected_global_indices: dict[str, int],
     selected_source_global_indices: dict[str, list[int]],
+    tda_tail_global_indices: list[int],
 ) -> dict[str, Any]:
     train_config = _config.get_config(config_name)
     base_data_config = train_config.data.base_config or _config.DataConfig()
@@ -157,6 +165,11 @@ def run_openpi_loader_smoke(
     data_config = data_factory.create(train_config.assets_dirs, train_config.model)
     if data_config.norm_stats is None:
         raise ValueError(f"K-Data norm stats were not loaded from {dataset / 'norm_stats.json'}")
+    if data_config.lerobot_video_backend != "pyav" or data_config.lerobot_tolerance_s != 0.05:
+        raise ValueError(
+            "K-Data must use the validated PyAV/0.05s mixed-source video contract, got "
+            f"backend={data_config.lerobot_video_backend!r}, tolerance={data_config.lerobot_tolerance_s!r}"
+        )
 
     data_transform_names = [type(transform).__name__ for transform in data_config.data_transforms.inputs]
     if "OpenArmInputs" not in data_transform_names or any("Piper" in name for name in data_transform_names):
@@ -216,12 +229,27 @@ def run_openpi_loader_smoke(
                 raise ValueError(f"{source} video sample {index} contains non-finite pixels")
             source_video_samples[source].append({"global_index": int(index), "image_shapes": image_shapes})
 
+    # TDA videos are regenerated independently from their parquet metadata. Decode every
+    # episode tail because an MP4 header can advertise one more frame than it contains.
+    for index in tda_tail_global_indices:
+        transformed = transformed_dataset[int(index)]
+        images = transformed["image"]
+        if not all(np.isfinite(np.asarray(value)).all() for value in images.values()):
+            raise ValueError(f"TDA tail video sample {index} contains non-finite pixels")
+
     return {
         "config": config_name,
+        "video_backend": data_config.lerobot_video_backend,
+        "video_tolerance_s": data_config.lerobot_tolerance_s,
         "data_transforms": data_transform_names,
         "model_transforms": [type(transform).__name__ for transform in data_config.model_transforms.inputs],
         "samples": samples,
         "source_video_samples": source_video_samples,
+        "tda_tail_samples": {
+            "count": len(tda_tail_global_indices),
+            "first_global_index": int(tda_tail_global_indices[0]) if tda_tail_global_indices else None,
+            "last_global_index": int(tda_tail_global_indices[-1]) if tda_tail_global_indices else None,
+        },
     }
 
 
@@ -247,6 +275,7 @@ def main() -> None:
         expected_episodes=args.expected_episodes,
         selected_global_indices=structure["selected_global_indices"],
         selected_source_global_indices=structure["selected_source_global_indices"],
+        tda_tail_global_indices=structure["tda_tail_global_indices"],
     )
     report = {"passed": True, "structure": structure, "loader": loader}
     args.output.parent.mkdir(parents=True, exist_ok=True)

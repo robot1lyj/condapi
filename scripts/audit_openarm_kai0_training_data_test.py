@@ -65,6 +65,7 @@ def test_audit_dataset_structure_accepts_binary_k_data(tmp_path):
     assert result["label_counts"] == {"0": 2, "1": 2}
     assert result["selected_global_indices"] == {"0": 0, "1": 1}
     assert result["selected_source_global_indices"] == {"HQ": [1], "Site": [3]}
+    assert result["tda_tail_global_indices"] == []
     assert result["positive_ratio"] == 0.5
 
 

@@ -1192,7 +1192,7 @@ _CONFIGS = [
                 prompt_from_task=True,
                 train_episodes=list(range(1719)),
                 lerobot_tolerance_s=0.05,
-                lerobot_video_backend="torchcodec",
+                lerobot_video_backend="pyav",
             ),
             base_image_key="observation.images.base",
             delta_action_mask=_transforms.make_bool_mask(7, -1, 7, -1),

@@ -1,4 +1,4 @@
-"""Launch one OpenPI JAX job across gpu12 and gpu14 from the cluster jump host."""
+"""Launch one OpenPI JAX job across configurable two-GPU cluster nodes."""
 
 from __future__ import annotations
 
@@ -23,10 +23,7 @@ class Node:
     process_id: int
 
 
-NODES = (
-    Node("gpu12", 0),
-    Node("gpu14", 1),
-)
+DEFAULT_HOSTS = ("gpu12", "gpu14", "gpu28")
 
 
 def _ssh_argv(host: str, args: list[str]) -> list[str]:
@@ -58,6 +55,7 @@ def build_node_command(
     mode: str,
     coordinator_address: str,
     xla_memory_fraction: float,
+    num_processes: int,
 ) -> tuple[str, pathlib.Path]:
     log_dir = OUTPUT_ROOT / "logs" / config
     log_path = log_dir / f"{exp_name}_{node.host}.log"
@@ -96,7 +94,7 @@ def build_node_command(
         "CUDA_VISIBLE_DEVICES": "0,1",
         "XLA_PYTHON_CLIENT_MEM_FRACTION": str(xla_memory_fraction),
         "JAX_COORDINATOR_ADDRESS": coordinator_address,
-        "JAX_NUM_PROCESSES": str(len(NODES)),
+        "JAX_NUM_PROCESSES": str(num_processes),
         "JAX_PROCESS_ID": str(node.process_id),
         "JAX_DISTRIBUTED_INITIALIZATION_TIMEOUT": "900",
     }
@@ -135,16 +133,21 @@ def launch(
     coordinator_address: str,
     xla_memory_fraction: float,
     dry_run: bool,
+    hosts: tuple[str, ...] = DEFAULT_HOSTS,
 ) -> dict:
     if mode not in {"overwrite", "resume"}:
         raise ValueError("mode must be overwrite or resume")
-    if batch_size % 4 != 0:
-        raise ValueError("Global batch size must be divisible by four devices")
+    if not hosts or len(set(hosts)) != len(hosts):
+        raise ValueError("Training hosts must be non-empty and unique")
+    nodes = tuple(Node(host, process_id) for process_id, host in enumerate(hosts))
+    global_device_count = len(nodes) * 2
+    if batch_size % global_device_count != 0:
+        raise ValueError(f"Global batch size must be divisible by {global_device_count} devices")
     if num_train_steps <= 0 or num_workers < 0:
         raise ValueError("Training steps must be positive and workers non-negative")
 
     jobs = []
-    for node in NODES:
+    for node in nodes:
         command, log_path = build_node_command(
             node,
             config=config,
@@ -156,6 +159,7 @@ def launch(
             mode=mode,
             coordinator_address=coordinator_address,
             xla_memory_fraction=xla_memory_fraction,
+            num_processes=len(nodes),
         )
         jobs.append(
             {
@@ -172,6 +176,8 @@ def launch(
         "exp_name": exp_name,
         "checkpoint_dir": str(OUTPUT_ROOT / config / exp_name),
         "global_batch_size": batch_size,
+        "global_device_count": global_device_count,
+        "hosts": list(hosts),
         "num_train_steps": num_train_steps,
         "coordinator_address": coordinator_address,
         "jobs": jobs,
@@ -213,7 +219,7 @@ def main() -> None:
     parser.add_argument("--config", required=True)
     parser.add_argument("--exp-name", required=True)
     parser.add_argument("--num-train-steps", type=int, required=True)
-    parser.add_argument("--batch-size", type=int, default=128)
+    parser.add_argument("--batch-size", type=int, default=126)
     parser.add_argument("--num-workers", type=int, default=2)
     parser.add_argument("--log-interval", type=int, default=20)
     parser.add_argument("--mode", choices=("overwrite", "resume"), default="overwrite")
@@ -221,6 +227,7 @@ def main() -> None:
     parser.add_argument("--coordinator-address", default="172.31.11.112:12365")
     parser.add_argument("--xla-memory-fraction", type=float, default=0.90)
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument("--hosts", nargs="+", default=list(DEFAULT_HOSTS))
     args = parser.parse_args()
     report = launch(
         config=args.config,
@@ -234,6 +241,7 @@ def main() -> None:
         coordinator_address=args.coordinator_address,
         xla_memory_fraction=args.xla_memory_fraction,
         dry_run=args.dry_run,
+        hosts=tuple(args.hosts),
     )
     print(json.dumps(report, ensure_ascii=False, indent=2))
 

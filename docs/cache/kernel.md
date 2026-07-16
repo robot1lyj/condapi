@@ -6,7 +6,7 @@ New sessions load `AGENTS.md` + this file first, then `context_index.md` and at 
 - Product: OpenPI VLA fine-tuning/inference for OpenArm cloth folding; Piper configs remain separate legacy/support paths.
 - Local workspace: `/home/lyj/lyj/openpi`
 - Remote access: `ssh -p 12222 linyongjia@172.31.11.100`, then `ssh gpu12/gpu14/gpu25/gpu28`.
-- Main training nodes: gpu12/gpu14, each 2x A800 80GB. gpu25 usually serves policy on port `6666`; gpu28 is eval/aux.
+- Current K-Policy training nodes: gpu12/gpu14/gpu28, each 2x A800 80GB; use six-card global batch 126. gpu25 is a single A800 and usually serves policy on port `6666`.
 - Remote repo/env/output: `/share/home/linyongjia/conda-pi/openpi`, env `pi-conda`, output `/share/home/linyongjia/output/openpi`.
 - Remote datasets: policy datasets under `/share/home/linyongjia/datasets`; some Stage/reference data may live under `/share/home/linyongjia/data`.
 - Main OpenArm configs: `pi05_openarms_dual_site_align_v1_probe`, `pi05_openarms_dual_evo_acp_hil_v1_probe`, and formal KAI0 `pi05_openarm_kai0_awbc_v1`; formal K-Policy must not reuse legacy `pi05_openarms_dual_awbc_v1`.

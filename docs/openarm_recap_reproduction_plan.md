@@ -226,11 +226,11 @@ KAI0 官方 TDA 类型保持不变：
 - `[论文/官方代码]` 从原始 π0.5 base 开始全参数训练，不从 HQ99999 warm start。
 - `[论文]` policy 训练表给出 80k steps、batch 128。
 - `[官方代码]` 发布的 AWBC config 给出 100k steps、batch 256。
-- 第一轮以论文 80k/batch128 为复现目标；如果硬件无法直接满足，只调整并行/梯度累积，不静默修改有效 global batch。
+- 第一轮以论文 80k/batch128 为复现目标；当前六卡无法整除 128，显式使用最接近的 global batch126（差 1.56%），不把它表述为严格 batch 复现。
 - 保存周期按官方 config 使用 5k/10k 级别 checkpoint，不预先指定哪个最好。
-- 正式配置固定为 `pi05_openarm_kai0_awbc_v1`，从原始 P05 初始化；gpu12+gpu14 组成 4 卡 JAX
-  多节点作业，全局 batch128（每节点 64、每卡 32），workers2，80k steps，5k 保存一次。
-- 正式训练前必须先以同一配置、同一全局 batch 和同一 4 卡启动器跑 20-step smoke；smoke 使用 workers0
+- 正式配置固定为 `pi05_openarm_kai0_awbc_v1`，从原始 P05 初始化；gpu12+gpu14+gpu28 组成 6 卡 JAX
+  多节点作业，全局 batch126（每节点 42、每卡 21），workers2，80k steps，5k 保存一次。
+- 正式训练前必须先以同一配置、同一全局 batch 和同一 6 卡启动器跑 20-step smoke；smoke 使用 workers0
   排除 DataLoader 子进程干扰，正式训练才恢复 workers2。
 
 必须有普通 π0.5 BC 对照：相同 HQ + Site + 小预算 TDA、相同训练样本数，只去掉 Advantage prompt。该对照对应 KAI0 的 normal π0.5 baseline，不是额外自研路线。
@@ -388,8 +388,9 @@ HQ-Score：
 
 截至 2026-07-13，HQ999 正式评分及质量审计已通过；Site-DirectScore 未通过迁移闸门，条件 Site-Stage
 已完成 5k 并从双域验证中选择 checkpoint 4000，适配后的 Site150 评分通过 absolute curve 闸门。正式
-K-Data 已完成 1719 集构建、全量 norm 和跨来源 loader/video 审计，四卡 smoke 已通过，80k 主训练已启动；
-早期 loss 从 step 0 的 0.1200 降至 step 240 的 0.04348，四卡利用率 100%。HQ `360:536`
+K-Data 已完成 1719 集构建和全量 norm；旧四卡 smoke 曾通过，旧 80k 主训练随后暴露 TDA 尾帧问题；
+旧四卡任务早期 loss 从 step 0 的 0.1200 降至 step 980 的 0.03205，但五次在固定 TDA 尾帧处失败且未到
+首个 checkpoint；已切换 PyAV/0.05s 尾帧合同，并改用六卡 global batch126 重启。HQ `360:536`
 的任务范围合同必须读取原始 `high_quality_folding/meta/episodes.jsonl`；
 评分派生集已统一训练提示词，不能用其 `tasks` 字段反推原始任务范围。构建时同时核对原始 HQ 与评分集的
 episode ID 和逐集长度，防止混入错误数据版本。

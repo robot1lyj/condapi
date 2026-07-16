@@ -1,4 +1,4 @@
-"""Supervise the OpenArm KAI0 path from Site audit through four-GPU policy training."""
+"""Supervise the OpenArm KAI0 path from Site audit through multi-node policy training."""
 
 from __future__ import annotations
 
@@ -66,8 +66,10 @@ K_DATA = DATASETS / "openarm_kai0_awbc_v1"
 K_DATA_REPORT = K_DATA / "kai0_awbc_build_report.json"
 K_DATA_AUDIT = PIPELINE_ROOT / "k_data_training_audit.json"
 K_CONFIG = "pi05_openarm_kai0_awbc_v1"
-K_SMOKE_EXP = "openarm_kai0_awbc_v1_4gpu_smoke20_20260710"
-K_FULL_EXP = "openarm_kai0_awbc_v1_4gpu_80k_20260710"
+K_TRAIN_HOSTS = jax_launcher.DEFAULT_HOSTS
+K_GLOBAL_BATCH_SIZE = 126
+K_SMOKE_EXP = "openarm_kai0_awbc_v1_6gpu_smoke20_20260716"
+K_FULL_EXP = "openarm_kai0_awbc_v1_6gpu_80k_20260716"
 K_SMOKE_CHECKPOINT = OUTPUT / K_CONFIG / K_SMOKE_EXP / "19"
 K_FULL_ROOT = OUTPUT / K_CONFIG / K_FULL_EXP
 K_FULL_CHECKPOINT = K_FULL_ROOT / "79999"
@@ -599,8 +601,8 @@ def _ensure_k_data_audit() -> bool:
 
 
 def _jax_job_state(exp_name: str, session_prefix: str, final_checkpoint: pathlib.Path) -> dict[str, Any]:
-    sessions = {host: _session_exists(host, f"{session_prefix}_{host}") for host in ("gpu12", "gpu14")}
-    exits = {host: _exit_code(OUTPUT / "logs" / K_CONFIG / f"{exp_name}_{host}.exit") for host in ("gpu12", "gpu14")}
+    sessions = {host: _session_exists(host, f"{session_prefix}_{host}") for host in K_TRAIN_HOSTS}
+    exits = {host: _exit_code(OUTPUT / "logs" / K_CONFIG / f"{exp_name}_{host}.exit") for host in K_TRAIN_HOSTS}
     checkpoint_root = OUTPUT / K_CONFIG / exp_name
     steps = sorted(int(path.name) for path in checkpoint_root.glob("*") if path.is_dir() and path.name.isdigit())
     return {
@@ -642,7 +644,7 @@ def _ensure_jax_job(
         config=K_CONFIG,
         exp_name=exp_name,
         num_train_steps=num_train_steps,
-        batch_size=128,
+        batch_size=K_GLOBAL_BATCH_SIZE,
         num_workers=num_workers,
         log_interval=1 if key == "k_smoke" else 20,
         mode=mode,
@@ -650,6 +652,7 @@ def _ensure_jax_job(
         coordinator_address="172.31.11.112:12365",
         xla_memory_fraction=0.90,
         dry_run=False,
+        hosts=K_TRAIN_HOSTS,
     )
     state["restarts"][key] = retries + 1
     return False

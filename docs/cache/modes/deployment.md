@@ -4,7 +4,7 @@ Use for SSH, conda env, remote train/serve, GPU status, logs, and artifact promo
 
 ## Defaults
 - Jump: `ssh -p 12222 linyongjia@172.31.11.100`
-- Nodes: `gpu12`, `gpu14` for training; `gpu25` for serve; `gpu28` for eval/aux.
+- Nodes: `gpu12`, `gpu14`, `gpu28` for current six-card K-Policy training; `gpu25` is single-card serve.
 - Remote repo: `/share/home/linyongjia/conda-pi/openpi`
 - Remote env: `/share/home/linyongjia/miniconda3/envs/pi-conda`
 - Dataset root: `/share/home/linyongjia/datasets`
@@ -29,7 +29,7 @@ Rules:
 - Use `pi-conda`; do not use uv.
 - Verify dataset `meta/info.json` and `norm_stats.json` before policy training.
 - For OpenArm LeRobot v2.1, prefer `scripts/compute_openarm_parquet_norm_stats.py`.
-- Use gpu12/gpu14 for training; avoid stealing gpu25 if it is serving.
+- Use gpu12/gpu14/gpu28 for current K-Policy training; avoid stealing gpu25 if it is serving.
 - Python SSH launchers must pass one `shlex.join(remote_argv)` command string to OpenSSH; raw trailing argv does not preserve boundaries through the remote login shell when arguments contain `&&`, redirects, spaces, or newlines.
 
 ## Serve
@@ -60,10 +60,10 @@ Local validation env is `pi-conda`. If missing, create with conda from `environm
 - HQ finalization must pass `scripts/audit_openarm_hq_stage_scores.py`; K-Data must not rely only on parquet counts or report visuals.
 - HQ watchdog session is `kai0_hq_score_monitor`; it may recover a stopped/stalled worker up to three times and writes status under `output/openpi/logs/openarm_kai0_stage_scores_hq_v1`.
 - Site supervisor session is `kai0_site_score_monitor`; it starts a balanced Site shard when the matching HQ GPU slot is free, then writes the transfer audit under `datasets/openarm_site_score_review_v1`.
-- End-to-end KAI0 supervisor is `kai0_pipeline_v1` on the jump host; status is `output/openpi/logs/openarm_kai0_pipeline_v1/status.json`. It may start Site-Stage only after a failed direct-transfer gate, then K-Data, norm, 4-GPU smoke, 80k, sweep, and gpu25 deployment in order.
-- Before the 4-GPU smoke, formal K-Data must pass `scripts/audit_openarm_kai0_training_data.py`; this checks all binary labels/source counts and real positive/negative OpenPI loader samples.
+- End-to-end KAI0 supervisor is `kai0_pipeline_v1` on the jump host; status is `output/openpi/logs/openarm_kai0_pipeline_v1/status.json`. It may start Site-Stage only after a failed direct-transfer gate, then K-Data, norm, six-GPU smoke, 80k, sweep, and gpu25 deployment in order.
+- Before the six-GPU smoke, formal K-Data must pass `scripts/audit_openarm_kai0_training_data.py`; this checks all binary labels/source counts, real positive/negative OpenPI loader samples, and every TDA episode tail.
 - OpenArm parquet norm stats are written through an atomic temporary file; never treat a partially written JSON as recoverable training input.
-- Formal K-Policy multi-node sessions are paired: `kai0_k_smoke_gpu12/gpu14` and `kai0_k_full_gpu12/gpu14`. Never restart only one JAX process.
+- Formal K-Policy sessions are a three-node unit on gpu12/gpu14/gpu28. Never restart only part of a JAX job.
 - Formal JAX loaders reshuffle deterministically per dataset epoch and derive the resume epoch/batch offset from restored `train_state.step`; do not replace this with a fixed `DistributedSampler` epoch or restart data at batch zero.
 - Treat a JAX checkpoint as ready only when Orbax `_CHECKPOINT_METADATA` and `params/_METADATA` exist; a numeric directory or `params/` alone may still be an asynchronous partial save.
 - Formal K-Policy deployment uses `serve_policy.py --force-prompt 'Fold the T-shirt properly, Advantage: positive'`; this intentionally overrides client prompts only for this conditioned policy.

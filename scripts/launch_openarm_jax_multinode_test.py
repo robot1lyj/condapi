@@ -14,12 +14,12 @@ def test_ssh_argv_preserves_multiline_tmux_command() -> None:
     assert shlex.split(argv[-1]) == remote_args
 
 
-def test_builds_two_process_four_gpu_command() -> None:
+def test_builds_three_process_six_gpu_command() -> None:
     report = launcher.launch(
         config="pi05_openarm_kai0_awbc_v1",
         exp_name="smoke",
         num_train_steps=20,
-        batch_size=128,
+        batch_size=126,
         num_workers=0,
         log_interval=1,
         mode="overwrite",
@@ -29,21 +29,24 @@ def test_builds_two_process_four_gpu_command() -> None:
         dry_run=True,
     )
 
-    assert report["global_batch_size"] == 128
-    assert [job["host"] for job in report["jobs"]] == ["gpu12", "gpu14"]
+    assert report["global_batch_size"] == 126
+    assert report["global_device_count"] == 6
+    assert [job["host"] for job in report["jobs"]] == ["gpu12", "gpu14", "gpu28"]
     assert "JAX_PROCESS_ID=0" in report["jobs"][0]["command"]
     assert "JAX_PROCESS_ID=1" in report["jobs"][1]["command"]
+    assert "JAX_PROCESS_ID=2" in report["jobs"][2]["command"]
+    assert "JAX_NUM_PROCESSES=3" in report["jobs"][0]["command"]
     assert "JAX_COORDINATOR_BIND_ADDRESS=0.0.0.0:12365" in report["jobs"][0]["command"]
     assert "--overwrite" in report["jobs"][0]["command"]
 
 
 def test_rejects_batch_not_divisible_by_global_device_count() -> None:
-    with pytest.raises(ValueError, match="divisible by four"):
+    with pytest.raises(ValueError, match="divisible by 6"):
         launcher.launch(
             config="config",
             exp_name="bad",
             num_train_steps=1,
-            batch_size=126,
+            batch_size=128,
             num_workers=0,
             log_interval=1,
             mode="overwrite",
