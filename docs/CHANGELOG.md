@@ -28,6 +28,9 @@ Design decisions → `docs/decisions/`. Architecture → `docs/ARCHITECTURE.md`.
 - **K-Policy 六卡训练适配**: 当前空闲同构节点为 gpu12/gpu14/gpu28，启动器支持可配置双卡节点集合；
   默认 smoke/80k 为三节点六卡、global batch126，并将全部远端会话作为不可拆分的生命周期单元；监督器
   支持通过环境变量覆盖节点、批量和实验标签，节点临时被占用时可退回空闲双节点四卡/global batch128。
+- **K-Policy loader 吞吐调优**: gpu28、本地 batch64 的 TorchCodec 定向回退基准显示 workers2 六批
+  平均 17.68s，workers4 十四批平均 14.38s，workers8 十四批平均 8.74s，workers16 首批超过 3 分钟；
+  正式 80k 使用每进程 workers8，监督器可通过 `OPENPI_K_NUM_WORKERS` 覆盖。
 
 ## 2026-07-12
 

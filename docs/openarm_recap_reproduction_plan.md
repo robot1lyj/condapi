@@ -397,6 +397,10 @@ K-Data 已完成 1719 集构建和全量 norm；旧四卡 smoke 曾通过，旧 
 评分派生集已统一训练提示词，不能用其 `tasks` 字段反推原始任务范围。构建时同时核对原始 HQ 与评分集的
 episode ID 和逐集长度，防止混入错误数据版本。
 
+同日 loader 基准使用每个 JAX 进程对应的 local batch64：workers8 在 14 批中平均 8.74s、排除首批后
+约 2.08s/batch，优于 workers4 的 14.38s 和 workers2 的 17.68s；workers16 出现过度并发。因此本轮
+正式 80k 使用每进程 workers8，仍需用真实训练前 100 步重新估算端到端 ETA。
+
 无人值守总控为 `scripts/monitor_openarm_kai0_pipeline.py`，跳板机 tmux 固定为 `kai0_pipeline_v1`，状态写到
 `output/openpi/logs/openarm_kai0_pipeline_v1/status.json`。它只按以下闸门推进：
 

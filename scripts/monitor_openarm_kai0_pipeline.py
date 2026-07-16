@@ -72,11 +72,12 @@ K_TRAIN_HOSTS = tuple(
     if host.strip()
 )
 K_GLOBAL_BATCH_SIZE = int(os.environ.get("OPENPI_K_GLOBAL_BATCH_SIZE", "126"))
+K_NUM_WORKERS = int(os.environ.get("OPENPI_K_NUM_WORKERS", "8"))
 K_TRAIN_TAG = os.environ.get("OPENPI_K_TRAIN_TAG", "6gpu").strip()
 if not K_TRAIN_HOSTS or K_TRAIN_HOSTS[0] != "gpu12" or len(set(K_TRAIN_HOSTS)) != len(K_TRAIN_HOSTS):
     raise ValueError("OPENPI_K_TRAIN_HOSTS must be unique, non-empty, and start with coordinator host gpu12")
-if not K_TRAIN_TAG or K_GLOBAL_BATCH_SIZE % (2 * len(K_TRAIN_HOSTS)) != 0:
-    raise ValueError("K-Policy batch size must be divisible by two GPUs per configured host")
+if not K_TRAIN_TAG or K_NUM_WORKERS < 0 or K_GLOBAL_BATCH_SIZE % (2 * len(K_TRAIN_HOSTS)) != 0:
+    raise ValueError("K-Policy tag/workers must be valid and batch size divisible by two GPUs per configured host")
 K_SMOKE_EXP = f"openarm_kai0_awbc_v1_{K_TRAIN_TAG}_smoke20_20260716"
 K_FULL_EXP = f"openarm_kai0_awbc_v1_{K_TRAIN_TAG}_80k_20260716"
 K_SMOKE_CHECKPOINT = OUTPUT / K_CONFIG / K_SMOKE_EXP / "19"
@@ -955,7 +956,7 @@ def monitor_once(state: dict[str, Any]) -> dict[str, Any]:
         exp_name=K_FULL_EXP,
         session_prefix="kai0_k_full",
         num_train_steps=80_000,
-        num_workers=2,
+        num_workers=K_NUM_WORKERS,
         final_checkpoint=K_FULL_CHECKPOINT,
         max_restarts=5,
     ):

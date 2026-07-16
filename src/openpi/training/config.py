@@ -1208,7 +1208,7 @@ _CONFIGS = [
         ),
         log_interval=20,
         wandb_enabled=True,
-        num_workers=2,
+        num_workers=8,
         save_interval=5_000,
         keep_period=5_000,
         num_train_steps=80_000,
