@@ -1,7 +1,22 @@
+import argparse
+
 import numpy as np
 import pandas as pd
 
 from scripts import evaluate_openarm_checkpoint_sweep as sweep
+
+
+def test_sampling_signature_versions_critical_selector() -> None:
+    args = argparse.Namespace(
+        uniform_frames=3,
+        critical_frames=3,
+        include_adjacent=True,
+        train_max_episodes=20,
+        val_max_episodes=10,
+        prompt="Fold the T-shirt properly, Advantage: positive",
+    )
+
+    assert sweep._sampling_signature(args)["critical_selector"] == sweep.CRITICAL_SELECTOR_VERSION  # noqa: SLF001
 
 
 def test_prompt_override_for_awbc_evaluation() -> None:

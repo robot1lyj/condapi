@@ -38,6 +38,7 @@ import openpi.training.config as _config
 
 LOGGER = logging.getLogger("openarm_checkpoint_sweep")
 REPORT_SCHEMA_VERSION = "openarm_checkpoint_sweep_v2"
+CRITICAL_SELECTOR_VERSION = "joint_action_and_gripper_frame_delta_v1"
 
 
 @dataclasses.dataclass(frozen=True)
@@ -446,6 +447,7 @@ def _load_cached_report(
 
 def _sampling_signature(args: argparse.Namespace) -> dict[str, Any]:
     return {
+        "critical_selector": CRITICAL_SELECTOR_VERSION,
         "uniform_frames": args.uniform_frames,
         "critical_frames": args.critical_frames,
         "include_adjacent": args.include_adjacent,
