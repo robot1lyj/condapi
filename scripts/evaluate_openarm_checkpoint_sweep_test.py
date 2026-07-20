@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 
 from scripts import evaluate_openarm_checkpoint_sweep as sweep
 
@@ -60,3 +61,36 @@ def test_cached_report_requires_matching_positive_prompt(tmp_path) -> None:
 
     assert cached == report
     assert wrong_prompt is None
+
+
+def test_critical_offsets_follow_motion_not_absolute_joint_pose(monkeypatch, tmp_path) -> None:
+    actions = np.zeros((20, 16), dtype=np.float32)
+    actions[:, 0] = 100.0
+    actions[10:, 1] = 25.0
+    states = np.zeros((20, 16), dtype=np.float32)
+    frame = pd.DataFrame({"action": list(actions), "observation.state": list(states)})
+    monkeypatch.setattr(sweep, "_episode_parquet_path", lambda *_args: tmp_path / "episode.parquet")
+    monkeypatch.setattr(sweep.pd, "read_parquet", lambda *_args, **_kwargs: frame)
+
+    offsets = sweep._critical_offsets(  # noqa: SLF001
+        tmp_path,
+        0,
+        count=1,
+        min_separation=1,
+        max_length=20,
+    )
+
+    assert offsets == [10]
+
+
+def test_critical_offsets_include_commanded_gripper_change(monkeypatch, tmp_path) -> None:
+    actions = np.zeros((20, 16), dtype=np.float32)
+    actions[7:, 7] = -66.0
+    states = np.zeros((20, 16), dtype=np.float32)
+    frame = pd.DataFrame({"action": list(actions), "observation.state": list(states)})
+    monkeypatch.setattr(sweep, "_episode_parquet_path", lambda *_args: tmp_path / "episode.parquet")
+    monkeypatch.setattr(sweep.pd, "read_parquet", lambda *_args, **_kwargs: frame)
+
+    offsets = sweep._critical_offsets(tmp_path, 0, count=1, min_separation=1, max_length=20)  # noqa: SLF001
+
+    assert offsets == [7]

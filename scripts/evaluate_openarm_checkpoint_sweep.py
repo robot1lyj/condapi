@@ -144,11 +144,15 @@ def _critical_offsets(
         if dim < joint_mask.size:
             joint_mask[dim] = False
 
-    action_score = np.linalg.norm(actions[:, joint_mask], axis=1)
+    action_delta = np.zeros_like(actions)
+    action_delta[1:] = actions[1:] - actions[:-1]
+    action_score = np.linalg.norm(action_delta[:, joint_mask], axis=1)
     gripper_score = np.zeros(len(actions), dtype=np.float32)
     for dim in (7, 15):
+        if dim < actions.shape[1]:
+            gripper_score[1:] += np.abs(action_delta[1:, dim]).astype(np.float32)
         if dim < states.shape[1]:
-            gripper_score += np.abs(np.gradient(states[:, dim])).astype(np.float32)
+            gripper_score[1:] += np.abs(states[1:, dim] - states[:-1, dim]).astype(np.float32)
 
     def normalize(values: np.ndarray) -> np.ndarray:
         spread = float(values.max() - values.min())
@@ -591,7 +595,9 @@ def main() -> None:
     parser.add_argument("--seed", type=int, default=20260706)
     parser.add_argument("--lerobot-tolerance-s", type=float, default=0.05)
     parser.add_argument("--prompt", default=None, help="Override every sampled frame prompt, e.g. AWBC positive mode.")
-    parser.add_argument("--resume", action="store_true", help="Reuse complete per-checkpoint reports that match inputs.")
+    parser.add_argument(
+        "--resume", action="store_true", help="Reuse complete per-checkpoint reports that match inputs."
+    )
     parser.add_argument("--output", type=pathlib.Path, required=True)
     args = parser.parse_args()
 

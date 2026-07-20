@@ -424,6 +424,8 @@ episode ID 和逐集长度，防止混入错误数据版本。
    计算 epoch 和 batch offset，继续读取下一批，禁止每轮重复同一顺序或从 batch zero 重放。
 6. 80k 后对 `5000/10000/.../75000/79999` 全部 16 个 checkpoint 在 HQ holdout 与 Site val10 上使用
    固定 positive prompt 做 sampled sweep；
+   关键帧按相邻帧关节动作变化和夹爪状态变化选择，不按关节绝对角度大小选择，确保覆盖抓取、抬升和
+   夹爪切换而不是静止的极端姿态；
    选择权重为 Site 关键帧30%、Site MAE25%、HQ关键帧20%、HQ MAE15%、Site chunk overlap10%，优先
    保留 HQ val/train MAE 比不超过2.0的 checkpoint，最后部署到 gpu25:6666。服务端使用 `--force-prompt`
    覆盖客户端普通 task，保证真实推理和离线 sweep 同样走 `Advantage: positive` 条件；普通/RTC 服务默认不覆盖。
