@@ -433,7 +433,8 @@ episode ID 和逐集长度，防止混入错误数据版本。
    checkpoint 的 HQ/Site 指标、来源/标签分布、质量闸门、选中权重和 gpu25 服务合同；gpu28:8769
    报告服务监听成功后总控才标记 complete。gpu25 端口监听后还必须由
    `smoke_test_openarm_policy_server.py` 发出真实 WebSocket 请求并获得有限的 `(50,16)` 动作；smoke 证据必须
-   绑定选中 checkpoint 和强制 positive prompt，不能仅凭端口存活验收部署。
+   绑定选中 checkpoint 和强制 positive prompt，并校验50步、16D、角度制及夹爪 `0/-66` 元数据；不能仅凭
+   端口存活验收部署。
 
 ## 10. 禁止项
 

@@ -1185,6 +1185,20 @@ _CONFIGS = [
     TrainConfig(
         name="pi05_openarm_kai0_awbc_v1",
         model=pi0_config.Pi0Config(pi05=True, discrete_state_input=True),
+        policy_metadata={
+            "model_action_dim": 32,
+            "robot_action_dim": 16,
+            "output_action_dim": 16,
+            "control_hz": 30,
+            "use_delta_joint_actions": True,
+            "returned_actions": "actions are output-transform robot actions with shape [50, 16]",
+            "model_internal_actions": "state/actions are zero-padded to 32 inside the pi0.5 model and RTC path",
+            "action_unit": "degrees",
+            "gripper_unit": "hq_motor_degrees",
+            "gripper_open": 0.0,
+            "gripper_closed": -66.0,
+            "task": "Fold the T-shirt properly",
+        },
         data=LeRobotOpenArmDataConfig(
             repo_id="/share/home/linyongjia/datasets/openarm_kai0_awbc_v1",
             assets=AssetsConfig(

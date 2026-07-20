@@ -22,7 +22,7 @@ New sessions load `AGENTS.md` + this file first, then `context_index.md` and at 
 - KAI0 AWBC stage groups do not replace model advantage: Site uses manual `flatten_done`; HQ `0:536` uses model crossing and folding-only `536:999` is stage 1; TDA inherits its HQ source stage.
 - Formal K-Data follows released KAI0 AWBC code and discretizes stage-wise top-30% `absolute_advantage`; `relative_advantage` remains a scorer diagnostic only.
 - K-Policy serving must force `Fold the T-shirt properly, Advantage: positive`; a default prompt is insufficient when clients send their own prompt.
-- K-Policy deployment is valid only after a real websocket request returns finite `(50,16)` OpenArm actions; port listening alone is insufficient.
+- K-Policy deployment is valid only after a real websocket request returns finite `(50,16)` actions and metadata confirms 50-step/16D/degrees/HQ-gripper `0/-66`; port listening alone is insufficient.
 - Formal JAX policy training uses deterministic epoch-aware sampling; resume positions the loader from restored `train_state.step` instead of replaying the dataset from batch zero.
 - KAI0 pipeline controller is jump-host tmux `kai0_pipeline_v1`; canonical status is `output/openpi/logs/openarm_kai0_pipeline_v1/status.json`.
 

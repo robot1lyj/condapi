@@ -835,6 +835,7 @@ def _deployment_evidence_current(deployment: Any, smoke: Any, checkpoint: str) -
         and smoke.get("checkpoint") == checkpoint
         and smoke.get("prompt") == POSITIVE_PROMPT
         and smoke.get("actions", {}).get("shape") == [50, 16]
+        and smoke.get("contract", {}).get("passed") is True
     )
 
 
@@ -902,6 +903,7 @@ def _ensure_gpu25_deployment(selection: dict[str, Any]) -> bool:
         smoke.get("passed") is not True
         or smoke.get("checkpoint") != str(checkpoint)
         or smoke.get("actions", {}).get("shape") != [50, 16]
+        or smoke.get("contract", {}).get("passed") is not True
     ):
         raise RuntimeError(f"gpu25 K-Policy inference smoke failed: {smoke}")
     deployment = {

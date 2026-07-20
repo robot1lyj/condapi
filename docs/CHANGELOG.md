@@ -10,8 +10,8 @@ Design decisions → `docs/decisions/`. Architecture → `docs/ARCHITECTURE.md`.
 ## 2026-07-20
 
 - **K-Policy 部署验收加固**: gpu25 部署不再仅以端口监听为成功；新增 OpenArm WebSocket 真实推理 smoke，
-  强制校验有限的 `(50,16)` 动作，并把选中 checkpoint、positive prompt、时延和动作摘要写入部署报告。
-  旧 checkpoint 或缺少 smoke 的部署记录不会被误复用。
+  强制校验有限的 `(50,16)` 动作以及50步/16D/角度制/夹爪 `0/-66` 元数据，并把选中 checkpoint、
+  positive prompt、时延和动作摘要写入部署报告。旧 checkpoint 或缺少 smoke 的部署记录不会被误复用。
 
 ## 2026-07-13
 

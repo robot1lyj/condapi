@@ -82,6 +82,7 @@ def test_deployment_evidence_contract_binds_checkpoint_prompt_and_action_shape()
         "checkpoint": checkpoint,
         "prompt": pipeline.POSITIVE_PROMPT,
         "actions": {"shape": [50, 16]},
+        "contract": {"passed": True},
     }
     deployment = {"checkpoint": checkpoint, "prompt": pipeline.POSITIVE_PROMPT}
 

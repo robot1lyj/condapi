@@ -39,7 +39,12 @@ def test_builds_self_contained_kai0_policy_report(tmp_path):
             "host": "gpu25",
             "port": 6666,
             "prompt": "Fold the T-shirt properly, Advantage: positive",
-            "inference_smoke": {"passed": True, "elapsed_ms": 1234, "actions": {"shape": [50, 16]}},
+            "inference_smoke": {
+                "passed": True,
+                "elapsed_ms": 1234,
+                "actions": {"shape": [50, 16]},
+                "contract": {"passed": True},
+            },
         },
     )
     hq_audit = tmp_path / "hq_audit.json"

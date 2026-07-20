@@ -44,6 +44,26 @@ def _action_summary(value: Any) -> dict[str, Any]:
     }
 
 
+def _contract_summary(metadata: dict[str, Any]) -> dict[str, Any]:
+    expected = {
+        "action_horizon": 50,
+        "robot_action_dim": 16,
+        "output_action_dim": 16,
+        "action_unit": "degrees",
+        "gripper_unit": "hq_motor_degrees",
+        "gripper_open": 0.0,
+        "gripper_closed": -66.0,
+    }
+    mismatches = {
+        key: {"expected": value, "actual": metadata.get(key)}
+        for key, value in expected.items()
+        if metadata.get(key) != value
+    }
+    if mismatches:
+        raise ValueError(f"OpenArm server metadata contract mismatch: {mismatches}")
+    return {"passed": True, **expected}
+
+
 def _jsonable(value: Any) -> Any:
     if isinstance(value, dict):
         return {str(key): _jsonable(item) for key, item in value.items()}
@@ -94,6 +114,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         "prompt": args.prompt,
         "elapsed_ms": 1000.0 * (time.perf_counter() - started),
         "actions": _action_summary(result["actions"]),
+        "contract": _contract_summary(client.get_server_metadata()),
         "server_metadata": _jsonable(client.get_server_metadata()),
     }
     _write_json_atomic(args.output, payload)
