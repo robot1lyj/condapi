@@ -9,6 +9,8 @@ Design decisions → `docs/decisions/`. Architecture → `docs/ARCHITECTURE.md`.
 
 ## 2026-07-20
 
+- **KAI0 完成审计闸门**: 总控新增独立 completion audit，只有 HQ999、Site150、K-Data、最终79999、
+  16-checkpoint sweep、选中权重、gpu25真实推理 smoke 与报告一致性全部通过才允许标记 complete。
 - **K-Policy 关键帧评估修正**: checkpoint sweep 的关键帧从关节绝对角度范数改为相邻帧动作变化与夹爪
   状态变化，避免把姿态幅度大的静止帧误当作抓取、抬升或夹爪切换关键帧而影响最终选模；采样指纹记录
   选择器版本，旧算法报告不会被断点续跑误复用。

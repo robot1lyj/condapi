@@ -71,5 +71,6 @@ Local validation env is `pi-conda`. If missing, create with conda from `environm
 - Deployment success additionally requires `smoke_test_openarm_policy_server.py` to return finite `(50,16)` actions, validate 50-step/16D/degrees/HQ-gripper `0/-66` metadata, and bind evidence to the selected checkpoint; listening on `6666` is insufficient.
 - HQ/Site policy sweep runs with `--resume`; reuse is allowed only for atomic v2 reports with identical checkpoint, dataset, sampled episodes/settings, config, and forced positive prompt.
 - After deployment, the controller builds the self-contained K-Policy report at `policy_report/index.html` under the pipeline log root and serves it from gpu28 port `8769`; completion requires that server to listen.
+- The controller may mark `complete` only after `completion_audit.json` passes HQ999, Site150, K-Data, 79999, all 16 sweep checkpoints, selection, deployment smoke, and report consistency gates.
 - When remote code is behind local commits, sync the full `git ls-files` set; selectively copying `training/config.py` can omit new policy/transform dependencies. Validate Torch/OpenPI imports inside gpu12/gpu14/gpu28, not on the older-glibc jump host.
 - The reusable report server supports byte ranges; current HQ report is `openarm_hq_score_review_v1/hq_score_report/index.html` on gpu28 port 8767.

@@ -437,6 +437,8 @@ episode ID 和逐集长度，防止混入错误数据版本。
    `smoke_test_openarm_policy_server.py` 发出真实 WebSocket 请求并获得有限的 `(50,16)` 动作；smoke 证据必须
    绑定选中 checkpoint 和强制 positive prompt，并校验50步、16D、角度制及夹爪 `0/-66` 元数据；不能仅凭
    端口存活验收部署。
+8. 总控最终生成 `completion_audit.json`，逐项核对 HQ999、Site150、1719集 K-Data、完整 `79999`、全部
+   16 个 sweep checkpoint、选中权重、gpu25 smoke 和报告 checkpoint 一致性；任一项失败不得标记 complete。
 
 ## 10. 禁止项
 

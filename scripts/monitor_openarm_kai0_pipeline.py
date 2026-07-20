@@ -12,11 +12,13 @@ import time
 from typing import Any
 
 try:
+    from scripts import audit_openarm_kai0_pipeline_completion as completion_audit
     from scripts import launch_openarm_jax_multinode as jax_launcher
     from scripts import select_openarm_site_stage_checkpoint as stage_selector
     from scripts.openarm_kai0_contract import HQ_FOLDING_ONLY_START
     from scripts.openarm_kai0_contract import HQ_LAYOUT_TASK_START
 except ImportError:
+    import audit_openarm_kai0_pipeline_completion as completion_audit
     import launch_openarm_jax_multinode as jax_launcher
     from openarm_kai0_contract import HQ_FOLDING_ONLY_START
     from openarm_kai0_contract import HQ_LAYOUT_TASK_START
@@ -89,6 +91,7 @@ K_DEPLOYMENT = PIPELINE_ROOT / "gpu25_deployment.json"
 K_DEPLOYMENT_SMOKE = PIPELINE_ROOT / "gpu25_inference_smoke.json"
 K_POLICY_REPORT = PIPELINE_ROOT / "policy_report/index.html"
 K_POLICY_REPORT_PAYLOAD = PIPELINE_ROOT / "policy_report/report.json"
+K_COMPLETION_AUDIT = PIPELINE_ROOT / "completion_audit.json"
 POSITIVE_PROMPT = "Fold the T-shirt properly, Advantage: positive"
 SWEEP_SCHEMA_VERSION = "openarm_checkpoint_sweep_v2"
 
@@ -975,6 +978,29 @@ def _ensure_policy_report(selection: dict[str, Any]) -> bool:
     raise RuntimeError("K-Policy report server did not listen on port 8769")
 
 
+def _ensure_completion_audit() -> dict[str, Any]:
+    report = completion_audit.audit(
+        argparse.Namespace(
+            hq_audit=HQ_SCORE_AUDIT,
+            site_selection=SITE_SELECTION,
+            k_data_report=K_DATA_REPORT,
+            k_data_audit=K_DATA_AUDIT,
+            norm_stats=K_DATA / "norm_stats.json",
+            checkpoint_root=K_FULL_ROOT,
+            policy_selection=K_POLICY_SELECTION,
+            deployment=K_DEPLOYMENT,
+            report_html=K_POLICY_REPORT,
+            report_payload=K_POLICY_REPORT_PAYLOAD,
+            output=K_COMPLETION_AUDIT,
+        )
+    )
+    _write_json_atomic(K_COMPLETION_AUDIT, report)
+    if not report["passed"]:
+        failed = [name for name, passed in report["gates"].items() if not passed]
+        raise RuntimeError(f"KAI0 completion audit failed: {failed}")
+    return report
+
+
 def monitor_once(state: dict[str, Any]) -> dict[str, Any]:
     status: dict[str, Any] = {"timestamp": time.strftime("%Y-%m-%d %H:%M:%S %Z")}
     selection = _ensure_site_selection(state)
@@ -1024,7 +1050,9 @@ def monitor_once(state: dict[str, Any]) -> dict[str, Any]:
         elif not _ensure_policy_report(policy_selection):
             status["phase"] = "building_k_policy_report"
         else:
+            completion = _ensure_completion_audit()
             status["phase"] = "complete"
+            status["completion_audit"] = completion
             status["deployment"] = _load_json(K_DEPLOYMENT)
             status["policy_report"] = {
                 "path": str(K_POLICY_REPORT),
