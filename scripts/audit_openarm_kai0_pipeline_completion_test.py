@@ -111,3 +111,10 @@ def test_completion_audit_rejects_smoke_for_wrong_checkpoint(tmp_path) -> None:
 
     assert not result["passed"]
     assert not result["gates"]["deployment_inference_smoke"]
+
+
+def test_completion_audit_does_not_treat_two_missing_checkpoints_as_match(tmp_path) -> None:
+    result = completion.audit(_args(tmp_path))
+
+    assert not result["passed"]
+    assert not result["gates"]["deployment_matches_selection"]

@@ -71,7 +71,8 @@ def audit(args: argparse.Namespace) -> dict[str, Any]:
         "selection_is_candidate": selected_step in EXPECTED_STEPS
         and selected_checkpoint == str(args.checkpoint_root / str(selected_step)),
         "selection_positive_prompt": selection.get("positive_prompt") == POSITIVE_PROMPT,
-        "deployment_matches_selection": deployment.get("checkpoint") == selected_checkpoint,
+        "deployment_matches_selection": bool(selected_checkpoint)
+        and deployment.get("checkpoint") == selected_checkpoint,
         "deployment_positive_prompt": deployment.get("prompt") == POSITIVE_PROMPT,
         "deployment_inference_smoke": smoke.get("passed") is True
         and smoke.get("checkpoint") == selected_checkpoint
