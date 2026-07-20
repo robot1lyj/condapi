@@ -86,6 +86,7 @@ K_FULL_CHECKPOINT = K_FULL_ROOT / "79999"
 K_SWEEP_ROOT = PIPELINE_ROOT / "checkpoint_sweep"
 K_POLICY_SELECTION = K_SWEEP_ROOT / "selection.json"
 K_DEPLOYMENT = PIPELINE_ROOT / "gpu25_deployment.json"
+K_DEPLOYMENT_SMOKE = PIPELINE_ROOT / "gpu25_inference_smoke.json"
 K_POLICY_REPORT = PIPELINE_ROOT / "policy_report/index.html"
 K_POLICY_REPORT_PAYLOAD = PIPELINE_ROOT / "policy_report/report.json"
 POSITIVE_PROMPT = "Fold the T-shirt properly, Advantage: positive"
@@ -824,12 +825,31 @@ def _ensure_policy_selection(state: dict[str, Any]) -> dict[str, Any] | None:
     return None
 
 
+def _deployment_evidence_current(deployment: Any, smoke: Any, checkpoint: str) -> bool:
+    return bool(
+        isinstance(deployment, dict)
+        and isinstance(smoke, dict)
+        and deployment.get("checkpoint") == checkpoint
+        and deployment.get("prompt") == POSITIVE_PROMPT
+        and smoke.get("passed") is True
+        and smoke.get("checkpoint") == checkpoint
+        and smoke.get("prompt") == POSITIVE_PROMPT
+        and smoke.get("actions", {}).get("shape") == [50, 16]
+    )
+
+
 def _ensure_gpu25_deployment(selection: dict[str, Any]) -> bool:
     deployment = _load_json(K_DEPLOYMENT)
+    smoke = _load_json(K_DEPLOYMENT_SMOKE, {})
     session = "openarm_kai0_policy_v1"
-    if deployment and _session_exists("gpu25", session):
-        return True
     checkpoint = pathlib.Path(selection["selected_checkpoint"])
+    deployment_current = _deployment_evidence_current(deployment, smoke, str(checkpoint))
+    if deployment_current and _session_exists("gpu25", session):
+        return True
+    K_DEPLOYMENT.unlink(missing_ok=True)
+    K_DEPLOYMENT_SMOKE.unlink(missing_ok=True)
+    if _session_exists("gpu25", session):
+        _kill_session("gpu25", session)
     log = PIPELINE_ROOT / "gpu25_serve.log"
     command = (
         f"cd {shlex.quote(str(REPO_ROOT))} && export XLA_PYTHON_CLIENT_MEM_FRACTION=0.9 "
@@ -854,6 +874,36 @@ def _ensure_gpu25_deployment(selection: dict[str, Any]) -> bool:
             break
     if listening != "listening":
         raise RuntimeError("gpu25 K-Policy server did not listen on port 6666 within ten minutes")
+    smoke_command = [
+        str(PYTHON),
+        "scripts/smoke_test_openarm_policy_server.py",
+        "--host",
+        "gpu25",
+        "--port",
+        "6666",
+        "--checkpoint",
+        str(checkpoint),
+        "--prompt",
+        POSITIVE_PROMPT,
+        "--output",
+        str(K_DEPLOYMENT_SMOKE),
+    ]
+    _ssh(
+        "gpu28",
+        [
+            "bash",
+            "-lc",
+            f"cd {shlex.quote(str(REPO_ROOT))} && PYTHONPATH=packages/openpi-client/src {shlex.join(smoke_command)}",
+        ],
+        timeout=660,
+    )
+    smoke = _load_json(K_DEPLOYMENT_SMOKE, {})
+    if (
+        smoke.get("passed") is not True
+        or smoke.get("checkpoint") != str(checkpoint)
+        or smoke.get("actions", {}).get("shape") != [50, 16]
+    ):
+        raise RuntimeError(f"gpu25 K-Policy inference smoke failed: {smoke}")
     deployment = {
         "host": "gpu25",
         "port": 6666,
@@ -861,6 +911,8 @@ def _ensure_gpu25_deployment(selection: dict[str, Any]) -> bool:
         "config": K_CONFIG,
         "checkpoint": str(checkpoint),
         "prompt": POSITIVE_PROMPT,
+        "inference_smoke": smoke,
+        "inference_smoke_report": str(K_DEPLOYMENT_SMOKE),
         "deployed_at": time.strftime("%Y-%m-%d %H:%M:%S %Z"),
     }
     _write_json_atomic(K_DEPLOYMENT, deployment)

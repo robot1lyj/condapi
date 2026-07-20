@@ -39,6 +39,7 @@ def test_builds_self_contained_kai0_policy_report(tmp_path):
             "host": "gpu25",
             "port": 6666,
             "prompt": "Fold the T-shirt properly, Advantage: positive",
+            "inference_smoke": {"passed": True, "elapsed_ms": 1234, "actions": {"shape": [50, 16]}},
         },
     )
     hq_audit = tmp_path / "hq_audit.json"
@@ -81,6 +82,7 @@ def test_builds_self_contained_kai0_policy_report(tmp_path):
     assert result["selected_step"] == 5000
     assert "OpenArm K-Policy 训练报告" in html
     assert '"schema_version": "openarm_kai0_policy_report_v1"' in html
+    assert "gpu25 inference smoke" in html
     assert "https://" not in html
     assert json.loads((output.parent / "report.json").read_text())["selection"]["selected_step"] == 5000
     assert not list(output.parent.glob(".index.html.tmp-*"))

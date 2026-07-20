@@ -73,3 +73,19 @@ def test_policy_selection_rejects_non_positive_sweep_prompt(tmp_path) -> None:
 
     with pytest.raises(RuntimeError, match="positive AWBC prompt"):
         pipeline._select_policy_reports(hq, {5_000: site_report}, [5_000], tmp_path)  # noqa: SLF001
+
+
+def test_deployment_evidence_contract_binds_checkpoint_prompt_and_action_shape() -> None:
+    checkpoint = "/checkpoints/5000"
+    smoke = {
+        "passed": True,
+        "checkpoint": checkpoint,
+        "prompt": pipeline.POSITIVE_PROMPT,
+        "actions": {"shape": [50, 16]},
+    }
+    deployment = {"checkpoint": checkpoint, "prompt": pipeline.POSITIVE_PROMPT}
+
+    assert pipeline._deployment_evidence_current(deployment, smoke, checkpoint)  # noqa: SLF001
+    smoke["actions"]["shape"] = [50, 32]
+    assert not pipeline._deployment_evidence_current(deployment, smoke, checkpoint)  # noqa: SLF001
+    assert not pipeline._deployment_evidence_current(None, None, checkpoint)  # noqa: SLF001

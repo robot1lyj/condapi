@@ -226,12 +226,12 @@ KAI0 官方 TDA 类型保持不变：
 - `[论文/官方代码]` 从原始 π0.5 base 开始全参数训练，不从 HQ99999 warm start。
 - `[论文]` policy 训练表给出 80k steps、batch 128。
 - `[官方代码]` 发布的 AWBC config 给出 100k steps、batch 256。
-- 第一轮以论文 80k/batch128 为复现目标；当前六卡无法整除 128，显式使用最接近的 global batch126（差 1.56%），不把它表述为严格 batch 复现。
+- 第一轮以论文 80k/batch128 为复现目标；当前正式任务使用 gpu12+gpu28 四卡，global batch128，可整除且与论文 batch 对齐。
 - 保存周期按官方 config 使用 5k/10k 级别 checkpoint，不预先指定哪个最好。
-- 正式配置固定为 `pi05_openarm_kai0_awbc_v1`，从原始 P05 初始化；gpu12+gpu14+gpu28 组成 6 卡 JAX
-  多节点作业，全局 batch126（每节点 42、每卡 21），workers2，80k steps，5k 保存一次。
-- 正式训练前必须先以同一配置、同一全局 batch 和同一 6 卡启动器跑 20-step smoke；smoke 使用 workers0
-  排除 DataLoader 子进程干扰，正式训练才恢复 workers2。
+- 正式配置固定为 `pi05_openarm_kai0_awbc_v1`，从原始 P05 初始化；本轮 gpu12+gpu28 组成 4 卡 JAX
+  多节点作业，全局 batch128（每节点64、每卡32），workers8，80k steps，5k 保存一次。
+- 正式训练前必须先以同一配置、同一全局 batch 和同一多节点启动器跑 20-step smoke；smoke 使用 workers0
+  排除 DataLoader 子进程干扰，正式训练恢复基准选出的 workers8。
 
 必须有普通 π0.5 BC 对照：相同 HQ + Site + 小预算 TDA、相同训练样本数，只去掉 Advantage prompt。该对照对应 KAI0 的 normal π0.5 baseline，不是额外自研路线。
 
@@ -320,11 +320,11 @@ HIL raw HDF5/mp4
 |---|---|---|---|
 | **P05** | 官方 `pi05_base` | 所有正式 KAI0 policy 的初始化 | 已有 |
 | **HQ-Policy** | `pi05_openarms_dual_hq` / `99999` | 1200 HQ 训练出的历史策略 | 已有 |
-| **HQ-Stage** | `ADVANTAGE_TORCH_OPENARM_FLATTEN_FOLD` / `10000` | HQ 正式评分 + Site 直接迁移基线 | 已有，HQ 六卡评分中 |
-| **Site-Stage** | `ADVANTAGE_TORCH_OPENARM_SITE_FOLD` | HQ-Stage -> Site-StageData 领域适配 | 仅在 Site 直接迁移失败时训练 |
+| **HQ-Stage** | `ADVANTAGE_TORCH_OPENARM_FLATTEN_FOLD` / `10000` | HQ 正式评分 + Site 直接迁移基线 | HQ999 评分与审计已通过 |
+| **Site-Stage** | `ADVANTAGE_TORCH_OPENARM_SITE_FOLD` / `4000` | HQ-Stage -> Site-StageData 领域适配 | 直接迁移失败后已适配并通过 Site150 闸门 |
 | **Site-5K** | `pi05_openarms_dual_site_align_v1_probe` / `4999` | 当前 HIL collector 和真机候选 | 已有 |
 | **Site-10K** | `pi05_openarms_dual_site_align_v1_base_10k` / `9999` | P05 直接微调 Site 的对照 | 已有 |
-| **K-Policy** | `pi05_openarm_kai0_awbc_v1` | P05 -> K-Data AWBC | 待实现/训练 |
+| **K-Policy** | `pi05_openarm_kai0_awbc_v1` | P05 -> K-Data AWBC | 四卡 80k 正式训练中，已完成 60k checkpoint |
 | **K-BC** | `pi05_openarm_kai0_bc_control_v1` | P05 -> K-Control 普通 BC | 待实现/训练 |
 | **E-Value** | `openarm_evo_value_v1` | HIL success/intervention -> value/advantage | 待实现/训练 |
 | **E-Policy** | `pi05_openarm_evo_acp_v1` | Site-5K -> Evo ACP | 待正式训练 |
@@ -346,7 +346,7 @@ HIL raw HDF5/mp4
 
 六张 GPU 的用途是并行评分和独立路线实验，不在没有多机等价性验证时声称单个训练已经使用官方 8-GPU 配置。
 
-### 9.1 当前执行状态（2026-07-12）
+### 9.1 当前执行状态（2026-07-20）
 
 Site-A151 / Site-Score：
 
@@ -431,7 +431,9 @@ episode ID 和逐集长度，防止混入错误数据版本。
    positive prompt 全部相同才复用；最终选模再次拒绝旧 schema 或非 positive 报告。
 7. 部署后由 `build_openarm_kai0_policy_report.py` 生成单文件综合 HTML，包含 80k loss/grad 曲线、16 个
    checkpoint 的 HQ/Site 指标、来源/标签分布、质量闸门、选中权重和 gpu25 服务合同；gpu28:8769
-   报告服务监听成功后总控才标记 complete。
+   报告服务监听成功后总控才标记 complete。gpu25 端口监听后还必须由
+   `smoke_test_openarm_policy_server.py` 发出真实 WebSocket 请求并获得有限的 `(50,16)` 动作；smoke 证据必须
+   绑定选中 checkpoint 和强制 positive prompt，不能仅凭端口存活验收部署。
 
 ## 10. 禁止项
 

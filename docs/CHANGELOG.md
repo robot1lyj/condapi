@@ -7,6 +7,12 @@ Design decisions → `docs/decisions/`. Architecture → `docs/ARCHITECTURE.md`.
 
 ---
 
+## 2026-07-20
+
+- **K-Policy 部署验收加固**: gpu25 部署不再仅以端口监听为成功；新增 OpenArm WebSocket 真实推理 smoke，
+  强制校验有限的 `(50,16)` 动作，并把选中 checkpoint、positive prompt、时延和动作摘要写入部署报告。
+  旧 checkpoint 或缺少 smoke 的部署记录不会被误复用。
+
 ## 2026-07-13
 
 - **K-Data HQ 范围校验修复**: Stage 评分派生集会统一训练提示词，无法保留原始 HQ `360:536` 的 layout
