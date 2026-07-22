@@ -7,6 +7,12 @@ Design decisions → `docs/decisions/`. Architecture → `docs/ARCHITECTURE.md`.
 
 ---
 
+## 2026-07-22
+
+- **K-Policy HQ 评估坏视频恢复**: 80k 训练完成后的 HQ sweep 抽到缺少有效 MP4 `moov` 元数据的
+  多个左腕视频（包括 episode 1170/1177/1186）而退出；评估器现有限重试视频探测，对持续不可解码的已抽中 episode 做
+  确定性替换并原子记录选择与拒绝原因，同时保持全部有效的原抽样和既有 Site 评估缓存不变，无需重跑训练。
+
 ## 2026-07-20
 
 - **KAI0 完成审计闸门**: 总控新增独立 completion audit，只有 HQ999、Site150、K-Data、最终79999、

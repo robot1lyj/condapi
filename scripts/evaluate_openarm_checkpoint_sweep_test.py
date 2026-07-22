@@ -19,6 +19,26 @@ def test_sampling_signature_versions_critical_selector() -> None:
     assert sweep._sampling_signature(args)["critical_selector"] == sweep.CRITICAL_SELECTOR_VERSION  # noqa: SLF001
 
 
+def test_subsample_decodable_episodes_replaces_invalid_initial_sample(monkeypatch, tmp_path) -> None:
+    monkeypatch.setattr(sweep, "_subsample_episodes", lambda *_args, **_kwargs: [0, 1, 2])
+    monkeypatch.setattr(
+        sweep,
+        "_episode_video_error",
+        lambda _dataset, episode: "broken video" if episode == 1 else None,
+    )
+
+    selected, rejected = sweep._subsample_decodable_episodes(  # noqa: SLF001
+        tmp_path,
+        list(range(6)),
+        3,
+        seed=7,
+    )
+
+    assert len(selected) == 3
+    assert 1 not in selected
+    assert rejected == [{"episode_index": 1, "reason": "broken video"}]
+
+
 def test_prompt_override_for_awbc_evaluation() -> None:
     item = {
         "observation.state": np.zeros(16, dtype=np.float32),

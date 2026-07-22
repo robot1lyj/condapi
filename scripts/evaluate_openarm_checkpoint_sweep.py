@@ -26,6 +26,7 @@ import logging
 import os
 import pathlib
 import re
+import time
 from typing import Any
 
 import cv2
@@ -39,6 +40,11 @@ import openpi.training.config as _config
 LOGGER = logging.getLogger("openarm_checkpoint_sweep")
 REPORT_SCHEMA_VERSION = "openarm_checkpoint_sweep_v2"
 CRITICAL_SELECTOR_VERSION = "joint_action_and_gripper_frame_delta_v1"
+VIDEO_KEYS = (
+    "observation.images.base",
+    "observation.images.left_wrist",
+    "observation.images.right_wrist",
+)
 
 
 @dataclasses.dataclass(frozen=True)
@@ -99,23 +105,67 @@ def _video_path(dataset_dir: pathlib.Path, episode_index: int, video_key: str) -
 
 
 def _video_frame_count(path: pathlib.Path) -> int:
-    capture = cv2.VideoCapture(str(path))
-    count = int(capture.get(cv2.CAP_PROP_FRAME_COUNT))
-    capture.release()
-    if count <= 0:
-        raise ValueError(f"Could not read frame count from {path}")
-    return count
+    for attempt in range(3):
+        capture = cv2.VideoCapture(str(path))
+        count = int(capture.get(cv2.CAP_PROP_FRAME_COUNT))
+        capture.release()
+        if count > 0:
+            return count
+        if attempt < 2:
+            time.sleep(0.5 * (attempt + 1))
+    raise ValueError(f"Could not read frame count from {path}")
+
+
+def _episode_video_error(dataset_dir: pathlib.Path, episode_index: int) -> str | None:
+    try:
+        for video_key in VIDEO_KEYS:
+            _video_frame_count(_video_path(dataset_dir, episode_index, video_key))
+    except (OSError, ValueError) as error:
+        return str(error)
+    return None
+
+
+def _subsample_decodable_episodes(
+    dataset_dir: pathlib.Path,
+    episodes: list[int],
+    max_episodes: int,
+    *,
+    seed: int,
+) -> tuple[list[int], list[dict[str, Any]]]:
+    initial = _subsample_episodes(episodes, max_episodes, seed=seed)
+    target_count = len(initial)
+    selected: list[int] = []
+    rejected: list[dict[str, Any]] = []
+    checked: set[int] = set()
+
+    def consider(episode_index: int) -> None:
+        checked.add(episode_index)
+        error = _episode_video_error(dataset_dir, episode_index)
+        if error is None:
+            selected.append(episode_index)
+        else:
+            rejected.append({"episode_index": episode_index, "reason": error})
+
+    for episode_index in initial:
+        consider(episode_index)
+
+    if len(selected) < target_count:
+        remaining = np.asarray([episode for episode in episodes if episode not in checked], dtype=np.int64)
+        replacement_order = np.random.default_rng(seed + 10_000).permutation(remaining)
+        for episode_value in replacement_order:
+            consider(int(episode_value))
+            if len(selected) >= target_count:
+                break
+
+    if len(selected) != target_count:
+        raise RuntimeError(
+            f"Not enough decodable episodes: requested={target_count}, selected={len(selected)}, rejected={rejected}"
+        )
+    return sorted(selected), rejected
 
 
 def _safe_episode_length(dataset_dir: pathlib.Path, episode_index: int, parquet_length: int) -> int:
-    video_counts = [
-        _video_frame_count(_video_path(dataset_dir, episode_index, video_key))
-        for video_key in (
-            "observation.images.base",
-            "observation.images.left_wrist",
-            "observation.images.right_wrist",
-        )
-    ]
+    video_counts = [_video_frame_count(_video_path(dataset_dir, episode_index, video_key)) for video_key in VIDEO_KEYS]
     return min(parquet_length, *video_counts)
 
 
@@ -606,8 +656,26 @@ def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
     args.output.mkdir(parents=True, exist_ok=True)
 
-    train_episodes = _subsample_episodes(_parse_range(args.train_split), args.train_max_episodes, seed=args.seed)
-    val_episodes = _subsample_episodes(_parse_range(args.val_split), args.val_max_episodes, seed=args.seed + 1)
+    train_episodes, train_rejected = _subsample_decodable_episodes(
+        args.dataset,
+        _parse_range(args.train_split),
+        args.train_max_episodes,
+        seed=args.seed,
+    )
+    val_episodes, val_rejected = _subsample_decodable_episodes(
+        args.dataset,
+        _parse_range(args.val_split),
+        args.val_max_episodes,
+        seed=args.seed + 1,
+    )
+    _write_json_atomic(
+        args.output / "episode_selection.json",
+        {
+            "schema_version": "openarm_checkpoint_sweep_episode_selection_v1",
+            "train": {"selected": train_episodes, "rejected": train_rejected},
+            "val": {"selected": val_episodes, "rejected": val_rejected},
+        },
+    )
 
     reports = []
     sampling = _sampling_signature(args)
