@@ -6,7 +6,7 @@ New sessions load `AGENTS.md` + this file first, then `context_index.md` and at 
 - Product: OpenPI VLA fine-tuning/inference for OpenArm cloth folding; Piper configs remain separate legacy/support paths.
 - Local workspace: `/home/lyj/lyj/openpi`
 - Remote access: `ssh -p 12222 linyongjia@172.31.11.100`, then `ssh gpu12/gpu14/gpu25/gpu28`.
-- Current K-Policy run uses gpu12+gpu28, 4x A800 80GB, global batch128 and workers8 per JAX process; host set and batch remain runtime-configurable. gpu25 is the single-card serving node on port `6666`.
+- K-Policy 80k and 16-checkpoint sweep are complete. Offline selection is 20k, but real-robot A/B did not beat 79999; gpu25 currently serves 79999 on port `6666` as the HIL collector.
 - Remote repo/env/output: `/share/home/linyongjia/conda-pi/openpi`, env `pi-conda`, output `/share/home/linyongjia/output/openpi`.
 - Remote datasets: policy datasets under `/share/home/linyongjia/datasets`; some Stage/reference data may live under `/share/home/linyongjia/data`.
 - Main OpenArm configs: `pi05_openarms_dual_site_align_v1_probe`, `pi05_openarms_dual_evo_acp_hil_v1_probe`, and formal KAI0 `pi05_openarm_kai0_awbc_v1`; formal K-Policy must not reuse legacy `pi05_openarms_dual_awbc_v1`.
@@ -25,6 +25,7 @@ New sessions load `AGENTS.md` + this file first, then `context_index.md` and at 
 - K-Policy deployment is valid only after a real websocket request returns finite `(50,16)` actions and metadata confirms 50-step/16D/degrees/HQ-gripper `0/-66`; port listening alone is insufficient.
 - Formal JAX policy training uses deterministic epoch-aware sampling; resume positions the loader from restored `train_state.step` instead of replaying the dataset from batch zero.
 - KAI0 pipeline controller is jump-host tmux `kai0_pipeline_v1`; canonical status is `output/openpi/logs/openarm_kai0_pipeline_v1/status.json`.
+- Current next dataset is HIL-T30: 10 wrong-diagonal recoveries, 10 repeated-shake recoveries, and 10 already-flat-to-fold interventions; the main next policy is K-Policy79999 plus Evo value/ACP, with Site-5K retained only as the controlled Evo baseline.
 
 ## Safety Kernel
 - Do not commit credentials, tokens, private host keys, or server passwords.

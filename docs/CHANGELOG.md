@@ -12,6 +12,9 @@ Design decisions → `docs/decisions/`. Architecture → `docs/ARCHITECTURE.md`.
 - **K-Policy 真机覆盖与阶段审计**: 20k 真机表现未优于79999，gpu25恢复为79999运行候选并保留离线20k
   正式选择历史；全量标签审计确认折叠阶段帧数和positive数量均不少于展开阶段，当前阶段切换失败的关键
   边界是 `stage_id_awbc` 不进入策略条件且成功示范缺少错误甩平/恢复状态，下一批改为30条定向完整HIL。
+- **后续路线收敛**: 当前采集器固定为K-Policy79999，首批定向HIL按错误对角线、重复甩平和已展开不折叠
+  各10条采集；主力路线使用同一批数据训练Evo value/ACP并从79999初始化组合策略，Site-5K只保留为
+  Evo受控对照，Site-heavy采样和阶段条件提示词作为隔离消融而非官方复现。
 
 ## 2026-07-22
 

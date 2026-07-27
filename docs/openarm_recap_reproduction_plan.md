@@ -260,10 +260,13 @@ KAI0 官方 TDA 类型保持不变：
 
 ## 6. 路线 E：Evo-RL 复现
 
-数据仍由现有 Site HQ 5k / `4999` collector 持续采集：
+当前现实采集统一使用 gpu25 上的 K-Policy `79999`。它是真机 A/B 后的运行选择，不改写离线 sweep
+选中 `20k` 的历史记录。采集器和路线 E 的训练初始化是两个概念：同一批 HIL 可以同时用于路线 E 的
+受控对照和路线 H 的主力组合实验。
 
 ```text
-HIL raw HDF5/mp4
+K-Policy 79999 现实失败/接管/恢复
+  -> HIL raw HDF5/mp4
   -> openarm_hil_evo_v1 clean
   -> value train
   -> value infer
@@ -287,14 +290,16 @@ HIL raw HDF5/mp4
 - 当前 OpenArm ACP config 的 dropout 仍是 0.0，正式路线 E 前必须改成 0.3。
 - OpenArm value-train/value-infer 固定入口仍未完成，不能绕过 value 模型直接把 intervention 当全部标签。
 
-`[OpenArm适配/实验控制]` 路线 E 的策略初始化固定使用 Site-5K；这不是 Evo-RL 论文指定的 OpenArm 模型，而是为了只测 Evo-RL 带来的增量。
+`[OpenArm适配/实验控制]` 路线 E 的策略初始化固定使用 Site-5K；这不是当前采集器，也不是 Evo-RL
+论文指定的 OpenArm checkpoint，而是为了只测 Evo-RL 相对历史 Site 微调模型的增量。路线 E 与路线 H
+必须使用同一份 clean HIL、同一个 E-Value、同一组 ACP 标签和训练超参数。
 
 ## 7. 路线 H：KAI0 + Evo-RL 组合
 
-路线 H 只改变 Evo-RL 的策略初始化：
+路线 H 是当前主力下一步，只改变 Evo-RL 的策略初始化：
 
 ```text
-路线 K 胜出的 K-Policy
+当前真机运行的 K-Policy 79999
   -> 使用与路线 E 完全相同的 HIL 数据
   -> 使用同一个 value checkpoint
   -> 使用同样的 n_step / positive_ratio / dropout / steps
@@ -305,6 +310,9 @@ HIL raw HDF5/mp4
 - 不重新解释 HIL success/failure。
 - 不改变路线 E 的数据和超参数。
 - 只有初始化 checkpoint 不同，才能回答“KAI0 离线底座是否帮助 Evo-RL”。
+- 离线规则选出的 `20k` 继续作为历史 checkpoint；真机已经确认它没有优于 `79999`，因此本轮 H-Policy
+  初始化使用 `79999`，不再重复以20k采集或训练。
+- HQ-Stage 只用于失败前缀诊断，不替代 Evo 的 E-Value，也不直接生成 `acp_indicator`。
 
 ## 8. 统一命名
 
@@ -328,6 +336,7 @@ HIL raw HDF5/mp4
 | **K-Data** | `openarm_kai0_awbc_v1` | HQ-Score + Site-Score + TDA-S 的二值 AWBC 数据 | 合并后统一二值化 | 混合来源有明确 metadata |
 | **K-Control** | `openarm_kai0_bc_control_v1` | 与 K-Data 同样本、普通 task prompt | 去掉 advantage prompt | 否 |
 | **HIL-Raw** | 客户端 `openarm_hil_dagger` | policy/human/hold 原始 HIL | 现实采集 | 否 |
+| **HIL-T30** | HIL-Raw 中首批30条定向完整成功 episode | 错误对角线、重复甩平、已展开不折叠各10条 | K-Policy79999失败前缀 + 人工接管恢复 | 只作诊断，不用 HQ-Stage 造标签 |
 | **E-Data** | `openarm_hil_evo_v1` | clean HIL + value/ACP 字段 | HIL-Raw 清洗和 Evo value | Evo value，不用 HQ-Stage |
 
 历史/禁用数据名：
@@ -345,123 +354,62 @@ HIL raw HDF5/mp4
 | **HQ-Policy** | `pi05_openarms_dual_hq` / `99999` | 1200 HQ 训练出的历史策略 | 已有 |
 | **HQ-Stage** | `ADVANTAGE_TORCH_OPENARM_FLATTEN_FOLD` / `10000` | HQ 正式评分 + Site 直接迁移基线 | HQ999 评分与审计已通过 |
 | **Site-Stage** | `ADVANTAGE_TORCH_OPENARM_SITE_FOLD` / `4000` | HQ-Stage -> Site-StageData 领域适配 | 直接迁移失败后已适配并通过 Site150 闸门 |
-| **Site-5K** | `pi05_openarms_dual_site_align_v1_probe` / `4999` | 当前 HIL collector 和真机候选 | 已有 |
+| **Site-5K** | `pi05_openarms_dual_site_align_v1_probe` / `4999` | 历史 Site 微调模型；路线 E 的受控初始化 | 已有，不是当前 collector |
 | **Site-10K** | `pi05_openarms_dual_site_align_v1_base_10k` / `9999` | P05 直接微调 Site 的对照 | 已有 |
-| **K-Policy** | `pi05_openarm_kai0_awbc_v1` | P05 -> K-Data AWBC | 四卡 80k 正式训练中，已完成 60k checkpoint |
+| **K-Policy** | `pi05_openarm_kai0_awbc_v1` | P05 -> K-Data AWBC | 80k与16-checkpoint sweep已完成；离线选20k，gpu25当前运行79999 |
 | **K-BC** | `pi05_openarm_kai0_bc_control_v1` | P05 -> K-Control 普通 BC | 待实现/训练 |
 | **E-Value** | `openarm_evo_value_v1` | HIL success/intervention -> value/advantage | 待实现/训练 |
-| **E-Policy** | `pi05_openarm_evo_acp_v1` | Site-5K -> Evo ACP | 待正式训练 |
-| **H-Policy** | `pi05_openarm_kai0_evo_hybrid_v1` | K-Policy -> 同一 Evo ACP | 待路线 K/E 通过后训练 |
+| **E-Policy** | `pi05_openarm_evo_acp_v1` | Site-5K -> Evo ACP 受控对照 | HIL-T30清洗及E-Value完成后训练 |
+| **H-Policy** | `pi05_openarm_kai0_evo_hybrid_v1` | K-Policy79999 -> 同一 Evo ACP | 当前主力下一模型 |
 
 旧配置 `pi05_openarms_dual_awbc_v1` 使用旧数据名和 HQ-Policy warm start，不代表正式 K-Policy，禁止混用。
 
 ## 9. 执行顺序和 GPU
 
-1. HQ `0:999` 用 HQ-Stage 完成六分片 HQ-Score；实现断点续跑和官方并行预处理加速，但不更换 scorer。
-2. HQ-Stage 直接推理 Site-A150 生成 Site-DirectScore；Site-F1 排除并保留给恢复路线。
-3. 用人工标注对 Site-DirectScore 做迁移审计；合格则直接提升为 Site-Score。
-4. 只有直接迁移不合格时，才构建 Site-StageData、适配 Site-Stage，再重新生成并审计 Site-Score。
-5. 构建 TDA-S，并从 HQ-Score 映射 advantage。
-6. 合并 HQ-Score、Site-Score、TDA-S，完成来源/尺度审计后生成二值 K-Data。
-7. 从 P05 分别训练 K-Policy 与 K-BC；禁止从 HQ-Policy warm start。
-8. HIL 数据达到可用规模后，路线 E 用 E-Data 训练 E-Value/E-Policy。
-9. 路线 K 和 E 都通过各自 smoke 后，路线 H 只替换初始化训练 H-Policy。
+### 9.1 已完成基线
 
-六张 GPU 的用途是并行评分和独立路线实验，不在没有多机等价性验证时声称单个训练已经使用官方 8-GPU 配置。
+1. HQ999 已由 HQ-Stage 完成评分和质量审计；HQ policy holdout `999:1199` 未进入 K-Data。
+2. Site-DirectScore 未通过迁移闸门；Site-Stage `4000` 通过 Site150 与 HQ 遗忘保护后生成 Site-Score。
+3. TDA-S、1719集 K-Data、全量 norm、真实 OpenPI loader smoke 和四卡80k均已完成。
+4. `5000/10000/.../75000/79999` 共16个 checkpoint 的双域 sweep、综合报告、完成审计和 gpu25
+   WebSocket 合同验证均已完成。
+5. 离线规则选择20k；真机20k未优于79999，因此运行选择恢复79999。两者必须继续分别称为“离线选择”和
+   “当前运行选择”。
 
-### 9.1 当前执行状态（2026-07-20）
+详细故障、修复和训练历史由 `docs/CHANGELOG.md` 与远端
+`output/openpi/logs/openarm_kai0_pipeline_v1/` 保存，本计划不再重复运行日志。
 
-Site-A151 / Site-Score：
+### 9.2 当前主线（2026-07-27）
 
-- 数据集：`/share/home/linyongjia/datasets/openarm_site_align_v1_deg`，151 episodes。
-- 标注内容：每集只点一次 `flatten_done`；起点和终点直接使用精修后的首尾帧。
-- Site-A151 已完成 151/151，已检查 episode 唯一性、缺失项和边界合法性。
-- 权威输入：`annotations/openarm_stage_v1.jsonl`。
-- episode 95 为 Site-F1；当前 Site-Stage 可用监督为 Site-A150，即 140 train + 10 val。
-- 已否决并删除 `openarm_site_gt_v1` 和 8766 报告服务；源 Site 和 Site-A151 均保持完整。
-- Site-A150 已按真实帧数均衡成 6 个分片，每片 25 集、约 6.55 万帧；`kai0_site_score_monitor` 在对应
-  HQ GPU 槽位释放后自动启动 Site-DirectScore，并在结束后执行曲线指标和 val10 随机帧对双重闸门。
-- 独立 `openarm_site_stage_v1` 已生成并验证为 150 episodes / 394008 frames / 450 videos，顺序固定为
-  Site140 train + Site10 validation；它只作迁移评估和条件 Site-Stage 监督，不进入最终 K-Data。
-- 条件配置 `ADVANTAGE_TORCH_OPENARM_SITE_FOLD` 固定从 HQ-Stage 10000 初始化，Site140×3 + HQ-A180
-  形成 70/30 replay，global batch32（每卡16）、5k steps、peak LR `5e-6`；只有直接迁移闸门失败才启动。
-  直接迁移已在 150/150 集上失败（corrcoef `0.592`、R² `-0.222`），因此已进入 Site-Stage 适配；最初
-  global batch64 且关闭梯度检查点实测峰值约 `78.7 GiB/卡` 并 OOM，正式重启配置降为 global batch32。
-- Site-A150 人工阶段共394008帧，stage0/stage1 为171100/222908（43.4%/56.6%）；train 与 val
-  均覆盖两阶段，单集 stage0 比例20.96%-70.05%，可用于官方 stage-aware percentile 分组。
+1. **固定采集器**：gpu25 保持 K-Policy79999、强制 positive prompt 和现有16D/角度制/HQ夹爪合同；
+   采集过程中不切换20k或其他 checkpoint。
+2. **采集 HIL-T30**：错误对角线后松手重抓10条、重复甩平后中止恢复10条、已经展开却不折叠时完整接管
+   10条。每条都保留策略失败前缀、hold、人类动作和最终完整成功结尾。
+3. **清洗与硬审计**：Raw 保留全部帧；Evo clean 丢弃 `session_state=intervention_hold`，只保留真实
+   policy 与有限16D human VR 动作。逐集检查时间戳单调、视频同步、intervention 起止、success/recovery
+   元数据、单位和夹爪范围；任一合同失败不得进入 E-Value。
+4. **先诊断再训练**：对三类失败前缀分别绘制 HQ/Site-Stage 进度曲线和 E-Value 曲线。Stage 结果只回答
+   “成功示范评分器如何看这些错误状态”，不能代替 Evo value 标签，也不能阻塞路线 E/H。
+5. **补齐 Evo JAX 链路**：实现并验证 OpenArm E-Value train/infer，固定 `n_step=50`、
+   `positive_ratio=0.3`、`indicator_dropout_prob=0.3`，再物化 E-Data。禁止把
+   `is_intervention=1` 直接当作全部 ACP 标签。
+6. **并行训练两个可归因结果**：E-Policy 从 Site-5K 初始化，H-Policy 从 K-Policy79999 初始化；
+   两者使用同一 E-Data、E-Value、step 数、batch、学习率和随机种子。H-Policy 是主力候选，E-Policy 是
+   Evo-RL 增量对照。
+7. **真机固定协议比较**：至少分别统计正确对角线选择率、无进展甩平循环率、人工展开后进入折叠率、
+   完整折叠成功率、每集接管次数和恢复成功率；不能只用训练 loss 或一次演示决定胜负。
 
-HQ-Score：
+### 9.3 并行但隔离的 OpenArm 实验
 
-- 输入：`high_quality_folding` 的 policy train `0:999`；holdout `999:1199` 不参与策略数据构建。
-- scorer：HQ-Stage checkpoint `10000`；`batch_size=32`、`relative_interval=50`、`samples_per_batch=1`。
-- 三路相机预处理已从逐帧 GPU resize 改为 batch resize，逐元素等价测试通过；单分片实测约从
-  `8.5 s/batch` 降至 `5.4 s/batch`，六路均已从完整 episode 断点恢复，不改变 scorer 或评分超参数。
-- 六个 score-only 分片：gpu12 `0:167`/`167:334`，gpu14 `334:501`/`501:668`，gpu28 `668:835`/`835:999`。
-- tmux：`kai0_hq_s0` 至 `kai0_hq_s5`；分片输出前缀为 `openarm_kai0_stage_scores_hq_v1_s*`。
-- score-only 阶段只落盘 `relative_advantage/absolute_value/absolute_advantage` 和源 episode 映射，不生成三档标签，也不在各分片内计算阈值。
-- scorer 按 episode 校验并原子落盘，`--resume` 只跳过完整且有限值的结果；不得用 `--overwrite` 重启已有进度。
-- 共享盘视频打开/单帧读取若瞬时超时，reader 最多退避重试 3 次；持续失败才退出当前 shard，再由 watchdog
-  从最后一个完整 episode 恢复，禁止跳过坏 episode 伪造完整评分。
-- watchdog：`kai0_hq_score_monitor` 每 5 分钟写入 `monitor_latest.txt`/`monitor.log`；发现进程停止或日志停滞时最多自动恢复 3 次，进度前进后重置失败计数，999 集完成后自动刷新最终报告。
-- HQ-Stage 动态报告快照位于 `openarm_hq_score_review_v1/hq_score_report/index.html`，展示当前已完成
-  episode 的 `absolute_value` 与直接双帧 `relative_advantage` 诊断；通用渲染器按 Base/wrist 原始宽高比把
-  曲线、当前帧和正负状态直接叠在视频上，供后续 Site/HIL 报告复用。
-
-当前固定顺序：HQ-Score 继续生成；并行生成/审计 Site-DirectScore，必要时才适配 Site-Stage -> 构建 TDA-S -> 合并并审计三种来源 -> K-Data -> K-Policy/K-BC。在 Site-Score 和 K-Data 审计完成前不得启动 AWBC 策略训练。
-
-截至 2026-07-13，HQ999 正式评分及质量审计已通过；Site-DirectScore 未通过迁移闸门，条件 Site-Stage
-已完成 5k 并从双域验证中选择 checkpoint 4000，适配后的 Site150 评分通过 absolute curve 闸门。正式
-K-Data 已完成 1719 集构建和全量 norm；旧四卡 smoke 曾通过，旧 80k 主训练随后暴露 TDA 尾帧问题；
-旧四卡任务早期 loss 从 step 0 的 0.1200 降至 step 980 的 0.03205，但五次在固定 TDA 尾帧处失败且未到
-首个 checkpoint；全量 PyAV/0.05s 可避开错误，但正式 80k 实测约 25 秒/step，已改为 TorchCodec 快路径且
-仅对明确 end-of-stream 的短视频尾帧回退 PyAV。启动器默认支持 gpu12+gpu14+gpu28 六卡/global batch126；
-2026-07-16 实际复核时 gpu14 被其他用户占用，因此本轮通过运行时覆盖使用 gpu12+gpu28 四卡/global batch128。HQ `360:536`
-的任务范围合同必须读取原始 `high_quality_folding/meta/episodes.jsonl`；
-评分派生集已统一训练提示词，不能用其 `tasks` 字段反推原始任务范围。构建时同时核对原始 HQ 与评分集的
-episode ID 和逐集长度，防止混入错误数据版本。
-
-同日 loader 基准使用每个 JAX 进程对应的 local batch64：workers8 在 14 批中平均 8.74s、排除首批后
-约 2.08s/batch，优于 workers4 的 14.38s 和 workers2 的 17.68s；workers16 出现过度并发。因此本轮
-正式 80k 使用每进程 workers8，仍需用真实训练前 100 步重新估算端到端 ETA。
-
-无人值守总控为 `scripts/monitor_openarm_kai0_pipeline.py`，跳板机 tmux 固定为 `kai0_pipeline_v1`，状态写到
-`output/openpi/logs/openarm_kai0_pipeline_v1/status.json`。它只按以下闸门推进：
-
-1. Site-DirectScore 的曲线闸门和 val10 随机帧对闸门都通过，才直接选择 HQ-Stage；否则训练 Site-Stage。
-2. Site-Stage 使用 HQ180×1 + Site140×3、global batch32、2 卡 DDP、5k steps、peak LR `5e-6`；评估
-   1000/2000/3000/4000/4999，同时要求 Site 质量和 HQ 遗忘保护全部通过，再按最低 Site MSE 选择。
-   适配后的整曲线硬门禁只覆盖正式 K-Data 使用的绝对进度/`absolute_advantage` 基础质量（MSE、MAE、
-   correlation、R²）；局部 `relative_advantage` 方向和预测 0.5 crossing 继续报告但不否决，因为 Site
-   AWBC 分阶段使用人工 `flatten_done`，正式标签也不使用 `relative_advantage`。
-3. K-Data 必须正好 1719 集，完成每阶段 top-30% 及来源比例审计，并生成全量 16D relative-action norm stats。
-4. norm stats 完成后运行 `audit_openarm_kai0_training_data.py`：全量核对 999 HQ + 420 Site + 300 TDA、二值逐帧
-   `task_index`、连续索引，并分别取一条 positive/negative 样本走真实 OpenPI loader；原始 16D 必须经
-   `OpenArmInputs` 变为模型 `(50,32)` action，且禁止出现 Piper transform。`norm_stats.json` 使用原子替换，
-   中断时不得留下可被总控误读的截断 JSON。
-   视频预检同时解码 HQ/Site/TDA 各自首、中、尾 episode 的中间帧；混合数据使用 `0.05s` LeRobot 容差，
-   覆盖现场视频毫秒级时间戳量化，避免只抽到 HQ 后在正式训练随机命中 Site 才失败。
-5. 20-step 4 卡 smoke 成功后才启动 80k；训练异常时两节点成对停止，并从最近 5k checkpoint 恢复。
-   总控只认含 Orbax `_CHECKPOINT_METADATA` 与 `params/_METADATA` 的完整 checkpoint，不以数字目录或
-   `params/` 提前出现作为保存完成，避免异步保存期间误启动 sweep。JAX loader 每个完整数据轮次按
-   `seed + epoch` 确定性重洗牌，多机 rank 分片互斥；断点恢复按 checkpoint 内的 `train_state.step`
-   计算 epoch 和 batch offset，继续读取下一批，禁止每轮重复同一顺序或从 batch zero 重放。
-6. 80k 后对 `5000/10000/.../75000/79999` 全部 16 个 checkpoint 在 HQ holdout 与 Site val10 上使用
-   固定 positive prompt 做 sampled sweep；
-   关键帧按相邻帧关节动作变化和夹爪状态变化选择，不按关节绝对角度大小选择，确保覆盖抓取、抬升和
-   夹爪切换而不是静止的极端姿态；
-   选择权重为 Site 关键帧30%、Site MAE25%、HQ关键帧20%、HQ MAE15%、Site chunk overlap10%，优先
-   保留 HQ val/train MAE 比不超过2.0的 checkpoint，最后部署到 gpu25:6666。服务端使用 `--force-prompt`
-   覆盖客户端普通 task，保证真实推理和离线 sweep 同样走 `Advantage: positive` 条件；普通/RTC 服务默认不覆盖。
-   sweep 逐 checkpoint 原子写 v2 报告并支持严格续跑，只有 checkpoint、数据集、采样 episode/参数、配置和
-   positive prompt 全部相同才复用；最终选模再次拒绝旧 schema 或非 positive 报告。
-7. 部署后由 `build_openarm_kai0_policy_report.py` 生成单文件综合 HTML，包含 80k loss/grad 曲线、16 个
-   checkpoint 的 HQ/Site 指标、来源/标签分布、质量闸门、选中权重和 gpu25 服务合同；gpu28:8769
-   报告服务监听成功后总控才标记 complete。gpu25 端口监听后还必须由
-   `smoke_test_openarm_policy_server.py` 发出真实 WebSocket 请求并获得有限的 `(50,16)` 动作；smoke 证据必须
-   绑定选中 checkpoint 和强制 positive prompt，并校验50步、16D、角度制及夹爪 `0/-66` 元数据；不能仅凭
-   端口存活验收部署。
-8. 总控最终生成 `completion_audit.json`，逐项核对 HQ999、Site150、1719集 K-Data、完整 `79999`、全部
-   16 个 sweep checkpoint、选中权重、gpu25 smoke 和报告 checkpoint 一致性；任一项失败不得标记 complete。
+- `[待确认实验]` 可以另做 Site-heavy BC/KAI0 消融，使用加权采样而不是复制数据：第一版总采样权重
+  Site/HQ/TDA 为 `50/40/10`；若做阶段感知采样，展开阶段暂用 `55/35/10`，折叠阶段暂用
+  `40/50/10`。这些比例来自当前真机问题，不是 KAI0 官方参数。
+- Site-heavy 实验不得与 E/H 共用实验名或被写成 Evo-RL 效果；先用短程 probe 判断减少 HQ 是否改善
+  现场阶段切换，再决定是否长训。
+- 当前不再追加150条同类黑衣普通成功示范。数据预算优先给 HIL-T30 的错误状态和恢复动作；后续是否补
+  普通 Site 数据，由固定协议下的错误类型覆盖率决定。
+- 如果完成 HIL-T30、E-Value 和 H-Policy 后仍然频繁“已经展开却继续甩平”，才启动
+  `stage × advantage` 四提示词及在线阶段迟滞实验；它是 OpenArm 扩展，不属于 KAI0 或 Evo-RL 官方复现。
 
 ## 10. 禁止项
 
