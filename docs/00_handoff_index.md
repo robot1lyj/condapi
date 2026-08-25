@@ -12,7 +12,7 @@
 |---|---|---|
 | 00 | 本页 | 交接路由、当前/计划/历史边界 |
 | 01 | 系统架构 | 代码模块、数据流、OpenArm/Piper 边界 |
-| 02 | 环境与安装 | conda、远端资源、路径和安装顺序 |
+| 02 | 服务器与环境 | conda、远端资源、数据预检、训练路径和安全要求 |
 | 03 | 训练与评估 | config、训练命令、checkpoint 和评估 gate |
 | 04 | 数据合同 | LeRobot、16D、单位、清洗、norm stats |
 | 05 | 推理与 rollout | serve、WebSocket、HIL、RTC、安全 |

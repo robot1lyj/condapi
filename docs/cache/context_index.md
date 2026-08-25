@@ -12,7 +12,7 @@
 
 - 交接入口 → `docs/00_handoff_index.md`
 - 架构 → `docs/01_system_architecture.md`
-- 安装与资源 → `docs/02_installation_and_environment.md`
+- 服务器与环境 → `docs/02_installation_and_environment.md`
 - 训练与评估 → `docs/03_training_and_evaluation.md`
 - 数据合同 → `docs/04_data_contracts.md`
 - 推理与 rollout → `docs/05_inference_and_rollout.md`

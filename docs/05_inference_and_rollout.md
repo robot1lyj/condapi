@@ -1,57 +1,204 @@
 # 05 · 推理与 Rollout
 
-## 1. 服务启动
+本页是 OpenArm 服务、WebSocket 合同、RTC、HIL 和真机 rollout 的唯一操作 owner。服务器登录、GPU/tmux 审计和 checkpoint 目录见 [02 · 服务器与环境](02_installation_and_environment.md)，动作/单位/数据版本见 [04 · 数据合同](04_data_contracts.md)。
 
-OpenArm checkpoint 服务使用 `policy:checkpoint`，并把 `--port` 放在它前面。K-Policy 必须覆盖客户端 prompt：
+## 1. Rollout 前的四个 gate
+
+服务启动前必须同时满足：
+
+1. **代码 gate**：服务端 commit、训练 config 和客户端代码已记录；服务运行在 `pi-conda`，不是 jump host 的系统 Python。
+2. **checkpoint gate**：数字 step 目录包含 `_CHECKPOINT_METADATA`、`params/_METADATA` 和 `assets/<asset_id>/norm_stats.json`。缺任一项都不能部署。
+3. **合同 gate**：OpenArm state/action 是 16D，关节为 degree，HQ 夹爪为 motor degree（`0=open`、`-66=closed`），动作 horizon 为 50；不能把 Piper 14D、弧度或 `[0,1]` 夹爪数据接进来。
+4. **安全 gate**：急停、人工接管、工作空间、夹爪限位、相机/时间戳和动作频率均已现场确认；服务端只输出动作，不替代机器人侧限幅和安全控制。
+
+在正式 K-Policy 上可先设置变量并做只读检查：
 
 ```bash
-cd /share/home/linyongjia/conda-pi/openpi
+export REPO_ROOT=/share/home/linyongjia/conda-pi/openpi
+export PYTHON=/share/home/linyongjia/miniconda3/envs/pi-conda/bin/python
+export OUTPUT_ROOT=/share/home/linyongjia/output/openpi
+export CONFIG=pi05_openarm_kai0_awbc_v1
+export EXP_NAME=replace_with_exp_name
+export STEP=replace_with_step
+export CHECKPOINT_DIR="$OUTPUT_ROOT/$CONFIG/$EXP_NAME/$STEP"
+export ASSET_ID=openarm_kai0_awbc_v1
+export PROMPT='Fold the T-shirt properly, Advantage: positive'
+
+cd "$REPO_ROOT"
+test -f "$CHECKPOINT_DIR/_CHECKPOINT_METADATA"
+test -f "$CHECKPOINT_DIR/params/_METADATA"
+test -f "$CHECKPOINT_DIR/assets/$ASSET_ID/norm_stats.json"
+"$PYTHON" -m json.tool "$CHECKPOINT_DIR/assets/$ASSET_ID/norm_stats.json" >/dev/null
+```
+
+`replace_with_exp_name` 和 `replace_with_step` 是必须替换的占位符；不要把研究计划里的历史 step 或另一个数据版本的 norm stats 直接复制过来。服务代码会优先加载 checkpoint 内的 `assets/<asset_id>/norm_stats.json`，`--policy-repo-id` 只覆盖构造 transform 时的 `repo_id`，不能替代 checkpoint stats。
+
+## 2. 启动、健康检查和停止服务
+
+### 2.1 用 tmux 启动
+
+长时间服务不要依赖 SSH 前台会话。先在服务 GPU 节点完成 [02](02_installation_and_environment.md) 的 GPU 审计，再执行：
+
+```bash
+export SERVE_HOST=gpu25
+export SERVE_PORT=6666
+export SERVE_SESSION=openarm_policy
+mkdir -p "$OUTPUT_ROOT/logs/serve/$CONFIG"
+tmux new-session -s "$SERVE_SESSION" -c "$REPO_ROOT"
+```
+
+进入 tmux 后逐行执行，完成后按 `Ctrl-b d` 脱离：
+
+```bash
+set -o pipefail
 XLA_PYTHON_CLIENT_MEM_FRACTION=0.9 \
-/share/home/linyongjia/miniconda3/envs/pi-conda/bin/python scripts/serve_policy.py \
-  --port 6666 \
-  --force-prompt 'Fold the T-shirt properly, Advantage: positive' \
+  "$PYTHON" scripts/serve_policy.py \
+  --port "$SERVE_PORT" \
+  --force-prompt "$PROMPT" \
   --rtc-mode off \
   policy:checkpoint \
-  --policy.config=pi05_openarm_kai0_awbc_v1 \
-  --policy.dir=<CHECKPOINT_DIR>
+  --policy.config="$CONFIG" \
+  --policy.dir="$CHECKPOINT_DIR" \
+  2>&1 | tee "$OUTPUT_ROOT/logs/serve/$CONFIG/${EXP_NAME}_${STEP}.log"
 ```
 
-`default_prompt` 只在客户端没有 prompt 时生效，不能替代 K-Policy 的 `force_prompt`。启动前核对 checkpoint、config、数据 repo 和 norm stats 是同一套产物。
+`--force-prompt` 会替换客户端传来的 prompt；`--default-prompt` 只在客户端没有 prompt 时补全，不能作为 K-Policy 的强制条件。OpenArm 没有适合本项目的 `DEFAULT_CHECKPOINT`，必须显式使用 `policy:checkpoint`。
 
-## 2. 真实 WebSocket smoke
+### 2.2 健康检查和日志
+
+`/healthz` 是 HTTP 健康检查，不会触发模型推理：
 
 ```bash
-conda run -n pi-conda python scripts/smoke_test_openarm_policy_server.py \
-  --host gpu25 --port 6666 \
-  --checkpoint <CHECKPOINT_DIR> \
-  --output /tmp/openarm_policy_smoke.json
+curl --fail --silent "http://$SERVE_HOST:$SERVE_PORT/healthz"
+tmux ls
+tail -n 80 "$OUTPUT_ROOT/logs/serve/$CONFIG/${EXP_NAME}_${STEP}.log"
+nvidia-smi --query-compute-apps=pid,process_name,used_memory --format=csv,noheader
 ```
 
-通过条件是：真实请求成功；动作有限且形状 `(50,16)`；metadata 确认 50-step、16D、degree、HQ 夹爪 `0/-66`；报告绑定实际 checkpoint 和 prompt。只有端口监听、进程存在或能加载模型都不算部署成功。
+`OK`、端口监听或进程存在只说明服务进程存活，不说明 checkpoint transform、动作维度或 prompt 合同正确。必须继续做第 3 节的真实 WebSocket smoke。停止服务前记录 smoke 报告和日志，然后在对应 tmux 中按 `Ctrl-c`；不要通过 kill/重启其他训练节点来“修复”服务。
 
-## 3. Rollout 分层
+## 3. 真实 WebSocket smoke
+
+仓库脚本会连接真实服务，发送三路零图像、16D 零 state 和 prompt，检查返回动作及握手 metadata，并把结果原子写入 JSON。它验证的是**服务合同和可推理性**，不是衣服任务成功率：
+
+```bash
+cd "$REPO_ROOT"
+"$PYTHON" scripts/smoke_test_openarm_policy_server.py \
+  --host "$SERVE_HOST" --port "$SERVE_PORT" \
+  --checkpoint "$CHECKPOINT_DIR" \
+  --prompt "$PROMPT" \
+  --timeout-seconds 600 \
+  --output "$OUTPUT_ROOT/logs/serve/$CONFIG/${EXP_NAME}_${STEP}_smoke.json"
+```
+
+报告的 `passed` 必须为 `true`，并同时确认：
+
+- `actions.shape == [50, 16]`，所有元素有限；
+- metadata 为 `action_horizon=50`、`robot_action_dim=16`、`output_action_dim=16`；
+- `action_unit=degrees`、`gripper_unit=hq_motor_degrees`、夹爪开/闭为 `0/-66`；
+- 报告中的 host、port、checkpoint、prompt 与本次服务一致。
+
+脚本使用 `openpi-client` 的 msgpack-numpy WebSocket 协议，不是普通 JSON HTTP API。机器人客户端至少要发送下列 observation 键：
 
 ```text
-静态检查 -> 仿真/离线回放 -> 低风险真机单步 -> 小批量固定协议 -> HIL raw -> clean/export -> 训练/再评估
+observation.state       float array, shape (16,)
+observation.images.base uint8 image, HWC (推荐 224x224x3)
+observation.images.left_wrist  uint8 image, HWC
+observation.images.right_wrist uint8 image, HWC
+prompt                  string
 ```
 
-每一级都保存 checkpoint、config、prompt、数据版本、节点、时间和日志；不跨级跳到连续真机。真机开始前确认急停、工作空间、夹爪限位、动作频率和人工接管通道。
+服务握手先返回 metadata；普通推理请求返回 `actions`，以及可选的 `policy_timing`/`server_timing`。服务端支持 CHW 图像和浮点图像的兼容解析，但真机应统一为 HWC `uint8`，避免客户端各自隐式缩放。一个 smoke 通过后，仍需用真实相机和真实 state 做低风险单步验证。
 
-## 4. HIL 采集
+## 4. Rollout 分层和停止条件
 
-- 固定 collector checkpoint 和强制 prompt；不要在同一批数据中途切换 20k/79999 或其他模型。
-- Raw 保留策略失败前缀、policy action、human action、hold、intervention、视频/时间戳以及 `episode_success`/`recovery_success`。
-- clean 阶段丢弃 hold 等等待帧，保留真实 human VR correction；逐集检查 16D、单位、时间同步、视频尾帧和成功结尾。
-- 当前研究计划中的 HIL-T30 是错误对角线、重复甩平、已展开不折叠三类恢复各 10 条；是否已完成必须查远端数据，不看计划文字推断。
+按下面顺序逐级放量，每一级都绑定同一个 checkpoint、config、prompt 和数据版本：
 
-## 5. Rollout 指标
+```text
+静态 checkpoint gate
+  -> 零图/固定图 WebSocket smoke
+  -> 仿真或离线回放
+  -> 真机无物体/低风险单步
+  -> 固定任务集小批量（人工接管）
+  -> HIL raw
+  -> clean/export
+  -> 训练、离线评估和下一轮 rollout
+```
 
-至少按固定任务集统计：正确对角线选择率、无进展重复甩平率、已展开后进入折叠率、完整折叠成功率、每集接管次数、恢复成功率和动作/延迟异常。训练 loss 或单条成功演示不能替代真机结论。
+出现以下任一情况立即停止：动作非有限或维度不是 50x16、单位/夹爪方向错误、prompt 未强制、相机/时间戳不同步、急停或人工接管失效、越过工作空间/夹爪限位、checkpoint 半写入。保留原始日志和数据，修复后从 checkpoint gate 重新开始；不要以“看起来能动”替代 smoke。
 
-## 6. RTC
+固定任务集至少记录：正确对角线选择率、无进展重复甩平率、已展开后继续甩平率、完整折叠成功率、每集接管次数、恢复成功率、推理延迟和动作越界次数。训练 loss 或单条成功演示不能替代真机结论。
 
-服务支持 `--rtc-mode off|auto|only`，默认 `off`。OpenArm 先用旧路径完成 baseline；启用 RTC 时单独记录 metadata、`prev_actions` 的 delta/absolute 语义和客户端 payload，并保留 `off` 回退。任何 RTC 修改必须同时通过旧路径和 RTC 路径 smoke；不得把 Piper 专用 metadata 当 OpenArm 合同。
+## 5. HIL 采集合同
 
-## 7. 停止条件
+- **固定 collector**：一批数据从开始到结束只使用一个 checkpoint、一个 prompt 和一个服务配置；不要中途切换 20k/79999 或改变 `rtc_mode`。
+- **raw 不覆盖**：保存 policy action、human/VR action、hold、intervention、视频、时间戳、`episode_success` 和 `recovery_success`；失败前缀必须保留，便于分析策略卡住的阶段。
+- **clean 有规则**：清理可删除 `intervention_hold` 等等待帧，但不能删除真实 human VR correction，也不能把 hold 当接管；检查 16D、单位、时间单调、视频尾帧和成功结尾。
+- **版本隔离**：raw 与 clean 使用不同目录/数据 id；导出只能写新目录，不能原地覆盖 raw 或冻结 K-Data。导出和 norm 规则见 [04 § 从 raw 转成新数据版本](04_data_contracts.md)。
+- 当前研究计划中的 HIL-T30 是“错误对角线、重复甩平、已展开后未进入折叠”三类恢复各 10 条；它是计划数量，不代表已经采集完成，必须以远端 metadata 和审计报告为准。
 
-出现非有限动作、形状/单位不符、prompt 未强制、视频/时间戳不一致、急停或接管失效、checkpoint 不完整时立即停止 rollout，保留 raw 和日志，修复并重新 smoke；不要用“看起来能动”继续采集。
+## 6. RTC：协议、模式和回退
+
+RTC 是可选的 action chunk 重规划路径。旧的普通 `obs -> policy.infer(obs)` 路径必须始终可用；OpenArm 第一次部署和每次 RTC 改动都先用 `--rtc-mode off` 做 baseline。
+
+### 6.1 启动模式
+
+```bash
+# 默认/旧路径：忽略 RTC 字段
+--rtc-mode off
+
+# 收到 RTC envelope 时尝试 RTC；字段非法、模型不支持或推理失败则回退普通推理
+--rtc-mode auto
+
+# 必须收到并成功执行 RTC；非法或失败直接返回请求错误
+--rtc-mode only
+```
+
+`rtc_mode` 会写入握手 metadata。正式 K-Policy 的 handshake 同时包含 `action_dim/model_action_dim=32`（模型内部维度）和 `robot_action_dim/output_action_dim=16`（机器人输出维度）。`auto` 的回退必须在 rollout 日志中记录 `server_timing.rtc_error` 或 `rtc_warnings`；不能把一次自动回退标成“RTC 成功”。
+
+### 6.2 请求 envelope
+
+普通客户端发送 observation 字典即可；RTC 客户端发送 msgpack-numpy 对象，结构如下（这是协议示意，不是 JSON HTTP 请求）：
+
+```text
+{
+  "type": "infer",
+  "obs": {"observation.state": ..., "observation.images.base": ..., "prompt": ...},
+  "rtc": {
+    "action_horizon": 50,
+    "action_dim": 32,
+    "prev_actions": [[... 32 values ...], ...],
+    "d": <integer>,
+    "s": <integer>,
+    "reset": false
+  }
+}
+```
+
+`prev_actions` 必须是二维、**32D 模型空间**数值数组；正式 OpenArm 的前 16 维是 degree/HQ 动作，后 16 维按模型 padding 合同补零。服务端会检查 horizon/dim 与 metadata 是否一致，将 `d/s` 限制到合法范围，并把长度不足的历史动作补齐、过长的截断。`reset=true` 会忽略历史动作。客户端必须明确 `prev_actions` 的 degree/HQ 语义和 `d/s` 计数，不要把 16D 机器人输出直接当成 RTC `prev_actions`，也不要在服务端偷偷做弧度或夹爪转换。
+
+当前 `WebsocketClientPolicy.infer()` 发送的是普通 observation；要使用 envelope，需要实现/审查能够发送上述 msgpack 对象的 RTC 客户端，并用 `server_timing.rtc_used` 验证实际走了 RTC。`only` 模式不要直接用于首轮真机。
+
+### 6.3 RTC 验收矩阵
+
+| 服务模式 | 普通 observation | 合法 RTC envelope | 非法/不支持 RTC |
+|---|---|---|---|
+| `off` | 普通推理 | 忽略 RTC，普通推理 | 普通推理 |
+| `auto` | 普通推理 | RTC 推理 | 回退普通推理并记录 warning/error |
+| `only` | 请求错误 | RTC 推理 | 请求错误 |
+
+每次改动至少跑 `off` 普通 smoke，再跑 `auto` 合法/非法两组；只有旧路径和 RTC 路径都通过，才允许进入真机小批量。Piper 的 metadata 或 action transform 不属于 OpenArm RTC 合同。
+
+## 7. Rollout 记录模板
+
+每一集至少记录以下字段，存放在与 raw/clean 数据同名的 manifest 或实验报告中：
+
+```text
+date/time, operator, robot, checkpoint, config, git_commit
+prompt, rtc_mode, server_host/port, client_commit
+camera/state calibration, task_seed, intervention_count
+success, recovery_success, failure_stage, failure_reason
+action_shape/unit, infer_ms, safety_stop, raw_video/path
+```
+
+把跨实验的结论和事故摘要写入 [07 · 变更历史](07_change_log.md)；不要在本页复制某一次实验的成功率或当前 collector step。

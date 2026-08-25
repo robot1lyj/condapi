@@ -1,7 +1,6 @@
-# 07 · openpi Change Log
+# 07 · 变更历史
 
-Record **what changed + why**. Not config values, verification steps, or impact scope —
-those live in config files, git log, and CI respectively.
+只记录已经发生的变更、原因、结果和必要的证据索引。这里出现的旧路径、step、指标或命令都是历史快照，不能直接当作当前默认值；当前操作以 `docs/00`–`docs/06` 和源码为准。
 
 当前架构 → `docs/01_system_architecture.md`；研究决策 → `docs/decisions/`；交接入口 → `docs/00_handoff_index.md`。
 
@@ -9,6 +8,8 @@ those live in config files, git log, and CI respectively.
 
 ## 2026-08-25
 
+- **服务器与数据集交接手册加深**：将远端拓扑、跳板登录、GPU/tmux 审计、K-Data 1719 集硬门禁、norm stats、真实 loader、四卡 smoke/80k、总控和 checkpoint 交接集中到 `docs/02`；将服务健康检查、WebSocket 合同、RTC 回退、HIL raw/clean 和 rollout 停止条件集中到 `docs/05`。本轮未启动/停止/删除服务器任务；SSH 只读探测被远端在密钥交换阶段关闭，因此实时占用和服务状态仍须按 `docs/02` 第 2、3 节现场复核。
+- **重复入口清理**：删除无职责的 `docs/README.md` 和重复 RTC 参考页，`docs/reference/` 只保留 Piper legacy 指引；当前 RTC、OpenArm 合同和服务器命令分别以编号化主线文档和源码为准。
 - **交接文档三轮重构**：将 README、Context OS、安装/训练/数据/推理文档改为 OpenArm 主线的 00–07 编号体系；Piper 长篇训练、微调、推理和专用 RTC 说明删除，只保留一个 legacy 指引；旧上游说明删除，避免与当前 OpenArm 合同冲突。
 
 ---

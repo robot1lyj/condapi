@@ -1,6 +1,6 @@
 # 06 · OpenArm KAI0 / Evo-RL / 组合复现计划
 
-最后更新：2026-07-27
+最后更新：2026-08-25（研究状态沿用 2026-07-27，文档 owner/入口已在本轮复核）
 
 状态：**路线 K 的 80k、16-checkpoint 双域 sweep 和正式报告已完成；离线规则选中20k，但真机 A/B 未见改善，
 当前 gpu25 人工恢复为79999。下一步使用79999采集30条定向 HIL，重点解决错误对角线、重复甩平和展开到折叠的
@@ -353,7 +353,7 @@ K-Policy 79999 现实失败/接管/恢复
 | **P05** | 官方 `pi05_base` | 所有正式 KAI0 policy 的初始化 | 已有 |
 | **HQ-Policy** | `pi05_openarms_dual_hq` / `99999` | 1200 HQ 训练出的历史策略 | 已有 |
 | **HQ-Stage** | `ADVANTAGE_TORCH_OPENARM_FLATTEN_FOLD` / `10000` | HQ 正式评分 + Site 直接迁移基线 | HQ999 评分与审计已通过 |
-| **Site-Stage** | `ADVANTAGE_TORCH_OPENARM_SITE_FOLD` / `4000` | HQ-Stage -> Site-StageData 领域适配 | 直接迁移失败后已适配并通过 Site150 闸门 |
+| **Site-Stage** | `ADVANTAGE_TORCH_OPENARM_SITE_FOLD` / `4999` | HQ-Stage -> Site-StageData 领域适配 | 直接迁移失败后已适配并通过 Site150 闸门 |
 | **Site-5K** | `pi05_openarms_dual_site_align_v1_probe` / `4999` | 历史 Site 微调模型；路线 E 的受控初始化 | 已有，不是当前 collector |
 | **Site-10K** | `pi05_openarms_dual_site_align_v1_base_10k` / `9999` | P05 直接微调 Site 的对照 | 已有 |
 | **K-Policy** | `pi05_openarm_kai0_awbc_v1` | P05 -> K-Data AWBC | 80k与16-checkpoint sweep已完成；离线选20k，gpu25当前运行79999 |
@@ -369,7 +369,7 @@ K-Policy 79999 现实失败/接管/恢复
 ### 9.1 已完成基线
 
 1. HQ999 已由 HQ-Stage 完成评分和质量审计；HQ policy holdout `999:1199` 未进入 K-Data。
-2. Site-DirectScore 未通过迁移闸门；Site-Stage `4000` 通过 Site150 与 HQ 遗忘保护后生成 Site-Score。
+2. Site-DirectScore 未通过迁移闸门；Site-Stage `4999` 通过 Site150 与 HQ 遗忘保护后生成 Site-Score。
 3. TDA-S、1719集 K-Data、全量 norm、真实 OpenPI loader smoke 和四卡80k均已完成。
 4. `5000/10000/.../75000/79999` 共16个 checkpoint 的双域 sweep、综合报告、完成审计和 gpu25
    WebSocket 合同验证均已完成。

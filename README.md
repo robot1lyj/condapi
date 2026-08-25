@@ -8,7 +8,7 @@
 
 1. [交接索引](docs/00_handoff_index.md)：当前/计划中/历史内容的唯一导航。
 2. [系统架构](docs/01_system_architecture.md)：代码、数据、训练和服务边界。
-3. [环境与安装](docs/02_installation_and_environment.md)：本地和远端 conda、路径及安全要求。
+3. [服务器与环境](docs/02_installation_and_environment.md)：远端拓扑、数据预检、训练命令、路径及安全要求。
 4. [训练与评估](docs/03_training_and_evaluation.md)：通用训练入口、OpenArm 正式配置和验收。
 5. [数据合同](docs/04_data_contracts.md)：16D 动作、单位、LeRobot 数据和 norm stats。
 6. [推理与 rollout](docs/05_inference_and_rollout.md)：服务端、WebSocket smoke、HIL 和 RTC。
@@ -58,12 +58,13 @@ norm stats、正式 OpenArm 多节点命令、数据集参数和 smoke gate 见 
 ### 服务与 rollout
 
 ```bash
+CHECKPOINT_DIR=replace_with_checkpoint_dir
 conda run -n pi-conda python scripts/serve_policy.py \
   --port 6666 \
   --force-prompt 'Fold the T-shirt properly, Advantage: positive' \
   policy:checkpoint \
   --policy.config=pi05_openarm_kai0_awbc_v1 \
-  --policy.dir=<CHECKPOINT_DIR>
+  --policy.dir="$CHECKPOINT_DIR"
 ```
 
 端口监听不算部署成功。必须从真实 WebSocket 客户端请求一次，确认有限的 `(50, 16)` 动作、50 步 horizon、degree/HQ 夹爪元数据和强制 prompt；完整流程见 [推理与 rollout](docs/05_inference_and_rollout.md)。

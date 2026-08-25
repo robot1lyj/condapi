@@ -1,6 +1,6 @@
 # Run Aloha (Real Robot)
 
-This example demonstrates how to run with a real robot using an [ALOHA setup](https://github.com/tonyzhaozh/aloha). See [here](../../docs/remote_inference.md) for instructions on how to load checkpoints and run inference. We list the relevant checkpoint paths for each provided fine-tuned model below.
+This example demonstrates how to run with a real robot using an [ALOHA setup](https://github.com/tonyzhaozh/aloha). For the upstream serving/checkpoint guide, see the [OpenPI documentation](https://github.com/Physical-Intelligence/openpi/tree/main/docs). The numbered docs in this fork are the OpenArm handoff path and should not be applied to ALOHA dimensions blindly.
 
 ## Prerequisites
 

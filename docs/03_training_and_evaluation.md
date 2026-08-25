@@ -14,9 +14,12 @@ conda run -n pi-conda python scripts/train_test.py
 ## 通用单机入口
 
 ```bash
+CONFIG=replace_with_config
+EXP_NAME=replace_with_exp_name
+STEPS=replace_with_steps
 XLA_PYTHON_CLIENT_MEM_FRACTION=0.9 \
-conda run -n pi-conda python scripts/train.py <CONFIG> \
-  --exp-name <EXP_NAME> --num-train-steps <STEPS>
+  conda run -n pi-conda python scripts/train.py "$CONFIG" \
+  --exp-name "$EXP_NAME" --num-train-steps "$STEPS"
 ```
 
 PyTorch（仅 pi0/pi0.5）使用 `scripts/train_pytorch.py` 或 `torchrun`；JAX 是正式 OpenArm 主路径。配置注册表在 `src/openpi/training/config.py`，训练输出由 `checkpoint_base_dir/config/exp_name/step` 组织。
@@ -25,18 +28,7 @@ PyTorch（仅 pi0/pi0.5）使用 `scripts/train_pytorch.py` 或 `torchrun`；JAX
 
 `pi05_openarm_kai0_awbc_v1` 是当前 KAI0/AWBC 正式配置：P05 base 初始化、OpenArm 16D、全局 batch 128、80k steps、每 5k 保存、TorchCodec 尾帧显式 PyAV fallback、训练 episode `0:1719`。它不能与历史 `pi05_openarms_dual_awbc_v1` 混称。
 
-四卡多节点（gpu12 + gpu28）示例：
-
-```bash
-conda run -n pi-conda python scripts/launch_openarm_jax_multinode.py \
-  --config pi05_openarm_kai0_awbc_v1 \
-  --exp-name openarm_kai0_awbc_v1 \
-  --num-train-steps 80000 --batch-size 128 --num-workers 8 \
-  --mode overwrite --session-prefix kai0_awbc_v1 \
-  --hosts gpu12 gpu28
-```
-
-正式任务前先用相同 host/batch 做 20-step、`--num-workers 0` smoke；继续训练使用 `--mode resume`，不要只重启一个节点，也不要覆盖已有进度。
+远端四卡 smoke、正式 80k、coordinator、tmux 和 resume 命令统一由 [02 · 服务器与环境](02_installation_and_environment.md) 的 5.4 节持有；不要在本页复制另一套 host/batch 参数。正式任务前先用相同 host/batch 做 20-step、`--num-workers 0` smoke；继续训练使用 `--mode resume`，不要只重启一个节点，也不要覆盖已有进度。
 
 ## KAI0 数据与 scorer gate
 

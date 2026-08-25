@@ -16,7 +16,7 @@
 
 - `docs/00_handoff_index.md`：交接导航和当前/计划/历史边界。
 - `docs/01_system_architecture.md`：代码与运行架构。
-- `docs/02_installation_and_environment.md`：环境、路径和远端资源。
+- `docs/02_installation_and_environment.md`：服务器、环境、数据预检、路径和远端资源。
 - `docs/03_training_and_evaluation.md`：训练、评估和 checkpoint gate。
 - `docs/04_data_contracts.md`：数据格式、单位、动作维度和 norm stats。
 - `docs/05_inference_and_rollout.md`：服务、WebSocket、HIL、RTC 和安全 rollout。
