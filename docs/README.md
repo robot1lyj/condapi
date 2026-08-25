@@ -1,14 +1,8 @@
-# Documentation Index
+# 文档目录
 
-## Training and Fine-tuning
-- Default offline / conda training: piper_conda_training.md
-- Normalization stats reload: norm_stats.md
-- Piper dual-arm training: piper_dual_arm_training.md
-- Piper dual-arm fine-tuning: piper_dual_arm_finetune.md
-- OpenArm KAI0 / Evo-RL / hybrid reproduction plan: openarm_recap_reproduction_plan.md
+当前文档的唯一交接入口是 [00 · 项目交接索引](00_handoff_index.md)，阅读顺序、编号和所有权都由它维护；本文件只为熟悉 `docs/README.md` 的工具保留，不复制目录内容。
 
-## Serving (Server-side)
-- Remote policy server: remote_inference.md
-- Piper dual-arm policy server: piper_dual_arm_remote_inference.md
-- RTC server adaptation: rtc_server_adaptation.md
-- RTC metadata template: rtc_metadata_piper_dual.json
+- 当前主线：`docs/00`–`docs/07`
+- 决策记录：`docs/decisions/README.md`
+- 实现参考：`docs/reference/00_reference_index.md`
+- Piper 唯一 legacy 入口：`docs/reference/legacy/piper.md`

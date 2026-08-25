@@ -1,9 +1,15 @@
-# openpi Change Log
+# 07 · openpi Change Log
 
 Record **what changed + why**. Not config values, verification steps, or impact scope —
 those live in config files, git log, and CI respectively.
 
-Design decisions → `docs/decisions/`. Architecture → `docs/ARCHITECTURE.md`.
+当前架构 → `docs/01_system_architecture.md`；研究决策 → `docs/decisions/`；交接入口 → `docs/00_handoff_index.md`。
+
+---
+
+## 2026-08-25
+
+- **交接文档三轮重构**：将 README、Context OS、安装/训练/数据/推理文档改为 OpenArm 主线的 00–07 编号体系；Piper 长篇训练、微调、推理和专用 RTC 说明删除，只保留一个 legacy 指引；旧上游说明删除，避免与当前 OpenArm 合同冲突。
 
 ---
 
@@ -145,7 +151,7 @@ Design decisions → `docs/decisions/`. Architecture → `docs/ARCHITECTURE.md`.
 ## 2026-07-09
 
 - **Context OS 记忆瘦身**: 压缩 `docs/cache` 热记忆默认值和部署模式，重写
-  `docs/openarm_recap_reproduction_plan.md` 为当前 OpenArm RECAP/Evo-RL 复现执行计划；旧训练流水和事故细节不再放在热路径。
+  `docs/06_openarm_research_plan.md` 为当前 OpenArm RECAP/Evo-RL 复现执行计划；旧训练流水和事故细节不再放在热路径。
 - **OpenArm/Piper 数据链路拆分**: 新增 `OpenArmInputs/OpenArmOutputs` 与
   `LeRobotOpenArmDataConfig`，OpenArm 训练配置不再复用 Piper transform；OpenArm 路径固定校验
   HQ 16D state/action，并禁止使用旧 Piper 14D `swap_left_right` 逻辑。

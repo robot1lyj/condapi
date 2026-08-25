@@ -1,58 +1,44 @@
-# Context Kernel
+# 00 · Context Kernel
 
-New sessions load `AGENTS.md` + this file first, then `context_index.md` and at most one mode pack.
+启动顺序：`AGENTS.md` → 本文件 → `docs/cache/context_index.md` → 与任务匹配的一个 mode。这里只放高频、会改变操作安全的事实；详细说明由编号化 `docs/` 持有。
 
-## Defaults
-- Product: OpenPI VLA fine-tuning/inference for OpenArm cloth folding; Piper configs remain separate legacy/support paths.
-- Local workspace: `/home/lyj/lyj/openpi`
-- Remote access: `ssh -p 12222 linyongjia@172.31.11.100`, then `ssh gpu12/gpu14/gpu25/gpu28`.
-- K-Policy 80k and 16-checkpoint sweep are complete. Offline selection is 20k, but real-robot A/B did not beat 79999; gpu25 currently serves 79999 on port `6666` as the HIL collector.
-- Remote repo/env/output: `/share/home/linyongjia/conda-pi/openpi`, env `pi-conda`, output `/share/home/linyongjia/output/openpi`.
-- Remote datasets: policy datasets under `/share/home/linyongjia/datasets`; some Stage/reference data may live under `/share/home/linyongjia/data`.
-- Main OpenArm configs: `pi05_openarms_dual_site_align_v1_probe`, `pi05_openarms_dual_evo_acp_hil_v1_probe`, and formal KAI0 `pi05_openarm_kai0_awbc_v1`; formal K-Policy must not reuse legacy `pi05_openarms_dual_awbc_v1`.
+## 当前默认
 
-## OpenArm Contract
-- Task prompt: `Fold the T-shirt properly`.
-- State/action: 16D `[右臂7关节, 右夹爪, 左臂7关节, 左夹爪]`.
-- Units: arm joints degrees; gripper HQ motor degrees, `0=open`, `-66=closed`. ROS/runtime conversion stays at client boundary.
-- OpenArm configs use `LeRobotOpenArmDataConfig` with `OpenArmInputs/OpenArmOutputs`; never route OpenArm through Piper transforms or Piper 14D `swap_left_right`.
-- Clean site/HIL data only through `scripts/convert_openarm_hq_dataset.py`; HIL clean export drops hold frames and marks only real human VR as intervention.
-- Evo-RL ACP uses `ACPPromptTransform` on `complementary_info.acp_indicator`; clean HIL dataset name is `openarm_hil_evo_v1`.
-- KAI0 Stage boundary: HQ-Stage scores HQ, then directly scores Site-A150 for a transfer audit; only if that fails do 140 train + 10 val annotations adapt Site-Stage. Site-F1 is excluded, final Site-Score must be model-predicted, and linear Site-GT was deleted.
-- KAI0 AWBC stage groups do not replace model advantage: Site uses manual `flatten_done`; HQ `0:536` uses model crossing and folding-only `536:999` is stage 1; TDA inherits its HQ source stage.
-- Formal K-Data follows released KAI0 AWBC code and discretizes stage-wise top-30% `absolute_advantage`; `relative_advantage` remains a scorer diagnostic only.
-- K-Policy serving must force `Fold the T-shirt properly, Advantage: positive`; a default prompt is insufficient when clients send their own prompt.
-- K-Policy deployment is valid only after a real websocket request returns finite `(50,16)` actions and metadata confirms 50-step/16D/degrees/HQ-gripper `0/-66`; port listening alone is insufficient.
-- Formal JAX policy training uses deterministic epoch-aware sampling; resume positions the loader from restored `train_state.step` instead of replaying the dataset from batch zero.
-- KAI0 pipeline controller is jump-host tmux `kai0_pipeline_v1`; canonical status is `output/openpi/logs/openarm_kai0_pipeline_v1/status.json`.
-- Current next dataset is HIL-T30: 10 wrong-diagonal recoveries, 10 repeated-shake recoveries, and 10 already-flat-to-fold interventions; the main next policy is K-Policy79999 plus Evo value/ACP, with Site-5K retained only as the controlled Evo baseline.
+- 产品：OpenPI VLA 在 OpenArm 双臂 T-shirt folding 上的后训练和 rollout。
+- 任务 prompt：`Fold the T-shirt properly`；K-Policy 服务需强制 `Fold the T-shirt properly, Advantage: positive`。
+- OpenArm state/action 为 16D `[右臂7关节, 右夹爪, 左臂7关节, 左夹爪]`；训练单位为 degree，HQ 夹爪 `0=open,-66=closed`。
+- OpenArm 只走 `LeRobotOpenArmDataConfig`、`OpenArmInputs/Outputs`；Piper 是 legacy，不是默认路径。
 
-## Safety Kernel
-- Do not commit credentials, tokens, private host keys, or server passwords.
-- Do not delete remote datasets/checkpoints/caches unless the user explicitly asks.
-- Training/serve runs use tmux and offline-friendly W&B/Hugging Face settings.
-- OpenPI does not auto-use LeRobot split intent; set `DataConfig.train_episodes` when a split matters.
+## 运行资源
 
-## Context Loading
-- `docs/cache/context_index.md` routes only; it must not store facts.
-- `docs/cache/modes/code_change.md`: code/config/docs changes, tests, commits.
-- `docs/cache/modes/deployment.md`: SSH, conda, remote train/serve, artifacts.
-- Current OpenArm KAI0 / Evo-RL / hybrid plan: `docs/openarm_recap_reproduction_plan.md`.
+- 本地仓库：`/home/lyj/lyj/openpi`。
+- 跳板：`ssh -p 12222 linyongjia@172.31.11.100`；常用节点 gpu12/gpu14/gpu25/gpu28。
+- 远端仓库：`/share/home/linyongjia/conda-pi/openpi`；环境：`pi-conda`；输出：`/share/home/linyongjia/output/openpi`；数据：`/share/home/linyongjia/datasets`。
+- 80k K-Policy 和 16 checkpoint sweep 已记录完成；离线选择 20k，但交接记录中的真机 collector 是 79999（gpu25/6666）。接手时先核对远端状态，不把该历史快照当实时事实。
 
-## Budget And Writeback
-- Budgets: `kernel.md` <=80 lines, `context_index.md` <=100, each mode <=80.
-- One stable fact has one owner; compress or demote before adding memory.
-- `critical`: default machine/env/model/data contract/boundary changed -> update owning hot/canonical doc same turn.
-- `incident`: training/deploy/hardware failure -> `docs/CHANGELOG.md` or a short canonical note.
-- `batch`: repeated runs/validations -> one concise history entry after sequence ends.
-- `ephemeral`: status reads and one-off checks -> no memory update.
+## 当前路线
 
-## Resume Audit
-- After compact/resume/interruption: confirm latest user request, `pwd`, git root, `AGENTS.md`, this file, `git status --short`, `git log --oneline -5`, and the relevant mode pack.
-- Trust committed files, artifacts, explicit checkpoints, and current repo docs over conversation memory.
+- KAI0/K-Policy 的完整边界和 HIL-T30、Evo-RL、Hybrid 下一步只看 `docs/06_openarm_research_plan.md`。
+- HIL-T30 计划为三类各 10 条：错误对角线恢复、重复甩平恢复、已展开但未折叠接管；计划不等于已采集。
+- 现有 Evo ACP probe 的 dropout `0.0` 不是正式目标；正式路线目标为 `0.3`，E-Value/train/infer 完成前不得宣称 Evo-RL 完成。
 
-## Answer Protocol
-- Lead with the current conclusion.
-- Distinguish implemented, planned, historical, and forbidden behavior.
-- Give precise files/commands/verification when relevant.
-- End with memory writeback/verification status for substantial work.
+## 安全闸门
+
+- 长任务必须用 tmux；不删除远端数据、权重或缓存，不提交凭据。
+- 训练前核对 `meta/info.json`、视频可解码性、norm stats、16D/单位/夹爪范围和 prompt。
+- checkpoint 必须有完整 Orbax 元数据；服务必须通过真实 WebSocket smoke，确认有限 `(50,16)` 动作和元数据，端口监听本身不算成功。
+- RTC 改动必须保留旧路径，并支持 `rtc_mode=off` 或自动回退。
+
+## 记忆写回
+
+- 默认、路径、合同改变 → 更新本文件和对应 canonical doc。
+- 新训练/部署故障 → `docs/07_change_log.md`；连续实验结束后只写一条摘要。
+- 一次性状态不写记忆。一个事实只能有一个 owner；index 只路由，不存事实。
+
+## 恢复审计
+
+压缩/中断后重新确认：`pwd`、`git status --short`、最近提交、`AGENTS.md`、本文件、相关 mode，以及当前远端 checkpoint/服务状态。
+
+## 回答约定
+
+先给当前结论，区分已实现、已验证、计划中和禁止项；涉及实验证据时给出文件/命令，结尾说明文档写回与验证结果。

@@ -1,4 +1,4 @@
-# OpenArm KAI0 / Evo-RL / 组合复现计划
+# 06 · OpenArm KAI0 / Evo-RL / 组合复现计划
 
 最后更新：2026-07-27
 
@@ -376,7 +376,7 @@ K-Policy 79999 现实失败/接管/恢复
 5. 离线规则选择20k；真机20k未优于79999，因此运行选择恢复79999。两者必须继续分别称为“离线选择”和
    “当前运行选择”。
 
-详细故障、修复和训练历史由 `docs/CHANGELOG.md` 与远端
+详细故障、修复和训练历史由 `docs/07_change_log.md` 与远端
 `output/openpi/logs/openarm_kai0_pipeline_v1/` 保存，本计划不再重复运行日志。
 
 ### 9.2 当前主线（2026-07-27）
@@ -385,18 +385,21 @@ K-Policy 79999 现实失败/接管/恢复
    采集过程中不切换20k或其他 checkpoint。
 2. **采集 HIL-T30**：错误对角线后松手重抓10条、重复甩平后中止恢复10条、已经展开却不折叠时完整接管
    10条。每条都保留策略失败前缀、hold、人类动作和最终完整成功结尾。
-3. **清洗与硬审计**：Raw 保留全部帧；Evo clean 丢弃 `session_state=intervention_hold`，只保留真实
+3. **不要把 T30 当成孤立的二次 SFT 数据集**：如果后续做定向 SFT，只能作为带旧数据 replay 的独立 probe，
+   记录采样权重、保留集和遗忘指标；不能仅用30条长程全参数训练后把训练 loss 当成阶段切换成功。当前优先把
+   T30 用于失败前缀诊断、E-Value 和 ACP recovery。
+4. **清洗与硬审计**：Raw 保留全部帧；Evo clean 丢弃 `session_state=intervention_hold`，只保留真实
    policy 与有限16D human VR 动作。逐集检查时间戳单调、视频同步、intervention 起止、success/recovery
    元数据、单位和夹爪范围；任一合同失败不得进入 E-Value。
-4. **先诊断再训练**：对三类失败前缀分别绘制 HQ/Site-Stage 进度曲线和 E-Value 曲线。Stage 结果只回答
+5. **先诊断再训练**：对三类失败前缀分别绘制 HQ/Site-Stage 进度曲线和 E-Value 曲线。Stage 结果只回答
    “成功示范评分器如何看这些错误状态”，不能代替 Evo value 标签，也不能阻塞路线 E/H。
-5. **补齐 Evo JAX 链路**：实现并验证 OpenArm E-Value train/infer，固定 `n_step=50`、
+6. **补齐 Evo JAX 链路**：实现并验证 OpenArm E-Value train/infer，固定 `n_step=50`、
    `positive_ratio=0.3`、`indicator_dropout_prob=0.3`，再物化 E-Data。禁止把
    `is_intervention=1` 直接当作全部 ACP 标签。
-6. **并行训练两个可归因结果**：E-Policy 从 Site-5K 初始化，H-Policy 从 K-Policy79999 初始化；
+7. **并行训练两个可归因结果**：E-Policy 从 Site-5K 初始化，H-Policy 从 K-Policy79999 初始化；
    两者使用同一 E-Data、E-Value、step 数、batch、学习率和随机种子。H-Policy 是主力候选，E-Policy 是
    Evo-RL 增量对照。
-7. **真机固定协议比较**：至少分别统计正确对角线选择率、无进展甩平循环率、人工展开后进入折叠率、
+8. **真机固定协议比较**：至少分别统计正确对角线选择率、无进展甩平循环率、人工展开后进入折叠率、
    完整折叠成功率、每集接管次数和恢复成功率；不能只用训练 loss 或一次演示决定胜负。
 
 ### 9.3 并行但隔离的 OpenArm 实验

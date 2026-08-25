@@ -1,5 +1,13 @@
-# Reference Index
+# 00 · 参考资料索引
 
-Long technical notes and archived investigations belong under `docs/reference/`.
+`reference/` 不是 OpenArm 当前操作入口，只保存不适合放在主线文档中的实现参考和 legacy 指引。
 
-The hot context files in `docs/cache/` should link here only when a reference is needed for routing.
+## 当前可参考
+
+- `rtc_server_adaptation.md`：RTC 服务端的通用实现边界；使用前以 `docs/05_inference_and_rollout.md` 的 OpenArm 合同为准。
+- `legacy/piper.md`：Piper 唯一保留的维护指引。
+
+## 明确不作为默认值
+
+- `legacy/piper.md` 中的旧配置仅用于维护/复现，不能作为 OpenArm 数据、norm stats、prompt 或服务命令。
+- 任何旧参考与编号化当前文档冲突时，以 `docs/01`–`docs/06` 和代码中的当前 config 为准，并在变更历史中说明原因。
