@@ -33,9 +33,53 @@ test -f "$CHECKPOINT_DIR/assets/$ASSET_ID/norm_stats.json"
 
 `replace_with_exp_name` 和 `replace_with_step` 是必须替换的占位符；不要把研究计划里的历史 step 或另一个数据版本的 norm stats 直接复制过来。服务代码会优先加载 checkpoint 内的 `assets/<asset_id>/norm_stats.json`，`--policy-repo-id` 只覆盖构造 transform 时的 `repo_id`，不能替代 checkpoint stats。
 
-## 2. 启动、健康检查和停止服务
+## 2. 参数与初始位姿
 
-### 2.1 用 tmux 启动
+### 2.1 服务和 action-chunk 参数
+
+| 参数 | 入口 | 当前建议 | 修改后检查 |
+|---|---|---:|---|
+| `port` | `scripts/serve_policy.py --port` | `6666` | 端口占用、真实 WebSocket smoke |
+| prompt | `--force-prompt` / `--default-prompt` | K-Policy 强制 `Fold the T-shirt properly, Advantage: positive` | handshake 和 smoke 报告 |
+| `rtc_mode` | `--rtc-mode {off,auto,only}` | 首轮 `off` | 按 §7 的三种协议分别 smoke |
+| action horizon | `src/openpi/training/config.py` 的 model config | 模型 `50`，不能与数据合同脱节 | loader、server metadata、客户端形状 |
+| 执行步长 | 机器人侧 `ActionChunkBroker(action_horizon)` 或等价 client 参数 | 不大于 `50`；真机先用短步长 | 记录每次重规划间隔和推理延迟 |
+| 控制频率 | 机器人侧 ROS/client | 与 checkpoint metadata 的 `control_hz=30` 对齐 | 现场测频、时间戳和动作限幅 |
+| 相机/队列/TDA | `/home/lyj/openarm_ros2_docker/scripts/start_real_inference_openpi.sh` CLI | 默认三路 `320x240@30 MJPG`、policy `30Hz`、prefetch `25`、`tda_smooth` | 用 `--help`/`--entrypoint-check`，再做真实相机 smoke |
+
+服务参数只影响推理协议，不会改变机械臂 home pose。模型 horizon 是一次返回的动作数；client 执行步长是多久重新请求一次，二者不要混写。
+
+### 2.2 OpenArm 初始/复位位姿
+
+本仓库没有 OpenArm 机器人驱动和初始关节常量。`serve_policy.py` 只输出动作；`packages/openpi-client/runtime/runtime.py` 只调用环境 `reset()`，不提供关节值。真实位姿的唯一主线在 `/home/lyj/openarm_ros2_docker`：
+
+| 场景 | 修改位置 | 说明 |
+|---|---|---|
+| 真机推理/退出回零 | `scripts/start_real_inference_openpi.sh`、`scripts/start_real_inference_lerobot.sh` 的 `home_all()` | policy 启动前和退出时都会调用；两份脚本要保持一致 |
+| 真机 HIL | `scripts/start_real_hil_dagger_openpi.sh` 的 `home_all()` | 同步检查 `--home-duration-sec` |
+| VR/Teleop | `scripts/start_real_vr_teleop.sh` 的 `home_arms` | 只影响 teleop，不会自动改推理脚本 |
+| 仿真初始值 | `src/openarm_bimanual_moveit_config/config/initial_positions.yaml` | 只影响 fake ros2_control，不会改变 DM 真机 |
+
+一次性真机回零（先启动 bringup、确认只有一个 `/openarm/joint_target` 写入者，并在低速/急停可用条件下执行）：
+
+```bash
+cd /home/lyj/openarm_ros2_docker
+ros2 run openarm_arm openarm-arm home both \
+  --position 0 0 0 0 0 0 0 --gripper 0.9 \
+  --duration-sec 5 --rate-hz 50 --wait-for-command-slot-sec 2
+```
+
+`--position` 是 7 个 ROS 弧度关节值；`--gripper 0.9` 是 ROS 开口量，不是训练合同里的 `-66` motor degree。没有夹爪控制时使用 `--no-gripper`。永久改 home 时只改上述 ROS 脚本的 `home_all/home_arms`，并执行 `bash -n scripts/start_real_*.sh`；推理/HIL 用 `--entrypoint-check`，VR teleop 另支持 `--self-check`。不要改本仓库 policy config 或 `--rtc-metadata`。
+
+回零平滑参数由 `openarm-arm home` 控制：`--duration-sec 5`、`--rate-hz 50`、`--max-step-rad 0.016`、`--settle-sec 0.5`。出现抖动或冲击时优先增大 duration、减小 max-step，改完仍需低速空载复核；不要用调 policy 频率代替硬件回零限速。
+
+改位姿后，先低速空载复位至少 5 次，检查碰撞、工作空间、急停、夹爪和三路相机；再记录 OpenArm 16D state，确认客户端转换到 degree/HQ 合同，并核对新 reset pose 与训练数据起始分布。分布变化明显时先采集/清洗新数据，不能只改 home 后直接沿用旧 checkpoint。
+
+`examples/aloha_real/constants.py:START_ARM_POSE`、`examples/aloha_real/real_env.py:DEFAULT_RESET_POSITION` 和 ALOHA 的 `policy_metadata.reset_pose` 只对 ALOHA legacy 生效，不能复制到 OpenArm。`--rtc-metadata` 只用于握手 metadata。
+
+## 3. 启动、健康检查和停止服务
+
+### 3.1 用 tmux 启动
 
 长时间服务不要依赖 SSH 前台会话。先在服务 GPU 节点完成 [02](02_installation_and_environment.md) 的 GPU 审计，再执行：
 
@@ -64,7 +108,7 @@ XLA_PYTHON_CLIENT_MEM_FRACTION=0.9 \
 
 `--force-prompt` 会替换客户端传来的 prompt；`--default-prompt` 只在客户端没有 prompt 时补全，不能作为 K-Policy 的强制条件。OpenArm 没有适合本项目的 `DEFAULT_CHECKPOINT`，必须显式使用 `policy:checkpoint`。
 
-### 2.2 健康检查和日志
+### 3.2 健康检查和日志
 
 `/healthz` 是 HTTP 健康检查，不会触发模型推理：
 
@@ -75,9 +119,9 @@ tail -n 80 "$OUTPUT_ROOT/logs/serve/$CONFIG/${EXP_NAME}_${STEP}.log"
 nvidia-smi --query-compute-apps=pid,process_name,used_memory --format=csv,noheader
 ```
 
-`OK`、端口监听或进程存在只说明服务进程存活，不说明 checkpoint transform、动作维度或 prompt 合同正确。必须继续做第 3 节的真实 WebSocket smoke。停止服务前记录 smoke 报告和日志，然后在对应 tmux 中按 `Ctrl-c`；不要通过 kill/重启其他训练节点来“修复”服务。
+`OK`、端口监听或进程存在只说明服务进程存活，不说明 checkpoint transform、动作维度或 prompt 合同正确。必须继续做第 4 节的真实 WebSocket smoke。停止服务前记录 smoke 报告和日志，然后在对应 tmux 中按 `Ctrl-c`；不要通过 kill/重启其他训练节点来“修复”服务。
 
-## 3. 真实 WebSocket smoke
+## 4. 真实 WebSocket smoke
 
 仓库脚本会连接真实服务，发送三路零图像、16D 零 state 和 prompt，检查返回动作及握手 metadata，并把结果原子写入 JSON。它验证的是**服务合同和可推理性**，不是衣服任务成功率：
 
@@ -110,7 +154,7 @@ prompt                  string
 
 服务握手先返回 metadata；普通推理请求返回 `actions`，以及可选的 `policy_timing`/`server_timing`。服务端支持 CHW 图像和浮点图像的兼容解析，但真机应统一为 HWC `uint8`，避免客户端各自隐式缩放。一个 smoke 通过后，仍需用真实相机和真实 state 做低风险单步验证。
 
-## 4. Rollout 分层和停止条件
+## 5. Rollout 分层和停止条件
 
 按下面顺序逐级放量，每一级都绑定同一个 checkpoint、config、prompt 和数据版本：
 
@@ -129,7 +173,7 @@ prompt                  string
 
 固定任务集至少记录：正确对角线选择率、无进展重复甩平率、已展开后继续甩平率、完整折叠成功率、每集接管次数、恢复成功率、推理延迟和动作越界次数。训练 loss 或单条成功演示不能替代真机结论。
 
-## 5. HIL 采集合同
+## 6. HIL 采集合同
 
 - **固定 collector**：一批数据从开始到结束只使用一个 checkpoint、一个 prompt 和一个服务配置；不要中途切换 20k/79999 或改变 `rtc_mode`。
 - **raw 不覆盖**：保存 policy action、human/VR action、hold、intervention、视频、时间戳、`episode_success` 和 `recovery_success`；失败前缀必须保留，便于分析策略卡住的阶段。
@@ -137,11 +181,11 @@ prompt                  string
 - **版本隔离**：raw 与 clean 使用不同目录/数据 id；导出只能写新目录，不能原地覆盖 raw 或冻结 K-Data。导出和 norm 规则见 [04 § 从 raw 转成新数据版本](04_data_contracts.md)。
 - 当前研究计划中的 HIL-T30 是“错误对角线、重复甩平、已展开后未进入折叠”三类恢复各 10 条；它是计划数量，不代表已经采集完成，必须以远端 metadata 和审计报告为准。
 
-## 6. RTC：协议、模式和回退
+## 7. RTC：协议、模式和回退
 
 RTC 是可选的 action chunk 重规划路径。旧的普通 `obs -> policy.infer(obs)` 路径必须始终可用；OpenArm 第一次部署和每次 RTC 改动都先用 `--rtc-mode off` 做 baseline。
 
-### 6.1 启动模式
+### 7.1 启动模式
 
 ```bash
 # 默认/旧路径：忽略 RTC 字段
@@ -156,7 +200,7 @@ RTC 是可选的 action chunk 重规划路径。旧的普通 `obs -> policy.infe
 
 `rtc_mode` 会写入握手 metadata。正式 K-Policy 的 handshake 同时包含 `action_dim/model_action_dim=32`（模型内部维度）和 `robot_action_dim/output_action_dim=16`（机器人输出维度）。`auto` 的回退必须在 rollout 日志中记录 `server_timing.rtc_error` 或 `rtc_warnings`；不能把一次自动回退标成“RTC 成功”。
 
-### 6.2 请求 envelope
+### 7.2 请求 envelope
 
 普通客户端发送 observation 字典即可；RTC 客户端发送 msgpack-numpy 对象，结构如下（这是协议示意，不是 JSON HTTP 请求）：
 
@@ -179,7 +223,7 @@ RTC 是可选的 action chunk 重规划路径。旧的普通 `obs -> policy.infe
 
 当前 `WebsocketClientPolicy.infer()` 发送的是普通 observation；要使用 envelope，需要实现/审查能够发送上述 msgpack 对象的 RTC 客户端，并用 `server_timing.rtc_used` 验证实际走了 RTC。`only` 模式不要直接用于首轮真机。
 
-### 6.3 RTC 验收矩阵
+### 7.3 RTC 验收矩阵
 
 | 服务模式 | 普通 observation | 合法 RTC envelope | 非法/不支持 RTC |
 |---|---|---|---|
@@ -189,7 +233,7 @@ RTC 是可选的 action chunk 重规划路径。旧的普通 `obs -> policy.infe
 
 每次改动至少跑 `off` 普通 smoke，再跑 `auto` 合法/非法两组；只有旧路径和 RTC 路径都通过，才允许进入真机小批量。Piper 的 metadata 或 action transform 不属于 OpenArm RTC 合同。
 
-## 7. Rollout 记录模板
+## 8. Rollout 记录模板
 
 每一集至少记录以下字段，存放在与 raw/clean 数据同名的 manifest 或实验报告中：
 

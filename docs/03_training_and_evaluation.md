@@ -8,7 +8,7 @@
 4. 做真实 loader smoke，再启动正式训练。
 
 ```bash
-conda run -n pi-conda python scripts/train_test.py
+conda run -n pi-conda python -m pytest scripts/train_test.py -q
 ```
 
 ## 通用单机入口
@@ -23,6 +23,17 @@ XLA_PYTHON_CLIENT_MEM_FRACTION=0.9 \
 ```
 
 PyTorch（仅 pi0/pi0.5）使用 `scripts/train_pytorch.py` 或 `torchrun`；JAX 是正式 OpenArm 主路径。配置注册表在 `src/openpi/training/config.py`，训练输出由 `checkpoint_base_dir/config/exp_name/step` 组织。
+
+## 参数修改规则
+
+| 参数 | 修改位置 | 说明 |
+|---|---|---|
+| `repo_id`、`train_episodes`、transform、初始化权重 | `src/openpi/training/config.py` 的新配置 | 数据版本或 split 改变就新建 config/实验名并重算 norm |
+| `batch_size`、`num_workers`、`num_train_steps`、`log_interval` | config 或 `scripts/train.py` CLI | 多节点时由 [02](02_installation_and_environment.md#可调参数) 的 launcher 统一传入 |
+| `save_interval`、`keep_period`、学习率/冻结规则 | config | 续训不能覆盖旧实验目录 |
+| `model.action_horizon`、`action_dim` | model config + 数据/客户端合同 | OpenArm 正式值为 `50`、机器人输出 `16D`；改动后必须重跑 loader、server smoke 和客户端检查 |
+
+不要直接修改 `pi05_openarm_kai0_awbc_v1` 作为试验；复制为新配置并记录初始化 checkpoint、数据、seed 和所有覆盖参数。
 
 ## 正式 K-Policy 配置
 
@@ -39,6 +50,26 @@ KAI0 的 HQ-Stage、Site-Score、TDA-S、K-Data 和 AWBC 二值化是独立阶�
 - 混合 HQ/Site/TDA 的 norm 和 loader smoke；不能只抽 HQ 开头样本。
 
 普通 BC 对照必须使用相同来源/样本预算，只去掉 Advantage prompt；不能把它和 KAI0 或 Evo-RL 结果合并归因。
+
+## 离线 checkpoint 评估
+
+这一步只作离线动作误差和 chunk 连续性参考，不等价于真机成功率。脚本中的 `rollout_drift` 是预留字段，当前不作为 gate；先通过 checkpoint gate，再在固定 holdout 上运行：
+
+```bash
+# HQ 原始数据的固定 holdout；K-Data 的 1719 集不是 999:1199 的 HQ holdout。
+DATASET=/share/home/linyongjia/datasets/high_quality_folding
+OUTPUT_ROOT=/share/home/linyongjia/output/openpi
+CHECKPOINT=/share/home/linyongjia/output/openpi/CONFIG/EXP_NAME/STEP
+conda run -n pi-conda python scripts/evaluate_checkpoint.py \
+  --config pi05_openarm_kai0_awbc_v1 \
+  --checkpoint-dir "$CHECKPOINT" \
+  --dataset "$DATASET" \
+  --val-split "999:1199" \
+  --output "$OUTPUT_ROOT/eval/EXP_NAME_STEP" \
+  --verbose
+```
+
+报告至少保存 config、checkpoint、数据版本、val split 和 git commit；真机结论仍以 [05 · 推理与 rollout](05_inference_and_rollout.md) 的固定协议为准。
 
 ## checkpoint 验收
 

@@ -1,85 +1,85 @@
-# OpenPI + OpenArm 后训练与 Rollout 工程
+# OpenPI + OpenArm 后训练与 Rollout
 
-这是 OpenPI 的 OpenArm 定制分支，当前工作重点是双臂 OpenArm 上的 T-shirt folding VLA：监督微调、KAI0/AWBC、Evo-RL、HIL 和真机 rollout。上游 OpenPI 的通用示例仍保留在 `examples/` 与 `third_party/`，但不再作为本项目的交接入口；Piper 文档只用于历史追溯。
+本仓库是 OpenPI 的 OpenArm 定制分支，主线任务是双臂 OpenArm 的 T-shirt folding VLA：监督微调、KAI0/AWBC、Evo-RL、HIL 和真机 rollout。`examples/`、`third_party/` 与 Piper 仅作 legacy/reference，不是默认入口。
 
-## 先读什么
+## 从这里开始
 
-接手者按下面顺序阅读，避免把历史实验当成当前默认路径：
+1. [交接索引](docs/00_handoff_index.md)：文档路由和状态词。
+2. [系统架构](docs/01_system_architecture.md)：代码、数据流和边界。
+3. [服务器与环境](docs/02_installation_and_environment.md)：服务器、conda、数据预检和训练命令。
+4. [训练与评估](docs/03_training_and_evaluation.md)：配置、训练、checkpoint 和离线评估。
+5. [数据合同](docs/04_data_contracts.md)：数据格式、单位、split 和 norm stats。
+6. [推理与 rollout](docs/05_inference_and_rollout.md)：服务、初始位姿、WebSocket、HIL 和 RTC。
+7. [研究计划](docs/06_openarm_research_plan.md)：KAI0、Evo-RL、Hybrid 的当前状态。
 
-1. [交接索引](docs/00_handoff_index.md)：当前/计划中/历史内容的唯一导航。
-2. [系统架构](docs/01_system_architecture.md)：代码、数据、训练和服务边界。
-3. [服务器与环境](docs/02_installation_and_environment.md)：远端拓扑、数据预检、训练命令、路径及安全要求。
-4. [训练与评估](docs/03_training_and_evaluation.md)：通用训练入口、OpenArm 正式配置和验收。
-5. [数据合同](docs/04_data_contracts.md)：16D 动作、单位、LeRobot 数据和 norm stats。
-6. [推理与 rollout](docs/05_inference_and_rollout.md)：服务端、WebSocket smoke、HIL 和 RTC。
-7. [研究计划](docs/06_openarm_research_plan.md)：KAI0、Evo-RL、Hybrid 的当前实验状态与下一步。
+变更原因和结果只看 [07 · 变更历史](docs/07_change_log.md)。Piper 只看 [legacy 指引](docs/reference/legacy/piper.md)。
 
-历史变更只看 [CHANGELOG](docs/07_change_log.md)；RTC 实现边界和 Piper legacy 指引位于 [reference](docs/reference/00_reference_index.md)，不应覆盖当前文档。
-
-## 当前项目边界
+## 固定合同
 
 ```text
-输入：三路相机 + OpenArm state + prompt
-模型：π0/π0.5（JAX 为主，pi0/pi0.5 支持 PyTorch）
-输出：50 步动作块，OpenArm 16D
+输入：base、left wrist、right wrist 三路图像 + OpenArm state + prompt
 任务：Fold the T-shirt properly
+state/action：16D = [右臂7关节, 右夹爪, 左臂7关节, 左夹爪]
+训练单位：关节 degree；HQ 夹爪 motor degree，0=open，-66=closed
+输出：50 步 action chunk；模型内部 32D，机器人输出 16D
 ```
 
-OpenArm 的 16D 顺序固定为 `[右臂7关节, 右夹爪, 左臂7关节, 左夹爪]`。训练数据中的机械臂关节使用 degree，HQ 夹爪使用电机角度 `0=open`、`-66=closed`；ROS/运行时的弧度和归一化转换只允许发生在客户端边界。OpenArm 必须使用 `LeRobotOpenArmDataConfig`、`OpenArmInputs` 和 `OpenArmOutputs`，不能套用 Piper 的 14D transform。
-
-## 已实现与当前状态
-
-- OpenArm HQ/Site 数据清洗、Stage scorer、KAI0 二值 AWBC 数据构建和正式 `pi05_openarm_kai0_awbc_v1` 配置已在仓库中。
-- 80k K-Policy、16 个 checkpoint 的双域 sweep 和部署 smoke 已记录完成；离线规则选择 20k，但现有真机 A/B 未优于 79999，交接记录中的当前 collector 是 79999。
-- 下一批是 HIL-T30：错误对角线恢复、重复甩平恢复、已展开但未进入折叠各 10 条。它是计划，不等同于“已经采集完成”；先检查 `docs/06_openarm_research_plan.md` 和远端状态。
-- Evo value/infer、正式 ACP 训练和 KAI0+Evo Hybrid 仍属于后续路线；配置中 ACP dropout 的正式目标为 `0.3`，不能把现有 probe 的 `0.0` 当最终结论。
+OpenArm 只使用 `LeRobotOpenArmDataConfig`、`OpenArmInputs` 和 `OpenArmOutputs`。弧度、归一化夹爪和硬件限幅只在机器人客户端/ROS 边界处理；不能接入 Piper 14D 或旧单位数据。
 
 ## 最短可用路径
 
-### 本地准备
+### 1. 安装
+
+联网机器构建离线包；将仓库和 `artifacts/pi-conda-offline-bundle` 同步到目标机后，在目标机安装：
 
 ```bash
+# 联网机器
 git submodule update --init --recursive
 bash scripts/conda/build_offline_bundle.sh artifacts/pi-conda-offline-bundle
+```
+
+```bash
+# 目标机，当前目录为同步后的仓库
 bash scripts/conda/install_offline_bundle.sh \
-  --bundle-dir artifacts/pi-conda-offline-bundle --env-name pi-conda
-conda run -n pi-conda pip install --no-build-isolation --no-deps -e .
-conda run -n pi-conda pip install --no-build-isolation --no-deps -e packages/openpi-client
+  --bundle-dir artifacts/pi-conda-offline-bundle \
+  --openpi-dir "$PWD" --env-name pi-conda
 ```
 
-### 训练前检查
+### 2. 训练前检查
 
 ```bash
-conda run -n pi-conda python scripts/train_test.py
+conda run -n pi-conda python -m pytest scripts/train_test.py -q
 ```
 
-norm stats、正式 OpenArm 多节点命令、数据集参数和 smoke gate 见 [训练与评估](docs/03_training_and_evaluation.md) 与 [数据合同](docs/04_data_contracts.md)，不要从这里复制一个未经核对的旧 checkpoint 路径。
+服务器数据、norm、正式 K-Policy 多节点训练和评估命令分别见 [02](docs/02_installation_and_environment.md)、[03](docs/03_training_and_evaluation.md) 和 [04](docs/04_data_contracts.md)。
 
-### 服务与 rollout
+### 3. 服务与 smoke
 
 ```bash
-CHECKPOINT_DIR=replace_with_checkpoint_dir
+CHECKPOINT_DIR=/share/home/linyongjia/output/openpi/CONFIG/EXP_NAME/STEP
 conda run -n pi-conda python scripts/serve_policy.py \
   --port 6666 \
   --force-prompt 'Fold the T-shirt properly, Advantage: positive' \
+  --rtc-mode off \
   policy:checkpoint \
   --policy.config=pi05_openarm_kai0_awbc_v1 \
   --policy.dir="$CHECKPOINT_DIR"
 ```
 
-端口监听不算部署成功。必须从真实 WebSocket 客户端请求一次，确认有限的 `(50, 16)` 动作、50 步 horizon、degree/HQ 夹爪元数据和强制 prompt；完整流程见 [推理与 rollout](docs/05_inference_and_rollout.md)。
+端口监听不是部署成功。必须运行 [真实 WebSocket smoke](docs/05_inference_and_rollout.md#4-真实-websocket-smoke)，确认 `(50,16)`、单位、夹爪语义和 checkpoint 一致。
 
-## 交接时必须确认
+## 初始位姿与可调参数
 
-- [ ] 已读 `AGENTS.md`、`docs/cache/kernel.md`、`docs/cache/context_index.md`，再按任务只读一个 mode pack。
-- [ ] 已确认远端仓库、conda 环境、数据集和输出目录，不把本地路径误当远端路径。
-- [ ] 已确认 checkpoint 是完整 Orbax 保存，而不是只有数字目录或半写入的 `params/`。
-- [ ] 已完成数据 `meta/info.json`、视频尾帧、norm stats、16D/单位和 prompt 检查。
-- [ ] 真机前使用 tmux、低风险动作和可回退 checkpoint；任何 RTC 改动都保留 `rtc_mode=off` 旧路径。
-- [ ] 新事实只写入一个 owner 文档，并在 [CHANGELOG](docs/07_change_log.md) 留下简短原因和结果。
+- OpenArm 初始/复位位姿不在本仓库的 policy server/config 中；主线机器人仓库是 `/home/lyj/openarm_ros2_docker`。真机推理改 `scripts/start_real_inference_openpi.sh` 与 `scripts/start_real_inference_lerobot.sh` 的 `home_all()`，HIL 改 `scripts/start_real_hil_dagger_openpi.sh`，完整说明见该仓库 `docs/02_parameters_and_home.md`。
+- 一次性真机回零在 bringup 后执行：`ros2 run openarm_arm openarm-arm home both --position 0 0 0 0 0 0 0 --gripper 0.9 --duration-sec 5 --rate-hz 50 --wait-for-command-slot-sec 2`。7 个关节值是 ROS 弧度，`0.9` 是 ROS 夹爪开口量；训练侧仍是 degree/HQ `0/-66`。先低速验证限位、碰撞和急停，再确认相机/数据分布；不要把位姿写进 `--rtc-metadata`。
+- `examples/aloha_real/constants.py` 的 `START_ARM_POSE` 和 `examples/aloha_real/real_env.py` 的 `DEFAULT_RESET_POSITION` 只属于 ALOHA legacy，不能复制给 OpenArm。
+- 训练参数改 `src/openpi/training/config.py` 或通过训练 CLI 覆盖；服务器路径、GPU、hosts、batch、workers 和 coordinator 看 [02](docs/02_installation_and_environment.md#可调参数)。服务参数和 action-chunk 执行策略看 [05](docs/05_inference_and_rollout.md#2-参数与初始位姿)。
 
-## 开发约定
+## 交接检查
 
-Python 3.11，行宽 120；常用检查为 `ruff check .`、`ruff format .` 和 `conda run -n pi-conda python -m pytest --strict-markers -m "not manual"`。详细规则、提交要求和 Context OS 记忆边界见 [AGENTS.md](AGENTS.md)。
+- [ ] 已按 `AGENTS.md` → `docs/cache/kernel.md` → `docs/cache/context_index.md` → 一个 mode pack 启动。
+- [ ] 已确认远端 commit、数据目录、episode split、norm stats 和 checkpoint 是同一版本。
+- [ ] 已通过真实 WebSocket smoke；真机 rollout 使用 tmux、急停、人工接管和可回退 checkpoint。
+- [ ] 新事实只写入一个 owner 文档；历史结果才写入 [07](docs/07_change_log.md)。
 
-本分支不自动上传权重、不提交凭据、不执行 `git push`。接手者完成改动后应提交中文 commit，推送由项目负责人执行。
+Python 3.11、conda 离线依赖、Ruff/pytest 和提交边界见 [AGENTS.md](AGENTS.md)。本分支不提交凭据、不上传权重、不执行 `git push`。

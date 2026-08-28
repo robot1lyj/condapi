@@ -1,6 +1,6 @@
 # 06 · OpenArm KAI0 / Evo-RL / 组合复现计划
 
-最后更新：2026-08-25（研究状态沿用 2026-07-27，文档 owner/入口已在本轮复核）
+最后更新：2026-08-28（研究状态沿用 2026-07-27；远端实时状态需按 docs/02 复核）
 
 状态：**路线 K 的 80k、16-checkpoint 双域 sweep 和正式报告已完成；离线规则选中20k，但真机 A/B 未见改善，
 当前 gpu25 人工恢复为79999。下一步使用79999采集30条定向 HIL，重点解决错误对角线、重复甩平和展开到折叠的
@@ -107,7 +107,7 @@ robot/ROS boundary: radians + normalized gripper only at client/runtime edge
 - Model Arithmetic。
 - 新的自定义 failure stage。
 
-Model Arithmetic、DAgger 和 temporal smoothing 属于完整 KAI0 的其他模块，后续单列，不能把 K0 第一版称为“完整 χ0 复现”。
+Model Arithmetic、DAgger 和 temporal smoothing 属于完整 KAI0 的其他模块，后续单列，不能把 K0 第一版称为“完整 KAI0 复现”。
 
 ### K1. 两个领域的 Stage 评分
 

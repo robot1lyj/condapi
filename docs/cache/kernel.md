@@ -8,6 +8,7 @@
 - 任务 prompt：`Fold the T-shirt properly`；K-Policy 服务需强制 `Fold the T-shirt properly, Advantage: positive`。
 - OpenArm state/action 为 16D `[右臂7关节, 右夹爪, 左臂7关节, 左夹爪]`；训练单位为 degree，HQ 夹爪 `0=open,-66=closed`。
 - OpenArm 只走 `LeRobotOpenArmDataConfig`、`OpenArmInputs/Outputs`；Piper 是 legacy，不是默认路径。
+- policy server 不定义 OpenArm 初始/复位位姿；位姿由 `/home/lyj/openarm_ros2_docker` 的 ROS/client `reset()` 管理，细节只看 `docs/05_inference_and_rollout.md`。
 
 ## 运行资源
 

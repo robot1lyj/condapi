@@ -56,6 +56,23 @@ cd "$REPO_ROOT"
 
 训练输出约定为 $OUTPUT_ROOT/<CONFIG>/<EXP_NAME>/<STEP>；运行日志约定为 $OUTPUT_ROOT/logs/<CONFIG>/。KAI0 总控状态位于 $OUTPUT_ROOT/logs/openarm_kai0_pipeline_v1/status.json。
 
+## 可调参数
+
+参数只在一个地方改；改完必须重新跑对应 gate。新实验优先用 CLI 覆盖，不要修改正式配置或 launcher 默认值。
+
+| 参数 | 修改入口 | K-Policy 当前值 | 修改后必须做什么 |
+|---|---|---:|---|
+| 数据集路径、输出路径 | 本页环境变量 `DATA_ROOT`、`OUTPUT_ROOT` | 见 §1 | 检查目录、权限和磁盘空间 |
+| 训练数据、split、norm 资产 | `src/openpi/training/config.py` 的独立 config | K-Data、`0:1719` | 新数据版本重算 norm，跑数据 audit/loader smoke |
+| hosts、coordinator | launcher 的 `--hosts`、`--coordinator-address` | `gpu12 gpu28`、`172.31.11.112:12365` | 检查所有节点和端口；所有节点一起启动 |
+| 全局 batch、workers | launcher 的 `--batch-size`、`--num-workers` | `128`、smoke `0`/正式 `8` | batch 能被 `2 × 主机数` 整除；先 20-step smoke |
+| 训练步数、保存频率 | config 或 launcher 的 `--num-train-steps`；保存频率在 config | `80000`、`5000` | 新 `EXP_NAME` 用 overwrite；续训只用 resume |
+| XLA 显存比例 | launcher `--xla-memory-fraction` 或单机环境变量 | `0.90` | 记录显存和 OOM；不要用删 cache 规避问题 |
+| norm 统计 episode | `compute_openarm_parquet_norm_stats.py --episodes` | `0:1719` | 必须与训练 split 完全一致，并写入同一数据版本 |
+| 总控覆盖项 | `OPENPI_K_TRAIN_HOSTS`、`OPENPI_K_GLOBAL_BATCH_SIZE`、`OPENPI_K_NUM_WORKERS`、`OPENPI_K_TRAIN_TAG` | 见 §5.5 | 仅负责人启动 controller；被动查看不要调用总控 |
+
+模型 action 维度、单位、horizon 属于 [04 · 数据合同](04_data_contracts.md)；服务端端口、prompt、RTC 和 action-chunk 属于 [05 · 推理与 rollout](05_inference_and_rollout.md)。不要在本页复制它们的操作命令。
+
 ## 2. 首次登录与版本/环境预检
 
 从本地进入服务器：
@@ -73,7 +90,7 @@ git branch --show-current
 git rev-parse --short HEAD
 git status --short
 test -x "$PYTHON"
-"$PYTHON" -c "import openpi, torch; print('openpi ok; cuda=', torch.cuda.is_available())"
+"$PYTHON" -c "import jax, lerobot, openpi, openpi_client, torch; print('imports ok; jax=', jax.__version__, 'cuda=', torch.cuda.is_available())"
 git submodule status
 ~~~
 
@@ -96,16 +113,19 @@ ss -ltnp 2>/dev/null | grep ':6666' || true
 
 ## 4. 本地 conda 环境
 
-本次交接基于 conda-pi 分支；联网机器构建离线包，再在目标机安装：
+本次交接基于 conda-pi 分支；联网机器构建离线包，把仓库和 `artifacts/pi-conda-offline-bundle` 同步到目标机，再在目标机安装：
 
 ~~~bash
+# 联网机器
 git submodule update --init --recursive
 bash scripts/conda/build_offline_bundle.sh artifacts/pi-conda-offline-bundle
+~~
+
+~~~bash
+# 目标机，当前目录为同步后的仓库
 bash scripts/conda/install_offline_bundle.sh \
-  --bundle-dir artifacts/pi-conda-offline-bundle --env-name pi-conda
-conda run -n pi-conda python scripts/conda/patch_transformers.py --openpi-dir .
-conda run -n pi-conda pip install --no-build-isolation --no-deps -e .
-conda run -n pi-conda pip install --no-build-isolation --no-deps -e packages/openpi-client
+  --bundle-dir artifacts/pi-conda-offline-bundle \
+  --openpi-dir "$PWD" --env-name pi-conda
 ~~~
 
 远端运行时统一使用 pi-conda、离线 W&B/Hugging Face 和 XLA_PYTHON_CLIENT_MEM_FRACTION=0.9；不要用 uv，不要在 jump host 上跑 GPU 训练，不要把 token 写入脚本。

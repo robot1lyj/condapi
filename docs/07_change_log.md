@@ -2,7 +2,15 @@
 
 只记录已经发生的变更、原因、结果和必要的证据索引。这里出现的旧路径、step、指标或命令都是历史快照，不能直接当作当前默认值；当前操作以 `docs/00`–`docs/06` 和源码为准。
 
-当前架构 → `docs/01_system_architecture.md`；研究决策 → `docs/decisions/`；交接入口 → `docs/00_handoff_index.md`。
+当前架构 → `docs/01_system_architecture.md`；研究计划 → `docs/06_openarm_research_plan.md`；交接入口 → `docs/00_handoff_index.md`。
+
+---
+
+## 2026-08-28
+
+- **交接文档第三轮收敛**：README 改为 OpenArm 主线最短入口；补齐训练、服务器、服务参数和初始/复位位姿归属（含 `/home/lyj/openarm_ros2_docker` 回零入口）；离线评估固定使用 HQ `999:1199` holdout，并明确 `rollout_drift` 预留字段不作 gate；`train_test.py` 调用改为可执行的 pytest 入口。
+- **清理无职责文档**：删除空的 `docs/decisions/README.md`；编号化主线仍由 `docs/00`–`docs/07` 按唯一职责维护，Piper 只保留 reference 指引。
+- **验证结果**：Markdown 链接/锚点 28 项、Bash 文档块 33 项和 Python compileall 通过；外部 OpenArm ROS 脚本语法通过；smoke/launcher 目标测试 7 项通过。当前本机 `pi-conda` 未安装 `lerobot`，数据 audit、训练和评估命令需在完整离线包环境复核。
 
 ---
 
