@@ -2,6 +2,8 @@
 
 本仓库是 OpenPI 的 OpenArm 定制分支，主线任务是双臂 OpenArm 的 T-shirt folding VLA：监督微调、KAI0/AWBC、Evo-RL、HIL 和真机 rollout。`examples/`、`third_party/` 与 Piper 仅作 legacy/reference，不是默认入口。
 
+服务器已切换到琶洲模方智算平台：SSH 入口为 `wuyan@10.18.31.234:22`，工作台为 `http://10.18.31.233:3080/`；服务器目录、模块环境和迁移状态统一看 [02](docs/02_installation_and_environment.md)。仓库不保存服务器密码。
+
 ## 从这里开始
 
 1. [交接索引](docs/00_handoff_index.md)：文档路由和状态词。
@@ -30,7 +32,7 @@ OpenArm 只使用 `LeRobotOpenArmDataConfig`、`OpenArmInputs` 和 `OpenArmOutpu
 
 ### 1. 安装
 
-联网机器构建离线包；将仓库和 `artifacts/pi-conda-offline-bundle` 同步到目标机后，在目标机安装：
+通用离线安装入口仍保留在此处；新平台优先按 [02](docs/02_installation_and_environment.md) 使用 module 和现有 `yam` 环境，只有完成 Python/依赖核验后才决定是否安装离线包：
 
 ```bash
 # 联网机器
@@ -48,7 +50,10 @@ bash scripts/conda/install_offline_bundle.sh \
 ### 2. 训练前检查
 
 ```bash
-conda run -n pi-conda python -m pytest scripts/train_test.py -q
+module load miniconda3/26.1.1
+conda activate /home/wuyan/.conda/envs/yam
+export PYTHON="$CONDA_PREFIX/bin/python"
+"$PYTHON" -m pytest scripts/train_test.py -q
 ```
 
 服务器数据、norm、正式 K-Policy 多节点训练和评估命令分别见 [02](docs/02_installation_and_environment.md)、[03](docs/03_training_and_evaluation.md) 和 [04](docs/04_data_contracts.md)。
@@ -56,8 +61,9 @@ conda run -n pi-conda python -m pytest scripts/train_test.py -q
 ### 3. 服务与 smoke
 
 ```bash
-CHECKPOINT_DIR=/share/home/linyongjia/output/openpi/CONFIG/EXP_NAME/STEP
-conda run -n pi-conda python scripts/serve_policy.py \
+OUTPUT_ROOT=replace_with_new_platform_output_root
+CHECKPOINT_DIR="$OUTPUT_ROOT/CONFIG/EXP_NAME/STEP"
+"$PYTHON" scripts/serve_policy.py \
   --port 6666 \
   --force-prompt 'Fold the T-shirt properly, Advantage: positive' \
   --rtc-mode off \
@@ -70,7 +76,7 @@ conda run -n pi-conda python scripts/serve_policy.py \
 
 ## 初始位姿与可调参数
 
-- OpenArm 初始/复位位姿不在本仓库的 policy server/config 中；主线机器人仓库是 `/home/lyj/openarm_ros2_docker`。真机推理改 `scripts/start_real_inference_openpi.sh` 与 `scripts/start_real_inference_lerobot.sh` 的 `home_all()`，HIL 改 `scripts/start_real_hil_dagger_openpi.sh`，完整说明见该仓库 `docs/02_parameters_and_home.md`。
+- OpenArm 初始/复位位姿不在本仓库的 policy server/config 中；机器人 ROS/driver/client 主机和路径需在新平台另行核实，旧记录中的 `/home/lyj/openarm_ros2_docker` 不作为新服务器默认值。
 - 一次性真机回零在 bringup 后执行：`ros2 run openarm_arm openarm-arm home both --position 0 0 0 0 0 0 0 --gripper 0.9 --duration-sec 5 --rate-hz 50 --wait-for-command-slot-sec 2`。7 个关节值是 ROS 弧度，`0.9` 是 ROS 夹爪开口量；训练侧仍是 degree/HQ `0/-66`。先低速验证限位、碰撞和急停，再确认相机/数据分布；不要把位姿写进 `--rtc-metadata`。
 - `examples/aloha_real/constants.py` 的 `START_ARM_POSE` 和 `examples/aloha_real/real_env.py` 的 `DEFAULT_RESET_POSITION` 只属于 ALOHA legacy，不能复制给 OpenArm。
 - 训练参数改 `src/openpi/training/config.py` 或通过训练 CLI 覆盖；服务器路径、GPU、hosts、batch、workers 和 coordinator 看 [02](docs/02_installation_and_environment.md#可调参数)。服务参数和 action-chunk 执行策略看 [05](docs/05_inference_and_rollout.md#2-参数与初始位姿)。

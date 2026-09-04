@@ -2,74 +2,57 @@
 
 本页是远端训练/验证服务器的唯一操作 owner：说明机器、目录、数据预检、单机 probe、多节点 K-Policy、监控和 checkpoint 交接。数据语义看 docs/04_data_contracts.md，训练策略看 docs/03_training_and_evaluation.md，服务与真机看 docs/05_inference_and_rollout.md。
 
-下列节点、路径和端口是交接记录中的固定 profile，不等于当前实时占用或服务状态；每次操作都必须重新执行第 2、3 节的版本/GPU/tmux 检查。
+下列新平台信息于 2026-09-04 按用户提供的《琶洲模方智算平台用户操作手册》（2026-04-15）和 SSH/Slurm 只读核验建立。作业、数据下载进度和资源占用都是接管快照；每次操作仍必须重新执行第 2、3 节检查。
 
-## 1. 服务器拓扑与固定目录
+## 1. 新平台入口与固定目录
 
 ~~~text
-本地工作站
-  -> jump host: ssh -p 12222 linyongjia@172.31.11.100
-      -> GPU 节点: gpu12 / gpu14 / gpu18 / gpu19 / gpu25 / gpu28
+工作台网页： http://10.18.31.233:3080/
+SSH：       wuyan@10.18.31.234:22
+登录主机：  rocky-login.hlink.local
+账号家目录：/home/wuyan
+项目工作区：/home/wuyan/lyj/YAM
 ~~~
 
-gpu19 可能需要有效的 host key 和 Slurm allocation；PAM 拒绝时视为不可用。gpu25 是当前服务/采集候选，未经明确授权不得停止它的 6666 服务、启动第二个同端口服务或抢占 GPU。GPU 节点必须先做占用审计，不能凭主机名假设空闲。
+网页入口按平台手册要求使用可访问内网的 HTTP 代理；网页和 SSH 是两个入口，不能把 `.233:3080` 当作 SSH 地址。密码由用户/密码管理器提供，不写入仓库、脚本或命令历史。
 
-| 节点 | 交接角色 | 使用前确认 |
+| 变量/目录 | 当前值 | 接管时核验 |
 |---|---|---|
-| `gpu12` | 多节点 JAX coordinator 首选 | 必须是 `--hosts` 的第一个节点，确认 12365 未被占用 |
-| `gpu14`、`gpu28` | 多节点训练候选 | 与 gpu12 组成完整作业；不能只启动其中一个 |
-| `gpu18` | 评分/训练候选 | 先查实时 GPU/会话，不把历史空闲记录当现状 |
-| `gpu19` | 受限候选 | host key、PAM 和 Slurm allocation 均通过后才使用 |
-| `gpu25` | 服务/真机采集候选 | 默认端口 6666；未经授权不得停止、抢占或重启 |
+| `HOME_ROOT` | `/home/wuyan` | 存在，登录用户为 `wuyan` |
+| `PROJECT_ROOT` | `/home/wuyan/lyj/YAM` | 存在 |
+| `CODE_ROOT` | `/home/wuyan/lyj/YAM/YAM_code` | 存在但接管时为空，尚未同步 OpenPI |
+| `DATA_ROOT` | `/home/wuyan/lyj/YAM/YAM_data` | 存在，接管时约 23 GB |
+| `ENV_PREFIX` | `/home/wuyan/.conda/envs/yam` | 存在；需先加载 `miniconda3/26.1.1` |
+| `OUTPUT_ROOT` | 未确认 | 不得沿用旧 `/share/home/...` 路径，须以新作业实际输出目录为准 |
 
-远端共享路径：
+接管时已发现数据目录 `/home/wuyan/lyj/YAM/YAM_data/ABC-130k-two-tasks`，并有 `train`/`val`、metadata、parquet 和视频下载日志；它尚未通过 OpenArm 16D/单位/任务合同审计，不能仅凭目录名接入 OpenArm 训练。
 
-~~~text
-REPO_ROOT=/share/home/linyongjia/conda-pi/openpi
-PYTHON=/share/home/linyongjia/miniconda3/envs/pi-conda/bin/python
-DATA_ROOT=/share/home/linyongjia/datasets
-REFERENCE_ROOT=/share/home/linyongjia/data
-OUTPUT_ROOT=/share/home/linyongjia/output/openpi
-OPENPI_DATA_HOME=/share/home/linyongjia/.cache/openpi
-HF_HOME=/share/home/linyongjia/.cache/huggingface
-~~~
-
-进入 GPU 节点后先执行：
+迁移后的 shell 可先设置已核实的目录变量；`REPO_ROOT` 和 `OUTPUT_ROOT` 在新平台实际同步/提交后再设置：
 
 ~~~bash
-export REPO_ROOT=/share/home/linyongjia/conda-pi/openpi
-export PYTHON=/share/home/linyongjia/miniconda3/envs/pi-conda/bin/python
-export DATA_ROOT=/share/home/linyongjia/datasets
-export REFERENCE_ROOT=/share/home/linyongjia/data
-export OUTPUT_ROOT=/share/home/linyongjia/output/openpi
-export OPENPI_DATA_HOME=/share/home/linyongjia/.cache/openpi
-export HF_HOME=/share/home/linyongjia/.cache/huggingface
-export HF_LEROBOT_HOME="$DATA_ROOT"
-export WANDB_MODE=offline
-export WANDB_SILENT=true
-export HF_HUB_OFFLINE=1
-export HUGGINGFACE_HUB_OFFLINE=1
-export TRANSFORMERS_OFFLINE=1
-export HF_DATASETS_OFFLINE=1
-cd "$REPO_ROOT"
+export HOME_ROOT=/home/wuyan
+export PROJECT_ROOT=/home/wuyan/lyj/YAM
+export CODE_ROOT="$PROJECT_ROOT/YAM_code"
+export DATA_ROOT="$PROJECT_ROOT/YAM_data"
+export ENV_PREFIX=/home/wuyan/.conda/envs/yam
 ~~~
 
-训练输出约定为 $OUTPUT_ROOT/<CONFIG>/<EXP_NAME>/<STEP>；运行日志约定为 $OUTPUT_ROOT/logs/<CONFIG>/。KAI0 总控状态位于 $OUTPUT_ROOT/logs/openarm_kai0_pipeline_v1/status.json。
+平台手册说明工作台提供文件管理、作业编排、命令行、Jupyter、GUI 和运行总览；GUI/Jupyter 的 GPU、CPU 和时长以作业提交页的实时资源为准。不要把登录节点当 GPU 训练节点。
 
 ## 可调参数
 
-参数只在一个地方改；改完必须重新跑对应 gate。新实验优先用 CLI 覆盖，不要修改正式配置或 launcher 默认值。
+参数只在一个地方改；改完必须重新跑对应 gate。表中 K-Policy 的步数/保存频率是旧项目配置参考，不代表新平台已有训练状态；新实验优先用 CLI 覆盖，不要修改正式配置或 launcher 默认值。
 
 | 参数 | 修改入口 | K-Policy 当前值 | 修改后必须做什么 |
 |---|---|---:|---|
-| 数据集路径、输出路径 | 本页环境变量 `DATA_ROOT`、`OUTPUT_ROOT` | 见 §1 | 检查目录、权限和磁盘空间 |
+| 数据集路径、输出路径 | 本页环境变量 `DATA_ROOT`、待确认的 `OUTPUT_ROOT` | 见 §1 | 检查目录、权限和磁盘空间 |
 | 训练数据、split、norm 资产 | `src/openpi/training/config.py` 的独立 config | K-Data、`0:1719` | 新数据版本重算 norm，跑数据 audit/loader smoke |
-| hosts、coordinator | launcher 的 `--hosts`、`--coordinator-address` | `gpu12 gpu28`、`172.31.11.112:12365` | 检查所有节点和端口；所有节点一起启动 |
-| 全局 batch、workers | launcher 的 `--batch-size`、`--num-workers` | `128`、smoke `0`/正式 `8` | batch 能被 `2 × 主机数` 整除；先 20-step smoke |
+| 计算节点、分区、coordinator | 新平台作业编排/Slurm；多节点 launcher 尚未迁移 | 接管时仅核实 `gpu` 分区上的 `gpu001` 下载作业 | 先查 `squeue`/`sinfo`；未核实前不得套用旧节点名或 coordinator |
+| 全局 batch、workers | 新作业脚本或 launcher | 未确认 | 先在新平台单节点分配中做 smoke，再确定多节点拓扑 |
 | 训练步数、保存频率 | config 或 launcher 的 `--num-train-steps`；保存频率在 config | `80000`、`5000` | 新 `EXP_NAME` 用 overwrite；续训只用 resume |
 | XLA 显存比例 | launcher `--xla-memory-fraction` 或单机环境变量 | `0.90` | 记录显存和 OOM；不要用删 cache 规避问题 |
 | norm 统计 episode | `compute_openarm_parquet_norm_stats.py --episodes` | `0:1719` | 必须与训练 split 完全一致，并写入同一数据版本 |
-| 总控覆盖项 | `OPENPI_K_TRAIN_HOSTS`、`OPENPI_K_GLOBAL_BATCH_SIZE`、`OPENPI_K_NUM_WORKERS`、`OPENPI_K_TRAIN_TAG` | 见 §5.5 | 仅负责人启动 controller；被动查看不要调用总控 |
+| 总控覆盖项 | 新平台迁移后的 launcher/controller | 未迁移 | 未完成代码、环境、数据和输出路径迁移前不得启动 controller |
 
 模型 action 维度、单位、horizon 属于 [04 · 数据合同](04_data_contracts.md)；服务端端口、prompt、RTC 和 action-chunk 属于 [05 · 推理与 rollout](05_inference_and_rollout.md)。不要在本页复制它们的操作命令。
 
@@ -78,70 +61,67 @@ cd "$REPO_ROOT"
 从本地进入服务器：
 
 ~~~bash
-ssh -p 12222 linyongjia@172.31.11.100
-ssh gpu12
+ssh -p 22 wuyan@10.18.31.234
 ~~~
 
-在 GPU 节点执行；这些命令只读，不会修改远端代码：
+登录后先加载平台环境；这些命令只读，不会修改远端代码：
 
 ~~~bash
-cd "$REPO_ROOT"
-git branch --show-current
-git rev-parse --short HEAD
-git status --short
-test -x "$PYTHON"
-"$PYTHON" -c "import jax, lerobot, openpi, openpi_client, torch; print('imports ok; jax=', jax.__version__, 'cuda=', torch.cuda.is_available())"
-git submodule status
+module load miniconda3/26.1.1
+conda activate /home/wuyan/.conda/envs/yam
+hostname
+id
+pwd
+echo "$CONDA_PREFIX"
+python --version
+test -d /home/wuyan/lyj/YAM/YAM_code
+test -d /home/wuyan/lyj/YAM/YAM_data
 ~~~
 
-如果 git status 有未提交修改，不要直接 pull 或覆盖；先记录修改归属并确认远端代码 commit 与待运行 checkpoint/config 匹配。共享服务器上的代码同步由项目负责人决定，文档不假设某个远端 branch 自动跟随本地工作树。
+接管时上述环境激活后 Python 为 3.13.12；在登录节点导入 `torch` 失败，尚未证明它适合 OpenPI。仓库要求 Python 3.11，必须在新平台实际 GPU 作业内完成依赖/import gate 后，才能安装或运行 OpenPI。`YAM_code` 当前为空，不要执行 `git pull`、覆盖目录或把本地仓库自动同步上去。
 
 ## 3. GPU、进程和 tmux 审计
 
-每次训练/服务前都执行一次：
+每次训练/服务前都执行一次；先在工作台或 Slurm 确认分配，再到计算节点执行 GPU 检查：
 
 ~~~bash
+squeue -u "$USER"
+sinfo
 nvidia-smi --query-gpu=index,name,memory.used,memory.total,utilization.gpu,temperature.gpu \
   --format=csv,noheader,nounits
 nvidia-smi --query-compute-apps=pid,process_name,used_memory --format=csv,noheader
 tmux ls 2>/dev/null || true
 pgrep -af '(serve_policy|scripts/train.py|monitor_openarm)' || true
-ss -ltnp 2>/dev/null | grep ':6666' || true
 ~~~
 
-低利用率不代表空闲：可能正在模型加载、JAX 编译、视频解码或异步保存。结合 GPU 进程、日志 mtime、CPU 和 tmux 再判断。一个多节点 JAX 作业是不可拆分单元，不能只重启一台节点。
+低利用率不代表空闲：可能正在模型加载、JAX 编译、视频解码或异步保存。结合 GPU 进程、日志 mtime、CPU、Slurm 状态和 tmux 再判断。一个多节点 JAX 作业是不可拆分单元，不能只重启一台节点。
 
-## 4. 本地 conda 环境
+## 4. 新平台 Conda 环境
 
-本次交接基于 conda-pi 分支；联网机器构建离线包，把仓库和 `artifacts/pi-conda-offline-bundle` 同步到目标机，再在目标机安装：
-
-~~~bash
-# 联网机器
-git submodule update --init --recursive
-bash scripts/conda/build_offline_bundle.sh artifacts/pi-conda-offline-bundle
-~~
+新平台不是旧的 `pi-conda` profile。当前可复核的环境入口是平台 module 加用户环境：
 
 ~~~bash
-# 目标机，当前目录为同步后的仓库
-bash scripts/conda/install_offline_bundle.sh \
-  --bundle-dir artifacts/pi-conda-offline-bundle \
-  --openpi-dir "$PWD" --env-name pi-conda
+module load miniconda3/26.1.1
+conda activate /home/wuyan/.conda/envs/yam
+export PYTHON="$CONDA_PREFIX/bin/python"
+python --version
 ~~~
 
-远端运行时统一使用 pi-conda、离线 W&B/Hugging Face 和 XLA_PYTHON_CLIENT_MEM_FRACTION=0.9；不要用 uv，不要在 jump host 上跑 GPU 训练，不要把 token 写入脚本。
+`yam` 环境接管时为 Python 3.13.12，登录节点未安装 `torch`；它目前只能作为待审计的现有环境，不能直接宣称满足 OpenPI。待 `CODE_ROOT` 同步仓库且在 GPU 作业内通过 Python 3.11/`jax`/`torch`/`lerobot`/`openpi_client` import gate 后，才决定是否复制平台公共环境或在该环境中安装项目依赖。不要使用 uv，不要在登录节点跑 GPU 训练，不要把 token 写入脚本。
 
 ## 5. 数据到训练的完整服务器闭环
 
-下面是可以复核的顺序。DATASET、CONFIG、EXP_NAME 必须替换为同一实验的实体；不要把 Site probe 的默认值套到 KAI0。
+下面是可以复核的顺序。DATASET、CONFIG、EXP_NAME 必须替换为同一实验的实体；不要把接管时的 `ABC-130k-two-tasks` 目录直接套到 OpenArm，也不要把旧服务器的 KAI0 快照当作新平台现状。
 
 ### 5.1 服务器数据目录与容量检查
 
-服务器上的数据按“原始/转换/冻结派生/训练输出”分层；不要把 `$REFERENCE_ROOT` 的 Stage/reference 目录当作 policy repo，也不要把 `/tmp` 中的 raw 当作可恢复的唯一副本。开始转换或训练前先确认空间、权限和数据入口：
+服务器上的数据按“原始/转换/冻结派生/训练输出”分层；新平台的 reference/output 根目录尚未确认，不要自行创建兼容旧服务器的别名，也不要把 `/tmp` 中的 raw 当作可恢复的唯一副本。开始转换或训练前先确认空间、权限和数据入口：
 
 ~~~bash
 export DATASET_ROOT="$DATA_ROOT/openarm_kai0_awbc_v1"
-df -h "$DATA_ROOT" "$OUTPUT_ROOT"
-du -sh "$DATA_ROOT" "$OUTPUT_ROOT" 2>/dev/null
+df -h "$DATA_ROOT"
+du -sh "$DATA_ROOT" 2>/dev/null
+test -d "$DATASET_ROOT" || { echo "OpenArm K-Data 未在新平台核实：$DATASET_ROOT" >&2; exit 1; }
 test -d "$DATASET_ROOT/meta" && test -d "$DATASET_ROOT/data" && test -d "$DATASET_ROOT/videos"
 find "$DATASET_ROOT/meta" -maxdepth 1 -type f -printf '%f\n' | sort
 find "$DATASET_ROOT/data" -type f -name '*.parquet' | wc -l
@@ -192,92 +172,45 @@ mkdir -p "$OUTPUT_ROOT/logs/openarm_kai0_pipeline_v1"
 
 audit 会检查二值 task、来源数量、连续 episode/frame/index、norm stats、真实 16D loader、三类视频样本和每个 TDA episode 尾帧；它通过后才允许启动正式训练。
 
-### 5.3 单机 Site probe（新实验）
+### 5.3 新平台单机作业入口（待迁移）
 
-pi05_openarms_dual_site_align_v1_probe 的默认数据是 openarm_site_align_v1_deg，训练 split 为 0:141，不是正式 K-Data。新实验可在单节点 tmux 内执行：
-
-~~~bash
-export DATASET_ROOT="$DATA_ROOT/openarm_site_align_v1_deg"
-export CONFIG=pi05_openarms_dual_site_align_v1_probe
-export EXP_NAME=site_probe_DATE
-export TMUX_NAME="train_$EXP_NAME"
-mkdir -p "$OUTPUT_ROOT/logs/$CONFIG"
-tmux new-session -s "$TMUX_NAME" -c "$REPO_ROOT"
-~~~
-
-进入 tmux 后逐行执行，完成后按 Ctrl-b d 脱离：
+平台手册给出的默认入口是“作业编排”页面，也可以从命令行进入 Slurm。当前 `CODE_ROOT` 为空、`OUTPUT_ROOT` 未确认，且 `yam` 还未通过 OpenPI 依赖 gate，因此本节暂不启动训练。迁移完成后必须在新作业中先做 20-step/loader smoke，并将代码、配置、数据、norm 和输出目录绑定到同一份记录。
 
 ~~~bash
-"$PYTHON" scripts/compute_openarm_parquet_norm_stats.py \
-  --dataset "$DATASET_ROOT" --episodes 0:141
-XLA_PYTHON_CLIENT_MEM_FRACTION=0.9 "$PYTHON" scripts/train.py "$CONFIG" \
-  --exp-name "$EXP_NAME" --checkpoint-base-dir "$OUTPUT_ROOT" \
-  --batch-size 32 --num-workers 2 --num-train-steps 5000 --log-interval 20 \
-  --overwrite 2>&1 | tee "$OUTPUT_ROOT/logs/$CONFIG/$EXP_NAME"_gpu12.log
-~~~
-
-监控：
-
-~~~bash
-tmux attach -t "$TMUX_NAME"
-tail -f "$OUTPUT_ROOT/logs/$CONFIG/$EXP_NAME"_gpu12.log
-~~~
-
-### 5.4 正式 K-Policy 多节点
-
-正式配置是 pi05_openarm_kai0_awbc_v1。当前记录的四卡拓扑为 gpu12 + gpu28、global batch 128、每进程 workers 8；launcher 默认拓扑却是 gpu12 + gpu14 + gpu28、六卡 batch 126，不能混淆。四卡 smoke：
-
-~~~bash
-"$PYTHON" scripts/launch_openarm_jax_multinode.py \
-  --hosts gpu12 gpu28 --coordinator-address 172.31.11.112:12365 \
-  --config pi05_openarm_kai0_awbc_v1 \
-  --exp-name kpolicy_DATE_smoke20 \
-  --num-train-steps 20 --batch-size 128 --num-workers 0 \
-  --mode overwrite --session-prefix kpolicy_smoke \
-  --xla-memory-fraction 0.90
-~~~
-
-smoke 产生完整 step 后才启动正式训练；新实验使用新 EXP_NAME，已有实验继续使用完全相同拓扑和 --mode resume：
-
-~~~bash
-"$PYTHON" scripts/launch_openarm_jax_multinode.py \
-  --hosts gpu12 gpu28 --coordinator-address 172.31.11.112:12365 \
-  --config pi05_openarm_kai0_awbc_v1 \
-  --exp-name kpolicy_DATE_80k \
-  --num-train-steps 80000 --batch-size 128 --num-workers 8 \
-  --mode overwrite --session-prefix kpolicy_80k \
-  --xla-memory-fraction 0.90
-~~~
-
-batch 必须能被 2 × 主机数整除；overwrite 只用于全新目录，已有目录只能在确认 checkpoint 完整后 resume。launcher 会在每个节点创建 tmux、设置离线缓存/JAX 分布式变量并写 $OUTPUT_ROOT/logs/<CONFIG>/ 日志。
-
-### 5.5 KAI0 总控和监控
-
-KAI0 总控 monitor_openarm_kai0_pipeline.py 是 controller，不是纯查看器；它可能推进评分、训练、sweep、部署和报告。只有项目负责人确认状态机和空闲节点后才运行：
-
-~~~bash
-export OPENPI_K_TRAIN_HOSTS=gpu12,gpu28
-export OPENPI_K_GLOBAL_BATCH_SIZE=128
-export OPENPI_K_NUM_WORKERS=8
-export OPENPI_K_TRAIN_TAG=4gpu_gpu12_gpu28
-"$PYTHON" scripts/monitor_openarm_kai0_pipeline.py --once
-~~~
-
-被动查看不启动 controller：
-
-~~~bash
-"$PYTHON" -m json.tool "$OUTPUT_ROOT/logs/openarm_kai0_pipeline_v1/status.json"
-tail -f "$OUTPUT_ROOT/logs/openarm_kai0_pipeline_v1/history.jsonl"
+module load miniconda3/26.1.1
+conda activate /home/wuyan/.conda/envs/yam
+sinfo
+squeue -u "$USER"
 tmux ls 2>/dev/null || true
 ~~~
 
-多节点训练、评分或服务出现异常时，先保存 status/log/tmux/GPU 证据，再决定恢复；不要只 kill 一台节点。
+长任务仍使用 Slurm 作业或 tmux；提交前确认作业脚本目录、`--chdir`、标准输出目录和资源申请。不要复用旧服务器的 `gpu12/gpu14/gpu28`、coordinator 或 `pi-conda` 命令，除非已完成新平台适配并重新核验。
+
+### 5.4 正式 K-Policy 迁移闸门
+
+`pi05_openarm_kai0_awbc_v1`、K-Data 1719 集和旧多节点拓扑属于上一台训练服务器的项目快照。新平台当前只核实到 `ABC-130k-two-tasks` 下载任务，尚未核实 OpenArm K-Data、OpenPI 仓库、checkpoint、输出根目录或多节点 coordinator；因此不能在新平台直接启动正式 K-Policy。
+
+迁移顺序固定为：同步完整仓库到新 `CODE_ROOT` → 在计算节点核验 Python 3.11/依赖 → 确认 OpenArm 数据与 norm → 单节点 loader/20-step smoke → 核实 Slurm 多节点资源 → 才决定是否迁移 launcher 和正式训练。任何一步失败都保留日志，不删除数据或缓存掩盖问题。
+
+### 5.5 新平台任务监控
+
+被动查看使用 Slurm 和实际作业日志，不调用尚未迁移的 KAI0 controller：
+
+~~~bash
+squeue -u "$USER"
+sacct -u "$USER" --starttime today --format=JobID,JobName,State,Elapsed,ExitCode,NodeList
+tmux ls 2>/dev/null || true
+tail -f /home/wuyan/lyj/YAM/YAM_data/ABC-130k-two-tasks/download.log
+~~~
+
+接管时作业 `1962/abc-download` 在 `gpu001` 的 `gpu` 分区运行，标准输出与错误均指向该数据目录的 `slurm-1962.out`；这是正在进行的下载任务，不是 OpenPI 服务。异常时先保存 `squeue`/`sacct`/日志/GPU 证据，不要只 kill 一台节点。
 
 ## 6. checkpoint 交接
 
 JAX checkpoint 只有下列条件同时满足才可服务：
 
 ~~~bash
+export OUTPUT_ROOT=replace_with_new_platform_output_root
 export CONFIG=pi05_openarm_kai0_awbc_v1
 export EXP_NAME=replace_with_exp_name
 export STEP=replace_with_step
@@ -291,6 +224,6 @@ test -f "$CHECKPOINT/assets/openarm_kai0_awbc_v1/norm_stats.json"
 
 ## 7. 服务器安全与失败处理
 
-- 不提交凭据，不删除数据/权重/cache，不停止 gpu25:6666；服务和采集先确认急停、人工接管、动作单位和工作空间。
+- 不提交凭据，不删除数据/权重/cache，不停止接管时的 `1962/abc-download`；服务和采集先确认急停、人工接管、动作单位和工作空间。
 - 端口监听、进程存在、训练 loss 下降都不是部署成功；必须完成 docs/05_inference_and_rollout.md 的真实 WebSocket smoke。
 - 看到 OOM、视频尾帧、JAX 初始化、SSH 参数边界或 checkpoint 半写入问题时，保留原日志和状态，写入 docs/07_change_log.md，不要用删除缓存掩盖原因。

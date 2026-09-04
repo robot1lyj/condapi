@@ -8,14 +8,15 @@
 - 任务 prompt：`Fold the T-shirt properly`；K-Policy 服务需强制 `Fold the T-shirt properly, Advantage: positive`。
 - OpenArm state/action 为 16D `[右臂7关节, 右夹爪, 左臂7关节, 左夹爪]`；训练单位为 degree，HQ 夹爪 `0=open,-66=closed`。
 - OpenArm 只走 `LeRobotOpenArmDataConfig`、`OpenArmInputs/Outputs`；Piper 是 legacy，不是默认路径。
-- policy server 不定义 OpenArm 初始/复位位姿；位姿由 `/home/lyj/openarm_ros2_docker` 的 ROS/client `reset()` 管理，细节只看 `docs/05_inference_and_rollout.md`。
+- policy server 不定义 OpenArm 初始/复位位姿；旧记录中的 `/home/lyj/openarm_ros2_docker` 在新平台尚未核实，机器人 ROS/client `reset()` 主机和路径待单独确认，细节只看 `docs/05_inference_and_rollout.md`。
 
 ## 运行资源
 
-- 本地仓库：`/home/lyj/lyj/openpi`。
-- 跳板：`ssh -p 12222 linyongjia@172.31.11.100`；常用节点 gpu12/gpu14/gpu25/gpu28。
-- 远端仓库：`/share/home/linyongjia/conda-pi/openpi`；环境：`pi-conda`；输出：`/share/home/linyongjia/output/openpi`；数据：`/share/home/linyongjia/datasets`。
-- 80k K-Policy 和 16 checkpoint sweep 已记录完成；离线选择 20k，但交接记录中的真机 collector 是 79999（gpu25/6666）。接手时先核对远端状态，不把该历史快照当实时事实。
+- 本地仓库：`/home/wuyan-lyj/condapi`。
+- 新平台 SSH：`wuyan@10.18.31.234:22`；2026-09-04 实测登录主机为 `rocky-login.hlink.local`；工作台入口为 `http://10.18.31.233:3080/`（按手册需内网 HTTP 代理）。
+- 新服务器工作区：`/home/wuyan/lyj/YAM`；数据：`/home/wuyan/lyj/YAM/YAM_data`；代码入口：`/home/wuyan/lyj/YAM/YAM_code`（接管时为空，尚未同步 OpenPI）。
+- 环境入口：`module load miniconda3/26.1.1`，再 `conda activate /home/wuyan/.conda/envs/yam`；接管时环境 Python 为 3.13.12，OpenPI 所需 Python 3.11/完整依赖尚未在计算节点验证。
+- 接管时唯一核实的运行任务是 Slurm `1962/abc-download`（`gpu001`，仍在运行）；旧训练服务器、gpu25/6666、旧 checkpoint 和旧路径均只属于历史快照，不能作为新平台默认值。
 
 ## 当前路线
 

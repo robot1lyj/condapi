@@ -17,7 +17,7 @@ LeRobot v2.1 数据
 
 ## 初始/复位位姿归属
 
-policy server 只推理，不移动机器人，也不定义 OpenArm home pose。当前 OpenArm 配置没有 `reset_pose`；初始位姿、复位速度、夹爪复位和急停由 `/home/lyj/openarm_ros2_docker` 的 ROS/driver/client `reset()` 实现，唯一参数说明是该仓库的 `docs/02_parameters_and_home.md`。真机推理脚本是 `scripts/start_real_inference_openpi.sh`、`scripts/start_real_inference_lerobot.sh`，HIL 脚本是 `scripts/start_real_hil_dagger_openpi.sh`；`packages/openpi-client/runtime/runtime.py` 只负责调用环境的 `reset()`，不包含机械臂关节值。
+policy server 只推理，不移动机器人，也不定义 OpenArm home pose。当前 OpenArm 配置没有 `reset_pose`；初始位姿、复位速度、夹爪复位和急停由机器人侧 ROS/driver/client `reset()` 实现。旧记录中的 `/home/lyj/openarm_ros2_docker` 在新平台尚未核实，不能作为新服务器默认路径；真机推理脚本是 `scripts/start_real_inference_openpi.sh`、`scripts/start_real_inference_lerobot.sh`，HIL 脚本是 `scripts/start_real_hil_dagger_openpi.sh`；`packages/openpi-client/runtime/runtime.py` 只负责调用环境的 `reset()`，不包含机械臂关节值。
 
 `examples/aloha_real/constants.py:START_ARM_POSE` 和 `examples/aloha_real/real_env.py:DEFAULT_RESET_POSITION` 属于 ALOHA legacy，不得复制为 OpenArm 位姿。改变 OpenArm 位姿时必须同步检查碰撞/限位、相机标定和训练数据起始分布；不要在 policy config 或 `--rtc-metadata` 中伪造位姿。
 

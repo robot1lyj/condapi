@@ -2,11 +2,13 @@
 
 本页是 OpenArm 服务、WebSocket 合同、RTC、HIL 和真机 rollout 的唯一操作 owner。服务器登录、GPU/tmux 审计和 checkpoint 目录见 [02 · 服务器与环境](02_installation_and_environment.md)，动作/单位/数据版本见 [04 · 数据合同](04_data_contracts.md)。
 
+新平台的 OpenPI 代码、checkpoint、输出目录和服务节点尚未迁移核实；接管时只确认了 `wuyan@10.18.31.234` 登录入口、`yam` Conda 环境和一个独立的 Slurm 数据下载任务。按 [02](02_installation_and_environment.md) 完成计算节点 import/checkpoint gate 后，才能把本页模板落地；不能沿用旧服务器的 `pi-conda`、`gpu25` 或 `/share/home/...` 默认值。
+
 ## 1. Rollout 前的四个 gate
 
 服务启动前必须同时满足：
 
-1. **代码 gate**：服务端 commit、训练 config 和客户端代码已记录；服务运行在 `pi-conda`，不是 jump host 的系统 Python。
+1. **代码 gate**：服务端 commit、训练 config 和客户端代码已记录；服务运行在新平台经过验收的 Conda 环境，不是登录节点的系统 Python。
 2. **checkpoint gate**：数字 step 目录包含 `_CHECKPOINT_METADATA`、`params/_METADATA` 和 `assets/<asset_id>/norm_stats.json`。缺任一项都不能部署。
 3. **合同 gate**：OpenArm state/action 是 16D，关节为 degree，HQ 夹爪为 motor degree（`0=open`、`-66=closed`），动作 horizon 为 50；不能把 Piper 14D、弧度或 `[0,1]` 夹爪数据接进来。
 4. **安全 gate**：急停、人工接管、工作空间、夹爪限位、相机/时间戳和动作频率均已现场确认；服务端只输出动作，不替代机器人侧限幅和安全控制。
@@ -14,9 +16,11 @@
 在正式 K-Policy 上可先设置变量并做只读检查：
 
 ```bash
-export REPO_ROOT=/share/home/linyongjia/conda-pi/openpi
-export PYTHON=/share/home/linyongjia/miniconda3/envs/pi-conda/bin/python
-export OUTPUT_ROOT=/share/home/linyongjia/output/openpi
+module load miniconda3/26.1.1
+conda activate /home/wuyan/.conda/envs/yam
+export REPO_ROOT=/home/wuyan/lyj/YAM/YAM_code
+export PYTHON="$CONDA_PREFIX/bin/python"
+export OUTPUT_ROOT=replace_with_new_platform_output_root
 export CONFIG=pi05_openarm_kai0_awbc_v1
 export EXP_NAME=replace_with_exp_name
 export STEP=replace_with_step
@@ -45,13 +49,13 @@ test -f "$CHECKPOINT_DIR/assets/$ASSET_ID/norm_stats.json"
 | action horizon | `src/openpi/training/config.py` 的 model config | 模型 `50`，不能与数据合同脱节 | loader、server metadata、客户端形状 |
 | 执行步长 | 机器人侧 `ActionChunkBroker(action_horizon)` 或等价 client 参数 | 不大于 `50`；真机先用短步长 | 记录每次重规划间隔和推理延迟 |
 | 控制频率 | 机器人侧 ROS/client | 与 checkpoint metadata 的 `control_hz=30` 对齐 | 现场测频、时间戳和动作限幅 |
-| 相机/队列/TDA | `/home/lyj/openarm_ros2_docker/scripts/start_real_inference_openpi.sh` CLI | 默认三路 `320x240@30 MJPG`、policy `30Hz`、prefetch `25`、`tda_smooth` | 用 `--help`/`--entrypoint-check`，再做真实相机 smoke |
+| 相机/队列/TDA | 新平台/机器人侧脚本（路径待核实） | 默认三路 `320x240@30 MJPG`、policy `30Hz`、prefetch `25`、`tda_smooth` | 先核实脚本归属，再用 `--help`/`--entrypoint-check` 和真实相机 smoke |
 
 服务参数只影响推理协议，不会改变机械臂 home pose。模型 horizon 是一次返回的动作数；client 执行步长是多久重新请求一次，二者不要混写。
 
 ### 2.2 OpenArm 初始/复位位姿
 
-本仓库没有 OpenArm 机器人驱动和初始关节常量。`serve_policy.py` 只输出动作；`packages/openpi-client/runtime/runtime.py` 只调用环境 `reset()`，不提供关节值。真实位姿的唯一主线在 `/home/lyj/openarm_ros2_docker`：
+本仓库没有 OpenArm 机器人驱动和初始关节常量。`serve_policy.py` 只输出动作；`packages/openpi-client/runtime/runtime.py` 只调用环境 `reset()`，不提供关节值。旧服务器记录中的 `/home/lyj/openarm_ros2_docker` 在新平台尚未核实，不能作为新服务器默认路径；真实机器人 ROS/driver/client 主机和 home pose 需要单独确认：
 
 | 场景 | 修改位置 | 说明 |
 |---|---|---|
@@ -63,7 +67,8 @@ test -f "$CHECKPOINT_DIR/assets/$ASSET_ID/norm_stats.json"
 一次性真机回零（先启动 bringup、确认只有一个 `/openarm/joint_target` 写入者，并在低速/急停可用条件下执行）：
 
 ```bash
-cd /home/lyj/openarm_ros2_docker
+# 在已核实的机器人 ROS/driver 主机执行；新平台暂未给出该路径
+cd replace_with_verified_openarm_ros_root
 ros2 run openarm_arm openarm-arm home both \
   --position 0 0 0 0 0 0 0 --gripper 0.9 \
   --duration-sec 5 --rate-hz 50 --wait-for-command-slot-sec 2
@@ -84,8 +89,8 @@ ros2 run openarm_arm openarm-arm home both \
 长时间服务不要依赖 SSH 前台会话。先在服务 GPU 节点完成 [02](02_installation_and_environment.md) 的 GPU 审计，再执行：
 
 ```bash
-export SERVE_HOST=gpu25
-export SERVE_PORT=6666
+export SERVE_HOST=replace_with_allocated_service_host
+export SERVE_PORT=replace_with_verified_service_port
 export SERVE_SESSION=openarm_policy
 mkdir -p "$OUTPUT_ROOT/logs/serve/$CONFIG"
 tmux new-session -s "$SERVE_SESSION" -c "$REPO_ROOT"

@@ -1,5 +1,7 @@
 # 03 · 训练与评估
 
+新平台命令先按 [02 · 服务器与环境](02_installation_and_environment.md) 加载 `miniconda3/26.1.1` 并激活 `/home/wuyan/.conda/envs/yam`，再使用其中导出的 `$PYTHON`。接管时该环境为 Python 3.13.12，且登录节点未通过 OpenPI import gate；`CODE_ROOT`、`OUTPUT_ROOT` 和 OpenArm checkpoint 尚未迁移完成，以下命令在 gate 通过前均只作模板。
+
 ## 训练前顺序
 
 1. 固定数据集版本、episode split、config 和初始化 checkpoint；OpenPI 不会自动把 LeRobot split 意图当作训练 split。
@@ -8,7 +10,7 @@
 4. 做真实 loader smoke，再启动正式训练。
 
 ```bash
-conda run -n pi-conda python -m pytest scripts/train_test.py -q
+"$PYTHON" -m pytest scripts/train_test.py -q
 ```
 
 ## 通用单机入口
@@ -18,7 +20,7 @@ CONFIG=replace_with_config
 EXP_NAME=replace_with_exp_name
 STEPS=replace_with_steps
 XLA_PYTHON_CLIENT_MEM_FRACTION=0.9 \
-  conda run -n pi-conda python scripts/train.py "$CONFIG" \
+  "$PYTHON" scripts/train.py "$CONFIG" \
   --exp-name "$EXP_NAME" --num-train-steps "$STEPS"
 ```
 
@@ -57,10 +59,10 @@ KAI0 的 HQ-Stage、Site-Score、TDA-S、K-Data 和 AWBC 二值化是独立阶�
 
 ```bash
 # HQ 原始数据的固定 holdout；K-Data 的 1719 集不是 999:1199 的 HQ holdout。
-DATASET=/share/home/linyongjia/datasets/high_quality_folding
-OUTPUT_ROOT=/share/home/linyongjia/output/openpi
-CHECKPOINT=/share/home/linyongjia/output/openpi/CONFIG/EXP_NAME/STEP
-conda run -n pi-conda python scripts/evaluate_checkpoint.py \
+DATASET="$DATA_ROOT/high_quality_folding"
+OUTPUT_ROOT=replace_with_new_platform_output_root
+CHECKPOINT="$OUTPUT_ROOT/CONFIG/EXP_NAME/STEP"
+"$PYTHON" scripts/evaluate_checkpoint.py \
   --config pi05_openarm_kai0_awbc_v1 \
   --checkpoint-dir "$CHECKPOINT" \
   --dataset "$DATASET" \

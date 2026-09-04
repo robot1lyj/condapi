@@ -1,5 +1,7 @@
 # 04 · 数据合同
 
+新平台数据根目录以 `docs/02_installation_and_environment.md` 的 `$DATA_ROOT` 为准；接管时已核实的目录只有 `/home/wuyan/lyj/YAM/YAM_data/ABC-130k-two-tasks`，尚未证明它符合本页 OpenArm 合同。所有 OpenArm 数据路径、norm 和 checkpoint 在新平台重新审计前都不能沿用旧服务器快照。
+
 ## OpenArm 机器人合同
 
 ```text
@@ -71,9 +73,9 @@ $CHECKPOINT/assets/<asset_id>/norm_stats.json
 OpenArm policy 的 state/action stats 应由训练版本的 parquet 重新计算：
 
 ```bash
-DATASET=/share/home/linyongjia/datasets/replace_with_dataset
+DATASET="$DATA_ROOT/replace_with_dataset"
 TRAIN_EPISODES=0:141
-conda run -n pi-conda python scripts/compute_openarm_parquet_norm_stats.py \
+"$PYTHON" scripts/compute_openarm_parquet_norm_stats.py \
   --dataset "$DATASET" \
   --episodes "$TRAIN_EPISODES"
 ```
@@ -86,24 +88,24 @@ conda run -n pi-conda python scripts/compute_openarm_parquet_norm_stats.py \
 
 ```bash
 # Site/HDF5 -> degree/HQ LeRobot v2.1
-conda run -n pi-conda python scripts/convert_openarm_hq_dataset.py from-hdf5 \
-  --src /storage1t/ipc \
-  --dst /share/home/linyongjia/datasets/openarm_site_align_v1_deg \
+"$PYTHON" scripts/convert_openarm_hq_dataset.py from-hdf5 \
+  --src replace_with_new_platform_raw_dir \
+  --dst "$DATA_ROOT/openarm_site_align_v1_deg" \
   --dataset-id openarm_site_align_v1_deg --val-count 10 \
   --verify-video-frames --copy-mode hardlink --dry-run
 
 # 旧 OpenArm LeRobot 单位转换 -> 新 degree/HQ 目录
-conda run -n pi-conda python scripts/convert_openarm_hq_dataset.py from-lerobot \
-  --src /share/home/linyongjia/datasets/openarm_site_align_v1 \
-  --dst /share/home/linyongjia/datasets/openarm_site_align_v1_deg \
+"$PYTHON" scripts/convert_openarm_hq_dataset.py from-lerobot \
+  --src "$DATA_ROOT/openarm_site_align_v1" \
+  --dst "$DATA_ROOT/openarm_site_align_v1_deg" \
   --dataset-id openarm_site_align_v1_deg \
   --policy-joint-unit degrees --policy-gripper-unit dataset_degrees \
   --copy-mode hardlink --overwrite
 
 # HIL raw -> Evo clean LeRobot v2.1
-conda run -n pi-conda python scripts/convert_openarm_hq_dataset.py from-hil-hdf5 \
-  --src /tmp/openarm_hil/openarm_hil_dagger \
-  --dst /share/home/linyongjia/datasets/openarm_hil_evo_v1 \
+"$PYTHON" scripts/convert_openarm_hq_dataset.py from-hil-hdf5 \
+  --src replace_with_new_platform_hil_raw_dir \
+  --dst "$DATA_ROOT/openarm_hil_evo_v1" \
   --dataset-id openarm_hil_evo_v1 --verify-video-frames --dry-run
 ```
 

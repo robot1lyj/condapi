@@ -6,6 +6,14 @@
 
 ---
 
+## 2026-09-04
+
+- **服务器切换接管**：根据琶洲模方智算平台手册和只读 SSH/Slurm 核验，将当前默认服务器入口更新为 `wuyan@10.18.31.234:22`（登录主机 `rocky-login.hlink.local`），工作台入口为 `http://10.18.31.233:3080/`；用户密码未写入仓库。
+- **新平台目录与环境核实**：确认家目录 `/home/wuyan`、项目工作区 `/home/wuyan/lyj/YAM`、数据目录 `YAM_data`、代码目录 `YAM_code`（当时为空），以及 `module load miniconda3/26.1.1` + `conda activate /home/wuyan/.conda/envs/yam` 的环境入口。该环境 Python 3.13.12，尚未通过 OpenPI Python 3.11/完整依赖 gate。
+- **下载任务保护**：接管时 Slurm `1962/abc-download` 在 `gpu001` 运行，`ABC-130k-two-tasks` 数据目录约 23 GB，日志显示视频片段处理到 `3200/19917`、失败数为 0；本次未停止、重启、删除或修改远端任务和数据。
+
+---
+
 ## 2026-08-28
 
 - **交接文档第三轮收敛**：README 改为 OpenArm 主线最短入口；补齐训练、服务器、服务参数和初始/复位位姿归属（含 `/home/lyj/openarm_ros2_docker` 回零入口）；离线评估固定使用 HQ `999:1199` holdout，并明确 `rollout_drift` 预留字段不作 gate；`train_test.py` 调用改为可执行的 pytest 入口。
