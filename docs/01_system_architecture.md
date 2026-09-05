@@ -11,10 +11,12 @@ YAM LeRobot v3 数据
   -> 模型内部 32D action、50 步 horizon
   -> YamOutputs + AbsoluteActions -> YAM 14D action chunk
   -> checkpoint / norm assets
-  -> Thor 端侧：JAX reference -> PyTorch BF16 -> TensorRT FP8（通过 gate 后再试 NVFP4）
+  -> 原 JAX policy golden + LoRA/精度审计
+  -> Thor：原生 JAX 可行性验证，或经 FP32 转换审计的未量化后端
+  -> 需要加速时独立评估 TensorRT/FlashRT；量化须额外通过 gate
 ```
 
-当前代码只负责训练数据、模型 transform 和训练后 policy 的通用输出；YAM 机械臂驱动、CAN、GUI、home pose 和控制频率不属于本仓库的训练适配范围。
+本仓库只负责训练数据、模型 transform、Thor 端侧模型部署和训练后 policy 输出；生产系统由两台 IPC 组成：Thor 负责本地模型推理，3588 负责相机信号采集、机械臂驱动、CAN、GUI、home pose 和控制频率。两者通过网线直连交换 observation/action；本仓库不读取、修改或同步 3588 的代码。
 
 ## 代码模块
 
@@ -24,8 +26,8 @@ YAM LeRobot v3 数据
 | 配置/训练 | `src/openpi/training/`、`scripts/train.py`、`scripts/train_pytorch.py` | `TrainConfig`、数据 loader、优化器、checkpoint |
 | 数据变换 | `src/openpi/transforms.py`、`src/openpi/training/config.py` | YAM 输入、delta action、prompt、norm 和模型输入 |
 | YAM policy | `src/openpi/policies/yam_policy.py` | 校验 14D 合同、映射三路图像、裁掉模型 32D padding |
-| 部署 | `docs/08_thor_edge_deployment.md`、Thor 容器/engine | 训练后 policy 的端侧转换、加速和本地推理；远程 WebSocket 仅作兼容回退 |
-| 兼容服务 | `src/openpi/serving/`、`scripts/serve_policy.py` | 加载 checkpoint 和通用 WebSocket 推理，不是 Thor 默认运行边界 |
+| 部署 | `docs/08_thor_edge_deployment.md`、Thor 容器/engine | 训练后 policy 的端侧转换、加速和本地推理 |
+| IPC 直连服务 | `src/openpi/serving/`、`scripts/serve_policy.py` | Thor 上加载 checkpoint，通过直连以太网向 3588 提供 observation/action；这是两 IPC 的数据通道，不是远程模型推理 |
 | 客户端 | `packages/openpi-client/` | 通用请求/响应协议；不实现 YAM 机械臂控制 |
 | 数据工具 | `scripts/compute_norm_stats.py`、审计脚本 | norm、metadata、视频和 loader 预检 |
 

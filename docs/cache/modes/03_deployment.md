@@ -15,7 +15,7 @@
 - 先审计 LeRobot metadata、三路图像、14D state/action、task/prompt、视频首中尾和 norm stats。
 - `pi05_yam_lora` 是低显存首选；模型内部 action 是 32D/50 步，YAM 输出合同是 14D。
 - checkpoint 必须有完整参数元数据和 `assets/yam/norm_stats.json`，之后才做服务 smoke。
-- Thor 本地推理或兼容 WebSocket smoke 必须验证 `(50,14)`、有限值、YAM metadata、checkpoint/norm 绑定；端口监听本身不算通过。
+- Thor 本地推理和 Thor↔3588 直连以太网 smoke 必须验证 `(50,14)`、有限值、YAM metadata、checkpoint/norm 绑定；端口监听本身不算通过。
 
 ## Git 写回
 

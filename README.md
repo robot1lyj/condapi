@@ -1,8 +1,8 @@
 # OpenPI + YAM 双臂训练适配
 
-本仓库当前用于 YAM 双臂（与 YAM-ABC 同硬件配置）的 VLA 后训练和 NVIDIA Jetson AGX Thor 端侧推理部署。首选模型是 Pi0.5，服务器训练优先走 LoRA；训练后默认在 Thor 本地推理，远程 WebSocket 只保留兼容/调试回退。OpenArm、Piper 和独立 YAM-ABC-Reproduce 代码只保留为 legacy/reference，不是本项目默认实现。
+本仓库当前用于 YAM 双臂（与 YAM-ABC 同硬件配置）的 VLA 后训练和 NVIDIA Jetson AGX Thor 端侧推理部署。首选模型是 Pi0.5，服务器训练优先走 LoRA；训练后模型在 Thor 本地推理，Thor 与负责相机/机械臂的 3588 IPC 通过网线直连交换 observation/action。OpenArm、Piper 和独立 YAM-ABC-Reproduce 代码只保留为 legacy/reference，不是本项目默认实现。
 
-服务器入口、环境和迁移状态见 [服务器与环境](docs/02_installation_and_environment.md)。`/home/wuyan-lyj/YAM` 只作为 YAM 数据/训练合同的只读参考，本项目代码仍是本仓库。
+服务器入口、训练环境和 Thor 系统入口见 [服务器与 Thor 环境](docs/02_installation_and_environment.md)。`/home/wuyan-lyj/YAM` 只作为 YAM 数据/训练合同的只读参考，本项目代码仍是本仓库。
 
 ## 当前训练合同
 
@@ -57,4 +57,4 @@ cd "$REPO_ROOT"
 
 - 不在仓库写入服务器密码、token 或私钥；长训练使用 Slurm/tmux，不在登录节点训练。
 - 本地中文 commit 后推送到 Gitea `origin` 和 GitHub `github`；服务器无法连接 GitHub，只从 Gitea 同步代码；不要 force push。
-- Thor 端侧推理只在 checkpoint、JAX/PyTorch/TensorRT 对照和真实本地 smoke 通过后使用；若启用兼容服务，再额外验证 WebSocket。YAM 输出应为有限的 `(50,14)` 动作。
+- Thor 端侧推理只在 checkpoint、JAX/PyTorch/TensorRT 对照、真实本地 smoke 和 Thor↔3588 直连以太网 smoke 通过后使用；YAM 输出应为有限的 `(50,14)` 动作。

@@ -2,7 +2,7 @@
 
 ## 项目定位
 
-本仓库是 OpenPI 的 YAM 双臂训练适配分支，当前默认任务是使用 LeRobot 数据对 YAM（与 YAM-ABC 同硬件配置）进行 VLA 后训练，并把训练后 policy 部署到 NVIDIA Jetson AGX Thor 端侧推理。首选模型是 Pi0.5，首选低显存路线是 LoRA；训练仍在服务器 GPU 上，端侧推理默认不依赖远程 policy server。OpenArm、Piper 和独立 YAM-ABC-Reproduce 代码只作为 legacy/reference，不是本项目默认实现。
+本仓库是 OpenPI 的 YAM 双臂训练适配分支，当前默认任务是使用 LeRobot 数据对 YAM（与 YAM-ABC 同硬件配置）进行 VLA 后训练，并把训练后 policy 部署到 NVIDIA Jetson AGX Thor 端侧推理。系统由两台 IPC 组成：Thor 只负责模型推理，3588 负责相机采集、机械臂控制和控制侧逻辑，两者通过网线直连交换数据。首选模型是 Pi0.5，首选低显存路线是 LoRA；训练仍在服务器 GPU 上，模型不再放在远程推理服务器。OpenArm、Piper 和独立 YAM-ABC-Reproduce 代码只作为 legacy/reference，不是本项目默认实现。
 
 `/home/wuyan-lyj/YAM` 是外部 YAM 参考目录，只读查看训练数据合同和模型适配信息；本仓库自身始终是 `/home/wuyan-lyj/condapi`，不得把 YAM-ABC 的机械臂控制代码同步进来替代本项目。
 
@@ -19,10 +19,10 @@
 
 - `docs/00_handoff_index.md`：交接导航和当前/计划/历史边界。
 - `docs/01_system_architecture.md`：代码与训练数据流架构。
-- `docs/02_installation_and_environment.md`：服务器、环境、数据预检、路径和远端资源。
+- `docs/02_installation_and_environment.md`：服务器、Thor 环境、数据预检、路径和远端资源。
 - `docs/03_training_and_evaluation.md`：训练、评估和 checkpoint gate。
 - `docs/04_data_contracts.md`：YAM 数据格式、动作维度、单位待核项和 norm stats。
-- `docs/05_inference_and_rollout.md`：训练后 policy 服务协议和最小 smoke；不承载机械臂驱动说明。
+- `docs/05_inference_and_rollout.md`：训练后 policy 的 Thor 本地协议、Thor↔3588 网络通道和最小 smoke；不承载机械臂驱动说明。
 - `docs/08_thor_edge_deployment.md`：Thor 官方系统、容器环境、Pi0.5 转换/加速和端侧验收；不承载机械臂驱动说明。
 - `docs/09_memory_system.md`：记忆预算、证据生命周期、skill 接入与迭代验收。
 - `docs/06_openarm_research_plan.md`：历史 OpenArm/KAI0/Evo-RL 研究归档，不是当前 YAM 路线。
@@ -63,6 +63,7 @@ conda run -p /home/wuyan/.conda/envs/condapi-yam python -m pytest --strict-marke
 
 ## 当前 YAM 数据边界
 
+- 训练产物确定为 JAX/Flax checkpoint；部署转换必须保留原始权重与 LoRA，精度验收依据见 `docs/08_thor_edge_deployment.md`，不得默认接受 BF16 转存或 FP8/NVFP4 量化。
 - 双臂合同固定为 14D `[左臂6关节, 左夹爪, 右臂6关节, 右夹爪]`；YAM 数据的具体物理单位必须由数据 metadata/audit 确认，不能擅自套用 OpenArm degree 或 ROS 弧度。
 - 图像键固定为 `observation.images.top_rgb`、`observation.images.left_rgb`、`observation.images.right_rgb`；动作键为单数 `action`；状态键为 `observation.state`。
 - 训练默认将每臂 6 个关节动作转为相对当前状态的 delta，夹爪维度保持 absolute；mask 为 `(6,-1,6,-1)`。
@@ -72,7 +73,8 @@ conda run -p /home/wuyan/.conda/envs/condapi-yam python -m pytest --strict-marke
 ## 不可违反的边界
 
 - 不提交凭据、token、私钥、服务器密码；不删除远端数据/权重/缓存，除非用户明确授权。
-- 长训练使用 Slurm 作业或 tmux；端侧推理默认在 Thor 本地容器/进程执行，远程 WebSocket 只作兼容/调试回退。端口监听不等于推理可用，必须做真实本地推理或启用远程协议后的 WebSocket smoke。
+- 长训练使用 Slurm 作业或 tmux；端侧推理默认在 Thor 本地容器/进程执行，Thor↔3588 的直连以太网协议是生产数据通道。端口监听不等于推理可用，必须做真实本地推理和跨 IPC 直连 smoke。
+- 本任务只改 Thor 侧；不得读取、修改、同步或替代 3588 的机械臂控制、相机采集和系统部署。
 - 数据转换只写新目录；原始 YAM 数据和现有下载任务不可覆盖、停止或删除。
 - 任何 RTC 改动都必须保留旧推理路径，并可通过 `rtc_mode` 关闭或自动回退。
 

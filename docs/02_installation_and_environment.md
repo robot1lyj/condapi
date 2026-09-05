@@ -1,29 +1,31 @@
-# 02 · 服务器与环境
+# 02 · 服务器与 Thor 环境
 
 本页是训练服务器、conda、数据预检和训练资源的操作 owner，也记录 Thor 从零安装的入口。YAM 数据语义见 [04 · 数据合同](04_data_contracts.md)，Pi0.5 端侧转换和验收见 [08 · Thor 端侧部署](08_thor_edge_deployment.md)，训练入口见 [03 · 训练与评估](03_training_and_evaluation.md)。
 
-以下信息于 2026-09-04 按用户提供的《琶洲模方智算平台用户操作手册》（本地参考文件：`/home/wuyan-lyj/下载/琶洲模方智算平台用户操作手册_带目录.pdf`）以及 SSH/Slurm 只读核验建立。一次性状态每次操作前都要重新检查。
+服务器信息于 2026-09-04 按用户提供的《琶洲模方智算平台用户操作手册》（本地参考文件：`/home/wuyan-lyj/下载/琶洲模方智算平台用户操作手册_带目录.pdf`）以及 SSH/Slurm 只读核验建立；Thor 官方版本和端侧方案于 2026-09-05 更新。一次性状态每次操作前都要重新检查。
 
 ## Thor 端侧系统与从零安装
 
 当前端侧目标暂按 Jetson AGX Thor Developer Kit（T5000 口径）记录；设备到手后先核对实际 SKU。官方最新系统基线是 JetPack 7.2.1 / Jetson Linux r39.2.1 / Ubuntu 24.04 / Kernel 6.8 / CUDA 13.2.1 / TensorRT 10.16.2。完整部署决策和 Pi0.5 调研见 [08 · Thor 端侧部署](08_thor_edge_deployment.md)。
 
-本次已从 NVIDIA 官方地址下载 Jetson ISO，原始文件放在仓库外，避免进入 Git：
+本次已从 NVIDIA 官方地址下载 Jetson ISO，原始文件放在仓库外；已核对文件长度、类型并记录本地摘要：
 
 ```text
 /home/wuyan-lyj/thor-system/jetpack-7.2.1/jetsoninstaller-r39.2.1-2026-08-07-18-30-47-arm64.iso
 ```
 
+下载观察时间、文件大小、本地 SHA-256 与官方参考校验的证据边界见 [08 · 官方系统基线](08_thor_edge_deployment.md#2-官方系统基线)。
+
 制作系统盘前必须完成：
 
-1. 对 ISO 执行 `sha256sum`，把结果记录到 `docs/08_thor_edge_deployment.md` 和 `docs/07_change_log.md`。
+1. 若重新下载或替换 ISO，必须重新执行 `sha256sum`，并同步更新 `docs/08_thor_edge_deployment.md` 和 `docs/07_change_log.md`。
 2. 在至少 25 GB 可用空间的主机上，用 Balena Etcher 将 ISO 写入至少 16 GB U 盘；ISO 不能作为 Live USB 直接试运行。
 3. Thor 从 U 盘启动，若出现 QSPI capsule update 提示确认 `Y`，安装目标选择 `Install on NVMe`；安装完成拔出 U 盘，再完成 `oem-config`。
 4. 首次启动在 Thor 上记录 `cat /etc/nv_tegra_release`、`uname -a`、`jetson_release`、`docker --version`、`dpkg-query -W nvidia-container-toolkit` 和 `nvidia-smi`。
 
-Jetson ISO 安装方式通常已经带 Docker 和 NVIDIA Container Toolkit；若使用 SDK Manager 或 `Linux_for_Tegra` 刷写，按 [Thor Docker Setup](https://docs.nvidia.com/jetson/agx-thor-devkit/user-guide/latest/setup_docker.html) 补装，不要无审计地覆盖容器运行时。Pi0.5 首次部署优先使用匹配 Thor 的 NVIDIA PyTorch 容器；原生 `nvidia-jetpack`/`nvidia-cuda-dev` 仅在确有需要时安装，禁止安装 Ubuntu 的 `nvidia-cuda-toolkit`。
+Jetson ISO 安装方式通常已经带 Docker 和 NVIDIA Container Toolkit；若使用 SDK Manager 或 `Linux_for_Tegra` 刷写，按 [Thor Docker Setup](https://docs.nvidia.com/jetson/agx-thor-devkit/user-guide/latest/setup_docker.html) 补装，不要无审计地覆盖容器运行时。按 [08](08_thor_edge_deployment.md) 分别建立隔离的 JAX 验证环境或匹配 Thor 的 NVIDIA PyTorch 候选环境；原生 `nvidia-jetpack`/`nvidia-cuda-dev` 仅在确有需要时安装，禁止安装 Ubuntu 的 `nvidia-cuda-toolkit`。
 
-系统版本与 Docker GPU gate 通过后，才把本仓库和 checkpoint 放到 Thor；随后按 [08](08_thor_edge_deployment.md) 的 JAX reference → PyTorch → TensorRT 流程做 YAM 真实样本验收。系统盘刷写、Docker smoke 和 YAM engine 目前都不能仅凭文档宣称已验证。
+系统版本与 GPU 环境 gate 通过后，才把本仓库和 checkpoint 放到 Thor；随后按 [08](08_thor_edge_deployment.md) 的原 JAX golden、LoRA/FP32 转换审计和未量化后端对照完成 YAM 验收，再决定是否需要 TensorRT 或量化。系统盘刷写、Docker smoke 和 YAM engine 目前都不能仅凭文档宣称已验证。
 
 ## 1. 服务器和目录
 

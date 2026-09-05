@@ -23,6 +23,10 @@
   额外的 Pi0、Pi0-Fast 或 FAST tokenizer 权重。
 - **本地验证结果**：YAM policy 定向测试 4 项通过；排除大模型实例化后的轻量测试为 `53 passed, 2 deselected`。
   本地 CPU 执行完整模型测试曾因内存限制以 exit 137 结束，模型创建、GPU smoke 和正式训练留待服务器 GPU 可用后复核。
+- **Thor 两 IPC 端侧边界确立**：后续生产架构为 Thor 本地负责 Pi0.5 模型推理，3588 IPC 负责相机采集、机械臂控制和控制侧逻辑，二者通过网线直连交换 observation/action；本仓库只负责 Thor，不读取、修改或同步 3588 侧代码。详细边界见 `docs/08_thor_edge_deployment.md`。
+- **Pi0.5 Thor 初轮调研**：识别官方 `pi05_libero` 的 JAX→Torch→TensorRT 流程及 FlashRT、`openpi-thor`；初轮将 BF16→FP8 作为默认后续路线，同日精度深度复核后被下条决策取代。
+- **JAX 精度路线修正**：用户确认训练产物必定为 JAX。核对 #958/#960/#978/#984、官方 overlay 和本仓库代码，确认现有转换器存在 LoRA 未合并、宽松加载和提前 BF16 舍入风险；修复 PR 核验时均未合并。撤回无条件 FP8 默认路线，保留 Thor 原生 JAX 可行性分支，转换先做 LoRA-aware FP32 审计和未量化对照。FlashRT 单视角 23.01 ms 配置未过 fidelity gate，491/500 任务对照也不是 JAX 原模型；两者证据范围已补齐。详细结论、来源、分阶段验收和未验项归 `docs/08_thor_edge_deployment.md`；本次未修改模型代码或执行权重转换。
+- **Thor 官方系统盘准备**：JetPack 7.2.1 / Jetson Linux r39.2.1 ISO 已下载到仓库外，文件长度/类型已核对并记录本地 SHA-256，尚未与官方参考摘要/签名比对；完整路径和摘要归 `docs/08_thor_edge_deployment.md`。系统盘制作、实机刷写、GPU 和直连 smoke 未完成。
 - **代码同步边界修正**：确认服务器无法连接 GitHub；本地工作站负责向 Gitea 和 GitHub 推送，服务器只通过 Gitea
   同步代码。Gitea Git 身份固定为 `wuyan_lyj <linyongjia@wuyanai.cn>`，未将密码写入仓库或 remote URL。
 
