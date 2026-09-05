@@ -2,7 +2,7 @@
 
 ## 项目定位
 
-本仓库是 OpenPI 的 YAM 双臂训练适配分支，当前默认任务是使用 LeRobot 数据对 YAM（与 YAM-ABC 同硬件配置）进行 VLA 后训练。首选模型是 Pi0.5，首选低显存路线是 LoRA；OpenArm、Piper 和独立 YAM-ABC-Reproduce 代码只作为 legacy/reference，不是本项目默认实现。
+本仓库是 OpenPI 的 YAM 双臂训练适配分支，当前默认任务是使用 LeRobot 数据对 YAM（与 YAM-ABC 同硬件配置）进行 VLA 后训练，并把训练后 policy 部署到 NVIDIA Jetson AGX Thor 端侧推理。首选模型是 Pi0.5，首选低显存路线是 LoRA；训练仍在服务器 GPU 上，端侧推理默认不依赖远程 policy server。OpenArm、Piper 和独立 YAM-ABC-Reproduce 代码只作为 legacy/reference，不是本项目默认实现。
 
 `/home/wuyan-lyj/YAM` 是外部 YAM 参考目录，只读查看训练数据合同和模型适配信息；本仓库自身始终是 `/home/wuyan-lyj/condapi`，不得把 YAM-ABC 的机械臂控制代码同步进来替代本项目。
 
@@ -22,6 +22,7 @@
 - `docs/03_training_and_evaluation.md`：训练、评估和 checkpoint gate。
 - `docs/04_data_contracts.md`：YAM 数据格式、动作维度、单位待核项和 norm stats。
 - `docs/05_inference_and_rollout.md`：训练后 policy 服务协议和最小 smoke；不承载机械臂驱动说明。
+- `docs/08_thor_edge_deployment.md`：Thor 官方系统、容器环境、Pi0.5 转换/加速和端侧验收；不承载机械臂驱动说明。
 - `docs/06_openarm_research_plan.md`：历史 OpenArm/KAI0/Evo-RL 研究归档，不是当前 YAM 路线。
 - `docs/07_change_log.md`：按日期记录原因和结果。
 - `docs/reference/`：长篇技术参考或 legacy；默认入口不依赖其中的旧结论。
@@ -69,17 +70,18 @@ conda run -p /home/wuyan/.conda/envs/condapi-yam python -m pytest --strict-marke
 ## 不可违反的边界
 
 - 不提交凭据、token、私钥、服务器密码；不删除远端数据/权重/缓存，除非用户明确授权。
-- 长训练和服务使用 Slurm 作业或 tmux；端口监听不等于推理可用，必须做真实 WebSocket smoke。
+- 长训练使用 Slurm 作业或 tmux；端侧推理默认在 Thor 本地容器/进程执行，远程 WebSocket 只作兼容/调试回退。端口监听不等于推理可用，必须做真实本地推理或启用远程协议后的 WebSocket smoke。
 - 数据转换只写新目录；原始 YAM 数据和现有下载任务不可覆盖、停止或删除。
 - 任何 RTC 改动都必须保留旧推理路径，并可通过 `rtc_mode` 关闭或自动回退。
 
 ## Git 自动化
 
-完成请求后执行 `git diff --check`，代码改动再执行 Ruff/pytest，然后 `git add -A` 和中文 commit，例如 `git commit -m "接入YAM双臂训练配置"`。每次提交完成后，必须把同一 `main` 提交同步到两个备份远端：
+完成请求后执行 `git diff --check`，代码改动再执行 Ruff/pytest，然后 `git add -A` 和中文 commit，例如 `git commit -m "接入YAM双臂训练配置"`。本地工作站提交后把同一 `main` 提交同步到 Gitea 和 GitHub；服务器无法连接 GitHub，只从 Gitea 同步代码：
 
 ```bash
-git push -u origin main    # Gitea
-git push github main       # GitHub
+git push -u origin main    # 本地 → Gitea，服务器的唯一代码来源
+git push github main       # 本地 → GitHub，仅作本地侧备份
+# 服务器：git fetch/pull origin main；不访问 github remote
 ```
 
-同步后核对两个远端的 `main` 指向同一提交；永远不要 force push，不要把凭据写进 remote URL 或提交历史，也不要推送到未明确配置的其他远端。
+Git 身份固定为 `wuyan_lyj <linyongjia@wuyanai.cn>`。本地推送后核对两个远端的 `main`；服务器只核对 Gitea。永远不要 force push，不要把凭据写进 remote URL 或提交历史，也不要推送到未明确配置的其他远端。

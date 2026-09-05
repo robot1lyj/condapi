@@ -93,7 +93,7 @@ XLA_PYTHON_CLIENT_MEM_FRACTION=0.9 \
 - step 目录的 Orbax 参数元数据完整；
 - `assets/yam/norm_stats.json` 存在且与 config/data 绑定；
 - config、git commit、数据版本和训练日志可追溯；
-- 用 [05 · 训练后 policy smoke](05_inference_and_rollout.md) 验证输出为有限 `(50,14)`。
+- 用 [05 · 训练后 policy smoke](05_inference_and_rollout.md) 验证输出为有限 `(50,14)`；若部署 Thor，还要按 [08 · Thor 端侧部署](08_thor_edge_deployment.md) 保留 JAX reference 与转换后 engine 的验证报告。
 
 半写入数字目录、缺少 norm 或只有单独 `params/` 的目录不得部署。
 

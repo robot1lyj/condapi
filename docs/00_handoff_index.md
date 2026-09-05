@@ -4,7 +4,7 @@
 
 ## 推荐阅读顺序
 
-`README.md` → `01_system_architecture.md` → `02_installation_and_environment.md` → `03_training_and_evaluation.md` → `04_data_contracts.md` → `05_inference_and_rollout.md`。
+`README.md` → `01_system_architecture.md` → `02_installation_and_environment.md` → `08_thor_edge_deployment.md` → `03_training_and_evaluation.md` → `04_data_contracts.md` → `05_inference_and_rollout.md`。
 
 `06_openarm_research_plan.md` 是历史 OpenArm 研究归档；变更原因和结果只看 `07_change_log.md`。
 
@@ -17,9 +17,10 @@
 | 02 | 服务器与环境 | conda、远端资源、数据预检、训练路径和安全要求 |
 | 03 | 训练与评估 | YAM config、norm、训练、checkpoint 和评估 gate |
 | 04 | 数据合同 | LeRobot、YAM 14D、图像/动作键、单位待核项和 norm |
-| 05 | 训练后 policy smoke | policy 输入输出协议和最小服务验收，不承载机械臂控制说明 |
+| 05 | 端侧/兼容 policy smoke | policy 输入输出协议、本地推理和兼容服务验收，不承载机械臂控制说明 |
 | 06 | 历史研究 | OpenArm/KAI0/Evo-RL 旧计划，仅供追溯 |
 | 07 | 变更历史 | 按日期记录原因、结果和事故 |
+| 08 | Thor 端侧部署 | 官方系统、容器、Pi0.5 转换/加速和端侧验收，不承载机械臂驱动说明 |
 
 ## 状态词
 

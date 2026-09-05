@@ -13,12 +13,14 @@
   额外的 Pi0、Pi0-Fast 或 FAST tokenizer 权重。
 - **本地验证结果**：YAM policy 定向测试 4 项通过；排除大模型实例化后的轻量测试为 `53 passed, 2 deselected`。
   本地 CPU 执行完整模型测试曾因内存限制以 exit 137 结束，模型创建、GPU smoke 和正式训练留待服务器 GPU 可用后复核。
+- **代码同步边界修正**：确认服务器无法连接 GitHub；本地工作站负责向 Gitea 和 GitHub 推送，服务器只通过 Gitea
+  同步代码。Gitea Git 身份固定为 `wuyan_lyj <linyongjia@wuyanai.cn>`，未将密码写入仓库或 remote URL。
 
 ## 2026-09-04
 
 - **项目默认路线切换为 YAM**：当前仓库从 OpenArm 默认改为 YAM 双臂（与 YAM-ABC 同硬件配置）训练适配，新增独立 `LeRobotYamDataConfig`、`YamInputs/Outputs` 和 `pi0/pi05_yam(_lora)` 配置；首选 `pi05_yam_lora`，模型内部 32D/50 步，YAM 输出 14D。独立 YAM-ABC-Reproduce 代码未同步进本仓库。
 - **YAM 数据加载兼容**：按 YAM LeRobot 合同接入 `observation.state`、`action` 和三路 RGB 键，新增 LeRobot v3 import/task metadata 兼容；依赖固定到 `lerobot==0.5.1`、`torchcodec`，项目环境改为 Python 3.12 以满足该版本约束。
-- **环境与同步规则更新**：本地安装 Miniconda 和 `condapi-yam` 验证环境；服务器项目环境规划为 `/home/wuyan/.conda/envs/condapi-yam`。每次中文 commit 后同时推送 Gitea `origin` 和 GitHub `github` 互为备份。
+- **环境与同步规则更新**：本地安装 Miniconda 和 `condapi-yam` 验证环境；服务器项目环境规划为 `/home/wuyan/.conda/envs/condapi-yam`。本地 commit 后推送 Gitea `origin` 和 GitHub `github`，服务器只从 Gitea 同步。
 - **污染审计**：发现并按当前项目规则重写了外部 agent 对 `README.md` 的 YAM 改动，恢复被删除的 `docs/00_handoff_index.md`；未发现其他不属于本轮 YAM 适配的未跟踪文件。
 
 - **服务器切换接管**：根据琶洲模方智算平台手册和只读 SSH/Slurm 核验，将当前默认服务器入口更新为 `wuyan@10.18.31.234:22`（登录主机 `rocky-login.hlink.local`），工作台入口为 `http://10.18.31.233:3080/`；用户密码未写入仓库。

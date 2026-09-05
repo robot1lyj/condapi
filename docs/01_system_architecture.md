@@ -10,6 +10,8 @@ YAM LeRobot v3 数据
   -> norm stats -> Pi0/Pi0.5 模型输入
   -> 模型内部 32D action、50 步 horizon
   -> YamOutputs + AbsoluteActions -> YAM 14D action chunk
+  -> checkpoint / norm assets
+  -> Thor 端侧：JAX reference -> PyTorch BF16 -> TensorRT FP8（通过 gate 后再试 NVFP4）
 ```
 
 当前代码只负责训练数据、模型 transform 和训练后 policy 的通用输出；YAM 机械臂驱动、CAN、GUI、home pose 和控制频率不属于本仓库的训练适配范围。
@@ -22,7 +24,8 @@ YAM LeRobot v3 数据
 | 配置/训练 | `src/openpi/training/`、`scripts/train.py`、`scripts/train_pytorch.py` | `TrainConfig`、数据 loader、优化器、checkpoint |
 | 数据变换 | `src/openpi/transforms.py`、`src/openpi/training/config.py` | YAM 输入、delta action、prompt、norm 和模型输入 |
 | YAM policy | `src/openpi/policies/yam_policy.py` | 校验 14D 合同、映射三路图像、裁掉模型 32D padding |
-| 服务 | `src/openpi/serving/`、`scripts/serve_policy.py` | 加载 checkpoint 和通用 WebSocket 推理 |
+| 部署 | `docs/08_thor_edge_deployment.md`、Thor 容器/engine | 训练后 policy 的端侧转换、加速和本地推理；远程 WebSocket 仅作兼容回退 |
+| 兼容服务 | `src/openpi/serving/`、`scripts/serve_policy.py` | 加载 checkpoint 和通用 WebSocket 推理，不是 Thor 默认运行边界 |
 | 客户端 | `packages/openpi-client/` | 通用请求/响应协议；不实现 YAM 机械臂控制 |
 | 数据工具 | `scripts/compute_norm_stats.py`、审计脚本 | norm、metadata、视频和 loader 预检 |
 
@@ -47,7 +50,8 @@ LeRobot 原始键直接在 YAM policy boundary 处理，因此本仓库没有把
 
 - OpenPI 模型统一需要标准 `image/state/actions` 结构和 32D padding；YAM 的真实合同只在 `YamInputs/YamOutputs` 边界出现。
 - norm stats 在训练输入经 delta transform 后计算，checkpoint 内保存到 `assets/yam/norm_stats.json`；不能跨单位或跨数据版本复用。
-- 推理服务返回 50 步、14D YAM 动作；任何单位转换、限幅、执行和安全检查必须由已核实的机器人侧系统负责。
+- Thor 部署保留 JAX checkpoint 作为数值基线，转换后的 PyTorch/TensorRT 产物必须在同一 YAM 样本上比较；官方 `pi05_libero` 的 10 步/7D benchmark 不能替代 YAM 的 50 步/14D gate。
+- 端侧 policy 返回 50 步、14D YAM 动作；任何单位转换、限幅、执行和安全检查必须由已核实的机器人侧系统负责。
 
 ## 历史边界
 

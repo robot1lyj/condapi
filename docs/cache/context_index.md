@@ -16,6 +16,7 @@
 - 训练与评估 → `docs/03_training_and_evaluation.md`
 - 数据合同 → `docs/04_data_contracts.md`
 - 训练后 policy smoke → `docs/05_inference_and_rollout.md`
+- Thor 端侧系统与 Pi0.5 部署 → `docs/08_thor_edge_deployment.md`
 - 历史 OpenArm 研究归档 → `docs/06_openarm_research_plan.md`
 - 变更历史 → `docs/07_change_log.md`
 - 旧方案指引 → `docs/reference/00_reference_index.md`
@@ -24,6 +25,7 @@
 
 - 改代码/配置/文档、跑测试、提交 → `02_code_change.md`
 - 远端环境、训练、服务、GPU、tmux → `03_deployment.md`
+- Thor 系统盘、容器、JAX→PyTorch→TensorRT 和端侧 smoke → `08_thor_edge_deployment.md`
 - YAM 数据审计、SFT、Pi0.5 LoRA、评估 → `04_model_ops.md`
 - 只需了解项目 → 从 `docs/00_handoff_index.md` 开始，按编号阅读。
 

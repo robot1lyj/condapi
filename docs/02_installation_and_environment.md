@@ -1,8 +1,29 @@
 # 02 · 服务器与环境
 
-本页是新平台服务器、conda、数据预检和训练资源的唯一操作 owner。YAM 数据语义见 [04 · 数据合同](04_data_contracts.md)，训练入口见 [03 · 训练与评估](03_training_and_evaluation.md)。
+本页是训练服务器、conda、数据预检和训练资源的操作 owner，也记录 Thor 从零安装的入口。YAM 数据语义见 [04 · 数据合同](04_data_contracts.md)，Pi0.5 端侧转换和验收见 [08 · Thor 端侧部署](08_thor_edge_deployment.md)，训练入口见 [03 · 训练与评估](03_training_and_evaluation.md)。
 
 以下信息于 2026-09-04 按用户提供的《琶洲模方智算平台用户操作手册》（本地参考文件：`/home/wuyan-lyj/下载/琶洲模方智算平台用户操作手册_带目录.pdf`）以及 SSH/Slurm 只读核验建立。一次性状态每次操作前都要重新检查。
+
+## Thor 端侧系统与从零安装
+
+当前端侧目标暂按 Jetson AGX Thor Developer Kit（T5000 口径）记录；设备到手后先核对实际 SKU。官方最新系统基线是 JetPack 7.2.1 / Jetson Linux r39.2.1 / Ubuntu 24.04 / Kernel 6.8 / CUDA 13.2.1 / TensorRT 10.16.2。完整部署决策和 Pi0.5 调研见 [08 · Thor 端侧部署](08_thor_edge_deployment.md)。
+
+本次已从 NVIDIA 官方地址下载 Jetson ISO，原始文件放在仓库外，避免进入 Git：
+
+```text
+/home/wuyan-lyj/thor-system/jetpack-7.2.1/jetsoninstaller-r39.2.1-2026-08-07-18-30-47-arm64.iso
+```
+
+制作系统盘前必须完成：
+
+1. 对 ISO 执行 `sha256sum`，把结果记录到 `docs/08_thor_edge_deployment.md` 和 `docs/07_change_log.md`。
+2. 在至少 25 GB 可用空间的主机上，用 Balena Etcher 将 ISO 写入至少 16 GB U 盘；ISO 不能作为 Live USB 直接试运行。
+3. Thor 从 U 盘启动，若出现 QSPI capsule update 提示确认 `Y`，安装目标选择 `Install on NVMe`；安装完成拔出 U 盘，再完成 `oem-config`。
+4. 首次启动在 Thor 上记录 `cat /etc/nv_tegra_release`、`uname -a`、`jetson_release`、`docker --version`、`dpkg-query -W nvidia-container-toolkit` 和 `nvidia-smi`。
+
+Jetson ISO 安装方式通常已经带 Docker 和 NVIDIA Container Toolkit；若使用 SDK Manager 或 `Linux_for_Tegra` 刷写，按 [Thor Docker Setup](https://docs.nvidia.com/jetson/agx-thor-devkit/user-guide/latest/setup_docker.html) 补装，不要无审计地覆盖容器运行时。Pi0.5 首次部署优先使用匹配 Thor 的 NVIDIA PyTorch 容器；原生 `nvidia-jetpack`/`nvidia-cuda-dev` 仅在确有需要时安装，禁止安装 Ubuntu 的 `nvidia-cuda-toolkit`。
+
+系统版本与 Docker GPU gate 通过后，才把本仓库和 checkpoint 放到 Thor；随后按 [08](08_thor_edge_deployment.md) 的 JAX reference → PyTorch → TensorRT 流程做 YAM 真实样本验收。系统盘刷写、Docker smoke 和 YAM engine 目前都不能仅凭文档宣称已验证。
 
 ## 1. 服务器和目录
 
@@ -143,14 +164,21 @@ df -h "$DATA_ROOT"
 
 当前本地仓库是 `condapi`；服务器 `YAM_code` 只接收本仓库的代码。不得同步 `/home/wuyan-lyj/YAM/yam-abc-reproduce` 到该目录，也不得把它的控制/GUI 依赖作为训练依赖。
 
-本地提交后使用两个远端互为备份：
+本地工作站提交后使用两个远端：Gitea 是服务器唯一代码来源，GitHub 只由本地工作站维护备份。服务器无法连接 GitHub，不在服务器配置或执行 GitHub push/pull：
 
 ```bash
-git push -u origin main    # Gitea
-git push github main       # GitHub
+git push -u origin main    # 本地 → Gitea
+git push github main       # 本地 → GitHub
 ```
 
-服务器端如需通过 Git 拉取，先确认 Gitea SSH 公钥已登记，再使用无密码写入的 clone/fetch；未登记前不要把密码拼进 URL。服务器代码同步、环境安装和数据审计必须分开记录。
+服务器端如需通过 Git 同步，只使用 Gitea `origin` 的 clone/fetch/pull；先确认服务器公钥已登记到 Gitea，再使用非交互认证。Gitea Git 身份为 `wuyan_lyj <linyongjia@wuyanai.cn>`；未登记前不要把密码拼进 URL。服务器代码同步、环境安装和数据审计必须分开记录。
+
+用于登记 Gitea 的服务器侧公钥（此前从服务器环境读取并核实）是下面这一把；它不是本机连接服务器所用的
+`/home/wuyan-lyj/.ssh/id_ed25519_condapi_yam.pub`：
+
+```text
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDvsyWnnsxG4PskVm36sn9WVFp1TiWyFBq92zN8RP0gTMLxxloN96LokVb2HSymzQ0yfrzxd2/RKX7ykjYgWhE3VVbjaoIBDDOTlxVisr/3G8LGIFxgd+KmSsmhnMRjNGwSnoqrAUJf3c87D9/zFnlLP1g9+p7B5wYXXfX8rzsdcJICKEFosrC1OQMKOB9kRK+e+NCvQwe0Th2O92rVcny4jI728k3IEITtzaMh1U5udKP7K9nCwaqOUhXRFzodjZKzuxuQb7kSlBt9y8wmbyOEancDU4WCQc0N6xm5b5kt9ynUcPkxPAmB4BKIMOiOOPA4dEcZBCMbDTveIHJK8Dn1AeJG9HTgHaSyPlgUIZLLYN3lg0aieG5qSlOE/nTQYaLM3zKpIyAqXC6YSoxKMpQ4XcowJaky89JuuQEpAoSe2drD2XNwdAfdYBM7m+SXge2riHqQ3g7mO4PMsR9yNJ0op0Vd0aIXDCmrWi5eWO6vZ/aTWsAhxQB9m/UIOrUL0= root@rocky-ood.hlink.local
+```
 
 ## 6. 安全边界
 
