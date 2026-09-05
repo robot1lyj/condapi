@@ -1,229 +1,160 @@
 # 02 · 服务器与环境
 
-本页是远端训练/验证服务器的唯一操作 owner：说明机器、目录、数据预检、单机 probe、多节点 K-Policy、监控和 checkpoint 交接。数据语义看 docs/04_data_contracts.md，训练策略看 docs/03_training_and_evaluation.md，服务与真机看 docs/05_inference_and_rollout.md。
+本页是新平台服务器、conda、数据预检和训练资源的唯一操作 owner。YAM 数据语义见 [04 · 数据合同](04_data_contracts.md)，训练入口见 [03 · 训练与评估](03_training_and_evaluation.md)。
 
-下列新平台信息于 2026-09-04 按用户提供的《琶洲模方智算平台用户操作手册》（2026-04-15）和 SSH/Slurm 只读核验建立。作业、数据下载进度和资源占用都是接管快照；每次操作仍必须重新执行第 2、3 节检查。
+以下信息于 2026-09-04 按用户提供的《琶洲模方智算平台用户操作手册》（本地参考文件：`/home/wuyan-lyj/下载/琶洲模方智算平台用户操作手册_带目录.pdf`）以及 SSH/Slurm 只读核验建立。一次性状态每次操作前都要重新检查。
 
-## 1. 新平台入口与固定目录
+## 1. 服务器和目录
 
-~~~text
-工作台网页： http://10.18.31.233:3080/
-SSH：       wuyan@10.18.31.234:22
-登录主机：  rocky-login.hlink.local
-账号家目录：/home/wuyan
-项目工作区：/home/wuyan/lyj/YAM
-~~~
+```text
+SSH：          wuyan@10.18.31.234:22
+登录主机：     rocky-login.hlink.local
+工作台：       http://10.18.31.233:3080/
+服务器家目录： /home/wuyan
+项目工作区：   /home/wuyan/lyj/YAM
+```
 
-网页入口按平台手册要求使用可访问内网的 HTTP 代理；网页和 SSH 是两个入口，不能把 `.233:3080` 当作 SSH 地址。密码由用户/密码管理器提供，不写入仓库、脚本或命令历史。
-
-| 变量/目录 | 当前值 | 接管时核验 |
+| 变量 | 当前路径/状态 | 说明 |
 |---|---|---|
-| `HOME_ROOT` | `/home/wuyan` | 存在，登录用户为 `wuyan` |
-| `PROJECT_ROOT` | `/home/wuyan/lyj/YAM` | 存在 |
-| `CODE_ROOT` | `/home/wuyan/lyj/YAM/YAM_code` | 存在但接管时为空，尚未同步 OpenPI |
-| `DATA_ROOT` | `/home/wuyan/lyj/YAM/YAM_data` | 存在，接管时约 23 GB |
-| `ENV_PREFIX` | `/home/wuyan/.conda/envs/yam` | 存在；需先加载 `miniconda3/26.1.1` |
-| `OUTPUT_ROOT` | 未确认 | 不得沿用旧 `/share/home/...` 路径，须以新作业实际输出目录为准 |
+| `PROJECT_ROOT` | `/home/wuyan/lyj/YAM` | 服务器工作区 |
+| `CODE_ROOT` | `/home/wuyan/lyj/YAM/YAM_code` | 当前项目 `condapi` 的目标目录；不放独立 YAM-ABC 代码 |
+| `DATA_ROOT` | `/home/wuyan/lyj/YAM/YAM_data` | 已存在的数据目录 |
+| `RAW_YAM_DATA` | `/home/wuyan/lyj/YAM/YAM_data/ABC-130k-two-tasks` | 已发现，需先做 LeRobot/合同审计 |
+| 项目环境 | `/home/wuyan/.conda/envs/condapi-yam` | Python 3.12；待在服务器创建/安装 |
+| 输出根目录 | 未确认 | 不沿用旧服务器路径，首次 Slurm 作业时确定 |
 
-接管时已发现数据目录 `/home/wuyan/lyj/YAM/YAM_data/ABC-130k-two-tasks`，并有 `train`/`val`、metadata、parquet 和视频下载日志；它尚未通过 OpenArm 16D/单位/任务合同审计，不能仅凭目录名接入 OpenArm 训练。
+服务器数据下载任务 `1962/abc-download` 在 `gpu001` 上运行时不可停止、删除或抢占；本项目只读取其完成后的数据，不改变下载进程。
 
-迁移后的 shell 可先设置已核实的目录变量；`REPO_ROOT` 和 `OUTPUT_ROOT` 在新平台实际同步/提交后再设置：
+服务器登录后使用：
 
-~~~bash
-export HOME_ROOT=/home/wuyan
+```bash
 export PROJECT_ROOT=/home/wuyan/lyj/YAM
 export CODE_ROOT="$PROJECT_ROOT/YAM_code"
 export DATA_ROOT="$PROJECT_ROOT/YAM_data"
-export ENV_PREFIX=/home/wuyan/.conda/envs/yam
-~~~
+export RAW_YAM_DATA="$DATA_ROOT/ABC-130k-two-tasks"
+```
 
-平台手册说明工作台提供文件管理、作业编排、命令行、Jupyter、GUI 和运行总览；GUI/Jupyter 的 GPU、CPU 和时长以作业提交页的实时资源为准。不要把登录节点当 GPU 训练节点。
+密码只通过交互式 SSH/密码管理器提供，绝不写入仓库、脚本、remote URL 或日志。
 
-## 可调参数
+## 2. 环境方案
 
-参数只在一个地方改；改完必须重新跑对应 gate。表中 K-Policy 的步数/保存频率是旧项目配置参考，不代表新平台已有训练状态；新实验优先用 CLI 覆盖，不要修改正式配置或 launcher 默认值。
+### 2.1 创建项目环境
 
-| 参数 | 修改入口 | K-Policy 当前值 | 修改后必须做什么 |
-|---|---|---:|---|
-| 数据集路径、输出路径 | 本页环境变量 `DATA_ROOT`、待确认的 `OUTPUT_ROOT` | 见 §1 | 检查目录、权限和磁盘空间 |
-| 训练数据、split、norm 资产 | `src/openpi/training/config.py` 的独立 config | K-Data、`0:1719` | 新数据版本重算 norm，跑数据 audit/loader smoke |
-| 计算节点、分区、coordinator | 新平台作业编排/Slurm；多节点 launcher 尚未迁移 | 接管时仅核实 `gpu` 分区上的 `gpu001` 下载作业 | 先查 `squeue`/`sinfo`；未核实前不得套用旧节点名或 coordinator |
-| 全局 batch、workers | 新作业脚本或 launcher | 未确认 | 先在新平台单节点分配中做 smoke，再确定多节点拓扑 |
-| 训练步数、保存频率 | config 或 launcher 的 `--num-train-steps`；保存频率在 config | `80000`、`5000` | 新 `EXP_NAME` 用 overwrite；续训只用 resume |
-| XLA 显存比例 | launcher `--xla-memory-fraction` 或单机环境变量 | `0.90` | 记录显存和 OOM；不要用删 cache 规避问题 |
-| norm 统计 episode | `compute_openarm_parquet_norm_stats.py --episodes` | `0:1719` | 必须与训练 split 完全一致，并写入同一数据版本 |
-| 总控覆盖项 | 新平台迁移后的 launcher/controller | 未迁移 | 未完成代码、环境、数据和输出路径迁移前不得启动 controller |
+本仓库的 `environment.pi-conda.yml` 已收敛为 Python 3.12；服务器 conda 已核实可以使用 conda-forge 镜像，pip 经大 wheel 实测选择腾讯云 PyPI 镜像。创建前确认 `CODE_ROOT` 是当前 `condapi` 仓库，而不是 `/home/wuyan-lyj/YAM/yam-abc-reproduce`：
 
-模型 action 维度、单位、horizon 属于 [04 · 数据合同](04_data_contracts.md)；服务端端口、prompt、RTC 和 action-chunk 属于 [05 · 推理与 rollout](05_inference_and_rollout.md)。不要在本页复制它们的操作命令。
-
-## 2. 首次登录与版本/环境预检
-
-从本地进入服务器：
-
-~~~bash
-ssh -p 22 wuyan@10.18.31.234
-~~~
-
-登录后先加载平台环境；这些命令只读，不会修改远端代码：
-
-~~~bash
+```bash
 module load miniconda3/26.1.1
-conda activate /home/wuyan/.conda/envs/yam
-hostname
-id
-pwd
-echo "$CONDA_PREFIX"
-python --version
-test -d /home/wuyan/lyj/YAM/YAM_code
-test -d /home/wuyan/lyj/YAM/YAM_data
-~~~
-
-接管时上述环境激活后 Python 为 3.13.12；在登录节点导入 `torch` 失败，尚未证明它适合 OpenPI。仓库要求 Python 3.11，必须在新平台实际 GPU 作业内完成依赖/import gate 后，才能安装或运行 OpenPI。`YAM_code` 当前为空，不要执行 `git pull`、覆盖目录或把本地仓库自动同步上去。
-
-## 3. GPU、进程和 tmux 审计
-
-每次训练/服务前都执行一次；先在工作台或 Slurm 确认分配，再到计算节点执行 GPU 检查：
-
-~~~bash
-squeue -u "$USER"
-sinfo
-nvidia-smi --query-gpu=index,name,memory.used,memory.total,utilization.gpu,temperature.gpu \
-  --format=csv,noheader,nounits
-nvidia-smi --query-compute-apps=pid,process_name,used_memory --format=csv,noheader
-tmux ls 2>/dev/null || true
-pgrep -af '(serve_policy|scripts/train.py|monitor_openarm)' || true
-~~~
-
-低利用率不代表空闲：可能正在模型加载、JAX 编译、视频解码或异步保存。结合 GPU 进程、日志 mtime、CPU、Slurm 状态和 tmux 再判断。一个多节点 JAX 作业是不可拆分单元，不能只重启一台节点。
-
-## 4. 新平台 Conda 环境
-
-新平台不是旧的 `pi-conda` profile。当前可复核的环境入口是平台 module 加用户环境：
-
-~~~bash
-module load miniconda3/26.1.1
-conda activate /home/wuyan/.conda/envs/yam
+conda env create -f "$CODE_ROOT/environment.pi-conda.yml" \
+  -p /home/wuyan/.conda/envs/condapi-yam
+conda activate /home/wuyan/.conda/envs/condapi-yam
 export PYTHON="$CONDA_PREFIX/bin/python"
 python --version
-~~~
+```
 
-`yam` 环境接管时为 Python 3.13.12，登录节点未安装 `torch`；它目前只能作为待审计的现有环境，不能直接宣称满足 OpenPI。待 `CODE_ROOT` 同步仓库且在 GPU 作业内通过 Python 3.11/`jax`/`torch`/`lerobot`/`openpi_client` import gate 后，才决定是否复制平台公共环境或在该环境中安装项目依赖。不要使用 uv，不要在登录节点跑 GPU 训练，不要把 token 写入脚本。
+如果项目环境已存在，只允许先检查版本和包，再决定是否补装；不删除环境或清理其他用户缓存。
 
-## 5. 数据到训练的完整服务器闭环
+### 2.2 安装当前仓库
 
-下面是可以复核的顺序。DATASET、CONFIG、EXP_NAME 必须替换为同一实验的实体；不要把接管时的 `ABC-130k-two-tasks` 目录直接套到 OpenArm，也不要把旧服务器的 KAI0 快照当作新平台现状。
+先安装项目声明的完整依赖，再以 editable 方式覆盖本地 `openpi` 和 `openpi-client`。不使用 uv；本地测速选用腾讯云镜像：
 
-### 5.1 服务器数据目录与容量检查
+```bash
+cd "$CODE_ROOT"
+"$PYTHON" -m pip install --index-url https://mirrors.cloud.tencent.com/pypi/simple/ \
+  --upgrade-strategy only-if-needed -e .
+"$PYTHON" -m pip install --no-build-isolation --no-deps -e packages/openpi-client
+```
 
-服务器上的数据按“原始/转换/冻结派生/训练输出”分层；新平台的 reference/output 根目录尚未确认，不要自行创建兼容旧服务器的别名，也不要把 `/tmp` 中的 raw 当作可恢复的唯一副本。开始转换或训练前先确认空间、权限和数据入口：
+依赖安装完成后，在 GPU 计算节点而不是登录节点执行 import gate：
 
-~~~bash
-export DATASET_ROOT="$DATA_ROOT/openarm_kai0_awbc_v1"
-df -h "$DATA_ROOT"
-du -sh "$DATA_ROOT" 2>/dev/null
-test -d "$DATASET_ROOT" || { echo "OpenArm K-Data 未在新平台核实：$DATASET_ROOT" >&2; exit 1; }
-test -d "$DATASET_ROOT/meta" && test -d "$DATASET_ROOT/data" && test -d "$DATASET_ROOT/videos"
-find "$DATASET_ROOT/meta" -maxdepth 1 -type f -printf '%f\n' | sort
-find "$DATASET_ROOT/data" -type f -name '*.parquet' | wc -l
-find "$DATASET_ROOT/videos" -type f | wc -l
-"$PYTHON" -m json.tool "$DATASET_ROOT/meta/info.json" | sed -n '1,100p'
-~~~
+```bash
+"$PYTHON" - <<'PY'
+import jax
+import lerobot.datasets.lerobot_dataset as lerobot_dataset
+import openpi
+import openpi.policies.yam_policy as yam_policy
+import torch
 
-`meta/info.json`、`episodes.jsonl`、parquet、videos、`norm_stats.json` 和 build report 必须来自同一冻结版本；文件数量只能作为发现异常的线索，最终以 5.2 的正式 audit 为准。磁盘满、目录不可读、软链接指向临时目录或 metadata 的 `data_path/video_path` 不可解析时，停止流程并先修复数据版本。
+print("jax", jax.__version__)
+print("lerobot", getattr(lerobot_dataset, "__file__", "<unknown>"))
+print("torch", torch.__version__, "cuda", torch.cuda.is_available())
+print("yam_action_dim", yam_policy.YAM_STATE_ACTION_DIM)
+PY
+```
 
-### 5.2 数据和 norm 预检
+完整 import 或 CUDA gate 失败时，停止训练启动，记录具体版本/错误；不要通过把 YAM-ABC 代码复制进本项目来绕过依赖问题。
 
-先看 docs/04_data_contracts.md 的数据矩阵和单位，再在 GPU 节点执行：
+### 2.3 本地验证环境与当前模型资产
 
-~~~bash
-export DATASET_ROOT="$DATA_ROOT/openarm_kai0_awbc_v1"
-test -f "$DATASET_ROOT/meta/info.json"
-test -f "$DATASET_ROOT/meta/episodes.jsonl"
-test -f "$DATASET_ROOT/meta/episodes_stats.jsonl"
-test -f "$DATASET_ROOT/meta/tasks.jsonl"
-test -f "$DATASET_ROOT/kai0_awbc_build_report.json"
-~~~
+服务器尚未恢复可用前，先使用本地 Miniconda 环境完成代码和资产验证：
 
-正式 K-Data 缺少 episodes_stats.jsonl、build report 或视频时应停止，不要在训练前静默修复冻结数据。只有在另存新版本并获得授权后，才可使用 scripts/write_lerobot_episode_stats.py 或 scripts/repair_lerobot_subset.py 生成派生结果。
+```bash
+export LOCAL_PYTHON=/home/wuyan-lyj/miniconda3/envs/condapi-yam/bin/python
+export OPENPI_DATA_HOME=/home/wuyan-lyj/.cache/openpi
+"$LOCAL_PYTHON" --version
+"$LOCAL_PYTHON" -m pip check
+```
 
-norm stats 必须和训练 episode 一致；正式 K-Data 只在冻结版本上计算一次：
+当前 Pi0.5 LoRA 路线只需要 Pi0.5 基础 checkpoint 和 PaliGemma tokenizer；两项已在本地缓存，分别为：
 
-~~~bash
-if [[ ! -f "$DATASET_ROOT/norm_stats.json" ]]; then
-  "$PYTHON" scripts/compute_openarm_parquet_norm_stats.py \
-    --dataset "$DATASET_ROOT" --episodes 0:1719
-fi
-~~~
+```text
+$OPENPI_DATA_HOME/openpi-assets/checkpoints/pi05_base/params/
+$OPENPI_DATA_HOME/big_vision/paligemma_tokenizer.model
+```
 
-正式 K-Data 的结构和真实 OpenPI loader gate：
+基础 checkpoint 目录必须保留 `commit_success.txt` 后才能认为下载完整。Pi0、Pi0-Fast 或 FAST tokenizer
+不是当前 `pi05_yam_lora` 的必需资产，除非后续明确新增对应实验，不提前下载。YAM 的 `assets/yam/norm_stats.json`
+仍必须在正式数据版本审计后计算，不能用 Pi0.5 基础资产或其他机器人合同的统计量代替。
 
-~~~bash
-mkdir -p "$OUTPUT_ROOT/logs/openarm_kai0_pipeline_v1"
-"$PYTHON" scripts/audit_openarm_kai0_training_data.py \
-  --dataset "$DATASET_ROOT" \
-  --config pi05_openarm_kai0_awbc_v1 \
-  --expected-episodes 1719 \
-  --expected-hq 999 --expected-site 420 --expected-tda 300 \
-  --output "$OUTPUT_ROOT/logs/openarm_kai0_pipeline_v1/k_data_training_audit.json"
-"$PYTHON" scripts/openarm_benchmark_loader.py \
-  pi05_openarm_kai0_awbc_v1 --backend torchcodec \
-  --num-workers 0 --batch-size 2 --batches 2
-~~~
+## 3. Slurm 和 GPU 预检
 
-audit 会检查二值 task、来源数量、连续 episode/frame/index、norm stats、真实 16D loader、三类视频样本和每个 TDA episode 尾帧；它通过后才允许启动正式训练。
+登录节点只用于提交/查看任务。每次创建作业先查看资源，GPU 型号和显存必须在实际分配后记录：
 
-### 5.3 新平台单机作业入口（待迁移）
-
-平台手册给出的默认入口是“作业编排”页面，也可以从命令行进入 Slurm。当前 `CODE_ROOT` 为空、`OUTPUT_ROOT` 未确认，且 `yam` 还未通过 OpenPI 依赖 gate，因此本节暂不启动训练。迁移完成后必须在新作业中先做 20-step/loader smoke，并将代码、配置、数据、norm 和输出目录绑定到同一份记录。
-
-~~~bash
-module load miniconda3/26.1.1
-conda activate /home/wuyan/.conda/envs/yam
+```bash
+squeue -u "$USER"
 sinfo
-squeue -u "$USER"
-tmux ls 2>/dev/null || true
-~~~
+scontrol show partition gpu
+srun --partition=gpu --gres=gpu:1 --time=00:10:00 --pty bash
+```
 
-长任务仍使用 Slurm 作业或 tmux；提交前确认作业脚本目录、`--chdir`、标准输出目录和资源申请。不要复用旧服务器的 `gpu12/gpu14/gpu28`、coordinator 或 `pi-conda` 命令，除非已完成新平台适配并重新核验。
+进入计算节点后：
 
-### 5.4 正式 K-Policy 迁移闸门
+```bash
+nvidia-smi --query-gpu=index,name,memory.used,memory.total,utilization.gpu \
+  --format=csv,noheader,nounits
+"$PYTHON" -c 'import torch; print(torch.cuda.get_device_name(0), torch.cuda.get_device_properties(0).total_memory)'
+```
 
-`pi05_openarm_kai0_awbc_v1`、K-Data 1719 集和旧多节点拓扑属于上一台训练服务器的项目快照。新平台当前只核实到 `ABC-130k-two-tasks` 下载任务，尚未核实 OpenArm K-Data、OpenPI 仓库、checkpoint、输出根目录或多节点 coordinator；因此不能在新平台直接启动正式 K-Policy。
+长训练用 Slurm batch/job 或 tmux 保持会话；不要在 login shell 前台运行训练。训练前检查 `squeue`，不得影响 `1962/abc-download`。
 
-迁移顺序固定为：同步完整仓库到新 `CODE_ROOT` → 在计算节点核验 Python 3.11/依赖 → 确认 OpenArm 数据与 norm → 单节点 loader/20-step smoke → 核实 Slurm 多节点资源 → 才决定是否迁移 launcher 和正式训练。任何一步失败都保留日志，不删除数据或缓存掩盖问题。
+## 4. 数据接入前检查
 
-### 5.5 新平台任务监控
+`RAW_YAM_DATA` 的目录名不等于可训练的 LeRobot repo。先确认数据是否已经是当前 LeRobot v3 布局，尤其是 `meta/info.json`、tasks metadata、parquet、三路视频和 feature names：
 
-被动查看使用 Slurm 和实际作业日志，不调用尚未迁移的 KAI0 controller：
+```bash
+test -d "$RAW_YAM_DATA"
+find "$RAW_YAM_DATA" -maxdepth 2 -type f | sort | sed -n '1,80p'
+find "$RAW_YAM_DATA" -name 'info.json' -o -name 'tasks.parquet' -o -name 'episodes*.jsonl' | sort
+df -h "$DATA_ROOT"
+```
 
-~~~bash
-squeue -u "$USER"
-sacct -u "$USER" --starttime today --format=JobID,JobName,State,Elapsed,ExitCode,NodeList
-tmux ls 2>/dev/null || true
-tail -f /home/wuyan/lyj/YAM/YAM_data/ABC-130k-two-tasks/download.log
-~~~
+只有通过 [04 · 数据合同](04_data_contracts.md) 的键、14D 形状、task/prompt、视频首中尾解码和 norm gate 后，才能将 `--data.repo-id` 指向它。若需转换，必须写到新目标目录，原始下载目录保持只读。
 
-接管时作业 `1962/abc-download` 在 `gpu001` 的 `gpu` 分区运行，标准输出与错误均指向该数据目录的 `slurm-1962.out`；这是正在进行的下载任务，不是 OpenPI 服务。异常时先保存 `squeue`/`sacct`/日志/GPU 证据，不要只 kill 一台节点。
+## 5. 代码同步和远端备份
 
-## 6. checkpoint 交接
+当前本地仓库是 `condapi`；服务器 `YAM_code` 只接收本仓库的代码。不得同步 `/home/wuyan-lyj/YAM/yam-abc-reproduce` 到该目录，也不得把它的控制/GUI 依赖作为训练依赖。
 
-JAX checkpoint 只有下列条件同时满足才可服务：
+本地提交后使用两个远端互为备份：
 
-~~~bash
-export OUTPUT_ROOT=replace_with_new_platform_output_root
-export CONFIG=pi05_openarm_kai0_awbc_v1
-export EXP_NAME=replace_with_exp_name
-export STEP=replace_with_step
-export CHECKPOINT="$OUTPUT_ROOT/$CONFIG/$EXP_NAME/$STEP"
-test -f "$CHECKPOINT/_CHECKPOINT_METADATA"
-test -f "$CHECKPOINT/params/_METADATA"
-test -f "$CHECKPOINT/assets/openarm_kai0_awbc_v1/norm_stats.json"
-~~~
+```bash
+git push -u origin main    # Gitea
+git push github main       # GitHub
+```
 
-部署前同时记录 config、dataset、训练 commit、step、prompt、norm stats 路径和日志；数字目录或只有 params/ 的异步中间态不可晋级。`replace_with_exp_name` 和 `replace_with_step` 必须替换成真实值。policy server 会优先从 checkpoint 的 assets/<asset_id>/norm_stats.json 加载 stats，因此不能用另一数据版本的 stats 替换它。
+服务器端如需通过 Git 拉取，先确认 Gitea SSH 公钥已登记，再使用无密码写入的 clone/fetch；未登记前不要把密码拼进 URL。服务器代码同步、环境安装和数据审计必须分开记录。
 
-## 7. 服务器安全与失败处理
+## 6. 安全边界
 
-- 不提交凭据，不删除数据/权重/cache，不停止接管时的 `1962/abc-download`；服务和采集先确认急停、人工接管、动作单位和工作空间。
-- 端口监听、进程存在、训练 loss 下降都不是部署成功；必须完成 docs/05_inference_and_rollout.md 的真实 WebSocket smoke。
-- 看到 OOM、视频尾帧、JAX 初始化、SSH 参数边界或 checkpoint 半写入问题时，保留原日志和状态，写入 docs/07_change_log.md，不要用删除缓存掩盖原因。
+- 不提交或展示私钥、密码、token；服务器只读公钥可交给用户登记 Gitea。
+- 不删除远端数据、权重、缓存、日志或现有下载任务。
+- 不在登录节点训练或进行需要 GPU 的 import/benchmark。
+- 新环境失败时保留错误日志，不删除其他环境或清理其他用户缓存。

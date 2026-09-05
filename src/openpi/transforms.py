@@ -112,76 +112,6 @@ class InjectDefaultPrompt(DataTransformFn):
 
 
 @dataclasses.dataclass(frozen=True)
-class ForcePrompt(DataTransformFn):
-    prompt: str | None
-
-    def __call__(self, data: DataDict) -> DataDict:
-        if self.prompt is not None:
-            data["prompt"] = np.asarray(self.prompt)
-        return data
-
-
-def _scalar_string(value) -> str:
-    if isinstance(value, str):
-        return value
-    value = np.asarray(value)
-    if value.shape == ():
-        return str(value.item())
-    if value.size == 1:
-        return str(value.reshape(-1)[0].item())
-    raise ValueError(f"Expected a scalar string prompt, got shape={value.shape}.")
-
-
-def _scalar_binary_indicator(value) -> bool:
-    value = np.asarray(value)
-    if value.shape != () and value.size != 1:
-        raise ValueError(f"ACP indicator must be a scalar 0/1 value, got shape={value.shape}.")
-    if np.issubdtype(value.dtype, np.bool_):
-        raise TypeError(f"ACP indicator must be integer 0/1, got boolean dtype={value.dtype}.")
-    if np.issubdtype(value.dtype, np.floating):
-        raise TypeError(f"ACP indicator must be integer 0/1, got floating dtype={value.dtype}.")
-
-    parsed = int(value.reshape(-1)[0].item())
-    if parsed not in (0, 1):
-        raise ValueError(f"ACP indicator must be 0 or 1, got {parsed}.")
-    return parsed == 1
-
-
-@dataclasses.dataclass(frozen=True)
-class ACPPromptTransform(DataTransformFn):
-    """Append Evo-RL ACP advantage tags to the prompt before tokenization."""
-
-    indicator_key: str = "complementary_info.acp_indicator"
-    prompt_key: str = "prompt"
-    positive_tag: str = "Advantage: positive"
-    negative_tag: str = "Advantage: negative"
-    separator: str = "\n"
-    indicator_dropout_prob: float = 0.0
-
-    def __post_init__(self):
-        if not 0.0 <= self.indicator_dropout_prob <= 1.0:
-            raise ValueError("indicator_dropout_prob must be within [0, 1].")
-        if not self.indicator_key:
-            raise ValueError("indicator_key must be non-empty.")
-        if not self.prompt_key:
-            raise ValueError("prompt_key must be non-empty.")
-
-    def __call__(self, data: DataDict) -> DataDict:
-        if self.indicator_key not in data:
-            raise KeyError(f"ACP indicator field '{self.indicator_key}' is missing from data.")
-        if self.prompt_key not in data:
-            raise KeyError(f"ACP prompt field '{self.prompt_key}' is missing from data.")
-
-        prompt = _scalar_string(data[self.prompt_key])
-        if self.indicator_dropout_prob > 0.0 and np.random.random() < self.indicator_dropout_prob:
-            return {**data, self.prompt_key: prompt}
-
-        tag = self.positive_tag if _scalar_binary_indicator(data[self.indicator_key]) else self.negative_tag
-        conditioned_prompt = tag if not prompt else f"{prompt}{self.separator}{tag}"
-        return {**data, self.prompt_key: conditioned_prompt}
-
-
-@dataclasses.dataclass(frozen=True)
 class Normalize(DataTransformFn):
     norm_stats: at.PyTree[NormStats] | None
     # If true, will use quantile normalization. Otherwise, normal z-score normalization will be used.
@@ -274,13 +204,8 @@ class SubsampleActions(DataTransformFn):
 class DeltaActions(DataTransformFn):
     """Repacks absolute actions into action space relative to the current state.
 
-    This implements the UMI-style "relative trajectory" approach: each action in the
-    chunk is an offset from the robot's CURRENT STATE at prediction time, not from
-    the previous action. This is the same as what LeRobot calls "relative actions"
-    and is consistent with π0.5's pretraining distribution.
-
-    For chained deltas (each action relative to the previous action), see
-    `ChainedDeltaActions` instead.
+    Every masked action dimension is offset from the current state; unmasked
+    dimensions (for example, grippers) remain absolute.
     """
 
     # Boolean mask for the action dimensions to be repacked. Length can be smaller
@@ -301,58 +226,9 @@ class DeltaActions(DataTransformFn):
         return data
 
 
-# Alias: RelativeActions is the correct name for the UMI-style transform above.
-# DeltaActions is kept for backward compatibility with existing configs.
-RelativeActions = DeltaActions
-
-
-@dataclasses.dataclass(frozen=True)
-class ChainedDeltaActions(DataTransformFn):
-    """Repacks absolute actions into chained delta action space.
-
-    Each action in the chunk is relative to the PREVIOUS action (error accumulates):
-        action[t+0] = abs[t+0] - state[t]
-        action[t+1] = abs[t+1] - abs[t+0]
-        action[t+2] = abs[t+2] - abs[t+1]
-        ...
-
-    This is different from `DeltaActions` which makes all actions relative to the
-    current state (UMI-style). Chained deltas can accumulate prediction errors over
-    long horizons.
-    """
-
-    mask: Sequence[bool] | None
-
-    def __call__(self, data: DataDict) -> DataDict:
-        if "actions" not in data or self.mask is None:
-            return data
-
-        state, actions = data["state"], data["actions"]
-        mask = np.asarray(self.mask)
-        dims = mask.shape[-1]
-
-        # First action: delta from current state (for masked dims)
-        # Subsequent actions: delta from previous action
-        actions_delta = actions.copy()
-        actions_delta[..., 0, :dims] = np.where(
-            mask, actions[..., 0, :dims] - state[..., :dims], actions[..., 0, :dims]
-        )
-        for i in range(1, actions.shape[-2]):
-            actions_delta[..., i, :dims] = np.where(
-                mask, actions[..., i, :dims] - actions[..., i - 1, :dims], actions[..., i, :dims]
-            )
-        data["actions"] = actions_delta
-
-        return data
-
-
 @dataclasses.dataclass(frozen=True)
 class AbsoluteActions(DataTransformFn):
-    """Repacks delta/relative actions back into absolute action space.
-
-    Reverses the `DeltaActions` (= `RelativeActions`) transform. For masked
-    dimensions, adds the current state back to each action.
-    """
+    """Repacks delta actions back into absolute action space."""
 
     # Boolean mask for the action dimensions. Length can be smaller than the actual
     # number of dimensions. If None, this transform is a no-op.
@@ -366,37 +242,6 @@ class AbsoluteActions(DataTransformFn):
         mask = np.asarray(self.mask)
         dims = mask.shape[-1]
         actions[..., :dims] += np.expand_dims(np.where(mask, state[..., :dims], 0), axis=-2)
-        data["actions"] = actions
-
-        return data
-
-
-# Alias for clarity
-AbsoluteRelativeActions = AbsoluteActions
-
-
-@dataclasses.dataclass(frozen=True)
-class AbsoluteChainedDeltaActions(DataTransformFn):
-    """Reverses `ChainedDeltaActions`, converting chained deltas back to absolute."""
-
-    mask: Sequence[bool] | None
-
-    def __call__(self, data: DataDict) -> DataDict:
-        if "actions" not in data or self.mask is None:
-            return data
-
-        state, actions = data["state"], data["actions"]
-        mask = np.asarray(self.mask)
-        dims = mask.shape[-1]
-
-        # First action: add state back (must happen before cumulative sum since
-        # subsequent steps chain from the recovered absolute action)
-        actions[..., 0, :dims] = np.where(mask, actions[..., 0, :dims] + state[..., :dims], actions[..., 0, :dims])
-        # Cumulatively add deltas: a[i] = d[i] + a[i-1]
-        for i in range(1, actions.shape[-2]):
-            actions[..., i, :dims] = np.where(
-                mask, actions[..., i, :dims] + actions[..., i - 1, :dims], actions[..., i, :dims]
-            )
         data["actions"] = actions
 
         return data

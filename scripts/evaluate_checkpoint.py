@@ -1,419 +1,276 @@
-"""Offline generalization evaluation for VLA checkpoints.
+"""Evaluate a YAM Pi0.5 checkpoint on held-out LeRobot episodes.
 
-Evaluates a trained pi05_openarms_dual checkpoint on a held-out validation
-split of the dataset.  Produces a report with:
+The report deliberately stays at the offline policy level: first-action MAE
+and chunk continuity are useful diagnostics, but neither is a real-robot
+success metric.  The dataset must expose the YAM 14D contract and all three
+RGB streams.
 
-- Per-joint MAE vs ground truth (overall + per-episode)
-- Temporal action consistency (L2 distance between consecutive predicted chunks)
-- Cumulative rollout drift (autoregressive prediction over N steps)
-- Per-episode ranking (worst-performing episodes first)
+Example::
 
-Usage:
-    # Use train=0:N, val=N:end via the splits dict in dataset meta
     python scripts/evaluate_checkpoint.py \
-        --config pi05_openarms_dual \
-        --checkpoint-dir .../openarms_folding_v002_bs32_fsdp2/19999 \
-        --dataset /share/home/linyongjia/datasets/openarms_folding_v002 \
-        --val-split "132:165" \
+        --config pi05_yam_lora \
+        --checkpoint-dir ./checkpoints/pi05_yam_lora/lego_sorting/30000 \
+        --dataset /path/to/yam_lerobot \
+        --val-split 80:100 \
         --output ./eval_report
 """
 
 import argparse
+from collections import defaultdict
 import dataclasses
 import json
 import logging
 import pathlib
-import sys
-from collections.abc import Sequence
 from typing import Any
 
 import numpy as np
 
-# dataset loading
-import lerobot.common.datasets.lerobot_dataset as lerobot_dataset
+try:
+    import lerobot.datasets.lerobot_dataset as lerobot_dataset
+except ModuleNotFoundError:
+    import lerobot.common.datasets.lerobot_dataset as lerobot_dataset
 
-import openpi.models.model as _model
 import openpi.policies.policy as _policy
 import openpi.policies.policy_config as _policy_config
 import openpi.training.config as _config
-import openpi.transforms as _transforms
 
 logger = logging.getLogger(__name__)
+
+YAM_ACTION_DIM = 14
+YAM_IMAGE_KEYS = (
+    "observation.images.top_rgb",
+    "observation.images.left_rgb",
+    "observation.images.right_rgb",
+)
 
 
 @dataclasses.dataclass
 class EvalMetrics:
     episode_idx: int
     num_frames: int
-
-    # per-frame MAE averaged across joints
-    mae_per_joint: np.ndarray  # [action_dim]
+    evaluated_frames: int
+    mae_per_action: np.ndarray
     mae_overall: float
-
-    # temporal consistency: L2 between (pred[t] action chunk) and (pred[t+1] action chunk)
-    # measured on the *first* action of each chunk to avoid comparing full 50-dim sequences
-    temporal_consistency: list[float]  # one per adjacent frame pair
+    temporal_consistency: list[float]
     temporal_consistency_mean: float
 
-    # cumulative drift: autoregress over K consecutive frames, compare pred vs truth
-    # drift[t][k] = L2(pred_{t+k}, truth_{t+k}) when using pred at t as state
-    rollout_drift: list[float]  # drift at each autoregressive depth
-    rollout_drift_mean: float
+
+def _scalar_int(value: Any) -> int:
+    return int(np.asarray(value).reshape(-1)[0])
 
 
-def _parse_split_spec(spec: str, total: int) -> tuple[list[int], list[int]]:
-    """Parse a split spec like '0:132' or '132:165' into train and val indices."""
-    train_spec, val_spec = spec.split(",")
-    train_start, train_end = map(int, train_spec.split(":"))
-    val_start, val_end = map(int, val_spec.split(":"))
-
-    train_indices = list(range(train_start, min(train_end, total)))
-    val_indices = list(range(val_start, min(val_end, total)))
-    return train_indices, val_indices
+def _scalar_text(value: Any) -> str:
+    return str(np.asarray(value).reshape(-1)[0])
 
 
-def _action_mae(pred: np.ndarray, truth: np.ndarray) -> np.ndarray:
-    """Per-joint MAE. Both arrays shape [action_dim]."""
-    return np.abs(pred - truth)
+def _task_mapping(tasks: Any) -> dict[int, str]:
+    """Normalize LeRobot v2/v3 task metadata to a simple lookup table."""
+    if hasattr(tasks, "iterrows"):
+        return {int(row["task_index"]): str(task) for task, row in tasks.iterrows()}
+    return {int(index): str(task) for index, task in (tasks or {}).items()}
+
+
+def _parse_episode_range(spec: str) -> list[int]:
+    try:
+        start, end = (int(value) for value in spec.split(":", maxsplit=1))
+    except ValueError as error:
+        raise ValueError(f"Expected episode range START:END, got {spec!r}.") from error
+    if start < 0 or end <= start:
+        raise ValueError(f"Episode range must satisfy 0 <= START < END, got {spec!r}.")
+    return list(range(start, end))
+
+
+def _first_action(value: Any) -> np.ndarray:
+    action = np.asarray(value, dtype=np.float32)
+    if action.ndim == 1:
+        return action
+    if action.ndim == 2:
+        return action[0]
+    raise ValueError(f"Expected an action vector or chunk, got shape={action.shape}.")
 
 
 def _temporal_consistency(pred_chunks: list[np.ndarray]) -> list[float]:
-    """Compute L2 between first action of consecutive predicted chunks.
-
-    Args:
-        pred_chunks: list of predicted action arrays, each shape [action_horizon, action_dim]
-
-    Returns:
-        list of L2 distances (len = len(pred_chunks) - 1)
-    """
     if len(pred_chunks) < 2:
         return []
-    diffs = []
-    for i in range(len(pred_chunks) - 1):
-        # Compare first action of chunk i vs first action of chunk i+1
-        diff = np.linalg.norm(pred_chunks[i][0] - pred_chunks[i + 1][0])
-        diffs.append(float(diff))
-    return diffs
+    return [
+        float(np.linalg.norm(pred_chunks[index][0] - pred_chunks[index + 1][0]))
+        for index in range(len(pred_chunks) - 1)
+    ]
+
+
+def _build_observation(frame: dict, tasks: dict[int, str]) -> dict | None:
+    """Build the raw observation expected by ``YamInputs``."""
+    if "observation.state" not in frame or any(key not in frame for key in YAM_IMAGE_KEYS):
+        return None
+
+    observation = {
+        "observation.state": np.asarray(frame["observation.state"], dtype=np.float32),
+    }
+    for key in YAM_IMAGE_KEYS:
+        image = np.asarray(frame[key])
+        if image.ndim != 3 or (image.shape[-1] != 3 and image.shape[0] != 3):
+            return None
+        observation[key] = image
+
+    if "prompt" in frame:
+        observation["prompt"] = _scalar_text(frame["prompt"])
+    elif "task_index" in frame:
+        task_index = _scalar_int(frame["task_index"])
+        if task_index not in tasks:
+            return None
+        observation["prompt"] = tasks[task_index]
+    elif "task" in frame:
+        observation["prompt"] = _scalar_text(frame["task"])
+    else:
+        return None
+    return observation
 
 
 def evaluate_episode(
     policy: _policy.Policy,
+    episode_idx: int,
     episode_frames: list[dict],
-    action_dim: int,
-    rollout_depth: int = 10,
-    tasks: dict[int, str] | None = None,
+    tasks: dict[int, str],
 ) -> EvalMetrics:
-    """Evaluate a single episode.
+    mae_accum = np.zeros(YAM_ACTION_DIM, dtype=np.float64)
+    pred_chunks: list[np.ndarray] = []
+    evaluated_frames = 0
 
-    Args:
-        policy: loaded policy with transforms.
-        episode_frames: list of raw dataset frames for one episode.
-        action_dim: expected action dimension.
-        rollout_depth: how many steps to autoregress for drift measurement.
-        tasks: mapping from task_index to task description string.
-    """
-    mae_accum = np.zeros(action_dim)
-    mae_count = 0
-    pred_chunks = []
-    rollout_errors = []
-
-    for t, frame in enumerate(episode_frames):
-        # Extract observation
-        obs = _build_observation(frame, tasks=tasks)
-        if obs is None:
+    for frame_index, frame in enumerate(episode_frames):
+        observation = _build_observation(frame, tasks)
+        if observation is None:
+            logger.warning("Skipping episode %s frame %s: incomplete YAM observation", episode_idx, frame_index)
             continue
 
         try:
-            # Run inference
-            result = policy.infer(obs)
-        except Exception as exc:
-            logger.warning(f"Episode inference error at frame {t}: {exc}")
+            result = policy.infer(observation)
+            predicted = np.asarray(result["actions"], dtype=np.float32)
+            truth = _first_action(frame["action"])
+        except (KeyError, TypeError, ValueError, RuntimeError) as error:
+            logger.warning("Skipping episode %s frame %s: %s", episode_idx, frame_index, error)
             continue
 
-        pred_actions = result.get("actions")
-        if pred_actions is None:
-            continue
+        if predicted.ndim != 2 or predicted.shape[1] != YAM_ACTION_DIM or predicted.shape[0] == 0:
+            raise ValueError(f"YAM policy returned invalid action shape {predicted.shape}; expected [horizon, 14].")
+        if truth.shape != (YAM_ACTION_DIM,):
+            raise ValueError(f"YAM dataset returned invalid action shape {truth.shape}; expected (14,).")
+        if not np.isfinite(predicted).all() or not np.isfinite(truth).all():
+            raise ValueError("YAM action contains NaN or Inf.")
 
-        # pred_actions shape: [action_horizon, action_dim]
-        pred_chunks.append(np.asarray(pred_actions))
+        pred_chunks.append(predicted)
+        mae_accum += np.abs(predicted[0] - truth)
+        evaluated_frames += 1
 
-        # Ground truth action (first frame of action chunk)
-        if "action" in frame:
-            truth_action = np.asarray(frame["action"][0], dtype=np.float32)
-            if truth_action.shape[0] == action_dim:
-                mae_accum += _action_mae(pred_actions[0], truth_action)
-                mae_count += 1
+    if evaluated_frames == 0:
+        raise ValueError(f"No valid YAM frames were evaluated in episode {episode_idx}.")
 
-        # Autoregressive rollout drift: use pred[0] as state, compare pred[t+
-        ...
-
-    # Compute aggregated metrics
-    per_joint_mae = mae_accum / max(mae_count, 1)
-    overall_mae = float(np.mean(per_joint_mae))
-
-    tc = _temporal_consistency(pred_chunks)
-    tc_mean = float(np.mean(tc)) if tc else 0.0
-
-    rd_mean = float(np.mean(rollout_errors)) if rollout_errors else 0.0
-
+    mae_per_action = mae_accum / evaluated_frames
+    temporal_consistency = _temporal_consistency(pred_chunks)
     return EvalMetrics(
-        episode_idx=0,
+        episode_idx=episode_idx,
         num_frames=len(episode_frames),
-        mae_per_joint=per_joint_mae,
-        mae_overall=overall_mae,
-        temporal_consistency=tc,
-        temporal_consistency_mean=tc_mean,
-        rollout_drift=rollout_errors,
-        rollout_drift_mean=rd_mean,
+        evaluated_frames=evaluated_frames,
+        mae_per_action=mae_per_action,
+        mae_overall=float(mae_per_action.mean()),
+        temporal_consistency=temporal_consistency,
+        temporal_consistency_mean=float(np.mean(temporal_consistency)) if temporal_consistency else 0.0,
     )
 
 
-# Supported base camera key names — order = detection priority
-_BASE_CAMERA_CANDIDATES = [
-    "observation.images.top_rgb",
-    "observation.images.base",
-]
+def load_dataset(
+    repo_id: str, episode_indices: list[int], action_horizon: int
+) -> tuple[dict[int, list[dict]], dict[int, str]]:
+    metadata = lerobot_dataset.LeRobotDatasetMetadata(repo_id)
+    action_dim = metadata.features["action"]["shape"][0]
+    if action_dim != YAM_ACTION_DIM:
+        raise ValueError(f"This evaluator is for YAM 14D data, but the dataset declares action_dim={action_dim}.")
 
-
-def _detect_image_keys(frame: dict) -> dict[str, str]:
-    """Detect which camera keys are present in the dataset frame.
-
-    Returns a mapping {src_key: dst_key} for all image keys found.
-    The base camera is auto-detected from known candidates.
-    """
-    mappings: dict[str, str] = {}
-
-    # Detect base camera
-    for candidate in _BASE_CAMERA_CANDIDATES:
-        if candidate in frame:
-            mappings[candidate] = candidate
-            break
-
-    # Wrist cameras (same naming across all known datasets)
-    for key in ("observation.images.left_wrist", "observation.images.right_wrist"):
-        if key in frame:
-            mappings[key] = key
-
-    return mappings
-
-
-def _build_observation(frame: dict, tasks: dict[int, str] | None = None) -> dict | None:
-    """Build an observation dict from a raw dataset frame.
-
-    Auto-detects camera keys (supports both top_rgb and base naming).
-    Converts task_index to prompt string using dataset task metadata.
-    """
-    try:
-        obs = {}
-        # State
-        if "observation.state" in frame:
-            obs["observation.state"] = np.asarray(frame["observation.state"], dtype=np.float32)
-
-        # Images — auto-detect which camera keys are present
-        for src_key, dst_key in _detect_image_keys(frame).items():
-            img = np.asarray(frame[src_key])
-            if img.ndim == 3 and img.shape[-1] == 3:
-                obs[dst_key] = img.astype(np.uint8)
-
-        # Prompt: prefer explicit prompt field, then task_index + metadata, then task
-        if "prompt" in frame:
-            obs["prompt"] = str(frame["prompt"])
-        elif "task_index" in frame and tasks is not None:
-            task_idx = int(frame["task_index"])
-            obs["prompt"] = tasks.get(task_idx, "fold the t-shirt")
-        elif "task" in frame:
-            obs["prompt"] = str(frame["task"])
-
-        if "observation.state" not in obs:
-            return None
-        return obs
-    except Exception:
-        return None
-
-
-def load_val_dataset(
-    repo_id: str,
-    val_indices: list[int],
-    action_horizon: int = 50,
-) -> tuple[list[dict], int, dict[int, str]]:
-    """Load the validation portion of a LeRobot dataset.
-
-    Returns:
-        val_frames: list of frames belonging to val episodes.
-        action_dim: dimension of action space.
-        tasks: mapping from task_index to task description string.
-    """
-    dataset_meta = lerobot_dataset.LeRobotDatasetMetadata(repo_id)
-    # Use delta_timestamps to get action chunks for ground-truth comparison
     dataset = lerobot_dataset.LeRobotDataset(
         repo_id,
-        delta_timestamps={
-            "action": [t / dataset_meta.fps for t in range(action_horizon)],
-        },
+        delta_timestamps={"action": [t / metadata.fps for t in range(action_horizon)]},
     )
-
-    action_dim = dataset_meta.features["action"]["shape"][0]
-
-    # Group frames by episode
-    val_frames = []
-    for idx, frame in enumerate(dataset):
-        episode_idx = int(frame.get("episode_index", 0))
-        if episode_idx in val_indices:
-            # Convert keys: lerobot stores as observation.state, action, etc.
-            val_frames.append(dict(frame))
-
-    return val_frames, action_dim, dataset_meta.tasks
+    selected = set(episode_indices)
+    episodes: dict[int, list[dict]] = defaultdict(list)
+    for frame in dataset:
+        episode_idx = _scalar_int(frame["episode_index"])
+        if episode_idx in selected:
+            episodes[episode_idx].append(dict(frame))
+    return episodes, _task_mapping(metadata.tasks)
 
 
-def main():
-    parser = argparse.ArgumentParser(description="VLA offline generalization evaluation")
-    parser.add_argument("--config", required=True, help="Training config name, e.g. pi05_openarms_dual")
-    parser.add_argument("--checkpoint-dir", required=True, help="Path to checkpoint directory")
-    parser.add_argument("--dataset", required=True, help="Path to LeRobot dataset")
-    parser.add_argument("--val-split", default="132:165", help="val episode range, e.g. '132:165'")
-    parser.add_argument("--output", default="./eval_report", help="Output directory for report")
-    parser.add_argument("--rollout-depth", type=int, default=10, help="Autoregressive rollout steps")
-    parser.add_argument("--max-episodes", type=int, default=0, help="Max val episodes to evaluate (0=all)")
-    parser.add_argument("--verbose", "-v", action="store_true", help="Print per-episode details")
+def _action_names() -> list[str]:
+    return [
+        *(f"left_j{i}" for i in range(1, 7)),
+        "left_gripper",
+        *(f"right_j{i}" for i in range(1, 7)),
+        "right_gripper",
+    ]
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Evaluate a YAM Pi0.5 checkpoint on a held-out LeRobot split.")
+    parser.add_argument("--config", default="pi05_yam_lora", help="YAM training config name")
+    parser.add_argument("--checkpoint-dir", required=True, help="Path to a complete checkpoint directory")
+    parser.add_argument("--dataset", required=True, help="Path or repo id of a YAM LeRobot dataset")
+    parser.add_argument("--val-split", required=True, help="Validation episode range, e.g. '80:100'")
+    parser.add_argument("--output", default="./eval_report", help="Output directory for the JSON report")
+    parser.add_argument("--max-episodes", type=int, default=0, help="Maximum episodes to evaluate (0=all)")
+    parser.add_argument("--verbose", "-v", action="store_true", help="Print per-episode metrics")
     args = parser.parse_args()
 
     logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
-
-    # Load config
     train_config = _config.get_config(args.config)
-    logger.info(f"Loaded config: {args.config}")
-
-    # Create policy
     checkpoint_dir = pathlib.Path(args.checkpoint_dir)
     policy = _policy_config.create_trained_policy(train_config, checkpoint_dir)
-    logger.info(f"Loaded policy from {checkpoint_dir}")
 
-    # Load dataset and split
-    val_indices = list(range(*map(int, args.val_split.split(":"))))
-    logger.info(f"Loading dataset from {args.dataset}")
-    val_frames, action_dim, tasks = load_val_dataset(
-        args.dataset, val_indices, action_horizon=train_config.model.action_horizon
-    )
-
-    # Group by episode
-    from collections import defaultdict
-
-    episodes: dict[int, list[dict]] = defaultdict(list)
-    for frame in val_frames:
-        ep = int(frame.get("episode_index", -1))
-        episodes[ep].append(frame)
-
-    logger.info(f"Validation: {len(episodes)} episodes, {len(val_frames)} frames")
+    requested_episodes = _parse_episode_range(args.val_split)
+    episodes, tasks = load_dataset(args.dataset, requested_episodes, train_config.model.action_horizon)
+    episode_keys = sorted(episodes)
     if args.max_episodes > 0:
-        episode_keys = sorted(episodes.keys())[: args.max_episodes]
-        episodes = {k: episodes[k] for k in episode_keys}
+        episode_keys = episode_keys[: args.max_episodes]
+    if not episode_keys:
+        raise ValueError(f"No episodes from {args.val_split!r} were found in {args.dataset!r}.")
 
-    # Evaluate each episode
-    all_metrics: list[EvalMetrics] = []
-    for ep_idx in sorted(episodes.keys()):
-        frames = episodes[ep_idx]
-        metrics = evaluate_episode(policy, frames, action_dim, args.rollout_depth, tasks=tasks)
-        metrics.episode_idx = ep_idx
-        all_metrics.append(metrics)
-
-        if args.verbose:
-            print(f"Episode {ep_idx:4d}: frames={metrics.num_frames:4d}, "
-                  f"MAE={metrics.mae_overall:.4f}, "
-                  f"TC={metrics.temporal_consistency_mean:.4f}, "
-                  f"Drift={metrics.rollout_drift_mean:.4f}")
-
-    # Sort by MAE descending (worst first)
-    all_metrics.sort(key=lambda m: m.mae_overall, reverse=True)
-
-    # Generate report
-    output_dir = pathlib.Path(args.output)
-    output_dir.mkdir(parents=True, exist_ok=True)
-
-    all_mae = np.array([m.mae_overall for m in all_metrics])
-    all_tc = np.array([m.temporal_consistency_mean for m in all_metrics])
-    all_drift = np.array([m.rollout_drift_mean for m in all_metrics])
-
-    # Aggregate per-joint MAE
-    joint_names = [
-        "right_j1", "right_j2", "right_j3", "right_j4", "right_j5", "right_j6", "right_j7", "right_grip",
-        "left_j1", "left_j2", "left_j3", "left_j4", "left_j5", "left_j6", "left_j7", "left_grip",
-    ]
-    per_joint_maes = np.array([m.mae_per_joint for m in all_metrics])  # [N, 16]
-    mean_joint_mae = per_joint_maes.mean(axis=0)
+    metrics = [evaluate_episode(policy, episode_idx, episodes[episode_idx], tasks) for episode_idx in episode_keys]
+    metrics.sort(key=lambda item: item.mae_overall, reverse=True)
+    per_action = np.mean([item.mae_per_action for item in metrics], axis=0)
+    action_names = _action_names()
 
     report = {
         "checkpoint": str(checkpoint_dir),
         "config": args.config,
         "dataset": args.dataset,
         "val_split": args.val_split,
-        "num_val_episodes": len(all_metrics),
-        "num_val_frames": sum(m.num_frames for m in all_metrics),
+        "num_val_episodes": len(metrics),
+        "num_val_frames": sum(item.num_frames for item in metrics),
+        "evaluated_frames": sum(item.evaluated_frames for item in metrics),
         "summary": {
-            "mae_mean": float(np.mean(all_mae)),
-            "mae_median": float(np.median(all_mae)),
-            "mae_std": float(np.std(all_mae)),
-            "mae_min": float(np.min(all_mae)),
-            "mae_max": float(np.max(all_mae)),
-            "temporal_consistency_mean": float(np.mean(all_tc)),
-            "temporal_consistency_std": float(np.std(all_tc)),
-            "rollout_drift_mean": float(np.mean(all_drift)),
-            "rollout_drift_std": float(np.std(all_drift)),
+            "mae_mean": float(np.mean([item.mae_overall for item in metrics])),
+            "mae_median": float(np.median([item.mae_overall for item in metrics])),
+            "mae_std": float(np.std([item.mae_overall for item in metrics])),
+            "temporal_consistency_mean": float(np.mean([item.temporal_consistency_mean for item in metrics])),
         },
-        "per_joint_mae": {name: float(v) for name, v in zip(joint_names, mean_joint_mae)},
+        "per_action_mae": dict(zip(action_names, (float(value) for value in per_action), strict=True)),
         "worst_10_episodes": [
-            {
-                "episode_idx": m.episode_idx,
-                "num_frames": m.num_frames,
-                "mae": m.mae_overall,
-                "temporal_consistency": m.temporal_consistency_mean,
-                "rollout_drift": m.rollout_drift_mean,
-            }
-            for m in all_metrics[:10]
-        ],
-        "best_10_episodes": [
-            {
-                "episode_idx": m.episode_idx,
-                "num_frames": m.num_frames,
-                "mae": m.mae_overall,
-                "temporal_consistency": m.temporal_consistency_mean,
-                "rollout_drift": m.rollout_drift_mean,
-            }
-            for m in all_metrics[-10:]
+            dataclasses.asdict(item) | {"mae_per_action": item.mae_per_action.tolist()} for item in metrics[:10]
         ],
     }
+    report_path = pathlib.Path(args.output) / "evaluation_report.json"
+    report_path.parent.mkdir(parents=True, exist_ok=True)
+    report_path.write_text(json.dumps(report, indent=2) + "\n")
 
-    # Write report
-    report_path = output_dir / "evaluation_report.json"
-    with open(report_path, "w") as f:
-        json.dump(report, f, indent=2)
-    logger.info(f"Report saved to {report_path}")
-
-    # Print summary
-    print("\n" + "=" * 60)
-    print("  VLA Generalization Evaluation Report")
-    print("=" * 60)
-    print(f"  Checkpoint:        {checkpoint_dir}")
-    print(f"  Val episodes:      {len(all_metrics)}")
-    print(f"  Val frames:        {sum(m.num_frames for m in all_metrics)}")
-    print(f"  MAE (mean/median): {report['summary']['mae_mean']:.4f} / {report['summary']['mae_median']:.4f}")
-    print(f"  MAE (min/max):     {report['summary']['mae_min']:.4f} / {report['summary']['mae_max']:.4f}")
-    print(f"  Temp Consistency:  {report['summary']['temporal_consistency_mean']:.4f}")
-    print(f"  Rollout Drift:     {report['summary']['rollout_drift_mean']:.4f}")
-    print("-" * 60)
-    print("  Per-Joint MAE:")
-    for name, mae in report["per_joint_mae"].items():
-        bar = "█" * int(min(mae * 20, 40))
-        arm = "R" if name.startswith("right") else "L"
-        joint = name.split("_")[-1]
-        print(f"    {arm} {joint:5s}: {mae:.4f} {bar}")
-    print("-" * 60)
-    print("  Worst 3 episodes:")
-    for m in all_metrics[:3]:
-        print(f"    ep {m.episode_idx:4d}: MAE={m.mae_overall:.4f}, TC={m.temporal_consistency_mean:.4f}, Drift={m.rollout_drift_mean:.4f}")
-    print("  Best 3 episodes:")
-    for m in all_metrics[-3:]:
-        print(f"    ep {m.episode_idx:4d}: MAE={m.mae_overall:.4f}, TC={m.temporal_consistency_mean:.4f}, Drift={m.rollout_drift_mean:.4f}")
-    print("=" * 60)
+    logger.info(
+        "Evaluated %s episodes / %s frames; mean first-action MAE %.5f",
+        len(metrics),
+        report["evaluated_frames"],
+        report["summary"]["mae_mean"],
+    )
+    if args.verbose:
+        for item in metrics:
+            print(
+                f"episode={item.episode_idx} frames={item.evaluated_frames} "
+                f"mae={item.mae_overall:.5f} temporal={item.temporal_consistency_mean:.5f}"
+            )
 
 
 if __name__ == "__main__":

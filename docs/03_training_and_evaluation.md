@@ -1,82 +1,114 @@
 # 03 · 训练与评估
 
-新平台命令先按 [02 · 服务器与环境](02_installation_and_environment.md) 加载 `miniconda3/26.1.1` 并激活 `/home/wuyan/.conda/envs/yam`，再使用其中导出的 `$PYTHON`。接管时该环境为 Python 3.13.12，且登录节点未通过 OpenPI import gate；`CODE_ROOT`、`OUTPUT_ROOT` 和 OpenArm checkpoint 尚未迁移完成，以下命令在 gate 通过前均只作模板。
+本页只描述当前 YAM 训练路线。服务器和环境先看 [02 · 服务器与环境](02_installation_and_environment.md)，动作/图像合同看 [04 · 数据合同](04_data_contracts.md)。
 
-## 训练前顺序
+## 当前默认路线
 
-1. 固定数据集版本、episode split、config 和初始化 checkpoint；OpenPI 不会自动把 LeRobot split 意图当作训练 split。
-2. 检查 `meta/info.json`、`meta/episodes.jsonl`、parquet/video 可读性和 OpenArm 16D/单位合同。
-3. 按 [数据合同](04_data_contracts.md) 为该版本计算 norm stats；不要手工复制别的合同。
-4. 做真实 loader smoke，再启动正式训练。
+首选配置为 `pi05_yam_lora`：
+
+- Pi0.5，`gemma_2b_lora` + `gemma_300m_lora`；
+- 冻结规则由对应 `Pi0Config.get_freeze_filter()` 生成，LoRA 关闭 EMA；
+- YAM 双臂真实动作 14D，模型内部 padding 为 32D；
+- action horizon 为 50；
+- 初始保守默认值为 batch 4、workers 2、每 1000 步保存、保留周期 5000、总步数 30000；这些是新服务器上的起始值，不是 GPU 性能结论。
+
+`pi0_yam`、`pi0_yam_lora`、`pi05_yam`、`pi05_yam_lora` 均已注册在 `src/openpi/training/config.py`。默认 `repo_id=local/yam_bimanual` 只是占位符，正式训练必须用 CLI 或复制配置覆盖为已审计的数据路径。
+
+阶段顺序固定为：第一阶段用已审计的乐高分拣示范做 Pi0.5 LoRA SFT；第二阶段再接入 DAgger，用人工纠正/回放数据建立独立数据版本和实验名。当前仓库只提供 YAM 的输入输出合同和通用训练入口，DAgger 的采集、纠正合并和安全 rollout 尚未宣称完成，不得把普通 SFT 结果写成 DAgger 结果。
+
+## 训练前 gate
+
+按以下顺序执行，任一步失败都不启动长训：
+
+1. 确认当前 commit、数据版本、episode split、config 和初始化 checkpoint。
+2. 检查 LeRobot metadata、`action`/`observation.state` 的 14D、三路图像、task/prompt、视频首中尾解码。
+3. 按同一训练数据版本计算 norm stats，保存为 `assets/yam/norm_stats.json`。
+4. 用真实 dataset loader 取样，确认 transform 后 state/action 能进入模型的 32D spec。
+5. 在 Slurm GPU 分配内做短步数 smoke，再启动正式训练。
+
+基础代码测试：
 
 ```bash
-"$PYTHON" -m pytest scripts/train_test.py -q
+"$PYTHON" -m pytest --strict-markers -m "not manual" -q
 ```
 
-## 通用单机入口
+## Norm stats
+
+YAM 的 norm 必须在 `YamInputs` 和 delta action transform 后计算；不要复用 OpenArm、Piper 或其他单位合同的 stats。示例：
 
 ```bash
-CONFIG=replace_with_config
-EXP_NAME=replace_with_exp_name
-STEPS=replace_with_steps
+DATASET=/home/wuyan/lyj/YAM/YAM_data/audited/yam_lerobot_v001
+"$PYTHON" scripts/compute_norm_stats.py pi05_yam_lora \
+  --repo-id="$DATASET"
+```
+
+实际输出根目录和资产目录以脚本日志为准，完成后确认 `yam/norm_stats.json` 可读且与训练数据版本一致。`compute_norm_stats.py` 不会替代数据结构审计。
+
+## 单机 smoke 和正式训练
+
+先在已分配 GPU 的节点运行 10～20 步，使用新实验名和独立输出目录：
+
+```bash
+CONFIG=pi05_yam_lora
+DATASET=/home/wuyan/lyj/YAM/YAM_data/audited/yam_lerobot_v001
+EXP_NAME=yam_pi05_lora_smoke
+
 XLA_PYTHON_CLIENT_MEM_FRACTION=0.9 \
   "$PYTHON" scripts/train.py "$CONFIG" \
-  --exp-name "$EXP_NAME" --num-train-steps "$STEPS"
+  --data.repo-id="$DATASET" \
+  --exp-name="$EXP_NAME" \
+  --num-train-steps=20 \
+  --batch-size=1 \
+  --num-workers=0
 ```
 
-PyTorch（仅 pi0/pi0.5）使用 `scripts/train_pytorch.py` 或 `torchrun`；JAX 是正式 OpenArm 主路径。配置注册表在 `src/openpi/training/config.py`，训练输出由 `checkpoint_base_dir/config/exp_name/step` 组织。
-
-## 参数修改规则
-
-| 参数 | 修改位置 | 说明 |
-|---|---|---|
-| `repo_id`、`train_episodes`、transform、初始化权重 | `src/openpi/training/config.py` 的新配置 | 数据版本或 split 改变就新建 config/实验名并重算 norm |
-| `batch_size`、`num_workers`、`num_train_steps`、`log_interval` | config 或 `scripts/train.py` CLI | 多节点时由 [02](02_installation_and_environment.md#可调参数) 的 launcher 统一传入 |
-| `save_interval`、`keep_period`、学习率/冻结规则 | config | 续训不能覆盖旧实验目录 |
-| `model.action_horizon`、`action_dim` | model config + 数据/客户端合同 | OpenArm 正式值为 `50`、机器人输出 `16D`；改动后必须重跑 loader、server smoke 和客户端检查 |
-
-不要直接修改 `pi05_openarm_kai0_awbc_v1` 作为试验；复制为新配置并记录初始化 checkpoint、数据、seed 和所有覆盖参数。
-
-## 正式 K-Policy 配置
-
-`pi05_openarm_kai0_awbc_v1` 是当前 KAI0/AWBC 正式配置：P05 base 初始化、OpenArm 16D、全局 batch 128、80k steps、每 5k 保存、TorchCodec 尾帧显式 PyAV fallback、训练 episode `0:1719`。它不能与历史 `pi05_openarms_dual_awbc_v1` 混称。
-
-远端四卡 smoke、正式 80k、coordinator、tmux 和 resume 命令统一由 [02 · 服务器与环境](02_installation_and_environment.md) 的 5.4 节持有；不要在本页复制另一套 host/batch 参数。正式任务前先用相同 host/batch 做 20-step、`--num-workers 0` smoke；继续训练使用 `--mode resume`，不要只重启一个节点，也不要覆盖已有进度。
-
-## KAI0 数据与 scorer gate
-
-KAI0 的 HQ-Stage、Site-Score、TDA-S、K-Data 和 AWBC 二值化是独立阶段；具体数据命名、当前结果和下一批 HIL 只看 `docs/06_openarm_research_plan.md`。训练前至少通过：
-
-- `scripts/audit_openarm_kai0_training_data.py`：来源、二值标签、真实 loader 样本和尾帧。
-- Stage score 的 episode/有限值/范围审计；失败不得进入 K-Data。
-- 混合 HQ/Site/TDA 的 norm 和 loader smoke；不能只抽 HQ 开头样本。
-
-普通 BC 对照必须使用相同来源/样本预算，只去掉 Advantage prompt；不能把它和 KAI0 或 Evo-RL 结果合并归因。
-
-## 离线 checkpoint 评估
-
-这一步只作离线动作误差和 chunk 连续性参考，不等价于真机成功率。脚本中的 `rollout_drift` 是预留字段，当前不作为 gate；先通过 checkpoint gate，再在固定 holdout 上运行：
+smoke 通过后再用保守默认值启动正式训练；长任务使用 Slurm/tmux：
 
 ```bash
-# HQ 原始数据的固定 holdout；K-Data 的 1719 集不是 999:1199 的 HQ holdout。
-DATASET="$DATA_ROOT/high_quality_folding"
-OUTPUT_ROOT=replace_with_new_platform_output_root
-CHECKPOINT="$OUTPUT_ROOT/CONFIG/EXP_NAME/STEP"
-"$PYTHON" scripts/evaluate_checkpoint.py \
-  --config pi05_openarm_kai0_awbc_v1 \
-  --checkpoint-dir "$CHECKPOINT" \
-  --dataset "$DATASET" \
-  --val-split "999:1199" \
-  --output "$OUTPUT_ROOT/eval/EXP_NAME_STEP" \
-  --verbose
+XLA_PYTHON_CLIENT_MEM_FRACTION=0.9 \
+  "$PYTHON" scripts/train.py pi05_yam_lora \
+  --data.repo-id="$DATASET" \
+  --exp-name=yam_pi05_lora_v001 \
+  --num-train-steps=30000
 ```
 
-报告至少保存 config、checkpoint、数据版本、val split 和 git commit；真机结论仍以 [05 · 推理与 rollout](05_inference_and_rollout.md) 的固定协议为准。
+若使用 PyTorch 训练入口，仍必须使用同一个 YAM config、数据版本和 norm stats；JAX/PyTorch 不能共用未记录的输出目录。续训只从完整 checkpoint resume，不能覆盖旧实验。
 
-## checkpoint 验收
+## 参数和实验隔离
 
-一个数字目录存在不等于 checkpoint 完整。部署前检查 Orbax `_CHECKPOINT_METADATA`、`params/_METADATA`、config、norm stats 和训练日志；再跑 policy server 的真实 WebSocket smoke，并把 checkpoint 路径绑定到输出报告。
+| 参数 | 入口 | 规则 |
+|---|---|---|
+| 数据路径/split | `--data.repo-id` 或独立配置 | 变化就新建数据版本并重算 norm |
+| LoRA/全量 | config 的 model/freeze filter | 首轮优先 `pi05_yam_lora`，不要混用 checkpoint |
+| batch/workers | config 或 CLI | 先以 GPU smoke 测定，OOM 后降低 batch/worker |
+| horizon/action dim | model config + YAM contract | 当前为 50/32 内部、14D 外部；不能随意改一端 |
+| 保存/步数 | config 或 CLI | 输出目录包含 config、实验名和 step |
 
-## 结果记录
+每个实验至少记录 git commit、config、repo id、数据版本、split、norm 路径、base checkpoint、LoRA 设置、batch、workers、step 和 seed。普通 SFT、不同 LoRA 设置和后续评估必须使用独立实验名，避免结果无法归因。
 
-训练 loss 不是真机成功率。每个候选至少记录固定 prompt、checkpoint、数据版本、训练步数、rollout 次数、完整折叠成功率、正确对角线率、重复甩平率、已展开后进入折叠率、接管次数和恢复成功率。结果写入 `docs/07_change_log.md` 或研究计划的对应状态段，不在多个文档复制。
+## Checkpoint gate
+
+训练日志显示完成不代表 checkpoint 可用。部署或评估前检查：
+
+- step 目录的 Orbax 参数元数据完整；
+- `assets/yam/norm_stats.json` 存在且与 config/data 绑定；
+- config、git commit、数据版本和训练日志可追溯；
+- 用 [05 · 训练后 policy smoke](05_inference_and_rollout.md) 验证输出为有限 `(50,14)`。
+
+半写入数字目录、缺少 norm 或只有单独 `params/` 的目录不得部署。
+
+## 评估与结果记录
+
+离线 loss、动作误差和 chunk 连续性只能作为诊断，不能直接等同于 YAM 真机成功率。固定 holdout 上比较时必须保持数据版本、prompt、horizon 和 norm 一致；真机或服务结论另行记录 checkpoint、版本和 smoke 证据。结果原因写入 `docs/07_change_log.md`，不把历史 OpenArm KAI0 计划混入当前 YAM 结论。
+
+当前评估入口示例：
+
+```bash
+"$PYTHON" scripts/evaluate_checkpoint.py \
+  --config=pi05_yam_lora \
+  --checkpoint-dir=/path/to/checkpoint \
+  --dataset="$DATASET" \
+  --val-split=80:100
+```
+
+该入口只做数据/动作合同、首步误差和 chunk 连续性的离线诊断；DAgger 只有在纠正数据、采集协议和安全 rollout 均单独留痕后才进入第二阶段。

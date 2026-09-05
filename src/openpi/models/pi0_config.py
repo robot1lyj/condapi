@@ -106,9 +106,3 @@ class Pi0Config(_model.BaseModelConfig):
         if not filters:
             return nnx.Nothing
         return nnx.All(*filters)
-
-
-@dataclasses.dataclass(frozen=True)
-class AdvantageEstimatorConfig(Pi0Config):
-    loss_action_weight: float = 1.0
-    loss_value_weight: float = 1.0

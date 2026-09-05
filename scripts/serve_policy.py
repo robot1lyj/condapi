@@ -55,9 +55,6 @@ class Args:
     # If provided, will be used in case the "prompt" key is not present in the data, or if the model doesn't have a default
     # prompt.
     default_prompt: str | None = None
-    # If provided, always replaces a client-supplied prompt. Leave unset for legacy/default behavior.
-    force_prompt: str | None = None
-
     # Port to serve the policy on.
     port: int = 8000
     # Record the policy's behavior for debugging.
@@ -113,7 +110,6 @@ def create_default_policy(
     env: EnvMode,
     *,
     default_prompt: str | None = None,
-    force_prompt: str | None = None,
     policy_repo_id: str | None = None,
 ) -> _policy.Policy:
     """Create a default policy for the given environment."""
@@ -123,7 +119,6 @@ def create_default_policy(
             train_config,
             checkpoint.dir,
             default_prompt=default_prompt,
-            force_prompt=force_prompt,
         )
     raise ValueError(f"Unsupported environment mode: {env}")
 
@@ -137,13 +132,11 @@ def create_policy(args: Args) -> _policy.Policy:
                 train_config,
                 args.policy.dir,
                 default_prompt=args.default_prompt,
-                force_prompt=args.force_prompt,
             )
         case Default():
             return create_default_policy(
                 args.env,
                 default_prompt=args.default_prompt,
-                force_prompt=args.force_prompt,
                 policy_repo_id=args.policy_repo_id,
             )
 

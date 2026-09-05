@@ -141,7 +141,6 @@ def build_datasets(config: _config.TrainConfig):
         config,
         framework="pytorch",
         shuffle=True,
-        skip_norm_stats=config.skip_norm_stats,
     )
     return data_loader, data_loader.data_config()
 
@@ -377,11 +376,6 @@ def train_loop(config: _config.TrainConfig):
     # Pass the original batch size to data loader - it will handle DDP splitting internally
     loader, data_config = build_datasets(config)
 
-    if config.advantage_estimator:
-        if not isinstance(config.model, openpi.models.pi0_config.AdvantageEstimatorConfig):
-            raise TypeError("config.model must be AdvantageEstimatorConfig when advantage_estimator=True")
-        logging.info("Training mode: Stage Advantage estimator")
-
     # Log sample images to wandb on first batch
     if is_main and config.wandb_enabled and not resuming:
         # Create a separate data loader for sample batch to avoid consuming the main loader
@@ -389,7 +383,6 @@ def train_loop(config: _config.TrainConfig):
             config,
             framework="pytorch",
             shuffle=False,
-            skip_norm_stats=config.skip_norm_stats,
         )
         sample_batch = next(iter(sample_data_loader))
         # Convert observation and actions to torch tensors
@@ -435,10 +428,7 @@ def train_loop(config: _config.TrainConfig):
         # Update dtype to match pytorch_training_precision
         object.__setattr__(model_cfg, "dtype", config.pytorch_training_precision)
 
-    if config.advantage_estimator:
-        model = openpi.models_pytorch.pi0_pytorch.AdvantageEstimator(model_cfg).to(device)
-    else:
-        model = openpi.models_pytorch.pi0_pytorch.PI0Pytorch(model_cfg).to(device)
+    model = openpi.models_pytorch.pi0_pytorch.PI0Pytorch(model_cfg).to(device)
 
     if config.pytorch_gradient_checkpointing and hasattr(model, "gradient_checkpointing_enable"):
         enable_gradient_checkpointing = True
@@ -481,7 +471,7 @@ def train_loop(config: _config.TrainConfig):
         safetensors.torch.load_model(
             (model.module if isinstance(model, torch.nn.parallel.DistributedDataParallel) else model),
             model_path,
-            strict=not config.advantage_estimator,
+            strict=True,
         )
         logging.info(f"Loaded PyTorch weights from {config.pytorch_weight_path}")
 

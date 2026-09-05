@@ -1,4 +1,4 @@
-python=3.11.13
+python=3.12
 pip=25.1
 git=2.45
 ffmpeg

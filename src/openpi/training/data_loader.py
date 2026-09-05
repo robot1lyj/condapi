@@ -8,12 +8,17 @@ from typing import Literal, Protocol, SupportsIndex, TypeVar
 
 import jax
 import jax.numpy as jnp
-import lerobot.common.datasets.lerobot_dataset as lerobot_dataset
 import numpy as np
 import torch
 
+try:
+    import lerobot.datasets.lerobot_dataset as lerobot_dataset
+except ModuleNotFoundError:
+    # LeRobot <=0.4 used the ``common.datasets`` namespace.  YAM exports use
+    # the v3.0 layout from LeRobot 0.5.x, whose public path is ``datasets``.
+    import lerobot.common.datasets.lerobot_dataset as lerobot_dataset
+
 import openpi.models.model as _model
-from openpi.training.advantage_dataset import AdvantageLeRobotDataset
 import openpi.training.config as _config
 from openpi.training.droid_rlds_dataset import DroidRldsDataset
 import openpi.transforms as _transforms
@@ -217,6 +222,13 @@ def _lerobot_dataset_kwargs(data_config: _config.DataConfig) -> dict:
     return dataset_kwargs
 
 
+def _task_mapping(tasks) -> dict[int, str]:
+    """Normalize LeRobot v2/v3 task metadata to the transform's dict API."""
+    if hasattr(tasks, "iterrows"):
+        return {int(row["task_index"]): str(task) for task, row in tasks.iterrows()}
+    return tasks
+
+
 def create_torch_dataset(
     data_config: _config.DataConfig, action_horizon: int, model_config: _model.BaseModelConfig
 ) -> Dataset:
@@ -240,37 +252,7 @@ def create_torch_dataset(
         dataset = TorchCodecTailFallbackDataset(dataset)
 
     if data_config.prompt_from_task:
-        dataset = TransformedDataset(dataset, [_transforms.PromptFromLeRobotTask(dataset_meta.tasks)])
-
-    return dataset
-
-
-def create_advantage_torch_dataset(
-    data_config: _config.DataConfig,
-    action_horizon: int,
-    model_config: _model.BaseModelConfig,
-) -> Dataset:
-    """Create a paired-frame dataset for Stage Advantage estimator training."""
-    del model_config
-    repo_id = data_config.repo_id
-    if repo_id is None:
-        raise ValueError("Repo ID is not set. Cannot create dataset.")
-    if repo_id == "fake":
-        raise ValueError("Stage Advantage training requires a real LeRobot dataset with stage_progress_gt.")
-
-    dataset_meta = lerobot_dataset.LeRobotDatasetMetadata(repo_id)
-    dataset_kwargs = _lerobot_dataset_kwargs(data_config)
-
-    dataset = AdvantageLeRobotDataset(
-        repo_id,
-        delta_timestamps={
-            key: [t / dataset_meta.fps for t in range(action_horizon)] for key in data_config.action_sequence_keys
-        },
-        **dataset_kwargs,
-    )
-
-    if data_config.prompt_from_task:
-        dataset = TransformedDataset(dataset, [_transforms.PromptFromLeRobotTask(dataset_meta.tasks)])
+        dataset = TransformedDataset(dataset, [_transforms.PromptFromLeRobotTask(_task_mapping(dataset_meta.tasks))])
 
     return dataset
 
@@ -389,7 +371,6 @@ def create_data_loader(
         seed=config.seed,
         skip_norm_stats=skip_norm_stats,
         framework=framework,
-        config=config,
     )
 
 
@@ -406,7 +387,6 @@ def create_torch_data_loader(
     num_workers: int = 0,
     seed: int = 0,
     framework: str = "jax",
-    config: _config.TrainConfig | None = None,
 ) -> DataLoader[tuple[_model.Observation, _model.Actions]]:
     """Create a data loader for training.
 
@@ -425,10 +405,7 @@ def create_torch_data_loader(
             execute in the main process.
         seed: The seed to use for shuffling the data.
     """
-    if config is not None and getattr(config, "advantage_estimator", False):
-        dataset = create_advantage_torch_dataset(data_config, action_horizon, model_config)
-    else:
-        dataset = create_torch_dataset(data_config, action_horizon, model_config)
+    dataset = create_torch_dataset(data_config, action_horizon, model_config)
     dataset = transform_dataset(dataset, data_config, skip_norm_stats=skip_norm_stats)
 
     # Use TorchDataLoader for both frameworks

@@ -109,7 +109,7 @@ export CONDA_PKGS_DIRS="$CONDA_CACHE_DIR"
 export XDG_CACHE_HOME="$XDG_CACHE_DIR"
 export PIP_CACHE_DIR="$PIP_CACHE_DIR"
 export PIP_DISABLE_PIP_VERSION_CHECK=1
-export PIP_INDEX_URL="${OPENPI_PIP_INDEX_URL:-https://pypi.org/simple}"
+export PIP_INDEX_URL="${OPENPI_PIP_INDEX_URL:-https://mirrors.cloud.tencent.com/pypi/simple}"
 CONDA_SOLVER="${OPENPI_CONDA_SOLVER:-libmamba}"
 
 echo "[info] output dir: $OUT_DIR"
@@ -209,7 +209,7 @@ Install on the training server with:
   bash scripts/conda/install_offline_bundle.sh \\
     --bundle-dir <bundle_dir> \\
     --openpi-dir <server_openpi_repo> \\
-    --env-name pi-conda
+    --env-name condapi-yam
 EOF
 
 echo "[ok] bundle created:"

@@ -21,8 +21,8 @@ import openpi.models.tokenizer as _tokenizer
 import openpi.policies.aloha_policy as aloha_policy
 import openpi.policies.droid_policy as droid_policy
 import openpi.policies.libero_policy as libero_policy
-import openpi.policies.openarm_policy as openarm_policy
 import openpi.policies.piper_policy as piper_policy
+import openpi.policies.yam_policy as yam_policy
 import openpi.shared.download as _download
 import openpi.shared.normalize as _normalize
 import openpi.training.droid_rlds_dataset as droid_rlds_dataset
@@ -398,9 +398,6 @@ class LeRobotPiperDataConfig(DataConfigFactory):
         default_factory=lambda: _transforms.make_bool_mask(6, -1, 6, -1)
     )
     use_delta_joint_actions: bool = True
-    # "relative": UMI-style, all actions relative to current state (matches π0.5 pretraining)
-    # "chained_delta": each action = diff from previous action (error accumulates)
-    action_style: str = "relative"
     swap_left_right: bool = False
     default_prompt: str | None = None
 
@@ -440,15 +437,9 @@ class LeRobotPiperDataConfig(DataConfigFactory):
         )
 
         if self.use_delta_joint_actions and self.delta_action_mask is not None:
-            if self.action_style == "chained_delta":
-                action_cls = _transforms.ChainedDeltaActions
-                action_out_cls = _transforms.AbsoluteChainedDeltaActions
-            else:
-                action_cls = _transforms.DeltaActions  # UMI-style relative
-                action_out_cls = _transforms.AbsoluteActions
             data_transforms = data_transforms.push(
-                inputs=[action_cls(self.delta_action_mask)],
-                outputs=[action_out_cls(self.delta_action_mask)],
+                inputs=[_transforms.DeltaActions(self.delta_action_mask)],
+                outputs=[_transforms.AbsoluteActions(self.delta_action_mask)],
             )
 
         model_transforms = ModelTransformFactory(default_prompt=self.default_prompt)(model_config)
@@ -463,69 +454,44 @@ class LeRobotPiperDataConfig(DataConfigFactory):
 
 
 @dataclasses.dataclass(frozen=True)
-class LeRobotOpenArmDataConfig(DataConfigFactory):
-    """
-    Data config for OpenArm LeRobot datasets using the HQ 16D state/action contract.
-    This intentionally does not reuse Piper transforms or Piper left/right swap logic.
+class LeRobotYamDataConfig(DataConfigFactory):
+    """Data config for bimanual YAM LeRobot datasets.
+
+    YAM stores one seven-value block per arm: six joints followed by one gripper
+    value.  The default two-arm contract is therefore 14D in the order
+    ``[left arm, right arm]``.  This config owns the YAM transform and keeps
+    the raw LeRobot feature names at the policy boundary.
     """
 
-    base_image_key: str = "observation.images.base"
-    left_wrist_image_key: str = "observation.images.left_wrist"
-    right_wrist_image_key: str = "observation.images.right_wrist"
+    base_image_key: str = "observation.images.top_rgb"
+    left_wrist_image_key: str = "observation.images.left_rgb"
+    right_wrist_image_key: str = "observation.images.right_rgb"
     state_key: str = "observation.state"
     action_key: str = "action"
     prompt_key: str = "prompt"
     action_sequence_keys: Sequence[str] = ("action",)
-    delta_action_mask: tuple[bool, ...] | None = dataclasses.field(
-        default_factory=lambda: _transforms.make_bool_mask(7, -1, 7, -1)
-    )
+    num_arms: int = 2
     use_delta_joint_actions: bool = True
-    # "relative": UMI-style, all actions relative to current state (matches π0.5 pretraining)
-    # "chained_delta": each action = diff from previous action (error accumulates)
-    action_style: str = "relative"
+    assets: AssetsConfig = dataclasses.field(default_factory=lambda: AssetsConfig(asset_id="yam"))
     default_prompt: str | None = None
-    include_advantage_fields: bool = False
-    acp_indicator_key: str | None = None
-    acp_indicator_dropout_prob: float = 0.0
+
+    def __post_init__(self) -> None:
+        if self.num_arms not in (1, 2):
+            raise ValueError(f"YAM supports one or two arms, got num_arms={self.num_arms}.")
 
     @override
     def create(self, assets_dirs: pathlib.Path, model_config: _model.BaseModelConfig) -> DataConfig:
-        if model_config.action_dim < openarm_policy.OPENARM_STATE_ACTION_DIM:
-            raise ValueError(
-                f"OpenArm requires model action_dim >= {openarm_policy.OPENARM_STATE_ACTION_DIM}, "
-                f"got {model_config.action_dim}."
-            )
+        action_dim = yam_policy.YAM_ARM_DIM * self.num_arms
+        if model_config.action_dim < action_dim:
+            raise ValueError(f"YAM requires model action_dim >= {action_dim}, got {model_config.action_dim}.")
 
-        repack_structure = {
-            self.base_image_key: self.base_image_key,
-            self.left_wrist_image_key: self.left_wrist_image_key,
-            self.right_wrist_image_key: self.right_wrist_image_key,
-            self.state_key: self.state_key,
-            self.action_key: self.action_key,
-            self.prompt_key: self.prompt_key,
-        }
-        if self.include_advantage_fields:
-            repack_structure.update(
-                {
-                    f"his_-100_{self.base_image_key}": f"his_-100_{self.base_image_key}",
-                    f"his_-100_{self.left_wrist_image_key}": f"his_-100_{self.left_wrist_image_key}",
-                    f"his_-100_{self.right_wrist_image_key}": f"his_-100_{self.right_wrist_image_key}",
-                    "episode_length": "episode_length",
-                    "frame_index": "frame_index",
-                    "episode_index": "episode_index",
-                    "stage_progress_gt": "stage_progress_gt",
-                    "progress": "progress",
-                }
-            )
-        if self.acp_indicator_key is not None:
-            repack_structure[self.acp_indicator_key] = self.acp_indicator_key
-
-        repack_transform = _transforms.Group(inputs=[_transforms.RepackTransform(repack_structure)])
-
+        # Keep the dataset feature names at the policy boundary.  YAM inference
+        # observations use the same names as the LeRobot export.
         data_transforms = _transforms.Group(
             inputs=[
-                openarm_policy.OpenArmInputs(
+                yam_policy.YamInputs(
                     model_type=model_config.model_type,
+                    action_dim=action_dim,
                     base_image_key=self.base_image_key,
                     left_wrist_image_key=self.left_wrist_image_key,
                     right_wrist_image_key=self.right_wrist_image_key,
@@ -534,37 +500,20 @@ class LeRobotOpenArmDataConfig(DataConfigFactory):
                     prompt_key=self.prompt_key,
                 )
             ],
-            outputs=[openarm_policy.OpenArmOutputs()],
+            outputs=[yam_policy.YamOutputs(action_dim=action_dim)],
         )
-
-        if self.use_delta_joint_actions and self.delta_action_mask is not None:
-            if self.action_style == "chained_delta":
-                action_cls = _transforms.ChainedDeltaActions
-                action_out_cls = _transforms.AbsoluteChainedDeltaActions
-            else:
-                action_cls = _transforms.DeltaActions
-                action_out_cls = _transforms.AbsoluteActions
+        if self.use_delta_joint_actions:
+            # Each arm contributes six relative joint targets and one absolute
+            # gripper target.  Repeat the mask once per arm.
+            mask = _transforms.make_bool_mask(*sum(((6, -1) for _ in range(self.num_arms)), ()))
             data_transforms = data_transforms.push(
-                inputs=[action_cls(self.delta_action_mask)],
-                outputs=[action_out_cls(self.delta_action_mask)],
+                inputs=[_transforms.DeltaActions(mask)],
+                outputs=[_transforms.AbsoluteActions(mask)],
             )
 
         model_transforms = ModelTransformFactory(default_prompt=self.default_prompt)(model_config)
-        if self.acp_indicator_key is not None:
-            model_inputs = list(model_transforms.inputs)
-            model_inputs.insert(
-                1,
-                _transforms.ACPPromptTransform(
-                    indicator_key=self.acp_indicator_key,
-                    prompt_key="prompt",
-                    indicator_dropout_prob=self.acp_indicator_dropout_prob,
-                ),
-            )
-            model_transforms = _transforms.Group(inputs=tuple(model_inputs), outputs=model_transforms.outputs)
-
         return dataclasses.replace(
             self.create_base_config(assets_dirs, model_config),
-            repack_transforms=repack_transform,
             data_transforms=data_transforms,
             model_transforms=model_transforms,
             action_sequence_keys=self.action_sequence_keys,
@@ -703,11 +652,6 @@ class TrainConfig:
     # If true, PyTorch models enable gradient checkpointing to reduce activation memory.
     pytorch_gradient_checkpointing: bool = True
 
-    # If true, train the PyTorch Stage Advantage estimator instead of the policy head.
-    advantage_estimator: bool = False
-    # If true, bypass OpenPI norm stats. KAI0 Stage Advantage training uses raw labels and skips stats.
-    skip_norm_stats: bool = False
-
     lr_schedule: _optimizer.LRScheduleConfig = dataclasses.field(default_factory=_optimizer.CosineDecaySchedule)
     optimizer: _optimizer.OptimizerConfig = dataclasses.field(default_factory=_optimizer.AdamW)
     ema_decay: float | None = 0.99
@@ -777,6 +721,26 @@ class TrainConfig:
     def __post_init__(self) -> None:
         if self.resume and self.overwrite:
             raise ValueError("Cannot resume and overwrite at the same time.")
+
+
+YAM_DEFAULT_REPO_ID = "local/yam_bimanual"
+
+
+def _yam_policy_metadata() -> dict[str, Any]:
+    return {
+        "robot": "YAM",
+        "hardware_family": "YAM-ABC-compatible",
+        "num_arms": 2,
+        "robot_action_dim": 14,
+        "model_action_dim": 32,
+        "action_horizon": 50,
+        "action_layout": "[left 6 joints, left gripper, right 6 joints, right gripper]",
+        "image_keys": [
+            "observation.images.top_rgb",
+            "observation.images.left_rgb",
+            "observation.images.right_rgb",
+        ],
+    }
 
 
 # Use `get_config` if you need to get a config by name in your code.
@@ -1014,320 +978,84 @@ _CONFIGS = [
         wandb_enabled=True,
         num_train_steps=20_000,
     ),
+    #
+    # Fine-tuning bimanual YAM.  ``pi05_yam_lora`` is the default low-memory
+    # route for the current server; override ``data.repo_id`` at launch with
+    # the audited local LeRobot dataset.
+    #
     TrainConfig(
-        name="pi0_openarms_dual",
+        name="pi0_yam",
         model=pi0_config.Pi0Config(),
-        data=LeRobotOpenArmDataConfig(
-            repo_id="/share/home/linyongjia/datasets/openarms_folding_v001",
-            base_config=DataConfig(prompt_from_task=True),
-            base_image_key="observation.images.top_rgb",
-            delta_action_mask=_transforms.make_bool_mask(7, -1, 7, -1),
-            use_delta_joint_actions=True,
+        policy_metadata=_yam_policy_metadata(),
+        data=LeRobotYamDataConfig(
+            repo_id=YAM_DEFAULT_REPO_ID,
+            base_config=DataConfig(prompt_from_task=True, action_sequence_keys=("action",)),
+            num_arms=2,
         ),
         weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi0_base/params"),
-        log_interval=20,
-        wandb_enabled=True,
-        num_train_steps=20_000,
-    ),
-    TrainConfig(
-        name="pi05_openarms_dual",
-        model=pi0_config.Pi0Config(pi05=True, discrete_state_input=True),
-        data=LeRobotOpenArmDataConfig(
-            repo_id="/share/home/linyongjia/datasets/openarms_folding_v001",
-            base_config=DataConfig(prompt_from_task=True),
-            base_image_key="observation.images.top_rgb",
-            delta_action_mask=_transforms.make_bool_mask(7, -1, 7, -1),
-            use_delta_joint_actions=True,
-        ),
-        weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi05_base/params"),
-        log_interval=20,
-        wandb_enabled=True,
-        num_train_steps=20_000,
-    ),
-    TrainConfig(
-        name="pi05_openarms_dual_hq",
-        model=pi0_config.Pi0Config(pi05=True, discrete_state_input=True),
-        data=LeRobotOpenArmDataConfig(
-            repo_id="/share/home/linyongjia/datasets/high_quality_folding",
-            base_config=DataConfig(prompt_from_task=True, train_episodes=list(range(999))),
-            base_image_key="observation.images.base",  # HQ dataset uses "base" (not "top_rgb")
-            delta_action_mask=_transforms.make_bool_mask(7, -1, 7, -1),
-            use_delta_joint_actions=True,
-            action_style="relative",  # UMI-style, validated in blog experiments — required for π0.5
-        ),
-        weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi05_base/params"),
-        log_interval=20,
-        wandb_enabled=True,
-        num_train_steps=100_000,  # 100k fine-tuning steps on HQ data (matching blog recipe)
-    ),
-    TrainConfig(
-        name="pi05_openarms_dual_hq_tda_aug",
-        model=pi0_config.Pi0Config(pi05=True, discrete_state_input=True),
-        data=LeRobotOpenArmDataConfig(
-            repo_id="/share/home/linyongjia/datasets/openarm_hq_tda_aug_v1",
-            assets=AssetsConfig(
-                assets_dir="/share/home/linyongjia/datasets",
-                asset_id="openarm_hq_tda_aug_v1",
-            ),
-            base_config=DataConfig(prompt_from_task=True, train_episodes=list(range(2298))),
-            base_image_key="observation.images.base",
-            delta_action_mask=_transforms.make_bool_mask(7, -1, 7, -1),
-            use_delta_joint_actions=True,
-            action_style="relative",
-        ),
-        weight_loader=weight_loaders.CheckpointWeightLoader(
-            "/share/home/linyongjia/output/openpi/pi05_openarms_dual_hq/openarms_hq_bs32/99999/params"
-        ),
-        log_interval=20,
-        wandb_enabled=True,
-        num_train_steps=88_000,
-    ),
-    TrainConfig(
-        name="pi05_openarms_dual_site_align_v1_probe",
-        model=pi0_config.Pi0Config(pi05=True, discrete_state_input=True),
-        data=LeRobotOpenArmDataConfig(
-            repo_id="/share/home/linyongjia/datasets/openarm_site_align_v1_deg",
-            assets=AssetsConfig(
-                assets_dir="/share/home/linyongjia/datasets",
-                asset_id="openarm_site_align_v1_deg",
-            ),
-            base_config=DataConfig(
-                prompt_from_task=True,
-                train_episodes=list(range(141)),
-                lerobot_tolerance_s=0.05,
-            ),
-            base_image_key="observation.images.base",
-            delta_action_mask=_transforms.make_bool_mask(7, -1, 7, -1),
-            use_delta_joint_actions=True,
-            action_style="relative",
-        ),
-        weight_loader=weight_loaders.CheckpointWeightLoader(
-            "/share/home/linyongjia/output/openpi/pi05_openarms_dual_hq/openarms_hq_bs32/99999/params"
-        ),
-        log_interval=20,
-        wandb_enabled=True,
-        num_train_steps=5_000,
-    ),
-    TrainConfig(
-        name="pi05_openarms_dual_site_align_v1_base_10k",
-        model=pi0_config.Pi0Config(pi05=True, discrete_state_input=True),
-        data=LeRobotOpenArmDataConfig(
-            repo_id="/share/home/linyongjia/datasets/openarm_site_align_v1_deg",
-            assets=AssetsConfig(
-                assets_dir="/share/home/linyongjia/datasets",
-                asset_id="openarm_site_align_v1_deg",
-            ),
-            base_config=DataConfig(
-                prompt_from_task=True,
-                train_episodes=list(range(141)),
-                lerobot_tolerance_s=0.05,
-                lerobot_video_backend="torchcodec",
-            ),
-            base_image_key="observation.images.base",
-            delta_action_mask=_transforms.make_bool_mask(7, -1, 7, -1),
-            use_delta_joint_actions=True,
-            action_style="relative",
-        ),
-        weight_loader=weight_loaders.CheckpointWeightLoader(
-            "/share/home/linyongjia/.cache/openpi/openpi-assets/checkpoints/pi05_base/params"
-        ),
-        log_interval=20,
-        wandb_enabled=True,
+        batch_size=4,
         num_workers=2,
-        save_interval=200,
-        keep_period=1000,
-        num_train_steps=10_000,
-    ),
-    TrainConfig(
-        name="pi05_openarms_dual_hq_tda_site_v1",
-        model=pi0_config.Pi0Config(pi05=True, discrete_state_input=True),
-        data=LeRobotOpenArmDataConfig(
-            repo_id="/share/home/linyongjia/datasets/openarm_hq_tda_site_v1",
-            assets=AssetsConfig(
-                assets_dir="/share/home/linyongjia/datasets",
-                asset_id="openarm_hq_tda_site_v1",
-            ),
-            base_config=DataConfig(prompt_from_task=True),
-            base_image_key="observation.images.base",
-            delta_action_mask=_transforms.make_bool_mask(7, -1, 7, -1),
-            use_delta_joint_actions=True,
-            action_style="relative",
-        ),
-        weight_loader=weight_loaders.CheckpointWeightLoader(
-            "/share/home/linyongjia/output/openpi/pi05_openarms_dual_hq/openarms_hq_bs32/99999/params"
-        ),
-        log_interval=20,
-        wandb_enabled=True,
-        num_train_steps=88_000,
-    ),
-    TrainConfig(
-        name="pi05_openarms_dual_awbc_v1",
-        model=pi0_config.Pi0Config(pi05=True, discrete_state_input=True),
-        data=LeRobotOpenArmDataConfig(
-            repo_id="/share/home/linyongjia/datasets/openarm_awbc_v1",
-            assets=AssetsConfig(
-                assets_dir="/share/home/linyongjia/datasets",
-                asset_id="openarm_awbc_v1",
-            ),
-            base_config=DataConfig(prompt_from_task=True),
-            base_image_key="observation.images.base",
-            delta_action_mask=_transforms.make_bool_mask(7, -1, 7, -1),
-            use_delta_joint_actions=True,
-            action_style="relative",
-        ),
-        weight_loader=weight_loaders.CheckpointWeightLoader(
-            "/share/home/linyongjia/output/openpi/pi05_openarms_dual_hq/openarms_hq_bs32/99999/params"
-        ),
-        log_interval=20,
-        wandb_enabled=True,
-        num_train_steps=88_000,
-    ),
-    TrainConfig(
-        name="pi05_openarm_kai0_awbc_v1",
-        model=pi0_config.Pi0Config(pi05=True, discrete_state_input=True),
-        policy_metadata={
-            "model_action_dim": 32,
-            "robot_action_dim": 16,
-            "output_action_dim": 16,
-            "control_hz": 30,
-            "use_delta_joint_actions": True,
-            "returned_actions": "actions are output-transform robot actions with shape [50, 16]",
-            "model_internal_actions": "state/actions are zero-padded to 32 inside the pi0.5 model and RTC path",
-            "action_unit": "degrees",
-            "gripper_unit": "hq_motor_degrees",
-            "gripper_open": 0.0,
-            "gripper_closed": -66.0,
-            "task": "Fold the T-shirt properly",
-        },
-        data=LeRobotOpenArmDataConfig(
-            repo_id="/share/home/linyongjia/datasets/openarm_kai0_awbc_v1",
-            assets=AssetsConfig(
-                assets_dir="/share/home/linyongjia/datasets",
-                asset_id="openarm_kai0_awbc_v1",
-            ),
-            base_config=DataConfig(
-                prompt_from_task=True,
-                train_episodes=list(range(1719)),
-                lerobot_tolerance_s=0.05,
-                lerobot_video_backend="torchcodec",
-                lerobot_torchcodec_tail_fallback=True,
-            ),
-            base_image_key="observation.images.base",
-            delta_action_mask=_transforms.make_bool_mask(7, -1, 7, -1),
-            use_delta_joint_actions=True,
-            action_style="relative",
-        ),
-        weight_loader=weight_loaders.CheckpointWeightLoader(
-            "/share/home/linyongjia/.cache/openpi/openpi-assets/checkpoints/pi05_base/params"
-        ),
-        log_interval=20,
-        wandb_enabled=True,
-        num_workers=8,
-        save_interval=5_000,
+        save_interval=1_000,
         keep_period=5_000,
-        num_train_steps=80_000,
-        batch_size=128,
+        num_train_steps=30_000,
     ),
     TrainConfig(
-        name="pi05_openarms_dual_evo_acp_hil_v1_probe",
-        model=pi0_config.Pi0Config(pi05=True, discrete_state_input=True),
-        data=LeRobotOpenArmDataConfig(
-            repo_id="/share/home/linyongjia/datasets/openarm_hil_evo_v1",
-            assets=AssetsConfig(
-                assets_dir="/share/home/linyongjia/datasets",
-                asset_id="openarm_hil_evo_v1",
-            ),
-            base_config=DataConfig(
-                prompt_from_task=True,
-                lerobot_tolerance_s=0.05,
-                lerobot_video_backend="torchcodec",
-            ),
-            base_image_key="observation.images.base",
-            delta_action_mask=_transforms.make_bool_mask(7, -1, 7, -1),
-            use_delta_joint_actions=True,
-            action_style="relative",
-            acp_indicator_key="complementary_info.acp_indicator",
-            acp_indicator_dropout_prob=0.0,
+        name="pi0_yam_lora",
+        model=pi0_config.Pi0Config(paligemma_variant="gemma_2b_lora", action_expert_variant="gemma_300m_lora"),
+        policy_metadata=_yam_policy_metadata(),
+        data=LeRobotYamDataConfig(
+            repo_id=YAM_DEFAULT_REPO_ID,
+            base_config=DataConfig(prompt_from_task=True, action_sequence_keys=("action",)),
+            num_arms=2,
         ),
-        weight_loader=weight_loaders.CheckpointWeightLoader(
-            "/share/home/linyongjia/output/openpi/pi05_openarms_dual_site_align_v1_probe/"
-            "openarm_site_deg_151e_2gpu_5k_hq99999_20260707/4999/params"
-        ),
-        log_interval=20,
-        wandb_enabled=True,
+        weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi0_base/params"),
+        freeze_filter=pi0_config.Pi0Config(
+            paligemma_variant="gemma_2b_lora", action_expert_variant="gemma_300m_lora"
+        ).get_freeze_filter(),
+        ema_decay=None,
+        batch_size=4,
         num_workers=2,
-        save_interval=200,
-        keep_period=1000,
-        num_train_steps=5_000,
+        save_interval=1_000,
+        keep_period=5_000,
+        num_train_steps=30_000,
     ),
     TrainConfig(
-        name="ADVANTAGE_TORCH_OPENARM_FLATTEN_FOLD",
-        advantage_estimator=True,
-        skip_norm_stats=True,
-        model=pi0_config.AdvantageEstimatorConfig(
-            pi05=True,
-            discrete_state_input=False,
-            loss_action_weight=0.0,
-            loss_value_weight=1.0,
+        name="pi05_yam",
+        model=pi0_config.Pi0Config(pi05=True),
+        policy_metadata=_yam_policy_metadata(),
+        data=LeRobotYamDataConfig(
+            repo_id=YAM_DEFAULT_REPO_ID,
+            base_config=DataConfig(prompt_from_task=True, action_sequence_keys=("action",)),
+            num_arms=2,
         ),
-        data=LeRobotOpenArmDataConfig(
-            repo_id="/share/home/linyongjia/data/high_quality_folding_v2p1_stage_train180",
-            base_config=DataConfig(prompt_from_task=True, lerobot_tolerance_s=0.05),
-            base_image_key="observation.images.base",
-            delta_action_mask=_transforms.make_bool_mask(7, -1, 7, -1),
-            use_delta_joint_actions=True,
-            action_style="relative",
-            include_advantage_fields=True,
-        ),
-        log_interval=20,
-        save_interval=1000,
-        keep_period=5000,
-        wandb_enabled=True,
-        num_train_steps=20_000,
-        num_workers=4,
-        batch_size=16,
-    ),
-    TrainConfig(
-        name="ADVANTAGE_TORCH_OPENARM_SITE_FOLD",
-        advantage_estimator=True,
-        skip_norm_stats=True,
-        model=pi0_config.AdvantageEstimatorConfig(
-            pi05=True,
-            discrete_state_input=False,
-            loss_action_weight=0.0,
-            loss_value_weight=1.0,
-        ),
-        data=LeRobotOpenArmDataConfig(
-            repo_id="/share/home/linyongjia/data/openarm_stage_mix_site_v1",
-            base_config=DataConfig(
-                prompt_from_task=True,
-                train_episodes=list(range(600)),
-                lerobot_tolerance_s=0.05,
-            ),
-            base_image_key="observation.images.base",
-            delta_action_mask=_transforms.make_bool_mask(7, -1, 7, -1),
-            use_delta_joint_actions=True,
-            action_style="relative",
-            include_advantage_fields=True,
-        ),
-        pytorch_weight_path=(
-            "/share/home/linyongjia/output/openpi/ADVANTAGE_TORCH_OPENARM_FLATTEN_FOLD/"
-            "openarm_stage_v1_train180_bs32_no_ckpt_10k_20260701/10000"
-        ),
-        pytorch_gradient_checkpointing=False,
-        lr_schedule=_optimizer.CosineDecaySchedule(
-            warmup_steps=100,
-            peak_lr=5e-6,
-            decay_steps=5_000,
-            decay_lr=5e-7,
-        ),
-        log_interval=20,
-        save_interval=500,
-        keep_period=500,
-        wandb_enabled=True,
-        num_train_steps=5_000,
+        weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi05_base/params"),
+        batch_size=4,
         num_workers=2,
-        batch_size=32,
+        save_interval=1_000,
+        keep_period=5_000,
+        num_train_steps=30_000,
+    ),
+    TrainConfig(
+        name="pi05_yam_lora",
+        model=pi0_config.Pi0Config(
+            pi05=True, paligemma_variant="gemma_2b_lora", action_expert_variant="gemma_300m_lora"
+        ),
+        policy_metadata=_yam_policy_metadata(),
+        data=LeRobotYamDataConfig(
+            repo_id=YAM_DEFAULT_REPO_ID,
+            base_config=DataConfig(prompt_from_task=True, action_sequence_keys=("action",)),
+            num_arms=2,
+        ),
+        weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi05_base/params"),
+        freeze_filter=pi0_config.Pi0Config(
+            pi05=True, paligemma_variant="gemma_2b_lora", action_expert_variant="gemma_300m_lora"
+        ).get_freeze_filter(),
+        ema_decay=None,
+        batch_size=4,
+        num_workers=2,
+        save_interval=1_000,
+        keep_period=5_000,
+        num_train_steps=30_000,
     ),
     #
     # Fine-tuning Aloha configs.

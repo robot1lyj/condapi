@@ -6,10 +6,23 @@
 
 ---
 
+## 2026-09-05
+
+- **本地 Pi0.5 资产补齐**：本地 `condapi-yam`（Python 3.12.12）已安装并通过 `pip check`；Pi0.5 基础
+  checkpoint 已确认缓存完整，PaliGemma tokenizer 已下载并完成实际编码 smoke。当前 `pi05_yam_lora` 不需要
+  额外的 Pi0、Pi0-Fast 或 FAST tokenizer 权重。
+- **本地验证结果**：YAM policy 定向测试 4 项通过；排除大模型实例化后的轻量测试为 `53 passed, 2 deselected`。
+  本地 CPU 执行完整模型测试曾因内存限制以 exit 137 结束，模型创建、GPU smoke 和正式训练留待服务器 GPU 可用后复核。
+
 ## 2026-09-04
 
+- **项目默认路线切换为 YAM**：当前仓库从 OpenArm 默认改为 YAM 双臂（与 YAM-ABC 同硬件配置）训练适配，新增独立 `LeRobotYamDataConfig`、`YamInputs/Outputs` 和 `pi0/pi05_yam(_lora)` 配置；首选 `pi05_yam_lora`，模型内部 32D/50 步，YAM 输出 14D。独立 YAM-ABC-Reproduce 代码未同步进本仓库。
+- **YAM 数据加载兼容**：按 YAM LeRobot 合同接入 `observation.state`、`action` 和三路 RGB 键，新增 LeRobot v3 import/task metadata 兼容；依赖固定到 `lerobot==0.5.1`、`torchcodec`，项目环境改为 Python 3.12 以满足该版本约束。
+- **环境与同步规则更新**：本地安装 Miniconda 和 `condapi-yam` 验证环境；服务器项目环境规划为 `/home/wuyan/.conda/envs/condapi-yam`。每次中文 commit 后同时推送 Gitea `origin` 和 GitHub `github` 互为备份。
+- **污染审计**：发现并按当前项目规则重写了外部 agent 对 `README.md` 的 YAM 改动，恢复被删除的 `docs/00_handoff_index.md`；未发现其他不属于本轮 YAM 适配的未跟踪文件。
+
 - **服务器切换接管**：根据琶洲模方智算平台手册和只读 SSH/Slurm 核验，将当前默认服务器入口更新为 `wuyan@10.18.31.234:22`（登录主机 `rocky-login.hlink.local`），工作台入口为 `http://10.18.31.233:3080/`；用户密码未写入仓库。
-- **新平台目录与环境核实**：确认家目录 `/home/wuyan`、项目工作区 `/home/wuyan/lyj/YAM`、数据目录 `YAM_data`、代码目录 `YAM_code`（当时为空），以及 `module load miniconda3/26.1.1` + `conda activate /home/wuyan/.conda/envs/yam` 的环境入口。该环境 Python 3.13.12，尚未通过 OpenPI Python 3.11/完整依赖 gate。
+- **新平台目录核实**：确认家目录 `/home/wuyan`、项目工作区 `/home/wuyan/lyj/YAM`、数据目录 `YAM_data` 和代码目录 `YAM_code`（当时为空）。
 - **下载任务保护**：接管时 Slurm `1962/abc-download` 在 `gpu001` 运行，`ABC-130k-two-tasks` 数据目录约 23 GB，日志显示视频片段处理到 `3200/19917`、失败数为 0；本次未停止、重启、删除或修改远端任务和数据。
 
 ---

@@ -1,21 +1,22 @@
 # 04 · Mode — Model Operations
 
-用于 OpenArm 数据、监督微调、KAI0/AWBC、Evo-RL、HIL 采集和 rollout 评估。
+用于 YAM LeRobot 数据、Pi0.5 LoRA、乐高分拣和后续 DAgger。
 
-## 先确认
+## 入口
 
-- 任务和 16D/degree/HQ 夹爪合同 → `docs/04_data_contracts.md`
-- 配置、norm、训练、评估 gate → `docs/03_training_and_evaluation.md`
-- 服务、prompt、WebSocket、HIL/RTC rollout → `docs/05_inference_and_rollout.md`
-- 当前 KAI0/Evo-RL/Hybrid 结论和待办 → `docs/06_openarm_research_plan.md`
+- 数据格式、14D 动作和 norm stats → `docs/04_data_contracts.md`
+- 训练、评估和 checkpoint gate → `docs/03_training_and_evaluation.md`
+- 服务与安全 rollout → `docs/05_inference_and_rollout.md`
+- 环境与服务器 → `docs/02_installation_and_environment.md`
 
-## 实验纪律
+## 操作边界
 
-- 区分 implemented、planned、historical；计划中的 HIL 或 E-Value 不能写成已完成。
-- 新数据必须有独立版本、元数据和审计结果；不要覆盖原始数据或复用不同单位合同的 norm stats。
-- SFT、KAI0 和 Evo-RL 保持独立实验名、初始化 checkpoint、数据集和评价协议，才能归因。
-- 低成功率策略优先采集失败前缀、接管动作和恢复结尾；不能只增加普通成功示范后宣称阶段问题已解决。
+- 先审计数据集版本、任务 prompt、三路图像、14D state/action 和 norm stats，再启动训练。
+- 当前第一阶段是乐高分拣监督微调；第二阶段收集并清洗人工纠正数据后再做 DAgger，不能混用数据集和 checkpoint。
+- 使用 `pi05_yam_lora` 或其任务配置；模型内部可为 32D，YAM 输出必须回到真实 14D。
+- 长任务使用 tmux；记录节点、GPU、实际命令、checkpoint 和失败原因。
+- 真机 rollout 先做策略 transform 与 WebSocket smoke，再进入低速、限位和人工急停可用的测试。
 
 ## 结果写回
 
-固定协议下的一组实验只在结束后写一条 `docs/07_change_log.md` 记录；新的稳定阈值、路径或配置写回其唯一 owner，不复制到本 mode。
+稳定默认写入 `kernel.md`；当前训练/数据事实写入 `docs/03` 或 `docs/04`；历史原因写入 `docs/07_change_log.md`。不要恢复 OpenArm/KAI0 研究计划作为当前入口。

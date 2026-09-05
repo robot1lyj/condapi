@@ -4,7 +4,7 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 BUNDLE_DIR=""
 OPENPI_DIR="$ROOT_DIR"
-ENV_NAME="pi-conda"
+ENV_NAME="condapi-yam"
 FORCE=0
 
 usage() {
@@ -18,7 +18,7 @@ Required:
 
 Optional:
   --openpi-dir DIR   Server-side openpi repo to install in editable mode
-  --env-name NAME    Target conda env name, default: pi-conda
+  --env-name NAME    Target conda env name, default: condapi-yam
   --force            Remove any existing env with the same name first
 EOF
 }

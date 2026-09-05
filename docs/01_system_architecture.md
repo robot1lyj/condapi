@@ -1,58 +1,54 @@
 # 01 · 系统架构
 
-## 总体数据流
+## 当前训练数据流
 
 ```text
-LeRobot v2.1 数据
-  -> dataset/config transforms
-  -> Observation(state/images/prompt) + Actions
-  -> pi0/pi0.5（JAX 主路径；pi0/pi0.5 亦支持 PyTorch）
-  -> OpenArm policy wrapper
-  -> 50 步、16D action chunk
-  -> WebSocket server
-  -> openpi-client / ROS runtime
+YAM LeRobot v3 数据
+  -> LeRobotDataset / metadata task 映射
+  -> YamInputs：三路 RGB + 14D state/action -> OpenPI 标准键
+  -> DeltaActions：每臂 6 个关节转相对当前 state，夹爪保持 absolute
+  -> norm stats -> Pi0/Pi0.5 模型输入
+  -> 模型内部 32D action、50 步 horizon
+  -> YamOutputs + AbsoluteActions -> YAM 14D action chunk
 ```
 
-训练与真机之间的边界是 policy server 和客户端：模型内部使用 OpenArm 数据合同；ROS 弧度、归一化夹爪和硬件安全限制只在客户端/运行时边界处理。
-
-## 初始/复位位姿归属
-
-policy server 只推理，不移动机器人，也不定义 OpenArm home pose。当前 OpenArm 配置没有 `reset_pose`；初始位姿、复位速度、夹爪复位和急停由机器人侧 ROS/driver/client `reset()` 实现。旧记录中的 `/home/lyj/openarm_ros2_docker` 在新平台尚未核实，不能作为新服务器默认路径；真机推理脚本是 `scripts/start_real_inference_openpi.sh`、`scripts/start_real_inference_lerobot.sh`，HIL 脚本是 `scripts/start_real_hil_dagger_openpi.sh`；`packages/openpi-client/runtime/runtime.py` 只负责调用环境的 `reset()`，不包含机械臂关节值。
-
-`examples/aloha_real/constants.py:START_ARM_POSE` 和 `examples/aloha_real/real_env.py:DEFAULT_RESET_POSITION` 属于 ALOHA legacy，不得复制为 OpenArm 位姿。改变 OpenArm 位姿时必须同步检查碰撞/限位、相机标定和训练数据起始分布；不要在 policy config 或 `--rtc-metadata` 中伪造位姿。
+当前代码只负责训练数据、模型 transform 和训练后 policy 的通用输出；YAM 机械臂驱动、CAN、GUI、home pose 和控制频率不属于本仓库的训练适配范围。
 
 ## 代码模块
 
 | 层 | 主要位置 | 责任 |
 |---|---|---|
-| 模型 | `src/openpi/models/`、`src/openpi/models_pytorch/` | pi0、pi0.5、视觉/语言 backbone 和 action sampling |
+| 模型 | `src/openpi/models/`、`src/openpi/models_pytorch/` | Pi0、Pi0.5、视觉/语言 backbone 和 action sampling |
 | 配置/训练 | `src/openpi/training/`、`scripts/train.py`、`scripts/train_pytorch.py` | `TrainConfig`、数据 loader、优化器、checkpoint |
-| 数据变换 | `src/openpi/transforms.py`、`src/openpi/training/config.py` | repack、机器人 transform、prompt/模型输入 |
-| 策略 | `src/openpi/policies/` | 将模型输出映射为机器人动作；OpenArm 入口见 `openarm_policy.py` |
-| 服务 | `src/openpi/serving/`、`scripts/serve_policy.py` | 加载 checkpoint、WebSocket 推理、RTC 兼容开关 |
-| 客户端 | `packages/openpi-client/` | 机器人侧请求、时间戳、运行时单位和 IO |
-| 研究脚本 | `scripts/` | OpenArm 清洗、Stage/value、AWBC、HIL、审计和 smoke |
+| 数据变换 | `src/openpi/transforms.py`、`src/openpi/training/config.py` | YAM 输入、delta action、prompt、norm 和模型输入 |
+| YAM policy | `src/openpi/policies/yam_policy.py` | 校验 14D 合同、映射三路图像、裁掉模型 32D padding |
+| 服务 | `src/openpi/serving/`、`scripts/serve_policy.py` | 加载 checkpoint 和通用 WebSocket 推理 |
+| 客户端 | `packages/openpi-client/` | 通用请求/响应协议；不实现 YAM 机械臂控制 |
+| 数据工具 | `scripts/compute_norm_stats.py`、审计脚本 | norm、metadata、视频和 loader 预检 |
 
-## OpenArm 配置路径
+## YAM 配置路径
 
-OpenArm 配置集中在 `src/openpi/training/config.py`，核心数据类是 `LeRobotOpenArmDataConfig`，输入/输出类是 `OpenArmInputs`/`OpenArmOutputs`。正式 KAI0 配置为 `pi05_openarm_kai0_awbc_v1`；Site probe、Evo ACP probe 和 advantage scorer 是独立配置，具体状态由 `docs/06_openarm_research_plan.md` 维护。
+YAM 配置集中在 `src/openpi/training/config.py`：
 
-OpenArm 输入通常包括 base、left wrist、right wrist 三路图像、16D state、prompt 和可选的 ACP/metadata 字段。动作 horizon 当前为 50，policy wrapper 会校验 state/action 的最后一维为 16。
+- `LeRobotYamDataConfig`：默认双臂、14D、`assets/yam`，动作序列键为单数 `action`。
+- `YamInputs`：接收 `observation.images.top_rgb`、`left_rgb`、`right_rgb`、`observation.state`、`action` 和 prompt。
+- `YamOutputs`：把模型至少 32D 的 action chunk 裁回 14D；不足 14D 直接报错。
+- `pi05_yam_lora`：当前首选低显存配置；对应 `gemma_2b_lora` 和 `gemma_300m_lora`，关闭 EMA。
 
-## 数据/模型边界
+YAM policy 不复用 OpenArm 或 Piper 的 transform。单臂 7D 只作为配置类的显式兼容选项，当前项目默认始终是双臂 14D。
 
-- 清洗后的 OpenArm 数据必须经过 `scripts/convert_openarm_hq_dataset.py` 或对应的 OpenArm 专用脚本；不要直接把 HIL raw 喂给训练 loader。
-- `norm_stats.json` 必须与数据版本和配置绑定；不能跨单位合同复用。
-- Stage/value 是离线评分器，不是默认在线控制器；KAI0 policy 只接收 policy prompt，不能假设线上有 `stage_id`。
-- HIL 的 policy action、human action、hold 和 intervention 元数据必须在 clean 阶段保留/区分，Evo value 才能使用。
+## 数据加载兼容
 
-## Piper 边界
+当前仓库兼容 LeRobot 新旧 import 路径：优先使用 `lerobot.datasets.lerobot_dataset`，旧版本才回退到 `lerobot.common.datasets.lerobot_dataset`。LeRobot v3 的 `meta.tasks` 可能是 DataFrame，loader 会先归一化为 `task_index -> prompt` 映射。
 
-Piper 仍能通过 `pi*_piper_dual` 配置运行，但它是 legacy 支持路径，使用不同维度/transform/单位约定。新 OpenArm 代码、数据、norm stats、服务和研究结论不得依赖 Piper；需要追溯时只看 `docs/reference/legacy/piper.md`。
+LeRobot 原始键直接在 YAM policy boundary 处理，因此本仓库没有把独立 YAM-ABC 项目的数据转换器或机械臂控制层复制进来。若实际数据不是上述键，先写独立转换/审计产物，再接入训练配置。
 
-## 重要不变量
+## 模型与机器人边界
 
-1. OpenArm 16D 顺序和 degree/HQ 夹爪语义不可改变。
-2. 训练 config、数据 metadata、norm stats、checkpoint 和 serve config 必须成套核对。
-3. RTC 新路径必须和旧推理路径共存，通过 `rtc_mode` 选择或回退。
-4. WebSocket 层返回的动作必须有限且形状为 `(50,16)`；客户端再做机器人边界转换。
+- OpenPI 模型统一需要标准 `image/state/actions` 结构和 32D padding；YAM 的真实合同只在 `YamInputs/YamOutputs` 边界出现。
+- norm stats 在训练输入经 delta transform 后计算，checkpoint 内保存到 `assets/yam/norm_stats.json`；不能跨单位或跨数据版本复用。
+- 推理服务返回 50 步、14D YAM 动作；任何单位转换、限幅、执行和安全检查必须由已核实的机器人侧系统负责。
+
+## 历史边界
+
+OpenArm 16D、Piper transform、KAI0/Evo-RL/HIL 方案只在变更记录和历史归档中保留背景；对应的当前专用代码已从默认训练树清理。它们不能改变当前 YAM 默认配置，也不能把 OpenArm 的单位或动作顺序套到 YAM。

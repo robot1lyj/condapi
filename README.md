@@ -1,91 +1,59 @@
-# OpenPI + OpenArm 后训练与 Rollout
+# OpenPI + YAM 双臂训练适配
 
-本仓库是 OpenPI 的 OpenArm 定制分支，主线任务是双臂 OpenArm 的 T-shirt folding VLA：监督微调、KAI0/AWBC、Evo-RL、HIL 和真机 rollout。`examples/`、`third_party/` 与 Piper 仅作 legacy/reference，不是默认入口。
+本仓库当前用于 YAM 双臂（与 YAM-ABC 同硬件配置）的 VLA 后训练。首选模型是 Pi0.5，当前服务器优先走 LoRA；OpenArm、Piper 和独立 YAM-ABC-Reproduce 代码只保留为 legacy/reference，不是本项目默认实现。
 
-服务器已切换到琶洲模方智算平台：SSH 入口为 `wuyan@10.18.31.234:22`，工作台为 `http://10.18.31.233:3080/`；服务器目录、模块环境和迁移状态统一看 [02](docs/02_installation_and_environment.md)。仓库不保存服务器密码。
+服务器入口、环境和迁移状态见 [服务器与环境](docs/02_installation_and_environment.md)。`/home/wuyan-lyj/YAM` 只作为 YAM 数据/训练合同的只读参考，本项目代码仍是本仓库。
 
-## 从这里开始
-
-1. [交接索引](docs/00_handoff_index.md)：文档路由和状态词。
-2. [系统架构](docs/01_system_architecture.md)：代码、数据流和边界。
-3. [服务器与环境](docs/02_installation_and_environment.md)：服务器、conda、数据预检和训练命令。
-4. [训练与评估](docs/03_training_and_evaluation.md)：配置、训练、checkpoint 和离线评估。
-5. [数据合同](docs/04_data_contracts.md)：数据格式、单位、split 和 norm stats。
-6. [推理与 rollout](docs/05_inference_and_rollout.md)：服务、初始位姿、WebSocket、HIL 和 RTC。
-7. [研究计划](docs/06_openarm_research_plan.md)：KAI0、Evo-RL、Hybrid 的当前状态。
-
-变更原因和结果只看 [07 · 变更历史](docs/07_change_log.md)。Piper 只看 [legacy 指引](docs/reference/legacy/piper.md)。
-
-## 固定合同
+## 当前训练合同
 
 ```text
-输入：base、left wrist、right wrist 三路图像 + OpenArm state + prompt
-任务：Fold the T-shirt properly
-state/action：16D = [右臂7关节, 右夹爪, 左臂7关节, 左夹爪]
-训练单位：关节 degree；HQ 夹爪 motor degree，0=open，-66=closed
-输出：50 步 action chunk；模型内部 32D，机器人输出 16D
+state/action: 14D = [左臂6关节, 左夹爪, 右臂6关节, 右夹爪]
+state key: observation.state
+action key: action
+image keys: observation.images.top_rgb / left_rgb / right_rgb
+training action: 每臂6个关节维度相对当前state，夹爪维度保持absolute
+model: Pi0.5, internal action_dim=32, action_horizon=50; YAM policy output=14D
+norm asset id: yam
 ```
 
-OpenArm 只使用 `LeRobotOpenArmDataConfig`、`OpenArmInputs` 和 `OpenArmOutputs`。弧度、归一化夹爪和硬件限幅只在机器人客户端/ROS 边界处理；不能接入 Piper 14D 或旧单位数据。
+YAM 数据的物理单位以数据 metadata 和 audit 为准；不能套用 OpenArm 的 degree/HQ 夹爪或 ROS 弧度合同。
 
-## 最短可用路径
+## 文档入口
 
-### 1. 安装
+1. [交接索引](docs/00_handoff_index.md)
+2. [系统架构](docs/01_system_architecture.md)
+3. [服务器与环境](docs/02_installation_and_environment.md)
+4. [训练与评估](docs/03_training_and_evaluation.md)
+5. [数据合同](docs/04_data_contracts.md)
+6. [训练后 policy smoke](docs/05_inference_and_rollout.md)
+7. [历史 OpenArm 研究归档](docs/06_openarm_research_plan.md)
 
-通用离线安装入口仍保留在此处；新平台优先按 [02](docs/02_installation_and_environment.md) 使用 module 和现有 `yam` 环境，只有完成 Python/依赖核验后才决定是否安装离线包：
-
-```bash
-# 联网机器
-git submodule update --init --recursive
-bash scripts/conda/build_offline_bundle.sh artifacts/pi-conda-offline-bundle
-```
-
-```bash
-# 目标机，当前目录为同步后的仓库
-bash scripts/conda/install_offline_bundle.sh \
-  --bundle-dir artifacts/pi-conda-offline-bundle \
-  --openpi-dir "$PWD" --env-name pi-conda
-```
-
-### 2. 训练前检查
+## 最短训练路径
 
 ```bash
 module load miniconda3/26.1.1
-conda activate /home/wuyan/.conda/envs/yam
+conda activate /home/wuyan/.conda/envs/condapi-yam
 export PYTHON="$CONDA_PREFIX/bin/python"
-"$PYTHON" -m pytest scripts/train_test.py -q
+export REPO_ROOT=/home/wuyan/lyj/YAM/YAM_code
+cd "$REPO_ROOT"
 ```
 
-服务器数据、norm、正式 K-Policy 多节点训练和评估命令分别见 [02](docs/02_installation_and_environment.md)、[03](docs/03_training_and_evaluation.md) 和 [04](docs/04_data_contracts.md)。
-
-### 3. 服务与 smoke
+当前默认配置为 `pi05_yam_lora`。它的 `repo_id` 是占位值 `local/yam_bimanual`，正式训练前必须通过 CLI/config override 指向已审计的本地 LeRobot 数据集，并在该数据版本下重新计算 `assets/yam/norm_stats.json`。
 
 ```bash
-OUTPUT_ROOT=replace_with_new_platform_output_root
-CHECKPOINT_DIR="$OUTPUT_ROOT/CONFIG/EXP_NAME/STEP"
-"$PYTHON" scripts/serve_policy.py \
-  --port 6666 \
-  --force-prompt 'Fold the T-shirt properly, Advantage: positive' \
-  --rtc-mode off \
-  policy:checkpoint \
-  --policy.config=pi05_openarm_kai0_awbc_v1 \
-  --policy.dir="$CHECKPOINT_DIR"
+"$PYTHON" scripts/compute_norm_stats.py pi05_yam_lora \
+  --repo-id=/path/to/audited/yam_lerobot_dataset
+
+"$PYTHON" scripts/train.py pi05_yam_lora \
+  --data.repo-id=/path/to/audited/yam_lerobot_dataset \
+  --exp-name=yam_pi05_lora_v001 \
+  --num-train-steps=30000
 ```
 
-端口监听不是部署成功。必须运行 [真实 WebSocket smoke](docs/05_inference_and_rollout.md#4-真实-websocket-smoke)，确认 `(50,16)`、单位、夹爪语义和 checkpoint 一致。
+首次运行先做 metadata、视频、loader 和 norm gate；不要把 `/home/wuyan/lyj/YAM/YAM_data/ABC-130k-two-tasks` 仅凭目录名称直接喂给训练 loader，它需要先确认/转换为当前 LeRobot 合同。完整顺序见 [训练与评估](docs/03_training_and_evaluation.md)。
 
-## 初始位姿与可调参数
+## 安全与同步
 
-- OpenArm 初始/复位位姿不在本仓库的 policy server/config 中；机器人 ROS/driver/client 主机和路径需在新平台另行核实，旧记录中的 `/home/lyj/openarm_ros2_docker` 不作为新服务器默认值。
-- 一次性真机回零在 bringup 后执行：`ros2 run openarm_arm openarm-arm home both --position 0 0 0 0 0 0 0 --gripper 0.9 --duration-sec 5 --rate-hz 50 --wait-for-command-slot-sec 2`。7 个关节值是 ROS 弧度，`0.9` 是 ROS 夹爪开口量；训练侧仍是 degree/HQ `0/-66`。先低速验证限位、碰撞和急停，再确认相机/数据分布；不要把位姿写进 `--rtc-metadata`。
-- `examples/aloha_real/constants.py` 的 `START_ARM_POSE` 和 `examples/aloha_real/real_env.py` 的 `DEFAULT_RESET_POSITION` 只属于 ALOHA legacy，不能复制给 OpenArm。
-- 训练参数改 `src/openpi/training/config.py` 或通过训练 CLI 覆盖；服务器路径、GPU、hosts、batch、workers 和 coordinator 看 [02](docs/02_installation_and_environment.md#可调参数)。服务参数和 action-chunk 执行策略看 [05](docs/05_inference_and_rollout.md#2-参数与初始位姿)。
-
-## 交接检查
-
-- [ ] 已按 `AGENTS.md` → `docs/cache/kernel.md` → `docs/cache/context_index.md` → 一个 mode pack 启动。
-- [ ] 已确认远端 commit、数据目录、episode split、norm stats 和 checkpoint 是同一版本。
-- [ ] 已通过真实 WebSocket smoke；真机 rollout 使用 tmux、急停、人工接管和可回退 checkpoint。
-- [ ] 新事实只写入一个 owner 文档；历史结果才写入 [07](docs/07_change_log.md)。
-
-Python 3.11、conda 离线依赖、Ruff/pytest 和提交边界见 [AGENTS.md](AGENTS.md)。本分支不提交凭据、不上传权重、不执行 `git push`。
+- 不在仓库写入服务器密码、token 或私钥；长训练使用 Slurm/tmux，不在登录节点训练。
+- 每次中文 commit 后，必须把同一提交推送到 Gitea `origin` 和 GitHub `github`，作为双备份；不要 force push。
+- 训练后服务只在 checkpoint gate 和真实 WebSocket smoke 通过后使用；YAM 输出应为有限的 `(50,14)` 动作。
