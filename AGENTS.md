@@ -75,7 +75,7 @@ conda run -p /home/wuyan/.conda/envs/condapi-yam python -m pytest --strict-marke
 - 不提交凭据、token、私钥、服务器密码；不删除远端数据/权重/缓存，除非用户明确授权。
 - 长训练使用 Slurm 作业或 tmux；端侧推理默认在 Thor 本地容器/进程执行，Thor↔3588 的直连以太网协议是生产数据通道。端口监听不等于推理可用，必须做真实本地推理和跨 IPC 直连 smoke。
 - 本任务只改 Thor 侧；不得读取、修改、同步或替代 3588 的机械臂控制、相机采集和系统部署。
-- Thor 推理默认使用 Docker + NVIDIA Container Toolkit，每个模型使用独立容器；模型依赖安装在镜像内，容器规划与精度验收由 `docs/08_thor_edge_deployment.md` 持有。
+- Thor 推理默认使用 Docker + NVIDIA Container Toolkit，按模型系列隔离容器，Pi 系列共用一个服务，通过配置/checkpoint 选择模型；模型依赖安装在系列镜像内，容器规划与精度验收由 `docs/08_thor_edge_deployment.md` 持有。
 - 数据转换只写新目录；原始 YAM 数据和现有下载任务不可覆盖、停止或删除。
 - 任何 RTC 改动都必须保留旧推理路径，并可通过 `rtc_mode` 关闭或自动回退。
 

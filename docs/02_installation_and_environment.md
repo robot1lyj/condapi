@@ -23,7 +23,7 @@
 3. Thor 从 U 盘启动，若出现 QSPI capsule update 提示确认 `Y`，安装目标选择 `Install on NVMe`；安装完成拔出 U 盘，再完成 `oem-config`。
 4. 首次启动在 Thor 上记录 `cat /etc/nv_tegra_release`、`uname -a`、`jetson_release`、`docker --version`、`dpkg-query -W nvidia-container-toolkit` 和 `nvidia-smi`。
 
-Jetson ISO 安装方式通常已经带 Docker 和 NVIDIA Container Toolkit；若使用 SDK Manager 或 `Linux_for_Tegra` 刷写，按 [Thor Docker Setup](https://docs.nvidia.com/jetson/agx-thor-devkit/user-guide/latest/setup_docker.html) 补装，不要无审计地覆盖容器运行时。Thor 统一采用每模型独立容器，首版在 JAX 容器内验证原始 checkpoint；宿主机维护系统、驱动、Docker/Compose/Toolkit，模型依赖在镜像构建阶段安装。镜像固定、挂载、端口与切换约定见 [08 · 容器方案](08_thor_edge_deployment.md#31-每模型独立容器的部署约定)；系统级开发组件仅在确有需要时从 JetPack 源安装，禁止安装 Ubuntu 的 `nvidia-cuda-toolkit`。
+Jetson ISO 安装方式通常已经带 Docker 和 NVIDIA Container Toolkit；若使用 SDK Manager 或 `Linux_for_Tegra` 刷写，按 [Thor Docker Setup](https://docs.nvidia.com/jetson/agx-thor-devkit/user-guide/latest/setup_docker.html) 补装，不要无审计地覆盖容器运行时。Thor 按模型系列隔离容器，Pi 系列共用一个服务，首版在其中验证原生 JAX checkpoint；宿主机维护系统、驱动、Docker/Compose/Toolkit，模型依赖在系列镜像构建阶段安装。镜像固定、挂载、端口与切换约定见 [08 · 容器方案](08_thor_edge_deployment.md#31-按模型系列隔离容器的部署约定)，官方基镜像口径见该页第 3.2 节；系统级开发组件仅在确有需要时从 JetPack 源安装，禁止安装 Ubuntu 的 `nvidia-cuda-toolkit`。
 
 系统版本与 GPU 环境 gate 通过后，才把本仓库和 checkpoint 放到 Thor；随后按 [08](08_thor_edge_deployment.md) 的原 JAX golden、LoRA/FP32 转换审计和未量化后端对照完成 YAM 验收，再决定是否需要 TensorRT 或量化。系统盘刷写、Docker smoke 和 YAM engine 目前都不能仅凭文档宣称已验证。
 

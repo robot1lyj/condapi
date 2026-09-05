@@ -10,7 +10,7 @@ Thor 系统、容器、Pi0.5 转换和 TensorRT 方案见 [08 · Thor 端侧部�
 
 1. checkpoint 参数元数据完整，且有与训练数据绑定的 `assets/yam/norm_stats.json`。
 2. 配置是 `pi05_yam_lora`（或明确记录的 YAM 配置），数据和 checkpoint 属于同一 14D 合同。
-3. Thor 已核验 JetPack/L4T、GPU、Docker runtime 和独立模型容器内的 CUDA/JAX；采用其他候选后端时额外核验其依赖。镜像、只读模型挂载与端口发布按 [08](08_thor_edge_deployment.md) 记录。
+3. Thor 已核验 JetPack/L4T、GPU、Docker runtime 和 Pi 系列容器内的 CUDA/JAX；采用其他候选后端时额外核验其依赖。镜像、只读模型挂载与端口发布按 [08](08_thor_edge_deployment.md) 记录。
 4. 原 JAX checkpoint 与 LoRA、golden 输入/噪声/输出已保存；任何候选后端均需按 [08](08_thor_edge_deployment.md) 做分阶段精度验收，不能只与转换后的 Torch 比较。
 5. Thor 本地推理 smoke 确认输入键、输出 shape、有限值和 checkpoint/norm 绑定；随后必须做 3588↔Thor 的真实直连以太网 smoke，验证 observation/action 往返。
 
@@ -21,7 +21,7 @@ Thor 系统、容器、Pi0.5 转换和 TensorRT 方案见 [08 · Thor 端侧部�
 ```text
 3588 camera/state/prompt
   == direct Ethernet / WebSocket or agreed transport ==>
-Thor 独立模型容器：YamInputs + norm
+Thor Pi 系列容器：YamInputs + norm
   -> 已通过原 JAX 精度验收的本地 policy（runtime 待实测确定）
   -> YamOutputs + absolute action
   == direct Ethernet / action response ==>
@@ -33,7 +33,7 @@ Thor 独立模型容器：YamInputs + norm
 首个端侧运行顺序固定为：
 
 1. 原 JAX policy 以实际 YAM 样本和同一份噪声数组生成 golden；保留原始 LoRA checkpoint。
-2. 在独立容器内核验 Thor 原生 JAX 可行性；若转换到 Torch，新增候选镜像/容器，先审计 LoRA 合并、FP32 构造/存储、norm 绑定和未量化计算对齐。
+2. 在 Pi 系列容器内核验 Thor 原生 JAX 可行性；若转换到 Torch，构建该系列的新候选镜像并临时验证，先审计 LoRA 合并、FP32 构造/存储、norm 绑定和未量化计算对齐。不同 checkpoint 通过配置选择，不各自建立常驻容器。
 3. 精度通过后再按延迟需求决定是否导出 engine；FP8/NVFP4 和定制 FP16 是独立候选，必须与原 JAX 比较。
 4. 在 Thor 本地用回放样本直接调用 policy，验证三路图像、14D state、prompt 和 `(50,14)` 输出；再用 3588 的真实 observation 做跨 IPC 直连 smoke。
 
@@ -72,7 +72,7 @@ actions: float array, shape (50, 14), all finite
 
 ## 5. Thor↔3588 网络推理通道
 
-Thor 服务端在模型容器内加载只读 checkpoint，3588 通过 Thor 直连网卡上发布的 policy 端口发送 observation 并接收 action。生产生命周期由 Compose 管理，GPU 接入与端口规则见 [08](08_thor_edge_deployment.md)。以下是容器内手动调试入口，路径均为容器内部路径，不能据此把模型依赖安装到宿主；正式启动命令待 Compose 实施时纳入服务配置：
+Thor 服务端在 Pi 系列容器内加载当前配置对应的只读 checkpoint，3588 通过 Thor 直连网卡上发布的 policy 端口发送 observation 并接收 action。生产生命周期由 Compose 管理；切换模型时更改配置/checkpoint 并重启该系列服务，重新预热和验收，不假定支持热切换。GPU 接入与端口规则见 [08](08_thor_edge_deployment.md)。以下是容器内手动调试入口，路径均为容器内部路径，不能据此把模型依赖安装到宿主；正式启动命令待 Compose 实施时纳入服务配置：
 
 ```bash
 export THOR_REPO_ROOT=/path/to/condapi-on-thor
