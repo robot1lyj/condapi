@@ -12,7 +12,7 @@ YAM LeRobot v3 数据
   -> YamOutputs + AbsoluteActions -> YAM 14D action chunk
   -> checkpoint / norm assets
   -> 原 JAX policy golden + LoRA/精度审计
-  -> Thor：原生 JAX 可行性验证，或经 FP32 转换审计的未量化后端
+  -> Thor 独立模型容器：原生 JAX 可行性验证，或经 FP32 转换审计的未量化后端
   -> 需要加速时独立评估 TensorRT/FlashRT；量化须额外通过 gate
 ```
 

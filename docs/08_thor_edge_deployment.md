@@ -6,8 +6,9 @@
 
 - 默认推理目标是 Jetson AGX Thor Developer Kit（T5000 口径）；设备到手后仍需用 `jetson_release`/`cat /etc/nv_tegra_release` 核对实际 SKU。若实际是 T4000 或定制载板，不能直接套用开发套件 ISO。
 - 官方系统基线选 JetPack 7.2.1 / Jetson Linux r39.2.1。系统盘制作介质是 Jetson ISO USB 安装盘，实际 BSP 安装到 Thor 的 NVMe，不把 ISO 当作 Live USB。
+- 部署形式确定为 Docker + NVIDIA Container Toolkit，以 Docker Compose 管理每模型独立容器。首版在容器内验证原生 JAX；“原生 JAX”表示保留原模型实现与权重，不表示直接安装到宿主机。模型 Python 依赖、转换工具和开发环境均封装在各自镜像中。
 - 用户确认训练产物必定为 JAX/Flax（Orbax）checkpoint；当前 `pi05_yam_lora` 的两条 Gemma 分支均有 LoRA。原始 checkpoint、配置、norm 和原 JAX policy 行为是部署验收依据，必须完整保留。
-- 精度优先：先建立原 JAX golden，并验证 Thor 原生 JAX 的可行性；需要转换时，先审计 LoRA 与权重映射，使用 FP32 中间产物，再验证与参考一致的未量化混合精度运行。生产 runtime 尚未定案，不再预设 PyTorch BF16 → TensorRT FP8 为必经路线。
+- 精度优先：先建立原 JAX golden，并验证 Thor 容器内原生 JAX 的可行性；需要转换时，先审计 LoRA 与权重映射，使用 FP32 中间产物，再验证与参考一致的未量化混合精度运行。容器部署形式已确定，模型后端的生产验收仍待实测，不预设 PyTorch BF16 → TensorRT FP8 为必经路线。
 - TensorRT BF16/FP32 混合精度是未量化候选，须另行验证 exporter 支持；FP8、NVFP4、定制 FP16 均为可选实验。只有逐层、逐去噪步、完整 action 与任务验收通过后才能晋级；cosine、有限输出或时延不能单独证明精度保持。
 - Thor 只在本地加载和执行模型；3588 通过直连以太网发送相机/状态/prompt observation，Thor 通过同一条直连链路返回 action chunk。WebSocket 或后续约定的直连协议是两 IPC 的生产数据通道，不等于远程模型推理；Thor 内部仍可用本地 direct API 做基准 smoke。
 
@@ -60,7 +61,39 @@ PATH: /home/wuyan-lyj/thor-system/jetpack-7.2.1/jetsoninstaller-r39.2.1-2026-08-
    ```
 
 5. ISO 安装方式通常已经包含 Docker 和 NVIDIA Container Toolkit；先做 GPU 容器 smoke，不要重复覆盖系统软件。如果不是 USB ISO，而是 SDK Manager 或 `Linux_for_Tegra` 手工刷写，按 [NVIDIA Thor Docker Setup](https://docs.nvidia.com/jetson/agx-thor-devkit/user-guide/latest/setup_docker.html) 安装并配置 Docker/Container Toolkit。
-6. 原生开发不是首选路径；若确实需要，在 JetPack APT 源中使用 `sudo apt install nvidia-jetpack` 或 `nvidia-cuda-dev`，不要安装 Ubuntu 的 `nvidia-cuda-toolkit`。Pi0.5 首次部署优先使用匹配 Thor 的 NVIDIA PyTorch 容器，减少 Python/CUDA/JAX 依赖污染。
+6. 核验 Docker Compose 与 NVIDIA GPU 容器接入，再构建第 3.1 节的 JAX 推理镜像。宿主机不安装模型专属 Python/conda 环境；系统级组件确有需要时从 JetPack APT 源安装，不安装 Ubuntu 的 `nvidia-cuda-toolkit`。基镜像必须匹配 ARM64、Thor GPU、宿主驱动和 CUDA 用户态库；具体镜像 digest 与 JAX/Flax/Orbax 版本组合通过实机验收后锁定，不直接采用 PyTorch 教程镜像作为 JAX 已验证环境。
+
+### 3.1 每模型独立容器的部署约定
+
+2026-09-05 用户指定容器化作为默认部署方式。本节为待实施的容器方案；尚未创建或验证 Dockerfile、Compose 文件或模型镜像。架构为：
+
+```text
+3588 IPC（相机、状态、机械臂控制）
+  <== 直连以太网 / observation、action ==>
+Thor 专用网卡 IP + policy 端口
+  -> Docker 发布端口
+  -> 当前激活的模型容器：OpenPI JAX + 原始 checkpoint/LoRA
+  -> NVIDIA Container Toolkit -> Thor GPU
+```
+
+| 层次 | 管理内容 | 生命周期 |
+|---|---|---|
+| Thor 宿主机 | JetPack/L4T、GPU 驱动、Docker、Compose、NVIDIA Container Toolkit、网卡 | 统一维护，不随模型安装 Python 包 |
+| 版本化镜像 | 固定代码 commit、Python、JAX/Flax/Orbax、CUDA 用户态依赖及启动入口 | 构建后以不可变 digest 记录；依赖或代码改变时构建新版本 |
+| 每模型容器 | 独立服务名、模型配置、端口与运行参数 | 一个模型一个容器实例；依赖相同的模型可复用同一镜像，不共用可写运行目录 |
+| 模型与运行数据 | 原始 checkpoint/norm/tokenizer、golden、日志和编译缓存 | 模型与 golden 只读挂载；日志和缓存独立持久化，重建容器不覆盖模型 |
+
+具体实施规则：
+
+1. 在镜像构建阶段通过项目约定的 conda/pip 安装固定依赖，记录基础镜像 digest、依赖清单和代码 commit；不使用 `latest` 作为生产版本，不在运行中容器临时升级依赖来形成不可复现的环境。需要尝试 Torch/TRT 时新增对应候选镜像和容器。
+2. checkpoint 整目录以只读方式挂载，保持 `params/` 与 `assets/yam/norm_stats.json` 的绑定；tokenizer 和 golden 也只读。镜像内包含固定版本代码，生产不依赖可变的宿主源码挂载。编译/下载缓存按模型与运行环境版本隔离并显式指定可写位置；日志按模型与运行批次保存。
+3. 用 Compose 显式声明 GPU 访问、挂载、环境变量、端口、启动命令和健康检查，便于查看状态、日志与重建。默认一个模型容器占用生产 GPU 服务；多个模型可以同时保留镜像和配置，但同时运行必须另测统一内存占用与延迟。容器不是 GPU 资源完全隔离的虚拟机。
+4. 首版使用 bridge 网络，将 policy 端口明确发布到 Thor 的直连网卡 IP；容器内服务监听 `0.0.0.0`，3588 连接 Thor IP，而非容器内部地址。IP/实际端口联调时确定；多候选容器使用不同测试端口。仅通过网线接收 observation，不给模型容器配置相机或机械臂设备透传。
+5. 首次启动必须完成 GPU 实际运算、checkpoint/norm 校验、JAX 编译预热和固定样本推理，之后才报告模型就绪；健康检查不能只看容器进程或 TCP 端口。后续轻量健康检查读取就绪状态，不反复触发大模型冷编译。
+6. 发布单元同时绑定镜像 digest、模型摘要、配置、Compose 参数和精度报告。先在独立候选容器完成 golden/延迟/网络验收，切换时由控制侧负责人配合暂停请求，再把生产端口交给通过的容器。保留前一版本镜像、模型及配置以回退，不删除已有模型资产。
+7. 容器仍共享宿主内核、GPU 驱动与硬件。更换镜像不能绕过 Thor/CUDA/JAX 兼容检查，也不自动保持数值精度；镜像、依赖、驱动或编译设置变动后重新跑第 6 节验收。
+
+实施交付物计划为 Dockerfile、版本锁定依赖清单、每模型 Compose 配置及镜像/模型 manifest；待 Thor 环境核验后实现，不在本次方案更新中填入未经验证的基镜像标签。依据：[NVIDIA Thor Docker Setup](https://docs.nvidia.com/jetson/agx-thor-devkit/user-guide/latest/setup_docker.html)、[Compose GPU 支持](https://docs.docker.com/compose/how-tos/gpu-support/)、[Docker 端口发布](https://docs.docker.com/engine/network/port-publishing/)（2026-09-05 核对）。
 
 ## 4. JAX 训练产物的精度深度调研
 
@@ -128,7 +161,7 @@ PR #960 作者给出的局部 checkpoint 对照如下；样本范围、硬件及
 
 [JAX 官方安装页](https://docs.jax.dev/en/latest/installation.html) 当前列出 Linux aarch64 与 CUDA 13 支持；它不能保证任意 wheel 含 Thor 所需全部 GPU kernels。[NVIDIA 论坛](https://forums.developer.nvidia.com/t/how-to-install-jax-0-5-3-on-jetson-thor-device/362519) 记录了旧 JAX 0.5.3/CUDA 13 构建不兼容，另有 0.9.1 能枚举 GPU 却在 warmup 报 `no kernel image`；NVIDIA 回复指向针对 Thor 的 0.10.0 构建配置，未给出本项目 Pi0.5 完整验收。
 
-本仓库依赖为 `jax[cuda12]==0.5.3`、`flax==0.10.2`、`orbax-checkpoint==0.11.13`（[pyproject.toml](../pyproject.toml)）。因此后续在隔离的 Thor 环境验证兼容组合、Orbax restore、Flax/NNX API、真实 GPU 运算及完整 policy；不得只升级一个 JAX 包就宣称可部署，也不得通过跳过 CUDA 兼容检查来接受结果。若原生 JAX 满足精度与延迟要求，可作为生产选择，避免增加转换环节。
+本仓库依赖为 `jax[cuda12]==0.5.3`、`flax==0.10.2`、`orbax-checkpoint==0.11.13`（[pyproject.toml](../pyproject.toml)）。因此后续在独立 Thor JAX 容器内验证兼容组合、Orbax restore、Flax/NNX API、真实 GPU 运算及完整 policy；不得只升级一个 JAX 包就宣称可部署，也不得通过跳过 CUDA 兼容检查来接受结果。若原生 JAX 满足精度与延迟要求，该容器可晋级生产，避免增加转换环节。
 
 目前没有找到已公开验证的“本项目 JAX LoRA + YAM 三路图像 + 14D 输出 + horizon 50”完整部署案例。部署后端是待实测决定的事项。
 
@@ -137,7 +170,7 @@ PR #960 作者给出的局部 checkpoint 对照如下；样本范围、硬件及
 以下是待实施方案，不代表已经完成转换或部署。bundle 绑定训练 commit、原 checkpoint、完整 config、norm、tokenizer 和 YAM 数据版本；训练用 JAX 这一事实不变。
 
 1. 在已验证的训练环境保存原 JAX policy golden：原始 observation、实际模型输入、参数 dtype 清单、完整噪声数组和各步输出。确认使用训练 checkpoint，而非基础权重或错误的 EMA 分支；当前 LoRA 配置 `ema_decay=None`。
-2. 优先做 Thor 原生 JAX 可行性核验，在同一 golden 上比较服务器与 Thor 输出和实际延迟；环境升级造成的差异也必须定位。
+2. 按第 3.1 节构建独立 JAX 候选容器，优先做 Thor 原生 JAX 可行性核验；在同一 golden 上比较服务器与容器输出和实际延迟，镜像/环境变化造成的差异也必须定位。
 3. 如需 Torch，先在独立输出目录进行 LoRA-aware FP32 转换。逐参数检查 key/shape/dtype/布局，所有 adapter 均须被映射或经验证合并；missing/unexpected keys 必须为空或仅有已核实的 tied-weight 白名单。不要直接运行现有通用脚本充当验收通过的转换器。
 4. 建立两种互补对照：原 JAX 生产行为对照，以及双方对齐 FP32 设置的诊断对照。先逐层验证，再启用与源路径匹配的 BF16/FP32 混合精度；逐个开启 compile、attention 优化、CUDA Graph 等变量。FP32 文件经默认 loader 自动 cast 的情况必须被记录。
 5. 只有精度合格但延迟仍不满足需求时，才评估 TRT 或 FlashRT。先确认未量化图/导出改写保持行为，再单独实验 FP8，最后按需实验 NVFP4；每个阶段都与上一阶段和原 JAX 比较。TensorRT BF16/FP32 导出需另行实现/验证，不能声称官方示例已直接支持。
@@ -146,6 +179,7 @@ PR #960 作者给出的局部 checkpoint 对照如下；样本范围、硬件及
 ## 6. 端侧验收闸门
 
 - 系统为 JetPack 7.2.1 / L4T r39.2.1，GPU/容器可见，Docker runtime 正确。
+- 镜像 digest、Compose 启动配置及只读/可写挂载可追溯；容器内完成 GPU 运算、预热和真实 policy 推理，重建后可恢复同一模型/配置，持久化日志与原始权重完整。
 - checkpoint、config、norm stats、tokenizer、LoRA 合并清单、参数 dtype、转换/overlay 版本与哈希、engine/插件摘要可追溯。
 - 固定同一份噪声数组：内部形状 `(1,50,32)`，policy API 可传 `(50,32)`；只设置相同 seed 不保证 JAX/Torch 生成相同噪声。固定输入图像、resize/padding、RGB/布局、token IDs、mask、量化 state、去噪时间表和 RTC 设置。
 - `action_horizon=50` 是预测序列长度；`num_steps=10` 是当前默认 flow 去噪次数，二者必须分别记录，不可混淆。
@@ -160,6 +194,7 @@ PR #960 作者给出的局部 checkpoint 对照如下；样本范围、硬件及
 ## 7. 当前状态
 
 - 官方 JetPack 7.2.1 ISO：2026-09-05 已下载，长度/类型已核对且本地 SHA-256 已记录，详见第 2 节；USB 制作与刷写未完成。
+- 每模型独立 Docker 容器方案：已确定并记录；首版候选为容器内原生 JAX。Dockerfile、Compose、镜像构建与容器内 GPU/精度/网络验收仍待实施。
 - 精度调研与静态代码审计：已完成；已确认训练产物为 JAX，并撤回无条件 FP8 默认路线。LoRA-aware 转换器、FP32 诊断工具、YAM 精度阈值尚未实现/确定，不能使用现有脚本直接宣称转换可靠。
 - Thor 实机刷写、Docker GPU smoke、YAM checkpoint 转换、TensorRT engine 和真实三路输入 smoke：计划中，尚未宣称已验证。
 
@@ -191,4 +226,4 @@ PR #960 作者给出的局部 checkpoint 对照如下；样本范围、硬件及
 
 检索分两轮：先检索 OpenPI 的 conversion/precision/LoRA/Thor 报告及官方教程，再追踪 #958/#960/#978/#984、官方实际 overlay、FlashRT fidelity 报告与 JAX CUDA13 安装支持。GitHub #810 评论 API 在一次替代分页重试后仍返回 403，因此仅使用可见的 issue 正文，不推断关闭原因。关键机制已有代码互证，剩余缺口需要具体 checkpoint 与 Thor 实测，继续增加同类网页不会解决，因此结束文献检索。
 
-记忆技能用于按证据修订 owner 并刷新 kernel；本轮记忆准入账本记录 `27,708 / 32,768` UTF-8 bytes，宿主完整请求 token 计量不可用，不能宣称该账本限制了全部对话/工具上下文。报告采用仓库 Markdown，执行结构与链接检查，不涉及 PDF/页面渲染验收。
+记忆技能用于按证据修订 owner 并刷新 kernel；精度调研完成时记忆准入账本记录 `27,708 / 32,768` UTF-8 bytes，后续更新沿用同一账本继续计费。宿主完整请求 token 计量不可用，不能宣称该账本限制了全部对话/工具上下文。报告采用仓库 Markdown，执行结构与链接检查，不涉及 PDF/页面渲染验收。

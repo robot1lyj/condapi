@@ -6,7 +6,7 @@
 
 - YAM 双臂训练适配，首选 Pi0.5 LoRA / `pi05_yam_lora`；训练运行在服务器 GPU。训练关闭 W&B，使用本地日志、JSONL/CSV 指标与曲线，见 [训练](../03_training_and_evaluation.md)。
 - YAM 为 14D `[左6关节, 左夹爪, 右6关节, 右夹爪]`；关节 delta、夹爪 absolute，mask `(6,-1,6,-1)`；模型内部 32D、horizon 50。物理单位仍须数据审计，不套用 OpenArm/Piper 合同，见 [数据合同](../04_data_contracts.md)。
-- 训练产物确定为 JAX/Flax checkpoint；Thor 本地推理，3588 采集/控制，两 IPC 网线直连，本项目只操作 Thor。精度优先保留原 JAX 与 LoRA，先验证原生 JAX 可行性；转换先审计 LoRA 和 FP32 中间产物，不预设量化 runtime，见 [Thor 部署](../08_thor_edge_deployment.md)。
+- 训练产物确定为 JAX/Flax checkpoint；Thor 按模型独立容器部署，3588 采集/控制，两 IPC 网线直连，本项目只操作 Thor。首版验证容器内原生 JAX，保留 LoRA；转换与量化须另过精度验收，见 [Thor 部署](../08_thor_edge_deployment.md)。
 - 本仓库为 `/home/wuyan-lyj/condapi`，外部 YAM 参考只读；设备、Git、数据保护和 RTC 回退边界由 `AGENTS.md` 持有。
 
 ## 恢复任务

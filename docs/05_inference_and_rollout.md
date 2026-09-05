@@ -10,7 +10,7 @@ Thor 系统、容器、Pi0.5 转换和 TensorRT 方案见 [08 · Thor 端侧部�
 
 1. checkpoint 参数元数据完整，且有与训练数据绑定的 `assets/yam/norm_stats.json`。
 2. 配置是 `pi05_yam_lora`（或明确记录的 YAM 配置），数据和 checkpoint 属于同一 14D 合同。
-3. Thor 已核验 JetPack/L4T、GPU、Docker runtime 和容器内 CUDA/PyTorch/TensorRT；具体系统基线见 [08](08_thor_edge_deployment.md)。
+3. Thor 已核验 JetPack/L4T、GPU、Docker runtime 和独立模型容器内的 CUDA/JAX；采用其他候选后端时额外核验其依赖。镜像、只读模型挂载与端口发布按 [08](08_thor_edge_deployment.md) 记录。
 4. 原 JAX checkpoint 与 LoRA、golden 输入/噪声/输出已保存；任何候选后端均需按 [08](08_thor_edge_deployment.md) 做分阶段精度验收，不能只与转换后的 Torch 比较。
 5. Thor 本地推理 smoke 确认输入键、输出 shape、有限值和 checkpoint/norm 绑定；随后必须做 3588↔Thor 的真实直连以太网 smoke，验证 observation/action 往返。
 
@@ -21,7 +21,7 @@ Thor 系统、容器、Pi0.5 转换和 TensorRT 方案见 [08 · Thor 端侧部�
 ```text
 3588 camera/state/prompt
   == direct Ethernet / WebSocket or agreed transport ==>
-Thor YamInputs + norm
+Thor 独立模型容器：YamInputs + norm
   -> 已通过原 JAX 精度验收的本地 policy（runtime 待实测确定）
   -> YamOutputs + absolute action
   == direct Ethernet / action response ==>
@@ -33,7 +33,7 @@ Thor YamInputs + norm
 首个端侧运行顺序固定为：
 
 1. 原 JAX policy 以实际 YAM 样本和同一份噪声数组生成 golden；保留原始 LoRA checkpoint。
-2. 核验 Thor 原生 JAX 可行性；若转换到 Torch，先审计 LoRA 合并、FP32 构造/存储、norm 绑定和未量化计算对齐。
+2. 在独立容器内核验 Thor 原生 JAX 可行性；若转换到 Torch，新增候选镜像/容器，先审计 LoRA 合并、FP32 构造/存储、norm 绑定和未量化计算对齐。
 3. 精度通过后再按延迟需求决定是否导出 engine；FP8/NVFP4 和定制 FP16 是独立候选，必须与原 JAX 比较。
 4. 在 Thor 本地用回放样本直接调用 policy，验证三路图像、14D state、prompt 和 `(50,14)` 输出；再用 3588 的真实 observation 做跨 IPC 直连 smoke。
 
@@ -72,7 +72,7 @@ actions: float array, shape (50, 14), all finite
 
 ## 5. Thor↔3588 网络推理通道
 
-Thor 服务端只在 Thor 上加载 checkpoint，3588 作为直连以太网客户端发送 observation 并接收 action；这不是远程模型推理，而是两台 IPC 的生产数据通道。服务端仍需显式指定 checkpoint 和配置：
+Thor 服务端在模型容器内加载只读 checkpoint，3588 通过 Thor 直连网卡上发布的 policy 端口发送 observation 并接收 action。生产生命周期由 Compose 管理，GPU 接入与端口规则见 [08](08_thor_edge_deployment.md)。以下是容器内手动调试入口，路径均为容器内部路径，不能据此把模型依赖安装到宿主；正式启动命令待 Compose 实施时纳入服务配置：
 
 ```bash
 export THOR_REPO_ROOT=/path/to/condapi-on-thor
@@ -80,10 +80,9 @@ export CHECKPOINT_DIR=/path/to/complete/yam_pi05_lora_checkpoint
 export PORT=8000
 
 cd "$THOR_REPO_ROOT"
-tmux new-session -s yam-policy -c "$THOR_REPO_ROOT"
 ```
 
-在 tmux 中执行：
+在容器内前台执行，正式部署由 Compose 承接该进程的日志与生命周期：
 
 ```bash
 "$PYTHON" scripts/serve_policy.py \
@@ -103,7 +102,7 @@ tmux new-session -s yam-policy -c "$THOR_REPO_ROOT"
 - metadata 的 `robot_action_dim/output_action_dim=14`、`model_action_dim/action_dim=32`、`action_horizon=50` 与 checkpoint config 一致；
 - 日志记录 commit、checkpoint、config、端口、prompt 和 smoke 结果。
 
-服务停止前保存 Thor 日志和跨 IPC 直连 smoke 报告，在 Thor 对应 tmux 中 `Ctrl-c`；不要触碰 3588 的系统、控制进程、相机进程或其他用户任务。
+服务停止前保存 Thor 容器日志和跨 IPC 直连 smoke 报告，通过 Compose 停止对应模型服务；容器内前台调试可用 `Ctrl-c`。不要触碰 3588 的系统、控制进程、相机进程或其他用户任务。
 
 ## 6. 停止条件
 
