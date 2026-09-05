@@ -9,10 +9,11 @@
 ## Context OS 记忆规则
 
 - 唯一记忆系统是 `AGENTS.md` + `docs/cache/`；不要新增 `.agents`、`.codex` 或其他平行缓存。
-- 启动时依次读取本文件、`docs/cache/kernel.md`、`docs/cache/context_index.md`，然后按路由最多读取一个 `docs/cache/modes/*.md`。
-- 稳定事实只保留一个 owner：热默认写 kernel，任务路由写 index，操作边界写 mode，详细事实写编号化 `docs/`，历史原因写 `docs/07_change_log.md`。
-- 记忆预算：`kernel.md` 不超过 80 行，`context_index.md` 不超过 100 行，每个 mode 不超过 80 行。
-- 新增事实先合并/压缩旧 owner，再写入；不要把命令、指标和架构复制到 index 或 kernel。
+- 启动时依次读取本文件、`docs/cache/kernel.md`、`docs/cache/context_index.md`，然后按路由最多读取一个 mode；已由宿主注入的内容不重复读取。
+- 稳定事实只保留一个 owner：规则归本文件，路由归 index，操作边界归 mode，详细事实归编号化 `docs/`，历史原因归 `docs/07_change_log.md`。kernel 只保留带来源的摘要，不独立维护第二份事实。
+- 取消文档行数硬限制；长期信息完整保留，严格限制进入上下文的内容。记忆包最多 12,288 UTF-8 字节，同一活跃上下文累计最多 32,768 字节（含已加载记忆）；用 `skills/mlops-memory/scripts/memory_gate.py` 执行准入，超预算整段拒绝，不截掉必要条件。
+- 每个仍保留历史的上下文使用同一预算账本 `docs/cache/runtime/`，不得靠换会话 ID 或多次读取绕过累计限制；真实压缩/新上下文后才重建并重新计入保留内容。完整请求 token 限制需宿主按实际 tokenizer、消息/工具封装和输出预留执行；字节预算不能宣称为完整 token 限制。
+- 临时状态带观察时间并在使用前复核；经验先候选、再证据验证、再合并 owner；原始产物不因压缩而删除。通用 skill 源码在 `skills/mlops-memory/`，不承载项目记忆副本。设计与验收归 `docs/09_memory_system.md`。
 
 ## 编号化文档所有权
 
@@ -23,6 +24,7 @@
 - `docs/04_data_contracts.md`：YAM 数据格式、动作维度、单位待核项和 norm stats。
 - `docs/05_inference_and_rollout.md`：训练后 policy 服务协议和最小 smoke；不承载机械臂驱动说明。
 - `docs/08_thor_edge_deployment.md`：Thor 官方系统、容器环境、Pi0.5 转换/加速和端侧验收；不承载机械臂驱动说明。
+- `docs/09_memory_system.md`：记忆预算、证据生命周期、skill 接入与迭代验收。
 - `docs/06_openarm_research_plan.md`：历史 OpenArm/KAI0/Evo-RL 研究归档，不是当前 YAM 路线。
 - `docs/07_change_log.md`：按日期记录原因和结果。
 - `docs/reference/`：长篇技术参考或 legacy；默认入口不依赖其中的旧结论。

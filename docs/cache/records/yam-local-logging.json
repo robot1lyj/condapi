@@ -1,0 +1,26 @@
+{
+  "id": "yam-local-logging-20260905",
+  "kind": "fact",
+  "claim": "四个 YAM TrainConfig 的 wandb_enabled 默认值均为 false；这是配置事实，不代表训练或 GPU 验收通过。",
+  "owner": "docs/03_training_and_evaluation.md",
+  "scope": {
+    "project": "condapi",
+    "platform": "training",
+    "contract": "yam14-h50"
+  },
+  "status": "verified",
+  "observed_at": "2026-09-05T02:45:45Z",
+  "recorded_at": "2026-09-05T02:45:45Z",
+  "evidence": [
+    {
+      "path": "src/openpi/training/config.py",
+      "sha256": "76492f1218a8e0687ad3a8a28a0baad36dd282c1b3fe5eacd7eb07bfcd9c591a"
+    }
+  ],
+  "recheck": "on_change",
+  "valid_until": null,
+  "depends_on": {
+    "src/openpi/training/config.py": "76492f1218a8e0687ad3a8a28a0baad36dd282c1b3fe5eacd7eb07bfcd9c591a"
+  },
+  "supersedes": []
+}

@@ -985,6 +985,7 @@ _CONFIGS = [
     #
     TrainConfig(
         name="pi0_yam",
+        wandb_enabled=False,
         model=pi0_config.Pi0Config(),
         policy_metadata=_yam_policy_metadata(),
         data=LeRobotYamDataConfig(
@@ -1001,6 +1002,7 @@ _CONFIGS = [
     ),
     TrainConfig(
         name="pi0_yam_lora",
+        wandb_enabled=False,
         model=pi0_config.Pi0Config(paligemma_variant="gemma_2b_lora", action_expert_variant="gemma_300m_lora"),
         policy_metadata=_yam_policy_metadata(),
         data=LeRobotYamDataConfig(
@@ -1021,6 +1023,7 @@ _CONFIGS = [
     ),
     TrainConfig(
         name="pi05_yam",
+        wandb_enabled=False,
         model=pi0_config.Pi0Config(pi05=True),
         policy_metadata=_yam_policy_metadata(),
         data=LeRobotYamDataConfig(
@@ -1037,6 +1040,7 @@ _CONFIGS = [
     ),
     TrainConfig(
         name="pi05_yam_lora",
+        wandb_enabled=False,
         model=pi0_config.Pi0Config(
             pi05=True, paligemma_variant="gemma_2b_lora", action_expert_variant="gemma_300m_lora"
         ),

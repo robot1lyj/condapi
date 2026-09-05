@@ -4,6 +4,8 @@
 
 ## 当前默认路线
 
+服务器训练关闭 W&B（`wandb_enabled=False` / CLI `--no-wandb-enabled`），不依赖 W&B 在线或离线运行。训练入口已有 `LocalMetricLogger`，将指标写入实验目录的 `metrics/metrics.jsonl`、`metrics/metrics.csv` 和 `metrics/plots/`；结合 Slurm stdout/stderr 和 checkpoint 作为记忆证据。日志存在不等于 checkpoint/部署 gate 通过。
+
 首选配置为 `pi05_yam_lora`：
 
 - Pi0.5，`gemma_2b_lora` + `gemma_300m_lora`；
@@ -85,6 +87,8 @@ XLA_PYTHON_CLIENT_MEM_FRACTION=0.9 \
 | 保存/步数 | config 或 CLI | 输出目录包含 config、实验名和 step |
 
 每个实验至少记录 git commit、config、repo id、数据版本、split、norm 路径、base checkpoint、LoRA 设置、batch、workers、step 和 seed。普通 SFT、不同 LoRA 设置和后续评估必须使用独立实验名，避免结果无法归因。
+
+面向跨会话记忆的产物身份、指纹和本地 run manifest 合同见 [09 · 记忆系统](09_memory_system.md)。该合同用于记录与验收；训练入口尚未自动生成其全部字段，不得把文档规范写成已经实现的采集器。
 
 ## Checkpoint gate
 
