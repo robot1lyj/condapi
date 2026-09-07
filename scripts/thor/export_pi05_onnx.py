@@ -35,6 +35,7 @@ def main():
     parser.add_argument("--suite", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--compute-dtype", choices=("float32", "bfloat16"), default="bfloat16")
+    parser.add_argument("--exporter", choices=("dynamo", "legacy"), default="dynamo")
     args = parser.parse_args()
     if args.output.exists():
         parser.error("Use a new immutable export directory")
@@ -78,6 +79,7 @@ def main():
         },
         "contract": {"views": 3, "image_resolution": [224, 224], "horizon": 50, "steps": 10, "action_dim": 32},
         "compute_dtype": args.compute_dtype,
+        "exporter": args.exporter,
         "quantization": None,
         "tf32": False,
         "nonfinite_sanitization": False,
@@ -171,11 +173,14 @@ def main():
             first_inputs,
             str(onnx_path),
             opset_version=19,
-            dynamo=False,
+            dynamo=args.exporter == "dynamo",
             do_constant_folding=True,
             external_data=True,
             input_names=list(INPUT_NAMES),
             output_names=["actions"],
+            **(
+                {"report": True, "artifacts_dir": str(args.output / "diagnostics")} if args.exporter == "dynamo" else {}
+            ),
         )
     report["export_s"] = time.monotonic() - started
     metadata = onnx.load(str(onnx_path), load_external_data=False)
@@ -185,6 +190,15 @@ def main():
     )
     report["onnx_nodes"] = len(metadata.graph.node)
     report["onnx_sha256"] = digest(onnx_path)
+    external = set()
+    for tensor in metadata.graph.initializer:
+        for item in tensor.external_data:
+            if item.key == "location":
+                path = (args.output / item.value).resolve()
+                if not path.is_relative_to(args.output.resolve()):
+                    raise ValueError("ONNX external weights escaped export directory")
+                external.add(path)
+    report["external_weights_sha256"] = {str(p.relative_to(args.output.resolve())): digest(p) for p in sorted(external)}
     onnx.checker.check_model(str(onnx_path))
     report["status"] = "onnx_exported_engine_not_validated"
     report["finished_at"] = datetime.datetime.now(datetime.UTC).isoformat()

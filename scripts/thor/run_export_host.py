@@ -16,10 +16,14 @@ def main():
     parser.add_argument("--image", required=True)
     parser.add_argument("--run-id", required=True)
     parser.add_argument("--code-commit", required=True)
+    parser.add_argument("--stage", choices=("export", "engine"), default="export")
+    parser.add_argument("--source-export")
     parser.add_argument("--root", type=Path, default=Path("/home/wuyan-lyj/thor/pi"))
     args = parser.parse_args()
     if os.geteuid() != 0 or not re.fullmatch(r"[a-zA-Z0-9_-]+", args.run_id):
         parser.error("Run with sudo and a filename-safe run-id")
+    if args.stage == "engine" and (not args.source_export or not re.fullmatch(r"[a-zA-Z0-9_-]+", args.source_export)):
+        parser.error("Engine build requires a filename-safe source-export ID")
     scripts = Path(__file__).resolve().parent
     repo = scripts.parents[1]
     artifacts = args.root / "artifacts"
@@ -63,9 +67,18 @@ def main():
         f"/artifacts/{args.run_id}",
     ]
     files = sorted([*scripts.glob("*.py"), *repo.glob("src/openpi/**/*.py")])
+    if args.stage == "engine":
+        command = [
+            *command[: command.index("/bench/export_pi05_onnx.py")],
+            "/bench/build_trt_engine.py",
+            "--source",
+            f"/artifacts/{args.source_export}",
+            "--output",
+            f"/artifacts/{args.run_id}",
+        ]
     manifest = {
         "run_id": args.run_id,
-        "phase": "export",
+        "phase": args.stage,
         "started_at": datetime.datetime.now(datetime.UTC).isoformat(),
         "code_commit_base": args.code_commit,
         "source_files_sha256": {str(p.relative_to(repo)): hashlib.sha256(p.read_bytes()).hexdigest() for p in files},
@@ -74,7 +87,7 @@ def main():
         ).strip(),
         "command": command,
         "power_before": subprocess.check_output(["nvpmodel", "-q"], text=True),
-        "scope": "GPU reference/preparation inference and trace; no weight overwrite, network or robot IO",
+        "scope": "GPU reference/preparation inference, trace or engine tactic profiling; no input overwrite, network or robot IO",
     }
     with prefix.with_suffix(".manifest.json").open("x") as stream:
         json.dump(manifest, stream, ensure_ascii=False, indent=2)
