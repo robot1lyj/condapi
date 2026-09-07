@@ -18,6 +18,8 @@ TORCH_MODES = {
     "G": ("bfloat16", "bfloat16"),
     "H": ("bfloat16", "bfloat16"),
     "I": ("bfloat16", "bfloat16"),
+    "J": ("bfloat16", "bfloat16"),
+    "K": ("bfloat16", "bfloat16"),
 }
 
 
@@ -87,12 +89,14 @@ def main():
         ]
         if is_pytorch:
             command.extend(["--backend", "pytorch", "--compile" if mode in ("F", "G", "H", "I") else "--no-compile"])
-            if mode in ("F", "G", "H", "I"):
+            if mode in ("F", "G", "H", "I", "J", "K"):
                 command.append("--native-attention-mask")
-            if mode in ("G", "H"):
+            if mode in ("G", "H", "K"):
                 command.extend(["--attention", "sdpa"])
-            if mode in ("H", "I"):
+            if mode in ("H", "I", "J", "K"):
                 command.append("--batch-vision")
+            if mode in ("J", "K"):
+                command.append("--cuda-graph")
         prefix.parent.mkdir(parents=True, exist_ok=True)
         files = sorted([*scripts.glob("*.py"), *repo.glob("src/openpi/**/*.py"), *repo.glob("scripts/docker/thor/*")])
         hashes = {str(p.relative_to(repo)): hashlib.sha256(p.read_bytes()).hexdigest() for p in files if p.is_file()}

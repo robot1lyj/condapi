@@ -42,6 +42,7 @@ def main():
     parser.add_argument("--attention", choices=("eager", "sdpa"), default="eager")
     parser.add_argument("--batch-vision", action="store_true")
     parser.add_argument("--native-attention-mask", action="store_true")
+    parser.add_argument("--cuda-graph", action="store_true")
     parser.add_argument("--repeats", type=int, default=20)
     parser.add_argument("--steps", type=int, default=10)
     parser.add_argument("--seed", type=int, default=0)
@@ -52,6 +53,8 @@ def main():
     if args.output.exists():
         parser.error("Use a new run directory; existing experiments are immutable")
     is_pytorch = args.backend == "pytorch"
+    if args.cuda_graph and (not is_pytorch or args.compile):
+        parser.error("CUDA graph experiment requires PyTorch --no-compile")
     weight_path = args.checkpoint / "model.safetensors"
     if weight_path.exists() != is_pytorch:
         parser.error("Checkpoint format does not match the selected backend")
@@ -109,6 +112,8 @@ def main():
         "config": "pi05_yam",
         "backend": args.backend,
         "compiled": args.compile if is_pytorch else True,
+        "cuda_graph": args.cuda_graph,
+        "static_denoising_loop": args.cuda_graph,
         "warmups_per_sample": args.warmups,
         "attention": args.attention if is_pytorch else "jax_native",
         "batch_vision": args.batch_vision if is_pytorch else False,
@@ -188,6 +193,22 @@ def main():
         record["loaded_param_dtypes"] = dict(Counter(str(x.dtype) for x in leaves))
         record["loaded_param_bytes"] = sum(x.size * x.dtype.itemsize for x in leaves)
     print("MODEL_LOAD_OK", record["load_s"], record["loaded_param_dtypes"], flush=True)
+    graph_sampler = None
+    if args.cuda_graph:
+        from cuda_graph_sampler import CudaGraphSampler  # noqa: PLC0415
+
+        policy._model.static_denoising_loop = True  # noqa: SLF001
+        original_sampler = policy._sample_actions  # noqa: SLF001
+
+        def legacy_loop_reference(*call_args, **call_kwargs):
+            policy._model.static_denoising_loop = False  # noqa: SLF001
+            try:
+                return original_sampler(*call_args, **call_kwargs)
+            finally:
+                policy._model.static_denoising_loop = True  # noqa: SLF001
+
+        graph_sampler = CudaGraphSampler(original_sampler, reference_sampler=legacy_loop_reference)
+        policy._sample_actions = graph_sampler  # noqa: SLF001
     raw = {}
     output_transform = policy._output_transform  # noqa: SLF001
 
@@ -233,6 +254,8 @@ def main():
             "p95_ms": float(np.percentile(latencies, 95)),
             "repeat_max_abs_difference": float(np.max(np.abs(actions - actions[0]))),
         }
+        if graph_sampler is not None:
+            measurement["cuda_graph_vs_eager_max_abs"] = graph_sampler.validate_current()
         # Preserve completed observations even if a later sample fails.
         np.savez_compressed(args.output / f"{sample_path.stem}.npz", actions=actions, normalized_actions=normalized)
         (args.output / f"{sample_path.stem}.json").write_text(json.dumps(measurement, indent=2))

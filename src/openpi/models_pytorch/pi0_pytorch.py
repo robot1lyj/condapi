@@ -91,6 +91,7 @@ class PI0Pytorch(nn.Module):
         self.attention_implementation = "eager"
         self.batch_vision = False
         self.attention_mask_dtype = None
+        self.static_denoising_loop = False
 
         paligemma_config = _gemma.get_config(config.paligemma_variant)
         action_expert_config = _gemma.get_config(config.action_expert_variant)
@@ -424,6 +425,15 @@ class PI0Pytorch(nn.Module):
 
         x_t = noise
         time = torch.tensor(1.0, dtype=torch.float32, device=device)
+        if self.static_denoising_loop:
+            # Same FP32 recurrence and exactly num_steps Euler evaluations.
+            # Opt-in avoids the CUDA-scalar -> CPU loop-condition synchronization
+            # and permits whole-sampler CUDA graph capture. Legacy path stays below.
+            for _ in range(num_steps):
+                v_t = self.denoise_step(state, prefix_pad_masks, past_key_values, x_t, time.expand(bsize))
+                x_t = x_t + dt * v_t
+                time += dt
+            return x_t
         while time >= -dt / 2:
             expanded_time = time.expand(bsize)
             v_t = self.denoise_step(

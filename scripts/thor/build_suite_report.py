@@ -261,8 +261,12 @@ def attach_additional_runs(data, reference, run_paths, logs):
         name = f"{run_id.split('-')[1]} · {record['backend']} / {record['compute_dtype']}"
         detail = (
             f"compile={record['compiled']} / attention={record['attention']} / "
-            f"合批相机={record.get('batch_vision', False)} / 掩码={record.get('attention_mask', 'float32')} / TF32 关闭"
+            f"合批相机={record.get('batch_vision', False)} / CUDA graph={record.get('cuda_graph', False)} / "
+            f"掩码={record.get('attention_mask', 'float32')} / TF32 关闭"
         )
+        if record.get("cuda_graph"):
+            graph_error = max(m["cuda_graph_vs_eager_max_abs"] for m in record["measurements"])
+            detail += f" / 每输入图重放与 eager 最大差={graph_error:.6g}（计时外额外验证）"
         error = comparison["physical_dataset_units"]
         normalized = comparison["normalized_active_14d"]
         data["experiments"].append(
