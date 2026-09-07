@@ -191,3 +191,27 @@ OpenArm 的 16D `[右臂7, 右夹爪, 左臂7, 左夹爪]`、HQ degree 语义和
 [固定版本 LeRobot 字段定义](https://huggingface.co/datasets/lerobot/abc_130k_v3_train/blob/68651e4929d9fb00f798937b2d62617cab5c771d/README.md)
 确认左右臂 14D 顺序。将原始单位用于该 LeRobot port 仍是与样本范围一致的推断，尚未做 raw-to-port 逐值对照或实机标定。
 当前转换保留数值、不做尺度转换，输出 training_verified=false；norm stats 与训练验收仍未完成。
+
+## 2026-09-07 全量 LeRobot 转换启动
+
+用户已授权全量转换，但禁止覆盖原始数据。当前任务在完整性验收之外增加格式转换，不增加语义筛选。
+`scripts/convert_yam_subset.py --video-mode copy` 使用 LeRobot 0.5.1 的公开 metadata API 重建 v3 数据：
+视频独立复制、目标 SHA-256 校验并完整解码，不重编码、不建软/硬链接；数值不缩放、不裁剪、不删帧。
+逐集重建连续索引、任务标签和来源映射；video image stats 不伪造，OpenPI norm stats 仍需另算。
+旧的 reencode 模式保留供小样本/显式使用，批量入口固定使用 copy。
+
+批量入口 `scripts/run_yam_conversion.sh`，远端 tmux `lego-convert-v1`，单 CPU 核、nice 19、最长 48 小时。
+按 val → train 顺序转换，发布目标：
+`/home/wuyan/lyj/YAM/YAM_data/processed/lego_lerobot_v1_20260907/{val,train}`。
+运行期间父目录带 `.incomplete`；两个 split 都通过回读才发布父目录。既有目录拒绝覆盖，失败产物保留排查。
+日志 `/home/wuyan/lyj/YAM/env-transfer/lego-convert-v1-20260907/conversion.log`；
+只有 `CONVERSION_COMPLETE=...` 才代表整个版本发布完成。当前已启动，不能声明全部完成。
+
+转换使用已验证的 `/tmp/condapi-yam-smoke.CzQI6oAj/env`，输入输出均在共享盘；正式共享环境安装独立继续。
+约 92.6GB 输入（视频约 91.5GB），输出另占空间。每路视频复制时记录 SHA-256，复制后检查目标 SHA-256，
+全部源文件在发布前重查 size/mtime，Parquet 另重查 SHA-256；不是对视频做发布时二次源文件全量哈希。
+不变性检查不能防御外部刻意改内容并恢复同 size/mtime 的操作，转换期间原始数据应冻结。
+
+验证：本地 28 项相关测试通过，服务器 7 项转换测试通过；真实 val/421 复制转换及回读成功。
+全量作业确认逐集推进后，停止旧 tmux `lego-full-audit` 的重复检查，保留旧日志和未完成报告，
+其 `full.json.incomplete` 不能当作全量通过证据；完整性验收由新转换流程执行。

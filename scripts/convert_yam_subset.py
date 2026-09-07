@@ -13,7 +13,12 @@ from pathlib import Path
 import time
 
 import av
+import datasets
+from lerobot.datasets.compute_stats import compute_episode_stats
+from lerobot.datasets.dataset_metadata import LeRobotDatasetMetadata
+from lerobot.datasets.feature_utils import get_hf_features_from_features
 from lerobot.datasets.lerobot_dataset import LeRobotDataset
+from lerobot.datasets.video_utils import get_video_info
 import numpy as np
 import pyarrow.compute as pc
 import pyarrow.parquet as pq
@@ -66,10 +71,10 @@ def source_paths(root, split, episode):
     return data, videos
 
 
-def convert(root, output, split, contract, episode_ids=None, min_age=300):
+def convert(root, output, split, contract, episode_ids=None, min_age=300, video_mode="reencode"):
     root, output = Path(root).resolve(), Path(output).resolve()
     work = output.with_name(output.name + ".incomplete")
-    if split not in ("train", "val") or min_age < 0:
+    if split not in ("train", "val") or min_age < 0 or video_mode not in ("copy", "reencode"):
         raise ValueError("Invalid split or minimum file age")
     validate_contract(contract)
     if output == root or root in output.parents or output in root.parents:
@@ -103,7 +108,10 @@ def convert(root, output, split, contract, episode_ids=None, min_age=300):
             if stat[0] == 0 or time.time() - stat[1] / 1e9 < min_age:
                 raise ValueError(f"Pending upload: {path}")
             snapshots[path] = stat
-    hashes = {str(path.relative_to(root)): digest(path) for path in snapshots}
+    # Copy mode hashes each video while copying, avoiding a full extra source scan.
+    hashes = {
+        str(path.relative_to(root)): digest(path) for path in snapshots if video_mode != "copy" or path.suffix != ".mp4"
+    }
     features = {
         key: {"dtype": "float32", "shape": (14,), "names": JOINT_NAMES} for key in ("observation.state", "action")
     }
@@ -116,6 +124,10 @@ def convert(root, output, split, contract, episode_ids=None, min_age=300):
                 "shape": (frame.height, frame.width, 3),
                 "names": ["height", "width", "channels"],
             }
+    if video_mode == "copy":
+        return convert_copied_videos(
+            root, output, work, split, contract, episodes, all_episodes, fps, features, snapshots, hashes, manifest_hash
+        )
     writer = LeRobotDataset.create(
         repo_id=f"local/{output.name}",
         root=work,
@@ -206,6 +218,134 @@ def convert(root, output, split, contract, episode_ids=None, min_age=300):
     return output
 
 
+def convert_copied_videos(
+    root, output, work, split, contract, episodes, all_episodes, fps, features, snapshots, hashes, manifest_hash
+):
+    """Independent byte-identical video copies, using the official v3 metadata API.
+
+    No symlinks/hardlinks, rescaling, frame deletion or video re-encoding. Image
+    statistics are deliberately absent; numeric metadata stats are not OpenPI norm stats.
+    """
+    meta = LeRobotDatasetMetadata.create(f"local/{output.name}", int(fps), features, robot_type="yam", root=work)
+    provenance = {
+        "source_root": str(root),
+        "split": split,
+        "source_manifest_sha256": manifest_hash,
+        "contract": contract,
+        "source_files_sha256": hashes,
+        "subset": len(episodes) != len(all_episodes),
+        "episodes": [],
+        "video_encoding": "byte-identical independent copies; destination SHA-256 checked; full decode verified",
+        "image_stats": "not_computed",
+        "source_recheck": "all file sizes/mtimes; parquet final SHA-256; video SHA-256 during copy",
+        "norm_stats": "not_computed",
+        "training_verified": False,
+    }
+    try:
+        cached_path, table = None, None
+        for new_id, episode in enumerate(episodes):
+            data, videos = source_paths(root, split, episode)
+            if cached_path != data:
+                table = pq.read_table(data)
+                cached_path = data
+            rows = table.filter(pc.equal(table["episode_index"], episode["source_episode_index"]))
+            validate_rows(rows, episode)
+            length = episode["length"]
+            start = meta.total_frames
+            chunk, file_id = divmod(new_id, meta.chunks_size)
+            metadata = {
+                "data/chunk_index": chunk,
+                "data/file_index": file_id,
+                "dataset_from_index": start,
+                "dataset_to_index": start + length,
+            }
+            for key, source in videos.items():
+                target = work / meta.video_path.format(video_key=key, chunk_index=chunk, file_index=file_id)
+                target.parent.mkdir(parents=True, exist_ok=True)
+                hashed = hashlib.sha256()
+                with source.open("rb") as reader, target.open("xb") as writer:
+                    while block := reader.read(4 * 1024 * 1024):
+                        writer.write(block)
+                        hashed.update(block)
+                hashes[str(source.relative_to(root))] = hashed.hexdigest()
+                if signature(source) != snapshots[source] or digest(target) != hashed.hexdigest():
+                    raise ValueError(f"Source changed or copy checksum mismatch: {source}")
+                validate_video(target, length, fps)
+                info = get_video_info(target)
+                if (info["video.height"], info["video.width"], info["video.channels"]) != features[key]["shape"]:
+                    raise ValueError(f"Video shape changed: {source}")
+                if new_id == 0:
+                    meta.info["features"][key]["info"] = info
+                elif info != meta.info["features"][key]["info"]:
+                    raise ValueError(f"Video stream format changed: {source}")
+                metadata.update(
+                    {
+                        f"videos/{key}/chunk_index": chunk,
+                        f"videos/{key}/file_index": file_id,
+                        f"videos/{key}/from_timestamp": 0.0,
+                        f"videos/{key}/to_timestamp": length / fps,
+                    }
+                )
+            meta.save_episode_tasks([episode["task"]])
+            values = {
+                key: np.asarray(rows[key].to_pylist(), dtype=np.float32) for key in ("observation.state", "action")
+            }
+            values.update(
+                {
+                    "timestamp": np.asarray(rows["timestamp"], dtype=np.float32),
+                    "frame_index": np.arange(length, dtype=np.int64),
+                    "episode_index": np.full(length, new_id, dtype=np.int64),
+                    "index": np.arange(start, start + length, dtype=np.int64),
+                    "task_index": np.full(length, meta.get_task_index(episode["task"]), dtype=np.int64),
+                }
+            )
+            numeric_features = {key: value for key, value in meta.features.items() if value["dtype"] != "video"}
+            parquet = work / meta.data_path.format(chunk_index=chunk, file_index=file_id)
+            parquet.parent.mkdir(parents=True, exist_ok=True)
+            datasets.Dataset.from_dict(values, features=get_hf_features_from_features(numeric_features)).to_parquet(
+                parquet
+            )
+            meta.save_episode(
+                new_id, length, [episode["task"]], compute_episode_stats(values, numeric_features), metadata
+            )
+            provenance["episodes"].append(
+                {
+                    "episode_index": new_id,
+                    "source_episode_index": episode["source_episode_index"],
+                    "source_repo": episode["source_repo"],
+                    "source_revision": episode["source_revision"],
+                    "length": length,
+                    "task": episode["task"],
+                }
+            )
+            print(f"Copied {split} {new_id + 1}/{len(episodes)} source={episode['source_episode_index']}", flush=True)
+        meta.finalize()
+        if digest(root / "manifests" / f"{split}.jsonl") != manifest_hash or any(
+            signature(path) != before or (path.suffix != ".mp4" and digest(path) != hashes[str(path.relative_to(root))])
+            for path, before in snapshots.items()
+        ):
+            raise ValueError("Source changed during conversion")
+        check = LeRobotDataset(f"local/{output.name}", root=work, video_backend="pyav")
+        offset = 0
+        for episode in episodes:
+            for index in {offset, offset + episode["length"] // 2, offset + episode["length"] - 1}:
+                sample = check[index]
+                if sample["observation.state"].shape != (14,) or sample["action"].shape != (14,):
+                    raise ValueError("Output loader shape mismatch")
+                if sample["task"] != episode["task"]:
+                    raise ValueError("Output task mismatch")
+            offset += episode["length"]
+        if len(check) != offset or check.num_episodes != len(episodes):
+            raise ValueError("Output episode/frame count mismatch")
+        (work / "conversion_manifest.json").write_text(json.dumps(provenance, ensure_ascii=False, indent=2) + "\n")
+        if output.exists():
+            raise FileExistsError(output)
+        work.rename(output)
+    finally:
+        meta.finalize()
+    return output
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("root", type=Path)
@@ -214,6 +354,7 @@ def main():
     parser.add_argument("--contract", type=Path, required=True)
     parser.add_argument("--episode-ids", type=int, nargs="+")
     parser.add_argument("--min-age", type=float, default=300)
+    parser.add_argument("--video-mode", choices=("copy", "reencode"), default="reencode")
     args = vars(parser.parse_args())
     args["contract"] = json.loads(args["contract"].read_text())
     print(convert(**args))

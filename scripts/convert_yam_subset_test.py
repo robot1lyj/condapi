@@ -1,6 +1,8 @@
 import json
+import shutil
 
 import av
+from lerobot.datasets.dataset_metadata import LeRobotDatasetMetadata
 from lerobot.datasets.lerobot_dataset import LeRobotDataset
 import numpy as np
 import pyarrow as pa
@@ -71,10 +73,11 @@ def contract():
     }
 
 
-def test_roundtrip_preserves_values_and_split(subset, contract, tmp_path):
+@pytest.mark.parametrize("video_mode", ["reencode", "copy"])
+def test_roundtrip_preserves_values_and_split(subset, contract, tmp_path, video_mode):
     before = {p: digest(p) for p in subset.rglob("*") if p.is_file()}
     for split in ("train", "val"):
-        output = convert(subset, tmp_path / f"clean_{split}", split, contract, min_age=0)
+        output = convert(subset, tmp_path / f"clean_{split}", split, contract, min_age=0, video_mode=video_mode)
         data = LeRobotDataset(
             f"local/clean_{split}", root=output, video_backend="pyav", delta_timestamps={"action": [0, 1 / 30, 2 / 30]}
         )
@@ -88,6 +91,13 @@ def test_roundtrip_preserves_values_and_split(subset, contract, tmp_path):
         assert provenance["episodes"][0]["source_repo"] == f"fixture/{split}"
         assert provenance["episodes"][0]["source_episode_index"] == 95
         assert provenance["training_verified"] is False
+        if video_mode == "copy":
+            for camera, key in CAMERA_KEYS.items():
+                original = subset / split / "videos" / camera / "episode-000095.mp4"
+                copied = output / "videos" / key / "chunk-000" / "file-000.mp4"
+                assert digest(original) == digest(copied)
+                assert not copied.is_symlink()
+                assert original.stat().st_ino != copied.stat().st_ino
         cfg = training_config.get_config("pi05_yam_lora")
         loader = data_loader.create_torch_dataset(
             training_config.DataConfig(
@@ -121,8 +131,10 @@ def test_refuses_source_output_and_missing_episode(subset, contract, tmp_path):
         convert(subset, tmp_path / "bad", "train", contract, episode_ids=[999], min_age=0)
 
 
-def test_changed_source_never_published(subset, contract, tmp_path, monkeypatch):
-    original_save = LeRobotDataset.save_episode
+@pytest.mark.parametrize("video_mode", ["reencode", "copy"])
+def test_changed_source_never_published(subset, contract, tmp_path, monkeypatch, video_mode):
+    writer_class = LeRobotDatasetMetadata if video_mode == "copy" else LeRobotDataset
+    original_save = writer_class.save_episode
 
     def changed_save(self, *args, **kwargs):
         result = original_save(self, *args, **kwargs)
@@ -130,8 +142,32 @@ def test_changed_source_never_published(subset, contract, tmp_path, monkeypatch)
         path.write_text(path.read_text() + "\n")
         return result
 
-    monkeypatch.setattr(LeRobotDataset, "save_episode", changed_save)
+    monkeypatch.setattr(writer_class, "save_episode", changed_save)
     with pytest.raises(ValueError, match="Source changed"):
-        convert(subset, tmp_path / "changed", "train", contract, min_age=0)
+        convert(subset, tmp_path / "changed", "train", contract, min_age=0, video_mode=video_mode)
     assert not (tmp_path / "changed").exists()
     assert (tmp_path / "changed.incomplete").exists()
+
+
+def test_copy_mode_multiple_episode_offsets(subset, contract, tmp_path):
+    manifest = subset / "manifests/train.jsonl"
+    first = json.loads(manifest.read_text())
+    second = dict(first, source_episode_index=96, task="sort another color")
+    manifest.write_text(json.dumps(first) + "\n" + json.dumps(second) + "\n")
+    parquet = subset / "train/data/source-file-000.parquet"
+    rows = pq.read_table(parquet).to_pydict()
+    expanded = {key: value + value for key, value in rows.items()}
+    expanded["episode_index"] = [95] * 3 + [96] * 3
+    expanded["action"] = [[1.0] * 14] * 3 + [[0.5] * 14] * 3
+    pq.write_table(pa.table(expanded), parquet)
+    for camera in CAMERA_KEYS:
+        source = subset / "train/videos" / camera / "episode-000095.mp4"
+        shutil.copyfile(source, source.with_name("episode-000096.mp4"))
+    output = convert(subset, tmp_path / "multi", "train", contract, min_age=0, video_mode="copy")
+    data = LeRobotDataset("local/multi", root=output, video_backend="pyav", delta_timestamps={"action": [0, 1 / 30]})
+    assert len(data) == 6
+    assert data.num_episodes == 2
+    np.testing.assert_array_equal(data[2]["action"], np.ones((2, 14)))
+    np.testing.assert_array_equal(data[3]["action"], np.full((2, 14), 0.5))
+    assert data[3]["task"] == "sort another color"
+    assert (output / "videos/observation.images.top_rgb/chunk-000/file-001.mp4").is_file()
