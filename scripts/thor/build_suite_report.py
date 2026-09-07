@@ -278,6 +278,11 @@ def attach_additional_runs(data, reference, run_paths, logs):
                 detail += f" / 同固定循环捕获差={pure_capture:.6g} / 固定与旧循环分支差={branch:.6g}"
         if record.get("thor_triton_autotune"):
             detail += " / Thor SM 门槛实验：ATen 与 Triton 实测选核，独立编译缓存"
+        if record.get("backend") == "tensorrt":
+            engine_error = max(
+                m["engine_vs_export_eager"]["normalized_14d_max_abs"] for m in record["measurements"]
+            )
+            detail += f" / strongly typed 非量化 / 对导出前 BF16 eager 的归一化 14D 最大差={engine_error:.6g}"
         error = comparison["physical_dataset_units"]
         normalized = comparison["normalized_active_14d"]
         data["experiments"].append(

@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-09-07T22:28:25.414113+08:00",
+  "updated_at": "2026-09-07T22:49:20.177561+08:00",
   "facts": [
     {
       "label": "完整模型模式",
@@ -226,6 +226,14 @@
           "dynamo",
           "bfloat16",
           "导出失败 · 不计入有效推理配置",
+          "9/9 输入完全一致",
+          "无量化 / 无 FP16 修补 / TF32 关闭 / 原 FP64 时间嵌入预计算"
+        ],
+        [
+          "pi05-onnx-bf16-20260907-r3",
+          "dynamo",
+          "bfloat16",
+          "ONNX 已导出 · 引擎和任务精度未验收",
           "9/9 输入完全一致",
           "无量化 / 无 FP16 修补 / TF32 关闭 / 原 FP64 时间嵌入预计算"
         ]
@@ -24642,6 +24650,338 @@
           "/test-data/pi05-replay-v1/suite.json",
           "--output",
           "/artifacts/pi05-onnx-bf16-20260907-r2"
+        ],
+        "power_before": "NV Power Mode: 120W\n1\n",
+        "scope": "GPU reference/preparation inference, trace or engine tactic profiling; no input overwrite, network or robot IO"
+      }
+    },
+    {
+      "report": {
+        "run_id": "pi05-onnx-bf16-20260907-r3",
+        "phase": "export",
+        "started_at": "2026-09-07T14:30:59.403741+00:00",
+        "status": "onnx_exported_engine_not_validated",
+        "suite_sha256": "5dc74ebd1fbf296f21156ec685cf9edd6d7eb20c1a7eec858d8091369db1e15d",
+        "norm_stats_sha256": "d3fb4d94c095f9bf1fdc25ef032cd5a6a7575a983f4039e6f214f6b7af38dda9",
+        "converted_weights_sha256": "0b8f56470a55039f4ff36eb2bde99bff2fd2b117025fd994c844f76d4c68618b",
+        "conversion_audit_sha256": "a13877365be144cf54d248fa810e4edfb6014f66841f90a834c9f412d6b24982",
+        "versions": {
+          "torch": "2.12.0a0+5aff3928d8.nv26.5.50603568",
+          "transformers": "4.53.2",
+          "onnx": "1.21.0",
+          "onnxscript": "0.7.0",
+          "tensorrt": "10.16.1.11"
+        },
+        "contract": {
+          "views": 3,
+          "image_resolution": [
+            224,
+            224
+          ],
+          "horizon": 50,
+          "steps": 10,
+          "action_dim": 32
+        },
+        "compute_dtype": "bfloat16",
+        "exporter": "dynamo",
+        "quantization": null,
+        "tf32": false,
+        "nonfinite_sanitization": false,
+        "scope": "base model only; no LoRA; export preparation is not engine/task accuracy acceptance",
+        "loaded_param_dtypes": {
+          "torch.float32": 122,
+          "torch.bfloat16": 690
+        },
+        "noise_sha256": "42bca6ac77eb9aeaa872cdecc1b432e2c3d0f9a49f5da287515cecf556131d84",
+        "wrapper_comparisons": [
+          {
+            "sample": "episode-000095-early.npz",
+            "raw_max_abs": 0.0,
+            "physical_max_abs": 0.0,
+            "finite": true,
+            "exact": true
+          },
+          {
+            "sample": "episode-000095-middle.npz",
+            "raw_max_abs": 0.0,
+            "physical_max_abs": 0.0,
+            "finite": true,
+            "exact": true
+          },
+          {
+            "sample": "episode-000095-late.npz",
+            "raw_max_abs": 0.0,
+            "physical_max_abs": 0.0,
+            "finite": true,
+            "exact": true
+          },
+          {
+            "sample": "episode-000096-early.npz",
+            "raw_max_abs": 0.0,
+            "physical_max_abs": 0.0,
+            "finite": true,
+            "exact": true
+          },
+          {
+            "sample": "episode-000096-middle.npz",
+            "raw_max_abs": 0.0,
+            "physical_max_abs": 0.0,
+            "finite": true,
+            "exact": true
+          },
+          {
+            "sample": "episode-000096-late.npz",
+            "raw_max_abs": 0.0,
+            "physical_max_abs": 0.0,
+            "finite": true,
+            "exact": true
+          },
+          {
+            "sample": "episode-000097-early.npz",
+            "raw_max_abs": 0.0,
+            "physical_max_abs": 0.0,
+            "finite": true,
+            "exact": true
+          },
+          {
+            "sample": "episode-000097-middle.npz",
+            "raw_max_abs": 0.0,
+            "physical_max_abs": 0.0,
+            "finite": true,
+            "exact": true
+          },
+          {
+            "sample": "episode-000097-late.npz",
+            "raw_max_abs": 0.0,
+            "physical_max_abs": 0.0,
+            "finite": true,
+            "exact": true
+          }
+        ],
+        "time_embeddings_sha256": "888eae9f3b729f7a12066730b7ecb33485d1c042122cc8a8dd99a0bf4303857a",
+        "times_fp32": [
+          1.0,
+          0.8999999761581421,
+          0.7999999523162842,
+          0.6999999284744263,
+          0.5999999046325684,
+          0.49999991059303284,
+          0.3999999165534973,
+          0.2999999225139618,
+          0.19999992847442627,
+          0.09999992698431015
+        ],
+        "input_contract": {
+          "images": {
+            "shape": [
+              1,
+              9,
+              224,
+              224
+            ],
+            "dtype": "torch.float32"
+          },
+          "img_masks": {
+            "shape": [
+              1,
+              3
+            ],
+            "dtype": "torch.bool"
+          },
+          "lang_tokens": {
+            "shape": [
+              1,
+              200
+            ],
+            "dtype": "torch.int64"
+          },
+          "lang_masks": {
+            "shape": [
+              1,
+              200
+            ],
+            "dtype": "torch.bool"
+          },
+          "state": {
+            "shape": [
+              1,
+              32
+            ],
+            "dtype": "torch.float64"
+          },
+          "noise": {
+            "shape": [
+              1,
+              50,
+              32
+            ],
+            "dtype": "torch.float32"
+          }
+        },
+        "export_s": 732.0633733719988,
+        "onnx_inputs": [
+          "images",
+          "img_masks",
+          "lang_tokens",
+          "lang_masks",
+          "state",
+          "noise"
+        ],
+        "onnx_initializer_dtypes": {
+          "FLOAT": 128,
+          "BFLOAT16": 692,
+          "INT64": 39,
+          "BOOL": 10
+        },
+        "onnx_nodes": 18305,
+        "onnx_sha256": "57d565c39c573137205152a274adb65b82e668aff98c3589d79993a0539d3f8e",
+        "external_weights_sha256": {
+          "sampler.onnx.data": "7be25298ffe2bf6fdd0d751c6f753649ac0b155037abaa1905dfa0e50ef98bc9"
+        },
+        "finished_at": "2026-09-07T14:44:40.143691+00:00"
+      },
+      "report_sha256": "9a0c10629f0e7ce2fe5cb94c73dad89722543aa09b2fb660d40dd9970e412579",
+      "host_exit": {
+        "exit_code": 0,
+        "finished_at": "2026-09-07T14:44:44.731051+00:00"
+      },
+      "host_manifest": {
+        "run_id": "pi05-onnx-bf16-20260907-r3",
+        "phase": "export",
+        "started_at": "2026-09-07T14:30:53.749748+00:00",
+        "code_commit_base": "fc41fe2f9ae8be52947005f7553cc0235f66d9f8",
+        "source_files_sha256": {
+          "scripts/thor/batch_vision_test.py": "46f53261a14d84bef82cf6e751aadce5ea23a85e0c59812911869e447780caa9",
+          "scripts/thor/benchmark_pi05.py": "53ca79105424af5eb7e71fadf00a9a35a87eb19fe135fc8beeb11861d4fc6320",
+          "scripts/thor/benchmark_pi05_test.py": "e359cc270ce95a9024e29ac85158d34cc401a85f0330380e7cc0fb975ef829f6",
+          "scripts/thor/benchmark_suite.py": "0903771a62be4dc6245cb7db7d09710143ea3c07ebab108348c00aacc46bd7bd",
+          "scripts/thor/build_suite_report.py": "eaacdbcd1734015d32fc105378581ac0ef2781fb36415612e6c885b2f41758ea",
+          "scripts/thor/build_suite_report_test.py": "09a3a563ba3907cdc7197818afe068d2e4294199e4968443167906fc7bbb4cc7",
+          "scripts/thor/build_trt_engine.py": "d65b8741d0129f3fad69aed5f08541869540fde850c19aa01319c997f22b7f89",
+          "scripts/thor/compare_suites.py": "b8c1bbe0b037e8ddb8a2fe16c4b06b0bcad019ebca7f315dc684470bc05e3fff",
+          "scripts/thor/compare_suites_test.py": "98036d36aca8405b117e0b2143e9c77518a1accc3d894be5ee1fdce17dce4552",
+          "scripts/thor/conversion_precision_test.py": "f6da0506d31f2292cac36bace9fe641642fa92a579a09c4beda16e5a68159401",
+          "scripts/thor/cuda_graph_sampler.py": "f7bcb376a42fbb735b4771942d9ed9337a2a9d4946873c845c3ca484bf5350fa",
+          "scripts/thor/cuda_graph_sampler_test.py": "54d70697146bee25ac0ddf9cd6bb28b657adf81fbd52e8b10484aa0cbbb7f353",
+          "scripts/thor/download_ngc_image.py": "8a625d76ad7c42d78594f051c5653215dbb7a313252fe41a790e3e1dc54d0d21",
+          "scripts/thor/download_ngc_image_test.py": "7ade402500ca00da5e81bc3e6572931a408ed584afede0575d7972b37aaf0498",
+          "scripts/thor/export_pi05_onnx.py": "6132797f36b88aaf23d6da1940f1cd2b7d8d0510e3c15c5ab557fe975be66c12",
+          "scripts/thor/logged_command.py": "7fdbdb74bec640f3248f6fd460d0bb00e3c234ffec007cfe9aaaefb2d962b04a",
+          "scripts/thor/maxn_session.py": "698e3e554b3b07407da23c9995f28bfd2d46ae82d9ad8b5fcdd078a1f7bf549c",
+          "scripts/thor/maxn_session_test.py": "e06b8b03893396a8472fe67ddd3d63a7303eefaed9e23e52ceb0b4afc1052615",
+          "scripts/thor/onnx_sampler.py": "9c19cedb9b38ca74e30d41431c4a71bcb18d98918d21288ffa1a2788e5197a3a",
+          "scripts/thor/onnx_sampler_test.py": "880136660c76893a928c141e41c150b9b9e53c340c53a37a7f5ad773adb5b544",
+          "scripts/thor/prepare_replay_fixture.py": "d49646094c23641e0b2a74bb66e10bd149ed448fbc6378eba6be262ff7392c1d",
+          "scripts/thor/prepare_replay_fixture_test.py": "04c34bb3cc1cb4497850bdc0135762fd469c1d45cc8ff3c6f4cbd8388a881a30",
+          "scripts/thor/render_report.py": "d28db2a871bc69fd09f8a22f987471d9b98f59b94c4fc497adf468931e9a6967",
+          "scripts/thor/render_report_test.py": "712abd779bba10f95492dd9fb63164ac33bf9d09d5ef8f945f8720a9bcd6730f",
+          "scripts/thor/run_export_host.py": "255e2d0b3ff8d1b16cc26f52fc6388fb4e162776c0102bcd2ee08e2868bb2ff3",
+          "scripts/thor/run_suite_host.py": "97d9d162b8405093a6ce4a1da84cb150ccc32c515e10ec651743ad13344d9e74",
+          "scripts/thor/sync_code.py": "f08fdcaf7c343da2606e8850cf0612168d80fc9fd8abb1542b7ad7773e08a825",
+          "scripts/thor/sync_code_test.py": "b7ab09ca04eaf415f8addeac81305009a88820fc3d8de71da64c72f6f51624a1",
+          "scripts/thor/thor_triton_autotune.py": "17bd04ac04519ca0c2b2fe703e0ccdc7cf1ca23ce8faf6fb07dfe8b7883c948e",
+          "scripts/thor/thor_triton_autotune_test.py": "bb9dc7f30b8bc8bf43c22425e4321de368e7e8a1fab201f3e0587fb1a7aa0046",
+          "scripts/thor/vendor_stack_test.py": "a551eb248d71ad17f287863b839416e48054694a1505a9571184d26706f18042",
+          "src/openpi/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "src/openpi/conftest.py": "626672e385fb276396c119e2220421065c58f8ec602401e8bf2ae509f9fffaf3",
+          "src/openpi/models/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "src/openpi/models/gemma.py": "7e42ada4ae7e9995f0ef3e33a0c224758323c2015e2d9d72ec15726a8a001d2a",
+          "src/openpi/models/gemma_fast.py": "563c6e1ffd8afa31c406bcb8894a605e87df88f6c075d398d97a57af6bc3aefa",
+          "src/openpi/models/lora.py": "ced28716950c34d84a1a6d0b03b1d9550000732721df884818080b6e78cb3289",
+          "src/openpi/models/lora_test.py": "a0f10525de7773310402b3ffa636e88ffff7035f3179b140aacc6809c122f085",
+          "src/openpi/models/model.py": "9ecc85edfcf9aba40954ae08fbc9828de6b345790c79910303c3bf8602448781",
+          "src/openpi/models/model_test.py": "f8e71f195045d4e3ef1ddfafb2337fa52e5aa2f89bce1fde62f5cbfb67121f21",
+          "src/openpi/models/pi0.py": "9294585c2e2780f70e4decab1c4219f8c833750e8e53743cf3a792613fa42b96",
+          "src/openpi/models/pi0_config.py": "e15d71586f1a561b35c5651227607613fb16d2df411f3708b1c9d36b02544285",
+          "src/openpi/models/pi0_fast.py": "627332a555046f2744ef144c45f8bd3361a9820cf68854a4528d0fdbba7e9aa3",
+          "src/openpi/models/pi0_test.py": "5082873014a7fc45fb8414f517909e1c24cdafea980a1fb612e0aea6058ed0fe",
+          "src/openpi/models/restore_params_test.py": "41b83a9970c0d428cf32ebb7c1323dff52dab74c1f3c95337f4bf872f65891ce",
+          "src/openpi/models/siglip.py": "14b4df0be280d5769fb0dc31a40cde27525dbb1980cc998c28475d62fa3cad32",
+          "src/openpi/models/tokenizer.py": "26b898e2ec0b9b1bf7dae8231138c59b6faa7c098401ccfc27f1b0c401799c5b",
+          "src/openpi/models/tokenizer_test.py": "5abd179ce883420e39d4d18b33d0123290af752da243003aa48a3bc06dbb9517",
+          "src/openpi/models/utils/fsq_tokenizer.py": "88866638ee4775f46a222561a957bd35e20600fe38c5888b587016ad77b1065f",
+          "src/openpi/models/vit.py": "d285d057636c3cba2d1fd3b37693b18075ad4b9c3b47bbde807c34c6c376ac93",
+          "src/openpi/models_pytorch/gemma_pytorch.py": "08fd8d750519f0fb44fc5173311e50a30f4c8f32c02e51244b4f8e47b32cd52f",
+          "src/openpi/models_pytorch/pi0_pytorch.py": "f17a594c1de9f51b7b0b8ef2677ab5da2a26bb9bd618c108f8b3788a013b0ea5",
+          "src/openpi/models_pytorch/preprocessing_pytorch.py": "6a44e91be2d7a724c6140d2cc98ed0a631b8d38bbb29f63b380a0a19f903bbf6",
+          "src/openpi/models_pytorch/transformers_replace/models/gemma/configuration_gemma.py": "26fd0d0f52730ab32b6f337eb73ae9a26cb71ae0915bc49eced1d0e2ed8d0ec6",
+          "src/openpi/models_pytorch/transformers_replace/models/gemma/modeling_gemma.py": "68591d8e82c8a37b84c3a390f014e44855185a082403c9c9b12457d79a349590",
+          "src/openpi/models_pytorch/transformers_replace/models/paligemma/modeling_paligemma.py": "c945d330b829264f927f3ee5339f977238631772de07a28e855e265bb85fd53c",
+          "src/openpi/models_pytorch/transformers_replace/models/siglip/check.py": "466e8eb7887ac5ccc98118a3169298d6ab65a284d834bae74751e3854dbc4245",
+          "src/openpi/models_pytorch/transformers_replace/models/siglip/modeling_siglip.py": "ef2e99500f263fdd78db9d4d9a255e29d844eb92f53c25ad640f8056700ef84b",
+          "src/openpi/policies/aloha_policy.py": "50d7ad972d80142ecb0f03b0780dacfd3af212946f4c9aac31a204b02db4543d",
+          "src/openpi/policies/droid_policy.py": "7d0893555964d485e231f70084125084a99495705ddd74b29461229d524fff26",
+          "src/openpi/policies/libero_policy.py": "ad01e5be74516d9ec9aeb1f76294d5c9f7f7179a60f1f7fbbb35e7646534f81a",
+          "src/openpi/policies/piper_policy.py": "c1ba6212884af14763fd155ab1d0f03457dc4727e1baca1fd9ba2fe66ecae338",
+          "src/openpi/policies/policy.py": "7b1dab66b4403c244d0b7c48d1c08c4d10517301fd4ca3306f2a3c65f293e8c1",
+          "src/openpi/policies/policy_config.py": "5950d05c53ebee96dd7c515a4cab771d85ae16f74b120365647974e105f6873c",
+          "src/openpi/policies/policy_config_dtype_test.py": "dcac48a384c2124fc11375cf71a80b88614ef7ed4f7b77493e2487d88bd16ee3",
+          "src/openpi/policies/policy_import_test.py": "e730301a9214687f6309d1deb04614dc5027d4713e2006e6887f58d529868b08",
+          "src/openpi/policies/policy_test.py": "9dbb20963600367a7e7abfc97d1e326916777c57a87b39b1bc4070ba64676683",
+          "src/openpi/policies/pytorch_precision_test.py": "e7405fb18f6080388064c9adff8d0de1f141b6f385eda1a09fda5490563ade66",
+          "src/openpi/policies/yam_policy.py": "e7eb4fdc219a1cb81610d3a105a4e41bcad9641d32356337c79e285dba4baeca",
+          "src/openpi/policies/yam_policy_test.py": "b7cfee67fd520a6bc84427e032979368a569a7192fce8c3cd8a5e5557be51f86",
+          "src/openpi/serving/websocket_policy_server.py": "f538bcfc8a5554923f8703af2d19ec159254e895dd40a3d79a2de9abc14ad494",
+          "src/openpi/shared/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "src/openpi/shared/array_typing.py": "6524945566eab3eb97b75a6280ba4724617b4d028c55f05172b283c3de68a026",
+          "src/openpi/shared/download.py": "1fee4957a275ab632fd4dd98af240516a2a708da2db38a838132f05c04da425d",
+          "src/openpi/shared/download_test.py": "234ee70ab2501a1421f6c44cbd83c1e16747597023319ae1446bed9d44f17072",
+          "src/openpi/shared/image_tools.py": "42145e9269b27a1dafe3f05b1c14adcb6455993cf74745b301317b4d24dc4f80",
+          "src/openpi/shared/image_tools_test.py": "f1b495607775ac25c42b2b015d20468a7f793f465a6e9b43c057544586aab37c",
+          "src/openpi/shared/nnx_utils.py": "4da7111ba3011c4d1c381c9ed17257771df6a50ed89182647c3fb6f79208005e",
+          "src/openpi/shared/normalize.py": "6c2cea4946fb07e51801530400d2b2fd94730e195cd290d6b6960114eca9739d",
+          "src/openpi/shared/normalize_test.py": "fda27a21cf37f337b12bcab71229407c2a349c5965c33f278bdc468ed03f58af",
+          "src/openpi/training/checkpoints.py": "a36dc6515376fe3f8d2bc25ad8fbbd2b271c0fa05c6bc2d439f4ba4d3c45306f",
+          "src/openpi/training/config.py": "300ee18be50ae0e4702324e0f8762f85a85d75b6999cf8f23cc35bc394889894",
+          "src/openpi/training/data_loader.py": "258a60f54ee4aabf462aceafe9a0976cf890d5b5ca88e054d0da8f86cf4ed8c4",
+          "src/openpi/training/data_loader_test.py": "ec2076a386ff0aa327460a8bd7a1aa762d7b35d72d381482918f5128349e86d2",
+          "src/openpi/training/droid_rlds_dataset.py": "1d3a057a040240218234d7dbc6680ee4fe8256f2058531a0f9fefd3f7ee995a4",
+          "src/openpi/training/metrics.py": "2e2e31ffa2bc6ee8fdde97cf799eedc1b77b6df647fc1cabeeb35c8303595444",
+          "src/openpi/training/misc/polaris_config.py": "c2ab92efb5e0d675118ad812113fd1c3cb3a62cdab5d79066014266e82df12d8",
+          "src/openpi/training/misc/roboarena_config.py": "914acdd74ccf90e6779c13a5093140595c7e4f687e9e0b167439446a81d74c01",
+          "src/openpi/training/optimizer.py": "cfb5d6f6aec61fbe961287b4015c652260628a0ed4682a0dbdc271b8e65431fa",
+          "src/openpi/training/sharding.py": "c67c4112a126ab097571c8a882fd1ee3f106b15b6e608e7205ac7f29b44ca985",
+          "src/openpi/training/utils.py": "b684e674343f86ef5e976f279a586d3fe2f885e901f396ac899ed136abc7eca6",
+          "src/openpi/training/weight_loaders.py": "a54ac3222f81f8c6233241bc16b6f369c9416cdaa83f7058f96f7ddcfde1a3b4",
+          "src/openpi/transforms.py": "d31a2288fb50258a758fd1a3e991e689c15271ffca7636fb7be38f738cc30e0f",
+          "src/openpi/transforms_test.py": "395601075c47eaa23be4805adda5f5351465bb240de2203a4da8722bd3a52760"
+        },
+        "image_id": "sha256:89d40707e81ab1d18078aba0471c65e31af201d95b03fe6c13bab129ebff221b",
+        "command": [
+          "docker",
+          "run",
+          "--rm",
+          "--name",
+          "pi05-onnx-bf16-20260907-r3",
+          "--runtime=nvidia",
+          "--gpus",
+          "all",
+          "--network",
+          "none",
+          "--shm-size=8g",
+          "-e",
+          "PYTHONUNBUFFERED=1",
+          "-e",
+          "NVIDIA_DRIVER_CAPABILITIES=compute,utility",
+          "-v",
+          "/home/wuyan-lyj/condapi/scripts/thor:/bench:ro",
+          "-v",
+          "/home/wuyan-lyj/thor/pi/checkpoints:/checkpoints:ro",
+          "-v",
+          "/home/wuyan-lyj/thor/pi/test-data:/test-data:ro",
+          "-v",
+          "/home/wuyan-lyj/thor/pi/cache:/cache",
+          "-v",
+          "/home/wuyan-lyj/thor/pi/artifacts:/artifacts",
+          "openpi-pi:thor-pytorch-onnx-v6-20260907",
+          "python",
+          "/bench/export_pi05_onnx.py",
+          "--checkpoint",
+          "/checkpoints/pi05_base_pytorch_fp32_v1",
+          "--suite",
+          "/test-data/pi05-replay-v1/suite.json",
+          "--output",
+          "/artifacts/pi05-onnx-bf16-20260907-r3"
         ],
         "power_before": "NV Power Mode: 120W\n1\n",
         "scope": "GPU reference/preparation inference, trace or engine tactic profiling; no input overwrite, network or robot IO"

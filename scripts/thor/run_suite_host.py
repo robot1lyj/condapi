@@ -23,6 +23,7 @@ TORCH_MODES = {
     "L": ("bfloat16", "bfloat16"),
     "M": ("bfloat16", "bfloat16"),
     "N": ("bfloat16", "bfloat16"),
+    "T": ("bfloat16", "bfloat16"),
 }
 
 
@@ -33,11 +34,14 @@ def main():
     parser.add_argument("--batch-id", required=True)
     parser.add_argument("--modes", nargs="+", choices=(*MODES, *TORCH_MODES), default=list(MODES))
     parser.add_argument("--code-commit", required=True)
+    parser.add_argument("--engine-id")
     args = parser.parse_args()
     if os.geteuid() != 0:
         parser.error("Run with sudo on Thor")
     if not re.fullmatch(r"[a-zA-Z0-9_-]+", args.batch_id):
         parser.error("batch-id must be a filename-safe identifier")
+    if "T" in args.modes and (not args.engine_id or not re.fullmatch(r"[a-zA-Z0-9_-]+", args.engine_id)):
+        parser.error("TensorRT mode requires a filename-safe engine-id")
     scripts = Path(__file__).resolve().parent
     repo = scripts.parents[1]
     for mode in args.modes:
@@ -93,8 +97,16 @@ def main():
         ]
         if is_pytorch:
             command.extend(
-                ["--backend", "pytorch", "--compile" if mode in ("F", "G", "H", "I", "N") else "--no-compile"]
+                [
+                    "--backend",
+                    "tensorrt" if mode == "T" else "pytorch",
+                    "--compile" if mode in ("F", "G", "H", "I", "N") else "--no-compile",
+                ]
             )
+            if mode == "T":
+                image_index = command.index(args.image)
+                command[image_index:image_index] = ["-v", f"{args.root / 'artifacts'}:/artifacts:ro"]
+                command.extend(["--engine", f"/artifacts/{args.engine_id}"])
             if mode in ("F", "G", "H", "I", "J", "K", "L", "M", "N"):
                 command.append("--native-attention-mask")
             if mode in ("G", "H", "K", "M"):

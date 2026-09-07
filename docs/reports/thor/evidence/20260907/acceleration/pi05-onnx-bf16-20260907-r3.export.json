@@ -1,0 +1,184 @@
+{
+  "run_id": "pi05-onnx-bf16-20260907-r3",
+  "phase": "export",
+  "started_at": "2026-09-07T14:30:59.403741+00:00",
+  "status": "onnx_exported_engine_not_validated",
+  "suite_sha256": "5dc74ebd1fbf296f21156ec685cf9edd6d7eb20c1a7eec858d8091369db1e15d",
+  "norm_stats_sha256": "d3fb4d94c095f9bf1fdc25ef032cd5a6a7575a983f4039e6f214f6b7af38dda9",
+  "converted_weights_sha256": "0b8f56470a55039f4ff36eb2bde99bff2fd2b117025fd994c844f76d4c68618b",
+  "conversion_audit_sha256": "a13877365be144cf54d248fa810e4edfb6014f66841f90a834c9f412d6b24982",
+  "versions": {
+    "torch": "2.12.0a0+5aff3928d8.nv26.5.50603568",
+    "transformers": "4.53.2",
+    "onnx": "1.21.0",
+    "onnxscript": "0.7.0",
+    "tensorrt": "10.16.1.11"
+  },
+  "contract": {
+    "views": 3,
+    "image_resolution": [
+      224,
+      224
+    ],
+    "horizon": 50,
+    "steps": 10,
+    "action_dim": 32
+  },
+  "compute_dtype": "bfloat16",
+  "exporter": "dynamo",
+  "quantization": null,
+  "tf32": false,
+  "nonfinite_sanitization": false,
+  "scope": "base model only; no LoRA; export preparation is not engine/task accuracy acceptance",
+  "loaded_param_dtypes": {
+    "torch.float32": 122,
+    "torch.bfloat16": 690
+  },
+  "noise_sha256": "42bca6ac77eb9aeaa872cdecc1b432e2c3d0f9a49f5da287515cecf556131d84",
+  "wrapper_comparisons": [
+    {
+      "sample": "episode-000095-early.npz",
+      "raw_max_abs": 0.0,
+      "physical_max_abs": 0.0,
+      "finite": true,
+      "exact": true
+    },
+    {
+      "sample": "episode-000095-middle.npz",
+      "raw_max_abs": 0.0,
+      "physical_max_abs": 0.0,
+      "finite": true,
+      "exact": true
+    },
+    {
+      "sample": "episode-000095-late.npz",
+      "raw_max_abs": 0.0,
+      "physical_max_abs": 0.0,
+      "finite": true,
+      "exact": true
+    },
+    {
+      "sample": "episode-000096-early.npz",
+      "raw_max_abs": 0.0,
+      "physical_max_abs": 0.0,
+      "finite": true,
+      "exact": true
+    },
+    {
+      "sample": "episode-000096-middle.npz",
+      "raw_max_abs": 0.0,
+      "physical_max_abs": 0.0,
+      "finite": true,
+      "exact": true
+    },
+    {
+      "sample": "episode-000096-late.npz",
+      "raw_max_abs": 0.0,
+      "physical_max_abs": 0.0,
+      "finite": true,
+      "exact": true
+    },
+    {
+      "sample": "episode-000097-early.npz",
+      "raw_max_abs": 0.0,
+      "physical_max_abs": 0.0,
+      "finite": true,
+      "exact": true
+    },
+    {
+      "sample": "episode-000097-middle.npz",
+      "raw_max_abs": 0.0,
+      "physical_max_abs": 0.0,
+      "finite": true,
+      "exact": true
+    },
+    {
+      "sample": "episode-000097-late.npz",
+      "raw_max_abs": 0.0,
+      "physical_max_abs": 0.0,
+      "finite": true,
+      "exact": true
+    }
+  ],
+  "time_embeddings_sha256": "888eae9f3b729f7a12066730b7ecb33485d1c042122cc8a8dd99a0bf4303857a",
+  "times_fp32": [
+    1.0,
+    0.8999999761581421,
+    0.7999999523162842,
+    0.6999999284744263,
+    0.5999999046325684,
+    0.49999991059303284,
+    0.3999999165534973,
+    0.2999999225139618,
+    0.19999992847442627,
+    0.09999992698431015
+  ],
+  "input_contract": {
+    "images": {
+      "shape": [
+        1,
+        9,
+        224,
+        224
+      ],
+      "dtype": "torch.float32"
+    },
+    "img_masks": {
+      "shape": [
+        1,
+        3
+      ],
+      "dtype": "torch.bool"
+    },
+    "lang_tokens": {
+      "shape": [
+        1,
+        200
+      ],
+      "dtype": "torch.int64"
+    },
+    "lang_masks": {
+      "shape": [
+        1,
+        200
+      ],
+      "dtype": "torch.bool"
+    },
+    "state": {
+      "shape": [
+        1,
+        32
+      ],
+      "dtype": "torch.float64"
+    },
+    "noise": {
+      "shape": [
+        1,
+        50,
+        32
+      ],
+      "dtype": "torch.float32"
+    }
+  },
+  "export_s": 732.0633733719988,
+  "onnx_inputs": [
+    "images",
+    "img_masks",
+    "lang_tokens",
+    "lang_masks",
+    "state",
+    "noise"
+  ],
+  "onnx_initializer_dtypes": {
+    "FLOAT": 128,
+    "BFLOAT16": 692,
+    "INT64": 39,
+    "BOOL": 10
+  },
+  "onnx_nodes": 18305,
+  "onnx_sha256": "57d565c39c573137205152a274adb65b82e668aff98c3589d79993a0539d3f8e",
+  "external_weights_sha256": {
+    "sampler.onnx.data": "7be25298ffe2bf6fdd0d751c6f753649ac0b155037abaa1905dfa0e50ef98bc9"
+  },
+  "finished_at": "2026-09-07T14:44:40.143691+00:00"
+}

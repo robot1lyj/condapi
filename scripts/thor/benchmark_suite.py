@@ -36,7 +36,8 @@ def main():
     parser.add_argument("--suite", type=Path, required=True)
     parser.add_argument("--params-dtype", choices=("checkpoint", "float32", "bfloat16"), required=True)
     parser.add_argument("--compute-dtype", choices=("float32", "bfloat16"), required=True)
-    parser.add_argument("--backend", choices=("jax", "pytorch"), default="jax")
+    parser.add_argument("--backend", choices=("jax", "pytorch", "tensorrt"), default="jax")
+    parser.add_argument("--engine", type=Path)
     parser.add_argument("--compile", action=argparse.BooleanOptionalAction, default=True)
     parser.add_argument("--warmups", type=int, default=2)
     parser.add_argument("--attention", choices=("eager", "sdpa"), default="eager")
@@ -54,7 +55,12 @@ def main():
         parser.error("Need at least two repeats and positive denoising steps")
     if args.output.exists():
         parser.error("Use a new run directory; existing experiments are immutable")
-    is_pytorch = args.backend == "pytorch"
+    is_trt = args.backend == "tensorrt"
+    is_pytorch = args.backend in ("pytorch", "tensorrt")
+    if is_trt and (
+        args.engine is None or args.compile or args.cuda_graph or args.thor_triton_autotune or args.steps != 10
+    ):
+        parser.error("TensorRT requires --engine and --no-compile without PyTorch-only optimizations")
     if args.cuda_graph and (not is_pytorch or args.compile):
         parser.error("CUDA graph experiment requires PyTorch --no-compile")
     if args.compile_graph_parts and not args.cuda_graph:
@@ -97,6 +103,8 @@ def main():
         metadata_hash = conversion["checkpoint_metadata_sha256"]
         devices = [torch.cuda.get_device_name(), str(torch.cuda.get_device_capability())]
         packages = ("torch", "transformers", "jax", "jaxlib", "flax", "orbax-checkpoint")
+        if is_trt:
+            packages = (*packages, "tensorrt")
     else:
         if any(d.platform != "gpu" for d in jax.devices()):
             raise RuntimeError("GPU execution is required; no CPU fallback")
@@ -121,11 +129,11 @@ def main():
         "cuda_graph": args.cuda_graph,
         "compiled_graph_parts": args.compile_graph_parts,
         "graph_reference": "uncaptured_legacy_loop_same_kernel_backend" if args.cuda_graph else None,
-        "static_denoising_loop": args.cuda_graph,
+        "static_denoising_loop": is_trt or args.cuda_graph,
         "warmups_per_sample": args.warmups,
-        "attention": args.attention if is_pytorch else "jax_native",
-        "batch_vision": args.batch_vision if is_pytorch else False,
-        "attention_mask": "query_dtype" if is_pytorch and args.native_attention_mask else "float32",
+        "attention": "onnx_eager_lowered_to_tensorrt" if is_trt else args.attention if is_pytorch else "jax_native",
+        "batch_vision": True if is_trt else args.batch_vision if is_pytorch else False,
+        "attention_mask": "query_dtype" if is_trt or (is_pytorch and args.native_attention_mask) else "float32",
         "params_dtype": f"fp32_checkpoint_to_{args.compute_dtype}" if is_pytorch else args.params_dtype,
         "compute_dtype": args.compute_dtype,
         "matmul_precision": str(jax.config.jax_default_matmul_precision),
@@ -168,16 +176,33 @@ def main():
         if is_pytorch
         else {}
     )
-    policy = policy_config.create_trained_policy(
-        train_config,
-        args.checkpoint,
-        norm_stats=normalize.deserialize_json(norm_path.read_text()),
-        sample_kwargs={"num_steps": args.steps},
-        jax_param_dtype=args.params_dtype,
-        **backend_options,
-    )
+    if is_trt:
+        from trt_policy import create_trt_policy  # noqa: PLC0415
+
+        policy = create_trt_policy(train_config, args.engine, normalize.deserialize_json(norm_path.read_text()))
+        engine_report = policy._model.build_report  # noqa: SLF001
+        export_report_path = Path(engine_report["source_export"]) / "export_report.json"
+        if digest(export_report_path) != engine_report["source_export_report_sha256"]:
+            raise ValueError("Source export report hash mismatch")
+        export_report = json.loads(export_report_path.read_text())
+        for key in ("suite_sha256", "norm_stats_sha256", "converted_weights_sha256"):
+            if export_report[key] != record[key]:
+                raise ValueError(f"TensorRT source mismatch: {key}")
+        if export_report["compute_dtype"] != args.compute_dtype:
+            raise ValueError("Engine precision does not match requested experiment")
+        record["engine_report"] = engine_report
+        record["engine_io"] = policy._model.io_contract  # noqa: SLF001
+    else:
+        policy = policy_config.create_trained_policy(
+            train_config,
+            args.checkpoint,
+            norm_stats=normalize.deserialize_json(norm_path.read_text()),
+            sample_kwargs={"num_steps": args.steps},
+            jax_param_dtype=args.params_dtype,
+            **backend_options,
+        )
     record["load_s"] = time.monotonic() - started
-    if is_pytorch:
+    if is_pytorch and not is_trt:
         policy._model.attention_implementation = args.attention  # noqa: SLF001
         policy._model.batch_vision = args.batch_vision  # noqa: SLF001
         if args.native_attention_mask:
@@ -190,11 +215,21 @@ def main():
         torch.set_float32_matmul_precision("highest")
         torch.backends.cuda.matmul.allow_tf32 = False
         torch.backends.cudnn.allow_tf32 = False
-        leaves = list(policy._model.parameters())  # noqa: SLF001
-        if not all(x.is_cuda for x in leaves):
-            raise RuntimeError("Model parameters are not all on CUDA")
-        record["loaded_param_dtypes"] = dict(Counter(str(x.dtype) for x in leaves))
-        record["loaded_param_bytes"] = sum(x.numel() * x.element_size() for x in leaves)
+        if is_trt:
+            record["loaded_param_dtypes"] = {}
+            record["loaded_param_bytes"] = None
+            record["parameter_introspection"] = (
+                "TensorRT weights opaque, NOT zero parameters; inspect engine layer report"
+            )
+            record["limitations"].append(
+                "PyTorch allocator peak excludes TensorRT external allocations; use system telemetry"
+            )
+        else:
+            leaves = list(policy._model.parameters())  # noqa: SLF001
+            if not leaves or not all(x.is_cuda for x in leaves):
+                raise RuntimeError("Model parameters are not all on CUDA")
+            record["loaded_param_dtypes"] = dict(Counter(str(x.dtype) for x in leaves))
+            record["loaded_param_bytes"] = sum(x.numel() * x.element_size() for x in leaves)
         record["matmul_precision"] = "FP32 highest; TF32 disabled"
         torch.cuda.synchronize()
         torch.cuda.reset_peak_memory_stats()
@@ -242,6 +277,8 @@ def main():
     noise = np.random.default_rng(args.seed).standard_normal((50, 32)).astype(np.float32)
     np.save(args.output / "noise.npy", noise, allow_pickle=False)
     record["noise_sha256"] = digest(args.output / "noise.npy")
+    if is_trt and record["noise_sha256"] != export_report["noise_sha256"]:
+        raise ValueError("Engine comparison requires the same export noise")
     all_actions, all_raw, measurements = [], [], []
     for sample_path, observation, provenance in samples:
         actions, normalized, latencies, warmup = [], [], [], []
@@ -279,6 +316,12 @@ def main():
         if graph_sampler is not None:
             measurement["cuda_graph_vs_eager_max_abs"] = graph_sampler.validate_current()
             measurement["cuda_graph_validation"] = graph_sampler.last_validation.copy()
+        if is_trt:
+            from trt_policy import compare_export_reference  # noqa: PLC0415
+
+            measurement["engine_vs_export_eager"] = compare_export_reference(
+                export_report_path.parent / sample_path.name, normalized
+            )
         # Preserve completed observations even if a later sample fails.
         np.savez_compressed(args.output / f"{sample_path.stem}.npz", actions=actions, normalized_actions=normalized)
         (args.output / f"{sample_path.stem}.json").write_text(json.dumps(measurement, indent=2))
