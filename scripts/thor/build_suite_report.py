@@ -262,11 +262,12 @@ def attach_additional_runs(data, reference, run_paths, logs):
         detail = (
             f"compile={record['compiled']} / attention={record['attention']} / "
             f"合批相机={record.get('batch_vision', False)} / CUDA graph={record.get('cuda_graph', False)} / "
+            f"分段编译={record.get('compiled_graph_parts', False)} / "
             f"掩码={record.get('attention_mask', 'float32')} / TF32 关闭"
         )
         if record.get("cuda_graph"):
             graph_error = max(m["cuda_graph_vs_eager_max_abs"] for m in record["measurements"])
-            detail += f" / 每输入图重放与 eager 最大差={graph_error:.6g}（计时外额外验证）"
+            detail += f" / 图重放与非图旧循环最大差={graph_error:.6g}（同算子实现，计时外逐输入验证）"
         error = comparison["physical_dataset_units"]
         normalized = comparison["normalized_active_14d"]
         data["experiments"].append(

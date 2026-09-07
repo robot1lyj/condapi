@@ -43,6 +43,7 @@ def main():
     parser.add_argument("--batch-vision", action="store_true")
     parser.add_argument("--native-attention-mask", action="store_true")
     parser.add_argument("--cuda-graph", action="store_true")
+    parser.add_argument("--compile-graph-parts", action="store_true")
     parser.add_argument("--repeats", type=int, default=20)
     parser.add_argument("--steps", type=int, default=10)
     parser.add_argument("--seed", type=int, default=0)
@@ -55,6 +56,8 @@ def main():
     is_pytorch = args.backend == "pytorch"
     if args.cuda_graph and (not is_pytorch or args.compile):
         parser.error("CUDA graph experiment requires PyTorch --no-compile")
+    if args.compile_graph_parts and not args.cuda_graph:
+        parser.error("Compiled graph parts require --cuda-graph")
     weight_path = args.checkpoint / "model.safetensors"
     if weight_path.exists() != is_pytorch:
         parser.error("Checkpoint format does not match the selected backend")
@@ -113,6 +116,8 @@ def main():
         "backend": args.backend,
         "compiled": args.compile if is_pytorch else True,
         "cuda_graph": args.cuda_graph,
+        "compiled_graph_parts": args.compile_graph_parts,
+        "graph_reference": "uncaptured_legacy_loop_same_kernel_backend" if args.cuda_graph else None,
         "static_denoising_loop": args.cuda_graph,
         "warmups_per_sample": args.warmups,
         "attention": args.attention if is_pytorch else "jax_native",
@@ -198,6 +203,16 @@ def main():
         from cuda_graph_sampler import CudaGraphSampler  # noqa: PLC0415
 
         policy._model.static_denoising_loop = True  # noqa: SLF001
+        if args.compile_graph_parts:
+            # Fuse each reusable region without unrolling ten experts into a
+            # huge compiler graph. Disable Inductor's own graphs: the outer
+            # CUDAGraph captures all ten calls after these regions are warmed.
+            model = policy._model  # noqa: SLF001
+            model.embed_prefix = torch.compile(model.embed_prefix, mode="max-autotune-no-cudagraphs")
+            model.paligemma_with_expert.forward = torch.compile(
+                model.paligemma_with_expert.forward, mode="max-autotune-no-cudagraphs"
+            )
+            model.denoise_step = torch.compile(model.denoise_step, mode="max-autotune-no-cudagraphs")
         original_sampler = policy._sample_actions  # noqa: SLF001
 
         def legacy_loop_reference(*call_args, **call_kwargs):
