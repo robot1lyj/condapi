@@ -24,6 +24,17 @@ def test_report_formats_real_measurements():
     assert "<td>12.500</td>" in page
 
 
+def test_small_nonzero_precision_error_is_not_displayed_as_zero():
+    page = render(
+        {
+            "updated_at": "test",
+            "experiments": [{"name": "D", "weights": "FP32", "compute": "FP32", "max_abs_error": 0.0000152587890625}],
+        }
+    )
+    assert "<td>1.52588e-05</td>" in page
+    assert "<td>0.000</td>" not in page
+
+
 def test_extra_sections_escape_cells_and_do_not_expand_data_placeholders():
     page = render(
         {

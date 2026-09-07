@@ -16,6 +16,8 @@ def render(data: dict) -> str:
 
     def metric(row, key, unit=""):
         value = row.get(key)
+        if key == "max_abs_error" and value is not None:
+            return f"{float(value):.6g}{unit}"
         return "—" if value is None else f"{float(value):.3f}{unit}"
 
     rows = []

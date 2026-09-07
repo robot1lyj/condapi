@@ -17,6 +17,7 @@ TORCH_MODES = {
     "F": ("bfloat16", "bfloat16"),
     "G": ("bfloat16", "bfloat16"),
     "H": ("bfloat16", "bfloat16"),
+    "I": ("bfloat16", "bfloat16"),
 }
 
 
@@ -85,12 +86,12 @@ def main():
             f"/results/{label}",
         ]
         if is_pytorch:
-            command.extend(["--backend", "pytorch", "--compile" if mode in ("F", "G", "H") else "--no-compile"])
-            if mode in ("F", "G", "H"):
+            command.extend(["--backend", "pytorch", "--compile" if mode in ("F", "G", "H", "I") else "--no-compile"])
+            if mode in ("F", "G", "H", "I"):
                 command.append("--native-attention-mask")
             if mode in ("G", "H"):
                 command.extend(["--attention", "sdpa"])
-            if mode == "H":
+            if mode in ("H", "I"):
                 command.append("--batch-vision")
         prefix.parent.mkdir(parents=True, exist_ok=True)
         files = sorted([*scripts.glob("*.py"), *repo.glob("src/openpi/**/*.py"), *repo.glob("scripts/docker/thor/*")])
