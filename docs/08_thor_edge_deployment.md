@@ -224,6 +224,25 @@ PR #960 作者给出的局部 checkpoint 对照如下；样本范围、硬件及
 
 ## 7. 当前状态
 
+### 2026-09-07 实机状态（替代下方早期安装进度）
+
+以下为当日 SSH、系统查询和传输实测状态，不是模型部署通过结论；临时地址、进程与下载状态使用前复核。
+
+- **系统已安装并启动**：原厂 Jetson AGX Thor 开发套件，NVMe 根分区 `/dev/nvme0n1p1`；JetPack 7.2.1 / L4T 39.2.1、Ubuntu 24.04.4、内核 `6.8.12-1021-tegra`。`nvidia-smi` 可识别 NVIDIA Thor，驱动 `595.78`；这不等同于 JAX 内核或模型推理验证。
+- **管理网络已可用**：用户名 `wuyan-lyj`，主机名 `thor`。USB 管理地址 `192.168.55.1`，工作站别名 `thor-usb`；Wi-Fi 当前 DHCP 地址 `192.168.110.108/23`，别名 `thor`。`thor-admin-wifi` 为系统连接，autoconnect=yes、重试次数 0（无限），NetworkManager 开机启用；已验证连接与配置，尚未重启实测回连。NTP 已同步。
+- **SSH 已配置**：`ssh.socket` 开机启用，服务 active，工作站密钥经 USB/Wi-Fi 登录成功；禁用 SSH 密码登录及 root 登录。用户的本地登录/sudo 密码不写入文档。USB/Wi-Fi 仅作管理，生产 Thor↔3588 仍为网线直连；不操作 3588。
+- **显示问题独立保留**：HDMI 状态为 disconnected、EDID 为空，未定位为硬件或驱动问题。系统安装成功不依赖 HDMI 修复；为支持 NoMachine 无屏桌面，已于当日关闭 GDM 本地登录服务，改用下面的远程显示。
+- **NoMachine 无屏管理**：用户确认个人非商业用途，Thor 安装官方 `nomachine_9.8.3_1_arm64.deb`。`nxserver.service` enabled/active，启动模式 Automatic；`CreateDisplay 1`、`DisplayOwner "wuyan-lyj"`、`DisplayGeometry 1920x1080`。已核对 GNOME 会话运行，`:1001` 的 `nxoutput0` 实际为 1920×1080，USB/Wi-Fi 的 TCP 4000 均可达；客户端实际看到画面及重启后回连仍待用户确认。USB 地址 `192.168.55.1:4000`，Wi-Fi 当前 `192.168.110.108:4000`，使用系统账户登录，不把密码写入连接文件。工作站现有 Personal Edition 10.0.60 的 Player 可用作客户端；它的服务端订阅不是连接 Thor v9 的前提，不代表本机服务端已激活。
+- **无屏配置恢复**：原配置备份 `/usr/NX/etc/server.cfg.before-thor-headless-20260907`。HDMI 恢复且希望切回物理桌面时，先断开 NoMachine，再恢复备份至 `/usr/NX/etc/server.cfg`、执行 `sudo systemctl enable --now gdm3`，最后 `sudo /usr/NX/bin/nxserver --restart`；不要在远程会话中无提示重启桌面。仅为远程桌面而关闭 GDM，不改 GPU 驱动和推理容器。NoMachine 10 服务端已改为订阅/试用许可，不能把旧版免费说明用于 v10，参见 [官方许可说明](https://kb.nomachine.com/AR03P00972)。
+- **容器基础已安装**：Docker `29.1.3`（Ubuntu `docker.io` 包）、NVIDIA Container Toolkit `1.19.1`；用户已加入 docker 组。Thor 尚未安装 Compose CLI。Pi 系列只维护一个系列环境，不按 checkpoint 新建独立依赖栈。
+- **JAX 镜像已下载到工作站**：`nvcr.io/nvidia/jax:26.05-py3` ARM64，manifest digest `sha256:3f009a485f5ba64c177f2f8f7999adc900fcf14dce3f11b826f412ea19d23553`，77 层共 9,010,137,575 字节；本机目录 `/home/wuyan-lyj/thor-system/images/jax-26.05-arm64`，17:52 下载完成。正在导出归档以经 USB 导入，**尚未完成 Thor GPU smoke / OpenPI 依赖适配**。不使用仓库训练环境的 CUDA 12/JAX 0.5.3 锁定项直接覆盖 NVIDIA 容器栈。
+- **模型资产已在 Thor**：`/home/wuyan-lyj/thor/pi/checkpoints/pi05_base`（12,441,749,581 字节），分词器 `/home/wuyan-lyj/thor/pi/cache/big_vision/paligemma_tokenizer.model`。Orbax 元数据实读 51 个参数叶子均 float32；原始磁盘权重未改写，没有已微调 YAM checkpoint。
+- **测试输入已本地化**：`/home/wuyan-lyj/thor/pi/test-data/ABC-130k-two-tasks/lego_sorting` 保存 train 轨迹 95、96、97，共 7,962 帧观测、9 个视频文件；连同 parquet/原始 manifest 共 60,021,788 字节。11 文件在服务器、工作站、Thor 的 SHA-256 一致，本机完整解码与状态/动作结构审计通过。另保留转换小样本于 `test-data/lego_sorting/smoke-train-20260907`。原始 manifest 覆盖更多轨迹，不代表整库已下载；耳机任务尚未找到三路齐全轨迹。所有回放从 Thor 磁盘读取，不从服务器实时取帧。
+- **精度对照仍待实测**：A 原始 FP32 参数 / FP32 计算 / highest；B 原始 FP32 参数 / BF16 计算；C 读取为 BF16 / BF16 计算。固定输入、噪声、10 次去噪与 50 步 horizon，分开首次编译和预热后完整调用计时。尚需生成固定输入和与 YAM delta 合同匹配、明确仅用于 benchmark 的 norm_stats；不套用 DROID 统计，不宣称基础模型具备 YAM 任务成功率。
+- **工具与结果入口**：`scripts/thor/benchmark_pi05.py`、`scripts/thor/render_report.py` 和 `docs/reports/thor/index.html`；11 项相关单元测试通过，不代表模型/GPU 验收。转换到 PyTorch 后的键/形状/dtype/LoRA 覆盖、逐层和完整动作对照另行验收，之后再分组比较 BF16/FP16、TensorRT 与量化，不同时改变格式和精度后直接接受结果。
+
+### 早期安装记录（历史状态，不能作为当前未完成项）
+
 - 2026-09-07：已编写并核对 [Thor 安装冷手册](reference/thor/00_start_here.md)，未操作 Thor/3588 或烧录磁盘。本地 ISO 重新检查类型、字节数与 SHA-256，结果与第 2 节一致；尚未取得发布者 ISO 校验和/签名匹配证据。系统/容器安装步骤为官方资料核对状态，不能宣称用户设备已实测通过；原生 JAX 镜像仍有依赖兼容与模型验收阻断项，见手册 G5。
 - 制盘软件：官方 Etcher 2.1.6 amd64 Debian 包已下载并与 Release 资产摘要匹配，尚未安装；路径与身份见第 3 节。用户采用六步简洁指导主线，扩展诊断按异常展开，不重复要求正常步骤截图/填表。
 

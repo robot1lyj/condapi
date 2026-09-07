@@ -12,5 +12,7 @@
 ## 恢复任务
 
 - 服务器入口、环境、原始数据路径和作业保护对象见 [环境](../02_installation_and_environment.md)。作业/下载状态是历史观察，使用前重新核验；没有实时证据就标记未知。
-- Thor 安装介质、系统版本和下载验收状态见 [Thor 部署](../08_thor_edge_deployment.md)；2026-09-05 官方 ISO 已下载、长度/类型已核对、本地 SHA-256 已记录，系统盘制作、实机刷写和 IPC smoke 未完成。
+- Thor 已完成官方系统安装并从 NVMe 启动；2026-09-07 实机复核为 JetPack 7.2.1 / L4T 39.2.1。Wi-Fi 开机自动连接已配置、SSH 密钥登录可用；USB `192.168.55.1` 为临时管理/传输通道。HDMI 仍无显示，不能误记为安装未完成；详见 [Thor 当前状态](../08_thor_edge_deployment.md#7-当前状态)。
+- Pi0.5 原始 JAX 基础权重、分词器和 3 条完整 YAM 回放轨迹已放到 Thor 本地；测试不依赖服务器实时传输。ARM64 JAX 26.05 镜像已下载，正在准备导入；完整模型推理和精度对照尚未完成，见 [Thor 当前状态](../08_thor_edge_deployment.md#7-当前状态) 与 [中文测试报告](../reports/thor/index.html)。
+- Thor 已安装 NoMachine 9.8.3 并配置自启动，无屏 GNOME / 1920×1080 输出已核对；USB 连接 `192.168.55.1:4000`，账户 `wuyan-lyj`。为此停用 GDM 本地登录画面；恢复方法及许可边界见 [Thor 当前状态](../08_thor_edge_deployment.md#7-当前状态)，客户端画面/重启回连不冒充已验收。
 - 新结果写回对应 owner，原因写入 [变更历史](../07_change_log.md)；候选经验、失效与预算协议见 [记忆系统](../09_memory_system.md)。
