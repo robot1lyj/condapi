@@ -156,6 +156,14 @@ CPU 导入和 24 项转换/数据加载相关测试通过；服务器实际运�
 当前处于共享盘解包阶段，尚无 `INSTALL_COMPLETE`；此后安装不再依赖本地电脑或连接。
 后续不要修改正在执行的 shell 脚本；脚本更新应在进程结束后生效。
 
+安装后的自动验证由远端 tmux `condapi-env-verify` 运行 `scripts/conda/verify_remote_env.sh`，
+等待安装成功最多 24 小时；安装进程失败则停止，不覆盖目标环境。日志位于
+`/home/wuyan/lyj/YAM/env-transfer/verification-b87e88a/verify.log`。
+该目录仅放本次转换/审计测试快照，不更新 `YAM_code`，不会替代正式 Gitea 同步。
+验证先运行合成三相机转换与回读测试，再对真实数据执行全量文件清点及每 split 首个 episode 的结构审计，
+输出保存在独立 `run.*` 目录。`SYNTHETIC_CONVERSION_VERIFIED` 仅表示合成转换通过，
+`VERIFICATION_COMPLETE` 也不代表真实数据单位已确认或 GPU/训练验收完成。
+
 上传结束后自动启动远端 tmux `condapi-env-install`，执行 `scripts/conda/install_packed_env.sh`：
 核对压缩包 SHA-256 → 拒绝覆盖既有目标 → 解压 → conda-unpack → 离线修复 packaging/setuptools →
 离线重装本仓库和客户端 editable 包 →
