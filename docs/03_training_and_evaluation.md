@@ -46,6 +46,11 @@ DATASET=/home/wuyan/lyj/YAM/YAM_data/audited/yam_lerobot_v001
 
 实际输出根目录和资产目录以脚本日志为准，完成后确认 `yam/norm_stats.json` 可读且与训练数据版本一致。`compute_norm_stats.py` 不会替代数据结构审计。
 
+YAM 的脚本默认输出已对齐训练读取目录：默认配置写入
+`assets/pi05_yam_lora/yam/norm_stats.json`，不是 dataset 根目录。
+自定义 `--output-dir` 时必须同时使训练的 assets 配置指向同一父目录。
+每个正式数据版本使用独立 assets 目录，避免重算 norm 覆盖另一实验的统计量。
+
 ## 单机 smoke 和正式训练
 
 先在已分配 GPU 的节点运行 10～20 步，使用新实验名和独立输出目录：
@@ -74,9 +79,25 @@ XLA_PYTHON_CLIENT_MEM_FRACTION=0.9 \
   --num-train-steps=30000
 ```
 
-若使用 PyTorch 训练入口，仍必须使用同一个 YAM config、数据版本和 norm stats；JAX/PyTorch 不能共用未记录的输出目录。续训只从完整 checkpoint resume，不能覆盖旧实验。
+当前使用 JAX 训练入口；PyTorch LoRA 支持须另行审计和验证，不属于本轮已验收路径。
+续训只从完整 checkpoint resume，不能覆盖旧实验。
 
 ## 参数和实验隔离
+
+2026-09-07 源码审查：当前继承 CosineDecaySchedule（warmup 1000 步，peak LR `2.5e-5`，
+decay 30000 步，终点 `2.5e-6`），AdamW（b1=0.9、b2=0.95、eps=1e-8、weight decay=1e-10、
+global gradient clip=1.0）。LoRA 的 PaliGemma rank/alpha=16/16，action expert=32/32。
+冻结过滤器冻结对应 LLM 主干并排除 LoRA；不能将其表述为全模型“只有 LoRA 可训练”，
+其他未命中过滤器的参数仍可训练。EMA 关闭，W&B 关闭；正式开跑前记录实际 trainable parameter 数和显存。
+
+30 FPS 数据上 horizon 50 对应约 1.67 秒预测窗口，不等于机器人每次必须执行 50 步。
+batch 4 × 30000 steps 约采样 120000 个训练窗口；manifest 声明数据约 97.586 小时（含验证集），
+因此 30000 步只是初始预算，不是完整 epoch 或已验证的收敛方案。
+完成清洗后按实际 train 帧数记录 `steps * global_batch / train_frames`，结合固定 holdout 决定训练长度。
+20 步 smoke 位于 warmup 初段，只验证训练链路，不作学习效果结论。
+
+当前首选是 `scripts/train.py` 的 JAX 路径；不要把该 LoRA 配置直接视为 PyTorch 入口已验证支持。
+上传子集的转换/发布流程见 [数据合同](04_data_contracts.md#abc-乐高子集上传期间的清洗流程)。
 
 | 参数 | 入口 | 规则 |
 |---|---|---|

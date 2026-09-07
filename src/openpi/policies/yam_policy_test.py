@@ -61,6 +61,14 @@ def test_yam_outputs_remove_model_padding():
         transform({"actions": np.zeros((50, 7), dtype=np.float32)})
 
 
+@pytest.mark.parametrize("key", ["observation.state", "action"])
+def test_yam_inputs_reject_nonfinite(key):
+    data = _observation()
+    data[key].flat[0] = np.nan
+    with pytest.raises(ValueError, match="finite numeric"):
+        _yam_policy.YamInputs(model_type=_model.ModelType.PI05)(data)
+
+
 def test_yam_data_config_uses_bimanual_action_mask_and_fixed_asset(tmp_path, monkeypatch):
     # The data-contract assertion does not need to download the PaliGemma tokenizer.
     monkeypatch.setattr(

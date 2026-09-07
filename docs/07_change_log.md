@@ -1,5 +1,16 @@
 # 07 · 变更历史
 
+## 2026-09-07 · YAM 训练与上传数据审查
+
+- 只读核对服务器乐高子集：实际为来源 manifest + 筛选 parquet + episode 视频，缺标准 LeRobot metadata。
+  train/val 清单分别 4458/69 条，当次全量清点 4527 条均待上传；详细格式、指纹与发布流程归 `docs/04_data_contracts.md`。
+- 新增 `scripts/audit_yam_subset.py`，支持无训练依赖的上传清点及 parquet/视频完整结构审计；缺文件不视为坏数据，
+  审计不修改原始文件。标准 LeRobot 转换与语义确认仍待完整 episode 可用后验收，不宣称当前可训练。
+- 修正 YAM norm 默认输出与训练 assets 读取路径不一致；本地原始目录在 loader 入口明确拒绝；
+  YAM 输入增加数值有限性检查。训练学习率、LoRA rank、优化器、窗口时长和步数覆盖量审查归 `docs/03_training_and_evaluation.md`。
+- 验证：YAM policy、审计器和 loader 定向测试共 20 项通过，修改文件 Ruff 和 `git diff --check` 通过。
+  真实 train episode 95–98 共 11082 行通过行数、14D 有限性、frame_index 和 timestamp 校验；视频缺失，未做真实完整 episode/训练验收。
+
 ## 2026-09-07 · Thor 安装指导冷手册
 
 - 用户随后改为由当前 agent 直接指导，并要求简化非必要验证；入口压缩为六步主线，详细章节也改成正常路径优先、异常时才展开诊断。保留选对目标盘、重要数据备份与固件不断电；取消逐条只读确认、重复哈希、强制截图/填表和正常安装后的额外重启，把模型工程验证与系统安装分开。

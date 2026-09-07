@@ -1,12 +1,14 @@
 """Compute normalization statistics for a config.
 
-By default, this writes `norm_stats.json` into the dataset root directory. This makes
+For YAM, the default matches the training config's assets directory. For other
+configs, this writes `norm_stats.json` into the dataset root directory. This makes
 versioned dataset directories self-contained for training. The legacy assets
 directory layout can still be used by explicitly passing `output_dir`.
 """
 
 import dataclasses
 import pathlib
+
 import numpy as np
 import tqdm
 import tyro
@@ -91,6 +93,8 @@ def create_rlds_dataloader(
 def _default_output_dir(data_config: _config.DataConfig, config: _config.TrainConfig) -> pathlib.Path:
     if data_config.repo_id is None:
         raise ValueError("Data config must have a repo_id")
+    if isinstance(config.data, _config.LeRobotYamDataConfig):
+        return pathlib.Path(config.data.assets.assets_dir or config.assets_dirs) / data_config.asset_id
     repo_path = pathlib.Path(data_config.repo_id)
     if repo_path.is_absolute():
         return repo_path
@@ -118,6 +122,8 @@ def main(
         )
 
     keys = ["state", "actions"]
+    if num_batches < 1:
+        raise ValueError("No complete batches for norm stats; lower batch size or increase max_frames.")
     stats = {key: normalize.RunningStats() for key in keys}
 
     for batch in tqdm.tqdm(data_loader, total=num_batches, desc="Computing stats"):

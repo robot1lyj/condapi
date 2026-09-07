@@ -239,14 +239,24 @@ def create_torch_dataset(
     if repo_id == "fake":
         return FakeDataset(model_config, num_samples=1024)
 
-    dataset_meta = lerobot_dataset.LeRobotDatasetMetadata(repo_id)
+    local_kwargs = {}
+    if repo_id.startswith("/"):
+        from pathlib import Path  # noqa: PLC0415
+
+        root = Path(repo_id)
+        if not (root / "meta/info.json").is_file():
+            raise ValueError(f"Local dataset is not a published LeRobot dataset: {root}")
+        local_kwargs["root"] = root
+        repo_id = f"local/{root.name}"
+    dataset_meta = lerobot_dataset.LeRobotDatasetMetadata(repo_id, **local_kwargs)
     dataset_kwargs = _lerobot_dataset_kwargs(data_config)
     dataset = lerobot_dataset.LeRobotDataset(
-        data_config.repo_id,
+        repo_id,
         delta_timestamps={
             key: [t / dataset_meta.fps for t in range(action_horizon)] for key in data_config.action_sequence_keys
         },
         **dataset_kwargs,
+        **local_kwargs,
     )
     if data_config.lerobot_torchcodec_tail_fallback:
         dataset = TorchCodecTailFallbackDataset(dataset)

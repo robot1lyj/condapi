@@ -74,6 +74,51 @@ norm 必须针对同一数据版本、同一 train episode split，并在 YAM ac
 
 ## 数据发布 gate
 
+### ABC 乐高子集：上传期间的清洗流程
+
+2026-09-07 只读核验：`ABC-130k-two-tasks/lego_sorting` 是任务筛选后的原始导出，
+不是可直接加载的 LeRobot v3 数据集。manifest 声明 train 4458、val 69 episodes，30 FPS；
+布局是 `manifests/{train,val}.jsonl`、`{train,val}/data/source-file-NNN.parquet` 和
+`{train,val}/videos/{top,left_wrist,right_wrist}/episode-NNNNNN.mp4`。
+parquet 保留原始 episode_index、frame_index、index、task_index，以及 language_persistent/events。
+抽查 train/source-file-000.parquet 有 11082 行，state/action 均 14D；语言列可为空。
+当次清点 4527 条全部为 `pending_upload`，首条 train episode 95 缺 top/right_wrist 视频；
+这是上传中的瞬时观察，不能作为后续完成状态。清点清单指纹：train manifest SHA-256
+`1fabf4a2b83224f85a724146fb37ccf17928f91c00bd0a697e470980e54fb3a6`，val
+`9927aa682e78662bec5584e83728c2e9eb5fd86323ab4bc46a90294f255bfe08`。
+
+清洗按以下顺序推进，每一步保留原始 train/val 分离：
+
+1. **上传清点（已实现）**：`scripts/audit_yam_subset.py --inventory-only` 对照 manifest 检查每条 episode
+   的 parquet 和三路视频；缺失、空文件、近期修改或读取期间变化标为 `pending_upload`。
+   报告包含 manifest SHA-256、源 repo/revision、episode ID、文件长度和 mtime；mtime 稳定仅是预检，
+   不是上传完成证明。冻结时仍须上传方确认完成并复核报告。
+2. **结构清洗（已实现审计，不修改原始文件）**：完整模式验证每个 episode 行数、14D 有限数值、
+   连续 frame_index、30 FPS 时间戳，逐帧解码三路视频并核对时间戳和帧数。
+   已稳定但失败的样本标为 `rejected`，人工核查/重传后重跑；不自动裁短视频、补零、插值或删帧。
+3. **语义确认（待完成）**：确认左右顺序、关节单位、夹爪范围、action 是否绝对目标。
+   manifest 的 `task` 用于统一 prompt：`sort the legos into containers by color`。
+   数值大小只能提示单位，不能证明单位；`validated_structure` 不等于可训练。
+4. **发布转换（待实现并以真实完整 episode 验收）**：只将验收通过的完整 episode 写入新版本目录，
+   train/val 各自生成独立 LeRobot v3 数据集。使用当前 LeRobot writer 生成 metadata/task/episode 表，
+   重编号索引并保留 `(source_repo, source_revision, split, source_episode_index)` 映射。
+   相机映射为 top→top_rgb、left_wrist→left_rgb、right_wrist→right_rgb。
+   manifest 视频时间戳指向原始长视频；当前逐 episode 视频必须使用本地 PTS，不重复裁切原始区间。
+5. **发布验收**：真实 loader 验证首中尾/跨 episode action chunk，核对源 split 无泄漏，
+   norm 仅使用 train；再做短训练。正式版本记录纳入/拒绝清单、源指纹和转换参数。
+   DAgger 后续追加独立版本与来源标签，不混入本轮 holdout。
+
+可在上传期间运行清点（仅标准库；JSON 写到 stdout，由调用方留存到原始数据目录外）：
+
+```bash
+python3 scripts/audit_yam_subset.py \
+  /home/wuyan/lyj/YAM/YAM_data/ABC-130k-two-tasks/lego_sorting --inventory-only
+```
+
+上传完成后的结构审计应放到计算节点，用项目环境运行同一命令并去掉 `--inventory-only`。
+可先加 `--limit 2`，表示每个 split 最多审计两条，不代表全量验收。
+报告始终保留 `trainable=false`，直到独立的语义、转换和 loader 发布 gate 完成。
+
 - `info` 中的 episode 数、task metadata、parquet 索引和视频清单一致。
 - state/action 所有样本最后一维为 14，顺序是 `[左6+夹爪, 右6+夹爪]`，无 NaN/Inf。
 - 三路图像首、中、尾样本可解码，时间戳不越界，颜色通道和 shape 一致。

@@ -49,6 +49,8 @@ def _parse_image(image) -> np.ndarray:
 def _validate_yam_dim(name: str, value: np.ndarray, expected_dim: int) -> None:
     if value.ndim == 0 or value.shape[-1] != expected_dim:
         raise ValueError(f"YAM {name} must be {expected_dim}D, got shape={value.shape}.")
+    if not np.issubdtype(value.dtype, np.number) or not np.isfinite(value).all():
+        raise ValueError(f"YAM {name} must contain finite numeric values.")
 
 
 def _validate_action_dim(action_dim: int) -> None:
