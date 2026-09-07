@@ -130,6 +130,37 @@ $OPENPI_DATA_HOME/big_vision/paligemma_tokenizer.model
 不是当前 `pi05_yam_lora` 的必需资产，除非后续明确新增对应实验，不提前下载。YAM 的 `assets/yam/norm_stats.json`
 仍必须在正式数据版本审计后计算，不能用 Pi0.5 基础资产或其他机器人合同的统计量代替。
 
+### 本地环境压缩迁移（2026-09-07）
+
+本地环境 `/home/wuyan-lyj/miniconda3/envs/condapi-yam` 约 8.5GB，已用 conda-pack 0.9.2 打包到
+`/home/wuyan-lyj/condapi-env-transfer/condapi-yam-20260907.tar.gz`（约 4.2GB）。SHA-256：
+`8005d7f2639cb31e3e67018cfbca08b93b33d76de99366497f600e3ecbe511ba`。
+两端 x86_64，本地 glibc 2.39、服务器 glibc 2.34；1115 个 ELF 的符号需求静态检查未发现超过 2.34 的要求，
+但这不能替代远端导入/CUDA 验收。
+
+打包使用 `--ignore-editable-packages --ignore-missing-files`：后者仅在确认缺失项来自 conda 原始
+setuptools/packaging 被 pip 固定版本替换后采用；实际运行版本是 setuptools 80.10.2、packaging 25.0，
+本地 `pip check` 通过。独立前缀解压验证发现 conda-pack 会混入缓存中的原始 conda 文件，导致
+`packaging._ranges` 缺失；安装器必须先从压缩包同级 `repair-wheels/` 离线强制重装这两个精确版本，
+再安装 editable 包。修复 wheel 已同步服务器，本地独立前缀修复后 editable 安装、`pip check`、
+CPU 导入和 24 项转换/数据加载相关测试通过；服务器实际运行验收仍待上传结束。
+不得把忽略缺失文件选项作为未知错误的通用绕过方式。
+
+`scripts/conda/migrate_local_env.sh` 是本次迁移入口，使用 flock 避免重复执行，rsync 断点续传、有限重试。
+本地后台服务 `condapi-env-migration-20260907.service` 负责上传；日志在
+`/home/wuyan-lyj/condapi-env-transfer/migration.log`。服务独立于对话，但上传期间本地电脑须保持开机和网络，
+当前用户未启用 linger，注销本地用户也可能停止用户服务。
+
+上传结束后自动启动远端 tmux `condapi-env-install`，执行 `scripts/conda/install_packed_env.sh`：
+核对压缩包 SHA-256 → 拒绝覆盖既有目标 → 解压 → conda-unpack → 离线修复 packaging/setuptools →
+离线重装本仓库和客户端 editable 包 →
+pip check → CPU 导入检查。目标为 `/home/wuyan/.conda/envs/condapi-yam`，
+日志 `/home/wuyan/lyj/YAM/env-transfer/install.log`；只有日志出现 `INSTALL_COMPLETE` 才能记录迁移成功。
+失败时保留目录与日志，不能自动删除目标；GPU gate 仍等待 Slurm 恢复。
+
+服务器直连内网 Gitea 曾超时，本次通过本地 SSH 反向隧道让服务器访问 Gitea，已 clone 到 `YAM_code`；
+服务器 origin 保留正式 Gitea 地址，未配置 GitHub。隧道只服务代码同步，不参与环境安装或作业运行。
+
 ## 3. Slurm 和 GPU 预检
 
 登录节点只用于提交/查看任务。每次创建作业先查看资源，GPU 型号和显存必须在实际分配后记录：

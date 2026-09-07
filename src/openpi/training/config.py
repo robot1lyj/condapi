@@ -472,6 +472,9 @@ class LeRobotYamDataConfig(DataConfigFactory):
     action_sequence_keys: Sequence[str] = ("action",)
     num_arms: int = 2
     use_delta_joint_actions: bool = True
+    # PyAV ships its FFmpeg libraries; TorchCodec also needs compatible system
+    # FFmpeg shared libraries that may be absent after relocating the environment.
+    video_backend: str = "pyav"
     assets: AssetsConfig = dataclasses.field(default_factory=lambda: AssetsConfig(asset_id="yam"))
     default_prompt: str | None = None
 
@@ -517,6 +520,7 @@ class LeRobotYamDataConfig(DataConfigFactory):
             data_transforms=data_transforms,
             model_transforms=model_transforms,
             action_sequence_keys=self.action_sequence_keys,
+            lerobot_video_backend=self.video_backend,
         )
 
 

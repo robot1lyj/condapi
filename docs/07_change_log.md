@@ -1,5 +1,17 @@
 # 07 · 变更历史
 
+## 2026-09-07 · 环境迁移与 LeRobot 转换实现
+
+- 本地 conda 环境已压缩并计算 SHA-256，后台 systemd 用户服务执行断点上传；上传完成后远端 tmux 自动校验、
+  解包和离线安装 editable 包。迁移状态以 `docs/02` 的日志和 `INSTALL_COMPLETE` 为准，尚不能把上传中写成已安装。
+- 独立解压预演发现 conda 缓存文件与 pip 版本混用；增加精确版本 packaging/setuptools 离线修复，
+  修复后独立前缀的 editable 安装和依赖检查通过，不让服务器依赖网络补包。
+- 服务器通过临时 SSH 隧道从 Gitea clone 本仓库至 `YAM_code`，正式 origin 仍为 Gitea，无服务器 GitHub 同步。
+- 实现 `scripts/convert_yam_subset.py`：显式单位/动作合同、train/val 分开、完整 episode 门禁、源散列、
+  来源映射、LeRobot v3 writer、finalize 和真实 loader 回读；失败保留未发布目录，原始文件只读。
+  24 项相关测试通过；合成样本覆盖 action horizon 50 的尾帧 padding、任务文本、两 split 来源隔离和转换中源文件变更拦截。
+- YAM 视频后端默认改为 PyAV；服务器登录环境未发现系统 FFmpeg 共享库，TorchCodec 不能仅凭 pip 安装成功就认定可解码。
+
 ## 2026-09-07 · YAM 训练与上传数据审查
 
 - 只读核对服务器乐高子集：实际为来源 manifest + 筛选 parquet + episode 视频，缺标准 LeRobot metadata。

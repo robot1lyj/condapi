@@ -83,6 +83,7 @@ def test_yam_data_config_uses_bimanual_action_mask_and_fixed_asset(tmp_path, mon
     )
 
     assert created.asset_id == "yam"
+    assert created.lerobot_video_backend == "pyav"
     assert created.action_sequence_keys == ("action",)
     assert isinstance(created.data_transforms.inputs[1], _transforms.DeltaActions)
     assert created.data_transforms.inputs[1].mask == (True,) * 6 + (False,) + (True,) * 6 + (False,)

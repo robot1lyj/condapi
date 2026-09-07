@@ -34,6 +34,9 @@ LeRobot dataset 每行至少应能提供三路 RGB 图像和 state/action：
 
 视频读取后可以是 CHW 或 HWC，`YamInputs` 会统一到 HWC；正式数据应固定编码、fps、时间戳和 RGB 语义。缺少任一路图像不应静默补黑图，先修复数据或明确建立新版本。
 
+YAM 配置默认视频后端为 `pyav`，便于 conda 打包后使用随 PyAV 提供的 FFmpeg 库；
+若计算节点另行通过 TorchCodec/系统 FFmpeg 导入与首中尾解码验收，可通过 `--data.video-backend=torchcodec` 切换。
+
 ## Action transform
 
 当前 `LeRobotYamDataConfig` 默认假定 LeRobot action 是绝对目标：
@@ -99,7 +102,7 @@ parquet 保留原始 episode_index、frame_index、index、task_index，以及 l
 3. **语义确认（待完成）**：确认左右顺序、关节单位、夹爪范围、action 是否绝对目标。
    manifest 的 `task` 用于统一 prompt：`sort the legos into containers by color`。
    数值大小只能提示单位，不能证明单位；`validated_structure` 不等于可训练。
-4. **发布转换（待实现并以真实完整 episode 验收）**：只将验收通过的完整 episode 写入新版本目录，
+4. **发布转换（已实现并通过合成数据回读；真实完整 episode 待验收）**：只将验收通过的完整 episode 写入新版本目录，
    train/val 各自生成独立 LeRobot v3 数据集。使用当前 LeRobot writer 生成 metadata/task/episode 表，
    重编号索引并保留 `(source_repo, source_revision, split, source_episode_index)` 映射。
    相机映射为 top→top_rgb、left_wrist→left_rgb、right_wrist→right_rgb。
@@ -125,6 +128,35 @@ python3 scripts/audit_yam_subset.py \
 - task/prompt 映射不为空，train/val split 明确且可复现。
 - 物理单位和夹爪语义已写入数据版本的 audit/manifest；未确认前标记为待核验。
 - norm stats、config、训练 split 和 checkpoint asset id 一一对应。
+
+## 转换工具操作
+
+`scripts/convert_yam_subset.py` 使用已安装的 LeRobot 0.5.1 writer 生成 v3 metadata、task 表、episode 表、
+parquet 和视频；train/val 分别转换，默认要求该 split 的全部 episode 完整。
+原始 parquet 的 state/action 以 float32 原值写入，不在转换时做 delta 或单位缩放；delta 仍由训练 transform 处理。
+空语言列由 manifest 的非空 task 补入标准 LeRobot task。
+
+转换必须提供经审计的 JSON 合同：`state_action_names` 为脚本 `JOINT_NAMES` 的完整左6+夹爪/右6+夹爪顺序，
+`joint_unit`、`gripper_unit` 为已确认单位，`action_mode` 为 `absolute` 或 `delta`，`evidence` 标明确认依据。
+工具只能检查声明是否完整，不能代替硬件/来源文档核验；不能用测试中的 synthetic 单位发布真实数据。
+若声明 action 已是 delta，训练配置必须关闭 `use_delta_joint_actions`。
+
+```bash
+"$PYTHON" scripts/convert_yam_subset.py \
+  /home/wuyan/lyj/YAM/YAM_data/ABC-130k-two-tasks/lego_sorting \
+  /home/wuyan/lyj/YAM/YAM_data/audited/lego_train_v001 \
+  --split train --contract /path/to/reviewed_yam_contract.json
+```
+
+首轮可通过 `--episode-ids` 显式选择少量已上传完整的源 ID；该子集选择会写入 provenance，不会自动跳过缺失 episode。
+不存在、近期修改、空文件、14D/时间戳异常、视频帧数不匹配均停止转换。
+工具对源文件记录并复查 SHA-256，在 `<output>.incomplete` 完成写入、finalize 和 loader 首中尾回读后才改名为输出目录。
+失败目录保留，不自动覆盖或续写；重跑使用新版本路径。原始数据只读。
+
+当前版本视频通过临时 PNG 和 LeRobot 默认 H.264/yuv420p（CRF30）重新编码；这不是视频无损复制。
+临时 PNG 会占用额外磁盘空间，适合先小样本验证；正式全量前需核验画质、吞吐和可用空间。
+`conversion_manifest.json` 记录 split、原始 repo/revision/episode 映射、源文件散列、合同和编码方式。
+转换成功不意味着训练就绪：norm 尚未计算，真实 GPU smoke 与最终训练验收另行完成。
 
 ## 旧合同隔离
 
