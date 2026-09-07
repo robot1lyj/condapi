@@ -18,15 +18,14 @@ nvpmodel -q
 
 ## 一次运行三组
 
-`--batch-id` 每次使用新的名字；已有结果不覆盖。以下 `manual-01` 只是示例，第二次改为 `manual-02`。`--code-commit` 填当前本机仓库提交；它是代码来源基点，启动器还会记录实际文件指纹和镜像 ID。
+`--batch-id` 每次使用新的名字；已有结果不覆盖。以下 `manual-01` 只是示例，第二次改为 `manual-02`。当前 Thor 代码通过 USB/rsync 同步，不带 `.git`，不要在 Thor 执行 `git rev-parse`。`--code-commit` 填工作站同步源码的提交；它是代码来源基点，启动器还会记录实际文件指纹和镜像 ID。下面已填本轮实现提交；以后更新源码时，从工作站仓库获取新提交并替换它。
 
 ```bash
-git rev-parse HEAD
 sudo python3 scripts/thor/run_suite_host.py \
   --image openpi-pi:thor-jax-20260907 \
   --batch-id manual-01 \
   --modes A B C \
-  --code-commit 上一条命令的提交哈希
+  --code-commit 058c1f7ef838874f444639d687fdcc1b166ab335
 ```
 
 只重跑 C 时改成 `--modes C`。每个模式各自加载模型一次，依次完成固定 9 输入的预热与正式调用；MAXN 只包围前台推理命令，结束/报错恢复 120W。期间自动记录自己的 `tegrastats` 进程，结束时只关闭这一进程；不停止其他用户任务。不使用 MAXN 开机服务。
