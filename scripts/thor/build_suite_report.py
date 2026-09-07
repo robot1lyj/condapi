@@ -542,6 +542,18 @@ def attach_profiles(data, paths, logs):
                     "这是待实施计划，不是已有回退或任务精度放行。"
                 ),
             }
+        padding_runs = [record for record in data.get("measured_records", []) if record.get("text_bucket", 200) < 200]
+        if padding_runs:
+            best_padding = min(padding_runs, key=lambda record: record["p50_ms"])
+            next_step = {
+                "title": "文本填充候选已完成实测，按数值和延迟共同选择",
+                "detail": (
+                    f"候选完整调用 {best_padding['p50_ms']:.2f} ms / P95 {best_padding['p95_ms']:.2f} ms。"
+                    "全部真实 token、三相机、H50、去噪 10 不变；与 JAX 的误差见对照表。"
+                    "text80 超长有效输入会拒绝，显式使用 V 的 200 桶；未实现自动路由。"
+                    "固定当前镜像、引擎和输入合同复测，微调后再做 LoRA/任务精度验收，不继续默认降位量化。"
+                ),
+            }
         data["recommendations"][:1] = [next_step]
 
 

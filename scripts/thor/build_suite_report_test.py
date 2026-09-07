@@ -67,6 +67,11 @@ def test_profile_is_separate_from_formal_latency_counts(tmp_path):
     attach_profiles(data, [tmp_path], tmp_path)
     assert data["experiments"] == ["untouched"]
     assert "不计入正式测速" in data["detail_tables"][0]["title"]
+    data["measured_records"] = [{"text_bucket": 80, "p50_ms": 99, "p95_ms": 100}]
+    attach_profiles(data, [tmp_path], tmp_path)
+    assert "已完成实测" in data["recommendations"][0]["title"]
+    assert "99.00" in data["recommendations"][0]["detail"]
+    assert "未实现自动路由" in data["recommendations"][0]["detail"]
 
 
 def test_completed_diagnostic_is_not_reported_as_still_running(tmp_path):

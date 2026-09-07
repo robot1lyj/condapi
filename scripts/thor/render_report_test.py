@@ -1,4 +1,21 @@
+from scripts.thor.render_report import latency_chart
 from scripts.thor.render_report import render
+
+
+def test_latency_chart_only_shows_measured_calls_and_escapes_labels():
+    chart = latency_chart(
+        [
+            {"name": "failed", "p50_ms": None, "p95_ms": None},
+            {"name": "<fast>", "p50_ms": 99, "p95_ms": 101},
+            {"name": "slow", "p50_ms": 125, "p95_ms": 126},
+        ]
+    )
+    assert "failed" not in chart
+    assert "&lt;fast&gt;" in chart
+    assert "99.00 / 101.00 ms" in chart
+    assert chart.index("&lt;fast&gt;") < chart.index("slow")
+    assert "100 ms" in chart
+    assert latency_chart([]) == ""
 
 
 def test_missing_measurements_are_not_fabricated():

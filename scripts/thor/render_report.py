@@ -10,6 +10,45 @@ from pathlib import Path
 import re
 
 
+def latency_chart(experiments):
+    """Fastest eight complete calls; original measurements remain in the table."""
+    measured = sorted(
+        (row for row in experiments if row.get("p50_ms") is not None and row.get("p95_ms") is not None),
+        key=lambda row: row["p50_ms"],
+    )[:8]
+    if not measured:
+        return ""
+    limit = max(120, max(row["p95_ms"] for row in measured) * 1.15)
+    scale, left = 620 / limit, 180
+    height = 52 + len(measured) * 42
+    bars = []
+    for index, row in enumerate(measured):
+        y = 32 + index * 42
+        label = html.escape(row["name"].split(" · ")[0], quote=True)
+        p50, p95 = row["p50_ms"], row["p95_ms"]
+        color = "#6057e7" if index == 0 else "#a6a2e8"
+        bars.append(
+            f'<text x="12" y="{y + 16}" fill="#172139">{label}</text>'
+            f'<rect x="{left}" y="{y}" width="{p50 * scale:.2f}" height="24" rx="5" fill="{color}"/>'
+            f'<line x1="{left + p95 * scale:.2f}" x2="{left + p95 * scale:.2f}" '
+            f'y1="{y - 2}" y2="{y + 26}" stroke="#172139" stroke-width="2"/>'
+            f'<text x="815" y="{y + 16}" fill="#172139">{p50:.2f} / {p95:.2f} ms</text>'
+        )
+    target = left + 100 * scale
+    return (
+        '<section class="panel"><h2>延迟速览 · 最快八组</h2>'
+        '<p class="sub">条形为完整调用 P50，黑线为 P95；虚线是 100ms 目标。只展示已完成实测，不表示任务精度通过。</p>'
+        '<div class="tablewrap">'
+        f'<svg role="img" aria-label="最快配置完整推理延迟与100毫秒目标比较" viewBox="0 0 1010 {height}" '
+        'style="width:100%;min-width:700px;font:13px system-ui,sans-serif">'
+        f'<line x1="{target:.2f}" x2="{target:.2f}" y1="20" y2="{height - 12}" '
+        'stroke="#c35935" stroke-dasharray="4 4"/>'
+        f'<text x="{target:.2f}" y="14" text-anchor="middle" fill="#c35935">100 ms</text>'
+        + "".join(bars)
+        + "</svg></div></section>"
+    )
+
+
 def render(data: dict) -> str:
     def esc(value):
         return html.escape(str(value), quote=True)
@@ -89,7 +128,7 @@ footer{color:var(--muted);font-size:12px;margin-top:20px;text-align:center}@medi
 </style><header><div class="eyebrow">EDGE INFERENCE / 可复现实测</div><h1>Thor · Pi0.5 推理实验室</h1>
 <p>原始 JAX 权重 → 精度对照 → 真实样本离线回放。把可运行、数值一致与任务有效分开验收。</p>
 <div class="meta">更新于 UPDATE · 基础模型 pi05_base · 不连接机械臂执行动作</div></header>
-<main><section class="facts">FACTS</section><section class="panel"><h2>精度配置对照</h2>
+<main><section class="facts">FACTS</section>LATENCY_CHART<section class="panel"><h2>精度配置对照</h2>
 <p class="sub">参数存储精度不等于计算精度。延迟以预热后完整 policy 调用为准，首次编译单独记录；“—”表示尚无实测数据。</p>
 <div class="tablewrap"><table><thead><tr><th>配置</th><th>权重</th><th>计算</th><th>状态</th><th>P50 / ms</th><th>P95 / ms</th><th>最大绝对误差</th><th>说明</th></tr></thead><tbody>ROWS</tbody></table></div></section>
 DETAIL_TABLES
@@ -102,6 +141,7 @@ NEXT_PLAN
     replacements = {
         "UPDATE": esc(data["updated_at"]),
         "FACTS": facts,
+        "LATENCY_CHART": latency_chart(data.get("experiments", [])),
         "ROWS": "".join(rows),
         "TIMELINE": timeline,
         "NOTICES": notices,
