@@ -174,6 +174,12 @@ pip check → CPU 导入检查。目标为 `/home/wuyan/.conda/envs/condapi-yam`
 服务器直连内网 Gitea 曾超时，本次通过本地 SSH 反向隧道让服务器访问 Gitea，已 clone 到 `YAM_code`；
 服务器 origin 保留正式 Gitea 地址，未配置 GitHub。隧道只服务代码同步，不参与环境安装或作业运行。
 
+环境补充（2026-09-07）：共享盘正式安装仍在慢速解包。为继续 CPU 数据验证，另在登录节点本地盘
+`/tmp/condapi-yam-smoke.CzQI6oAj/env` 完成同一压缩包的安装，pip check、CPU 导入及 9 项转换/审计测试通过。
+这是临时 CPU 验证环境，不是共享训练环境；重启/临时目录清理可能使其失效，不供计算节点训练引用。
+安装日志 `/tmp/condapi-yam-smoke.CzQI6oAj/install.log` 已出现 INSTALL_COMPLETE。
+不能据此宣布 `/home/wuyan/.conda/envs/condapi-yam` 已完成，后者仍以自身安装日志为准。
+
 ## 3. Slurm 和 GPU 预检
 
 最新复核（2026-09-07）：调度接口已恢复，按用户要求撤销仍在排队的作业 2063，

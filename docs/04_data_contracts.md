@@ -161,3 +161,28 @@ parquet 和视频；train/val 分别转换，默认要求该 split 的全部 epi
 ## 旧合同隔离
 
 OpenArm 的 16D `[右臂7, 右夹爪, 左臂7, 左夹爪]`、HQ degree 语义和 Piper 14D transform 都是历史/legacy。它们不能与 YAM 的 14D `[左6, 左夹爪, 右6, 右夹爪]` 混合，也不能复用其 norm stats、动作顺序或训练结论。
+
+## 2026-09-07 Lego 实测清洗状态
+
+本节为本次上传后的最新实测，不把先前的 pending_upload 清点当作当前结论。
+原始路径仍为 `/home/wuyan/lyj/YAM/YAM_data/ABC-130k-two-tasks/lego_sorting`，原始文件只读。
+
+- 4458 train + 69 val，共 4527 集、10,539,323 帧：文件齐备；全量 14D、有限值、帧序号和时间戳检查通过。
+- 287 集的 observation.state 夹爪值略超名义上限，最大约 1.003627；action 夹爪均在 [0,1]。
+  此项标记为 warning，不裁剪读数、不删除整集；不能从数值范围独立证明物理单位。
+- train/95（3428 帧）与 val/421（2567 帧）完成全部三路视频解码验证。
+- train/95 的实际 LeRobot 转换与首/中/尾帧回读通过。小样本发布到
+  `/home/wuyan/lyj/YAM/YAM_data/processed/lego_sorting/smoke-train-20260907`，不是全量训练集。
+- 全量视频逐帧审计已在 tmux `lego-full-audit` 启动，限制单核、nice 19、最长 24 小时；尚未完成。
+  报告目录 `/home/wuyan/lyj/YAM/env-transfer/lego-full-audit-20260907`，
+  `full.json.incomplete` 不作为完成结果；`full.json` 发布后还须检查 counts，不能仅凭进程结束宣称全部合格。
+
+全量数值报告为 `/home/wuyan/lyj/YAM/env-transfer/lego-clean-20260907/lowdim.json`。
+新增 `audit_yam_subset.py --lowdim-only --progress-every 100`，仅验证数值，状态为 validated_lowdim，
+绝不冒充 validated_structure；warning 不自动转成 rejected。默认 full 模式才逐帧解码全部视频。
+
+本次转换合同保留在同目录 `contract.json`，副本写入小样本的 conversion_manifest.json。
+[XDOF 原始格式说明](https://huggingface.co/datasets/XDOF/ABC-130k/blob/main/README.md) 明确弧度和夹爪 0=闭、1=开；
+[固定版本 LeRobot 字段定义](https://huggingface.co/datasets/lerobot/abc_130k_v3_train/blob/68651e4929d9fb00f798937b2d62617cab5c771d/README.md)
+确认左右臂 14D 顺序。将原始单位用于该 LeRobot port 仍是与样本范围一致的推断，尚未做 raw-to-port 逐值对照或实机标定。
+当前转换保留数值、不做尺度转换，输出 training_verified=false；norm stats 与训练验收仍未完成。

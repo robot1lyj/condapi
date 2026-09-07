@@ -95,6 +95,29 @@ def test_full_audit_decodes_videos_and_rejects_truncation(tmp_path):
     assert audit(tmp_path, min_age=0)["counts"] == {"validated_structure": 1}
     path.write_bytes(b"broken video")
     assert audit(tmp_path, min_age=0)["counts"] == {"rejected": 1}
+    lowdim = audit(tmp_path, min_age=0, lowdim_only=True)
+    assert lowdim["counts"] == {"validated_lowdim": 1}
+    assert lowdim["trainable"] is False
+    assert lowdim["episodes"][0]["value_ranges"]["action"]["max"] == [1] * 14
+    assert lowdim["split_counts"]["train"] == {"validated_lowdim": 1}
+    assert lowdim["declared_frames"] == 3
+    assert lowdim["warning_counts"] == {}
+    parquet = data_dir / "source-file-000.parquet"
+    rows = pq.read_table(parquet).to_pydict()
+    rows["observation.state"][0][6] = 1.003
+    pq.write_table(pa.table(rows), parquet)
+    result = audit(tmp_path, min_age=0, lowdim_only=True)
+    assert result["counts"] == {"validated_lowdim": 1}
+    assert result["warning_counts"] == {"observation.state:gripper_outside_nominal_0_1": 1}
+    assert pq.read_table(parquet)["observation.state"][0].as_py()[6] == 1.003
+
+
+def test_audit_modes_and_progress(tmp_path, capsys):
+    with pytest.raises(ValueError, match="mutually exclusive"):
+        audit(tmp_path, inventory_only=True, lowdim_only=True)
+    test_upload_missing_files_is_pending(tmp_path)
+    audit(tmp_path, inventory_only=True, progress_every=1)
+    assert "AUDIT train 1/1" in capsys.readouterr().err
 
 
 def test_raw_local_dataset_rejected_before_hub_access(tmp_path):

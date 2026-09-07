@@ -13,6 +13,7 @@ from collections import Counter
 import hashlib
 import json
 from pathlib import Path
+import sys
 import time
 
 CAMERAS = ("top", "left_wrist", "right_wrist")
@@ -58,12 +59,15 @@ def validate_video(path, length, fps):
         raise ValueError(f"video_frame_count:{count}!={length}")
 
 
-def audit(root, *, inventory_only=False, min_age=300, limit=None):
+def audit(root, *, inventory_only=False, lowdim_only=False, min_age=300, limit=None, progress_every=0):
+    if inventory_only and lowdim_only:
+        raise ValueError("inventory_only and lowdim_only are mutually exclusive")
     root = Path(root).resolve()
     report = {
         "source": str(root),
         "observed_at": time.time(),
         "inventory_only": inventory_only,
+        "lowdim_only": lowdim_only,
         "trainable": False,
         "episodes": [],
         "manifests": {},
@@ -83,7 +87,10 @@ def audit(root, *, inventory_only=False, min_age=300, limit=None):
         report["manifests"][split] = {"sha256": hashlib.sha256(content).hexdigest(), "expected": len(episodes)}
         ids = Counter(e["source_episode_index"] for e in episodes)
         cached_path, cached_table = None, None
-        for episode in episodes[:limit]:
+        selected = episodes[:limit]
+        for episode_number, episode in enumerate(selected, 1):
+            if progress_every and (episode_number == 1 or episode_number % progress_every == 0):
+                print(f"AUDIT {split} {episode_number}/{len(selected)}", file=sys.stderr, flush=True)
             eid = episode["source_episode_index"]
             item = {
                 "split": split,
@@ -122,9 +129,23 @@ def audit(root, *, inventory_only=False, min_age=300, limit=None):
                     cached_path = cache_key
                 table = cached_table.filter(pc.equal(cached_table["episode_index"], eid))
                 validate_rows(table, episode)
-                for video in videos:
-                    validate_video(video, episode["length"], episode["fps"])
-                item["status"] = "validated_structure"
+                import numpy as np
+
+                item["value_ranges"] = {}
+                for key in ("observation.state", "action"):
+                    values = np.asarray(table[key].to_pylist())
+                    item["value_ranges"][key] = {"min": values.min(axis=0).tolist(), "max": values.max(axis=0).tolist()}
+                # A range warning is not a license to clip readings or drop an
+                # episode. The raw sensor can slightly exceed nominal [0, 1].
+                item["warnings"] = [
+                    f"{key}:gripper_outside_nominal_0_1"
+                    for key, ranges in item["value_ranges"].items()
+                    if any(ranges["min"][i] < -1e-5 or ranges["max"][i] > 1.00001 for i in (6, 13))
+                ]
+                if not lowdim_only:
+                    for video in videos:
+                        validate_video(video, episode["length"], episode["fps"])
+                item["status"] = "validated_lowdim" if lowdim_only else "validated_structure"
             except (ValueError, OSError, KeyError, IndexError) as exc:
                 item.update(status="rejected", reason=str(exc))
             if any(not p.is_file() or signature(p) != old for p, old in zip(paths, before, strict=True)):
@@ -135,17 +156,30 @@ def audit(root, *, inventory_only=False, min_age=300, limit=None):
                 if item["split"] == split:
                     item["status"] = "pending_upload"
     report["counts"] = dict(Counter(item["status"] for item in report["episodes"]))
+    report["split_counts"] = {
+        split: dict(Counter(item["status"] for item in report["episodes"] if item["split"] == split))
+        for split in ("train", "val")
+    }
+    report["declared_frames"] = sum(item["length"] for item in report["episodes"])
+    report["warning_counts"] = dict(
+        Counter(warning for item in report["episodes"] for warning in item.get("warnings", []))
+    )
     return report
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("root", type=Path)
-    parser.add_argument("--inventory-only", action="store_true")
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument("--inventory-only", action="store_true")
+    mode.add_argument(
+        "--lowdim-only", action="store_true", help="Validate all state/action rows but do not decode videos"
+    )
     parser.add_argument("--min-age", type=float, default=300)
     parser.add_argument("--limit", type=int)
+    parser.add_argument("--progress-every", type=int, default=0, help="Report progress to stderr every N episodes")
     args = parser.parse_args()
-    if args.min_age < 0 or (args.limit is not None and args.limit <= 0):
+    if args.min_age < 0 or args.progress_every < 0 or (args.limit is not None and args.limit <= 0):
         parser.error("min-age must be nonnegative and limit positive")
     print(json.dumps(audit(**vars(args)), ensure_ascii=False, indent=2))
 
