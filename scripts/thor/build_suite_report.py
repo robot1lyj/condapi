@@ -3,6 +3,7 @@
 # ruff: noqa: RUF001
 import argparse
 import datetime
+import hashlib
 import json
 from pathlib import Path
 
@@ -219,6 +220,34 @@ def build(run_paths, logs, plan):
     }
 
 
+def attach_conversion(data, path):
+    audit = json.loads(path.read_text())
+    if audit.get("load_precision") != "float32" or audit.get("output_precision") != "float32":
+        raise ValueError("The conversion progress row requires an FP32 artifact")
+    data["conversion_evidence"] = {
+        "path": str(path),
+        "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+        "audit": audit,
+    }
+    data["detail_tables"].insert(
+        0,
+        {
+            "title": "100 ms 加速主线 · 权重转换进度",
+            "description": "FP32 转换已经完成；PyTorch GPU 容器准备中，尚无新延迟结果。首次加载使用数值相等检查（不区分正负零），不能据此宣称跨框架动作精度通过。",
+            "columns": ["阶段", "实测结果", "下一步"],
+            "rows": [
+                [
+                    "原始 JAX → PyTorch FP32",
+                    f"{audit['mapped_tensor_count']} 张量 / {audit['mapped_element_count']:,} 参数",
+                    "同输入 / 同噪声动作对照",
+                ],
+                ["LoRA", "当前基础模型不含 LoRA；转换器拒绝丢弃适配器", "微调后独立验证合并路径"],
+                ["PyTorch / TensorRT 延迟", "未实测，目标约 100 ms 或以下", "三相机 / H50 / 去噪 10，不缩减合同"],
+            ],
+        },
+    )
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--runs", nargs=3, type=Path, required=True)
@@ -226,8 +255,11 @@ def main():
     parser.add_argument("--plan", type=Path, required=True)
     parser.add_argument("--json", type=Path, required=True)
     parser.add_argument("--html", type=Path, required=True)
+    parser.add_argument("--conversion-audit", type=Path)
     args = parser.parse_args()
     data = build(args.runs, args.logs, json.loads(args.plan.read_text()))
+    if args.conversion_audit:
+        attach_conversion(data, args.conversion_audit)
     args.json.write_text(json.dumps(data, ensure_ascii=False, indent=2))
     args.html.write_text(render(data))
 

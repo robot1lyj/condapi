@@ -1,3 +1,4 @@
+import dataclasses
 import logging
 import os
 import pathlib
@@ -22,6 +23,8 @@ def create_trained_policy(
     default_prompt: str | None = None,
     norm_stats: dict[str, transforms.NormStats] | None = None,
     pytorch_device: str | None = None,
+    pytorch_precision: Literal["bfloat16", "float32"] = "bfloat16",
+    pytorch_compile: bool = True,
     jax_param_dtype: Literal["checkpoint", "bfloat16", "float32"] = "bfloat16",
 ) -> _policy.Policy:
     """Create a policy from a trained checkpoint.
@@ -40,6 +43,9 @@ def create_trained_policy(
                       If None and is_pytorch=True, will use "cuda" if available, otherwise "cpu".
         jax_param_dtype: JAX restoration dtype; "checkpoint" preserves stored dtypes.
                          The legacy default remains bfloat16. Does not set compute dtype.
+        pytorch_precision: Selected backend precision. FP32 also constructs FP32
+                           parameters before loading, avoiding irreversible BF16 rounding.
+        pytorch_compile: Compile sampling on the PyTorch backend; defaults to the legacy True.
 
     Note:
         The function automatically detects whether the model is PyTorch-based by checking for the
@@ -54,8 +60,14 @@ def create_trained_policy(
 
     logging.info("Loading model...")
     if is_pytorch:
-        model = train_config.model.load_pytorch(train_config, weight_path)
-        model.paligemma_with_expert.to_bfloat16_for_selected_params("bfloat16")
+        if pytorch_precision not in ("float32", "bfloat16"):
+            raise ValueError(f"Unsupported PyTorch precision: {pytorch_precision}")
+        if pytorch_precision == "float32":
+            train_config = dataclasses.replace(
+                train_config, model=dataclasses.replace(train_config.model, dtype="float32")
+            )
+        model = train_config.model.load_pytorch(train_config, weight_path, compile_model=pytorch_compile)
+        model.paligemma_with_expert.to_bfloat16_for_selected_params(pytorch_precision)
     else:
         dtypes = {"checkpoint": None, "bfloat16": jnp.bfloat16, "float32": jnp.float32}
         if jax_param_dtype not in dtypes:

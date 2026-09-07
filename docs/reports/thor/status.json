@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-09-07T19:25:54.292701+08:00",
+  "updated_at": "2026-09-07T19:46:55.653300+08:00",
   "facts": [
     {
       "label": "完整模型模式",
@@ -58,6 +58,32 @@
     }
   ],
   "detail_tables": [
+    {
+      "title": "100 ms 加速主线 · 权重转换进度",
+      "description": "FP32 转换已经完成；PyTorch GPU 容器准备中，尚无新延迟结果。首次加载使用数值相等检查（不区分正负零），不能据此宣称跨框架动作精度通过。",
+      "columns": [
+        "阶段",
+        "实测结果",
+        "下一步"
+      ],
+      "rows": [
+        [
+          "原始 JAX → PyTorch FP32",
+          "811 张量 / 3,353,433,872 参数",
+          "同输入 / 同噪声动作对照"
+        ],
+        [
+          "LoRA",
+          "当前基础模型不含 LoRA；转换器拒绝丢弃适配器",
+          "微调后独立验证合并路径"
+        ],
+        [
+          "PyTorch / TensorRT 延迟",
+          "未实测，目标约 100 ms 或以下",
+          "三相机 / H50 / 去噪 10，不缩减合同"
+        ]
+      ]
+    },
     {
       "title": "误差分解：计算与权重分别带来什么变化",
       "description": "比较每个输入的第一份稳定输出（9 个独立输入，不把 20 次重复冒充更多样本）。归一化误差仅统计有效 14D；物理输出保持数据集原始单位，不宣称弧度或毫米。动作步从 0 开始。",
@@ -5033,6 +5059,25 @@
       "power_before": "NV Power Mode: 120W\n1\n",
       "checkpoint": "pi05_base; no LoRA; original read-only checkpoint",
       "network": "disabled for inference container; all inputs local"
+    }
+  },
+  "conversion_evidence": {
+    "path": "docs/reports/thor/evidence/20260907/acceleration/conversion_audit.json",
+    "sha256": "a13877365be144cf54d248fa810e4edfb6014f66841f90a834c9f412d6b24982",
+    "audit": {
+      "mapped_tensor_count": 811,
+      "mapped_element_count": 3353433872,
+      "load_precision": "float32",
+      "mapped_to_loaded_bit_exact": true,
+      "missing_unused_language_heads": [
+        "paligemma_with_expert.gemma_expert.lm_head.weight",
+        "paligemma_with_expert.paligemma.lm_head.weight"
+      ],
+      "output_precision": "float32",
+      "checkpoint_metadata_sha256": "250d0ad0f6540a5e4bdd70442d6864cef729724f2d23e2dd2cc669563a668d70",
+      "checkpoint": "/checkpoint/pi05_base",
+      "lora": "absent; not a LoRA merge implementation",
+      "inference_equivalence": "not tested by tensor loading audit"
     }
   }
 }

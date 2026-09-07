@@ -82,7 +82,7 @@ def make_att_2d_masks(pad_masks, att_masks):
 
 
 class PI0Pytorch(nn.Module):
-    def __init__(self, config):
+    def __init__(self, config, *, compile_model=True):
         super().__init__()
         self.config = config
         self.pi05 = config.pi05
@@ -109,7 +109,8 @@ class PI0Pytorch(nn.Module):
             self.action_time_mlp_out = nn.Linear(action_expert_config.width, action_expert_config.width)
 
         torch.set_float32_matmul_precision("high")
-        self.sample_actions = torch.compile(self.sample_actions, mode="max-autotune")
+        if compile_model:
+            self.sample_actions = torch.compile(self.sample_actions, mode="max-autotune")
 
         # Initialize gradient checkpointing flag
         self.gradient_checkpointing_enabled = False
@@ -121,7 +122,7 @@ class PI0Pytorch(nn.Module):
             "to overlay the openpi transformers patches."
         )
         try:
-            from transformers.models.siglip import check
+            from transformers.models.siglip import check  # noqa: PLC0415
 
             if not check.check_whether_transformers_replace_is_installed_correctly():
                 raise ValueError(msg)

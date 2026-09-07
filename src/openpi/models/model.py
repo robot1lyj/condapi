@@ -238,13 +238,13 @@ class BaseModelConfig(abc.ABC):
         state.replace_by_pure_dict(params)
         return nnx.merge(graphdef, state)
 
-    def load_pytorch(self, train_config, weight_path: str):
+    def load_pytorch(self, train_config, weight_path: str, *, compile_model: bool = True):
         import safetensors.torch  # noqa: PLC0415
 
         from openpi.models_pytorch import pi0_pytorch  # noqa: PLC0415
 
         logger.info(f"train_config: {train_config}")
-        model = pi0_pytorch.PI0Pytorch(config=train_config.model)
+        model = pi0_pytorch.PI0Pytorch(config=train_config.model, compile_model=compile_model)
         safetensors.torch.load_model(model, weight_path)
         return model
 

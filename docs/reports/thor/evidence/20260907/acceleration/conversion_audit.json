@@ -1,0 +1,15 @@
+{
+  "mapped_tensor_count": 811,
+  "mapped_element_count": 3353433872,
+  "load_precision": "float32",
+  "mapped_to_loaded_bit_exact": true,
+  "missing_unused_language_heads": [
+    "paligemma_with_expert.gemma_expert.lm_head.weight",
+    "paligemma_with_expert.paligemma.lm_head.weight"
+  ],
+  "output_precision": "float32",
+  "checkpoint_metadata_sha256": "250d0ad0f6540a5e4bdd70442d6864cef729724f2d23e2dd2cc669563a668d70",
+  "checkpoint": "/checkpoint/pi05_base",
+  "lora": "absent; not a LoRA merge implementation",
+  "inference_equivalence": "not tested by tensor loading audit"
+}

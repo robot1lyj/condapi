@@ -26,6 +26,8 @@ Example:
     python examples/convert_jax_model_to_pytorch.py --checkpoint_dir /home/$USER/.cache/openpi/openpi-assets/checkpoints/pi05_droid --output_path /home/$USER/.cache/openpi/openpi-assets/checkpoints/pi05_droid_pytorch
 """
 
+import dataclasses
+import hashlib
 import json
 import os
 import pathlib
@@ -290,7 +292,7 @@ def slice_gemma_state_dict(state_dict, config, *, num_expert, checkpoint_dir, pi
     llm_mlp_linear = state_dict.pop(f"llm/layers/mlp_{num_expert}/linear{suffix}")
 
     # Check if we have Dense layers (for pi05/adaptive normalization) or scale layers (for regular pi0)
-    if "pi05" in checkpoint_dir:
+    if pi05:
         # Pi05 with adaptive normalization
         llm_input_layernorm_bias = state_dict.pop(f"llm/layers/pre_attention_norm_{num_expert}/Dense_0/bias{suffix}")
         llm_post_attention_layernorm_bias = state_dict.pop(f"llm/layers/pre_ffw_norm_{num_expert}/Dense_0/bias{suffix}")
@@ -345,7 +347,7 @@ def slice_gemma_state_dict(state_dict, config, *, num_expert, checkpoint_dir, pi
             i
         ].transpose()
 
-        if "pi05" in checkpoint_dir:
+        if pi05:
             # Pi05 with adaptive normalization - use Dense layer parameters directly
             state_dict[f"paligemma_with_expert.gemma_expert.model.layers.{i}.input_layernorm.dense.bias"] = (
                 llm_input_layernorm_bias[i]
@@ -369,7 +371,7 @@ def slice_gemma_state_dict(state_dict, config, *, num_expert, checkpoint_dir, pi
             )
 
     # Handle final norm layer
-    if "pi05" in checkpoint_dir:
+    if pi05:
         # Pi05 with adaptive normalization - use Dense layer parameters directly
         final_norm_bias = state_dict.pop(f"llm/final_norm_{num_expert}/Dense_0/bias{suffix}")
         final_norm_kernel = state_dict.pop(f"llm/final_norm_{num_expert}/Dense_0/kernel{suffix}")
@@ -431,11 +433,24 @@ def convert_pi0_checkpoint(
         output_path: Path to save the converted PyTorch model
         model_config: Model config
     """
+    if precision not in ("float32", "bfloat16"):
+        raise ValueError(f"Invalid precision: {precision}")
+    if pathlib.Path(output_path).exists():
+        raise FileExistsError("Use a new conversion directory; existing artifacts are immutable")
+    if "lora" in model_config.paligemma_variant or "lora" in model_config.action_expert_variant:
+        raise ValueError("LoRA conversion requires an independently verified merge; adapters must not be dropped")
+    # Casting back to FP32 after loading into BF16 does not recover lost bits.
+    model_config = dataclasses.replace(model_config, dtype="float32")
     print(f"Converting PI0 checkpoint from {checkpoint_dir} to {output_path}")
     print(f"Model config: {model_config}")
 
     # Break down orbax ckpts by restoring via JAX to respect dtype
-    initial_params = slice_initial_orbax_checkpoint(checkpoint_dir=checkpoint_dir, restore_precision="float32")
+    initial_params = slice_initial_orbax_checkpoint(checkpoint_dir=checkpoint_dir, restore_precision=None)
+    checkpoint_leaves = traversals.flatten_mapping(initial_params["projection_params"], sep="/")
+    if any("lora" in name.lower() for name in checkpoint_leaves):
+        raise ValueError("Checkpoint contains LoRA tensors; merge and verify them separately before conversion")
+    if any(value.dtype != np.float32 for value in checkpoint_leaves.values()):
+        raise ValueError("This audited converter requires original FP32 checkpoint tensors")
 
     # Process projection params
     if model_config.pi05:
@@ -453,6 +468,12 @@ def convert_pi0_checkpoint(
             "action_time_mlp_in",
             "action_time_mlp_out",
         ]
+
+    root_keys = set(initial_params["projection_params"])
+    if root_keys != {*keys, "PaliGemma"}:
+        raise ValueError(f"Unmapped checkpoint roots: {root_keys.symmetric_difference({*keys, 'PaliGemma'})}")
+    if any("lora" in key.lower() for key in initial_params["paligemma_params"]):
+        raise ValueError("Checkpoint contains LoRA tensors; refusing to silently discard adapters")
 
     projection_params = {}
     for key in keys:
@@ -511,13 +532,16 @@ def convert_pi0_checkpoint(
     )
 
     # Instantiate model
-    pi0_model = openpi.models_pytorch.pi0_pytorch.PI0Pytorch(model_config)
+    pi0_model = openpi.models_pytorch.pi0_pytorch.PI0Pytorch(model_config, compile_model=False)
 
     # Combine all parameters (no prefix needed for our model structure)
     all_params = {**paligemma_params, **gemma_params, **projection_params}
+    source_elements = sum(value.size for value in checkpoint_leaves.values())
+    if sum(value.numel() for value in all_params.values()) != source_elements:
+        raise ValueError("Source and mapped element counts differ; checkpoint coverage is incomplete")
 
     # Load state dict
-    pi0_model.load_state_dict(all_params, strict=False)
+    conversion_audit = load_mapped_parameters(pi0_model, all_params)
 
     if precision == "float32":
         pi0_model = pi0_model.to(torch.float32)
@@ -527,7 +551,7 @@ def convert_pi0_checkpoint(
         raise ValueError(f"Invalid precision: {precision}")
 
     # Save the converted model using safetensors
-    os.makedirs(output_path, exist_ok=True)
+    os.makedirs(output_path, exist_ok=False)
 
     # Save model weights as SafeTensors using save_model to handle tied weights
     safetensors.torch.save_model(pi0_model, os.path.join(output_path, "model.safetensors"))
@@ -536,8 +560,6 @@ def convert_pi0_checkpoint(
     assets_source = pathlib.Path(checkpoint_dir).parent / "assets"
     if assets_source.exists():
         assets_dest = pathlib.Path(output_path) / "assets"
-        if assets_dest.exists():
-            shutil.rmtree(assets_dest)
         shutil.copytree(assets_source, assets_dest)
 
     # Save config as JSON for reference
@@ -547,12 +569,61 @@ def convert_pi0_checkpoint(
         "paligemma_variant": model_config.paligemma_variant,
         "action_expert_variant": model_config.action_expert_variant,
         "precision": precision,
+        "pi05": model_config.pi05,
+        "max_token_len": model_config.max_token_len,
     }
     with open(os.path.join(output_path, "config.json"), "w") as f:
         json.dump(config_dict, f, indent=2)
 
+    metadata_path = pathlib.Path(checkpoint_dir) / "params" / "_METADATA"
+    conversion_audit.update(
+        output_precision=precision,
+        checkpoint_metadata_sha256=hashlib.sha256(metadata_path.read_bytes()).hexdigest(),
+        checkpoint=str(pathlib.Path(checkpoint_dir).resolve()),
+        lora="absent; not a LoRA merge implementation",
+        inference_equivalence="not tested by tensor loading audit",
+    )
+    (pathlib.Path(output_path) / "conversion_audit.json").write_text(json.dumps(conversion_audit, indent=2))
+
     print("Model conversion completed successfully!")
     print(f"Model saved to {output_path}")
+
+
+def load_mapped_parameters(model, parameters):
+    """Reject missing active weights, unknown tensors, and any load-time rounding.
+
+    OpenPI calls the transformer backbones directly, never the two language
+    output heads. The PaliGemma head is tied to the mapped token embedding;
+    the expert's unused language head has no corresponding JAX parameter.
+    """
+    unused_heads = {
+        "paligemma_with_expert.paligemma.lm_head.weight",
+        "paligemma_with_expert.gemma_expert.lm_head.weight",
+    }
+    expected = model.state_dict()
+    missing = set(expected) - set(parameters)
+    unexpected = set(parameters) - set(expected)
+    if missing - unused_heads or unexpected:
+        raise ValueError(f"Incomplete mapping: missing={sorted(missing - unused_heads)}, extra={sorted(unexpected)}")
+    for key, tensor in parameters.items():
+        if tensor.dtype != torch.float32 or expected[key].dtype != torch.float32:
+            raise ValueError(f"FP32 source and destination required before loading: {key}")
+        if tensor.shape != expected[key].shape or not torch.isfinite(tensor).all():
+            raise ValueError(f"Invalid source tensor: {key}")
+    result = model.load_state_dict(parameters, strict=False)
+    if set(result.missing_keys) - unused_heads or result.unexpected_keys:
+        raise ValueError(f"Unexpected load result: {result}")
+    loaded = model.state_dict()
+    for key, tensor in parameters.items():
+        if not torch.equal(loaded[key].contiguous().view(torch.int32), tensor.contiguous().view(torch.int32)):
+            raise ValueError(f"Load changed tensor values: {key}")
+    return {
+        "mapped_tensor_count": len(parameters),
+        "mapped_element_count": sum(t.numel() for t in parameters.values()),
+        "load_precision": "float32",
+        "mapped_to_loaded_bit_exact": True,
+        "missing_unused_language_heads": sorted(missing),
+    }
 
 
 def main(
