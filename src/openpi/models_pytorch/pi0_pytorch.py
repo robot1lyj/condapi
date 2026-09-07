@@ -259,7 +259,7 @@ class PI0Pytorch(nn.Module):
 
         return embs, pad_masks, att_masks
 
-    def embed_suffix(self, state, noisy_actions, timestep):
+    def embed_suffix(self, state, noisy_actions, timestep, *, time_embedding=None):
         """Embed state, noisy_actions, timestep to prepare for Expert Gemma processing."""
         embs = []
         pad_masks = []
@@ -286,9 +286,11 @@ class PI0Pytorch(nn.Module):
             att_masks += [1]
 
         # Embed timestep using sine-cosine positional encoding with sensitivity in the range [0, 1]
-        time_emb = create_sinusoidal_pos_embedding(
-            timestep, self.action_in_proj.out_features, min_period=4e-3, max_period=4.0, device=timestep.device
-        )
+        time_emb = time_embedding
+        if time_emb is None:
+            time_emb = create_sinusoidal_pos_embedding(
+                timestep, self.action_in_proj.out_features, min_period=4e-3, max_period=4.0, device=timestep.device
+            )
         time_emb = time_emb.type(dtype=timestep.dtype)
 
         # Fuse timestep + action information using an MLP
@@ -471,9 +473,13 @@ class PI0Pytorch(nn.Module):
         past_key_values,
         x_t,
         timestep,
+        *,
+        time_embedding=None,
     ):
         """Apply one denoising step of the noise `x_t` at a given timestep."""
-        suffix_embs, suffix_pad_masks, suffix_att_masks, adarms_cond = self.embed_suffix(state, x_t, timestep)
+        suffix_embs, suffix_pad_masks, suffix_att_masks, adarms_cond = self.embed_suffix(
+            state, x_t, timestep, time_embedding=time_embedding
+        )
 
         suffix_len = suffix_pad_masks.shape[1]
         batch_size = prefix_pad_masks.shape[0]
