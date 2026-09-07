@@ -215,3 +215,31 @@ OpenArm 的 16D `[右臂7, 右夹爪, 左臂7, 左夹爪]`、HQ degree 语义和
 验证：本地 28 项相关测试通过，服务器 7 项转换测试通过；真实 val/421 复制转换及回读成功。
 全量作业确认逐集推进后，停止旧 tmux `lego-full-audit` 的重复检查，保留旧日志和未完成报告，
 其 `full.json.incomplete` 不能当作全量通过证据；完整性验收由新转换流程执行。
+
+## 断点续跑（2026-09-07 当前入口）
+
+全量任务已切换为支持 `--video-mode copy --resume` 的版本。既有 val/69 集经源/目标哈希、数值和索引
+复核后复用，训练集从带检查点的新流程开始；没有重做或覆盖已完成验证集，也没有改动原始数据。
+
+- 检查点在共享盘的 `train.incomplete/resume_identity.json` 和 `resume_records/`（相对于版本暂存目录），
+  不放在临时环境目录。记录源 manifest、文件 size/mtime、Parquet 哈希、合同、episode 选择和 LeRobot 版本。
+- 每路视频复制、SHA-256 和全帧解码通过后，fsync 数据，再原子写入检查点；续跑校验目标哈希后复用，
+  不重复复制/解码。没有有效检查点或校验失败的派生文件移到 `.interrupted-*` 备份后重做，不删除原始数据。
+- 中断的 metadata 不直接追加：从校验后的文件重建，原有 metadata 代次保留；已有 Parquet 先逐值比较，
+  一致则复用。未知旧 `.incomplete` 目录不自动接管，源数据或配置改变时拒绝混用。
+- split 和整个版本各有文件锁，禁止并发写入；已发布 split 只读复核，损坏时拒绝覆盖。重启不保证自动启动，
+  但检查点保留；可用下面的入口恢复，已有同名 tmux 会拒绝重复启动。
+
+在本地执行：
+
+```bash
+ssh yam-server 'bash /home/wuyan/lyj/YAM/env-transfer/lego-resume-v2-20260907/scripts/resume_lego_server.sh'
+```
+
+入口优先使用已出现 INSTALL_COMPLETE 的正式环境，否则使用已验收的临时环境；二者均不可用时停止，
+需恢复环境或显式指定 `YAM_ENV_PREFIX`，不会因此删除检查点。tmux 仍为 `lego-convert-v1`，当前日志改为
+`/home/wuyan/lyj/YAM/env-transfer/lego-resume-v2-20260907/resume.log`。新版代码在独立执行快照，不改服务器 Git 仓库。
+进度 `reused_videos` 表示本集复用视频数；最终仍以 `CONVERSION_COMPLETE` 为整个版本发布标志。
+
+验证：本地 32 项相关测试、服务器 11 项转换/续跑测试通过，覆盖中途异常、派生视频损坏、配置变化、
+未知目录、并发锁、完成版本复核和批处理二次运行。实际服务器已输出 REUSED_COMPLETED_SPLIT=val 并继续训练集转换。

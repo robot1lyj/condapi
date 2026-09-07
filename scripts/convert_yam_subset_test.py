@@ -1,5 +1,10 @@
 import json
+import os
+from pathlib import Path
 import shutil
+import subprocess
+import sys
+import time
 
 import av
 from lerobot.datasets.dataset_metadata import LeRobotDatasetMetadata
@@ -15,6 +20,7 @@ from scripts.convert_yam_subset import CAMERA_KEYS
 from scripts.convert_yam_subset import JOINT_NAMES
 from scripts.convert_yam_subset import convert
 from scripts.convert_yam_subset import digest
+from scripts.yam_conversion_resume import conversion_lock
 
 
 @pytest.fixture
@@ -171,3 +177,98 @@ def test_copy_mode_multiple_episode_offsets(subset, contract, tmp_path):
     np.testing.assert_array_equal(data[3]["action"], np.full((2, 14), 0.5))
     assert data[3]["task"] == "sort another color"
     assert (output / "videos/observation.images.top_rgb/chunk-000/file-001.mp4").is_file()
+
+
+@pytest.mark.parametrize("damage_completed_video", [False, True])
+def test_resume_after_interruption(subset, contract, tmp_path, monkeypatch, damage_completed_video):
+    from scripts import convert_yam_subset as converter  # noqa: PLC0415
+
+    original = converter.validate_video
+    calls = []
+
+    def interrupt(path, length, fps):
+        calls.append(path)
+        if len(calls) == 2:
+            raise RuntimeError("simulated interruption")
+        return original(path, length, fps)
+
+    monkeypatch.setattr(converter, "validate_video", interrupt)
+    output = tmp_path / "resumable"
+    with pytest.raises(RuntimeError, match="simulated"):
+        convert(subset, output, "train", contract, min_age=0, video_mode="copy")
+    work = tmp_path / "resumable.incomplete"
+    copied = work / "videos/observation.images.top_rgb/chunk-000/file-000.mp4"
+    before = copied.stat().st_mtime_ns
+    if damage_completed_video:
+        copied.write_bytes(b"damaged derived copy")
+    calls.clear()
+
+    def count(path, length, fps):
+        calls.append(path)
+        return original(path, length, fps)
+
+    monkeypatch.setattr(converter, "validate_video", count)
+    convert(subset, output, "train", contract, min_age=0, video_mode="copy", resume=True)
+    assert len(calls) == (3 if damage_completed_video else 2)
+    final_video = output / copied.relative_to(work)
+    if not damage_completed_video:
+        assert final_video.stat().st_mtime_ns == before
+    else:
+        assert list(final_video.parent.glob("*.interrupted-*"))
+    data = LeRobotDataset("local/resumable", root=output, video_backend="pyav")
+    assert len(data) == 3
+    calls.clear()
+    assert convert(subset, output, "train", contract, min_age=0, video_mode="copy", resume=True) == output
+    assert calls == []
+    parquet = output / "data/chunk-000/file-000.parquet"
+    rows = pq.read_table(parquet).to_pydict()
+    rows["action"][0][0] = 0.123
+    pq.write_table(pa.table(rows), parquet)
+    with pytest.raises(ValueError, match="Completed parquet changed"):
+        convert(subset, output, "train", contract, min_age=0, video_mode="copy", resume=True)
+
+
+def test_resume_rejects_changed_configuration_and_unknown_work(subset, contract, tmp_path, monkeypatch):
+    from scripts import convert_yam_subset as converter  # noqa: PLC0415
+
+    def interrupt(*args):
+        raise RuntimeError("interrupted")
+
+    monkeypatch.setattr(converter, "validate_video", interrupt)
+    output = tmp_path / "changed_resume"
+    with pytest.raises(RuntimeError):
+        convert(subset, output, "train", contract, min_age=0, video_mode="copy")
+    with pytest.raises(ValueError, match="configuration changed"):
+        convert(
+            subset, output, "train", dict(contract, joint_unit="different"), min_age=0, video_mode="copy", resume=True
+        )
+    (tmp_path / "unknown.incomplete").mkdir()
+    with pytest.raises(ValueError, match="no matching resume checkpoint"):
+        convert(subset, tmp_path / "unknown", "train", contract, min_age=0, video_mode="copy", resume=True)
+    with conversion_lock(tmp_path / "locked.incomplete"), pytest.raises(RuntimeError, match="Another conversion"):
+        convert(subset, tmp_path / "locked", "train", contract, min_age=0, video_mode="copy", resume=True)
+
+
+def test_batch_runner_reuses_published_version(subset, contract, tmp_path):
+    for path in subset.rglob("*"):
+        if path.is_file():
+            os.utime(path, (time.time() - 600, time.time() - 600))
+    contract_path = tmp_path / "contract.json"
+    contract_path.write_text(json.dumps(contract))
+    repo = Path(__file__).resolve().parents[1]
+    output = tmp_path / "version"
+    command = [
+        "bash",
+        str(repo / "scripts/run_yam_conversion.sh"),
+        sys.prefix,
+        str(repo),
+        str(subset),
+        str(output),
+        str(contract_path),
+    ]
+    subprocess.run(command, check=True, capture_output=True, text=True)
+    before = {p: digest(p) for p in output.rglob("*") if p.is_file()}
+    result = subprocess.run([*command, "--resume"], check=True, capture_output=True, text=True)
+    assert "REUSED_COMPLETED_SPLIT=val" in result.stdout
+    assert "REUSED_COMPLETED_SPLIT=train" in result.stdout
+    assert all(digest(path) == value for path, value in before.items())

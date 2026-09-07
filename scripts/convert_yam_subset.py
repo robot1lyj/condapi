@@ -7,7 +7,9 @@ directory for inspection. The default conversion requires every selected episode
 
 import argparse
 from contextlib import ExitStack
+from contextlib import suppress
 import hashlib
+from importlib.metadata import version
 import json
 from pathlib import Path
 import time
@@ -27,10 +29,20 @@ if __package__:
     from .audit_yam_subset import signature
     from .audit_yam_subset import validate_rows
     from .audit_yam_subset import validate_video
+    from .yam_conversion_resume import atomic_json
+    from .yam_conversion_resume import conversion_lock
+    from .yam_conversion_resume import initialize_checkpoint
+    from .yam_conversion_resume import quarantine
+    from .yam_conversion_resume import sync_file
 else:
     from audit_yam_subset import signature
     from audit_yam_subset import validate_rows
     from audit_yam_subset import validate_video
+    from yam_conversion_resume import atomic_json
+    from yam_conversion_resume import conversion_lock
+    from yam_conversion_resume import initialize_checkpoint
+    from yam_conversion_resume import quarantine
+    from yam_conversion_resume import sync_file
 
 CAMERA_KEYS = {
     "top": "observation.images.top_rgb",
@@ -71,15 +83,17 @@ def source_paths(root, split, episode):
     return data, videos
 
 
-def convert(root, output, split, contract, episode_ids=None, min_age=300, video_mode="reencode"):
+def convert(root, output, split, contract, episode_ids=None, min_age=300, video_mode="reencode", *, resume=False):
     root, output = Path(root).resolve(), Path(output).resolve()
     work = output.with_name(output.name + ".incomplete")
     if split not in ("train", "val") or min_age < 0 or video_mode not in ("copy", "reencode"):
         raise ValueError("Invalid split or minimum file age")
     validate_contract(contract)
+    if resume and video_mode != "copy":
+        raise ValueError("Resume requires copy video mode")
     if output == root or root in output.parents or output in root.parents:
         raise ValueError("Output must be separate from the source tree")
-    if output.exists() or work.exists():
+    if (output.exists() or work.exists()) and not resume:
         raise FileExistsError("Output or .incomplete directory exists; use a new version")
     manifest = root / "manifests" / f"{split}.jsonl"
     content = manifest.read_bytes()
@@ -125,9 +139,24 @@ def convert(root, output, split, contract, episode_ids=None, min_age=300, video_
                 "names": ["height", "width", "channels"],
             }
     if video_mode == "copy":
-        return convert_copied_videos(
-            root, output, work, split, contract, episodes, all_episodes, fps, features, snapshots, hashes, manifest_hash
-        )
+        with conversion_lock(work):
+            if output.exists():
+                return verify_completed_copy(root, output, split, contract, episodes, manifest_hash, hashes)
+            return convert_copied_videos(
+                root,
+                output,
+                work,
+                split,
+                contract,
+                episodes,
+                all_episodes,
+                fps,
+                features,
+                snapshots,
+                hashes,
+                manifest_hash,
+                resume=resume,
+            )
     writer = LeRobotDataset.create(
         repo_id=f"local/{output.name}",
         root=work,
@@ -219,14 +248,45 @@ def convert(root, output, split, contract, episode_ids=None, min_age=300, video_
 
 
 def convert_copied_videos(
-    root, output, work, split, contract, episodes, all_episodes, fps, features, snapshots, hashes, manifest_hash
+    root,
+    output,
+    work,
+    split,
+    contract,
+    episodes,
+    all_episodes,
+    fps,
+    features,
+    snapshots,
+    hashes,
+    manifest_hash,
+    *,
+    resume=False,
 ):
     """Independent byte-identical video copies, using the official v3 metadata API.
 
     No symlinks/hardlinks, rescaling, frame deletion or video re-encoding. Image
     statistics are deliberately absent; numeric metadata stats are not OpenPI norm stats.
     """
-    meta = LeRobotDatasetMetadata.create(f"local/{output.name}", int(fps), features, robot_type="yam", root=work)
+    identity = {
+        "resume_format": 1,
+        "lerobot_version": version("lerobot"),
+        "root": str(root),
+        "split": split,
+        "contract": contract,
+        "episode_ids": [e["source_episode_index"] for e in episodes],
+        "manifest_sha256": manifest_hash,
+        "fps": fps,
+        "source_signatures": {str(p.relative_to(root)): list(s) for p, s in snapshots.items()},
+        "parquet_sha256": dict(hashes),
+    }
+    receipts = initialize_checkpoint(work, identity, resume)
+    # Never reopen an interrupted Parquet metadata writer. Rebuild metadata from
+    # validated files; old generations remain available for inspection.
+    metadata_root = work / f".metadata-build-{time.time_ns()}"
+    meta = LeRobotDatasetMetadata.create(
+        f"local/{output.name}", int(fps), features, robot_type="yam", root=metadata_root
+    )
     provenance = {
         "source_root": str(root),
         "split": split,
@@ -259,18 +319,39 @@ def convert_copied_videos(
                 "dataset_from_index": start,
                 "dataset_to_index": start + length,
             }
+            reused_videos = 0
             for key, source in videos.items():
                 target = work / meta.video_path.format(video_key=key, chunk_index=chunk, file_index=file_id)
                 target.parent.mkdir(parents=True, exist_ok=True)
-                hashed = hashlib.sha256()
-                with source.open("rb") as reader, target.open("xb") as writer:
-                    while block := reader.read(4 * 1024 * 1024):
-                        writer.write(block)
-                        hashed.update(block)
-                hashes[str(source.relative_to(root))] = hashed.hexdigest()
-                if signature(source) != snapshots[source] or digest(target) != hashed.hexdigest():
-                    raise ValueError(f"Source changed or copy checksum mismatch: {source}")
-                validate_video(target, length, fps)
+                receipt_path = receipts / f"video-{new_id:06d}-{key}.json"
+                receipt = json.loads(receipt_path.read_text()) if receipt_path.is_file() else None
+                reusable = (
+                    receipt is not None
+                    and target.is_file()
+                    and not target.is_symlink()
+                    and target.stat().st_nlink == 1
+                    and receipt["source_signature"] == list(snapshots[source])
+                    and digest(target) == receipt["sha256"]
+                )
+                if reusable:
+                    reused_videos += 1
+                    hashes[str(source.relative_to(root))] = receipt["sha256"]
+                else:
+                    if target.exists():
+                        quarantine(target)
+                    hashed = hashlib.sha256()
+                    with source.open("rb") as reader, target.open("xb") as writer:
+                        while block := reader.read(4 * 1024 * 1024):
+                            writer.write(block)
+                            hashed.update(block)
+                    sync_file(target)
+                    hashes[str(source.relative_to(root))] = hashed.hexdigest()
+                    if signature(source) != snapshots[source] or digest(target) != hashed.hexdigest():
+                        raise ValueError(f"Source changed or copy checksum mismatch: {source}")
+                    validate_video(target, length, fps)
+                    atomic_json(
+                        receipt_path, {"source_signature": list(snapshots[source]), "sha256": hashed.hexdigest()}
+                    )
                 info = get_video_info(target)
                 if (info["video.height"], info["video.width"], info["video.channels"]) != features[key]["shape"]:
                     raise ValueError(f"Video shape changed: {source}")
@@ -302,9 +383,18 @@ def convert_copied_videos(
             numeric_features = {key: value for key, value in meta.features.items() if value["dtype"] != "video"}
             parquet = work / meta.data_path.format(chunk_index=chunk, file_index=file_id)
             parquet.parent.mkdir(parents=True, exist_ok=True)
-            datasets.Dataset.from_dict(values, features=get_hf_features_from_features(numeric_features)).to_parquet(
-                parquet
-            )
+            dataset = datasets.Dataset.from_dict(values, features=get_hf_features_from_features(numeric_features))
+            parquet_valid = False
+            if parquet.is_file():
+                with suppress(ValueError, OSError):
+                    parquet_valid = pq.read_table(parquet).equals(dataset.with_format("arrow")[:], check_metadata=False)
+            if not parquet_valid:
+                if parquet.exists():
+                    quarantine(parquet)
+                temporary = parquet.with_suffix(".parquet.partial")
+                dataset.to_parquet(temporary)
+                sync_file(temporary)
+                temporary.rename(parquet)
             meta.save_episode(
                 new_id, length, [episode["task"]], compute_episode_stats(values, numeric_features), metadata
             )
@@ -318,8 +408,14 @@ def convert_copied_videos(
                     "task": episode["task"],
                 }
             )
-            print(f"Copied {split} {new_id + 1}/{len(episodes)} source={episode['source_episode_index']}", flush=True)
+            print(
+                f"Verified {split} {new_id + 1}/{len(episodes)} source={episode['source_episode_index']} reused_videos={reused_videos}",
+                flush=True,
+            )
         meta.finalize()
+        if (work / "meta").exists():
+            quarantine(work / "meta")
+        (metadata_root / "meta").rename(work / "meta")
         if digest(root / "manifests" / f"{split}.jsonl") != manifest_hash or any(
             signature(path) != before or (path.suffix != ".mp4" and digest(path) != hashes[str(path.relative_to(root))])
             for path, before in snapshots.items()
@@ -337,12 +433,75 @@ def convert_copied_videos(
             offset += episode["length"]
         if len(check) != offset or check.num_episodes != len(episodes):
             raise ValueError("Output episode/frame count mismatch")
-        (work / "conversion_manifest.json").write_text(json.dumps(provenance, ensure_ascii=False, indent=2) + "\n")
+        atomic_json(work / "conversion_manifest.json", provenance)
         if output.exists():
             raise FileExistsError(output)
         work.rename(output)
     finally:
         meta.finalize()
+    return output
+
+
+def verify_completed_copy(root, output, split, contract, episodes, manifest_hash, parquet_hashes):
+    """Validate a completed split before skipping it; never overwrite it."""
+    provenance = json.loads((output / "conversion_manifest.json").read_text())
+    if (
+        provenance["source_root"] != str(root)
+        or provenance["split"] != split
+        or provenance["contract"] != contract
+        or provenance["source_manifest_sha256"] != manifest_hash
+        or [e["source_episode_index"] for e in provenance["episodes"]] != [e["source_episode_index"] for e in episodes]
+        or not provenance["video_encoding"].startswith("byte-identical")
+        or any(provenance["source_files_sha256"].get(k) != v for k, v in parquet_hashes.items())
+    ):
+        raise ValueError("Completed output does not match requested conversion")
+    meta = LeRobotDatasetMetadata(f"local/{output.name}", root=output)
+    cached_path, source_table, start = None, None, 0
+    for index, episode in enumerate(episodes):
+        data, videos = source_paths(root, split, episode)
+        chunk, file_id = divmod(index, meta.chunks_size)
+        if cached_path != data:
+            source_table = pq.read_table(data)
+            cached_path = data
+        source_rows = source_table.filter(pc.equal(source_table["episode_index"], episode["source_episode_index"]))
+        rows = pq.read_table(output / meta.data_path.format(chunk_index=chunk, file_index=file_id))
+        validate_rows(rows, episode)
+        for key in ("observation.state", "action", "timestamp"):
+            if not np.array_equal(
+                np.asarray(rows[key].to_pylist()), np.asarray(source_rows[key].to_pylist(), dtype=np.float32)
+            ):
+                raise ValueError(f"Completed parquet changed: {key}")
+        for key, expected in {
+            "episode_index": np.full(episode["length"], index),
+            "index": np.arange(start, start + episode["length"]),
+            "task_index": np.full(episode["length"], meta.get_task_index(episode["task"])),
+        }.items():
+            if not np.array_equal(np.asarray(rows[key]), expected):
+                raise ValueError(f"Completed indices changed: {key}")
+        episode_metadata = meta.episodes[index]
+        for key, expected in {
+            "dataset_from_index": start,
+            "dataset_to_index": start + episode["length"],
+            "data/chunk_index": chunk,
+            "data/file_index": file_id,
+        }.items():
+            if episode_metadata[key] != expected:
+                raise ValueError(f"Completed metadata changed: {key}")
+        for key, source in videos.items():
+            expected = provenance["source_files_sha256"][str(source.relative_to(root))]
+            target = output / meta.video_path.format(video_key=key, chunk_index=chunk, file_index=file_id)
+            if target.is_symlink() or target.stat().st_nlink != 1:
+                raise ValueError("Completed video is not an independent copy")
+            if digest(source) != expected or digest(target) != expected:
+                raise ValueError(f"Completed video or source changed: {source}")
+            for suffix, value in {"chunk_index": chunk, "file_index": file_id, "from_timestamp": 0.0}.items():
+                if episode_metadata[f"videos/{key}/{suffix}"] != value:
+                    raise ValueError("Completed video metadata changed")
+        start += episode["length"]
+    check = LeRobotDataset(f"local/{output.name}", root=output, video_backend="pyav")
+    if len(check) != sum(e["length"] for e in episodes) or check.num_episodes != len(episodes):
+        raise ValueError("Completed output frame count mismatch")
+    print(f"REUSED_COMPLETED_SPLIT={split}", flush=True)
     return output
 
 
@@ -355,6 +514,7 @@ def main():
     parser.add_argument("--episode-ids", type=int, nargs="+")
     parser.add_argument("--min-age", type=float, default=300)
     parser.add_argument("--video-mode", choices=("copy", "reencode"), default="reencode")
+    parser.add_argument("--resume", action="store_true", help="Verify and reuse copy-mode checkpoints")
     args = vars(parser.parse_args())
     args["contract"] = json.loads(args["contract"].read_text())
     print(convert(**args))
