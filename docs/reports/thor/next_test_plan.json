@@ -1,8 +1,8 @@
 {
   "recommendations": [
     {
-      "title": "用户反馈后调整主线：原生 JAX 仅作参考，优先换加速后端",
-      "detail": "2026-09-07 用户明确不能接受当前最低 177.39 ms，目标是完整推理约 100 ms 或更低，同时保留模型精度。A/B/C 是在 MAXN 与锁频下取得的实测，不再将 C 视为可接受的最终部署方案。保留 A 数值参考和 B/C 精度对照，主线转为 PyTorch 编译、TensorRT 混合精度与 FlashRT 的低延迟适配；同时报告 P50/P95，不先承诺未经同合同实测的 30/50 ms。"
+      "title": "约 100 ms 目标保持不变：PyTorch 筛选已做，继续 TensorRT",
+      "detail": "原生 JAX、FP32 跨框架、PyTorch 编译、相机合批、整图重放和矩阵内核选型已取得实测，最新数字以本报告结果表为准。尚未同时满足约 100 ms 与精度资格，不把延迟领先者自动推荐为最终模型。保留原 JAX FP32 参考与原始 checkpoint，接下来优先适配非量化 TensorRT BF16/FP32，再独立测选择性 FP8；保持三相机、H50、去噪 10，不以教程 H10/量化延迟冒充本机成绩。"
     },
     {
       "title": "先用已有 9 输入筛后端，速度和误差有希望再扩样",
@@ -13,12 +13,12 @@
       "detail": "在服务器实际训练环境的已分配 GPU 上，一次性用同一 checkpoint、输入和固定噪声导出参考动作，再把小结果文件带回 Thor 本地比较；不建立服务器实时推理链路，也不在登录节点运行模型。先确认 Thor 新版 JAX 与训练栈的差异，再判断转换误差，避免把框架版本造成的差异误归因于 BF16。"
     },
     {
-      "title": "独立验证 JAX → PyTorch FP32 转换，再改变运算精度",
+      "title": "FP32 基础模型转换已有对照；未来 LoRA 仍需独立合并验收",
       "detail": "沿用 Jetson AI Lab 的 NVIDIA PyTorch 26.05 容器基底作为 Pi 系列的候选运行环境版本，依赖仍装在容器内。转换先保留 FP32，逐张量核对映射后的 key、shape、dtype 和数值；只做转置/重排的权重应可精确核对，不默认接受 BF16 转存。再用相同 suite/noise/norm 比较 FP32 前向，关闭 TF32 和自动混合精度以免参考名不副实，然后独立测 BF16 与 torch.compile。未来 LoRA 必须保留 adapter：先在 FP32 正确合并或实现等价加载，检查没有漏键，再比较合并前后的 JAX 输出；不把当前无 LoRA 基础模型的通过当成 LoRA 转换已通过。"
     },
     {
-      "title": "TensorRT 首轮选择保留 FP32 敏感运算的混合精度，不做全局 FP16",
-      "detail": "Jetson AI Lab 提醒其纯 FP16 导出会溢出；xuweiwu/openpi-thor 支持的是保留 RMSNorm 等 FP32 敏感运算、使用 strongly typed TensorRT 的定制混合 FP16 路径。下一轮可借鉴这条路径，但须独立对照 JAX A 与已验证 PyTorch，保持当前 horizon 50，不能拿教程 LIBERO horizon 10 的延迟作本机目标。转换误差、前向误差和 TensorRT 编译误差分开记录。"
+      "title": "TensorRT 首轮优先 BF16 / FP32，不默认采用 FP16 截断补救",
+      "detail": "优先用 BF16 的动态范围与 FP32 敏感层构建非量化 strongly typed 候选，先验证导出前后，再验证 engine 对 JAX A 和 PyTorch 的输出。xuweiwu/openpi-thor 的公开导出入口硬编码 FP16，部分 Gemma MLP 使用 nan_to_num 修补溢出；输出有限不代表没有发生数值损坏，因此只借鉴拆分、导出和 engine 结构，不直接采用该修补作为精度保证。BF16 导出与 H50 仍需实机适配，不能预先宣称可用。纯 FP16、FP8、NVFP4 分别保留为后续独立实验。"
     },
     {
       "title": "FlashRT 列为高性能候选，但先补齐 YAM / horizon 50 合同",
@@ -34,6 +34,11 @@
     }
   ],
   "sources": [
+    {
+      "title": "NVIDIA TensorRT：精度、溢出与混合精度原则",
+      "url": "https://docs.nvidia.com/deeplearning/tensorrt/latest/inference-library/accuracy-considerations.html",
+      "note": "2026-09-07 查阅。BF16 动态范围较大但尾数精度有限；敏感运算可保留 FP32。该 latest 页对应较新的文档分支，只用于数值原则，实际 API 必须按已安装 TensorRT 10.16.1.11 核验；不据此升级 Thor。"
+    },
     {
       "title": "FlashRT：Thor 测试与前端代码",
       "url": "https://github.com/flashrt-project/FlashRT/blob/main/examples/thor/README.md",

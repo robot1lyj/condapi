@@ -65,11 +65,22 @@ class CudaGraphSampler:
 
     @torch.no_grad()
     def validate_current(self):
-        """Compare this observation's graph output to eager, outside timed calls."""
+        """Separate capture effects from static/legacy branch effects, untimed."""
         captured = self.static_output.clone()
+        uncaptured_static = self._eager().clone()
         reference = self.reference_sampler(
             self.device, self.static_observation, noise=self.static_noise, num_steps=self.num_steps
         )
-        if not torch.isfinite(reference).all() or not torch.isfinite(captured).all():
+        if any(not torch.isfinite(value).all() for value in (reference, captured, uncaptured_static)):
             raise RuntimeError("Non-finite CUDA graph validation output")
-        return float((captured.float() - reference.float()).abs().max().item())
+        self.last_validation = {
+            "capture_vs_uncaptured_static_max_abs": float(
+                (captured.float() - uncaptured_static.float()).abs().max().item()
+            ),
+            "uncaptured_static_vs_legacy_max_abs": float(
+                (uncaptured_static.float() - reference.float()).abs().max().item()
+            ),
+            "capture_vs_legacy_max_abs": float((captured.float() - reference.float()).abs().max().item()),
+            "scope": "model normalized 32D; two extra untimed reference calls for this observation",
+        }
+        return self.last_validation["capture_vs_legacy_max_abs"]

@@ -268,6 +268,14 @@ def attach_additional_runs(data, reference, run_paths, logs):
         if record.get("cuda_graph"):
             graph_error = max(m["cuda_graph_vs_eager_max_abs"] for m in record["measurements"])
             detail += f" / 图重放与非图旧循环最大差={graph_error:.6g}（同算子实现，计时外逐输入验证）"
+            if all("cuda_graph_validation" in m for m in record["measurements"]):
+                pure_capture = max(
+                    m["cuda_graph_validation"]["capture_vs_uncaptured_static_max_abs"] for m in record["measurements"]
+                )
+                branch = max(
+                    m["cuda_graph_validation"]["uncaptured_static_vs_legacy_max_abs"] for m in record["measurements"]
+                )
+                detail += f" / 同固定循环捕获差={pure_capture:.6g} / 固定与旧循环分支差={branch:.6g}"
         if record.get("thor_triton_autotune"):
             detail += " / Thor SM 门槛实验：ATen 与 Triton 实测选核，独立编译缓存"
         error = comparison["physical_dataset_units"]

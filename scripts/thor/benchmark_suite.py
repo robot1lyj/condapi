@@ -278,6 +278,7 @@ def main():
         }
         if graph_sampler is not None:
             measurement["cuda_graph_vs_eager_max_abs"] = graph_sampler.validate_current()
+            measurement["cuda_graph_validation"] = graph_sampler.last_validation.copy()
         # Preserve completed observations even if a later sample fails.
         np.savez_compressed(args.output / f"{sample_path.stem}.npz", actions=actions, normalized_actions=normalized)
         (args.output / f"{sample_path.stem}.json").write_text(json.dumps(measurement, indent=2))

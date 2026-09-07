@@ -26,6 +26,20 @@ def test_signature_distinguishes_shape_and_dtype():
         tensor_signature([None])
 
 
+def test_validation_separates_capture_from_legacy_branch_changes():
+    sampler = CudaGraphSampler(
+        lambda *args, **kwargs: torch.tensor([1.0, 2.0]),
+        reference_sampler=lambda *args, **kwargs: torch.tensor([1.0, 3.0]),
+    )
+    sampler.static_output = torch.tensor([1.0, 2.0])
+    sampler.device = "cpu"
+    sampler.static_observation = sampler.static_noise = None
+    sampler.num_steps = 10
+    assert sampler.validate_current() == 1
+    assert sampler.last_validation["capture_vs_uncaptured_static_max_abs"] == 0
+    assert sampler.last_validation["uncaptured_static_vs_legacy_max_abs"] == 1
+
+
 @pytest.mark.parametrize("num_steps", [1, 5, 10, 20])
 def test_static_loop_preserves_fp32_timestamps_and_every_euler_step(num_steps):
     source = Path(__file__).resolve().parents[2] / "src/openpi/models_pytorch/pi0_pytorch.py"

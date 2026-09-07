@@ -332,3 +332,7 @@ PR #960 作者给出的局部 checkpoint 对照如下；样本范围、硬件及
 检索分两轮：先检索 OpenPI 的 conversion/precision/LoRA/Thor 报告及官方教程，再追踪 #958/#960/#978/#984、官方实际 overlay、FlashRT fidelity 报告与 JAX CUDA13 安装支持。GitHub #810 评论 API 在一次替代分页重试后仍返回 403，因此仅使用可见的 issue 正文，不推断关闭原因。关键机制已有代码互证，剩余缺口需要具体 checkpoint 与 Thor 实测，继续增加同类网页不会解决，因此结束文献检索。
 
 记忆技能用于按证据修订 owner 并刷新 kernel；精度调研完成时记忆准入账本记录 `27,708 / 32,768` UTF-8 bytes，后续更新沿用同一账本继续计费。宿主完整请求 token 计量不可用，不能宣称该账本限制了全部对话/工具上下文。报告采用仓库 Markdown，执行结构与链接检查，不涉及 PDF/页面渲染验收。
+
+### 2026-09-07 加速迭代记录入口
+
+本日原生 JAX A/B/C 之后已实际开展 FP32 跨框架对照、PyTorch 编译、三相机合批与 CUDA Graph 组合测试。最新配置、失败原因、动作差异和时延由 [Thor 系列 10](reference/thor/10_acceleration_execution.md) 持有，[中文 HTML](reports/thor/index.html) 展示实际结果。早先 A/B/C 的阶段状态不再代表只完成这三组；不得把最新延迟领先者自动视为精度通过或已达约 100 ms 目标。
