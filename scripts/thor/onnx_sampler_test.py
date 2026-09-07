@@ -3,6 +3,7 @@ from pathlib import Path
 from types import SimpleNamespace
 
 from onnx_sampler import IMAGE_KEYS
+from onnx_sampler import CachedTimeProjection
 from onnx_sampler import fixed_time_schedule
 from onnx_sampler import flat_inputs
 import pytest
@@ -82,3 +83,24 @@ def test_adaptive_rmsnorm_repr_does_not_require_nonexistent_weight():
     result = namespace["extra_repr"](norm)
     assert "8" in result
     assert "cond_dim=4" in result
+
+
+def test_time_projection_cache_preserves_fp32_and_default_path():
+    torch.manual_seed(4)
+    linear = torch.nn.Linear(8, 24).eval()
+    conditions = [torch.randn(1, 8) for _ in range(10)]
+    cached = CachedTimeProjection(linear, conditions).eval()
+    for step, condition in enumerate(conditions):
+        cached.step = step
+        assert torch.equal(cached(condition), linear(condition))
+    cached.step = None
+    different = torch.randn(2, 8)
+    assert torch.equal(cached(different), linear(different))
+    assert cached.table.dtype == torch.float32
+    assert "table" not in cached.state_dict()
+    cached.step = 0
+    with pytest.raises(ValueError, match="batch-1"):
+        cached(different)
+    cached.train()
+    with pytest.raises(ValueError, match="batch-1"):
+        cached(conditions[0])

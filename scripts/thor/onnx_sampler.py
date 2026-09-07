@@ -43,7 +43,7 @@ def flat_inputs(observation, noise):
 
 
 class Pi05OnnxSampler(nn.Module):
-    def __init__(self, model):
+    def __init__(self, model, *, cache_time_modulation=False):
         super().__init__()
         if not model.pi05 or model.config.action_horizon != 50 or model.config.action_dim != 32:
             raise ValueError("Exporter is scoped to Pi0.5 H50 / 32D")
@@ -54,6 +54,28 @@ class Pi05OnnxSampler(nn.Module):
         self.register_buffer("euler_dt", dt)
         self.register_buffer("times", times)
         self.register_buffer("time_embeddings", embeddings)
+        self.cached_modulations = []
+        self.cache_names = []
+        if cache_time_modulation:
+            with torch.no_grad():
+                # Preserve batch-1 GEMV arithmetic: batching all ten times
+                # could select different kernels and change FP32 rounding.
+                conditions = [
+                    torch.nn.functional.silu(
+                        model.time_mlp_out(torch.nn.functional.silu(model.time_mlp_in(embedding[None])))
+                    )
+                    for embedding in embeddings
+                ]
+                expert = model.paligemma_with_expert.gemma_expert.model
+                for name, module in list(expert.named_modules()):
+                    dense = getattr(module, "dense", None)
+                    if type(module).__name__ == "GemmaRMSNorm" and isinstance(dense, nn.Linear):
+                        cached = CachedTimeProjection(dense, conditions)
+                        module.dense = cached
+                        self.cached_modulations.append(cached)
+                        self.cache_names.append(name)
+                if len(self.cached_modulations) != 2 * len(expert.layers) + 1:
+                    raise ValueError("Unexpected number of adaptive time projections")
         # Direct-on-device constants are also friendly to legacy ONNX tracing.
         model.static_denoising_loop = True
 
@@ -72,17 +94,46 @@ class Pi05OnnxSampler(nn.Module):
             use_cache=True,
         )
         actions = noise
-        for step in range(10):
-            velocity = self.model.denoise_step(
-                state,
-                pad,
-                cache,
-                actions,
-                self.times[step].expand(images.shape[0]),
-                time_embedding=self.time_embeddings[step].expand(images.shape[0], -1),
-            )
-            actions = actions + self.euler_dt * velocity
+        try:
+            for step in range(10):
+                for projection in self.cached_modulations:
+                    projection.step = step
+                velocity = self.model.denoise_step(
+                    state,
+                    pad,
+                    cache,
+                    actions,
+                    self.times[step].expand(images.shape[0]),
+                    time_embedding=self.time_embeddings[step].expand(images.shape[0], -1),
+                )
+                actions = actions + self.euler_dt * velocity
+        finally:
+            for projection in self.cached_modulations:
+                projection.step = None  # Preserve ordinary eager calls outside the fixed wrapper.
         return actions
+
+
+class CachedTimeProjection(nn.Module):
+    """Opt-in inference cache tied to this checkpoint and its ten fixed times."""
+
+    def __init__(self, original, conditions):
+        super().__init__()
+        if len(conditions) != 10 or any(p.dtype != torch.float32 for p in original.parameters()):
+            raise ValueError("Time cache requires ten steps and original FP32 projections")
+        self.original = original
+        self.step = None
+        with torch.no_grad():
+            table = torch.stack([original(condition) for condition in conditions])
+        if not torch.isfinite(table).all():
+            raise ValueError("Non-finite time modulation cache")
+        self.register_buffer("table", table, persistent=False)
+
+    def forward(self, condition):
+        if self.step is None:
+            return self.original(condition)
+        if self.training or condition.shape != (*self.table.shape[1:-1], self.original.in_features):
+            raise ValueError("Fixed time cache is restricted to batch-1 inference")
+        return self.table[self.step]
 
 
 class FlatSamplerAdapter:

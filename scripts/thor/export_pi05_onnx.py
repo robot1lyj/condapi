@@ -36,6 +36,7 @@ def main():
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--compute-dtype", choices=("float32", "bfloat16"), default="bfloat16")
     parser.add_argument("--exporter", choices=("dynamo", "legacy"), default="dynamo")
+    parser.add_argument("--cache-time-modulation", action="store_true")
     args = parser.parse_args()
     if args.output.exists():
         parser.error("Use a new immutable export directory")
@@ -80,6 +81,7 @@ def main():
         "contract": {"views": 3, "image_resolution": [224, 224], "horizon": 50, "steps": 10, "action_dim": 32},
         "compute_dtype": args.compute_dtype,
         "exporter": args.exporter,
+        "cache_time_modulation": args.cache_time_modulation,
         "quantization": None,
         "tf32": False,
         "nonfinite_sanitization": False,
@@ -129,7 +131,23 @@ def main():
         action = policy.infer(observation, noise=noise)["actions"]
         references.append((action.copy(), captured["raw"].copy()))
         print("EXPORT_REFERENCE_OK", name, flush=True)
-    wrapper = Pi05OnnxSampler(model).eval()
+    wrapper = Pi05OnnxSampler(model, cache_time_modulation=args.cache_time_modulation).eval()
+    if wrapper.cached_modulations:
+        cache_path = args.output / "time_modulation_cache.npz"
+        np.savez_compressed(
+            cache_path,
+            **{
+                name: projection.table.detach().cpu().numpy()
+                for name, projection in zip(wrapper.cache_names, wrapper.cached_modulations, strict=True)
+            },
+        )
+        report["time_modulation_cache"] = {
+            "sha256": digest(cache_path),
+            "modules": wrapper.cache_names,
+            "dtype": "float32",
+            "batching": "ten independent batch-1 original GEMVs; no reduced precision",
+            "invalidated_by": "any checkpoint/LoRA weight or denoising schedule change",
+        }
     adapter = FlatSamplerAdapter(wrapper)
     policy._sample_actions = adapter  # noqa: SLF001
     report["wrapper_comparisons"] = []

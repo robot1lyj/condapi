@@ -19,6 +19,7 @@ def main():
     parser.add_argument("--stage", choices=("export", "engine", "profile"), default="export")
     parser.add_argument("--source-export")
     parser.add_argument("--source-engine")
+    parser.add_argument("--cache-time-modulation", action="store_true")
     parser.add_argument("--root", type=Path, default=Path("/home/wuyan-lyj/thor/pi"))
     args = parser.parse_args()
     if os.geteuid() != 0 or not re.fullmatch(r"[a-zA-Z0-9_-]+", args.run_id):
@@ -27,6 +28,8 @@ def main():
         parser.error("Engine build requires a filename-safe source-export ID")
     if args.stage == "profile" and (not args.source_engine or not re.fullmatch(r"[a-zA-Z0-9_-]+", args.source_engine)):
         parser.error("Profiling requires a filename-safe source-engine ID")
+    if args.cache_time_modulation and args.stage != "export":
+        parser.error("Time cache is an export preparation option")
     scripts = Path(__file__).resolve().parent
     repo = scripts.parents[1]
     artifacts = args.root / "artifacts"
@@ -70,6 +73,8 @@ def main():
         f"/artifacts/{args.run_id}",
     ]
     files = sorted([*scripts.glob("*.py"), *repo.glob("src/openpi/**/*.py")])
+    if args.cache_time_modulation:
+        command.append("--cache-time-modulation")
     if args.stage == "engine":
         command = [
             *command[: command.index("/bench/export_pi05_onnx.py")],
