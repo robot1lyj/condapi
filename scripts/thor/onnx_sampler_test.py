@@ -1,3 +1,5 @@
+import ast
+from pathlib import Path
 from types import SimpleNamespace
 
 from onnx_sampler import IMAGE_KEYS
@@ -63,3 +65,20 @@ def test_precomputed_time_override_preserves_real_embed_suffix_method():
     embedding = create_sinusoidal_pos_embedding(time, 8, 4e-3, 4.0, device=time.device).float()
     actual = PI0Pytorch.embed_suffix(model, state, noise, time, time_embedding=embedding)
     assert all(torch.equal(a, b) for a, b in zip(actual, expected, strict=True))
+
+
+def test_adaptive_rmsnorm_repr_does_not_require_nonexistent_weight():
+    source = (
+        Path(__file__).resolve().parents[2]
+        / "src/openpi/models_pytorch/transformers_replace/models/gemma/modeling_gemma.py"
+    )
+    cls = next(
+        n for n in ast.parse(source.read_text()).body if isinstance(n, ast.ClassDef) and n.name == "GemmaRMSNorm"
+    )
+    method = next(n for n in cls.body if isinstance(n, ast.FunctionDef) and n.name == "extra_repr")
+    namespace = {}
+    exec(compile(ast.Module(body=[method], type_ignores=[]), str(source), "exec"), namespace)
+    norm = SimpleNamespace(dim=8, eps=1e-6, cond_dim=4, dense=object())
+    result = namespace["extra_repr"](norm)
+    assert "8" in result
+    assert "cond_dim=4" in result

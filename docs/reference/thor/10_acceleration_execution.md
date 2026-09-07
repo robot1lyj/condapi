@@ -138,3 +138,18 @@ L/M 原始动作、日志、manifest、恢复记录仍按独立 run ID 留存，
 已补充图诊断代码，分别记录捕获与未捕获同固定循环、固定与旧 while 分支的差异；65 项相关 CPU 单元测试通过，但拆分诊断尚未重跑 L/M，不能反写旧运行数据。后续微调产物仍为 JAX/LoRA：当前转换器拒绝含未处理 LoRA 的输入，未来必须先验证 FP32 合并或等价 adapter 路径，不得漏掉 LoRA。
 
 本轮记忆读取沿用预算账本 `thor-accel-20260907-c3`，准入用量 11678 UTF-8 字节；为真实压缩后保留的摘要另预留预算，未重置账本绕过限制。完整请求 tokenizer/封装对宿主不可见，不能宣称这是完整请求 token 限制。详细日志与动作数组不因记忆预算而删除。
+
+## TensorRT 非量化导出准备（2026-09-07 追加）
+
+已接入 `scripts/thor/onnx_sampler.py`、`export_pi05_onnx.py` 和 `run_export_host.py`。使用现有 NVIDIA PyTorch 26.05 系列镜像；实查 TensorRT 10.16.1.11、ONNX 1.21.0、ONNXScript 0.7.0，无需升级宿主机或重新下载基础环境。
+
+保持三相机、H50、10 步和 BF16/FP32 敏感层。固定时间步仍按原 FP32 递推产生，各步正弦嵌入在 Thor 按原 GPU FP64 实现预计算后转为 FP32；导出图直接引用这些常量，不把运行中的 FP64 运算粗略改成 FP32。未做 FP16、量化或非有限值截断，原始权重保持只读，旧采样器继续可用。
+
+`pi05-onnx-bf16-20260907-r1` 与 `r2` 的九个真实输入均通过导出准备对照：模型 32D 和反变换后 14D 输出与原 PyTorch eager 采样器完全一致。这不是 JAX 等价、ONNX 等价或 engine 精度通过。两次实际导出均失败并恢复 120W：
+
+- r1：legacy 导出器报 `ScalarType ComplexDouble`。在同一容器用“FP32 标量 buffer × BF16 张量”的 CPU 最小例复现；普通 Python 浮点标量例可通过，不能把问题泛化成所有 BF16 乘法。新版 dynamo 导出器通过了相同最小例。[PyTorch 上游相关问题](https://github.com/pytorch/pytorch/issues/158658)提供了关联证据，实际版本仍以本机复现为准。
+- r2：新版导出器在输出模型信息时触发自适应 `GemmaRMSNorm.extra_repr()` 访问不存在的 `weight`。最小修复改用已有 `dim`，不改变前向计算。相关 CPU 测试目前 70 项通过，下一运行仍须重新进行真实输入准备对照及完整导出。
+
+`build_trt_engine.py` 已准备 strongly typed、显式关闭 TF32、固定输入形状的构建入口，校验 ONNX 和外部权重指纹后再调用现有 trtexec；尚未有成功 engine，不得报 TensorRT 推理成绩。GPU tactic 选型和模型验证才使用 MAXN 会话，退出恢复日常模式。
+
+原始导出产物位于 Thor `/home/wuyan-lyj/thor/pi/artifacts/<run_id>/`，工作站副本为 `/home/wuyan-lyj/thor-system/test-data/artifacts/<run_id>/`；报告、host manifest、exit、power-after、tegrastats 和压缩日志归档到 `docs/reports/thor/evidence/20260907/acceleration/`。中文 HTML 单列导出准备，不把失败导出计入原 14 组/2520 次正式推理调用。

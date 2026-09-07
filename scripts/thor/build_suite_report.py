@@ -393,6 +393,52 @@ def attach_front_runner(data):
     }
 
 
+def attach_exports(data, paths, logs):
+    rows = []
+    for path in paths:
+        report_path = path / "export_report.json"
+        report = json.loads(report_path.read_text())
+        run_id = report["run_id"]
+        exit_path = logs / f"{run_id}.exit.json"
+        exit_record = json.loads(exit_path.read_text()) if exit_path.exists() else None
+        checks = report.get("wrapper_comparisons", [])
+        exact = sum(bool(row["exact"] and row["finite"]) for row in checks)
+        if exit_record and exit_record["exit_code"] != 0:
+            status = "导出失败 · 不计入有效推理配置"
+        elif exit_record and report["status"] == "onnx_exported_engine_not_validated":
+            status = "ONNX 已导出 · 引擎和任务精度未验收"
+        else:
+            status = "尚未确认完成 · 查看运行日志"
+        rows.append(
+            [
+                run_id,
+                report.get("exporter", "legacy"),
+                report["compute_dtype"],
+                status,
+                f"{exact}/{len(checks)} 输入完全一致",
+                "无量化 / 无 FP16 修补 / TF32 关闭 / 原 FP64 时间嵌入预计算",
+            ]
+        )
+        data.setdefault("export_artifacts", []).append(
+            {
+                "report": report,
+                "report_sha256": hashlib.sha256(report_path.read_bytes()).hexdigest(),
+                "host_exit": exit_record,
+                "host_manifest": json.loads((logs / f"{run_id}.manifest.json").read_text()),
+            }
+        )
+    if rows:
+        data["detail_tables"].insert(
+            0,
+            {
+                "title": "TensorRT 前置导出 · 与推理成绩分开记录",
+                "description": "准备模型与原 PyTorch 采样器比较的是同一真实输入的完整动作；准备阶段零差异不代表 ONNX、最终 engine 或任务精度已通过。",
+                "columns": ["运行", "导出器", "主计算精度", "状态", "准备阶段对照", "精度处理"],
+                "rows": rows,
+            },
+        )
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--runs", nargs=3, type=Path, required=True)
@@ -403,6 +449,7 @@ def main():
     parser.add_argument("--conversion-audit", type=Path)
     parser.add_argument("--additional-runs", type=Path, nargs="*", default=[])
     parser.add_argument("--failed-runs", nargs="*", default=[])
+    parser.add_argument("--exports", type=Path, nargs="*", default=[])
     args = parser.parse_args()
     data = build(args.runs, args.logs, json.loads(args.plan.read_text()))
     if args.conversion_audit:
@@ -410,6 +457,7 @@ def main():
     attach_additional_runs(data, args.runs[0], args.additional_runs, args.logs)
     attach_failed_runs(data, args.failed_runs, args.logs)
     attach_front_runner(data)
+    attach_exports(data, args.exports, args.logs)
     args.json.write_text(json.dumps(data, ensure_ascii=False, indent=2))
     args.html.write_text(render(data))
 
