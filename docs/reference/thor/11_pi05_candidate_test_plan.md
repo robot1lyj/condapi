@@ -1,8 +1,40 @@
 # Pi0.5 当前候选与后续测试方案
 
+## 2026-09-08 当前选择：W，完整调用约 104 ms
+
+本轮固定 **W：原始 JAX FP32 → 已审计 PyTorch FP32 转换 → BF16 主干 / FP32 敏感运算 → 固定十步时间条件 FP32 缓存 → 非量化 TensorRT → CUDA Graph**。短文本使用经过 mask 检查的 text80 计算桶；tokenizer 接口仍为 200，三相机 224RGB、全部真实文本/状态 token、H50、去噪 10 不变。
+
+9 个真实输入 × 20 次正式调用：**P50 104.25 ms / P95 104.94 ms**，相对原 JAX A 的动作 MAE 0.002504、最大差 0.017282 数据集单位，归一化 14D 最大差 0.025594。比 V 节省 4.59 ms；本样本汇总误差未扩大，不等于任务效果改善或无损。单纯图捕获对同引擎非图输出 9/9 零差异，重复输出零变化。GPU 最高约 56.3°C，测试结束恢复 120W。
+
+这是“100ms 左右”的**部署候选**，尚未达到严格 ≤100ms，也不是生产服务/任务精度已验收。完整计时含 Thor policy 预处理、推理、后处理和 GPU 同步，不含 3588 采集/网络传输；本轮不涉及 3588。
+
+### 固定产物
+
+- Pi 系列候选镜像：`openpi-pi:thor-pytorch-onnx-v6-20260907`，基于 NVIDIA `nvcr.io/nvidia/pytorch:26.05-py3`；Docker ID `sha256:89d40707e81ab1d18078aba0471c65e31af201d95b03fe6c13bab129ebff221b`。不在宿主安装模型依赖。
+- TensorRT 10.16.1.11 / PyTorch `2.12.0a0+5aff3928d8.nv26.5.50603568`；`stronglyTyped`，TF32 关闭，没有 FP16 修补、FP8/FP4 或 `nan_to_num`。
+- Thor 引擎：`/home/wuyan-lyj/thor/pi/artifacts/pi05-trt-text80-20260908-r1/sampler.engine`，SHA-256 `a0052cf5847f565d804fe633f4445cd58037bf19e094704286986498775b1e78`。
+- 来源导出 `pi05-onnx-text80-20260908-r1`，ONNX SHA-256 `715e674d8b1104ecdfd012f29d5bdbe4c7bb5050cb3003f76fb9a6d6034f2d76`；完整权重、噪声、norm、输入和代码指纹见 export/engine/result JSON。
+- 性能运行 `pi05-W-20260908-r1`，运行代码 `849c8c884b8e21e5a6c6c580545c4269091c8180`。所有原始 JAX、FP32 转换权重及旧引擎保留。
+
+### 一条复测命令
+
+在 Thor 仓库目录执行，批次名必须新建；脚本自行临时 MAXN/锁频并在退出恢复日常设置：
+
+```bash
+sudo python3 scripts/thor/run_suite_host.py \
+  --image openpi-pi:thor-pytorch-onnx-v6-20260907 \
+  --modes W --batch-id manual-001 \
+  --engine-id pi05-trt-text80-20260908-r1 \
+  --code-commit "$(git rev-parse HEAD)"
+```
+
+复测先检查退出成功、180 次正式调用、P50/P95、finite、重复差和同引擎图/非图差，再运行 `compare_suites.py` 对 JAX A；报告继续保存所有误差，不把 observed error 自动当成容差。当前无需重新下载镜像、权重或构建引擎。超过 text80 的有效输入显式使用 V 的 200 桶（见下节），**自动路由尚未实现**。
+
+下一阶段优先用实际微调 checkpoint 完成 LoRA 合并与任务精度验证，再决定是否需要继续优化；本轮不为再省几毫秒默认降位量化。当前基础模型没有 LoRA，不能宣称该路径已经验证未来 LoRA 模型。
+
 本文持有候选复测顺序与下一轮测试规则；逐次成绩、误差和失败原因由 [加速执行记录](10_acceleration_execution.md) 持有，安装与容器环境按 [Thor 部署](../../08_thor_edge_deployment.md)。本方案只操作 Thor，不读写 3588。
 
-## 当前可复现路径
+## 原 V 可复现路径（长文本保留）
 
 原始 JAX FP32 checkpoint → 已审计的 PyTorch FP32 转换文件 → Pi 系列 v6 容器内 BF16 主计算、保留 FP32 敏感部分 → 原 batch=1 FP32 固定时间条件投影缓存 → 非量化 ONNX → strongly typed / noTF32 TensorRT 引擎 → CUDA Graph → 原 YAM 输入/归一化/动作还原。
 
