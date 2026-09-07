@@ -361,6 +361,27 @@ def attach_failed_runs(data, run_ids, logs):
         )
 
 
+def attach_front_runner(data):
+    """Highlight measured latency without turning it into an accuracy approval."""
+    measured = [row for row in data["experiments"] if row.get("p50_ms") is not None]
+    if not measured:
+        return
+    best = min(measured, key=lambda row: row["p50_ms"])
+    data["latency_front_runner"] = {
+        "name": best["name"],
+        "p50_ms": best["p50_ms"],
+        "p95_ms": best["p95_ms"],
+        "max_abs_error_vs_jax_fp32": best["max_abs_error"],
+        "target_ms": 100,
+        "accuracy_approved": False,
+    }
+    data["facts"][1] = {
+        "label": "当前最快完整调用 · P50",
+        "value": f"{best['p50_ms']:.2f} ms",
+        "detail": f"{best['name']}；P95 {best['p95_ms']:.2f} ms；目标约 100 ms，任务精度尚未验收",
+    }
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--runs", nargs=3, type=Path, required=True)
@@ -377,6 +398,7 @@ def main():
         attach_conversion(data, args.conversion_audit)
     attach_additional_runs(data, args.runs[0], args.additional_runs, args.logs)
     attach_failed_runs(data, args.failed_runs, args.logs)
+    attach_front_runner(data)
     args.json.write_text(json.dumps(data, ensure_ascii=False, indent=2))
     args.html.write_text(render(data))
 

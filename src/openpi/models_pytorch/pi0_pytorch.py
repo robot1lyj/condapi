@@ -248,7 +248,10 @@ class PI0Pytorch(nn.Module):
 
         embs = torch.cat(embs, dim=1)
         pad_masks = torch.cat(pad_masks, dim=1)
-        att_masks = torch.tensor(att_masks, dtype=torch.bool, device=pad_masks.device)
+        if self.static_denoising_loop:
+            att_masks = torch.zeros(len(att_masks), dtype=torch.bool, device=pad_masks.device)
+        else:
+            att_masks = torch.tensor(att_masks, dtype=torch.bool, device=pad_masks.device)
 
         # Get batch size from the first dimension of the concatenated tensors
         bsize = pad_masks.shape[0]
@@ -330,7 +333,11 @@ class PI0Pytorch(nn.Module):
 
         embs = torch.cat(embs, dim=1)
         pad_masks = torch.cat(pad_masks, dim=1)
-        att_masks = torch.tensor(att_masks, dtype=embs.dtype, device=embs.device)
+        if self.static_denoising_loop:
+            att_masks = torch.zeros(len(att_masks), dtype=embs.dtype, device=embs.device)
+            att_masks[: 1 if self.pi05 else 2] = 1
+        else:
+            att_masks = torch.tensor(att_masks, dtype=embs.dtype, device=embs.device)
         att_masks = att_masks[None, :].expand(bsize, len(att_masks))
 
         return embs, pad_masks, att_masks, adarms_cond
@@ -421,10 +428,18 @@ class PI0Pytorch(nn.Module):
         )
 
         dt = -1.0 / num_steps
-        dt = torch.tensor(dt, dtype=torch.float32, device=device)
+        dt = (
+            torch.full((), dt, dtype=torch.float32, device=device)
+            if self.static_denoising_loop
+            else torch.tensor(dt, dtype=torch.float32, device=device)
+        )
 
         x_t = noise
-        time = torch.tensor(1.0, dtype=torch.float32, device=device)
+        time = (
+            torch.ones((), dtype=torch.float32, device=device)
+            if self.static_denoising_loop
+            else torch.tensor(1.0, dtype=torch.float32, device=device)
+        )
         if self.static_denoising_loop:
             # Same FP32 recurrence and exactly num_steps Euler evaluations.
             # Opt-in avoids the CUDA-scalar -> CPU loop-condition synchronization

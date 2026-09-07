@@ -21,30 +21,30 @@ details{margin-top:22px}summary{cursor:pointer;color:var(--accent)}pre{font-size
 footer{color:var(--muted);font-size:12px;margin-top:20px;text-align:center}@media(max-width:800px){.facts{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr;gap:0}h1{font-size:28px}main{padding:0 14px}.panel{padding:18px}}
 </style><header><div class="eyebrow">EDGE INFERENCE / 可复现实测</div><h1>Thor · Pi0.5 推理实验室</h1>
 <p>原始 JAX 权重 → 精度对照 → 真实样本离线回放。把可运行、数值一致与任务有效分开验收。</p>
-<div class="meta">更新于 2026-09-07T21:23:09.725262+08:00 · 基础模型 pi05_base · 不连接机械臂执行动作</div></header>
-<main><section class="facts"><article class="fact"><div>完整模型模式</div><strong>8 组已实测</strong><small>原生 JAX 与新增后端；精度资格分别说明</small></article><article class="fact"><div>真实录像输入</div><strong>3 轨迹 · 9 组</strong><small>三路 RGB + 14D 状态 + 文本；来源见 suite 清单</small></article><article class="fact"><div>稳定推理调用</div><strong>1440 次</strong><small>正式调用总数；编译和预热另行记录</small></article><article class="fact"><div>性能模式</div><strong>仅推理 MAXN</strong><small>结束恢复 120W；记录实际频率与温度</small></article></section><section class="panel"><h2>精度配置对照</h2>
+<div class="meta">更新于 2026-09-07T21:34:10.145088+08:00 · 基础模型 pi05_base · 不连接机械臂执行动作</div></header>
+<main><section class="facts"><article class="fact"><div>完整模型模式</div><strong>9 组已实测</strong><small>原生 JAX 与新增后端；精度资格分别说明</small></article><article class="fact"><div>当前最快完整调用 · P50</div><strong>124.15 ms</strong><small>I · pytorch / bfloat16；P95 125.36 ms；目标约 100 ms，任务精度尚未验收</small></article><article class="fact"><div>稳定推理调用</div><strong>1620 次</strong><small>正式调用总数；编译和预热另行记录</small></article><article class="fact"><div>性能模式</div><strong>仅推理 MAXN</strong><small>结束恢复 120W；记录实际频率与温度</small></article></section><section class="panel"><h2>精度配置对照</h2>
 <p class="sub">参数存储精度不等于计算精度。延迟以预热后完整 policy 调用为准，首次编译单独记录；“—”表示尚无实测数据。</p>
-<div class="tablewrap"><table><thead><tr><th>配置</th><th>权重</th><th>计算</th><th>状态</th><th>P50 / ms</th><th>P95 / ms</th><th>最大绝对误差</th><th>说明</th></tr></thead><tbody><tr><td><strong>A · 原精度参考</strong><small>3 轨迹 / 9 输入 / 每输入 20 次</small></td><td>FP32</td><td>FP32 / highest</td><td><span class="badge">已实测 · 非任务精度验收</span></td><td>1231.477</td><td>1232.370</td><td>0</td><td>误差相对 A，采用数据集原始单位；原始 checkpoint 从未改写。</td></tr><tr><td><strong>B · 仅 BF16 计算</strong><small>3 轨迹 / 9 输入 / 每输入 20 次</small></td><td>FP32</td><td>BF16</td><td><span class="badge">已实测 · 非任务精度验收</span></td><td>239.761</td><td>240.805</td><td>0.0229041</td><td>误差相对 A，采用数据集原始单位；原始 checkpoint 从未改写。</td></tr><tr><td><strong>C · BF16 加载与计算</strong><small>3 轨迹 / 9 输入 / 每输入 20 次</small></td><td>原盘 FP32 → 内存 BF16</td><td>BF16</td><td><span class="badge">已实测 · 非任务精度验收</span></td><td>177.393</td><td>178.237</td><td>0.0186459</td><td>误差相对 A，采用数据集原始单位；原始 checkpoint 从未改写。</td></tr><tr><td><strong>D · pytorch / float32</strong><small>9 输入 / 每输入 20 次</small></td><td>fp32_checkpoint_to_float32</td><td>float32</td><td><span class="badge">已实测 · 非任务精度验收</span></td><td>1249.229</td><td>1251.134</td><td>1.52588e-05</td><td>compile=False / attention=eager / 合批相机=False / 掩码=float32 / TF32 关闭</td></tr><tr><td><strong>E · pytorch / bfloat16</strong><small>9 输入 / 每输入 20 次</small></td><td>fp32_checkpoint_to_bfloat16</td><td>bfloat16</td><td><span class="badge">已实测 · 非任务精度验收</span></td><td>221.342</td><td>227.245</td><td>0.0242882</td><td>compile=False / attention=eager / 合批相机=False / 掩码=float32 / TF32 关闭</td></tr><tr><td><strong>F · pytorch / bfloat16</strong><small>9 输入 / 每输入 20 次</small></td><td>fp32_checkpoint_to_bfloat16</td><td>bfloat16</td><td><span class="badge">已实测 · 非任务精度验收</span></td><td>135.227</td><td>136.098</td><td>0.0192254</td><td>compile=True / attention=eager / 合批相机=False / 掩码=query_dtype / TF32 关闭</td></tr><tr><td><strong>G · pytorch / bfloat16</strong><small>9 输入 / 每输入 20 次</small></td><td>fp32_checkpoint_to_bfloat16</td><td>bfloat16</td><td><span class="badge">已实测 · 非任务精度验收</span></td><td>151.880</td><td>153.348</td><td>0.0191467</td><td>compile=True / attention=sdpa / 合批相机=False / 掩码=query_dtype / TF32 关闭</td></tr><tr><td><strong>H · pytorch / bfloat16</strong><small>9 输入 / 每输入 20 次</small></td><td>fp32_checkpoint_to_bfloat16</td><td>bfloat16</td><td><span class="badge">已实测 · 非任务精度验收</span></td><td>142.293</td><td>143.762</td><td>0.0135294</td><td>compile=True / attention=sdpa / 合批相机=True / 掩码=query_dtype / TF32 关闭</td></tr><tr><td><strong>pi05-F-20260907-r1</strong><small>不计入完成的推理调用</small></td><td>pi05_base_pytorch_fp32_v1; no LoRA; read-only checkpoint</td><td>见实际命令</td><td><span class="badge">失败 · 无有效延迟</span></td><td>—</td><td>—</td><td>—</td><td>RuntimeError: invalid dtype for bias - should match query&#x27;s dtype</td></tr></tbody></table></div></section>
-<section class="panel"><h2>跨框架实测 · 保持三相机 / H50 / 去噪 10</h2><p class="sub">统一对照原 JAX FP32（A）。数据单位未做硬件校准，数值误差不等于任务成功率。所有数值来自完成的本地回放，不使用社区宣传延迟。</p><div class="tablewrap"><table><thead><tr><th>配置</th><th>实现</th><th>P50 ms</th><th>P95 ms</th><th>动作 MAE</th><th>动作最大误差</th><th>归一化 14D 最大误差</th><th>重复最大变化</th><th>GPU 最高温度</th></tr></thead><tbody><tr><td>D · pytorch / float32</td><td>compile=False / attention=eager / 合批相机=False / 掩码=float32 / TF32 关闭</td><td>1249.23</td><td>1251.13</td><td>0.00000109</td><td>0.00001526</td><td>0.00002154</td><td>0.00000000</td><td>56.0 °C</td></tr><tr><td>E · pytorch / bfloat16</td><td>compile=False / attention=eager / 合批相机=False / 掩码=float32 / TF32 关闭</td><td>221.34</td><td>227.25</td><td>0.00279421</td><td>0.02428818</td><td>0.03730353</td><td>0.00000000</td><td>55.5 °C</td></tr><tr><td>F · pytorch / bfloat16</td><td>compile=True / attention=eager / 合批相机=False / 掩码=query_dtype / TF32 关闭</td><td>135.23</td><td>136.10</td><td>0.00234401</td><td>0.01922536</td><td>0.03467023</td><td>0.00000000</td><td>53.8 °C</td></tr><tr><td>G · pytorch / bfloat16</td><td>compile=True / attention=sdpa / 合批相机=False / 掩码=query_dtype / TF32 关闭</td><td>151.88</td><td>153.35</td><td>0.00223713</td><td>0.01914668</td><td>0.02734043</td><td>0.00000000</td><td>53.6 °C</td></tr><tr><td>H · pytorch / bfloat16</td><td>compile=True / attention=sdpa / 合批相机=True / 掩码=query_dtype / TF32 关闭</td><td>142.29</td><td>143.76</td><td>0.00207001</td><td>0.01352936</td><td>0.02499557</td><td>0.00000000</td><td>55.1 °C</td></tr></tbody></table></div></section><section class="panel"><h2>100 ms 加速主线 · 权重转换进度</h2><p class="sub">FP32 转换已经完成；跨框架动作误差与延迟见实测表。首次权重加载检查数值相等（不区分正负零），不替代后续推理对照。</p><div class="tablewrap"><table><thead><tr><th>阶段</th><th>实测结果</th><th>下一步</th></tr></thead><tbody><tr><td>原始 JAX → PyTorch FP32</td><td>811 张量 / 3,353,433,872 参数</td><td>同输入 / 同噪声动作对照</td></tr><tr><td>LoRA</td><td>当前基础模型不含 LoRA；转换器拒绝丢弃适配器</td><td>微调后独立验证合并路径</td></tr><tr><td>加速目标</td><td>完整调用约 100 ms 或以下</td><td>三相机 / H50 / 去噪 10，不缩减合同</td></tr></tbody></table></div></section><section class="panel"><h2>误差分解：计算与权重分别带来什么变化</h2><p class="sub">比较每个输入的第一份稳定输出（9 个独立输入，不把 20 次重复冒充更多样本）。归一化误差仅统计有效 14D；物理输出保持数据集原始单位，不宣称弧度或毫米。动作步从 0 开始。</p><div class="tablewrap"><table><thead><tr><th>比较</th><th>P50 加速</th><th>MAE</th><th>RMSE</th><th>P95 绝对误差</th><th>最大绝对误差</th><th>归一化 MAE</th><th>归一化最大误差</th><th>原单位最大误差位置</th></tr></thead><tbody><tr><td>B − A（计算精度）</td><td>5.14×</td><td>0.002699</td><td>0.003963</td><td>0.008768</td><td>0.022904</td><td>0.003781</td><td>0.045872</td><td>episode-000097-early.npz / 动作步 38 / 右夹爪</td></tr><tr><td>C − A（计算与参数）</td><td>6.94×</td><td>0.002170</td><td>0.003248</td><td>0.007315</td><td>0.018646</td><td>0.003066</td><td>0.037344</td><td>episode-000096-early.npz / 动作步 49 / 右夹爪</td></tr><tr><td>C − B（参数加载精度）</td><td>1.35×</td><td>0.003433</td><td>0.005121</td><td>0.011693</td><td>0.025261</td><td>0.004844</td><td>0.050593</td><td>episode-000097-early.npz / 动作步 38 / 右夹爪</td></tr></tbody></table></div></section><section class="panel"><h2>逐录像 / 阶段实测</h2><p class="sub">耗时为完整 policy 调用 P50（ms），包括预处理、同步 GPU 执行、主机输出和少量证据拷贝；不是异步 dispatch 时间。</p><div class="tablewrap"><table><thead><tr><th>录像 / 阶段 / 帧</th><th>A / ms</th><th>B / ms</th><th>C / ms</th><th>B−A 归一化最大误差</th><th>C−A 归一化最大误差</th></tr></thead><tbody><tr><td>95 / 早期 / 帧 100</td><td>1231.51</td><td>240.22</td><td>177.52</td><td>0.013645</td><td>0.014252</td></tr><tr><td>95 / 中期 / 帧 1714</td><td>1231.38</td><td>239.75</td><td>177.23</td><td>0.020335</td><td>0.028612</td></tr><tr><td>95 / 后期 / 帧 3328</td><td>1231.26</td><td>239.83</td><td>177.38</td><td>0.039633</td><td>0.010233</td></tr><tr><td>96 / 早期 / 帧 100</td><td>1231.55</td><td>239.90</td><td>177.54</td><td>0.019545</td><td>0.037344</td></tr><tr><td>96 / 中期 / 帧 1162</td><td>1231.71</td><td>239.55</td><td>177.36</td><td>0.014536</td><td>0.012027</td></tr><tr><td>96 / 后期 / 帧 2224</td><td>1231.94</td><td>239.63</td><td>177.53</td><td>0.015166</td><td>0.015094</td></tr><tr><td>97 / 早期 / 帧 100</td><td>1231.39</td><td>239.80</td><td>177.26</td><td>0.045872</td><td>0.013027</td></tr><tr><td>97 / 中期 / 帧 1105</td><td>1231.59</td><td>239.69</td><td>177.23</td><td>0.011244</td><td>0.006553</td></tr><tr><td>97 / 后期 / 帧 2110</td><td>1231.31</td><td>239.89</td><td>177.44</td><td>0.007487</td><td>0.021677</td></tr></tbody></table></div></section><section class="panel"><h2>双臂逐维差异</h2><p class="sub">关节和夹爪分别列出，避免总体平均值掩盖单维漂移。当前基础模型未微调，不能把动作相似度当成任务成功率。</p><div class="tablewrap"><table><thead><tr><th>维度</th><th>B−A 原单位最大误差</th><th>C−A 原单位最大误差</th><th>B−A 归一化 MAE</th><th>C−A 归一化 MAE</th></tr></thead><tbody><tr><td>左关节1</td><td>0.013607</td><td>0.004152</td><td>0.005666</td><td>0.001992</td></tr><tr><td>左关节2</td><td>0.010937</td><td>0.009223</td><td>0.003862</td><td>0.002871</td></tr><tr><td>左关节3</td><td>0.012464</td><td>0.012485</td><td>0.004407</td><td>0.002838</td></tr><tr><td>左关节4</td><td>0.009913</td><td>0.007886</td><td>0.003901</td><td>0.002398</td></tr><tr><td>左关节5</td><td>0.004307</td><td>0.004845</td><td>0.002349</td><td>0.002043</td></tr><tr><td>左关节6</td><td>0.021607</td><td>0.005579</td><td>0.004191</td><td>0.002008</td></tr><tr><td>左夹爪</td><td>0.004926</td><td>0.002598</td><td>0.001233</td><td>0.001886</td></tr><tr><td>右关节1</td><td>0.013247</td><td>0.011059</td><td>0.004888</td><td>0.006427</td></tr><tr><td>右关节2</td><td>0.007648</td><td>0.010630</td><td>0.003036</td><td>0.003351</td></tr><tr><td>右关节3</td><td>0.012092</td><td>0.010884</td><td>0.003287</td><td>0.002525</td></tr><tr><td>右关节4</td><td>0.010392</td><td>0.015386</td><td>0.004754</td><td>0.004131</td></tr><tr><td>右关节5</td><td>0.005864</td><td>0.008263</td><td>0.002047</td><td>0.002041</td></tr><tr><td>右关节6</td><td>0.006930</td><td>0.004154</td><td>0.003075</td><td>0.001629</td></tr><tr><td>右夹爪</td><td>0.022904</td><td>0.018646</td><td>0.006244</td><td>0.006779</td></tr></tbody></table></div></section><section class="panel"><h2>加载、首次编译与资源</h2><p class="sub">系统 RAM 包含操作系统和远程桌面，不等于模型显存；温度/功率为 1 秒采样最大值，覆盖加载、预热和正式测试；频率范围不等价于硬件降频原因诊断。</p><div class="tablewrap"><table><thead><tr><th>配置</th><th>模型加载</th><th>首次调用（含编译）</th><th>实际参数占用</th><th>系统 RAM 峰值</th><th>GPU 最高温</th><th>GPU 实际频率</th><th>输入功率采样峰值</th><th>固定噪声重复差异</th></tr></thead><tbody><tr><td>A</td><td>4.70 s</td><td>6.16 s</td><td>12.49 GiB</td><td>28.07 GiB</td><td>54.9 °C</td><td>1574–1575 MHz</td><td>84.2 W</td><td>0.000000</td></tr><tr><td>B</td><td>4.98 s</td><td>5.36 s</td><td>12.49 GiB</td><td>37.91 GiB</td><td>55.8 °C</td><td>1572–1575 MHz</td><td>115.0 W</td><td>0.000000</td></tr><tr><td>C</td><td>4.84 s</td><td>5.11 s</td><td>6.25 GiB</td><td>35.39 GiB</td><td>57.8 °C</td><td>1572–1575 MHz</td><td>110.7 W</td><td>0.000000</td></tr></tbody></table></div></section>
+<div class="tablewrap"><table><thead><tr><th>配置</th><th>权重</th><th>计算</th><th>状态</th><th>P50 / ms</th><th>P95 / ms</th><th>最大绝对误差</th><th>说明</th></tr></thead><tbody><tr><td><strong>A · 原精度参考</strong><small>3 轨迹 / 9 输入 / 每输入 20 次</small></td><td>FP32</td><td>FP32 / highest</td><td><span class="badge">已实测 · 非任务精度验收</span></td><td>1231.477</td><td>1232.370</td><td>0</td><td>误差相对 A，采用数据集原始单位；原始 checkpoint 从未改写。</td></tr><tr><td><strong>B · 仅 BF16 计算</strong><small>3 轨迹 / 9 输入 / 每输入 20 次</small></td><td>FP32</td><td>BF16</td><td><span class="badge">已实测 · 非任务精度验收</span></td><td>239.761</td><td>240.805</td><td>0.0229041</td><td>误差相对 A，采用数据集原始单位；原始 checkpoint 从未改写。</td></tr><tr><td><strong>C · BF16 加载与计算</strong><small>3 轨迹 / 9 输入 / 每输入 20 次</small></td><td>原盘 FP32 → 内存 BF16</td><td>BF16</td><td><span class="badge">已实测 · 非任务精度验收</span></td><td>177.393</td><td>178.237</td><td>0.0186459</td><td>误差相对 A，采用数据集原始单位；原始 checkpoint 从未改写。</td></tr><tr><td><strong>D · pytorch / float32</strong><small>9 输入 / 每输入 20 次</small></td><td>fp32_checkpoint_to_float32</td><td>float32</td><td><span class="badge">已实测 · 非任务精度验收</span></td><td>1249.229</td><td>1251.134</td><td>1.52588e-05</td><td>compile=False / attention=eager / 合批相机=False / CUDA graph=False / 掩码=float32 / TF32 关闭</td></tr><tr><td><strong>E · pytorch / bfloat16</strong><small>9 输入 / 每输入 20 次</small></td><td>fp32_checkpoint_to_bfloat16</td><td>bfloat16</td><td><span class="badge">已实测 · 非任务精度验收</span></td><td>221.342</td><td>227.245</td><td>0.0242882</td><td>compile=False / attention=eager / 合批相机=False / CUDA graph=False / 掩码=float32 / TF32 关闭</td></tr><tr><td><strong>F · pytorch / bfloat16</strong><small>9 输入 / 每输入 20 次</small></td><td>fp32_checkpoint_to_bfloat16</td><td>bfloat16</td><td><span class="badge">已实测 · 非任务精度验收</span></td><td>135.227</td><td>136.098</td><td>0.0192254</td><td>compile=True / attention=eager / 合批相机=False / CUDA graph=False / 掩码=query_dtype / TF32 关闭</td></tr><tr><td><strong>G · pytorch / bfloat16</strong><small>9 输入 / 每输入 20 次</small></td><td>fp32_checkpoint_to_bfloat16</td><td>bfloat16</td><td><span class="badge">已实测 · 非任务精度验收</span></td><td>151.880</td><td>153.348</td><td>0.0191467</td><td>compile=True / attention=sdpa / 合批相机=False / CUDA graph=False / 掩码=query_dtype / TF32 关闭</td></tr><tr><td><strong>H · pytorch / bfloat16</strong><small>9 输入 / 每输入 20 次</small></td><td>fp32_checkpoint_to_bfloat16</td><td>bfloat16</td><td><span class="badge">已实测 · 非任务精度验收</span></td><td>142.293</td><td>143.762</td><td>0.0135294</td><td>compile=True / attention=sdpa / 合批相机=True / CUDA graph=False / 掩码=query_dtype / TF32 关闭</td></tr><tr><td><strong>I · pytorch / bfloat16</strong><small>9 输入 / 每输入 20 次</small></td><td>fp32_checkpoint_to_bfloat16</td><td>bfloat16</td><td><span class="badge">已实测 · 非任务精度验收</span></td><td>124.151</td><td>125.365</td><td>0.0160803</td><td>compile=True / attention=eager / 合批相机=True / CUDA graph=False / 掩码=query_dtype / TF32 关闭</td></tr><tr><td><strong>pi05-F-20260907-r1</strong><small>不计入完成的推理调用</small></td><td>pi05_base_pytorch_fp32_v1; no LoRA; read-only checkpoint</td><td>见实际命令</td><td><span class="badge">失败 · 无有效延迟</span></td><td>—</td><td>—</td><td>—</td><td>RuntimeError: invalid dtype for bias - should match query&#x27;s dtype</td></tr><tr><td><strong>pi05-J-20260907-r1</strong><small>不计入完成的推理调用</small></td><td>pi05_base_pytorch_fp32_v1; no LoRA; read-only checkpoint</td><td>见实际命令</td><td><span class="badge">失败 · 无有效延迟</span></td><td>—</td><td>—</td><td>—</td><td>RuntimeError: Cannot copy between CPU and CUDA tensors during CUDA graph capture unless the CPU tensor is pinned. Please use tensor.pin_memory() or allocate the tensor with pin_memory=True.</td></tr></tbody></table></div></section>
+<section class="panel"><h2>跨框架实测 · 保持三相机 / H50 / 去噪 10</h2><p class="sub">统一对照原 JAX FP32（A）。数据单位未做硬件校准，数值误差不等于任务成功率。所有数值来自完成的本地回放，不使用社区宣传延迟。</p><div class="tablewrap"><table><thead><tr><th>配置</th><th>实现</th><th>P50 ms</th><th>P95 ms</th><th>动作 MAE</th><th>动作最大误差</th><th>归一化 14D 最大误差</th><th>重复最大变化</th><th>GPU 最高温度</th></tr></thead><tbody><tr><td>D · pytorch / float32</td><td>compile=False / attention=eager / 合批相机=False / CUDA graph=False / 掩码=float32 / TF32 关闭</td><td>1249.23</td><td>1251.13</td><td>0.00000109</td><td>0.00001526</td><td>0.00002154</td><td>0.00000000</td><td>56.0 °C</td></tr><tr><td>E · pytorch / bfloat16</td><td>compile=False / attention=eager / 合批相机=False / CUDA graph=False / 掩码=float32 / TF32 关闭</td><td>221.34</td><td>227.25</td><td>0.00279421</td><td>0.02428818</td><td>0.03730353</td><td>0.00000000</td><td>55.5 °C</td></tr><tr><td>F · pytorch / bfloat16</td><td>compile=True / attention=eager / 合批相机=False / CUDA graph=False / 掩码=query_dtype / TF32 关闭</td><td>135.23</td><td>136.10</td><td>0.00234401</td><td>0.01922536</td><td>0.03467023</td><td>0.00000000</td><td>53.8 °C</td></tr><tr><td>G · pytorch / bfloat16</td><td>compile=True / attention=sdpa / 合批相机=False / CUDA graph=False / 掩码=query_dtype / TF32 关闭</td><td>151.88</td><td>153.35</td><td>0.00223713</td><td>0.01914668</td><td>0.02734043</td><td>0.00000000</td><td>53.6 °C</td></tr><tr><td>H · pytorch / bfloat16</td><td>compile=True / attention=sdpa / 合批相机=True / CUDA graph=False / 掩码=query_dtype / TF32 关闭</td><td>142.29</td><td>143.76</td><td>0.00207001</td><td>0.01352936</td><td>0.02499557</td><td>0.00000000</td><td>55.1 °C</td></tr><tr><td>I · pytorch / bfloat16</td><td>compile=True / attention=eager / 合批相机=True / CUDA graph=False / 掩码=query_dtype / TF32 关闭</td><td>124.15</td><td>125.36</td><td>0.00214831</td><td>0.01608032</td><td>0.02370663</td><td>0.00000000</td><td>53.4 °C</td></tr></tbody></table></div></section><section class="panel"><h2>100 ms 加速主线 · 权重转换进度</h2><p class="sub">FP32 转换已经完成；跨框架动作误差与延迟见实测表。首次权重加载检查数值相等（不区分正负零），不替代后续推理对照。</p><div class="tablewrap"><table><thead><tr><th>阶段</th><th>实测结果</th><th>下一步</th></tr></thead><tbody><tr><td>原始 JAX → PyTorch FP32</td><td>811 张量 / 3,353,433,872 参数</td><td>同输入 / 同噪声动作对照</td></tr><tr><td>LoRA</td><td>当前基础模型不含 LoRA；转换器拒绝丢弃适配器</td><td>微调后独立验证合并路径</td></tr><tr><td>加速目标</td><td>完整调用约 100 ms 或以下</td><td>三相机 / H50 / 去噪 10，不缩减合同</td></tr></tbody></table></div></section><section class="panel"><h2>误差分解：计算与权重分别带来什么变化</h2><p class="sub">比较每个输入的第一份稳定输出（9 个独立输入，不把 20 次重复冒充更多样本）。归一化误差仅统计有效 14D；物理输出保持数据集原始单位，不宣称弧度或毫米。动作步从 0 开始。</p><div class="tablewrap"><table><thead><tr><th>比较</th><th>P50 加速</th><th>MAE</th><th>RMSE</th><th>P95 绝对误差</th><th>最大绝对误差</th><th>归一化 MAE</th><th>归一化最大误差</th><th>原单位最大误差位置</th></tr></thead><tbody><tr><td>B − A（计算精度）</td><td>5.14×</td><td>0.002699</td><td>0.003963</td><td>0.008768</td><td>0.022904</td><td>0.003781</td><td>0.045872</td><td>episode-000097-early.npz / 动作步 38 / 右夹爪</td></tr><tr><td>C − A（计算与参数）</td><td>6.94×</td><td>0.002170</td><td>0.003248</td><td>0.007315</td><td>0.018646</td><td>0.003066</td><td>0.037344</td><td>episode-000096-early.npz / 动作步 49 / 右夹爪</td></tr><tr><td>C − B（参数加载精度）</td><td>1.35×</td><td>0.003433</td><td>0.005121</td><td>0.011693</td><td>0.025261</td><td>0.004844</td><td>0.050593</td><td>episode-000097-early.npz / 动作步 38 / 右夹爪</td></tr></tbody></table></div></section><section class="panel"><h2>逐录像 / 阶段实测</h2><p class="sub">耗时为完整 policy 调用 P50（ms），包括预处理、同步 GPU 执行、主机输出和少量证据拷贝；不是异步 dispatch 时间。</p><div class="tablewrap"><table><thead><tr><th>录像 / 阶段 / 帧</th><th>A / ms</th><th>B / ms</th><th>C / ms</th><th>B−A 归一化最大误差</th><th>C−A 归一化最大误差</th></tr></thead><tbody><tr><td>95 / 早期 / 帧 100</td><td>1231.51</td><td>240.22</td><td>177.52</td><td>0.013645</td><td>0.014252</td></tr><tr><td>95 / 中期 / 帧 1714</td><td>1231.38</td><td>239.75</td><td>177.23</td><td>0.020335</td><td>0.028612</td></tr><tr><td>95 / 后期 / 帧 3328</td><td>1231.26</td><td>239.83</td><td>177.38</td><td>0.039633</td><td>0.010233</td></tr><tr><td>96 / 早期 / 帧 100</td><td>1231.55</td><td>239.90</td><td>177.54</td><td>0.019545</td><td>0.037344</td></tr><tr><td>96 / 中期 / 帧 1162</td><td>1231.71</td><td>239.55</td><td>177.36</td><td>0.014536</td><td>0.012027</td></tr><tr><td>96 / 后期 / 帧 2224</td><td>1231.94</td><td>239.63</td><td>177.53</td><td>0.015166</td><td>0.015094</td></tr><tr><td>97 / 早期 / 帧 100</td><td>1231.39</td><td>239.80</td><td>177.26</td><td>0.045872</td><td>0.013027</td></tr><tr><td>97 / 中期 / 帧 1105</td><td>1231.59</td><td>239.69</td><td>177.23</td><td>0.011244</td><td>0.006553</td></tr><tr><td>97 / 后期 / 帧 2110</td><td>1231.31</td><td>239.89</td><td>177.44</td><td>0.007487</td><td>0.021677</td></tr></tbody></table></div></section><section class="panel"><h2>双臂逐维差异</h2><p class="sub">关节和夹爪分别列出，避免总体平均值掩盖单维漂移。当前基础模型未微调，不能把动作相似度当成任务成功率。</p><div class="tablewrap"><table><thead><tr><th>维度</th><th>B−A 原单位最大误差</th><th>C−A 原单位最大误差</th><th>B−A 归一化 MAE</th><th>C−A 归一化 MAE</th></tr></thead><tbody><tr><td>左关节1</td><td>0.013607</td><td>0.004152</td><td>0.005666</td><td>0.001992</td></tr><tr><td>左关节2</td><td>0.010937</td><td>0.009223</td><td>0.003862</td><td>0.002871</td></tr><tr><td>左关节3</td><td>0.012464</td><td>0.012485</td><td>0.004407</td><td>0.002838</td></tr><tr><td>左关节4</td><td>0.009913</td><td>0.007886</td><td>0.003901</td><td>0.002398</td></tr><tr><td>左关节5</td><td>0.004307</td><td>0.004845</td><td>0.002349</td><td>0.002043</td></tr><tr><td>左关节6</td><td>0.021607</td><td>0.005579</td><td>0.004191</td><td>0.002008</td></tr><tr><td>左夹爪</td><td>0.004926</td><td>0.002598</td><td>0.001233</td><td>0.001886</td></tr><tr><td>右关节1</td><td>0.013247</td><td>0.011059</td><td>0.004888</td><td>0.006427</td></tr><tr><td>右关节2</td><td>0.007648</td><td>0.010630</td><td>0.003036</td><td>0.003351</td></tr><tr><td>右关节3</td><td>0.012092</td><td>0.010884</td><td>0.003287</td><td>0.002525</td></tr><tr><td>右关节4</td><td>0.010392</td><td>0.015386</td><td>0.004754</td><td>0.004131</td></tr><tr><td>右关节5</td><td>0.005864</td><td>0.008263</td><td>0.002047</td><td>0.002041</td></tr><tr><td>右关节6</td><td>0.006930</td><td>0.004154</td><td>0.003075</td><td>0.001629</td></tr><tr><td>右夹爪</td><td>0.022904</td><td>0.018646</td><td>0.006244</td><td>0.006779</td></tr></tbody></table></div></section><section class="panel"><h2>加载、首次编译与资源</h2><p class="sub">系统 RAM 包含操作系统和远程桌面，不等于模型显存；温度/功率为 1 秒采样最大值，覆盖加载、预热和正式测试；频率范围不等价于硬件降频原因诊断。</p><div class="tablewrap"><table><thead><tr><th>配置</th><th>模型加载</th><th>首次调用（含编译）</th><th>实际参数占用</th><th>系统 RAM 峰值</th><th>GPU 最高温</th><th>GPU 实际频率</th><th>输入功率采样峰值</th><th>固定噪声重复差异</th></tr></thead><tbody><tr><td>A</td><td>4.70 s</td><td>6.16 s</td><td>12.49 GiB</td><td>28.07 GiB</td><td>54.9 °C</td><td>1574–1575 MHz</td><td>84.2 W</td><td>0.000000</td></tr><tr><td>B</td><td>4.98 s</td><td>5.36 s</td><td>12.49 GiB</td><td>37.91 GiB</td><td>55.8 °C</td><td>1572–1575 MHz</td><td>115.0 W</td><td>0.000000</td></tr><tr><td>C</td><td>4.84 s</td><td>5.11 s</td><td>6.25 GiB</td><td>35.39 GiB</td><td>57.8 °C</td><td>1572–1575 MHz</td><td>110.7 W</td><td>0.000000</td></tr></tbody></table></div></section>
 <div class="grid"><section class="panel"><h2>执行进度与证据</h2><ul class="timeline"><li><span class="dot"></span><strong>原生 JAX 容器实测通过</strong><p>NGC JAX 26.05 ARM64；保留 NVIDIA JAX/Flax/Orbax 栈，兼容新版 Orbax 元数据。CPU PyTorch 仅满足类型/IO 依赖，推理由 JAX GPU 完成。</p></li><li><span class="dot"></span><strong>固定输入与精度审计</strong><p>原盘 checkpoint 保持 FP32，无 LoRA；A/B 加载 51 个 FP32 叶子，C 加载 51 个 BF16 叶子。种子 0、固定同一噪声、10 次去噪、horizon 50。</p></li><li><span class="dot"></span><strong>真实本地离线回放完成</strong><p>从 3 条本地录像选取 9 个真实阶段输入；三路图像与低维数据校验时间戳。容器断网，没有服务器实时传输，也未连接机械臂。</p></li><li><span class="dot"></span><strong>原始证据保留</strong><p>每次运行独立目录，含 result.json、动作 NPY、归一化动作、noise.npy、逐样本记录；宿主日志和 tegrastats 单独留存。失败的首轮 Orbax 加载日志也保留。</p></li></ul></section>
 <section class="panel"><h2>结果解释边界</h2><p class="sub">性能数据只回答“多快”，不自动回答“动作是否正确”。</p>
 <div class="notice"><strong>当前限制</strong><ul><li>模型为未针对 YAM 微调的 pi05_base；没有实机闭环、成功率或安全动作验收。</li><li>本次 norm 来自同一组回放录像，仅为可复现精度/性能对照；未来必须绑定微调 checkpoint 自己的 norm。</li><li>A 是本机新版 JAX 的数值参考，不代表已验证与服务器训练版 JAX 完全相同。</li><li>3 条轨迹、9 个状态、一个固定噪声种子；不足以评价泛化、动态闭环和所有极端输入。</li><li>BF16 会改变数值；目前未制定任务级容差，不因输出有限或推理更快就默认批准部署。</li><li>首次编译曾出现 CUDA autotune 计时警告；正式耗时使用预热后的同步主机计时，不采用编译器内部测量值。</li></ul></div>
 <details><summary>展开原始记录 JSON</summary><pre>{
-  &quot;updated_at&quot;: &quot;2026-09-07T21:23:09.725262+08:00&quot;,
+  &quot;updated_at&quot;: &quot;2026-09-07T21:34:10.145088+08:00&quot;,
   &quot;facts&quot;: [
     {
       &quot;label&quot;: &quot;完整模型模式&quot;,
-      &quot;value&quot;: &quot;8 组已实测&quot;,
+      &quot;value&quot;: &quot;9 组已实测&quot;,
       &quot;detail&quot;: &quot;原生 JAX 与新增后端；精度资格分别说明&quot;
     },
     {
-      &quot;label&quot;: &quot;真实录像输入&quot;,
-      &quot;value&quot;: &quot;3 轨迹 · 9 组&quot;,
-      &quot;detail&quot;: &quot;三路 RGB + 14D 状态 + 文本；来源见 suite 清单&quot;
+      &quot;label&quot;: &quot;当前最快完整调用 · P50&quot;,
+      &quot;value&quot;: &quot;124.15 ms&quot;,
+      &quot;detail&quot;: &quot;I · pytorch / bfloat16；P95 125.36 ms；目标约 100 ms，任务精度尚未验收&quot;
     },
     {
       &quot;label&quot;: &quot;稳定推理调用&quot;,
-      &quot;value&quot;: &quot;1440 次&quot;,
+      &quot;value&quot;: &quot;1620 次&quot;,
       &quot;detail&quot;: &quot;正式调用总数；编译和预热另行记录&quot;
     },
     {
@@ -96,7 +96,7 @@ footer{color:var(--muted);font-size:12px;margin-top:20px;text-align:center}@medi
       &quot;p50_ms&quot;: 1249.2292240003735,
       &quot;p95_ms&quot;: 1251.1344745000315,
       &quot;max_abs_error&quot;: 1.52587890625e-05,
-      &quot;note&quot;: &quot;compile=False / attention=eager / 合批相机=False / 掩码=float32 / TF32 关闭&quot;
+      &quot;note&quot;: &quot;compile=False / attention=eager / 合批相机=False / CUDA graph=False / 掩码=float32 / TF32 关闭&quot;
     },
     {
       &quot;name&quot;: &quot;E · pytorch / bfloat16&quot;,
@@ -107,7 +107,7 @@ footer{color:var(--muted);font-size:12px;margin-top:20px;text-align:center}@medi
       &quot;p50_ms&quot;: 221.34244900007616,
       &quot;p95_ms&quot;: 227.24502419905548,
       &quot;max_abs_error&quot;: 0.024288177490234375,
-      &quot;note&quot;: &quot;compile=False / attention=eager / 合批相机=False / 掩码=float32 / TF32 关闭&quot;
+      &quot;note&quot;: &quot;compile=False / attention=eager / 合批相机=False / CUDA graph=False / 掩码=float32 / TF32 关闭&quot;
     },
     {
       &quot;name&quot;: &quot;F · pytorch / bfloat16&quot;,
@@ -118,7 +118,7 @@ footer{color:var(--muted);font-size:12px;margin-top:20px;text-align:center}@medi
       &quot;p50_ms&quot;: 135.22686349915602,
       &quot;p95_ms&quot;: 136.09782804951465,
       &quot;max_abs_error&quot;: 0.019225358963012695,
-      &quot;note&quot;: &quot;compile=True / attention=eager / 合批相机=False / 掩码=query_dtype / TF32 关闭&quot;
+      &quot;note&quot;: &quot;compile=True / attention=eager / 合批相机=False / CUDA graph=False / 掩码=query_dtype / TF32 关闭&quot;
     },
     {
       &quot;name&quot;: &quot;G · pytorch / bfloat16&quot;,
@@ -129,7 +129,7 @@ footer{color:var(--muted);font-size:12px;margin-top:20px;text-align:center}@medi
       &quot;p50_ms&quot;: 151.87963350035716,
       &quot;p95_ms&quot;: 153.34841510084516,
       &quot;max_abs_error&quot;: 0.01914668083190918,
-      &quot;note&quot;: &quot;compile=True / attention=sdpa / 合批相机=False / 掩码=query_dtype / TF32 关闭&quot;
+      &quot;note&quot;: &quot;compile=True / attention=sdpa / 合批相机=False / CUDA graph=False / 掩码=query_dtype / TF32 关闭&quot;
     },
     {
       &quot;name&quot;: &quot;H · pytorch / bfloat16&quot;,
@@ -140,7 +140,18 @@ footer{color:var(--muted);font-size:12px;margin-top:20px;text-align:center}@medi
       &quot;p50_ms&quot;: 142.29256650014577,
       &quot;p95_ms&quot;: 143.76158759923783,
       &quot;max_abs_error&quot;: 0.013529360294342041,
-      &quot;note&quot;: &quot;compile=True / attention=sdpa / 合批相机=True / 掩码=query_dtype / TF32 关闭&quot;
+      &quot;note&quot;: &quot;compile=True / attention=sdpa / 合批相机=True / CUDA graph=False / 掩码=query_dtype / TF32 关闭&quot;
+    },
+    {
+      &quot;name&quot;: &quot;I · pytorch / bfloat16&quot;,
+      &quot;weights&quot;: &quot;fp32_checkpoint_to_bfloat16&quot;,
+      &quot;compute&quot;: &quot;bfloat16&quot;,
+      &quot;status&quot;: &quot;已实测 · 非任务精度验收&quot;,
+      &quot;scope&quot;: &quot;9 输入 / 每输入 20 次&quot;,
+      &quot;p50_ms&quot;: 124.15142800091417,
+      &quot;p95_ms&quot;: 125.36496710017673,
+      &quot;max_abs_error&quot;: 0.01608031988143921,
+      &quot;note&quot;: &quot;compile=True / attention=eager / 合批相机=True / CUDA graph=False / 掩码=query_dtype / TF32 关闭&quot;
     },
     {
       &quot;name&quot;: &quot;pi05-F-20260907-r1&quot;,
@@ -152,6 +163,17 @@ footer{color:var(--muted);font-size:12px;margin-top:20px;text-align:center}@medi
       &quot;p95_ms&quot;: null,
       &quot;max_abs_error&quot;: null,
       &quot;note&quot;: &quot;RuntimeError: invalid dtype for bias - should match query&#x27;s dtype&quot;
+    },
+    {
+      &quot;name&quot;: &quot;pi05-J-20260907-r1&quot;,
+      &quot;weights&quot;: &quot;pi05_base_pytorch_fp32_v1; no LoRA; read-only checkpoint&quot;,
+      &quot;compute&quot;: &quot;见实际命令&quot;,
+      &quot;status&quot;: &quot;失败 · 无有效延迟&quot;,
+      &quot;scope&quot;: &quot;不计入完成的推理调用&quot;,
+      &quot;p50_ms&quot;: null,
+      &quot;p95_ms&quot;: null,
+      &quot;max_abs_error&quot;: null,
+      &quot;note&quot;: &quot;RuntimeError: Cannot copy between CPU and CUDA tensors during CUDA graph capture unless the CPU tensor is pinned. Please use tensor.pin_memory() or allocate the tensor with pin_memory=True.&quot;
     }
   ],
   &quot;detail_tables&quot;: [
@@ -172,7 +194,7 @@ footer{color:var(--muted);font-size:12px;margin-top:20px;text-align:center}@medi
       &quot;rows&quot;: [
         [
           &quot;D · pytorch / float32&quot;,
-          &quot;compile=False / attention=eager / 合批相机=False / 掩码=float32 / TF32 关闭&quot;,
+          &quot;compile=False / attention=eager / 合批相机=False / CUDA graph=False / 掩码=float32 / TF32 关闭&quot;,
           &quot;1249.23&quot;,
           &quot;1251.13&quot;,
           &quot;0.00000109&quot;,
@@ -183,7 +205,7 @@ footer{color:var(--muted);font-size:12px;margin-top:20px;text-align:center}@medi
         ],
         [
           &quot;E · pytorch / bfloat16&quot;,
-          &quot;compile=False / attention=eager / 合批相机=False / 掩码=float32 / TF32 关闭&quot;,
+          &quot;compile=False / attention=eager / 合批相机=False / CUDA graph=False / 掩码=float32 / TF32 关闭&quot;,
           &quot;221.34&quot;,
           &quot;227.25&quot;,
           &quot;0.00279421&quot;,
@@ -194,7 +216,7 @@ footer{color:var(--muted);font-size:12px;margin-top:20px;text-align:center}@medi
         ],
         [
           &quot;F · pytorch / bfloat16&quot;,
-          &quot;compile=True / attention=eager / 合批相机=False / 掩码=query_dtype / TF32 关闭&quot;,
+          &quot;compile=True / attention=eager / 合批相机=False / CUDA graph=False / 掩码=query_dtype / TF32 关闭&quot;,
           &quot;135.23&quot;,
           &quot;136.10&quot;,
           &quot;0.00234401&quot;,
@@ -205,7 +227,7 @@ footer{color:var(--muted);font-size:12px;margin-top:20px;text-align:center}@medi
         ],
         [
           &quot;G · pytorch / bfloat16&quot;,
-          &quot;compile=True / attention=sdpa / 合批相机=False / 掩码=query_dtype / TF32 关闭&quot;,
+          &quot;compile=True / attention=sdpa / 合批相机=False / CUDA graph=False / 掩码=query_dtype / TF32 关闭&quot;,
           &quot;151.88&quot;,
           &quot;153.35&quot;,
           &quot;0.00223713&quot;,
@@ -216,7 +238,7 @@ footer{color:var(--muted);font-size:12px;margin-top:20px;text-align:center}@medi
         ],
         [
           &quot;H · pytorch / bfloat16&quot;,
-          &quot;compile=True / attention=sdpa / 合批相机=True / 掩码=query_dtype / TF32 关闭&quot;,
+          &quot;compile=True / attention=sdpa / 合批相机=True / CUDA graph=False / 掩码=query_dtype / TF32 关闭&quot;,
           &quot;142.29&quot;,
           &quot;143.76&quot;,
           &quot;0.00207001&quot;,
@@ -224,6 +246,17 @@ footer{color:var(--muted);font-size:12px;margin-top:20px;text-align:center}@medi
           &quot;0.02499557&quot;,
           &quot;0.00000000&quot;,
           &quot;55.1 °C&quot;
+        ],
+        [
+          &quot;I · pytorch / bfloat16&quot;,
+          &quot;compile=True / attention=eager / 合批相机=True / CUDA graph=False / 掩码=query_dtype / TF32 关闭&quot;,
+          &quot;124.15&quot;,
+          &quot;125.36&quot;,
+          &quot;0.00214831&quot;,
+          &quot;0.01608032&quot;,
+          &quot;0.02370663&quot;,
+          &quot;0.00000000&quot;,
+          &quot;53.4 °C&quot;
         ]
       ]
     },
@@ -4582,6 +4615,512 @@ footer{color:var(--muted);font-size:12px;margin-top:20px;text-align:center}@medi
       ],
       &quot;cuda_peak_allocated_bytes&quot;: 7651078144,
       &quot;cuda_peak_reserved_bytes&quot;: 7753170944
+    },
+    {
+      &quot;run_id&quot;: &quot;pi05-I-20260907-r1&quot;,
+      &quot;phase&quot;: &quot;evaluate&quot;,
+      &quot;started_at&quot;: &quot;2026-09-07T13:25:02.270530+00:00&quot;,
+      &quot;status&quot;: &quot;measured_not_accuracy_approved&quot;,
+      &quot;command&quot;: [
+        &quot;/bench/benchmark_suite.py&quot;,
+        &quot;--checkpoint&quot;,
+        &quot;/checkpoints/pi05_base_pytorch_fp32_v1&quot;,
+        &quot;--suite&quot;,
+        &quot;/test-data/pi05-replay-v1/suite.json&quot;,
+        &quot;--params-dtype&quot;,
+        &quot;bfloat16&quot;,
+        &quot;--compute-dtype&quot;,
+        &quot;bfloat16&quot;,
+        &quot;--output&quot;,
+        &quot;/results/pi05-I-20260907-r1&quot;,
+        &quot;--backend&quot;,
+        &quot;pytorch&quot;,
+        &quot;--compile&quot;,
+        &quot;--native-attention-mask&quot;,
+        &quot;--batch-vision&quot;
+      ],
+      &quot;config&quot;: &quot;pi05_yam&quot;,
+      &quot;backend&quot;: &quot;pytorch&quot;,
+      &quot;compiled&quot;: true,
+      &quot;warmups_per_sample&quot;: 2,
+      &quot;attention&quot;: &quot;eager&quot;,
+      &quot;batch_vision&quot;: true,
+      &quot;attention_mask&quot;: &quot;query_dtype&quot;,
+      &quot;params_dtype&quot;: &quot;fp32_checkpoint_to_bfloat16&quot;,
+      &quot;compute_dtype&quot;: &quot;bfloat16&quot;,
+      &quot;matmul_precision&quot;: &quot;FP32 highest; TF32 disabled&quot;,
+      &quot;checkpoint_metadata_sha256&quot;: &quot;250d0ad0f6540a5e4bdd70442d6864cef729724f2d23e2dd2cc669563a668d70&quot;,
+      &quot;suite_sha256&quot;: &quot;5dc74ebd1fbf296f21156ec685cf9edd6d7eb20c1a7eec858d8091369db1e15d&quot;,
+      &quot;norm_stats_sha256&quot;: &quot;d3fb4d94c095f9bf1fdc25ef032cd5a6a7575a983f4039e6f214f6b7af38dda9&quot;,
+      &quot;suite&quot;: {
+        &quot;created_at&quot;: &quot;2026-09-07T10:31:18.850029+00:00&quot;,
+        &quot;source_kind&quot;: &quot;real_yam_recording&quot;,
+        &quot;source_root&quot;: &quot;/home/wuyan-lyj/thor-system/test-data/ABC-130k-two-tasks/lego_sorting&quot;,
+        &quot;source_files&quot;: {
+          &quot;manifests/train.jsonl&quot;: &quot;1fabf4a2b83224f85a724146fb37ccf17928f91c00bd0a697e470980e54fb3a6&quot;,
+          &quot;train/data/source-file-000.parquet&quot;: &quot;86c8358e45cc3888a5a8ad51d3165b8830a2ae21147fc2b7ee6cc1ac169b7b48&quot;,
+          &quot;train/videos/left_wrist/episode-000095.mp4&quot;: &quot;933af3b2463cfa8f79b036e54875d84b950a8fee646bd5d85f245b51d7ff8f21&quot;,
+          &quot;train/videos/left_wrist/episode-000096.mp4&quot;: &quot;84e438bc8fd5cf63df13973ec5364b34d2cd47e55993c2040c042a2319cc1013&quot;,
+          &quot;train/videos/left_wrist/episode-000097.mp4&quot;: &quot;516a6fb63a66ec5ad7984bb6d58c7a2358404ca06fc18097d2c61877e524c62b&quot;,
+          &quot;train/videos/right_wrist/episode-000095.mp4&quot;: &quot;6e7c239a40ea9a567d2a72b49f50880c0c60989b1ca2485bc1bfb8f1e92107b1&quot;,
+          &quot;train/videos/right_wrist/episode-000096.mp4&quot;: &quot;2055b5cd36bc75d7b359c013d56d96c620d5fe9bfa9f760e054c492a44ec332a&quot;,
+          &quot;train/videos/right_wrist/episode-000097.mp4&quot;: &quot;e52111ef360e949d4cc6aa9102e818a24c37792623c46ec2038156e1a2af49ea&quot;,
+          &quot;train/videos/top/episode-000095.mp4&quot;: &quot;9d04979383e8f4d81aebd04bdadfb9d6d77b2e33468f36bf765b3d39260699b9&quot;,
+          &quot;train/videos/top/episode-000096.mp4&quot;: &quot;fb29baaba91fc93573cf189707f608185c1273a3fad8884e141508622b6c40fb&quot;,
+          &quot;train/videos/top/episode-000097.mp4&quot;: &quot;8517f0b92104e1ce3faae39d5fa5c3f85c1f22b943d46ed00177dcece364ae8c&quot;
+        },
+        &quot;norm_stats_sha256&quot;: &quot;d3fb4d94c095f9bf1fdc25ef032cd5a6a7575a983f4039e6f214f6b7af38dda9&quot;,
+        &quot;normalization_scope&quot;: &quot;benchmark_only_same_recordings_not_production_training_stats&quot;,
+        &quot;normalization_method&quot;: &quot;OpenPI RunningStats; 50 future actions relative to current state; endpoint clamp&quot;,
+        &quot;joint_delta_mask&quot;: [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          false,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        &quot;action_horizon&quot;: 50,
+        &quot;units&quot;: &quot;original_dataset_values_no_rescaling_no_robot_calibration_claim&quot;,
+        &quot;base_model_only&quot;: true,
+        &quot;samples&quot;: [
+          {
+            &quot;sample&quot;: &quot;episode-000095-early.npz&quot;,
+            &quot;provenance&quot;: &quot;episode-000095-early.json&quot;
+          },
+          {
+            &quot;sample&quot;: &quot;episode-000095-middle.npz&quot;,
+            &quot;provenance&quot;: &quot;episode-000095-middle.json&quot;
+          },
+          {
+            &quot;sample&quot;: &quot;episode-000095-late.npz&quot;,
+            &quot;provenance&quot;: &quot;episode-000095-late.json&quot;
+          },
+          {
+            &quot;sample&quot;: &quot;episode-000096-early.npz&quot;,
+            &quot;provenance&quot;: &quot;episode-000096-early.json&quot;
+          },
+          {
+            &quot;sample&quot;: &quot;episode-000096-middle.npz&quot;,
+            &quot;provenance&quot;: &quot;episode-000096-middle.json&quot;
+          },
+          {
+            &quot;sample&quot;: &quot;episode-000096-late.npz&quot;,
+            &quot;provenance&quot;: &quot;episode-000096-late.json&quot;
+          },
+          {
+            &quot;sample&quot;: &quot;episode-000097-early.npz&quot;,
+            &quot;provenance&quot;: &quot;episode-000097-early.json&quot;
+          },
+          {
+            &quot;sample&quot;: &quot;episode-000097-middle.npz&quot;,
+            &quot;provenance&quot;: &quot;episode-000097-middle.json&quot;
+          },
+          {
+            &quot;sample&quot;: &quot;episode-000097-late.npz&quot;,
+            &quot;provenance&quot;: &quot;episode-000097-late.json&quot;
+          }
+        ],
+        &quot;norm_stats&quot;: &quot;norm_stats.json&quot;,
+        &quot;observation_count&quot;: 9
+      },
+      &quot;steps&quot;: 10,
+      &quot;horizon&quot;: 50,
+      &quot;seed&quot;: 0,
+      &quot;repeats&quot;: 20,
+      &quot;versions&quot;: {
+        &quot;torch&quot;: &quot;2.12.0a0+5aff3928d8.nv26.5.50603568&quot;,
+        &quot;transformers&quot;: &quot;4.53.2&quot;,
+        &quot;jax&quot;: &quot;0.6.2&quot;,
+        &quot;jaxlib&quot;: &quot;0.6.2&quot;,
+        &quot;flax&quot;: &quot;0.10.2&quot;,
+        &quot;orbax-checkpoint&quot;: &quot;0.11.13&quot;
+      },
+      &quot;devices&quot;: [
+        &quot;NVIDIA Thor&quot;,
+        &quot;(11, 0)&quot;
+      ],
+      &quot;precision_acceptance_threshold&quot;: null,
+      &quot;limitations&quot;: [
+        &quot;Base model is not YAM-finetuned; no robot execution or task success claim&quot;,
+        &quot;Benchmark-only norms from the same recordings; not production training norms&quot;,
+        &quot;Dataset units unchanged, not independently calibrated against hardware&quot;,
+        &quot;No numerical tolerance approved yet; measured differences do not constitute acceptance&quot;,
+        &quot;Same Thor JAX version reference, not a training-server JAX equivalence test&quot;
+      ],
+      &quot;converted_weights_sha256&quot;: &quot;0b8f56470a55039f4ff36eb2bde99bff2fd2b117025fd994c844f76d4c68618b&quot;,
+      &quot;conversion_audit&quot;: {
+        &quot;mapped_tensor_count&quot;: 811,
+        &quot;mapped_element_count&quot;: 3353433872,
+        &quot;load_precision&quot;: &quot;float32&quot;,
+        &quot;mapped_to_loaded_bit_exact&quot;: true,
+        &quot;missing_unused_language_heads&quot;: [
+          &quot;paligemma_with_expert.gemma_expert.lm_head.weight&quot;,
+          &quot;paligemma_with_expert.paligemma.lm_head.weight&quot;
+        ],
+        &quot;output_precision&quot;: &quot;float32&quot;,
+        &quot;checkpoint_metadata_sha256&quot;: &quot;250d0ad0f6540a5e4bdd70442d6864cef729724f2d23e2dd2cc669563a668d70&quot;,
+        &quot;checkpoint&quot;: &quot;/checkpoint/pi05_base&quot;,
+        &quot;lora&quot;: &quot;absent; not a LoRA merge implementation&quot;,
+        &quot;inference_equivalence&quot;: &quot;not tested by tensor loading audit&quot;
+      },
+      &quot;precision_policy&quot;: &quot;selected BF16 backbone with FP32 stability layers&quot;,
+      &quot;load_s&quot;: 68.28618887799894,
+      &quot;loaded_param_dtypes&quot;: {
+        &quot;torch.float32&quot;: 122,
+        &quot;torch.bfloat16&quot;: 690
+      },
+      &quot;loaded_param_bytes&quot;: 7472956256,
+      &quot;noise_sha256&quot;: &quot;42bca6ac77eb9aeaa872cdecc1b432e2c3d0f9a49f5da287515cecf556131d84&quot;,
+      &quot;finished_at&quot;: &quot;2026-09-07T13:28:15.465568+00:00&quot;,
+      &quot;measurements&quot;: [
+        {
+          &quot;sample&quot;: &quot;episode-000095-early.npz&quot;,
+          &quot;sample_sha256&quot;: &quot;3b2623cc18ee325742b2ec1baa187b89cb79353443b5585a31fec312bc72683e&quot;,
+          &quot;episode&quot;: 95,
+          &quot;frame&quot;: 100,
+          &quot;phase&quot;: &quot;early&quot;,
+          &quot;warmup_ms&quot;: [
+            38451.03598900096,
+            51979.823067002144
+          ],
+          &quot;latencies_ms&quot;: [
+            400.2872870005376,
+            125.8881729991117,
+            125.1536939998914,
+            124.09049200141453,
+            123.75665200306685,
+            123.76270799722988,
+            123.75524399976712,
+            123.73866099733277,
+            124.0507799993793,
+            123.75748599879444,
+            124.06125300185522,
+            123.78596599955927,
+            123.58908699752646,
+            123.86000400147168,
+            122.92206200072542,
+            123.23326399928192,
+            123.34414399811067,
+            123.00711699936073,
+            123.15118100013933,
+            123.12731999918469
+          ],
+          &quot;p50_ms&quot;: 123.75706900093064,
+          &quot;p95_ms&quot;: 139.6081286991832,
+          &quot;repeat_max_abs_difference&quot;: 0.0
+        },
+        {
+          &quot;sample&quot;: &quot;episode-000095-middle.npz&quot;,
+          &quot;sample_sha256&quot;: &quot;c9ff7ede028e642a2a0d6791b812837f3de8fac5c6df36e356e6a252b0e95c6e&quot;,
+          &quot;episode&quot;: 95,
+          &quot;frame&quot;: 1714,
+          &quot;phase&quot;: &quot;middle&quot;,
+          &quot;warmup_ms&quot;: [
+            123.6194949997298,
+            123.88872500014259
+          ],
+          &quot;latencies_ms&quot;: [
+            124.1322610003408,
+            124.52270499852602,
+            124.57244499819353,
+            124.86955599888461,
+            124.7297689988045,
+            124.28917800207273,
+            124.25535500005935,
+            124.80212999798823,
+            124.02691000170307,
+            124.49413099966478,
+            124.41660300100921,
+            124.53729699700489,
+            124.52944600227056,
+            124.34365899753175,
+            123.96681899917894,
+            123.88593799914815,
+            124.01135500113014,
+            124.4690570019884,
+            124.60686200211057,
+            124.10115000238875
+          ],
+          &quot;p50_ms&quot;: 124.4428300014988,
+          &quot;p95_ms&quot;: 124.80550129803305,
+          &quot;repeat_max_abs_difference&quot;: 0.0
+        },
+        {
+          &quot;sample&quot;: &quot;episode-000095-late.npz&quot;,
+          &quot;sample_sha256&quot;: &quot;6e7ef6a0d6f189b53ce6fa286e6707a79d4a01adf39ed7fb18c1dbe67a440c8b&quot;,
+          &quot;episode&quot;: 95,
+          &quot;frame&quot;: 3328,
+          &quot;phase&quot;: &quot;late&quot;,
+          &quot;warmup_ms&quot;: [
+            124.13779000053182,
+            126.07341300099506
+          ],
+          &quot;latencies_ms&quot;: [
+            126.52847600111272,
+            125.1216850032506,
+            124.46959400040214,
+            124.79712099957396,
+            125.533895999979,
+            124.86776999867288,
+            126.13119899833691,
+            125.03257299977122,
+            125.10955499965348,
+            125.63025599956745,
+            125.04475899913814,
+            125.25061899941647,
+            124.21326200274052,
+            124.27472399940598,
+            124.2574739990232,
+            124.26061400037725,
+            124.11618700207327,
+            124.3926780007314,
+            124.3292700019083,
+            124.20712300081505
+          ],
+          &quot;p50_ms&quot;: 124.83244549912342,
+          &quot;p95_ms&quot;: 126.1510628484757,
+          &quot;repeat_max_abs_difference&quot;: 0.0
+        },
+        {
+          &quot;sample&quot;: &quot;episode-000096-early.npz&quot;,
+          &quot;sample_sha256&quot;: &quot;91726a0c81ecd77254ca9c7829793522ce8f50bc3bb9ec683f3a469ed7203f6f&quot;,
+          &quot;episode&quot;: 96,
+          &quot;frame&quot;: 100,
+          &quot;phase&quot;: &quot;early&quot;,
+          &quot;warmup_ms&quot;: [
+            124.26063100065221,
+            124.10559500131058
+          ],
+          &quot;latencies_ms&quot;: [
+            123.94885500179953,
+            123.88626199754071,
+            123.8364669989096,
+            123.83928199778893,
+            124.00852200153167,
+            124.27705699883518,
+            123.99424300019746,
+            123.84901399855153,
+            124.08678100109682,
+            124.86189699848182,
+            124.1141600003175,
+            124.15729799977271,
+            124.54236300254706,
+            125.21967500288156,
+            124.32892799915862,
+            124.17310499949963,
+            124.14806600281736,
+            124.26301199957379,
+            124.533270001848,
+            124.52638000104344
+          ],
+          &quot;p50_ms&quot;: 124.15268200129503,
+          &quot;p95_ms&quot;: 124.87978589870181,
+          &quot;repeat_max_abs_difference&quot;: 0.0
+        },
+        {
+          &quot;sample&quot;: &quot;episode-000096-middle.npz&quot;,
+          &quot;sample_sha256&quot;: &quot;74094522d58cdbe14446d3239d67f896b2e4549b1cff8c5b1acef41b9666925c&quot;,
+          &quot;episode&quot;: 96,
+          &quot;frame&quot;: 1162,
+          &quot;phase&quot;: &quot;middle&quot;,
+          &quot;warmup_ms&quot;: [
+            124.52332500106422,
+            123.9429659981397
+          ],
+          &quot;latencies_ms&quot;: [
+            124.11726099890075,
+            124.45638199642417,
+            123.6779770006251,
+            123.95817800279474,
+            123.6926810015575,
+            123.93657699794858,
+            123.87837400092394,
+            124.64582599932328,
+            124.41075899914722,
+            124.00800399700529,
+            123.90263300039805,
+            125.15410000196425,
+            124.63651099824347,
+            125.19375800184207,
+            124.3686420020822,
+            123.99378099871683,
+            124.16262300030212,
+            124.71979700058,
+            124.09690999993472,
+            124.78561199895921
+          ],
+          &quot;p50_ms&quot;: 124.13994199960143,
+          &quot;p95_ms&quot;: 125.15608290195814,
+          &quot;repeat_max_abs_difference&quot;: 0.0
+        },
+        {
+          &quot;sample&quot;: &quot;episode-000096-late.npz&quot;,
+          &quot;sample_sha256&quot;: &quot;79eb626b45284d513ac6411efbb5c809e31122690b899e655a8cf754e841461d&quot;,
+          &quot;episode&quot;: 96,
+          &quot;frame&quot;: 2224,
+          &quot;phase&quot;: &quot;late&quot;,
+          &quot;warmup_ms&quot;: [
+            124.15820699970936,
+            123.84655899950303
+          ],
+          &quot;latencies_ms&quot;: [
+            123.89320599686471,
+            123.83367000074941,
+            123.83874399893102,
+            123.71002300278633,
+            124.1251050014398,
+            123.81908699899213,
+            123.93000399970333,
+            124.12682600188418,
+            123.98033700083033,
+            123.91983700217679,
+            124.73605600098381,
+            124.41048300024704,
+            124.97571299900301,
+            125.10978700083797,
+            124.74474099872168,
+            124.39328899927204,
+            124.4014750009228,
+            125.01371300095343,
+            124.37959499948192,
+            124.8305650005932
+          ],
+          &quot;p50_ms&quot;: 124.25321050068305,
+          &quot;p95_ms&quot;: 125.01851670094766,
+          &quot;repeat_max_abs_difference&quot;: 0.0
+        },
+        {
+          &quot;sample&quot;: &quot;episode-000097-early.npz&quot;,
+          &quot;sample_sha256&quot;: &quot;1a3da5c6087e3e1841b8024421a2d21842e332370f7d11a2ba1bb61bc43d37dc&quot;,
+          &quot;episode&quot;: 97,
+          &quot;frame&quot;: 100,
+          &quot;phase&quot;: &quot;early&quot;,
+          &quot;warmup_ms&quot;: [
+            124.35915899914107,
+            124.10959599947091
+          ],
+          &quot;latencies_ms&quot;: [
+            124.13528999968548,
+            124.12302200027625,
+            123.87299299734877,
+            123.99955000000773,
+            123.85280899979989,
+            123.95518899938907,
+            123.99752199780778,
+            123.94120799945085,
+            123.85539200113271,
+            123.8906059988949,
+            124.38168700100505,
+            123.83266200049547,
+            123.94359500103747,
+            124.02074399869889,
+            124.78032400031225,
+            124.00057800186914,
+            125.49718399895937,
+            124.52254600066226,
+            125.03506500070216,
+            124.72437099859235
+          ],
+          &quot;p50_ms&quot;: 124.00006400093844,
+          &quot;p95_ms&quot;: 125.05817095061502,
+          &quot;repeat_max_abs_difference&quot;: 0.0
+        },
+        {
+          &quot;sample&quot;: &quot;episode-000097-middle.npz&quot;,
+          &quot;sample_sha256&quot;: &quot;69a6950f558992dc9857d37e526cd03096835c823f38963837fd75483c96e147&quot;,
+          &quot;episode&quot;: 97,
+          &quot;frame&quot;: 1105,
+          &quot;phase&quot;: &quot;middle&quot;,
+          &quot;warmup_ms&quot;: [
+            125.24199099789257,
+            124.48005699843634
+          ],
+          &quot;latencies_ms&quot;: [
+            124.06517899944447,
+            123.85662399901776,
+            123.93057699955534,
+            124.50766699839733,
+            124.01067899918417,
+            124.19217899878277,
+            123.8405590011098,
+            123.89264299781644,
+            123.90646600033506,
+            123.72088399934,
+            124.53814900072757,
+            124.88500900144572,
+            124.53549199926783,
+            124.26084499747958,
+            124.06127199938055,
+            124.16705800205818,
+            124.27583599856007,
+            124.15478999901097,
+            125.48664499990991,
+            124.47863100169343
+          ],
+          &quot;p50_ms&quot;: 124.16092400053458,
+          &quot;p95_ms&quot;: 124.91509080136893,
+          &quot;repeat_max_abs_difference&quot;: 0.0
+        },
+        {
+          &quot;sample&quot;: &quot;episode-000097-late.npz&quot;,
+          &quot;sample_sha256&quot;: &quot;b296dac1adbefa81ab4c7cb44a1968b2f922ec0261d0978cfa0ed9bc7b549cf3&quot;,
+          &quot;episode&quot;: 97,
+          &quot;frame&quot;: 2110,
+          &quot;phase&quot;: &quot;late&quot;,
+          &quot;warmup_ms&quot;: [
+            124.01554000098258,
+            123.94281799788587
+          ],
+          &quot;latencies_ms&quot;: [
+            123.98142999882111,
+            123.78148499919917,
+            123.7774770015676,
+            123.85379999977886,
+            124.1098909995344,
+            124.29028900078265,
+            123.79883699759375,
+            124.26529900039895,
+            123.7925310015271,
+            123.73401399963768,
+            123.80684599702363,
+            124.24222499976167,
+            123.92394799826434,
+            123.97107600190793,
+            123.92149500010419,
+            124.13972400099738,
+            126.45345000055386,
+            125.35856300019077,
+            124.88827700144611,
+            124.91399099963019
+          ],
+          &quot;p50_ms&quot;: 123.97625300036452,
+          &quot;p95_ms&quot;: 125.41330735020892,
+          &quot;repeat_max_abs_difference&quot;: 0.0
+        }
+      ],
+      &quot;p50_ms&quot;: 124.15142800091417,
+      &quot;p95_ms&quot;: 125.36496710017673,
+      &quot;repeat_max_abs_difference&quot;: 0.0,
+      &quot;process_peak_rss_mib&quot;: 24607.77734375,
+      &quot;actions_sha256&quot;: &quot;5232afc1123503aa6edca0e77181e5d7730577cd204e4818ee266ac3c5d87b60&quot;,
+      &quot;normalized_actions_sha256&quot;: &quot;40ad6582afce926b91df38145aae0edf2e445cbf7c6971cb08b05dc6874a0438&quot;,
+      &quot;action_shape&quot;: [
+        9,
+        20,
+        50,
+        14
+      ],
+      &quot;cuda_peak_allocated_bytes&quot;: 7641494528,
+      &quot;cuda_peak_reserved_bytes&quot;: 7744782336
     }
   ],
   &quot;comparisons&quot;: [
@@ -8523,6 +9062,161 @@ footer{color:var(--muted);font-size:12px;margin-top:20px;text-align:center}@medi
         &quot;--native-attention-mask&quot;,
         &quot;--attention&quot;,
         &quot;sdpa&quot;,
+        &quot;--batch-vision&quot;
+      ],
+      &quot;power_before&quot;: &quot;NV Power Mode: 120W\n1\n&quot;,
+      &quot;checkpoint&quot;: &quot;pi05_base_pytorch_fp32_v1; no LoRA; read-only checkpoint&quot;,
+      &quot;network&quot;: &quot;disabled for inference container; all inputs local&quot;
+    },
+    &quot;pi05-I-20260907-r1&quot;: {
+      &quot;run_id&quot;: &quot;pi05-I-20260907-r1&quot;,
+      &quot;phase&quot;: &quot;evaluate&quot;,
+      &quot;started_at&quot;: &quot;2026-09-07T13:24:58.985158+00:00&quot;,
+      &quot;code_commit_base&quot;: &quot;f769b05b07e95ffd245159c31b675e5ca0a51fb0&quot;,
+      &quot;source_files_sha256&quot;: {
+        &quot;scripts/docker/thor/Dockerfile&quot;: &quot;1f53e6c3abd79e7a40a58832a0e04194007f9a127d8e5302672edb04c2974795&quot;,
+        &quot;scripts/docker/thor/compose.yaml&quot;: &quot;3149532e542617fa3d59799f7ef5470fa49d9a784a37bbd7401e70ce0839f671&quot;,
+        &quot;scripts/docker/thor/convert.Dockerfile&quot;: &quot;b79c792305347490deff4cd9ae86ab738bbd037494e8cd8c8335870f36d0eee4&quot;,
+        &quot;scripts/docker/thor/jax_smoke.py&quot;: &quot;8ebac2826357341db037b9decd7258d7a19b1de62057562ccf67acbc5f3fdc0e&quot;,
+        &quot;scripts/docker/thor/preserve_vendor_stack.py&quot;: &quot;8f5369383ddb6b7c402553e9860b79f4889171966936a1200c70355ec64ba0b1&quot;,
+        &quot;scripts/docker/thor/pytorch.Dockerfile&quot;: &quot;a9cf8e5c9747dc08929d3a10eb3347a6eae7412e0dd11bb4e4144025af6e0ec8&quot;,
+        &quot;scripts/docker/thor/requirements-inference.txt&quot;: &quot;75f7de64aaad7297b1fcb24f1cbf66e38012a02c9f0c8da2659ec674be7c8b69&quot;,
+        &quot;scripts/thor/batch_vision_test.py&quot;: &quot;52aa3d2a850930e2c9ab2809e98067520392a969580a54912a9f3f9ca9b6cc50&quot;,
+        &quot;scripts/thor/benchmark_pi05.py&quot;: &quot;53ca79105424af5eb7e71fadf00a9a35a87eb19fe135fc8beeb11861d4fc6320&quot;,
+        &quot;scripts/thor/benchmark_pi05_test.py&quot;: &quot;e359cc270ce95a9024e29ac85158d34cc401a85f0330380e7cc0fb975ef829f6&quot;,
+        &quot;scripts/thor/benchmark_suite.py&quot;: &quot;ece62bae4b9023ed57ac0dcd6dd17009f4730d6d127f4086680ac50147980462&quot;,
+        &quot;scripts/thor/build_suite_report.py&quot;: &quot;a0b100252d4a7be040eafc2b6856754896c199f7946844eb42789ccf3de03f31&quot;,
+        &quot;scripts/thor/compare_suites.py&quot;: &quot;b8c1bbe0b037e8ddb8a2fe16c4b06b0bcad019ebca7f315dc684470bc05e3fff&quot;,
+        &quot;scripts/thor/compare_suites_test.py&quot;: &quot;98036d36aca8405b117e0b2143e9c77518a1accc3d894be5ee1fdce17dce4552&quot;,
+        &quot;scripts/thor/conversion_precision_test.py&quot;: &quot;f6da0506d31f2292cac36bace9fe641642fa92a579a09c4beda16e5a68159401&quot;,
+        &quot;scripts/thor/download_ngc_image.py&quot;: &quot;8a625d76ad7c42d78594f051c5653215dbb7a313252fe41a790e3e1dc54d0d21&quot;,
+        &quot;scripts/thor/download_ngc_image_test.py&quot;: &quot;7ade402500ca00da5e81bc3e6572931a408ed584afede0575d7972b37aaf0498&quot;,
+        &quot;scripts/thor/logged_command.py&quot;: &quot;7fdbdb74bec640f3248f6fd460d0bb00e3c234ffec007cfe9aaaefb2d962b04a&quot;,
+        &quot;scripts/thor/maxn_session.py&quot;: &quot;698e3e554b3b07407da23c9995f28bfd2d46ae82d9ad8b5fcdd078a1f7bf549c&quot;,
+        &quot;scripts/thor/maxn_session_test.py&quot;: &quot;e06b8b03893396a8472fe67ddd3d63a7303eefaed9e23e52ceb0b4afc1052615&quot;,
+        &quot;scripts/thor/prepare_replay_fixture.py&quot;: &quot;d49646094c23641e0b2a74bb66e10bd149ed448fbc6378eba6be262ff7392c1d&quot;,
+        &quot;scripts/thor/prepare_replay_fixture_test.py&quot;: &quot;04c34bb3cc1cb4497850bdc0135762fd469c1d45cc8ff3c6f4cbd8388a881a30&quot;,
+        &quot;scripts/thor/render_report.py&quot;: &quot;d28db2a871bc69fd09f8a22f987471d9b98f59b94c4fc497adf468931e9a6967&quot;,
+        &quot;scripts/thor/render_report_test.py&quot;: &quot;712abd779bba10f95492dd9fb63164ac33bf9d09d5ef8f945f8720a9bcd6730f&quot;,
+        &quot;scripts/thor/run_suite_host.py&quot;: &quot;e6eaba707fc1e5ea3c6d3213d43b4c310ca37842d8f03df2ee9ee747635d8948&quot;,
+        &quot;scripts/thor/sync_code.py&quot;: &quot;f08fdcaf7c343da2606e8850cf0612168d80fc9fd8abb1542b7ad7773e08a825&quot;,
+        &quot;scripts/thor/sync_code_test.py&quot;: &quot;b7ab09ca04eaf415f8addeac81305009a88820fc3d8de71da64c72f6f51624a1&quot;,
+        &quot;scripts/thor/vendor_stack_test.py&quot;: &quot;a551eb248d71ad17f287863b839416e48054694a1505a9571184d26706f18042&quot;,
+        &quot;src/openpi/__init__.py&quot;: &quot;e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855&quot;,
+        &quot;src/openpi/conftest.py&quot;: &quot;626672e385fb276396c119e2220421065c58f8ec602401e8bf2ae509f9fffaf3&quot;,
+        &quot;src/openpi/models/__init__.py&quot;: &quot;e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855&quot;,
+        &quot;src/openpi/models/gemma.py&quot;: &quot;7e42ada4ae7e9995f0ef3e33a0c224758323c2015e2d9d72ec15726a8a001d2a&quot;,
+        &quot;src/openpi/models/gemma_fast.py&quot;: &quot;563c6e1ffd8afa31c406bcb8894a605e87df88f6c075d398d97a57af6bc3aefa&quot;,
+        &quot;src/openpi/models/lora.py&quot;: &quot;ced28716950c34d84a1a6d0b03b1d9550000732721df884818080b6e78cb3289&quot;,
+        &quot;src/openpi/models/lora_test.py&quot;: &quot;a0f10525de7773310402b3ffa636e88ffff7035f3179b140aacc6809c122f085&quot;,
+        &quot;src/openpi/models/model.py&quot;: &quot;9ecc85edfcf9aba40954ae08fbc9828de6b345790c79910303c3bf8602448781&quot;,
+        &quot;src/openpi/models/model_test.py&quot;: &quot;f8e71f195045d4e3ef1ddfafb2337fa52e5aa2f89bce1fde62f5cbfb67121f21&quot;,
+        &quot;src/openpi/models/pi0.py&quot;: &quot;9294585c2e2780f70e4decab1c4219f8c833750e8e53743cf3a792613fa42b96&quot;,
+        &quot;src/openpi/models/pi0_config.py&quot;: &quot;e15d71586f1a561b35c5651227607613fb16d2df411f3708b1c9d36b02544285&quot;,
+        &quot;src/openpi/models/pi0_fast.py&quot;: &quot;627332a555046f2744ef144c45f8bd3361a9820cf68854a4528d0fdbba7e9aa3&quot;,
+        &quot;src/openpi/models/pi0_test.py&quot;: &quot;5082873014a7fc45fb8414f517909e1c24cdafea980a1fb612e0aea6058ed0fe&quot;,
+        &quot;src/openpi/models/restore_params_test.py&quot;: &quot;41b83a9970c0d428cf32ebb7c1323dff52dab74c1f3c95337f4bf872f65891ce&quot;,
+        &quot;src/openpi/models/siglip.py&quot;: &quot;14b4df0be280d5769fb0dc31a40cde27525dbb1980cc998c28475d62fa3cad32&quot;,
+        &quot;src/openpi/models/tokenizer.py&quot;: &quot;26b898e2ec0b9b1bf7dae8231138c59b6faa7c098401ccfc27f1b0c401799c5b&quot;,
+        &quot;src/openpi/models/tokenizer_test.py&quot;: &quot;5abd179ce883420e39d4d18b33d0123290af752da243003aa48a3bc06dbb9517&quot;,
+        &quot;src/openpi/models/utils/fsq_tokenizer.py&quot;: &quot;88866638ee4775f46a222561a957bd35e20600fe38c5888b587016ad77b1065f&quot;,
+        &quot;src/openpi/models/vit.py&quot;: &quot;d285d057636c3cba2d1fd3b37693b18075ad4b9c3b47bbde807c34c6c376ac93&quot;,
+        &quot;src/openpi/models_pytorch/gemma_pytorch.py&quot;: &quot;08fd8d750519f0fb44fc5173311e50a30f4c8f32c02e51244b4f8e47b32cd52f&quot;,
+        &quot;src/openpi/models_pytorch/pi0_pytorch.py&quot;: &quot;ae855eb01cd8cf26116a2b683634c2f9d840dffcaba316146094204a19c6fd11&quot;,
+        &quot;src/openpi/models_pytorch/preprocessing_pytorch.py&quot;: &quot;6a44e91be2d7a724c6140d2cc98ed0a631b8d38bbb29f63b380a0a19f903bbf6&quot;,
+        &quot;src/openpi/models_pytorch/transformers_replace/models/gemma/configuration_gemma.py&quot;: &quot;26fd0d0f52730ab32b6f337eb73ae9a26cb71ae0915bc49eced1d0e2ed8d0ec6&quot;,
+        &quot;src/openpi/models_pytorch/transformers_replace/models/gemma/modeling_gemma.py&quot;: &quot;17eeb54e277939e58cd6f8a92719a275e36baf0c9f463b2754227d42f87aedde&quot;,
+        &quot;src/openpi/models_pytorch/transformers_replace/models/paligemma/modeling_paligemma.py&quot;: &quot;c945d330b829264f927f3ee5339f977238631772de07a28e855e265bb85fd53c&quot;,
+        &quot;src/openpi/models_pytorch/transformers_replace/models/siglip/check.py&quot;: &quot;466e8eb7887ac5ccc98118a3169298d6ab65a284d834bae74751e3854dbc4245&quot;,
+        &quot;src/openpi/models_pytorch/transformers_replace/models/siglip/modeling_siglip.py&quot;: &quot;ef2e99500f263fdd78db9d4d9a255e29d844eb92f53c25ad640f8056700ef84b&quot;,
+        &quot;src/openpi/policies/aloha_policy.py&quot;: &quot;50d7ad972d80142ecb0f03b0780dacfd3af212946f4c9aac31a204b02db4543d&quot;,
+        &quot;src/openpi/policies/droid_policy.py&quot;: &quot;7d0893555964d485e231f70084125084a99495705ddd74b29461229d524fff26&quot;,
+        &quot;src/openpi/policies/libero_policy.py&quot;: &quot;ad01e5be74516d9ec9aeb1f76294d5c9f7f7179a60f1f7fbbb35e7646534f81a&quot;,
+        &quot;src/openpi/policies/piper_policy.py&quot;: &quot;c1ba6212884af14763fd155ab1d0f03457dc4727e1baca1fd9ba2fe66ecae338&quot;,
+        &quot;src/openpi/policies/policy.py&quot;: &quot;7b1dab66b4403c244d0b7c48d1c08c4d10517301fd4ca3306f2a3c65f293e8c1&quot;,
+        &quot;src/openpi/policies/policy_config.py&quot;: &quot;5950d05c53ebee96dd7c515a4cab771d85ae16f74b120365647974e105f6873c&quot;,
+        &quot;src/openpi/policies/policy_config_dtype_test.py&quot;: &quot;dcac48a384c2124fc11375cf71a80b88614ef7ed4f7b77493e2487d88bd16ee3&quot;,
+        &quot;src/openpi/policies/policy_import_test.py&quot;: &quot;e730301a9214687f6309d1deb04614dc5027d4713e2006e6887f58d529868b08&quot;,
+        &quot;src/openpi/policies/policy_test.py&quot;: &quot;9dbb20963600367a7e7abfc97d1e326916777c57a87b39b1bc4070ba64676683&quot;,
+        &quot;src/openpi/policies/pytorch_precision_test.py&quot;: &quot;e7405fb18f6080388064c9adff8d0de1f141b6f385eda1a09fda5490563ade66&quot;,
+        &quot;src/openpi/policies/yam_policy.py&quot;: &quot;e7eb4fdc219a1cb81610d3a105a4e41bcad9641d32356337c79e285dba4baeca&quot;,
+        &quot;src/openpi/policies/yam_policy_test.py&quot;: &quot;b7cfee67fd520a6bc84427e032979368a569a7192fce8c3cd8a5e5557be51f86&quot;,
+        &quot;src/openpi/serving/websocket_policy_server.py&quot;: &quot;f538bcfc8a5554923f8703af2d19ec159254e895dd40a3d79a2de9abc14ad494&quot;,
+        &quot;src/openpi/shared/__init__.py&quot;: &quot;e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855&quot;,
+        &quot;src/openpi/shared/array_typing.py&quot;: &quot;6524945566eab3eb97b75a6280ba4724617b4d028c55f05172b283c3de68a026&quot;,
+        &quot;src/openpi/shared/download.py&quot;: &quot;1fee4957a275ab632fd4dd98af240516a2a708da2db38a838132f05c04da425d&quot;,
+        &quot;src/openpi/shared/download_test.py&quot;: &quot;234ee70ab2501a1421f6c44cbd83c1e16747597023319ae1446bed9d44f17072&quot;,
+        &quot;src/openpi/shared/image_tools.py&quot;: &quot;42145e9269b27a1dafe3f05b1c14adcb6455993cf74745b301317b4d24dc4f80&quot;,
+        &quot;src/openpi/shared/image_tools_test.py&quot;: &quot;f1b495607775ac25c42b2b015d20468a7f793f465a6e9b43c057544586aab37c&quot;,
+        &quot;src/openpi/shared/nnx_utils.py&quot;: &quot;4da7111ba3011c4d1c381c9ed17257771df6a50ed89182647c3fb6f79208005e&quot;,
+        &quot;src/openpi/shared/normalize.py&quot;: &quot;6c2cea4946fb07e51801530400d2b2fd94730e195cd290d6b6960114eca9739d&quot;,
+        &quot;src/openpi/shared/normalize_test.py&quot;: &quot;fda27a21cf37f337b12bcab71229407c2a349c5965c33f278bdc468ed03f58af&quot;,
+        &quot;src/openpi/training/checkpoints.py&quot;: &quot;a36dc6515376fe3f8d2bc25ad8fbbd2b271c0fa05c6bc2d439f4ba4d3c45306f&quot;,
+        &quot;src/openpi/training/config.py&quot;: &quot;300ee18be50ae0e4702324e0f8762f85a85d75b6999cf8f23cc35bc394889894&quot;,
+        &quot;src/openpi/training/data_loader.py&quot;: &quot;258a60f54ee4aabf462aceafe9a0976cf890d5b5ca88e054d0da8f86cf4ed8c4&quot;,
+        &quot;src/openpi/training/data_loader_test.py&quot;: &quot;ec2076a386ff0aa327460a8bd7a1aa762d7b35d72d381482918f5128349e86d2&quot;,
+        &quot;src/openpi/training/droid_rlds_dataset.py&quot;: &quot;1d3a057a040240218234d7dbc6680ee4fe8256f2058531a0f9fefd3f7ee995a4&quot;,
+        &quot;src/openpi/training/metrics.py&quot;: &quot;2e2e31ffa2bc6ee8fdde97cf799eedc1b77b6df647fc1cabeeb35c8303595444&quot;,
+        &quot;src/openpi/training/misc/polaris_config.py&quot;: &quot;c2ab92efb5e0d675118ad812113fd1c3cb3a62cdab5d79066014266e82df12d8&quot;,
+        &quot;src/openpi/training/misc/roboarena_config.py&quot;: &quot;914acdd74ccf90e6779c13a5093140595c7e4f687e9e0b167439446a81d74c01&quot;,
+        &quot;src/openpi/training/optimizer.py&quot;: &quot;cfb5d6f6aec61fbe961287b4015c652260628a0ed4682a0dbdc271b8e65431fa&quot;,
+        &quot;src/openpi/training/sharding.py&quot;: &quot;c67c4112a126ab097571c8a882fd1ee3f106b15b6e608e7205ac7f29b44ca985&quot;,
+        &quot;src/openpi/training/utils.py&quot;: &quot;b684e674343f86ef5e976f279a586d3fe2f885e901f396ac899ed136abc7eca6&quot;,
+        &quot;src/openpi/training/weight_loaders.py&quot;: &quot;a54ac3222f81f8c6233241bc16b6f369c9416cdaa83f7058f96f7ddcfde1a3b4&quot;,
+        &quot;src/openpi/transforms.py&quot;: &quot;d31a2288fb50258a758fd1a3e991e689c15271ffca7636fb7be38f738cc30e0f&quot;,
+        &quot;src/openpi/transforms_test.py&quot;: &quot;395601075c47eaa23be4805adda5f5351465bb240de2203a4da8722bd3a52760&quot;
+      },
+      &quot;source_state&quot;: &quot;working_tree_fingerprinted; image is authoritative for installed model code&quot;,
+      &quot;image_id&quot;: &quot;sha256:665a2074cf8d1e66627a944daa331ce62150eda2ec4946ca2fb4833b9aa20482&quot;,
+      &quot;hardware&quot;: &quot;NVIDIA Jetson AGX Thor Developer Kit&quot;,
+      &quot;kernel&quot;: &quot;6.8.12-1021-tegra&quot;,
+      &quot;command&quot;: [
+        &quot;docker&quot;,
+        &quot;run&quot;,
+        &quot;--rm&quot;,
+        &quot;--name&quot;,
+        &quot;pi05-I-20260907-r1&quot;,
+        &quot;--runtime=nvidia&quot;,
+        &quot;--gpus&quot;,
+        &quot;all&quot;,
+        &quot;--network&quot;,
+        &quot;none&quot;,
+        &quot;--shm-size=8g&quot;,
+        &quot;-e&quot;,
+        &quot;NVIDIA_DRIVER_CAPABILITIES=compute,utility&quot;,
+        &quot;-e&quot;,
+        &quot;PYTHONUNBUFFERED=1&quot;,
+        &quot;-e&quot;,
+        &quot;TORCHINDUCTOR_CACHE_DIR=/cache/torchinductor&quot;,
+        &quot;-e&quot;,
+        &quot;TRITON_CACHE_DIR=/cache/triton&quot;,
+        &quot;-v&quot;,
+        &quot;/home/wuyan-lyj/condapi/scripts/thor:/bench:ro&quot;,
+        &quot;-v&quot;,
+        &quot;/home/wuyan-lyj/thor/pi/checkpoints:/checkpoints:ro&quot;,
+        &quot;-v&quot;,
+        &quot;/home/wuyan-lyj/thor/pi/cache:/cache&quot;,
+        &quot;-v&quot;,
+        &quot;/home/wuyan-lyj/thor/pi/test-data:/test-data:ro&quot;,
+        &quot;-v&quot;,
+        &quot;/home/wuyan-lyj/thor/pi/results:/results&quot;,
+        &quot;openpi-pi:thor-pytorch-mask-v2-20260907&quot;,
+        &quot;python&quot;,
+        &quot;/bench/benchmark_suite.py&quot;,
+        &quot;--checkpoint&quot;,
+        &quot;/checkpoints/pi05_base_pytorch_fp32_v1&quot;,
+        &quot;--suite&quot;,
+        &quot;/test-data/pi05-replay-v1/suite.json&quot;,
+        &quot;--params-dtype&quot;,
+        &quot;bfloat16&quot;,
+        &quot;--compute-dtype&quot;,
+        &quot;bfloat16&quot;,
+        &quot;--output&quot;,
+        &quot;/results/pi05-I-20260907-r1&quot;,
+        &quot;--backend&quot;,
+        &quot;pytorch&quot;,
+        &quot;--compile&quot;,
+        &quot;--native-attention-mask&quot;,
         &quot;--batch-vision&quot;
       ],
       &quot;power_before&quot;: &quot;NV Power Mode: 120W\n1\n&quot;,
@@ -13464,6 +14158,989 @@ footer{color:var(--muted);font-size:12px;margin-top:20px;text-align:center}@medi
           &quot;candidate&quot;: &quot;pytorch&quot;
         }
       }
+    },
+    {
+      &quot;reference&quot;: &quot;pi05-A-20260907-r2&quot;,
+      &quot;candidate&quot;: &quot;pi05-I-20260907-r1&quot;,
+      &quot;physical_dataset_units&quot;: {
+        &quot;mae&quot;: 0.0021483095537370815,
+        &quot;rmse&quot;: 0.0034014306422311983,
+        &quot;p95_abs&quot;: 0.008007696270942681,
+        &quot;max_abs&quot;: 0.01608031988143921,
+        &quot;worst_index&quot;: [
+          4,
+          1,
+          2
+        ],
+        &quot;per_dimension_max_abs&quot;: [
+          0.009137451648712158,
+          0.009846806526184082,
+          0.01608031988143921,
+          0.013572096824645996,
+          0.003876008093357086,
+          0.0046828389167785645,
+          0.003015652298927307,
+          0.010367393493652344,
+          0.010263264179229736,
+          0.009843111038208008,
+          0.01336449384689331,
+          0.006332814693450928,
+          0.004595417529344559,
+          0.011836707592010498
+        ],
+        &quot;per_dimension_mae&quot;: [
+          0.0020687149796220993,
+          0.002639942409263717,
+          0.0038936537079926996,
+          0.0023072901176702646,
+          0.0008817620161506865,
+          0.0008941690375407537,
+          0.00043486485878626506,
+          0.003932077530318768,
+          0.002405314710405138,
+          0.002224778776160545,
+          0.003065474546617932,
+          0.001446269720731329,
+          0.0014519207096762128,
+          0.00243010063138273
+        ]
+      },
+      &quot;normalized_active_14d&quot;: {
+        &quot;mae&quot;: 0.0029948001585268814,
+        &quot;rmse&quot;: 0.0046945221617130245,
+        &quot;p95_abs&quot;: 0.011402587592601772,
+        &quot;max_abs&quot;: 0.023706629872322083,
+        &quot;worst_index&quot;: [
+          1,
+          23,
+          13
+        ],
+        &quot;per_dimension_max_abs&quot;: [
+          0.015980258584022522,
+          0.010057970881462097,
+          0.014774858951568604,
+          0.019414246082305908,
+          0.007947936654090881,
+          0.008589625358581543,
+          0.00603252649307251,
+          0.016144707798957825,
+          0.012165956199169159,
+          0.00962984561920166,
+          0.019083693623542786,
+          0.0070153772830963135,
+          0.007656112313270569,
+          0.023706629872322083
+        ],
+        &quot;per_dimension_mae&quot;: [
+          0.003617913502190883,
+          0.002696557470286886,
+          0.003577546738088131,
+          0.0033004596788022253,
+          0.0018080887633065382,
+          0.00164017289566497,
+          0.000869905153910319,
+          0.006123298555612564,
+          0.0028512622757504383,
+          0.0021766273201339775,
+          0.0043773065207319125,
+          0.0016021316912439134,
+          0.0024189225180695456,
+          0.0048670091355840365
+        ]
+      },
+      &quot;normalized_internal_32d&quot;: {
+        &quot;mae&quot;: 0.0014960406815448044,
+        &quot;rmse&quot;: 0.0031210550377486807,
+        &quot;p95_abs&quot;: 0.007228720560669899,
+        &quot;max_abs&quot;: 0.023706629872322083,
+        &quot;worst_index&quot;: [
+          1,
+          23,
+          13
+        ],
+        &quot;per_dimension_max_abs&quot;: [
+          0.015980258584022522,
+          0.010057970881462097,
+          0.014774858951568604,
+          0.019414246082305908,
+          0.007947936654090881,
+          0.008589625358581543,
+          0.00603252649307251,
+          0.016144707798957825,
+          0.012165956199169159,
+          0.00962984561920166,
+          0.019083693623542786,
+          0.0070153772830963135,
+          0.007656112313270569,
+          0.023706629872322083,
+          0.0014163553714752197,
+          0.0014713555574417114,
+          0.0012288391590118408,
+          0.0015454292297363281,
+          0.0013877823948860168,
+          0.0012078210711479187,
+          0.001199975609779358,
+          0.0013556554913520813,
+          0.0017873644828796387,
+          0.0013687163591384888,
+          0.0015480071306228638,
+          0.001122787594795227,
+          0.0014092475175857544,
+          0.0011763572692871094,
+          0.0014842450618743896,
+          0.0014806538820266724,
+          0.0012581348419189453,
+          0.0012011118233203888
+        ],
+        &quot;per_dimension_mae&quot;: [
+          0.003617913502190883,
+          0.002696557470286886,
+          0.003577546738088131,
+          0.0033004596788022253,
+          0.0018080887633065382,
+          0.00164017289566497,
+          0.000869905153910319,
+          0.006123298555612564,
+          0.0028512622757504383,
+          0.0021766273201339775,
+          0.0043773065207319125,
+          0.0016021316912439134,
+          0.0024189225180695456,
+          0.0048670091355840365,
+          0.00035509661409176057,
+          0.00034936113386518426,
+          0.00032494824305306084,
+          0.0003150260264778303,
+          0.00034623224805626604,
+          0.0003068262740271166,
+          0.0003087745556775998,
+          0.0003493840350872941,
+          0.0003450558355285062,
+          0.00033691705172208863,
+          0.00032789575796212175,
+          0.0003287563898548898,
+          0.00031940745163915886,
+          0.00033733005376739635,
+          0.00031886293462270664,
+          0.00032269500286525324,
+          0.00033938638678389707,
+          0.0003141435949752728
+        ]
+      },
+      &quot;per_sample&quot;: [
+        {
+          &quot;sample&quot;: &quot;episode-000095-early.npz&quot;,
+          &quot;physical&quot;: {
+            &quot;mae&quot;: 0.001212199177992131,
+            &quot;rmse&quot;: 0.0019003485245735793,
+            &quot;p95_abs&quot;: 0.00564150512218475,
+            &quot;max_abs&quot;: 0.007036328315734863,
+            &quot;worst_index&quot;: [
+              27,
+              7
+            ],
+            &quot;per_dimension_max_abs&quot;: [
+              0.0024089813232421875,
+              0.002175629138946533,
+              0.0019990205764770508,
+              0.0014079511165618896,
+              0.0007370114326477051,
+              0.0007512569427490234,
+              0.0008708834648132324,
+              0.007036328315734863,
+              0.002874612808227539,
+              0.0028510987758636475,
+              0.0022826194763183594,
+              0.002146601676940918,
+              0.0012143254280090332,
+              0.0027058422565460205
+            ],
+            &quot;per_dimension_mae&quot;: [
+              0.0016106444597244263,
+              0.0009820759296417236,
+              0.0005208095908164978,
+              0.0005860398709774018,
+              0.00022328317165374757,
+              0.00023003458976745606,
+              0.00031707763671875,
+              0.005936917066574097,
+              0.0015484201908111572,
+              0.0006475440692156553,
+              0.0012077653408050536,
+              0.0010539913177490235,
+              0.0006398093700408935,
+              0.0014663758873939515
+            ]
+          },
+          &quot;normalized&quot;: {
+            &quot;mae&quot;: 0.0018042960150965622,
+            &quot;rmse&quot;: 0.0029244084330383464,
+            &quot;p95_abs&quot;: 0.008785335719585414,
+            &quot;max_abs&quot;: 0.010957449674606323,
+            &quot;worst_index&quot;: [
+              27,
+              7
+            ],
+            &quot;per_dimension_max_abs&quot;: [
+              0.004213020205497742,
+              0.002222299575805664,
+              0.0018367171287536621,
+              0.0020140111446380615,
+              0.0015112757682800293,
+              0.0013780444860458374,
+              0.0017421245574951172,
+              0.010957449674606323,
+              0.0034075528383255005,
+              0.0027893781661987305,
+              0.003259330987930298,
+              0.002377927303314209,
+              0.0020230114459991455,
+              0.005419254302978516
+            ],
+            &quot;per_dimension_mae&quot;: [
+              0.0028168269991874694,
+              0.0010031360387802125,
+              0.0004785221815109253,
+              0.0008382887393236161,
+              0.0004578453302383423,
+              0.00042195528745651243,
+              0.0006342971324920654,
+              0.009245380237698555,
+              0.0018355176225304604,
+              0.00063353031873703,
+              0.0017245733737945557,
+              0.001167534589767456,
+              0.0010658745467662812,
+              0.0029368618130683898
+            ]
+          }
+        },
+        {
+          &quot;sample&quot;: &quot;episode-000095-middle.npz&quot;,
+          &quot;physical&quot;: {
+            &quot;mae&quot;: 0.0013765729142219893,
+            &quot;rmse&quot;: 0.0024957308356045047,
+            &quot;p95_abs&quot;: 0.0060289251967333216,
+            &quot;max_abs&quot;: 0.011836707592010498,
+            &quot;worst_index&quot;: [
+              23,
+              13
+            ],
+            &quot;per_dimension_max_abs&quot;: [
+              0.0011129975318908691,
+              0.0014847517013549805,
+              0.0013838410377502441,
+              0.0012559592723846436,
+              0.0007095560431480408,
+              0.0006296038627624512,
+              0.0009341239929199219,
+              0.00664164125919342,
+              0.0023804903030395508,
+              0.0033674240112304688,
+              0.010707706212997437,
+              0.0027013979852199554,
+              0.0035968124866485596,
+              0.011836707592010498
+            ],
+            &quot;per_dimension_mae&quot;: [
+              0.0005124425888061524,
+              0.00039069175720214845,
+              0.0004018568992614746,
+              0.0005227282643318176,
+              0.0002021414041519165,
+              0.00019712090492248534,
+              0.00025694608688354493,
+              0.0039906707825139165,
+              0.000960688591003418,
+              0.0009119749069213867,
+              0.005805398225784302,
+              0.0010210325568914414,
+              0.0012993187457323073,
+              0.002799009084701538
+            ]
+          },
+          &quot;normalized&quot;: {
+            &quot;mae&quot;: 0.0020813873576532517,
+            &quot;rmse&quot;: 0.004001227375147474,
+            &quot;p95_abs&quot;: 0.009374957904219628,
+            &quot;max_abs&quot;: 0.023706629872322083,
+            &quot;worst_index&quot;: [
+              23,
+              13
+            ],
+            &quot;per_dimension_max_abs&quot;: [
+              0.0019465535879135132,
+              0.001516595482826233,
+              0.0012714825570583344,
+              0.001796633005142212,
+              0.0014549493789672852,
+              0.0011550486087799072,
+              0.0018685460090637207,
+              0.010342836380004883,
+              0.0028217583894729614,
+              0.003294646739959717,
+              0.015289872884750366,
+              0.002992495894432068,
+              0.005992412567138672,
+              0.023706629872322083
+            ],
+            &quot;per_dimension_mae&quot;: [
+              0.0008962829690426588,
+              0.00039906795136630536,
+              0.000369221568107605,
+              0.0007477525621652603,
+              0.00041451165452599525,
+              0.0003615816403180361,
+              0.0005139887332916259,
+              0.006214552074670792,
+              0.0011388433445245027,
+              0.0008922439813613892,
+              0.008289743615314364,
+              0.001131051778793335,
+              0.0021647268906235693,
+              0.005605854243040085
+            ]
+          }
+        },
+        {
+          &quot;sample&quot;: &quot;episode-000095-late.npz&quot;,
+          &quot;physical&quot;: {
+            &quot;mae&quot;: 0.002448088317510805,
+            &quot;rmse&quot;: 0.0033754080409297625,
+            &quot;p95_abs&quot;: 0.007463386654853816,
+            &quot;max_abs&quot;: 0.012676000595092773,
+            &quot;worst_index&quot;: [
+              48,
+              2
+            ],
+            &quot;per_dimension_max_abs&quot;: [
+              0.008329153060913086,
+              0.0038574934005737305,
+              0.012676000595092773,
+              0.002571001648902893,
+              0.003520786762237549,
+              0.0046828389167785645,
+              0.003015652298927307,
+              0.005148857831954956,
+              0.010263264179229736,
+              0.0016002655029296875,
+              0.0029747486114501953,
+              0.001697242259979248,
+              0.004595417529344559,
+              0.0007435083389282227
+            ],
+            &quot;per_dimension_mae&quot;: [
+              0.004020369052886963,
+              0.0025522303581237793,
+              0.006253662109375,
+              0.0013875692849978805,
+              0.0016470754146575928,
+              0.002452629432082176,
+              0.0018018683791160583,
+              0.003388326317071915,
+              0.0042160522937774655,
+              0.0004654335975646973,
+              0.001740570068359375,
+              0.0007605874538421631,
+              0.0033685940504074095,
+              0.00021826863288879395
+            ]
+          },
+          &quot;normalized&quot;: {
+            &quot;mae&quot;: 0.003496882911505444,
+            &quot;rmse&quot;: 0.004630989594148223,
+            &quot;p95_abs&quot;: 0.009905377775430671,
+            &quot;max_abs&quot;: 0.014566630125045776,
+            &quot;worst_index&quot;: [
+              49,
+              0
+            ],
+            &quot;per_dimension_max_abs&quot;: [
+              0.014566630125045776,
+              0.003940422087907791,
+              0.011646971106529236,
+              0.003677666187286377,
+              0.007219523191452026,
+              0.008589625358581543,
+              0.00603252649307251,
+              0.00801818072795868,
+              0.012165956199169159,
+              0.0015657059848308563,
+              0.004247739911079407,
+              0.0018801204860210419,
+              0.007656112313270569,
+              0.0014889836311340332
+            ],
+            &quot;per_dimension_mae&quot;: [
+              0.007031102515757084,
+              0.002606990784406662,
+              0.0057459668442606925,
+              0.0019847677275538446,
+              0.0033774036169052124,
+              0.0044987589865922925,
+              0.003604452610015869,
+              0.005276541411876679,
+              0.004997715502977371,
+              0.00045538002625107767,
+              0.0024854263663291933,
+              0.0008425137773156166,
+              0.005612181052565574,
+              0.00043715953826904295
+            ]
+          }
+        },
+        {
+          &quot;sample&quot;: &quot;episode-000096-early.npz&quot;,
+          &quot;physical&quot;: {
+            &quot;mae&quot;: 0.0013627148520338648,
+            &quot;rmse&quot;: 0.0020823360193818847,
+            &quot;p95_abs&quot;: 0.004049664735794061,
+            &quot;max_abs&quot;: 0.009843111038208008,
+            &quot;worst_index&quot;: [
+              47,
+              9
+            ],
+            &quot;per_dimension_max_abs&quot;: [
+              0.0013518109917640686,
+              0.00200808048248291,
+              0.002038717269897461,
+              0.0011536478996276855,
+              0.0020864009857177734,
+              0.0010703504085540771,
+              0.0006412863731384277,
+              0.003109574317932129,
+              0.0021741390228271484,
+              0.009843111038208008,
+              0.00437617301940918,
+              0.005419224500656128,
+              0.001820206642150879,
+              0.004513382911682129
+            ],
+            &quot;per_dimension_mae&quot;: [
+              0.00046054713428020475,
+              0.0009983110427856446,
+              0.000497128963470459,
+              0.0003686869144439697,
+              0.0013725686073303223,
+              0.00029265940189361574,
+              0.00026568055152893067,
+              0.0017211005091667176,
+              0.0007736706733703614,
+              0.004193246364593506,
+              0.0024979662895202636,
+              0.00278519547675387,
+              0.0010884606838226318,
+              0.001762785315513611
+            ]
+          },
+          &quot;normalized&quot;: {
+            &quot;mae&quot;: 0.001884871827704566,
+            &quot;rmse&quot;: 0.0026883951780755505,
+            &quot;p95_abs&quot;: 0.005771937221288675,
+            &quot;max_abs&quot;: 0.00962984561920166,
+            &quot;worst_index&quot;: [
+              47,
+              9
+            ],
+            &quot;per_dimension_max_abs&quot;: [
+              0.002364218235015869,
+              0.002051129937171936,
+              0.001873210072517395,
+              0.0016502439975738525,
+              0.004278331995010376,
+              0.001963317394256592,
+              0.001282811164855957,
+              0.004842475056648254,
+              0.002577155828475952,
+              0.00962984561920166,
+              0.006248921155929565,
+              0.006003342568874359,
+              0.003032505512237549,
+              0.009039431810379028
+            ],
+            &quot;per_dimension_mae&quot;: [
+              0.0008054539561271667,
+              0.001019721031188965,
+              0.0004567788541316986,
+              0.0005273926258087158,
+              0.002814525365829468,
+              0.0005368684977293015,
+              0.000531461238861084,
+              0.0026802220940589905,
+              0.0009171193838119506,
+              0.00410248689353466,
+              0.0035669398307800293,
+              0.0030853714793920516,
+              0.0018133491277694703,
+              0.00353051520884037
+            ]
+          }
+        },
+        {
+          &quot;sample&quot;: &quot;episode-000096-middle.npz&quot;,
+          &quot;physical&quot;: {
+            &quot;mae&quot;: 0.0053017769640843785,
+            &quot;rmse&quot;: 0.006857199057958561,
+            &quot;p95_abs&quot;: 0.013312160968780518,
+            &quot;max_abs&quot;: 0.01608031988143921,
+            &quot;worst_index&quot;: [
+              1,
+              2
+            ],
+            &quot;per_dimension_max_abs&quot;: [
+              0.009137451648712158,
+              0.009846806526184082,
+              0.01608031988143921,
+              0.013572096824645996,
+              0.003876008093357086,
+              0.002664327621459961,
+              0.0007506608963012695,
+              0.010367393493652344,
+              0.007007002830505371,
+              0.004636287689208984,
+              0.01336449384689331,
+              0.0017044898122549057,
+              0.0033980607986450195,
+              0.003921151161193848
+            ],
+            &quot;per_dimension_mae&quot;: [
+              0.00673971176147461,
+              0.0074917030334472655,
+              0.013690874576568604,
+              0.011368952989578247,
+              0.0026249871402978897,
+              0.0011840534210205078,
+              0.00026287198066711427,
+              0.007905646562576293,
+              0.005582716464996338,
+              0.002878730297088623,
+              0.01024070143699646,
+              0.0005300412233918906,
+              0.002443791925907135,
+              0.0012800946831703186
+            ]
+          },
+          &quot;normalized&quot;: {
+            &quot;mae&quot;: 0.007139470363035798,
+            &quot;rmse&quot;: 0.009023138876670625,
+            &quot;p95_abs&quot;: 0.016366723179817196,
+            &quot;max_abs&quot;: 0.019414246082305908,
+            &quot;worst_index&quot;: [
+              1,
+              3
+            ],
+            &quot;per_dimension_max_abs&quot;: [
+              0.015980258584022522,
+              0.010057970881462097,
+              0.014774858951568604,
+              0.019414246082305908,
+              0.007947936654090881,
+              0.004887022078037262,
+              0.0015015602111816406,
+              0.016144707798957825,
+              0.008305922150611877,
+              0.004535853862762451,
+              0.019083693623542786,
+              0.0018882080912590027,
+              0.00566120445728302,
+              0.007853254675865173
+            ],
+            &quot;per_dimension_mae&quot;: [
+              0.011786897629499436,
+              0.007652372270822525,
+              0.012579398453235626,
+              0.016262737512588502,
+              0.005382654070854187,
+              0.0021718969941139222,
+              0.0005258941650390626,
+              0.012311199977993965,
+              0.006617691442370415,
+              0.002816413938999176,
+              0.014623090401291847,
+              0.0005871726199984551,
+              0.0040713965333998205,
+              0.0025637690722942353
+            ]
+          }
+        },
+        {
+          &quot;sample&quot;: &quot;episode-000096-late.npz&quot;,
+          &quot;physical&quot;: {
+            &quot;mae&quot;: 0.0028924086597232547,
+            &quot;rmse&quot;: 0.0037386255316716917,
+            &quot;p95_abs&quot;: 0.007666563987731933,
+            &quot;max_abs&quot;: 0.00894021987915039,
+            &quot;worst_index&quot;: [
+              49,
+              1
+            ],
+            &quot;per_dimension_max_abs&quot;: [
+              0.003623366355895996,
+              0.00894021987915039,
+              0.00891566276550293,
+              0.006091594696044922,
+              0.0012685209512710571,
+              0.0020644068717956543,
+              0.0008249282836914062,
+              0.004085522145032883,
+              0.007444143295288086,
+              0.0019097328186035156,
+              0.0059580206871032715,
+              0.002031072974205017,
+              0.0021198689937591553,
+              0.005610018968582153
+            ],
+            &quot;per_dimension_mae&quot;: [
+              0.002216905355453491,
+              0.006416158676147461,
+              0.0066996335983276365,
+              0.004415276050567627,
+              0.0006699416041374206,
+              0.001436988115310669,
+              0.0002750742435455322,
+              0.003012643056572415,
+              0.004918532371520996,
+              0.000850374698638916,
+              0.00438841462135315,
+              0.0007858520466834306,
+              0.0012648487091064453,
+              0.003143078088760376
+            ]
+          },
+          &quot;normalized&quot;: {
+            &quot;mae&quot;: 0.003882505073228718,
+            &quot;rmse&quot;: 0.004759137009549503,
+            &quot;p95_abs&quot;: 0.008291982114315033,
+            &quot;max_abs&quot;: 0.011235743761062622,
+            &quot;worst_index&quot;: [
+              32,
+              13
+            ],
+            &quot;per_dimension_max_abs&quot;: [
+              0.006336815655231476,
+              0.009131833910942078,
+              0.00819164514541626,
+              0.008713781833648682,
+              0.002601146697998047,
+              0.003786768764257431,
+              0.001650094985961914,
+              0.006362259387969971,
+              0.008823990821838379,
+              0.0018683820962905884,
+              0.008507803082466125,
+              0.0022499114274978638,
+              0.0035316050052642822,
+              0.011235743761062622
+            ],
+            &quot;per_dimension_mae&quot;: [
+              0.0038770620117429644,
+              0.006553716361522675,
+              0.006155673265457153,
+              0.00631587028503418,
+              0.0013737282156944274,
+              0.0026358287781476975,
+              0.0005502653121948242,
+              0.0046914958953857425,
+              0.0058303546905517575,
+              0.0008319693058729172,
+              0.00626640796661377,
+              0.0008705329895019532,
+              0.0021072089206427337,
+              0.006294957026839256
+            ]
+          }
+        },
+        {
+          &quot;sample&quot;: &quot;episode-000097-early.npz&quot;,
+          &quot;physical&quot;: {
+            &quot;mae&quot;: 0.0015142119250127247,
+            &quot;rmse&quot;: 0.002537102346295553,
+            &quot;p95_abs&quot;: 0.006792357563972471,
+            &quot;max_abs&quot;: 0.010710984468460083,
+            &quot;worst_index&quot;: [
+              37,
+              13
+            ],
+            &quot;per_dimension_max_abs&quot;: [
+              0.0019402503967285156,
+              0.002837657928466797,
+              0.0020086318254470825,
+              0.0019654035568237305,
+              0.0005760639905929565,
+              0.0009722709655761719,
+              0.0010546445846557617,
+              0.007613420486450195,
+              0.0031561851501464844,
+              0.003631591796875,
+              0.0013046860694885254,
+              0.00151863694190979,
+              0.0015404820442199707,
+              0.010710984468460083
+            ],
+            &quot;per_dimension_mae&quot;: [
+              0.0010953911393880844,
+              0.001598505675792694,
+              0.00047715693712234496,
+              0.0007134419679641723,
+              0.00023035824298858642,
+              0.00045577406883239745,
+              0.0002536749839782715,
+              0.00607851505279541,
+              0.0017926549911499022,
+              0.0026513814926147463,
+              0.00047472596168518066,
+              0.0007779073715209961,
+              0.0007588827610015869,
+              0.003840596303343773
+            ]
+          },
+          &quot;normalized&quot;: {
+            &quot;mae&quot;: 0.00225028269258993,
+            &quot;rmse&quot;: 0.004229997089089266,
+            &quot;p95_abs&quot;: 0.010646004974842069,
+            &quot;max_abs&quot;: 0.021451979875564575,
+            &quot;worst_index&quot;: [
+              37,
+              13
+            ],
+            &quot;per_dimension_max_abs&quot;: [
+              0.003393232822418213,
+              0.0028985142707824707,
+              0.00184553861618042,
+              0.0028113871812820435,
+              0.001181185245513916,
+              0.0017835497856140137,
+              0.0021097660064697266,
+              0.01185615360736847,
+              0.003741443157196045,
+              0.0035528838634490967,
+              0.0018630623817443848,
+              0.0016823410987854004,
+              0.0025663673877716064,
+              0.021451979875564575
+            ],
+            &quot;per_dimension_mae&quot;: [
+              0.0019156080484390259,
+              0.0016327857971191405,
+              0.00043841540813446047,
+              0.001020500659942627,
+              0.00047236323356628416,
+              0.0008360695838928223,
+              0.0005074489116668701,
+              0.009465845748782158,
+              0.0021250581741333006,
+              0.0025939905643463136,
+              0.0006778833270072937,
+              0.0008617321401834488,
+              0.0012643048167228698,
+              0.007691951282322407
+            ]
+          }
+        },
+        {
+          &quot;sample&quot;: &quot;episode-000097-middle.npz&quot;,
+          &quot;physical&quot;: {
+            &quot;mae&quot;: 0.000962920991836914,
+            &quot;rmse&quot;: 0.001260982654999973,
+            &quot;p95_abs&quot;: 0.002513891621492803,
+            &quot;max_abs&quot;: 0.003651784732937813,
+            &quot;worst_index&quot;: [
+              44,
+              2
+            ],
+            &quot;per_dimension_max_abs&quot;: [
+              0.0006832480430603027,
+              0.0032729506492614746,
+              0.003651784732937813,
+              0.0014411211013793945,
+              0.0008756071329116821,
+              0.0007364749908447266,
+              0.0006183385848999023,
+              0.0019127130508422852,
+              0.002006053924560547,
+              0.003441035747528076,
+              0.0021893978118896484,
+              0.001788794994354248,
+              0.002534329891204834,
+              0.002538815140724182
+            ],
+            &quot;per_dimension_mae&quot;: [
+              0.0002642977237701416,
+              0.001770925223827362,
+              0.0017662783619016408,
+              0.0007405006885528565,
+              0.00019184619188308716,
+              0.00028227567672729493,
+              0.00025622248649597167,
+              0.0009318244457244873,
+              0.0005956053733825684,
+              0.00233842134475708,
+              0.000756838321685791,
+              0.0007542598247528076,
+              0.0015902590751647949,
+              0.0012413391470909119
+            ]
+          },
+          &quot;normalized&quot;: {
+            &quot;mae&quot;: 0.0012767056695052556,
+            &quot;rmse&quot;: 0.0016357562311111544,
+            &quot;p95_abs&quot;: 0.0031628489494323715,
+            &quot;max_abs&quot;: 0.0050847530364990234,
+            &quot;worst_index&quot;: [
+              29,
+              13
+            ],
+            &quot;per_dimension_max_abs&quot;: [
+              0.001194968819618225,
+              0.0033431649208068848,
+              0.0033553242683410645,
+              0.0020614564418792725,
+              0.0017953962087631226,
+              0.0013509541749954224,
+              0.0012369155883789062,
+              0.0029786676168441772,
+              0.0023777782917022705,
+              0.0033665895462036133,
+              0.003126472234725952,
+              0.001981675624847412,
+              0.004222303628921509,
+              0.0050847530364990234
+            ],
+            &quot;per_dimension_mae&quot;: [
+              0.00046221613883972167,
+              0.0018089187145233154,
+              0.0016228914260864257,
+              0.001059289574623108,
+              0.00039339512586593627,
+              0.0005177725851535797,
+              0.0005125343799591064,
+              0.0014511243999004364,
+              0.0007060301303863525,
+              0.0022877976298332214,
+              0.0010807180404663085,
+              0.0008356000483036041,
+              0.002649429738521576,
+              0.0024861614406108856
+            ]
+          }
+        },
+        {
+          &quot;sample&quot;: &quot;episode-000097-late.npz&quot;,
+          &quot;physical&quot;: {
+            &quot;mae&quot;: 0.0022638921812176706,
+            &quot;rmse&quot;: 0.003087492300854378,
+            &quot;p95_abs&quot;: 0.006156158447265625,
+            &quot;max_abs&quot;: 0.009265005588531494,
+            &quot;worst_index&quot;: [
+              10,
+              13
+            ],
+            &quot;per_dimension_max_abs&quot;: [
+              0.002286076545715332,
+              0.002907566726207733,
+              0.005837738513946533,
+              0.0015808343887329102,
+              0.001361072063446045,
+              0.0019883811473846436,
+              0.000939786434173584,
+              0.0037903189659118652,
+              0.002782464027404785,
+              0.006641507148742676,
+              0.001446753740310669,
+              0.006332814693450928,
+              0.0014295578002929688,
+              0.009265005588531494
+            ],
+            &quot;per_dimension_mae&quot;: [
+              0.0016981256008148193,
+              0.0015588799864053725,
+              0.004735482335090638,
+              0.0006624150276184082,
+              0.0007736563682556152,
+              0.0015159857273101807,
+              0.00022436738014221193,
+              0.002423053979873657,
+              0.001259491443634033,
+              0.005085902214050293,
+              0.0004768906533718109,
+              0.0045475602149963375,
+              0.0006133210659027099,
+              0.006119358539581299
+            ]
+          },
+          &quot;normalized&quot;: {
+            &quot;mae&quot;: 0.003136799516422408,
+            &quot;rmse&quot;: 0.00452507816630796,
+            &quot;p95_abs&quot;: 0.011607536673545828,
+            &quot;max_abs&quot;: 0.01855596899986267,
+            &quot;worst_index&quot;: [
+              10,
+              13
+            ],
+            &quot;per_dimension_max_abs&quot;: [
+              0.003997988998889923,
+              0.0029699206352233887,
+              0.005363881587982178,
+              0.002261221408843994,
+              0.0027908384799957275,
+              0.0036473721265792847,
+              0.0018799901008605957,
+              0.005902528762817383,
+              0.0032982826232910156,
+              0.0064977556467056274,
+              0.002065896987915039,
+              0.0070153772830963135,
+              0.0023817718029022217,
+              0.01855596899986267
+            ],
+            &quot;per_dimension_mae&quot;: [
+              0.0029697712510824204,
+              0.0015923082828521729,
+              0.0043510526418685915,
+              0.0009475374221801758,
+              0.0015863722562789917,
+              0.0027808237075805666,
+              0.0004488039016723633,
+              0.0037733251601457596,
+              0.0014930301904678344,
+              0.004975833222270012,
+              0.0006809757649898529,
+              0.005037675797939301,
+              0.0010218310356140136,
+              0.012255852594971656
+            ]
+          }
+        }
+      ],
+      &quot;speedup_p50&quot;: 9.919155557283847,
+      &quot;acceptance&quot;: &quot;not_approved_no_task_level_tolerance&quot;,
+      &quot;comparison_scope&quot;: &quot;cross_backend_including_runtime_changes&quot;,
+      &quot;runtime_differences&quot;: {
+        &quot;versions&quot;: {
+          &quot;reference&quot;: {
+            &quot;jax&quot;: &quot;0.10.0.dev20260415+c98e1bb97&quot;,
+            &quot;jaxlib&quot;: &quot;0.10.0.dev20260521&quot;,
+            &quot;flax&quot;: &quot;0.12.6&quot;,
+            &quot;orbax-checkpoint&quot;: &quot;0.11.39&quot;
+          },
+          &quot;candidate&quot;: {
+            &quot;torch&quot;: &quot;2.12.0a0+5aff3928d8.nv26.5.50603568&quot;,
+            &quot;transformers&quot;: &quot;4.53.2&quot;,
+            &quot;jax&quot;: &quot;0.6.2&quot;,
+            &quot;jaxlib&quot;: &quot;0.6.2&quot;,
+            &quot;flax&quot;: &quot;0.10.2&quot;,
+            &quot;orbax-checkpoint&quot;: &quot;0.11.13&quot;
+          }
+        },
+        &quot;matmul_precision&quot;: {
+          &quot;reference&quot;: &quot;highest&quot;,
+          &quot;candidate&quot;: &quot;FP32 highest; TF32 disabled&quot;
+        },
+        &quot;backend&quot;: {
+          &quot;reference&quot;: &quot;jax&quot;,
+          &quot;candidate&quot;: &quot;pytorch&quot;
+        }
+      }
     }
   ],
   &quot;additional_telemetry&quot;: {
@@ -13516,6 +15193,16 @@ footer{color:var(--muted);font-size:12px;margin-top:20px;text-align:center}@medi
       &quot;input_power_max_w&quot;: 133.746,
       &quot;scope&quot;: &quot;whole_inference_process_including_loading_and_warmup; RAM includes OS/desktop&quot;,
       &quot;telemetry_sha256&quot;: &quot;9b88062ddce07fc43241241e61b7f71191542c480d7a4411e7c7fbb5f1a4e119&quot;
+    },
+    &quot;pi05-I-20260907-r1&quot;: {
+      &quot;samples&quot;: 195,
+      &quot;system_ram_peak_mib&quot;: 38276,
+      &quot;gpu_temperature_max_c&quot;: 53.406,
+      &quot;gpu_clock_min_mhz&quot;: 1573,
+      &quot;gpu_clock_max_mhz&quot;: 1575,
+      &quot;input_power_max_w&quot;: 136.882,
+      &quot;scope&quot;: &quot;whole_inference_process_including_loading_and_warmup; RAM includes OS/desktop&quot;,
+      &quot;telemetry_sha256&quot;: &quot;9a0dbc0bc0cb4023fdd244f2fb1b3e03a2b975234be4d447ce5085b51be4a84c&quot;
     }
   },
   &quot;failed_runs&quot;: [
@@ -13679,8 +15366,183 @@ footer{color:var(--muted);font-size:12px;margin-top:20px;text-align:center}@medi
       },
       &quot;error&quot;: &quot;RuntimeError: invalid dtype for bias - should match query&#x27;s dtype&quot;,
       &quot;log_sha256&quot;: &quot;8611358303643cee9b4f81d0313b88a37bcc937f1eb6299f365f3a8618f2ce55&quot;
+    },
+    {
+      &quot;run_id&quot;: &quot;pi05-J-20260907-r1&quot;,
+      &quot;exit&quot;: {
+        &quot;exit_code&quot;: 1,
+        &quot;finished_at&quot;: &quot;2026-09-07T13:32:52.243630+00:00&quot;
+      },
+      &quot;manifest&quot;: {
+        &quot;run_id&quot;: &quot;pi05-J-20260907-r1&quot;,
+        &quot;phase&quot;: &quot;evaluate&quot;,
+        &quot;started_at&quot;: &quot;2026-09-07T13:31:29.542810+00:00&quot;,
+        &quot;code_commit_base&quot;: &quot;8d3732d301c0c94c76832c15449535169b43a963&quot;,
+        &quot;source_files_sha256&quot;: {
+          &quot;scripts/docker/thor/Dockerfile&quot;: &quot;1f53e6c3abd79e7a40a58832a0e04194007f9a127d8e5302672edb04c2974795&quot;,
+          &quot;scripts/docker/thor/compose.yaml&quot;: &quot;3149532e542617fa3d59799f7ef5470fa49d9a784a37bbd7401e70ce0839f671&quot;,
+          &quot;scripts/docker/thor/convert.Dockerfile&quot;: &quot;b79c792305347490deff4cd9ae86ab738bbd037494e8cd8c8335870f36d0eee4&quot;,
+          &quot;scripts/docker/thor/jax_smoke.py&quot;: &quot;8ebac2826357341db037b9decd7258d7a19b1de62057562ccf67acbc5f3fdc0e&quot;,
+          &quot;scripts/docker/thor/preserve_vendor_stack.py&quot;: &quot;8f5369383ddb6b7c402553e9860b79f4889171966936a1200c70355ec64ba0b1&quot;,
+          &quot;scripts/docker/thor/pytorch.Dockerfile&quot;: &quot;a9cf8e5c9747dc08929d3a10eb3347a6eae7412e0dd11bb4e4144025af6e0ec8&quot;,
+          &quot;scripts/docker/thor/requirements-inference.txt&quot;: &quot;75f7de64aaad7297b1fcb24f1cbf66e38012a02c9f0c8da2659ec674be7c8b69&quot;,
+          &quot;scripts/thor/batch_vision_test.py&quot;: &quot;52aa3d2a850930e2c9ab2809e98067520392a969580a54912a9f3f9ca9b6cc50&quot;,
+          &quot;scripts/thor/benchmark_pi05.py&quot;: &quot;53ca79105424af5eb7e71fadf00a9a35a87eb19fe135fc8beeb11861d4fc6320&quot;,
+          &quot;scripts/thor/benchmark_pi05_test.py&quot;: &quot;e359cc270ce95a9024e29ac85158d34cc401a85f0330380e7cc0fb975ef829f6&quot;,
+          &quot;scripts/thor/benchmark_suite.py&quot;: &quot;ed7ce8330f347a9a5aa13e76899ad673a8a0f712f0abb064c34bc185478a66be&quot;,
+          &quot;scripts/thor/build_suite_report.py&quot;: &quot;683fdc577082753785e6aff46cde14e59c2b164172b2e19413a13e5480b1ccb6&quot;,
+          &quot;scripts/thor/compare_suites.py&quot;: &quot;b8c1bbe0b037e8ddb8a2fe16c4b06b0bcad019ebca7f315dc684470bc05e3fff&quot;,
+          &quot;scripts/thor/compare_suites_test.py&quot;: &quot;98036d36aca8405b117e0b2143e9c77518a1accc3d894be5ee1fdce17dce4552&quot;,
+          &quot;scripts/thor/conversion_precision_test.py&quot;: &quot;f6da0506d31f2292cac36bace9fe641642fa92a579a09c4beda16e5a68159401&quot;,
+          &quot;scripts/thor/cuda_graph_sampler.py&quot;: &quot;1af247f4da0c96b33d4b3219bd0c4d87afcc376f8937b540488480bc1078824c&quot;,
+          &quot;scripts/thor/cuda_graph_sampler_test.py&quot;: &quot;52ee9c68603acf80f73d1ebdff6f9cd59063dcec0ec61db61613d4cd325af11c&quot;,
+          &quot;scripts/thor/download_ngc_image.py&quot;: &quot;8a625d76ad7c42d78594f051c5653215dbb7a313252fe41a790e3e1dc54d0d21&quot;,
+          &quot;scripts/thor/download_ngc_image_test.py&quot;: &quot;7ade402500ca00da5e81bc3e6572931a408ed584afede0575d7972b37aaf0498&quot;,
+          &quot;scripts/thor/logged_command.py&quot;: &quot;7fdbdb74bec640f3248f6fd460d0bb00e3c234ffec007cfe9aaaefb2d962b04a&quot;,
+          &quot;scripts/thor/maxn_session.py&quot;: &quot;698e3e554b3b07407da23c9995f28bfd2d46ae82d9ad8b5fcdd078a1f7bf549c&quot;,
+          &quot;scripts/thor/maxn_session_test.py&quot;: &quot;e06b8b03893396a8472fe67ddd3d63a7303eefaed9e23e52ceb0b4afc1052615&quot;,
+          &quot;scripts/thor/prepare_replay_fixture.py&quot;: &quot;d49646094c23641e0b2a74bb66e10bd149ed448fbc6378eba6be262ff7392c1d&quot;,
+          &quot;scripts/thor/prepare_replay_fixture_test.py&quot;: &quot;04c34bb3cc1cb4497850bdc0135762fd469c1d45cc8ff3c6f4cbd8388a881a30&quot;,
+          &quot;scripts/thor/render_report.py&quot;: &quot;d28db2a871bc69fd09f8a22f987471d9b98f59b94c4fc497adf468931e9a6967&quot;,
+          &quot;scripts/thor/render_report_test.py&quot;: &quot;712abd779bba10f95492dd9fb63164ac33bf9d09d5ef8f945f8720a9bcd6730f&quot;,
+          &quot;scripts/thor/run_suite_host.py&quot;: &quot;051e4ae702cb43937ffe1a54b3452cbb90f128942c5da0efd67e750b266619fc&quot;,
+          &quot;scripts/thor/sync_code.py&quot;: &quot;f08fdcaf7c343da2606e8850cf0612168d80fc9fd8abb1542b7ad7773e08a825&quot;,
+          &quot;scripts/thor/sync_code_test.py&quot;: &quot;b7ab09ca04eaf415f8addeac81305009a88820fc3d8de71da64c72f6f51624a1&quot;,
+          &quot;scripts/thor/vendor_stack_test.py&quot;: &quot;a551eb248d71ad17f287863b839416e48054694a1505a9571184d26706f18042&quot;,
+          &quot;src/openpi/__init__.py&quot;: &quot;e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855&quot;,
+          &quot;src/openpi/conftest.py&quot;: &quot;626672e385fb276396c119e2220421065c58f8ec602401e8bf2ae509f9fffaf3&quot;,
+          &quot;src/openpi/models/__init__.py&quot;: &quot;e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855&quot;,
+          &quot;src/openpi/models/gemma.py&quot;: &quot;7e42ada4ae7e9995f0ef3e33a0c224758323c2015e2d9d72ec15726a8a001d2a&quot;,
+          &quot;src/openpi/models/gemma_fast.py&quot;: &quot;563c6e1ffd8afa31c406bcb8894a605e87df88f6c075d398d97a57af6bc3aefa&quot;,
+          &quot;src/openpi/models/lora.py&quot;: &quot;ced28716950c34d84a1a6d0b03b1d9550000732721df884818080b6e78cb3289&quot;,
+          &quot;src/openpi/models/lora_test.py&quot;: &quot;a0f10525de7773310402b3ffa636e88ffff7035f3179b140aacc6809c122f085&quot;,
+          &quot;src/openpi/models/model.py&quot;: &quot;9ecc85edfcf9aba40954ae08fbc9828de6b345790c79910303c3bf8602448781&quot;,
+          &quot;src/openpi/models/model_test.py&quot;: &quot;f8e71f195045d4e3ef1ddfafb2337fa52e5aa2f89bce1fde62f5cbfb67121f21&quot;,
+          &quot;src/openpi/models/pi0.py&quot;: &quot;9294585c2e2780f70e4decab1c4219f8c833750e8e53743cf3a792613fa42b96&quot;,
+          &quot;src/openpi/models/pi0_config.py&quot;: &quot;e15d71586f1a561b35c5651227607613fb16d2df411f3708b1c9d36b02544285&quot;,
+          &quot;src/openpi/models/pi0_fast.py&quot;: &quot;627332a555046f2744ef144c45f8bd3361a9820cf68854a4528d0fdbba7e9aa3&quot;,
+          &quot;src/openpi/models/pi0_test.py&quot;: &quot;5082873014a7fc45fb8414f517909e1c24cdafea980a1fb612e0aea6058ed0fe&quot;,
+          &quot;src/openpi/models/restore_params_test.py&quot;: &quot;41b83a9970c0d428cf32ebb7c1323dff52dab74c1f3c95337f4bf872f65891ce&quot;,
+          &quot;src/openpi/models/siglip.py&quot;: &quot;14b4df0be280d5769fb0dc31a40cde27525dbb1980cc998c28475d62fa3cad32&quot;,
+          &quot;src/openpi/models/tokenizer.py&quot;: &quot;26b898e2ec0b9b1bf7dae8231138c59b6faa7c098401ccfc27f1b0c401799c5b&quot;,
+          &quot;src/openpi/models/tokenizer_test.py&quot;: &quot;5abd179ce883420e39d4d18b33d0123290af752da243003aa48a3bc06dbb9517&quot;,
+          &quot;src/openpi/models/utils/fsq_tokenizer.py&quot;: &quot;88866638ee4775f46a222561a957bd35e20600fe38c5888b587016ad77b1065f&quot;,
+          &quot;src/openpi/models/vit.py&quot;: &quot;d285d057636c3cba2d1fd3b37693b18075ad4b9c3b47bbde807c34c6c376ac93&quot;,
+          &quot;src/openpi/models_pytorch/gemma_pytorch.py&quot;: &quot;08fd8d750519f0fb44fc5173311e50a30f4c8f32c02e51244b4f8e47b32cd52f&quot;,
+          &quot;src/openpi/models_pytorch/pi0_pytorch.py&quot;: &quot;d42d085bcd3dfe23dff3f41f07108b3edde1be74b154cece28789522e9fe1c09&quot;,
+          &quot;src/openpi/models_pytorch/preprocessing_pytorch.py&quot;: &quot;6a44e91be2d7a724c6140d2cc98ed0a631b8d38bbb29f63b380a0a19f903bbf6&quot;,
+          &quot;src/openpi/models_pytorch/transformers_replace/models/gemma/configuration_gemma.py&quot;: &quot;26fd0d0f52730ab32b6f337eb73ae9a26cb71ae0915bc49eced1d0e2ed8d0ec6&quot;,
+          &quot;src/openpi/models_pytorch/transformers_replace/models/gemma/modeling_gemma.py&quot;: &quot;17eeb54e277939e58cd6f8a92719a275e36baf0c9f463b2754227d42f87aedde&quot;,
+          &quot;src/openpi/models_pytorch/transformers_replace/models/paligemma/modeling_paligemma.py&quot;: &quot;c945d330b829264f927f3ee5339f977238631772de07a28e855e265bb85fd53c&quot;,
+          &quot;src/openpi/models_pytorch/transformers_replace/models/siglip/check.py&quot;: &quot;466e8eb7887ac5ccc98118a3169298d6ab65a284d834bae74751e3854dbc4245&quot;,
+          &quot;src/openpi/models_pytorch/transformers_replace/models/siglip/modeling_siglip.py&quot;: &quot;ef2e99500f263fdd78db9d4d9a255e29d844eb92f53c25ad640f8056700ef84b&quot;,
+          &quot;src/openpi/policies/aloha_policy.py&quot;: &quot;50d7ad972d80142ecb0f03b0780dacfd3af212946f4c9aac31a204b02db4543d&quot;,
+          &quot;src/openpi/policies/droid_policy.py&quot;: &quot;7d0893555964d485e231f70084125084a99495705ddd74b29461229d524fff26&quot;,
+          &quot;src/openpi/policies/libero_policy.py&quot;: &quot;ad01e5be74516d9ec9aeb1f76294d5c9f7f7179a60f1f7fbbb35e7646534f81a&quot;,
+          &quot;src/openpi/policies/piper_policy.py&quot;: &quot;c1ba6212884af14763fd155ab1d0f03457dc4727e1baca1fd9ba2fe66ecae338&quot;,
+          &quot;src/openpi/policies/policy.py&quot;: &quot;7b1dab66b4403c244d0b7c48d1c08c4d10517301fd4ca3306f2a3c65f293e8c1&quot;,
+          &quot;src/openpi/policies/policy_config.py&quot;: &quot;5950d05c53ebee96dd7c515a4cab771d85ae16f74b120365647974e105f6873c&quot;,
+          &quot;src/openpi/policies/policy_config_dtype_test.py&quot;: &quot;dcac48a384c2124fc11375cf71a80b88614ef7ed4f7b77493e2487d88bd16ee3&quot;,
+          &quot;src/openpi/policies/policy_import_test.py&quot;: &quot;e730301a9214687f6309d1deb04614dc5027d4713e2006e6887f58d529868b08&quot;,
+          &quot;src/openpi/policies/policy_test.py&quot;: &quot;9dbb20963600367a7e7abfc97d1e326916777c57a87b39b1bc4070ba64676683&quot;,
+          &quot;src/openpi/policies/pytorch_precision_test.py&quot;: &quot;e7405fb18f6080388064c9adff8d0de1f141b6f385eda1a09fda5490563ade66&quot;,
+          &quot;src/openpi/policies/yam_policy.py&quot;: &quot;e7eb4fdc219a1cb81610d3a105a4e41bcad9641d32356337c79e285dba4baeca&quot;,
+          &quot;src/openpi/policies/yam_policy_test.py&quot;: &quot;b7cfee67fd520a6bc84427e032979368a569a7192fce8c3cd8a5e5557be51f86&quot;,
+          &quot;src/openpi/serving/websocket_policy_server.py&quot;: &quot;f538bcfc8a5554923f8703af2d19ec159254e895dd40a3d79a2de9abc14ad494&quot;,
+          &quot;src/openpi/shared/__init__.py&quot;: &quot;e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855&quot;,
+          &quot;src/openpi/shared/array_typing.py&quot;: &quot;6524945566eab3eb97b75a6280ba4724617b4d028c55f05172b283c3de68a026&quot;,
+          &quot;src/openpi/shared/download.py&quot;: &quot;1fee4957a275ab632fd4dd98af240516a2a708da2db38a838132f05c04da425d&quot;,
+          &quot;src/openpi/shared/download_test.py&quot;: &quot;234ee70ab2501a1421f6c44cbd83c1e16747597023319ae1446bed9d44f17072&quot;,
+          &quot;src/openpi/shared/image_tools.py&quot;: &quot;42145e9269b27a1dafe3f05b1c14adcb6455993cf74745b301317b4d24dc4f80&quot;,
+          &quot;src/openpi/shared/image_tools_test.py&quot;: &quot;f1b495607775ac25c42b2b015d20468a7f793f465a6e9b43c057544586aab37c&quot;,
+          &quot;src/openpi/shared/nnx_utils.py&quot;: &quot;4da7111ba3011c4d1c381c9ed17257771df6a50ed89182647c3fb6f79208005e&quot;,
+          &quot;src/openpi/shared/normalize.py&quot;: &quot;6c2cea4946fb07e51801530400d2b2fd94730e195cd290d6b6960114eca9739d&quot;,
+          &quot;src/openpi/shared/normalize_test.py&quot;: &quot;fda27a21cf37f337b12bcab71229407c2a349c5965c33f278bdc468ed03f58af&quot;,
+          &quot;src/openpi/training/checkpoints.py&quot;: &quot;a36dc6515376fe3f8d2bc25ad8fbbd2b271c0fa05c6bc2d439f4ba4d3c45306f&quot;,
+          &quot;src/openpi/training/config.py&quot;: &quot;300ee18be50ae0e4702324e0f8762f85a85d75b6999cf8f23cc35bc394889894&quot;,
+          &quot;src/openpi/training/data_loader.py&quot;: &quot;258a60f54ee4aabf462aceafe9a0976cf890d5b5ca88e054d0da8f86cf4ed8c4&quot;,
+          &quot;src/openpi/training/data_loader_test.py&quot;: &quot;ec2076a386ff0aa327460a8bd7a1aa762d7b35d72d381482918f5128349e86d2&quot;,
+          &quot;src/openpi/training/droid_rlds_dataset.py&quot;: &quot;1d3a057a040240218234d7dbc6680ee4fe8256f2058531a0f9fefd3f7ee995a4&quot;,
+          &quot;src/openpi/training/metrics.py&quot;: &quot;2e2e31ffa2bc6ee8fdde97cf799eedc1b77b6df647fc1cabeeb35c8303595444&quot;,
+          &quot;src/openpi/training/misc/polaris_config.py&quot;: &quot;c2ab92efb5e0d675118ad812113fd1c3cb3a62cdab5d79066014266e82df12d8&quot;,
+          &quot;src/openpi/training/misc/roboarena_config.py&quot;: &quot;914acdd74ccf90e6779c13a5093140595c7e4f687e9e0b167439446a81d74c01&quot;,
+          &quot;src/openpi/training/optimizer.py&quot;: &quot;cfb5d6f6aec61fbe961287b4015c652260628a0ed4682a0dbdc271b8e65431fa&quot;,
+          &quot;src/openpi/training/sharding.py&quot;: &quot;c67c4112a126ab097571c8a882fd1ee3f106b15b6e608e7205ac7f29b44ca985&quot;,
+          &quot;src/openpi/training/utils.py&quot;: &quot;b684e674343f86ef5e976f279a586d3fe2f885e901f396ac899ed136abc7eca6&quot;,
+          &quot;src/openpi/training/weight_loaders.py&quot;: &quot;a54ac3222f81f8c6233241bc16b6f369c9416cdaa83f7058f96f7ddcfde1a3b4&quot;,
+          &quot;src/openpi/transforms.py&quot;: &quot;d31a2288fb50258a758fd1a3e991e689c15271ffca7636fb7be38f738cc30e0f&quot;,
+          &quot;src/openpi/transforms_test.py&quot;: &quot;395601075c47eaa23be4805adda5f5351465bb240de2203a4da8722bd3a52760&quot;
+        },
+        &quot;source_state&quot;: &quot;working_tree_fingerprinted; image is authoritative for installed model code&quot;,
+        &quot;image_id&quot;: &quot;sha256:ac50aa743010d55c8d76445da816fd089d62a55c5c0a53df9913d2f005995eab&quot;,
+        &quot;hardware&quot;: &quot;NVIDIA Jetson AGX Thor Developer Kit&quot;,
+        &quot;kernel&quot;: &quot;6.8.12-1021-tegra&quot;,
+        &quot;command&quot;: [
+          &quot;docker&quot;,
+          &quot;run&quot;,
+          &quot;--rm&quot;,
+          &quot;--name&quot;,
+          &quot;pi05-J-20260907-r1&quot;,
+          &quot;--runtime=nvidia&quot;,
+          &quot;--gpus&quot;,
+          &quot;all&quot;,
+          &quot;--network&quot;,
+          &quot;none&quot;,
+          &quot;--shm-size=8g&quot;,
+          &quot;-e&quot;,
+          &quot;NVIDIA_DRIVER_CAPABILITIES=compute,utility&quot;,
+          &quot;-e&quot;,
+          &quot;PYTHONUNBUFFERED=1&quot;,
+          &quot;-e&quot;,
+          &quot;TORCHINDUCTOR_CACHE_DIR=/cache/torchinductor&quot;,
+          &quot;-e&quot;,
+          &quot;TRITON_CACHE_DIR=/cache/triton&quot;,
+          &quot;-v&quot;,
+          &quot;/home/wuyan-lyj/condapi/scripts/thor:/bench:ro&quot;,
+          &quot;-v&quot;,
+          &quot;/home/wuyan-lyj/thor/pi/checkpoints:/checkpoints:ro&quot;,
+          &quot;-v&quot;,
+          &quot;/home/wuyan-lyj/thor/pi/cache:/cache&quot;,
+          &quot;-v&quot;,
+          &quot;/home/wuyan-lyj/thor/pi/test-data:/test-data:ro&quot;,
+          &quot;-v&quot;,
+          &quot;/home/wuyan-lyj/thor/pi/results:/results&quot;,
+          &quot;openpi-pi:thor-pytorch-graph-v3-20260907&quot;,
+          &quot;python&quot;,
+          &quot;/bench/benchmark_suite.py&quot;,
+          &quot;--checkpoint&quot;,
+          &quot;/checkpoints/pi05_base_pytorch_fp32_v1&quot;,
+          &quot;--suite&quot;,
+          &quot;/test-data/pi05-replay-v1/suite.json&quot;,
+          &quot;--params-dtype&quot;,
+          &quot;bfloat16&quot;,
+          &quot;--compute-dtype&quot;,
+          &quot;bfloat16&quot;,
+          &quot;--output&quot;,
+          &quot;/results/pi05-J-20260907-r1&quot;,
+          &quot;--backend&quot;,
+          &quot;pytorch&quot;,
+          &quot;--no-compile&quot;,
+          &quot;--native-attention-mask&quot;,
+          &quot;--batch-vision&quot;,
+          &quot;--cuda-graph&quot;
+        ],
+        &quot;power_before&quot;: &quot;NV Power Mode: 120W\n1\n&quot;,
+        &quot;checkpoint&quot;: &quot;pi05_base_pytorch_fp32_v1; no LoRA; read-only checkpoint&quot;,
+        &quot;network&quot;: &quot;disabled for inference container; all inputs local&quot;
+      },
+      &quot;error&quot;: &quot;RuntimeError: Cannot copy between CPU and CUDA tensors during CUDA graph capture unless the CPU tensor is pinned. Please use tensor.pin_memory() or allocate the tensor with pin_memory=True.&quot;,
+      &quot;log_sha256&quot;: &quot;f6ce326bd2ce024415b4ab2c23db81e522fcad67219f3594a451e49c22fc1957&quot;
     }
-  ]
+  ],
+  &quot;latency_front_runner&quot;: {
+    &quot;name&quot;: &quot;I · pytorch / bfloat16&quot;,
+    &quot;p50_ms&quot;: 124.15142800091417,
+    &quot;p95_ms&quot;: 125.36496710017673,
+    &quot;max_abs_error_vs_jax_fp32&quot;: 0.01608031988143921,
+    &quot;target_ms&quot;: 100,
+    &quot;accuracy_approved&quot;: false
+  }
 }</pre></details></section></div>
 <section class="panel"><h2>下一轮推理测试方案</h2><ol><li><strong>用户反馈后调整主线：原生 JAX 仅作参考，优先换加速后端</strong><p>2026-09-07 用户明确不能接受当前最低 177.39 ms，目标是完整推理约 100 ms 或更低，同时保留模型精度。A/B/C 是在 MAXN 与锁频下取得的实测，不再将 C 视为可接受的最终部署方案。保留 A 数值参考和 B/C 精度对照，主线转为 PyTorch 编译、TensorRT 混合精度与 FlashRT 的低延迟适配；同时报告 P50/P95，不先承诺未经同合同实测的 30/50 ms。</p></li><li><strong>先用已有 9 输入筛后端，速度和误差有希望再扩样</strong><p>复用本轮已经保存的输入、噪声、norm 和 JAX 参考动作，不先重跑大量慢速 JAX。每个候选保持三路 RGB、14D 输出、去噪 10 步和 horizon 50，先完成逐张量转换核对与 9 输入误差/延迟筛选；有明显提速且误差受控后再扩到每轨迹 100 状态 × 3 种子。最终性能用足够预热后的同步完整 policy P50/P95 衡量，编译/校准另计，不用减少相机或动作长度冒充同合同加速。</p></li><li><strong>把训练栈差异和精度差异分开核验</strong><p>在服务器实际训练环境的已分配 GPU 上，一次性用同一 checkpoint、输入和固定噪声导出参考动作，再把小结果文件带回 Thor 本地比较；不建立服务器实时推理链路，也不在登录节点运行模型。先确认 Thor 新版 JAX 与训练栈的差异，再判断转换误差，避免把框架版本造成的差异误归因于 BF16。</p></li><li><strong>独立验证 JAX → PyTorch FP32 转换，再改变运算精度</strong><p>沿用 Jetson AI Lab 的 NVIDIA PyTorch 26.05 容器基底作为 Pi 系列的候选运行环境版本，依赖仍装在容器内。转换先保留 FP32，逐张量核对映射后的 key、shape、dtype 和数值；只做转置/重排的权重应可精确核对，不默认接受 BF16 转存。再用相同 suite/noise/norm 比较 FP32 前向，关闭 TF32 和自动混合精度以免参考名不副实，然后独立测 BF16 与 torch.compile。未来 LoRA 必须保留 adapter：先在 FP32 正确合并或实现等价加载，检查没有漏键，再比较合并前后的 JAX 输出；不把当前无 LoRA 基础模型的通过当成 LoRA 转换已通过。</p></li><li><strong>TensorRT 首轮选择保留 FP32 敏感运算的混合精度，不做全局 FP16</strong><p>Jetson AI Lab 提醒其纯 FP16 导出会溢出；xuweiwu/openpi-thor 支持的是保留 RMSNorm 等 FP32 敏感运算、使用 strongly typed TensorRT 的定制混合 FP16 路径。下一轮可借鉴这条路径，但须独立对照 JAX A 与已验证 PyTorch，保持当前 horizon 50，不能拿教程 LIBERO horizon 10 的延迟作本机目标。转换误差、前向误差和 TensorRT 编译误差分开记录。</p></li><li><strong>FlashRT 列为高性能候选，但先补齐 YAM / horizon 50 合同</strong><p>项目公布 Thor 三相机 FP8 约 54.8 ms、NVFP4+FA4 约 31.74 ms，但这不是本机 YAM 结果。2026-09-07 阅读其 Thor 前端发现 action 序列长度 Sa 固定为 10，而本项目为 50；其最新 NVFP4 报告主要对照 FP8，并不能单独证明相对原始 JAX 的精度。先确认 H50/14D/状态提示与模型权重映射支持，再将融合算子、CUDA Graph 和 FP8 分项对比；NVFP4 只有在前级误差通过后才考虑。</p></li><li><strong>FP8 / NVFP4 放在基线转换通过之后</strong><p>先测 FP8；校准集和验证集分开，增加其他本地录像或任务后再判断泛化。仅对 FP8 有明显收益时再测 attention-side NVFP4，暂不采用全 attention+MLP 激进量化。社区作者报告过 ONNX/TensorRT 降低精度后误差放大，因此必须比较最终 engine，不只比较量化后的 PyTorch；保留逐维误差与最坏样本，余弦相似度不能单独作为机械臂精度验收。</p></li><li><strong>微调完成后再做模型任务验收与双 IPC 联调</strong><p>使用微调 checkpoint 自带 YAM norm 和准确的单位合同，重新建立 A 参考并测 C/转换候选。动作容差与实际关节、夹爪要求绑定，基础模型阶段不虚设机器人安全阈值。之后只操作 Thor 服务端，配合用户现有 3588 通过网线直连验证数据协议和耗时，不读取或改动 3588 控制与采集代码。</p></li></ol><h2>社区依据（不混入本机实测数字）</h2><ul><li><a href="https://github.com/flashrt-project/FlashRT/blob/main/examples/thor/README.md" rel="noreferrer">FlashRT：Thor 测试与前端代码</a>：2026-09-07 查阅。列出了三相机 FP8 性能和 LIBERO 评估；属于社区报告，不能替代本项目 YAM 任务精度或 H50 延迟。</li><li><a href="https://github.com/flashrt-project/FlashRT/blob/main/docs/pi05_thor_decoder_fp4_e2e.md" rel="noreferrer">FlashRT：最新 Thor NVFP4 实测合同</a>：2026-09-07 查阅。三视角约 31.74 ms 的对照参考为同轮 FP8，使用少量 LIBERO 观测；不可把其数值一致门槛解释为本项目机械臂任务成功率。</li><li><a href="https://github.com/flashrt-project/FlashRT/blob/main/flash_rt/frontends/torch/pi05_thor.py" rel="noreferrer">FlashRT：Pi0.5 Thor action 序列长度实现</a>：2026-09-07 查阅。前端构造中 Sa 固定为 10，另有 steps=10 去噪循环，两者不是同一个含义；不能只改文档参数就声称已经支持本项目 horizon 50。</li><li><a href="https://www.jetson-ai-lab.com/tutorials/openpi_on_thor/" rel="noreferrer">Jetson AI Lab：OpenPi π₀.₅ on Jetson Thor</a>：2026-09-07 查阅。官方教程使用 NVIDIA PyTorch 26.05 容器，路线为 JAX → PyTorch → ONNX → TensorRT；教程的 LIBERO/horizon 10 性能不是本项目 YAM/horizon 50 实测。其纯 FP16 溢出警告适用于该导出实现。</li><li><a href="https://github.com/xuweiwu/openpi-thor" rel="noreferrer">xuweiwu/openpi-thor：定制混合 FP16 与真实样本验证</a>：2026-09-07 查阅。作者说明 FP16 路径保留 FP32 敏感运算并使用 strongly typed TensorRT；NVFP4 采用 attention-side 方案避免更广量化带来的漂移。其结果和阈值属于作者测试栈，不直接成为本项目验收标准；不照搬其宿主机 venv/uv 安装方式。</li><li><a href="https://github.com/NVIDIA/JAX-Toolbox" rel="noreferrer">NVIDIA JAX Toolbox</a>：原生 JAX 容器上游。实际使用版本以本报告采集的 JAX、jaxlib、Flax、Orbax 版本与镜像 ID 为准，不能仅凭 GPU 枚举认定完整模型可运行。</li></ul></section>
 <footer>本页为离线静态报告，无外部 CDN、无遥测。每次采集新结果后重新生成，不会自动冒充实时状态。</footer></main></html>

@@ -25,3 +25,11 @@ python3 scripts/thor/sync_code.py --host thor-usb
 脚本要求两端均为干净 `main`，本地提交已发布到 Gitea，且 Thor 的 `origin` 与工作站一致；只 fetch 和 `merge --ff-only`，最后检查提交哈希。遇到未提交变更、分叉、远端在同步期间改变或首次 HEAD 缺失时退出，不 stash、不 reset、不覆盖。Wi-Fi 管理可改为已配置的 `--host thor`。
 
 同步源码不等于更新运行中的模型：容器镜像不会自动重建/重启，模型权重不会复制，功耗模式不会改变。新镜像仍需按精度/延迟对照后再切换 Pi 系列服务版本。
+
+## 2026-09-07 晚间复核：Gitea 密钥已生效
+
+本节取代本文早期“等待用户添加密钥 / 尚未同步”的临时状态。用户已添加 Thor 公钥，实际从 Gitea 拉取成功。观察时工作站、Gitea、GitHub 与 Thor 均已核对到 `8d3732d301c0c94c76832c15449535169b43a963`；这是时间点记录，不要求后续永久停在此提交。
+
+Thor `/home/wuyan-lyj/condapi` 是干净的 main 工作树，仅从 origin（Gitea）拉代码；工作站负责推送 Gitea 与 GitHub。入口 `python3 scripts/thor/sync_code.py --host thor-usb` 拒绝脏树、未发布提交、远端变更或非快进，不自动 stash、不重建镜像、不重启服务、不改电源模式。运行中的测试批次不可中途同步挂载脚本；报告可单独复制到代码目录以外的 `/home/wuyan-lyj/thor/pi/reports/`。
+
+原 rsync 工作目录的备份仍保存在 `/home/wuyan-lyj/thor/code-backups/rsync-before-gitea-20260907/`。没有移动或删除模型、数据和缓存。私钥留在各自机器，不在文档和 Git 中复制。

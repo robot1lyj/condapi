@@ -27,6 +27,7 @@ def test_batched_vision_preserves_every_view_and_mask(batch_size):
 
     model = SimpleNamespace(
         batch_vision=False,
+        static_denoising_loop=False,
         paligemma_with_expert=SimpleNamespace(
             embed_image=embed_image,
             embed_language_tokens=lambda tokens: tokens.float().unsqueeze(-1).expand(-1, -1, 3),
@@ -45,6 +46,9 @@ def test_batched_vision_preserves_every_view_and_mask(batch_size):
     assert calls == [batch_size * 3]
     assert all(torch.equal(a, b) for a, b in zip(old, new, strict=True))
     assert new[0].shape == (batch_size, 14, 3)
+    model.static_denoising_loop = True
+    graph_ready = namespace["embed_prefix"](model, images, masks, tokens, token_masks)
+    assert all(torch.equal(a, b) for a, b in zip(new, graph_ready, strict=True))
 
 
 def test_native_bf16_mask_preserves_masking_and_softmax_of_bf16_scores():
