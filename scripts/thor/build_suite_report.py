@@ -283,6 +283,8 @@ def attach_additional_runs(data, reference, run_paths, logs):
                 m["engine_vs_export_eager"]["normalized_14d_max_abs"] for m in record["measurements"]
             )
             detail += f" / strongly typed 非量化 / 对导出前 BF16 eager 的归一化 14D 最大差={engine_error:.6g}"
+            if record.get("engine_cuda_graph"):
+                detail += " / TensorRT CUDA Graph：逐输入要求与同引擎非图输出完全一致"
         error = comparison["physical_dataset_units"]
         normalized = comparison["normalized_active_14d"]
         data["experiments"].append(

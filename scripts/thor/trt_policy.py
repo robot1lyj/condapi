@@ -92,6 +92,8 @@ class TensorRTModel(torch.nn.Module):
         ):
             raise ValueError("Engine output must be exactly (1,50,32)")
         self.unused_bindings = {}
+        self.graph_inputs = None
+        self.cuda_graph = None
         # Pi0.5 encodes state in prompt tokens and retains the original state
         # for output transforms. Its separate sampler state input is dead.
         # TRT retains this unused ONNX DOUBLE input as FLOAT; bind a dummy
@@ -110,6 +112,27 @@ class TensorRTModel(torch.nn.Module):
                 self.unused_bindings["state"] = torch.zeros(shape, dtype=dtype, device=self.device)
                 self.io_contract["state"]["unused_binding"] = "zero dummy; original state untouched in policy"
 
+    def enable_cuda_graph(self):
+        self.graph_inputs = {
+            name: torch.empty(shape, dtype=dtype, device=self.device) for name, (shape, dtype) in self.inputs.items()
+        }
+
+    def _execute(self):
+        if not self.context.execute_async_v3(stream_handle=torch.cuda.current_stream().cuda_stream):
+            raise RuntimeError("TensorRT execution failed")
+
+    @torch.no_grad()
+    def validate_graph_current(self):
+        if self.cuda_graph is None:
+            raise RuntimeError("No TensorRT graph captured")
+        self.cuda_graph.replay()
+        captured = self.outputs["actions"].clone()
+        self._execute()
+        reference = self.outputs["actions"]
+        if not torch.isfinite(reference).all() or not torch.equal(captured, reference):
+            raise RuntimeError("TensorRT CUDA graph changed the uncaptured engine output")
+        return 0.0
+
     @torch.no_grad()
     def sample_actions(self, device, observation, *, noise=None, num_steps=10):
         if noise is None or num_steps != 10:
@@ -125,11 +148,23 @@ class TensorRTModel(torch.nn.Module):
             if tuple(value.shape) != shape or value.dtype != dtype or value.device != self.device:
                 raise ValueError(f"Input contract mismatch: {name}")
             value = value.contiguous()
+            if self.graph_inputs is not None:
+                self.graph_inputs[name].copy_(value)
+                value = self.graph_inputs[name]
             keepalive.append(value)
             if not self.context.set_tensor_address(name, value.data_ptr()):
                 raise RuntimeError(f"Failed to bind TensorRT input: {name}")
-        if not self.context.execute_async_v3(stream_handle=torch.cuda.current_stream().cuda_stream):
-            raise RuntimeError("TensorRT execution failed")
+        if self.graph_inputs is None:
+            self._execute()
+        else:
+            if self.cuda_graph is None:
+                self._execute()  # Flush TensorRT's lazy initialization before capture.
+                torch.cuda.synchronize()
+                graph = torch.cuda.CUDAGraph()
+                with torch.cuda.graph(graph):
+                    self._execute()
+                self.cuda_graph = graph
+            self.cuda_graph.replay()
         return self.outputs["actions"].clone()
 
 

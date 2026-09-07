@@ -38,6 +38,7 @@ def main():
     parser.add_argument("--compute-dtype", choices=("float32", "bfloat16"), required=True)
     parser.add_argument("--backend", choices=("jax", "pytorch", "tensorrt"), default="jax")
     parser.add_argument("--engine", type=Path)
+    parser.add_argument("--engine-cuda-graph", action="store_true")
     parser.add_argument("--compile", action=argparse.BooleanOptionalAction, default=True)
     parser.add_argument("--warmups", type=int, default=2)
     parser.add_argument("--attention", choices=("eager", "sdpa"), default="eager")
@@ -56,6 +57,8 @@ def main():
     if args.output.exists():
         parser.error("Use a new run directory; existing experiments are immutable")
     is_trt = args.backend == "tensorrt"
+    if args.engine_cuda_graph and not is_trt:
+        parser.error("Engine CUDA graph requires TensorRT backend")
     is_pytorch = args.backend in ("pytorch", "tensorrt")
     if is_trt and (
         args.engine is None or args.compile or args.cuda_graph or args.thor_triton_autotune or args.steps != 10
@@ -130,6 +133,7 @@ def main():
         "compiled_graph_parts": args.compile_graph_parts,
         "graph_reference": "uncaptured_legacy_loop_same_kernel_backend" if args.cuda_graph else None,
         "static_denoising_loop": is_trt or args.cuda_graph,
+        "engine_cuda_graph": args.engine_cuda_graph,
         "warmups_per_sample": args.warmups,
         "attention": "onnx_eager_lowered_to_tensorrt" if is_trt else args.attention if is_pytorch else "jax_native",
         "batch_vision": True if is_trt else args.batch_vision if is_pytorch else False,
@@ -180,6 +184,8 @@ def main():
         from trt_policy import create_trt_policy  # noqa: PLC0415
 
         policy = create_trt_policy(train_config, args.engine, normalize.deserialize_json(norm_path.read_text()))
+        if args.engine_cuda_graph:
+            policy._model.enable_cuda_graph()  # noqa: SLF001
         engine_report = policy._model.build_report  # noqa: SLF001
         export_report_path = Path(engine_report["source_export"]) / "export_report.json"
         if digest(export_report_path) != engine_report["source_export_report_sha256"]:
@@ -322,6 +328,8 @@ def main():
             measurement["engine_vs_export_eager"] = compare_export_reference(
                 export_report_path.parent / sample_path.name, normalized
             )
+            if args.engine_cuda_graph:
+                measurement["engine_graph_vs_uncaptured_max_abs"] = policy._model.validate_graph_current()  # noqa: SLF001
         # Preserve completed observations even if a later sample fails.
         np.savez_compressed(args.output / f"{sample_path.stem}.npz", actions=actions, normalized_actions=normalized)
         (args.output / f"{sample_path.stem}.json").write_text(json.dumps(measurement, indent=2))

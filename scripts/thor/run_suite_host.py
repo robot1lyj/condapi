@@ -24,6 +24,7 @@ TORCH_MODES = {
     "M": ("bfloat16", "bfloat16"),
     "N": ("bfloat16", "bfloat16"),
     "T": ("bfloat16", "bfloat16"),
+    "U": ("bfloat16", "bfloat16"),
 }
 
 
@@ -40,7 +41,9 @@ def main():
         parser.error("Run with sudo on Thor")
     if not re.fullmatch(r"[a-zA-Z0-9_-]+", args.batch_id):
         parser.error("batch-id must be a filename-safe identifier")
-    if "T" in args.modes and (not args.engine_id or not re.fullmatch(r"[a-zA-Z0-9_-]+", args.engine_id)):
+    if {"T", "U"}.intersection(args.modes) and (
+        not args.engine_id or not re.fullmatch(r"[a-zA-Z0-9_-]+", args.engine_id)
+    ):
         parser.error("TensorRT mode requires a filename-safe engine-id")
     scripts = Path(__file__).resolve().parent
     repo = scripts.parents[1]
@@ -99,14 +102,16 @@ def main():
             command.extend(
                 [
                     "--backend",
-                    "tensorrt" if mode == "T" else "pytorch",
+                    "tensorrt" if mode in ("T", "U") else "pytorch",
                     "--compile" if mode in ("F", "G", "H", "I", "N") else "--no-compile",
                 ]
             )
-            if mode == "T":
+            if mode in ("T", "U"):
                 image_index = command.index(args.image)
                 command[image_index:image_index] = ["-v", f"{args.root / 'artifacts'}:/artifacts:ro"]
                 command.extend(["--engine", f"/artifacts/{args.engine_id}"])
+                if mode == "U":
+                    command.append("--engine-cuda-graph")
             if mode in ("F", "G", "H", "I", "J", "K", "L", "M", "N"):
                 command.append("--native-attention-mask")
             if mode in ("G", "H", "K", "M"):

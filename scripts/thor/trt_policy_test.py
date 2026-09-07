@@ -60,6 +60,8 @@ def test_runtime_shape_guard_and_output_ownership(monkeypatch):
     model.device = torch.device("cpu")  # Fake runtime only; real constructor requires CUDA.
     model.inputs = {"noise": ((1, 50, 32), torch.float32)}
     model.unused_bindings = {}
+    model.graph_inputs = None
+    model.cuda_graph = None
     model.outputs = {"actions": torch.ones(1, 50, 32)}
     model.context = SimpleNamespace(set_tensor_address=lambda *args: True, execute_async_v3=lambda **kwargs: True)
     monkeypatch.setattr(torch.cuda, "current_stream", lambda: SimpleNamespace(cuda_stream=7))
