@@ -39,6 +39,7 @@ def main():
     parser.add_argument("--backend", choices=("jax", "pytorch", "tensorrt"), default="jax")
     parser.add_argument("--engine", type=Path)
     parser.add_argument("--engine-cuda-graph", action="store_true")
+    parser.add_argument("--require-time-cache", action="store_true")
     parser.add_argument("--compile", action=argparse.BooleanOptionalAction, default=True)
     parser.add_argument("--warmups", type=int, default=2)
     parser.add_argument("--attention", choices=("eager", "sdpa"), default="eager")
@@ -59,6 +60,8 @@ def main():
     is_trt = args.backend == "tensorrt"
     if args.engine_cuda_graph and not is_trt:
         parser.error("Engine CUDA graph requires TensorRT backend")
+    if args.require_time_cache and not is_trt:
+        parser.error("Time-cache requirement is scoped to the TensorRT export candidate")
     is_pytorch = args.backend in ("pytorch", "tensorrt")
     if is_trt and (
         args.engine is None or args.compile or args.cuda_graph or args.thor_triton_autotune or args.steps != 10
@@ -196,7 +199,10 @@ def main():
                 raise ValueError(f"TensorRT source mismatch: {key}")
         if export_report["compute_dtype"] != args.compute_dtype:
             raise ValueError("Engine precision does not match requested experiment")
+        if args.require_time_cache and not export_report.get("cache_time_modulation"):
+            raise ValueError("Expected engine with audited FP32 time modulation cache")
         record["engine_report"] = engine_report
+        record["time_modulation_cache"] = export_report.get("time_modulation_cache")
         record["engine_io"] = policy._model.io_contract  # noqa: SLF001
     else:
         policy = policy_config.create_trained_policy(

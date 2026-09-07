@@ -3,6 +3,7 @@ import json
 from build_suite_report import attach_engine_next_steps
 from build_suite_report import attach_exports
 from build_suite_report import attach_front_runner
+from build_suite_report import attach_profiles
 
 
 def test_highlight_is_measured_latency_not_accuracy_approval():
@@ -47,3 +48,20 @@ def test_engine_plan_uses_actual_result_without_accuracy_claim():
     attach_engine_next_steps(data)
     assert "127.37" in data["recommendations"][0]["detail"]
     assert "不是任务精度保证" in data["recommendations"][1]["detail"]
+
+def test_profile_is_separate_from_formal_latency_counts(tmp_path):
+    report = {
+        "run_id": "profile-r1",
+        "status": "profiled_not_latency_or_accuracy_approved",
+        "profiled_calls": 3,
+        "comparisons": [{"exact": True, "profiled_calls": 3}],
+        "summed_layers_mean_ms": 12,
+        "layer_types_mean_ms": {"gemm": 12},
+        "layers": [{"mean_ms_per_inference": 12}],
+    }
+    (tmp_path / "profile_report.json").write_text(json.dumps(report))
+    (tmp_path / "profile-r1.exit.json").write_text(json.dumps({"exit_code": 0}))
+    data = {"detail_tables": [], "recommendations": [], "experiments": ["untouched"]}
+    attach_profiles(data, [tmp_path], tmp_path)
+    assert data["experiments"] == ["untouched"]
+    assert "不计入正式测速" in data["detail_tables"][0]["title"]

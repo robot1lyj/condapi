@@ -285,6 +285,8 @@ def attach_additional_runs(data, reference, run_paths, logs):
             detail += f" / strongly typed 非量化 / 对导出前 BF16 eager 的归一化 14D 最大差={engine_error:.6g}"
             if record.get("engine_cuda_graph"):
                 detail += " / TensorRT CUDA Graph：逐输入要求与同引擎非图输出完全一致"
+            if record.get("time_modulation_cache"):
+                detail += " / 固定时间 AdaRMS 投影预计算，保留原 FP32"
         error = comparison["physical_dataset_units"]
         normalized = comparison["normalized_active_14d"]
         data["experiments"].append(
@@ -479,6 +481,50 @@ def attach_engine_next_steps(data):
     ]
 
 
+def attach_profiles(data, paths, logs):
+    for path in paths:
+        report_path = path / "profile_report.json"
+        report = json.loads(report_path.read_text())
+        run_id = report["run_id"]
+        host_exit = json.loads((logs / f"{run_id}.exit.json").read_text())
+        if host_exit["exit_code"] != 0 or report["status"] != "profiled_not_latency_or_accuracy_approved":
+            raise ValueError("Only completed diagnostic profiles can be shown here")
+        if not report["comparisons"] or not all(row["exact"] for row in report["comparisons"]):
+            raise ValueError("Profiling equivalence was not verified")
+        if report["profiled_calls"] != sum(row["profiled_calls"] for row in report["comparisons"]):
+            raise ValueError("Profile invocation count mismatch")
+        data.setdefault("layer_profiles", []).append(
+            {"report": report, "sha256": hashlib.sha256(report_path.read_bytes()).hexdigest(), "host_exit": host_exit}
+        )
+        rows = [
+            [kind, f"{ms:.3f}", f"{100 * ms / report['summed_layers_mean_ms']:.1f}%"]
+            for kind, ms in report["layer_types_mean_ms"].items()
+        ]
+        data["detail_tables"].insert(
+            0,
+            {
+                "title": "真实输入逐层分析 · 不计入正式测速",
+                "description": (
+                    f"{run_id}：{report['profiled_calls']} 次带分析开销的调用，"
+                    "与未开启 Profiler 的输出逐值一致。kgen 包含矩阵计算和融合算子，"
+                    "不能当作纯逐元素计算；各层时间之和不是端到端延迟。"
+                ),
+                "columns": ["TensorRT 内部类型", "平均每次调用的累计层级时间 ms", "层级时间占比"],
+                "rows": rows,
+            },
+        )
+        top = report["layers"][0]
+        next_step = {
+            "title": "逐层分析已完成，进入针对性优化",
+            "detail": (
+                f"本轮最大融合层约 {top['mean_ms_per_inference']:.2f} ms；"
+                "源节点定位和优化判断见 Thor 加速执行记录，不先假定瓶颈是注意力。"
+                "任何缓存或融合候选都保持原精度，先验证完整输出，再计时。"
+            ),
+        }
+        data["recommendations"][:1] = [next_step]
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--runs", nargs=3, type=Path, required=True)
@@ -490,6 +536,7 @@ def main():
     parser.add_argument("--additional-runs", type=Path, nargs="*", default=[])
     parser.add_argument("--failed-runs", nargs="*", default=[])
     parser.add_argument("--exports", type=Path, nargs="*", default=[])
+    parser.add_argument("--profiles", type=Path, nargs="*", default=[])
     args = parser.parse_args()
     data = build(args.runs, args.logs, json.loads(args.plan.read_text()))
     if args.conversion_audit:
@@ -499,6 +546,7 @@ def main():
     attach_front_runner(data)
     attach_exports(data, args.exports, args.logs)
     attach_engine_next_steps(data)
+    attach_profiles(data, args.profiles, args.logs)
     args.json.write_text(json.dumps(data, ensure_ascii=False, indent=2))
     args.html.write_text(render(data))
 

@@ -175,3 +175,15 @@ T/U 所有输出有限、重复最大差 0，但对导出前 BF16 eager 的归�
 累计 **16 组有效配置、2880 次正式调用**；新增 T 首轮绑定失败不计入。最快仍为 L 约 118.85 ms（旧循环数值分歧未单独定位），更简单的 I 约 124.15 ms 继续保留，T/U 不能替代它成为默认。下一步先用同一真实输入分析引擎各算子耗时，定位注意力/矩阵计算热点，再决定 SDPA/融合注意力的 BF16/FP32 导出或局部精度方案；不直接跳 FP16/FP4，不减少相机、H50 或去噪步数。未来 JAX LoRA 合并与任务级准确率仍需微调产物验证。
 
 证据：`docs/reports/thor/evidence/20260907/acceleration/pi05-{T-20260907-r2,U-20260907-r1}.*`、`compare-A-{T,U}-*.json`、`compare-T-U-20260907-r1.json`；原始动作数组分别保留于 Thor 和工作站各自 results 目录。中文 HTML 已纳入两组及新的后续计划，不把引擎构建时间写成推理延迟。
+
+## 固定时间条件投影：层级测量改变下一步选择
+
+`pi05-trt-profile-20260907-r1` 在同一非量化引擎、同一 9 个真实输入、同一 seed/noise/H50/10 步上完成 27 次带 Profiler 的调用。每个输入开启分析前后的原始 32D 和最终 14D 输出均相等。该诊断不增加正式 16 组/2880 次计数；TensorRT Profiler 会增加开销，各层平均时间之和 131.795 ms 不是新的端到端成绩。类型累计为 kgen 107.339 ms、gemm 24.100 ms、correlation 0.337 ms、custom_layer 0.019 ms；kgen 内含矩阵及融合计算，不能称为纯逐元素瓶颈。官方接口说明：https://docs.nvidia.com/deeplearning/tensorrt/10.x.x/_static/python-api/infer/Core/Profiler.html 。
+
+最大单个融合层为 18.6453 ms，包含 `node_linear_292` 到 `node_linear_1957` 等 370 个原始线性投影节点。检查原 ONNX 的 namespace / 输入依赖确认，前者对应 `gemma_expert.model.layers.0.input_layernorm.dense`，后者对应 `gemma_expert.model.norm.dense`；其输入来自 `time_mlp_in`、`time_mlp_out`，而不是相机或 noisy action。故本轮先测试固定时间条件缓存，不先假定瓶颈是注意力。
+
+候选 `--cache-time-modulation` 对 37 个 AdaRMS 投影分别缓存 10 个时间点的 FP32 输出；每个时间点仍用原 batch=1 GEMV，避免合批选核改变舍入。原始线性权重保留，wrapper 外仍可执行原路径；缓存是 non-persistent buffer，不写回 checkpoint。任何权重/LoRA 或去噪时间计划变化都使缓存失效，必须按新权重重建。该选项仅存在于推理测试/导出 wrapper，不改训练默认路径。
+
+`pi05-onnx-timecache-20260907-r1` 的 9 输入导出准备验证已通过：原始与最终动作均精确零差异。代码 `81356323839ab50a633432f80d4018b247c962a5`，仍使用 v6 镜像；后续 ONNX/引擎状态以其 exit/report 为准，准备通过不等于引擎或任务精度验收。下一配置 V 使用缓存引擎 + CUDA Graph，强制校验缓存来源，并继续验证同引擎图/非图完全一致及对 JAX A 的误差。
+
+原始层级数据与动作保留在 Thor/工作站 `artifacts/pi05-trt-profile-20260907-r1/`，报告和宿主证据已归档至 `docs/reports/thor/evidence/20260907/acceleration/pi05-trt-profile-20260907-r1.*`。分析会话退出恢复 120W；新导出会话单独记录功耗恢复。
