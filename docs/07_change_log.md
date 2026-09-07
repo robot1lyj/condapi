@@ -7,6 +7,12 @@
 - 提供一条命令的 tmux 恢复入口，优先选择已验收正式环境，临时环境丢失时仍保留共享盘检查点。
 - 本地 32 项、服务器 11 项相关测试通过；命令、日志和恢复边界归 docs/04。未改同期其他 agent 的 Thor 文档/内核记忆。
 
+## 2026-09-07 · 临时 MAXN 与原生 JAX GPU 检查通过
+
+- 用户指定推理测试使用 MAXN，又明确其他时间不启用：日常恢复 120W、动态调频、自动风扇；新增 `scripts/thor/maxn_session.py`，仅在前台测试期间切换，结束或常规异常后恢复，不创建 MAXN 自启动服务。
+- 5 项恢复逻辑单元测试通过；Thor 实际 GPU smoke 完成“120W → MAXN 锁频 → FP32/BF16 JIT 内核检查 → 120W/动态频率恢复”。SIGKILL/断电仍需手动检查恢复，避免夸大兜底能力。
+- NVIDIA JAX 26.05 ARM64 镜像已导入，容器内真实 GPU 运算通过；Python/Flax/Orbax/JAX 实读版本与启动告警写回部署 owner。完整 Pi0.5 checkpoint 加载和精度配置对照尚未执行，HTML 不填入虚构模型性能值。
+
 ## 2026-09-07 · 更新 Thor 实机状态与无屏管理
 
 - 修正核心记忆的旧安装状态：Thor 已安装官方系统并从 NVMe 启动，Wi-Fi 自动连接/SSH 管理已配置；HDMI 未解决与系统安装成功分别记录。详细当前事实归 `docs/08_thor_edge_deployment.md`，kernel 只保留来源摘要。

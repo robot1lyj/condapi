@@ -234,12 +234,24 @@ PR #960 作者给出的局部 checkpoint 对照如下；样本范围、硬件及
 - **显示问题独立保留**：HDMI 状态为 disconnected、EDID 为空，未定位为硬件或驱动问题。系统安装成功不依赖 HDMI 修复；为支持 NoMachine 无屏桌面，已于当日关闭 GDM 本地登录服务，改用下面的远程显示。
 - **NoMachine 无屏管理**：用户确认个人非商业用途，Thor 安装官方 `nomachine_9.8.3_1_arm64.deb`。`nxserver.service` enabled/active，启动模式 Automatic；`CreateDisplay 1`、`DisplayOwner "wuyan-lyj"`、`DisplayGeometry 1920x1080`。已核对 GNOME 会话运行，`:1001` 的 `nxoutput0` 实际为 1920×1080，USB/Wi-Fi 的 TCP 4000 均可达；客户端实际看到画面及重启后回连仍待用户确认。USB 地址 `192.168.55.1:4000`，Wi-Fi 当前 `192.168.110.108:4000`，使用系统账户登录，不把密码写入连接文件。工作站现有 Personal Edition 10.0.60 的 Player 可用作客户端；它的服务端订阅不是连接 Thor v9 的前提，不代表本机服务端已激活。
 - **无屏配置恢复**：原配置备份 `/usr/NX/etc/server.cfg.before-thor-headless-20260907`。HDMI 恢复且希望切回物理桌面时，先断开 NoMachine，再恢复备份至 `/usr/NX/etc/server.cfg`、执行 `sudo systemctl enable --now gdm3`，最后 `sudo /usr/NX/bin/nxserver --restart`；不要在远程会话中无提示重启桌面。仅为远程桌面而关闭 GDM，不改 GPU 驱动和推理容器。NoMachine 10 服务端已改为订阅/试用许可，不能把旧版免费说明用于 v10，参见 [官方许可说明](https://kb.nomachine.com/AR03P00972)。
-- **容器基础已安装**：Docker `29.1.3`（Ubuntu `docker.io` 包）、NVIDIA Container Toolkit `1.19.1`；用户已加入 docker 组。Thor 尚未安装 Compose CLI。Pi 系列只维护一个系列环境，不按 checkpoint 新建独立依赖栈。
-- **JAX 镜像已下载到工作站**：`nvcr.io/nvidia/jax:26.05-py3` ARM64，manifest digest `sha256:3f009a485f5ba64c177f2f8f7999adc900fcf14dce3f11b826f412ea19d23553`，77 层共 9,010,137,575 字节；本机目录 `/home/wuyan-lyj/thor-system/images/jax-26.05-arm64`，17:52 下载完成。正在导出归档以经 USB 导入，**尚未完成 Thor GPU smoke / OpenPI 依赖适配**。不使用仓库训练环境的 CUDA 12/JAX 0.5.3 锁定项直接覆盖 NVIDIA 容器栈。
+- **容器基础已安装**：Docker `29.1.3`（Ubuntu `docker.io` 包）、NVIDIA Container Toolkit `1.19.1`、Docker Compose `2.40.3`；用户已加入 docker 组，Compose 配置解析通过。Pi 系列只维护一个系列环境，不按 checkpoint 新建独立依赖栈。
+- **JAX 镜像已导入 Thor 并通过 GPU 内核检查**：`nvcr.io/nvidia/jax:26.05-py3` ARM64，manifest digest `sha256:3f009a485f5ba64c177f2f8f7999adc900fcf14dce3f11b826f412ea19d23553`，77 层共 9,010,137,575 字节。工作站 `/home/wuyan-lyj/thor-system/images/jax-26.05-arm64` 下载完成后导出 gzip 归档，经 USB 传输 9,265,433,320 字节、约 29.47 MB/s，已完成 docker load。
+- **实测 GPU 范围**：当日 18:15 使用 `maxn_session.py` 临时 MAXN，在禁网容器中执行 `scripts/docker/thor/jax_smoke.py`；FP32/BF16 的 JIT 矩阵乘法精确值检查、随机生成和非线性有限值检查全部通过，结束后实际自动恢复 120W/动态时钟。原始日志 `/home/wuyan-lyj/thor/pi/logs/jax-kernel-smoke-maxn-20260907.log`，工作站镜像目录留有副本。启动有 CUDA 驱动版本字符串格式告警但运算成功，不能把此小矩阵测试当作完整 Pi0.5 延迟/精度验收。
+- **容器内版本实读**：Python 3.12.3、JAX `0.10.0.dev20260415+c98e1bb97`、jaxlib `0.10.0.dev20260521`、Flax 0.12.6、Orbax 0.11.39、NumPy 2.4.4，未装 torch。**OpenPI 依赖适配/完整 checkpoint 加载仍未完成**；不使用仓库训练 CUDA 12/JAX 0.5.3 锁定项直接覆盖 NVIDIA 容器栈。
 - **模型资产已在 Thor**：`/home/wuyan-lyj/thor/pi/checkpoints/pi05_base`（12,441,749,581 字节），分词器 `/home/wuyan-lyj/thor/pi/cache/big_vision/paligemma_tokenizer.model`。Orbax 元数据实读 51 个参数叶子均 float32；原始磁盘权重未改写，没有已微调 YAM checkpoint。
 - **测试输入已本地化**：`/home/wuyan-lyj/thor/pi/test-data/ABC-130k-two-tasks/lego_sorting` 保存 train 轨迹 95、96、97，共 7,962 帧观测、9 个视频文件；连同 parquet/原始 manifest 共 60,021,788 字节。11 文件在服务器、工作站、Thor 的 SHA-256 一致，本机完整解码与状态/动作结构审计通过。另保留转换小样本于 `test-data/lego_sorting/smoke-train-20260907`。原始 manifest 覆盖更多轨迹，不代表整库已下载；耳机任务尚未找到三路齐全轨迹。所有回放从 Thor 磁盘读取，不从服务器实时取帧。
 - **精度对照仍待实测**：A 原始 FP32 参数 / FP32 计算 / highest；B 原始 FP32 参数 / BF16 计算；C 读取为 BF16 / BF16 计算。固定输入、噪声、10 次去噪与 50 步 horizon，分开首次编译和预热后完整调用计时。尚需生成固定输入和与 YAM delta 合同匹配、明确仅用于 benchmark 的 norm_stats；不套用 DROID 统计，不宣称基础模型具备 YAM 任务成功率。
 - **工具与结果入口**：`scripts/thor/benchmark_pi05.py`、`scripts/thor/render_report.py` 和 `docs/reports/thor/index.html`；11 项相关单元测试通过，不代表模型/GPU 验收。转换到 PyTorch 后的键/形状/dtype/LoRA 覆盖、逐层和完整动作对照另行验收，之后再分组比较 BF16/FP16、TensorRT 与量化，不同时改变格式和精度后直接接受结果。
+
+### MAXN 性能测试约定（2026-09-07 用户指定）
+
+- 用户进一步明确：**只在推理/测试时启用 MAXN**；安装、下载、远程桌面和待机时使用日常 120W、动态调频及自动风扇，不新增 MAXN/锁频自启动服务。性能测试使用本机官方 `MAXN` / mode 0，不修改官方频率表进行额外超频。
+- 使用 `sudo python3 scripts/thor/maxn_session.py -- <前台推理命令及参数>`：从 120W 保存当前时钟配置，临时切到 MAXN 并锁最高频率，前台命令结束后自动恢复已保存时钟与 120W；普通异常和 SIGINT/SIGTERM/SIGHUP 同样走恢复流程。禁止传入脱离前台的后台启动命令。断电、SIGKILL 或恢复命令本身失败不能保证清理，应按保留的时钟备份手动恢复并复核；不宣称全故障覆盖。
+- 当日已实机生效、无需重启：CPU 14 核在线且 min=max=current=2,601,000 kHz；GPU min=max=current=1,575,000,000 Hz；EMC min=max=current=4,266,000,000 Hz。`nvidia-smi` 亦实读 GPU 1575 MHz。模式名与频率是运行时观察，重启或其他工具改变配置后重新检查。
+- 曾尝试满速风扇：`jetson_clocks --fan` 在此 BSP 对 `pwm1_enable` 写入 255 报告 Invalid argument；当时实际 `pwm1=255`、`pwm1_enable=1`。已恢复自动风扇（nvfancontrol active，PWM 实读回到 78）；新启动器不使用有该告警的 `--fan`，保留自动散热并采集温度/频率，遇到降频不能宣称持续最高性能，不关闭硬件保护。
+- 首次切换前备份保留于 `/home/wuyan-lyj/thor/pi/logs/clocks-before-maxn-20260907.conf`；已执行恢复并确认 120W、CPU/GPU min/max 不再锁为同值。每次临时启动器另保存独立 `/tmp/thor-maxn-*/clocks.conf`。手动恢复先 `sudo jetson_clocks --restore <本次备份>`，再 `sudo nvpmodel -m 1`，复核自动风扇恢复。
+- MAXN 模式可跨重启保留，但不假设 `jetson_clocks` 的静态锁频也跨重启；每次推理计时前必须重新核对。报告绑定功耗模式、CPU/GPU/EMC 频率、温度和降频情况；桌面远程连接/后台负载也记录，避免混入精度差异。
+- 官方明确 MAXN 仍会受到供电/热限制，不能保证每种负载都比 120W 快；本项目按用户指定 MAXN 实测，不把模式名本身当作性能结论。[对应 r39.2.1 官方说明](https://docs.nvidia.com/jetson/archives/r39.2.1/DeveloperGuide/SD/PlatformPowerAndPerformance/JetsonThor.html#supported-modes-and-power-efficiency)
 
 ### 早期安装记录（历史状态，不能作为当前未完成项）
 

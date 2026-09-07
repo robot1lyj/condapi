@@ -21,15 +21,15 @@ details{margin-top:22px}summary{cursor:pointer;color:var(--accent)}pre{font-size
 footer{color:var(--muted);font-size:12px;margin-top:20px;text-align:center}@media(max-width:800px){.facts{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr;gap:0}h1{font-size:28px}main{padding:0 14px}.panel{padding:18px}}
 </style><header><div class="eyebrow">EDGE INFERENCE / 可复现实测</div><h1>Thor · Pi0.5 推理实验室</h1>
 <p>原始 JAX 权重 → 精度对照 → 真实样本离线回放。把可运行、数值一致与任务有效分开验收。</p>
-<div class="meta">更新于 2026-09-07T17:39:00+08:00 · 基础模型 pi05_base · 不连接机械臂执行动作</div></header>
-<main><section class="facts"><article class="fact"><div>系统基线</div><strong>JetPack 7.2.1</strong><small>已启动 NVMe · L4T 39.2.1 · Ubuntu 24.04.4</small></article><article class="fact"><div>基础权重</div><strong>12.44 GB</strong><small>已通过 USB 传入 Thor，原始 checkpoint 未改写</small></article><article class="fact"><div>权重元数据</div><strong>51 / FP32</strong><small>Orbax metadata 实读，51 个叶子均为 float32</small></article><article class="fact"><div>已完成模型配置测试</div><strong>0 / 3</strong><small>模型推理尚未开始，容器镜像下载中</small></article></section><section class="panel"><h2>精度配置对照</h2>
+<div class="meta">更新于 2026-09-07T18:16:00+08:00 · 基础模型 pi05_base · 不连接机械臂执行动作</div></header>
+<main><section class="facts"><article class="fact"><div>系统基线</div><strong>JetPack 7.2.1</strong><small>已启动 NVMe · L4T 39.2.1 · Ubuntu 24.04.4</small></article><article class="fact"><div>基础权重</div><strong>12.44 GB</strong><small>已通过 USB 传入 Thor，原始 checkpoint 未改写</small></article><article class="fact"><div>权重元数据</div><strong>51 / FP32</strong><small>Orbax metadata 实读，51 个叶子均为 float32</small></article><article class="fact"><div>已完成模型配置测试</div><strong>0 / 3</strong><small>容器 GPU 内核检查已通过，完整模型尚未开始</small></article></section><section class="panel"><h2>精度配置对照</h2>
 <p class="sub">参数存储精度不等于计算精度。延迟以预热后完整 policy 调用为准，首次编译单独记录；“—”表示尚无实测数据。</p>
 <div class="tablewrap"><table><thead><tr><th>配置</th><th>权重</th><th>计算</th><th>状态</th><th>P50 / ms</th><th>P95 / ms</th><th>最大绝对误差</th><th>说明</th></tr></thead><tbody><tr><td><strong>A · 全精度参考</strong><small>原生 JAX / 基础模型</small></td><td>保留 FP32</td><td>FP32 / highest</td><td><span class="badge">待测试</span></td><td>—</td><td>—</td><td>—</td><td>先建立参考输出，不使用 TF32 降精度作为基线</td></tr><tr><td><strong>B · 性能候选</strong><small>原生 JAX / 基础模型</small></td><td>保留 FP32</td><td>BF16</td><td><span class="badge">待测试</span></td><td>—</td><td>—</td><td>—</td><td>单独检查计算精度变化的影响，不预先认定准确性达标</td></tr><tr><td><strong>C · 默认路径对照</strong><small>原生 JAX / 基础模型</small></td><td>读取为 BF16</td><td>BF16</td><td><span class="badge">待测试</span></td><td>—</td><td>—</td><td>—</td><td>读取时舍入但不改写原始文件；与 B 比较权重精度的额外影响</td></tr></tbody></table></div></section>
-<div class="grid"><section class="panel"><h2>执行进度与证据</h2><ul class="timeline"><li><span class="dot"></span><strong>系统与管理网络 · 已核对</strong><p>Thor GPU 可被 nvidia-smi 识别；Wi-Fi 自动连接开启，失败无限重试，SSH 密钥登录已验证。未做重启回连实测。</p></li><li><span class="dot"></span><strong>USB 传输 · 已完成</strong><p>pi05_base 12,441,749,581 字节完成 rsync，约 30.10 MB/s；PaliGemma 分词器 4.1MB 已传入缓存。</p></li><li><span class="dot"></span><strong>精度入口 · 单元测试通过</strong><p>新增 checkpoint / float32 / bfloat16 读取选项，旧默认路径保持；4 项单元测试通过。此结果不是 GPU 或模型推理验收。</p></li><li><span class="dot"></span><strong>官方 JAX 容器 · 下载中</strong><p>候选 nvcr.io/nvidia/jax:26.05-py3，ARM64；Thor 直拉遇到 EOF，切换本机代理分层下载，之后经 USB 导入。</p></li><li><span class="dot"></span><strong>本地录像 · 已下载并复制到 Thor</strong><p>乐高分拣 train 轨迹 95/96/97，共 7,962 帧观测、9 路视频文件；连同 parquet 和原始 manifest 为 60,021,788 字节。11 个文件在服务器、本机和 Thor 的 SHA-256 一致。另已复制 7,485,274 字节的转换小样本。</p></li><li><span class="dot"></span><strong>录像结构 · 3 条通过</strong><p>本机 audit_yam_subset --limit 3 完整解码视频并核对时间戳、帧数、14D 有限状态/动作。只确认输入结构，不代表模型效果；耳机任务目前无三路齐全轨迹，未下载残缺样本。</p></li><li><span class="dot"></span><strong>回放路径 · Thor 本地离线</strong><p>数据位于 /home/wuyan-lyj/thor/pi/test-data，容器只读挂载 /test-data；服务器只作为一次性下载来源，推理计时不含服务器网络传输。下一步准备固定输入及匹配的 benchmark-only YAM norm_stats。</p></li><li><span class="dot"></span><strong>测试工具 · 11 项单元测试通过</strong><p>覆盖权重 dtype 选择、本地输入校验和中文 HTML 展示；尚未执行模型推理，不用单元测试替代真实 GPU 结果。</p></li></ul></section>
+<div class="grid"><section class="panel"><h2>执行进度与证据</h2><ul class="timeline"><li><span class="dot"></span><strong>系统与管理网络 · 已核对</strong><p>Thor GPU 可被 nvidia-smi 识别；Wi-Fi 自动连接开启，失败无限重试，SSH 密钥登录已验证。未做重启回连实测。</p></li><li><span class="dot"></span><strong>USB 传输 · 已完成</strong><p>pi05_base 12,441,749,581 字节完成 rsync，约 30.10 MB/s；PaliGemma 分词器 4.1MB 已传入缓存。</p></li><li><span class="dot"></span><strong>精度入口 · 单元测试通过</strong><p>新增 checkpoint / float32 / bfloat16 读取选项，旧默认路径保持；4 项单元测试通过。此结果不是 GPU 或模型推理验收。</p></li><li><span class="dot"></span><strong>官方 JAX 容器 · 已导入，GPU 内核检查通过</strong><p>nvcr.io/nvidia/jax:26.05-py3 ARM64 已完成 USB 传输与 docker load。禁网容器执行 FP32/BF16 JIT 矩阵乘法、随机生成和非线性检查通过；原始日志 jax-kernel-smoke-maxn-20260907.log。驱动版本字符串格式告警保留；此处不是完整 policy 测试。</p></li><li><span class="dot"></span><strong>NoMachine · 无屏桌面已生成</strong><p>Thor 9.8.3 开机服务启用，GNOME / nxoutput0 为 1920×1080；已实际抓取并查看桌面画面。无线管理地址 192.168.110.108:4000，USB 192.168.55.1:4000。为此关闭 GDM 本地登录；不代表 HDMI 已修复，未重启测试。</p></li><li><span class="dot"></span><strong>性能模式 · 仅推理期间 MAXN，自动恢复已实测</strong><p>日常 120W、动态调频和自动风扇；推理期间临时切 MAXN，CPU 2.601 GHz、GPU 1.575 GHz、EMC 4.266 GHz。5 项恢复逻辑单元测试通过；刚才 GPU smoke 实际进入 MAXN、退出后自动恢复 120W，未设置常驻/开机 MAXN。</p></li><li><span class="dot"></span><strong>本地录像 · 已下载并复制到 Thor</strong><p>乐高分拣 train 轨迹 95/96/97，共 7,962 帧观测、9 路视频文件；连同 parquet 和原始 manifest 为 60,021,788 字节。11 个文件在服务器、本机和 Thor 的 SHA-256 一致。另已复制 7,485,274 字节的转换小样本。</p></li><li><span class="dot"></span><strong>录像结构 · 3 条通过</strong><p>本机 audit_yam_subset --limit 3 完整解码视频并核对时间戳、帧数、14D 有限状态/动作。只确认输入结构，不代表模型效果；耳机任务目前无三路齐全轨迹，未下载残缺样本。</p></li><li><span class="dot"></span><strong>回放路径 · Thor 本地离线</strong><p>数据位于 /home/wuyan-lyj/thor/pi/test-data，容器只读挂载 /test-data；服务器只作为一次性下载来源，推理计时不含服务器网络传输。下一步准备固定输入及匹配的 benchmark-only YAM norm_stats。</p></li><li><span class="dot"></span><strong>测试工具 · 11 项单元测试通过</strong><p>覆盖权重 dtype 选择、本地输入校验和中文 HTML 展示；尚未执行模型推理，不用单元测试替代真实 GPU 结果。</p></li></ul></section>
 <section class="panel"><h2>结果解释边界</h2><p class="sub">性能数据只回答“多快”，不自动回答“动作是否正确”。</p>
 <div class="notice"><strong>当前限制</strong><ul><li>当前只有官方基础模型，未进行 YAM 微调；输出一致性测试不能代表 YAM 任务成功率。</li><li>未运行完整模型，因此本页暂不展示延迟、动作误差或部署通过结论。</li><li>后续 JAX→PyTorch、FP16/BF16、TensorRT、量化各自独立建组；保留原始权重，验证键、形状、dtype 和 LoRA，禁止将阶段差异混在一起。</li><li>HDMI 仍报告 disconnected，显示器信息为空；目前使用 SSH 无屏管理。</li><li>USB 是临时管理通道，Wi-Fi 是管理网络；Thor↔3588 网线直连才是计划中的生产数据通道。</li></ul></div>
 <details><summary>展开原始记录 JSON</summary><pre>{
-  &quot;updated_at&quot;: &quot;2026-09-07T17:39:00+08:00&quot;,
+  &quot;updated_at&quot;: &quot;2026-09-07T18:16:00+08:00&quot;,
   &quot;facts&quot;: [
     {
       &quot;label&quot;: &quot;系统基线&quot;,
@@ -49,7 +49,7 @@ footer{color:var(--muted);font-size:12px;margin-top:20px;text-align:center}@medi
     {
       &quot;label&quot;: &quot;已完成模型配置测试&quot;,
       &quot;value&quot;: &quot;0 / 3&quot;,
-      &quot;detail&quot;: &quot;模型推理尚未开始，容器镜像下载中&quot;
+      &quot;detail&quot;: &quot;容器 GPU 内核检查已通过，完整模型尚未开始&quot;
     }
   ],
   &quot;experiments&quot;: [
@@ -92,8 +92,16 @@ footer{color:var(--muted);font-size:12px;margin-top:20px;text-align:center}@medi
       &quot;detail&quot;: &quot;新增 checkpoint / float32 / bfloat16 读取选项，旧默认路径保持；4 项单元测试通过。此结果不是 GPU 或模型推理验收。&quot;
     },
     {
-      &quot;title&quot;: &quot;官方 JAX 容器 · 下载中&quot;,
-      &quot;detail&quot;: &quot;候选 nvcr.io/nvidia/jax:26.05-py3，ARM64；Thor 直拉遇到 EOF，切换本机代理分层下载，之后经 USB 导入。&quot;
+      &quot;title&quot;: &quot;官方 JAX 容器 · 已导入，GPU 内核检查通过&quot;,
+      &quot;detail&quot;: &quot;nvcr.io/nvidia/jax:26.05-py3 ARM64 已完成 USB 传输与 docker load。禁网容器执行 FP32/BF16 JIT 矩阵乘法、随机生成和非线性检查通过；原始日志 jax-kernel-smoke-maxn-20260907.log。驱动版本字符串格式告警保留；此处不是完整 policy 测试。&quot;
+    },
+    {
+      &quot;title&quot;: &quot;NoMachine · 无屏桌面已生成&quot;,
+      &quot;detail&quot;: &quot;Thor 9.8.3 开机服务启用，GNOME / nxoutput0 为 1920×1080；已实际抓取并查看桌面画面。无线管理地址 192.168.110.108:4000，USB 192.168.55.1:4000。为此关闭 GDM 本地登录；不代表 HDMI 已修复，未重启测试。&quot;
+    },
+    {
+      &quot;title&quot;: &quot;性能模式 · 仅推理期间 MAXN，自动恢复已实测&quot;,
+      &quot;detail&quot;: &quot;日常 120W、动态调频和自动风扇；推理期间临时切 MAXN，CPU 2.601 GHz、GPU 1.575 GHz、EMC 4.266 GHz。5 项恢复逻辑单元测试通过；刚才 GPU smoke 实际进入 MAXN、退出后自动恢复 120W，未设置常驻/开机 MAXN。&quot;
     },
     {
       &quot;title&quot;: &quot;本地录像 · 已下载并复制到 Thor&quot;,

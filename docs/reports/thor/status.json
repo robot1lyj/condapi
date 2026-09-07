@@ -1,10 +1,10 @@
 {
-  "updated_at": "2026-09-07T17:39:00+08:00",
+  "updated_at": "2026-09-07T18:16:00+08:00",
   "facts": [
     {"label": "系统基线", "value": "JetPack 7.2.1", "detail": "已启动 NVMe · L4T 39.2.1 · Ubuntu 24.04.4"},
     {"label": "基础权重", "value": "12.44 GB", "detail": "已通过 USB 传入 Thor，原始 checkpoint 未改写"},
     {"label": "权重元数据", "value": "51 / FP32", "detail": "Orbax metadata 实读，51 个叶子均为 float32"},
-    {"label": "已完成模型配置测试", "value": "0 / 3", "detail": "模型推理尚未开始，容器镜像下载中"}
+    {"label": "已完成模型配置测试", "value": "0 / 3", "detail": "容器 GPU 内核检查已通过，完整模型尚未开始"}
   ],
   "experiments": [
     {"name": "A · 全精度参考", "scope": "原生 JAX / 基础模型", "weights": "保留 FP32", "compute": "FP32 / highest", "status": "待测试", "note": "先建立参考输出，不使用 TF32 降精度作为基线"},
@@ -15,7 +15,9 @@
     {"title": "系统与管理网络 · 已核对", "detail": "Thor GPU 可被 nvidia-smi 识别；Wi-Fi 自动连接开启，失败无限重试，SSH 密钥登录已验证。未做重启回连实测。"},
     {"title": "USB 传输 · 已完成", "detail": "pi05_base 12,441,749,581 字节完成 rsync，约 30.10 MB/s；PaliGemma 分词器 4.1MB 已传入缓存。"},
     {"title": "精度入口 · 单元测试通过", "detail": "新增 checkpoint / float32 / bfloat16 读取选项，旧默认路径保持；4 项单元测试通过。此结果不是 GPU 或模型推理验收。"},
-    {"title": "官方 JAX 容器 · 下载中", "detail": "候选 nvcr.io/nvidia/jax:26.05-py3，ARM64；Thor 直拉遇到 EOF，切换本机代理分层下载，之后经 USB 导入。"},
+    {"title": "官方 JAX 容器 · 已导入，GPU 内核检查通过", "detail": "nvcr.io/nvidia/jax:26.05-py3 ARM64 已完成 USB 传输与 docker load。禁网容器执行 FP32/BF16 JIT 矩阵乘法、随机生成和非线性检查通过；原始日志 jax-kernel-smoke-maxn-20260907.log。驱动版本字符串格式告警保留；此处不是完整 policy 测试。"},
+    {"title": "NoMachine · 无屏桌面已生成", "detail": "Thor 9.8.3 开机服务启用，GNOME / nxoutput0 为 1920×1080；已实际抓取并查看桌面画面。无线管理地址 192.168.110.108:4000，USB 192.168.55.1:4000。为此关闭 GDM 本地登录；不代表 HDMI 已修复，未重启测试。"},
+    {"title": "性能模式 · 仅推理期间 MAXN，自动恢复已实测", "detail": "日常 120W、动态调频和自动风扇；推理期间临时切 MAXN，CPU 2.601 GHz、GPU 1.575 GHz、EMC 4.266 GHz。5 项恢复逻辑单元测试通过；刚才 GPU smoke 实际进入 MAXN、退出后自动恢复 120W，未设置常驻/开机 MAXN。"},
     {"title": "本地录像 · 已下载并复制到 Thor", "detail": "乐高分拣 train 轨迹 95/96/97，共 7,962 帧观测、9 路视频文件；连同 parquet 和原始 manifest 为 60,021,788 字节。11 个文件在服务器、本机和 Thor 的 SHA-256 一致。另已复制 7,485,274 字节的转换小样本。"},
     {"title": "录像结构 · 3 条通过", "detail": "本机 audit_yam_subset --limit 3 完整解码视频并核对时间戳、帧数、14D 有限状态/动作。只确认输入结构，不代表模型效果；耳机任务目前无三路齐全轨迹，未下载残缺样本。"},
     {"title": "回放路径 · Thor 本地离线", "detail": "数据位于 /home/wuyan-lyj/thor/pi/test-data，容器只读挂载 /test-data；服务器只作为一次性下载来源，推理计时不含服务器网络传输。下一步准备固定输入及匹配的 benchmark-only YAM norm_stats。"},
