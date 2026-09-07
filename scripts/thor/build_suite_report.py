@@ -446,6 +446,39 @@ def attach_exports(data, paths, logs):
         )
 
 
+def attach_engine_next_steps(data):
+    engines = [record for record in data["measured_records"] if record.get("backend") == "tensorrt"]
+    if not engines:
+        return
+    best = min(engines, key=lambda record: record["p50_ms"])
+    data["recommendations"] = [
+        {
+            "title": "非量化引擎已实测，按证据选择下一步",
+            "detail": (
+                f"当前 TensorRT 最快 {best['p50_ms']:.2f} ms / P95 {best['p95_ms']:.2f} ms；"
+                "保持三相机、H50、去噪 10。若仍高于 100 ms，先对真实输入做算子耗时分析，"
+                "确认注意力/矩阵计算热点，再测试融合实现，不反复盲调图重放。"
+            ),
+        },
+        {
+            "title": "保留两个精度对照，不直接采用低比特量化",
+            "detail": (
+                "每个新引擎同时比较原生 JAX FP32 和导出前 BF16 eager；"
+                "纯调度优化还须与同一引擎非图输出完全一致。"
+                "BF16 误差不是任务精度保证；FP8 仅作独立候选，FP4 不作为默认方案。"
+            ),
+        },
+        {
+            "title": "当前候选与未来微调分开",
+            "detail": (
+                "当前保留原生 JAX 精度参考和较简单的 PyTorch 编译路径；"
+                "基础模型录像回放不替代实机成功率。未来 JAX LoRA 必须先在 FP32 合并并验证，"
+                "随后转换和绑定该 checkpoint 的 norm；原始 checkpoint/LoRA 始终保留。"
+            ),
+        },
+    ]
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--runs", nargs=3, type=Path, required=True)
@@ -465,6 +498,7 @@ def main():
     attach_failed_runs(data, args.failed_runs, args.logs)
     attach_front_runner(data)
     attach_exports(data, args.exports, args.logs)
+    attach_engine_next_steps(data)
     args.json.write_text(json.dumps(data, ensure_ascii=False, indent=2))
     args.html.write_text(render(data))
 

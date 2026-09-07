@@ -1,5 +1,6 @@
 import json
 
+from build_suite_report import attach_engine_next_steps
 from build_suite_report import attach_exports
 from build_suite_report import attach_front_runner
 
@@ -37,3 +38,12 @@ def test_export_preparation_pass_does_not_hide_failed_export(tmp_path):
     assert "失败" in data["detail_tables"][0]["rows"][0][3]
     assert data["detail_tables"][0]["rows"][0][4] == "1/1 输入完全一致"
     assert "experiments" not in data
+
+def test_engine_plan_uses_actual_result_without_accuracy_claim():
+    data = {"measured_records": [], "recommendations": ["original"]}
+    attach_engine_next_steps(data)
+    assert data["recommendations"] == ["original"]
+    data["measured_records"] = [{"backend": "tensorrt", "p50_ms": 127.37, "p95_ms": 127.99}]
+    attach_engine_next_steps(data)
+    assert "127.37" in data["recommendations"][0]["detail"]
+    assert "不是任务精度保证" in data["recommendations"][1]["detail"]
