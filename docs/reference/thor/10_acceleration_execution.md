@@ -61,3 +61,11 @@ Thor 产物：
 本机只读参考仓库 `/home/wuyan-lyj/thor-system/references/openpi-thor/` 固定提交 `40c88146e5e6b82526db6583c8a75520e02e551e`。其 [export.py](https://github.com/xuweiwu/openpi-thor/blob/40c88146e5e6b82526db6583c8a75520e02e551e/src/openpi_thor/export.py) 支持从 config 读取 action horizon，但公开导出入口将 compute dtype 固定为 FP16，并对 Gemma MLP 中间结果使用 `nan_to_num`。因此“最后输出有限”不能单独证明该路径没有溢出或精度变化。
 
 后续若借用该导出器，应单独核对 FP32 稳定层、溢出修正是否触发和原 JAX 动作偏差；不能直接覆盖项目源码、沿用它的环境降级或照搬社区的精度阈值。当前优先测试不依赖这种 FP16 修正的 PyTorch BF16/SDPA 路径，再决定 TensorRT 适配细节。
+
+### 镜像文件校验已完成
+
+2026-09-07 20:10（北京时间），Thor 上 62 个唯一 config/blob 文件全部通过 SHA-256 验证，见 [原始校验日志](../../reports/thor/evidence/20260907/acceleration/pytorch-image-verify.log)。最后 9 个本机未完成的层从 Thor 本轮 Docker 拉取已完成的 containerd 内容缓存取出，逐个核对哈希；没有删除 Docker 缓存。
+
+随后停止本轮自己的剩余重复网络拉取，保留部分下载文件。Thor 安装了镜像工具 skopeo 1.13.3；直接写 docker-daemon 返回 `io: read/write on closed pipe`，因此使用已经验证过的 docker-archive → `docker load` 路径。该错误的底层原因没有进一步认定。
+
+下载器在文件齐备时现可完全离线校验/发布 manifest，不再为了检查本地缓存请求 NGC token。GPU 候选 Dockerfile 在装依赖前生成已装 torch / NVIDIA / TensorRT / NumPy / SciPy 版本约束；不依赖底座里内容为空的 `/etc/pip/constraint.txt` 来保证底层库不变。

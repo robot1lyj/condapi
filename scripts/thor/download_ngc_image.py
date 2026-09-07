@@ -11,6 +11,7 @@ import json
 from pathlib import Path
 import re
 import shutil
+import threading
 import time
 
 import requests
@@ -50,13 +51,21 @@ def main():
     published = args.output / "manifest.json"
     if published.exists() and digest(published) != checked_name(args.manifest_digest):
         parser.error("Output already belongs to a different image")
-    auth = requests.get(
-        "https://nvcr.io/proxy_auth",
-        params={"scope": f"repository:{args.repository}:pull"},
-        timeout=30,
-    )
-    auth.raise_for_status()
-    token = auth.json()["token"]
+    token = None
+    token_lock = threading.Lock()
+
+    def pull_token():
+        nonlocal token
+        with token_lock:
+            if token is None:
+                auth = requests.get(
+                    "https://nvcr.io/proxy_auth",
+                    params={"scope": f"repository:{args.repository}:pull"},
+                    timeout=30,
+                )
+                auth.raise_for_status()
+                token = auth.json()["token"]
+            return token
 
     def fetch(item):
         name = checked_name(item["digest"])
@@ -80,7 +89,7 @@ def main():
         for attempt in range(4):
             try:
                 start = partial.stat().st_size if partial.exists() else 0
-                headers = {"Authorization": f"Bearer {token}"}
+                headers = {"Authorization": f"Bearer {pull_token()}"}
                 if start:
                     headers["Range"] = f"bytes={start}-"
                 # requests strips Authorization on cross-host redirects.

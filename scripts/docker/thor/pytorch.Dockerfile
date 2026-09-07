@@ -11,7 +11,10 @@ ENV JAX_PLATFORMS=cpu \
 # Keep NVIDIA's torch/CUDA/TensorRT versions. JAX is CPU-only transform/IO
 # infrastructure here; checkpoint restoration uses the separate converter image.
 ARG PIP_INDEX_URL=https://pypi.tuna.tsinghua.edu.cn/simple
-RUN python3 -m pip install --no-cache-dir --index-url ${PIP_INDEX_URL} \
+COPY scripts/docker/thor/preserve_vendor_stack.py /opt/thor/preserve_vendor_stack.py
+RUN python3 /opt/thor/preserve_vendor_stack.py /opt/thor/vendor-constraints.txt --backend pytorch \
+    && python3 -m pip install --no-cache-dir --index-url ${PIP_INDEX_URL} \
+    -c /opt/thor/vendor-constraints.txt \
     'jax==0.6.2' 'jaxlib==0.6.2' 'flax==0.10.2' 'orbax-checkpoint==0.11.13' \
     'transformers==4.53.2' 'augmax==0.3.4' 'beartype==0.19.0' \
     'jaxtyping==0.2.36' 'dm-tree==0.1.9' 'ml_collections==1.0.0' \

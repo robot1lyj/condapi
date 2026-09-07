@@ -42,7 +42,7 @@ def test_reuses_verified_cache_without_fetching_blobs(tmp_path, monkeypatch):
 
     monkeypatch.setattr(download.requests, "get", get)
     download.main()
-    assert len(calls) == 1
+    assert len(calls) == 0
     assert (output / name).read_bytes() == payload
     assert (cache / name).read_bytes() == payload
     assert (output / "manifest.json").read_bytes() == manifest.read_bytes()
