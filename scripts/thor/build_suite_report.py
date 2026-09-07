@@ -268,6 +268,8 @@ def attach_additional_runs(data, reference, run_paths, logs):
         if record.get("cuda_graph"):
             graph_error = max(m["cuda_graph_vs_eager_max_abs"] for m in record["measurements"])
             detail += f" / 图重放与非图旧循环最大差={graph_error:.6g}（同算子实现，计时外逐输入验证）"
+        if record.get("thor_triton_autotune"):
+            detail += " / Thor SM 门槛实验：ATen 与 Triton 实测选核，独立编译缓存"
         error = comparison["physical_dataset_units"]
         normalized = comparison["normalized_active_14d"]
         data["experiments"].append(

@@ -22,6 +22,7 @@ TORCH_MODES = {
     "K": ("bfloat16", "bfloat16"),
     "L": ("bfloat16", "bfloat16"),
     "M": ("bfloat16", "bfloat16"),
+    "N": ("bfloat16", "bfloat16"),
 }
 
 
@@ -45,6 +46,7 @@ def main():
         is_pytorch = mode in TORCH_MODES
         params, compute = (TORCH_MODES if is_pytorch else MODES)[mode]
         checkpoint = "pi05_base_pytorch_fp32_v1" if is_pytorch else "pi05_base"
+        inductor_cache = "/cache/torchinductor-thor-triton-v1" if mode == "N" else "/cache/torchinductor"
         command = [
             "docker",
             "run",
@@ -62,7 +64,7 @@ def main():
             "-e",
             "PYTHONUNBUFFERED=1",
             "-e",
-            "TORCHINDUCTOR_CACHE_DIR=/cache/torchinductor",
+            f"TORCHINDUCTOR_CACHE_DIR={inductor_cache}",
             "-e",
             "TRITON_CACHE_DIR=/cache/triton",
             "-v",
@@ -90,17 +92,21 @@ def main():
             f"/results/{label}",
         ]
         if is_pytorch:
-            command.extend(["--backend", "pytorch", "--compile" if mode in ("F", "G", "H", "I") else "--no-compile"])
-            if mode in ("F", "G", "H", "I", "J", "K", "L", "M"):
+            command.extend(
+                ["--backend", "pytorch", "--compile" if mode in ("F", "G", "H", "I", "N") else "--no-compile"]
+            )
+            if mode in ("F", "G", "H", "I", "J", "K", "L", "M", "N"):
                 command.append("--native-attention-mask")
             if mode in ("G", "H", "K", "M"):
                 command.extend(["--attention", "sdpa"])
-            if mode in ("H", "I", "J", "K", "L", "M"):
+            if mode in ("H", "I", "J", "K", "L", "M", "N"):
                 command.append("--batch-vision")
             if mode in ("J", "K", "L", "M"):
                 command.append("--cuda-graph")
             if mode in ("L", "M"):
                 command.append("--compile-graph-parts")
+            if mode == "N":
+                command.append("--thor-triton-autotune")
         prefix.parent.mkdir(parents=True, exist_ok=True)
         files = sorted([*scripts.glob("*.py"), *repo.glob("src/openpi/**/*.py"), *repo.glob("scripts/docker/thor/*")])
         hashes = {str(p.relative_to(repo)): hashlib.sha256(p.read_bytes()).hexdigest() for p in files if p.is_file()}

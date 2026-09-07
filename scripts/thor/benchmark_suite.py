@@ -44,6 +44,7 @@ def main():
     parser.add_argument("--native-attention-mask", action="store_true")
     parser.add_argument("--cuda-graph", action="store_true")
     parser.add_argument("--compile-graph-parts", action="store_true")
+    parser.add_argument("--thor-triton-autotune", action="store_true")
     parser.add_argument("--repeats", type=int, default=20)
     parser.add_argument("--steps", type=int, default=10)
     parser.add_argument("--seed", type=int, default=0)
@@ -58,6 +59,8 @@ def main():
         parser.error("CUDA graph experiment requires PyTorch --no-compile")
     if args.compile_graph_parts and not args.cuda_graph:
         parser.error("Compiled graph parts require --cuda-graph")
+    if args.thor_triton_autotune and (not is_pytorch or not (args.compile or args.compile_graph_parts)):
+        parser.error("Thor Triton experiment requires a compiled PyTorch backend")
     weight_path = args.checkpoint / "model.safetensors"
     if weight_path.exists() != is_pytorch:
         parser.error("Checkpoint format does not match the selected backend")
@@ -153,6 +156,10 @@ def main():
             if args.compute_dtype == "bfloat16"
             else "FP32 / TF32 disabled",
         )
+    if args.thor_triton_autotune:
+        from thor_triton_autotune import enable_thor_triton_autotune  # noqa: PLC0415
+
+        record["thor_triton_autotune"] = enable_thor_triton_autotune()
     (args.output / "started.json").write_text(json.dumps(record, ensure_ascii=False, indent=2))
     print("MODEL_LOAD_START", flush=True)
     started = time.monotonic()

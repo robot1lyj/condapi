@@ -106,3 +106,13 @@ F 首次失败发生于编译器生成的 `aten._scaled_dot_product_efficient_at
 整图重放 J-r1 首次尝试在 `embed_prefix` 的 CPU→CUDA 常量拷贝处失败，未产生有效延迟；退出码 1，120W 恢复记录已确认。新增的固定步数分支保留 FP32 时间递推和完整 Euler 次数，默认关闭，旧 while 路径保留。后续修复只把固定掩码和时间常量直接创建在 GPU，并逐输入对照旧 while 路径的完整输出；不能在修复后重标旧失败运行成功。
 
 证据：仓库 `docs/reports/thor/evidence/20260907/acceleration/pi05-{F,G,H}-20260907-r2.*`、`pi05-{I,J}-20260907-r1.*`；原始日志在 Thor `/home/wuyan-lyj/thor/pi/logs/`，完整动作数组在 `/home/wuyan-lyj/thor/pi/results/`，工作站镜像在 `/home/wuyan-lyj/thor-system/test-data/results/`。Git 中 `.log.gz` 是原始日志的无损压缩，不修改原始文件。中文 HTML / JSON 含实际命令、镜像 ID、源码哈希、逐输入时延、动作差异和遥测。代码同步状态由 [09](09_gitea_code_sync.md) 持有。
+
+### 2026-09-07 21:42 后续观测：整图重放跑通但未胜出
+
+固定常量创建修复后的 `pi05-J-20260907-r2`（原 attention）P50/P95 为 168.994/170.154 ms，动作 MAE/最大差为 0.00249998/0.0235503；`pi05-K-20260907-r2`（SDPA）为 176.467/177.259 ms，动作 MAE/最大差为 0.00203562/0.0168608。二者都使用三相机合批、混合 BF16/FP32、完整 10 步及 H50，没有权重再转存和量化。参考依旧是 A 的 JAX FP32。
+
+J/K 的九个输入都额外执行一次未捕获的旧 while 循环对照，模型 32D 输出最大差均为 0。这证明本批数据上的重放与旧循环等价，不证明 BF16 与 JAX FP32 等价，也不证明机械臂任务成功率。额外对照不计入正式时延样本。两组退出均恢复 120W。
+
+整图重放自身并未超过 I 的 124.15 ms，不能因为用了 CUDA Graph 就默认推荐。下一步候选 L/M 使用 `max-autotune-no-cudagraphs` 分别编译图像前缀、模型 forward 和去噪段，再由一个外层 CUDA Graph 重放全部 10 步。这样保留算子融合，不把十个 action expert 展成一个巨大编译图；需要独立实测，不能借用 I/J 的数字。L/M 的非图对照使用相同分段编译后端的旧 while 循环，字段 `cuda_graph_vs_eager_max_abs` 为历史命名，报告按“非图旧循环”解释。
+
+J/K-r2 的 manifest、exit、power-after、tegrastats 和无损压缩日志与前述证据放在同一目录；完整结果在各自独立运行目录。此时共 11 组完整结果、1980 次正式调用，另保留两个失败运行。100 ms 是 Thor 完整 policy 调用目标；尚未包含未操作的 3588 采集/控制和生产网线传输延迟。
