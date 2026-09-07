@@ -23,6 +23,7 @@ def main():
     parser.add_argument("--text-bucket", type=int, choices=(80, 128, 200), default=200)
     parser.add_argument("--compute-dtype", choices=("float32", "bfloat16"), default="bfloat16")
     parser.add_argument("--prepare-only", action="store_true")
+    parser.add_argument("--padding-evidence", nargs=3)
     parser.add_argument("--root", type=Path, default=Path("/home/wuyan-lyj/thor/pi"))
     args = parser.parse_args()
     if os.geteuid() != 0 or not re.fullmatch(r"[a-zA-Z0-9_-]+", args.run_id):
@@ -35,6 +36,10 @@ def main():
         parser.error("Time cache is an export preparation option")
     if args.stage != "export" and (args.prepare_only or args.text_bucket != 200 or args.compute_dtype != "bfloat16"):
         parser.error("Preparation options require export stage")
+    if args.padding_evidence and (
+        args.stage != "export" or any(not re.fullmatch(r"[a-zA-Z0-9_-]+", value) for value in args.padding_evidence)
+    ):
+        parser.error("Padding evidence requires three safe artifact IDs and export stage")
     scripts = Path(__file__).resolve().parent
     repo = scripts.parents[1]
     artifacts = args.root / "artifacts"
@@ -84,6 +89,8 @@ def main():
         command.extend(["--text-bucket", str(args.text_bucket), "--compute-dtype", args.compute_dtype])
         if args.prepare_only:
             command.append("--prepare-only")
+        if args.padding_evidence:
+            command.extend(["--padding-evidence", *[f"/artifacts/{value}" for value in args.padding_evidence]])
     if args.stage == "engine":
         command = [
             *command[: command.index("/bench/export_pi05_onnx.py")],

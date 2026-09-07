@@ -22,6 +22,8 @@ import onnx
 from onnx_sampler import INPUT_NAMES
 from onnx_sampler import FlatSamplerAdapter
 from onnx_sampler import Pi05OnnxSampler
+from onnx_sampler import TextBucketSampler
+from padding_evidence import validate_padding_evidence
 import torch
 
 from openpi.policies import policy_config
@@ -39,11 +41,13 @@ def main():
     parser.add_argument("--cache-time-modulation", action="store_true")
     parser.add_argument("--text-bucket", type=int, choices=(80, 128, 200), default=200)
     parser.add_argument("--prepare-only", action="store_true")
+    parser.add_argument("--padding-evidence", type=Path, nargs=3)
     args = parser.parse_args()
     if args.output.exists():
         parser.error("Use a new immutable export directory")
-    if args.text_bucket != 200 and not args.prepare_only:
-        parser.error("Padding candidate is diagnostic-only until its precision gate is evaluated")
+    padding_export = args.text_bucket != 200 and not args.prepare_only
+    if padding_export and (not args.padding_evidence or args.compute_dtype != "bfloat16"):
+        parser.error("Padding export requires paired diagnostic evidence and the BF16 candidate")
     if not torch.cuda.is_available() or os.environ.get("TORCH_ALLOW_TF32_CUBLAS_OVERRIDE") == "1":
         parser.error("CUDA required and vendor TF32 override must be disabled")
     suite = json.loads(args.suite.read_text())
@@ -89,6 +93,7 @@ def main():
         "text_bucket": args.text_bucket,
         "text_interface_capacity": 200,
         "prepare_only": args.prepare_only,
+        "reference_scope": "legacy_eager_same_text_bucket" if padding_export else "legacy_eager_original_200",
         "fp32_diagnostic_tolerance": {"atol": 1e-6, "rtol": 1e-5, "scope": "raw outputs, not task tolerance"},
         "quantization": None,
         "tf32": False,
@@ -100,6 +105,11 @@ def main():
         (args.output / "export_report.json").write_text(json.dumps(report, ensure_ascii=False, indent=2))
 
     save_report()
+    if padding_export:
+        report["padding_experiment"] = validate_padding_evidence(
+            args.padding_evidence, report, [name for name, _ in samples], args.text_bucket
+        )
+        save_report()
     train = config.get_config("pi05_yam")
     train = dataclasses.replace(train, model=dataclasses.replace(train.model, dtype=args.compute_dtype))
     print("EXPORT_MODEL_LOAD_START", flush=True)
@@ -126,6 +136,8 @@ def main():
     noise = np.random.default_rng(0).standard_normal((50, 32)).astype(np.float32)
     np.save(args.output / "noise.npy", noise, allow_pickle=False)
     report["noise_sha256"] = digest(args.output / "noise.npy")
+    if padding_export and report["noise_sha256"] != report["padding_experiment"]["noise_sha256"]:
+        raise ValueError("Fresh export noise does not match padding diagnostics")
     captured = {}
     original_output_transform = policy._output_transform  # noqa: SLF001
 
@@ -134,10 +146,25 @@ def main():
         return original_output_transform(data)
 
     policy._output_transform = capture_output  # noqa: SLF001
+    if padding_export:
+        policy._sample_actions = TextBucketSampler(policy._sample_actions, args.text_bucket)  # noqa: SLF001
+        report["full_text_reference_comparisons"] = []
     references = []
     for name, observation in samples:
         action = policy.infer(observation, noise=noise)["actions"]
         references.append((action.copy(), captured["raw"].copy()))
+        if padding_export:
+            with np.load(args.padding_evidence[2] / name, allow_pickle=False) as arrays:
+                full_text = arrays["reference"]
+            difference = np.abs(captured["raw"].astype(np.float64) - full_text.astype(np.float64))
+            report["full_text_reference_comparisons"].append(
+                {
+                    "sample": name,
+                    "raw_32d_max_abs": float(difference.max()),
+                    "raw_14d_max_abs": float(difference[:, :14].max()),
+                    "scope": "same-bucket eager versus original 200-token eager; not engine/JAX acceptance",
+                }
+            )
         print("EXPORT_REFERENCE_OK", name, flush=True)
     wrapper = Pi05OnnxSampler(
         model, cache_time_modulation=args.cache_time_modulation, text_bucket=args.text_bucket

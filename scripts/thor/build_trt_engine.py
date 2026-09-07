@@ -29,6 +29,12 @@ def main():
         raise ValueError("Export preparation did not pass its own equivalence checks")
     if export["tf32"] or export["nonfinite_sanitization"]:
         raise ValueError("Non-quantized reference cannot enable TF32 or sanitize non-finite activations")
+    if export.get("text_bucket", 200) < 200 and (
+        export.get("reference_scope") != "legacy_eager_same_text_bucket"
+        or export.get("padding_experiment", {}).get("status") != "offline_experiment_supported_not_accuracy_approved"
+        or not export.get("full_text_reference_comparisons")
+    ):
+        raise ValueError("Padding engine requires separately recorded full-text diagnostic evidence")
     onnx_path = args.source / "sampler.onnx"
     if digest(onnx_path) != export["onnx_sha256"]:
         raise ValueError("ONNX fingerprint mismatch")

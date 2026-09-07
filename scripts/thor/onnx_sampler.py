@@ -4,6 +4,8 @@ No quantization, nan_to_num, FP16 conversion, image removal or horizon change.
 The legacy model remains available. Validate this wrapper against it before export.
 """
 
+import dataclasses
+
 import torch
 from torch import nn
 
@@ -167,3 +169,20 @@ class FlatSamplerAdapter:
             raise ValueError("Export replay requires batch 1, three 224 RGB views and H50/32D")
         self.last_inputs = inputs
         return self.sampler(*inputs)
+
+
+class TextBucketSampler:
+    """Unchanged legacy sampler with explicitly checked trailing-padding removal."""
+
+    def __init__(self, sampler, bucket):
+        self.sampler = sampler
+        self.bucket = bucket
+
+    def __call__(self, device, observation, **kwargs):
+        check_text_bucket(observation.tokenized_prompt, observation.tokenized_prompt_mask, self.bucket)
+        compact = dataclasses.replace(
+            observation,
+            tokenized_prompt=observation.tokenized_prompt[:, : self.bucket],
+            tokenized_prompt_mask=observation.tokenized_prompt_mask[:, : self.bucket],
+        )
+        return self.sampler(device, compact, **kwargs)

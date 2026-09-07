@@ -58,6 +58,7 @@ def test_runtime_shape_guard_and_output_ownership(monkeypatch):
     model = trt_policy.TensorRTModel.__new__(trt_policy.TensorRTModel)
     torch.nn.Module.__init__(model)
     model.device = torch.device("cpu")  # Fake runtime only; real constructor requires CUDA.
+    model.text_bucket = 200
     model.inputs = {"noise": ((1, 50, 32), torch.float32)}
     model.unused_bindings = {}
     model.graph_inputs = None
@@ -86,5 +87,9 @@ def test_runtime_shape_guard_and_output_ownership(monkeypatch):
     with pytest.raises(ValueError, match="ten denoising"):
         model.sample_actions("cpu", observation, noise=noise, num_steps=5)
     model.context.execute_async_v3 = lambda **kwargs: False
+    model.text_bucket = 80
+    with pytest.raises(ValueError, match="Valid tokens"):
+        model.sample_actions("cpu", observation, noise=noise)
+    model.text_bucket = 200
     with pytest.raises(RuntimeError, match="execution failed"):
         model.sample_actions("cpu", observation, noise=noise)

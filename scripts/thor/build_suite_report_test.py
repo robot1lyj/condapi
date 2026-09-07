@@ -40,6 +40,7 @@ def test_export_preparation_pass_does_not_hide_failed_export(tmp_path):
     assert data["detail_tables"][0]["rows"][0][4] == "1/1 输入完全一致"
     assert "experiments" not in data
 
+
 def test_engine_plan_uses_actual_result_without_accuracy_claim():
     data = {"measured_records": [], "recommendations": ["original"]}
     attach_engine_next_steps(data)
@@ -48,6 +49,7 @@ def test_engine_plan_uses_actual_result_without_accuracy_claim():
     attach_engine_next_steps(data)
     assert "127.37" in data["recommendations"][0]["detail"]
     assert "不是任务精度保证" in data["recommendations"][1]["detail"]
+
 
 def test_profile_is_separate_from_formal_latency_counts(tmp_path):
     report = {
@@ -65,3 +67,24 @@ def test_profile_is_separate_from_formal_latency_counts(tmp_path):
     attach_profiles(data, [tmp_path], tmp_path)
     assert data["experiments"] == ["untouched"]
     assert "不计入正式测速" in data["detail_tables"][0]["title"]
+
+
+def test_completed_diagnostic_is_not_reported_as_still_running(tmp_path):
+    report = {
+        "run_id": "diagnostic-r1",
+        "status": "preparation_diagnosed_not_approved",
+        "compute_dtype": "float32",
+        "prepare_only": True,
+        "text_bucket": 80,
+        "wrapper_comparisons": [{"exact": False, "finite": True, "fp32_diagnostic_close": True}],
+    }
+    (tmp_path / "export_report.json").write_text(json.dumps(report))
+    (tmp_path / "diagnostic-r1.exit.json").write_text(json.dumps({"exit_code": 0}))
+    (tmp_path / "diagnostic-r1.manifest.json").write_text("{}")
+    data = {"detail_tables": []}
+    attach_exports(data, [tmp_path], tmp_path)
+    row = data["detail_tables"][0]["rows"][0]
+    assert "诊断已完成" in row[3]
+    assert "未导出" in row[3]
+    assert "0/1 输入完全一致" in row[4]
+    assert "1/1" in row[4]

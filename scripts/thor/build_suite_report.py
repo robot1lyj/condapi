@@ -279,14 +279,14 @@ def attach_additional_runs(data, reference, run_paths, logs):
         if record.get("thor_triton_autotune"):
             detail += " / Thor SM 门槛实验：ATen 与 Triton 实测选核，独立编译缓存"
         if record.get("backend") == "tensorrt":
-            engine_error = max(
-                m["engine_vs_export_eager"]["normalized_14d_max_abs"] for m in record["measurements"]
-            )
+            engine_error = max(m["engine_vs_export_eager"]["normalized_14d_max_abs"] for m in record["measurements"])
             detail += f" / strongly typed 非量化 / 对导出前 BF16 eager 的归一化 14D 最大差={engine_error:.6g}"
             if record.get("engine_cuda_graph"):
                 detail += " / TensorRT CUDA Graph：逐输入要求与同引擎非图输出完全一致"
             if record.get("time_modulation_cache"):
                 detail += " / 固定时间 AdaRMS 投影预计算，保留原 FP32"
+            if record.get("text_bucket", 200) < 200:
+                detail += f" / 文本计算桶 {record['text_bucket']}：仅去无效填充，超长有效输入拒绝；导出对照为同桶 eager"
         error = comparison["physical_dataset_units"]
         normalized = comparison["normalized_active_14d"]
         data["experiments"].append(
@@ -416,16 +416,25 @@ def attach_exports(data, paths, logs):
             status = "导出失败 · 不计入有效推理配置"
         elif exit_record and report["status"] == "onnx_exported_engine_not_validated":
             status = "ONNX 已导出 · 引擎和任务精度未验收"
+        elif exit_record and report["status"] == "preparation_diagnosed_not_approved":
+            status = "准备诊断已完成 · 未导出 / 未放行"
         else:
             status = "尚未确认完成 · 查看运行日志"
+        comparison_detail = f"{exact}/{len(checks)} 输入完全一致"
+        if report.get("reference_scope") == "legacy_eager_same_text_bucket":
+            full_text_error = max(row["raw_32d_max_abs"] for row in report["full_text_reference_comparisons"])
+            comparison_detail += f"（仅与同文本桶 eager）；对原 200 桶最大差 {full_text_error:.6g}"
+        if report.get("prepare_only") and report["compute_dtype"] == "float32":
+            close = sum(row.get("fp32_diagnostic_close") is True for row in checks)
+            comparison_detail += f"；FP32 预设数值门槛 {close}/{len(checks)}"
         rows.append(
             [
                 run_id,
                 report.get("exporter", "legacy"),
                 report["compute_dtype"],
                 status,
-                f"{exact}/{len(checks)} 输入完全一致",
-                "无量化 / 无 FP16 修补 / TF32 关闭 / 原 FP64 时间嵌入预计算",
+                comparison_detail,
+                f"无量化 / 无 FP16 修补 / TF32 关闭 / 文本计算桶 {report.get('text_bucket', 200)}（仅去掉无效填充）",
             ]
         )
         data.setdefault("export_artifacts", []).append(
@@ -441,7 +450,7 @@ def attach_exports(data, paths, logs):
             0,
             {
                 "title": "TensorRT 前置导出 · 与推理成绩分开记录",
-                "description": "准备模型与原 PyTorch 采样器比较的是同一真实输入的完整动作；准备阶段零差异不代表 ONNX、最终 engine 或任务精度已通过。",
+                "description": "比较同一真实输入的完整动作；文本裁填充候选单列同桶对照与原 200 桶差异。准备阶段零差异不代表 ONNX、最终 engine 或任务精度已通过。",
                 "columns": ["运行", "导出器", "主计算精度", "状态", "准备阶段对照", "精度处理"],
                 "rows": rows,
             },

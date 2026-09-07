@@ -1,9 +1,11 @@
 import ast
+import dataclasses
 from pathlib import Path
 from types import SimpleNamespace
 
 from onnx_sampler import IMAGE_KEYS
 from onnx_sampler import CachedTimeProjection
+from onnx_sampler import TextBucketSampler
 from onnx_sampler import check_text_bucket
 from onnx_sampler import fixed_time_schedule
 from onnx_sampler import flat_inputs
@@ -12,6 +14,7 @@ import torch
 
 from openpi.models_pytorch.pi0_pytorch import PI0Pytorch
 from openpi.models_pytorch.pi0_pytorch import create_sinusoidal_pos_embedding
+from openpi.models_pytorch.pi0_pytorch import make_att_2d_masks
 
 
 def test_fixed_schedule_keeps_original_fp32_recurrence():
@@ -120,3 +123,47 @@ def test_text_bucket_rejects_real_token_truncation():
         check_text_bucket(tokens, mask, 201)
     with pytest.raises(ValueError, match="boolean"):
         check_text_bucket(tokens, mask.float(), 80)
+
+
+def test_text_bucket_adapter_preserves_original_observation_and_noise():
+    @dataclasses.dataclass
+    class Observation:
+        tokenized_prompt: torch.Tensor
+        tokenized_prompt_mask: torch.Tensor
+        images: dict
+        state: torch.Tensor
+
+    observation = Observation(torch.arange(200)[None], torch.arange(200)[None] < 70, {}, torch.zeros(1, 32))
+    noise = torch.zeros(1, 50, 32)
+
+    def sampler(device, trimmed, *, noise, num_steps):
+        assert device == "cpu"
+        assert num_steps == 10
+        assert trimmed.images is observation.images
+        assert trimmed.state is observation.state
+        assert trimmed.tokenized_prompt.shape == (1, 80)
+        return noise
+
+    adapter = TextBucketSampler(sampler, 80)
+    assert adapter("cpu", observation, noise=noise, num_steps=10) is noise
+    assert observation.tokenized_prompt.shape == (1, 200)
+    observation.tokenized_prompt_mask[:, 199] = True
+    with pytest.raises(ValueError, match="Valid tokens"):
+        adapter("cpu", observation, noise=noise, num_steps=10)
+
+
+@pytest.mark.parametrize("valid_text", [64, 70, 80])
+def test_padding_compaction_preserves_attention_edges_and_positions(valid_text):
+    image_pad = torch.ones(1, 768, dtype=torch.bool)
+    text_pad = torch.arange(200)[None] < valid_text
+    action_pad = torch.ones(1, 50, dtype=torch.bool)
+    full_pad = torch.cat([image_pad, text_pad, action_pad], dim=1)
+    full_groups = torch.zeros_like(full_pad)
+    full_groups[:, 968] = True
+    keep = torch.cat([torch.arange(848), torch.arange(968, 1018)])
+    compact_pad = full_pad[:, keep]
+    compact_groups = full_groups[:, keep]
+    full_mask = make_att_2d_masks(full_pad, full_groups)
+    compact_mask = make_att_2d_masks(compact_pad, compact_groups)
+    assert torch.equal(full_mask[:, keep][:, :, keep], compact_mask)
+    assert torch.equal((torch.cumsum(full_pad, dim=-1) - 1)[:, keep], torch.cumsum(compact_pad, dim=-1) - 1)

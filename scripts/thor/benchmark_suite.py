@@ -40,6 +40,7 @@ def main():
     parser.add_argument("--engine", type=Path)
     parser.add_argument("--engine-cuda-graph", action="store_true")
     parser.add_argument("--require-time-cache", action="store_true")
+    parser.add_argument("--expected-text-bucket", type=int, choices=(80, 128, 200))
     parser.add_argument("--compile", action=argparse.BooleanOptionalAction, default=True)
     parser.add_argument("--warmups", type=int, default=2)
     parser.add_argument("--attention", choices=("eager", "sdpa"), default="eager")
@@ -62,6 +63,8 @@ def main():
         parser.error("Engine CUDA graph requires TensorRT backend")
     if args.require_time_cache and not is_trt:
         parser.error("Time-cache requirement is scoped to the TensorRT export candidate")
+    if args.expected_text_bucket is not None and not is_trt:
+        parser.error("Text bucket expectation requires TensorRT backend")
     is_pytorch = args.backend in ("pytorch", "tensorrt")
     if is_trt and (
         args.engine is None or args.compile or args.cuda_graph or args.thor_triton_autotune or args.steps != 10
@@ -201,8 +204,13 @@ def main():
             raise ValueError("Engine precision does not match requested experiment")
         if args.require_time_cache and not export_report.get("cache_time_modulation"):
             raise ValueError("Expected engine with audited FP32 time modulation cache")
+        text_bucket = export_report.get("text_bucket", 200)
+        if args.expected_text_bucket is not None and args.expected_text_bucket != text_bucket:
+            raise ValueError("Engine text bucket does not match the requested experiment")
         record["engine_report"] = engine_report
         record["time_modulation_cache"] = export_report.get("time_modulation_cache")
+        record["text_bucket"] = text_bucket
+        record["padding_experiment"] = export_report.get("padding_experiment")
         record["engine_io"] = policy._model.io_contract  # noqa: SLF001
     else:
         policy = policy_config.create_trained_policy(

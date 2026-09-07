@@ -11,6 +11,7 @@ from pathlib import Path
 from benchmark_pi05 import digest
 import numpy as np
 from onnx_sampler import INPUT_NAMES
+from onnx_sampler import check_text_bucket
 from onnx_sampler import flat_inputs
 import torch
 
@@ -54,6 +55,17 @@ class TensorRTModel(torch.nn.Module):
             raise ValueError("A successful engine build is required")
         if report["tf32"] or report["quantization"] is not None or not report["strongly_typed"]:
             raise ValueError("This candidate requires non-quantized, strongly typed, TF32-off engine")
+        source_report = Path(report["source_export"]) / "export_report.json"
+        if digest(source_report) != report["source_export_report_sha256"]:
+            raise ValueError("Source export report fingerprint mismatch")
+        export = json.loads(source_report.read_text())
+        self.text_bucket = export.get("text_bucket", 200)
+        if not 1 <= self.text_bucket <= 200:
+            raise ValueError("Unsupported text bucket")
+        if self.text_bucket < 200 and export.get("padding_experiment", {}).get("status") != (
+            "offline_experiment_supported_not_accuracy_approved"
+        ):
+            raise ValueError("Padding engine lacks its separately recorded diagnostic evidence")
         engine_file = engine_dir / "sampler.engine"
         if digest(engine_file) != report["engine_sha256"]:
             raise ValueError("Engine hash mismatch")
@@ -137,6 +149,8 @@ class TensorRTModel(torch.nn.Module):
     def sample_actions(self, device, observation, *, noise=None, num_steps=10):
         if noise is None or num_steps != 10:
             raise ValueError("This engine requires ten denoising steps and explicit noise")
+        if self.text_bucket < 200:
+            check_text_bucket(observation.tokenized_prompt, observation.tokenized_prompt_mask, self.text_bucket)
         values = dict(zip(INPUT_NAMES, flat_inputs(observation, noise), strict=True))
         keepalive = []
         for name, (shape, dtype) in self.inputs.items():
