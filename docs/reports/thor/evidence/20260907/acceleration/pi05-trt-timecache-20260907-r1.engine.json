@@ -1,0 +1,44 @@
+{
+  "run_id": "pi05-trt-timecache-20260907-r1",
+  "phase": "engine_build_tactic_profile",
+  "started_at": "2026-09-07T15:41:12.203310+00:00",
+  "status": "built_not_inference_or_accuracy_validated",
+  "source_export": "/artifacts/pi05-onnx-timecache-20260907-r1",
+  "source_export_report_sha256": "9b7c3a54dee7d13ecdbdff44d7acbb763a61abea402580dbd4b384f86b061555",
+  "source_onnx_sha256": "45e95be8da29bb1d8e7873375bcc5e378378329b5e4fbb15afc05db740f4fd96",
+  "external_weights_sha256": {
+    "sampler.onnx.data": "83c38090d1882386b4ed8840c587eece6649c4222c5570da9f003f2ffb50a620"
+  },
+  "tensorrt_version": "10.16.1.11",
+  "command": [
+    "/usr/src/tensorrt/bin/trtexec",
+    "--onnx=/artifacts/pi05-onnx-timecache-20260907-r1/sampler.onnx",
+    "--saveEngine=/artifacts/pi05-trt-timecache-20260907-r1/sampler.engine",
+    "--stronglyTyped",
+    "--noTF32",
+    "--skipInference",
+    "--builderOptimizationLevel=3",
+    "--maxAuxStreams=0",
+    "--memPoolSize=workspace:8192",
+    "--profilingVerbosity=detailed",
+    "--exportLayerInfo=/artifacts/pi05-trt-timecache-20260907-r1/layers.json",
+    "--timingCacheFile=/artifacts/pi05-trt-timecache-20260907-r1/timing.cache"
+  ],
+  "tf32": false,
+  "quantization": null,
+  "strongly_typed": true,
+  "contract": {
+    "views": 3,
+    "image_resolution": [
+      224,
+      224
+    ],
+    "horizon": 50,
+    "steps": 10,
+    "action_dim": 32
+  },
+  "exit_code": 0,
+  "build_s": 477.4111271180009,
+  "engine_sha256": "abc91e29f7b0d022fe187a6f82325c3e61402c6d8bcbd1f7981a2f204625d954",
+  "finished_at": "2026-09-07T15:49:14.381148+00:00"
+}

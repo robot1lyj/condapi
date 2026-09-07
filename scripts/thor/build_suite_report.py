@@ -506,6 +506,7 @@ def attach_profiles(data, paths, logs):
                 "title": "真实输入逐层分析 · 不计入正式测速",
                 "description": (
                     f"{run_id}：{report['profiled_calls']} 次带分析开销的调用，"
+                    f"分析对象 {report.get('engine_report', {}).get('run_id', '见原始证据')}，并非自动代表最新引擎。"
                     "与未开启 Profiler 的输出逐值一致。kgen 包含矩阵计算和融合算子，"
                     "不能当作纯逐元素计算；各层时间之和不是端到端延迟。"
                 ),
@@ -522,6 +523,16 @@ def attach_profiles(data, paths, logs):
                 "任何缓存或融合候选都保持原精度，先验证完整输出，再计时。"
             ),
         }
+        if any(record.get("time_modulation_cache") for record in data.get("measured_records", [])):
+            next_step = {
+                "title": "时间条件缓存已测，下一步独立评估无效填充",
+                "detail": (
+                    "旧引擎的固定时间条件热点已经用原 FP32 缓存替代，新成绩见 V 组。"
+                    "下一候选只去除末尾 mask=false 文本填充，不截断真实 prompt/状态 token；"
+                    "先做 FP32 语义对照，再测 BF16/FP32 引擎，长输入保留原 200 路径。"
+                    "这是待实施计划，不是已有回退或任务精度放行。"
+                ),
+            }
         data["recommendations"][:1] = [next_step]
 
 
