@@ -20,6 +20,9 @@ def main():
     parser.add_argument("--source-export")
     parser.add_argument("--source-engine")
     parser.add_argument("--cache-time-modulation", action="store_true")
+    parser.add_argument("--text-bucket", type=int, choices=(80, 128, 200), default=200)
+    parser.add_argument("--compute-dtype", choices=("float32", "bfloat16"), default="bfloat16")
+    parser.add_argument("--prepare-only", action="store_true")
     parser.add_argument("--root", type=Path, default=Path("/home/wuyan-lyj/thor/pi"))
     args = parser.parse_args()
     if os.geteuid() != 0 or not re.fullmatch(r"[a-zA-Z0-9_-]+", args.run_id):
@@ -30,6 +33,8 @@ def main():
         parser.error("Profiling requires a filename-safe source-engine ID")
     if args.cache_time_modulation and args.stage != "export":
         parser.error("Time cache is an export preparation option")
+    if args.stage != "export" and (args.prepare_only or args.text_bucket != 200 or args.compute_dtype != "bfloat16"):
+        parser.error("Preparation options require export stage")
     scripts = Path(__file__).resolve().parent
     repo = scripts.parents[1]
     artifacts = args.root / "artifacts"
@@ -75,6 +80,10 @@ def main():
     files = sorted([*scripts.glob("*.py"), *repo.glob("src/openpi/**/*.py")])
     if args.cache_time_modulation:
         command.append("--cache-time-modulation")
+    if args.stage == "export":
+        command.extend(["--text-bucket", str(args.text_bucket), "--compute-dtype", args.compute_dtype])
+        if args.prepare_only:
+            command.append("--prepare-only")
     if args.stage == "engine":
         command = [
             *command[: command.index("/bench/export_pi05_onnx.py")],

@@ -4,6 +4,7 @@ from types import SimpleNamespace
 
 from onnx_sampler import IMAGE_KEYS
 from onnx_sampler import CachedTimeProjection
+from onnx_sampler import check_text_bucket
 from onnx_sampler import fixed_time_schedule
 from onnx_sampler import flat_inputs
 import pytest
@@ -104,3 +105,18 @@ def test_time_projection_cache_preserves_fp32_and_default_path():
     cached.train()
     with pytest.raises(ValueError, match="batch-1"):
         cached(conditions[0])
+
+
+def test_text_bucket_rejects_real_token_truncation():
+    tokens = torch.arange(200)[None]
+    mask = torch.zeros(1, 200, dtype=torch.bool)
+    mask[:, :70] = True
+    check_text_bucket(tokens, mask, 80)
+    mask[:, 199] = True  # Count alone is insufficient: a valid tail token cannot be dropped.
+    with pytest.raises(ValueError, match="Valid tokens"):
+        check_text_bucket(tokens, mask, 80)
+    check_text_bucket(tokens, mask, 200)
+    with pytest.raises(ValueError, match="outside"):
+        check_text_bucket(tokens, mask, 201)
+    with pytest.raises(ValueError, match="boolean"):
+        check_text_bucket(tokens, mask.float(), 80)

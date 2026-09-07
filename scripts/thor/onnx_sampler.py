@@ -14,6 +14,16 @@ IMAGE_KEYS = ("base_0_rgb", "left_wrist_0_rgb", "right_wrist_0_rgb")
 INPUT_NAMES = ("images", "img_masks", "lang_tokens", "lang_masks", "state", "noise")
 
 
+def check_text_bucket(tokens, mask, bucket):
+    """Reject truncation of any valid token; only masked trailing padding may go."""
+    if tokens.ndim != 2 or tokens.shape != mask.shape or mask.dtype != torch.bool:
+        raise ValueError("Expected matching batch/token tensors and a boolean mask")
+    if not 1 <= bucket <= tokens.shape[-1]:
+        raise ValueError("Text bucket is outside the original token capacity")
+    if bool(mask[:, bucket:].any()):
+        raise ValueError("Valid tokens exceed text bucket; use the original 200-token path")
+
+
 def fixed_time_schedule(num_steps, *, width, device):
     if num_steps != 10:
         raise ValueError("This export contract fixes exactly ten denoising steps")
@@ -43,11 +53,14 @@ def flat_inputs(observation, noise):
 
 
 class Pi05OnnxSampler(nn.Module):
-    def __init__(self, model, *, cache_time_modulation=False):
+    def __init__(self, model, *, cache_time_modulation=False, text_bucket=200):
         super().__init__()
         if not model.pi05 or model.config.action_horizon != 50 or model.config.action_dim != 32:
             raise ValueError("Exporter is scoped to Pi0.5 H50 / 32D")
         self.model = model
+        if not 1 <= text_bucket <= 200:
+            raise ValueError("Invalid text bucket")
+        self.text_bucket = text_bucket
         dt, times, embeddings = fixed_time_schedule(
             10, width=model.action_in_proj.out_features, device=next(model.parameters()).device
         )
@@ -80,6 +93,10 @@ class Pi05OnnxSampler(nn.Module):
         model.static_denoising_loop = True
 
     def forward(self, images, img_masks, lang_tokens, lang_masks, state, noise):
+        # FlatSamplerAdapter validates every input before tracing/inference.
+        # Tokenization still uses capacity 200; no actual token is truncated.
+        lang_tokens = lang_tokens[:, : self.text_bucket]
+        lang_masks = lang_masks[:, : self.text_bucket]
         views = [images[:, index * 3 : (index + 1) * 3] for index in range(3)]
         masks = [img_masks[:, index] for index in range(3)]
         prefix, pad, att = self.model.embed_prefix(views, masks, lang_tokens, lang_masks)
@@ -145,6 +162,7 @@ class FlatSamplerAdapter:
         if num_steps != 10 or noise is None:
             raise ValueError("Export replay requires ten steps and explicit noise")
         inputs = flat_inputs(observation, noise)
+        check_text_bucket(inputs[2], inputs[3], self.sampler.text_bucket)
         if tuple(inputs[0].shape) != (1, 9, 224, 224) or tuple(noise.shape) != (1, 50, 32):
             raise ValueError("Export replay requires batch 1, three 224 RGB views and H50/32D")
         self.last_inputs = inputs

@@ -37,9 +37,13 @@ def main():
     parser.add_argument("--compute-dtype", choices=("float32", "bfloat16"), default="bfloat16")
     parser.add_argument("--exporter", choices=("dynamo", "legacy"), default="dynamo")
     parser.add_argument("--cache-time-modulation", action="store_true")
+    parser.add_argument("--text-bucket", type=int, choices=(80, 128, 200), default=200)
+    parser.add_argument("--prepare-only", action="store_true")
     args = parser.parse_args()
     if args.output.exists():
         parser.error("Use a new immutable export directory")
+    if args.text_bucket != 200 and not args.prepare_only:
+        parser.error("Padding candidate is diagnostic-only until its precision gate is evaluated")
     if not torch.cuda.is_available() or os.environ.get("TORCH_ALLOW_TF32_CUBLAS_OVERRIDE") == "1":
         parser.error("CUDA required and vendor TF32 override must be disabled")
     suite = json.loads(args.suite.read_text())
@@ -82,6 +86,10 @@ def main():
         "compute_dtype": args.compute_dtype,
         "exporter": args.exporter,
         "cache_time_modulation": args.cache_time_modulation,
+        "text_bucket": args.text_bucket,
+        "text_interface_capacity": 200,
+        "prepare_only": args.prepare_only,
+        "fp32_diagnostic_tolerance": {"atol": 1e-6, "rtol": 1e-5, "scope": "raw outputs, not task tolerance"},
         "quantization": None,
         "tf32": False,
         "nonfinite_sanitization": False,
@@ -131,7 +139,9 @@ def main():
         action = policy.infer(observation, noise=noise)["actions"]
         references.append((action.copy(), captured["raw"].copy()))
         print("EXPORT_REFERENCE_OK", name, flush=True)
-    wrapper = Pi05OnnxSampler(model, cache_time_modulation=args.cache_time_modulation).eval()
+    wrapper = Pi05OnnxSampler(
+        model, cache_time_modulation=args.cache_time_modulation, text_bucket=args.text_bucket
+    ).eval()
     if wrapper.cached_modulations:
         cache_path = args.output / "time_modulation_cache.npz"
         np.savez_compressed(
@@ -160,15 +170,19 @@ def main():
         difference = {
             "sample": name,
             "raw_max_abs": float(np.max(np.abs(raw - ref_raw))),
+            "raw_mae": float(np.mean(np.abs(raw.astype(np.float64) - ref_raw.astype(np.float64)))),
             "physical_max_abs": float(np.max(np.abs(action - ref_action))),
             "finite": bool(np.isfinite(raw).all() and np.isfinite(action).all()),
             "exact": bool(np.array_equal(raw, ref_raw) and np.array_equal(action, ref_action)),
+            "fp32_diagnostic_close": bool(np.allclose(raw, ref_raw, rtol=1e-5, atol=1e-6))
+            if args.compute_dtype == "float32"
+            else None,
         }
         report["wrapper_comparisons"].append(difference)
         print("EXPORT_WRAPPER_CHECK", difference, flush=True)
         np.savez_compressed(args.output / f"{Path(name).stem}.npz", reference=ref_raw, prepared=raw)
         save_report()
-        if not difference["finite"] or not difference["exact"]:
+        if not difference["finite"] or (not args.prepare_only and not difference["exact"]):
             raise RuntimeError("Export preparation changed the eager output; investigate before exporting")
     np.save(args.output / "time_embeddings.npy", wrapper.time_embeddings.detach().cpu().numpy(), allow_pickle=False)
     report["time_embeddings_sha256"] = digest(args.output / "time_embeddings.npy")
@@ -182,6 +196,12 @@ def main():
         **{name: value.detach().cpu().numpy() for name, value in zip(INPUT_NAMES, first_inputs, strict=True)},
     )
     save_report()
+    if args.prepare_only:
+        report["status"] = "preparation_diagnosed_not_approved"
+        report["finished_at"] = datetime.datetime.now(datetime.UTC).isoformat()
+        save_report()
+        print("PREPARATION_DIAGNOSTIC_COMPLETE", report["wrapper_comparisons"], flush=True)
+        return
     onnx_path = args.output / "sampler.onnx"
     print("ONNX_EXPORT_START", flush=True)
     started = time.monotonic()
