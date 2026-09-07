@@ -1,0 +1,17 @@
+services:
+  pi:
+    image: openpi-pi:thor-jax-candidate
+    build:
+      context: ../../..
+      dockerfile: scripts/docker/thor/Dockerfile
+    runtime: nvidia
+    environment:
+      NVIDIA_VISIBLE_DEVICES: all
+      NVIDIA_DRIVER_CAPABILITIES: compute,utility
+    shm_size: 8gb
+    volumes:
+      - ${THOR_PI_ROOT:-/home/wuyan-lyj/thor/pi}/checkpoints:/checkpoints:ro
+      - ${THOR_PI_ROOT:-/home/wuyan-lyj/thor/pi}/cache:/cache
+      - ${THOR_PI_ROOT:-/home/wuyan-lyj/thor/pi}/logs:/results
+    # Until a checkpoint replay passes, this runs a one-shot GPU smoke, not a policy service.
+    restart: "no"

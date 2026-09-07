@@ -1,7 +1,7 @@
 import logging
 import os
 import pathlib
-from typing import Any
+from typing import Any, Literal
 
 import jax.numpy as jnp
 
@@ -22,6 +22,7 @@ def create_trained_policy(
     default_prompt: str | None = None,
     norm_stats: dict[str, transforms.NormStats] | None = None,
     pytorch_device: str | None = None,
+    jax_param_dtype: Literal["checkpoint", "bfloat16", "float32"] = "bfloat16",
 ) -> _policy.Policy:
     """Create a policy from a trained checkpoint.
 
@@ -37,6 +38,8 @@ def create_trained_policy(
             from the checkpoint directory.
         pytorch_device: Device to use for PyTorch models (e.g., "cpu", "cuda", "cuda:0").
                       If None and is_pytorch=True, will use "cuda" if available, otherwise "cpu".
+        jax_param_dtype: JAX restoration dtype; "checkpoint" preserves stored dtypes.
+                         The legacy default remains bfloat16. Does not set compute dtype.
 
     Note:
         The function automatically detects whether the model is PyTorch-based by checking for the
@@ -54,7 +57,10 @@ def create_trained_policy(
         model = train_config.model.load_pytorch(train_config, weight_path)
         model.paligemma_with_expert.to_bfloat16_for_selected_params("bfloat16")
     else:
-        model = train_config.model.load(_model.restore_params(checkpoint_dir / "params", dtype=jnp.bfloat16))
+        dtypes = {"checkpoint": None, "bfloat16": jnp.bfloat16, "float32": jnp.float32}
+        if jax_param_dtype not in dtypes:
+            raise ValueError(f"Unsupported JAX parameter dtype: {jax_param_dtype}")
+        model = train_config.model.load(_model.restore_params(checkpoint_dir / "params", dtype=dtypes[jax_param_dtype]))
     data_config = train_config.data.create(train_config.assets_dirs, train_config.model)
     if norm_stats is None:
         # We are loading the norm stats from the checkpoint instead of the config assets dir to make sure
@@ -66,7 +72,7 @@ def create_trained_policy(
     # Determine the device to use for PyTorch models
     if is_pytorch and pytorch_device is None:
         try:
-            import torch
+            import torch  # noqa: PLC0415
 
             pytorch_device = "cuda" if torch.cuda.is_available() else "cpu"
         except ImportError:

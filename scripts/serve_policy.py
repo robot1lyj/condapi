@@ -4,6 +4,7 @@ import json
 import logging
 import pathlib
 import socket
+from typing import Literal
 
 import tyro
 
@@ -71,6 +72,8 @@ class Args:
     # Optional override for train config data repo_id used while constructing policy transforms/norm stats.
     # Example: local/towel_merged
     policy_repo_id: str | None = None
+    # Restore JAX weights without silently rounding them when set to checkpoint.
+    jax_param_dtype: Literal["checkpoint", "bfloat16", "float32"] = "bfloat16"
 
 
 # Default checkpoints that should be used for each environment.
@@ -111,6 +114,7 @@ def create_default_policy(
     *,
     default_prompt: str | None = None,
     policy_repo_id: str | None = None,
+    jax_param_dtype: Literal["checkpoint", "bfloat16", "float32"] = "bfloat16",
 ) -> _policy.Policy:
     """Create a default policy for the given environment."""
     if checkpoint := DEFAULT_CHECKPOINT.get(env):
@@ -119,6 +123,7 @@ def create_default_policy(
             train_config,
             checkpoint.dir,
             default_prompt=default_prompt,
+            jax_param_dtype=jax_param_dtype,
         )
     raise ValueError(f"Unsupported environment mode: {env}")
 
@@ -132,12 +137,14 @@ def create_policy(args: Args) -> _policy.Policy:
                 train_config,
                 args.policy.dir,
                 default_prompt=args.default_prompt,
+                jax_param_dtype=args.jax_param_dtype,
             )
         case Default():
             return create_default_policy(
                 args.env,
                 default_prompt=args.default_prompt,
                 policy_repo_id=args.policy_repo_id,
+                jax_param_dtype=args.jax_param_dtype,
             )
 
 
