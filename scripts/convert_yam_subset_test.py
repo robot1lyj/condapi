@@ -20,6 +20,7 @@ from scripts.convert_yam_subset import CAMERA_KEYS
 from scripts.convert_yam_subset import JOINT_NAMES
 from scripts.convert_yam_subset import convert
 from scripts.convert_yam_subset import digest
+from scripts.repair_yam_video import repair
 from scripts.yam_conversion_resume import conversion_lock
 
 
@@ -272,3 +273,42 @@ def test_batch_runner_reuses_published_version(subset, contract, tmp_path):
     assert "REUSED_COMPLETED_SPLIT=val" in result.stdout
     assert "REUSED_COMPLETED_SPLIT=train" in result.stdout
     assert all(digest(path) == value for path, value in before.items())
+
+
+def test_source_video_recovery_preserves_backup_and_resumes(subset, contract, tmp_path):
+    source = subset / "train/videos/right_wrist/episode-000095.mp4"
+    replacement = tmp_path / "verified-upstream.mp4"
+    shutil.copyfile(source, replacement)
+    with av.open(str(source), "w") as container:
+        stream = container.add_stream("mpeg4", rate=30)
+        stream.width = stream.height = 32
+        stream.pix_fmt = "yuv420p"
+        for i in range(2):
+            frame = av.VideoFrame.from_ndarray(np.full((32, 32, 3), 50 + i, dtype=np.uint8), format="rgb24")
+            for packet in stream.encode(frame):
+                container.mux(packet)
+        for packet in stream.encode():
+            container.mux(packet)
+    bad_hash, good_hash = digest(source), digest(replacement)
+    output = tmp_path / "version.incomplete/train"
+    work = output.with_name("train.incomplete")
+    with pytest.raises(ValueError, match="video_frame_count"):
+        convert(subset, output, "train", contract, min_age=0, video_mode="copy")
+    kept = work / "videos/observation.images.top_rgb/chunk-000/file-000.mp4"
+    kept_mtime = kept.stat().st_mtime_ns
+    args = (work, source, replacement, bad_hash, good_hash, "synthetic upstream verification")
+    with conversion_lock(work), pytest.raises(RuntimeError, match="Another conversion"):
+        repair(*args)
+    with pytest.raises(ValueError, match="SHA-256 mismatch"):
+        repair(work, source, replacement, "0" * 64, good_hash, "synthetic")
+    assert digest(source) == bad_hash
+    record = repair(*args)
+    assert digest(Path(record["backup"])) == bad_hash
+    assert digest(source) == good_hash
+    convert(subset, output, "train", contract, min_age=0, video_mode="copy", resume=True)
+    assert (output / kept.relative_to(work)).stat().st_mtime_ns == kept_mtime
+    provenance = json.loads((output / "conversion_manifest.json").read_text())
+    assert provenance["source_repairs"][0]["new_sha256"] == good_hash
+    assert len(LeRobotDataset("local/repaired", root=output, video_backend="pyav")) == 3
+    with pytest.raises(ValueError, match="unpublished"):
+        repair(*args)

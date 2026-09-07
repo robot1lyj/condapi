@@ -281,6 +281,7 @@ def convert_copied_videos(
         "parquet_sha256": dict(hashes),
     }
     receipts = initialize_checkpoint(work, identity, resume)
+    source_repairs = json.loads((work / "resume_identity.json").read_text()).get("source_repairs", [])
     # Never reopen an interrupted Parquet metadata writer. Rebuild metadata from
     # validated files; old generations remain available for inspection.
     metadata_root = work / f".metadata-build-{time.time_ns()}"
@@ -301,6 +302,8 @@ def convert_copied_videos(
         "norm_stats": "not_computed",
         "training_verified": False,
     }
+    if source_repairs:
+        provenance["source_repairs"] = source_repairs
     try:
         cached_path, table = None, None
         for new_id, episode in enumerate(episodes):

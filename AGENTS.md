@@ -77,6 +77,7 @@ conda run -p /home/wuyan/.conda/envs/condapi-yam python -m pytest --strict-marke
 - 本任务只改 Thor 侧；不得读取、修改、同步或替代 3588 的机械臂控制、相机采集和系统部署。
 - Thor 推理默认使用 Docker + NVIDIA Container Toolkit，按模型系列隔离容器，Pi 系列共用一个服务，通过配置/checkpoint 选择模型；模型依赖安装在系列镜像内，容器规划与精度验收由 `docs/08_thor_edge_deployment.md` 持有。
 - 数据转换只写新目录；原始 YAM 数据和现有下载任务不可覆盖、停止或删除。
+- 2026-09-07 用户追加授权：确实损坏的 Lego episode 可修复或整条隔离排除；优先从固定上游 revision 恢复并逐帧验证，保留坏原件、哈希和修复记录，使用双写锁更新仅被修复文件的断点签名。不可把网络/权限/容量问题视为数据损坏；不随意裁帧，不改变其他数据和下载任务。非必要不永久删除。
 - 任何 RTC 改动都必须保留旧推理路径，并可通过 `rtc_mode` 关闭或自动回退。
 
 ## Git 自动化

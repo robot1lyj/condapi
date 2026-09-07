@@ -1,5 +1,11 @@
 # 07 · 变更历史
 
+## 2026-09-07：用户拒绝当前延迟，改为加速后端优先并准备 Thor Gitea
+
+- 用户不接受原生 JAX 最低约 177 ms，并明确要求完整推理约 100 ms 或更低且保证精度；A/B/C 保留为参考，停止将 C 作为最终部署选择。后续先用已有输入筛 PyTorch 编译、TensorRT 混合精度，并核对 FlashRT H50/14D 适配，再扩大样本；社区 H10/FP8/NVFP4 数字不得混为本机结果。
+- Thor 生成独立 Gitea SSH 密钥，私钥不传出；仓库局部连接配置、主机键核验、只允许快进均已准备。首次认证仍失败，等待用户添加公钥；只初始化 Git 元数据，未覆盖 rsync 代码副本，首次 checkout 尚未完成。
+- 新增工作站触发的快进同步脚本，拒绝脏工作树、未发布提交、远端分叉/变动及未初始化 HEAD；不后台双向覆盖、不自动重建镜像。三个针对性同步回归测试通过；最终实际拉取验证依赖用户完成 Gitea 授权。
+
 ## 2026-09-07：完成 Thor 原生 JAX Pi0.5 三精度真实回放
 
 - 构建 Pi 系列 ARM64 JAX 容器，保留 NVIDIA JAX/Flax/Orbax 栈并锁定本次直接依赖；按需导入 PyTorch/FAST，移除 JAX 策略对训练数据加载器的非必要导入。首次实跑发现 Orbax 元数据改为 `StepMetadata`，兼容新旧返回结构后原始 FP32 checkpoint 成功加载，未转换或改写原权重。
@@ -437,3 +443,11 @@
 
 - **离线 WandB 支持**: 训练强制使用离线 W&B 模式，同时生成本地 metrics.jsonl/metrics.csv/训练曲线图。
 - **Piper 双臂 Conda 训练**: `conda-pi` 分支建立非容器 conda 环境的离线训练路径，支持 `pi05_piper_dual` 配置。
+## 2026-09-07：恢复 Lego 9750 右腕视频并授权损坏数据隔离
+
+- 小时监控确认正式 `condapi-yam` 安装完成、pip check 通过、9 项合成转换测试通过；此结论不代表 GPU 可训练。
+- 转换在 train 第 324 条（source episode 9750）停止。原始右腕视频和派生副本 SHA256 相同（`64b1ae533e731a045bec2967f828a4a2e54458daa810dc9738b7a0e8907a2e21`），只能解码 2146 帧，manifest 要求 2154 帧。
+- 固定上游 `lerobot/abc_130k_v3_train@68651e4929d9fb00f798937b2d62617cab5c771d` 的 `videos/observation.images.right_wrist/chunk-000/file-435.mp4` 对应区间 `[2479.3333333333335,2551.1333333333337)` 可完整解码 2154 帧。独立下载后以 stream copy 提取，每帧像素与时间均匹配上游；恢复片段 SHA256 为 `e3b65e8304754c8c971b11cd3a42a8fd3ad5e14deb1018b117116b4432f5256e`。本地证据保留在 `/home/wuyan-lyj/condapi-env-transfer/lego-recovery-9750/`。
+- 新增 `scripts/repair_yam_video.py`：显式旧/新哈希、完整验证、batch/converter 双锁、原件可恢复备份、修复事务记录、仅更新该文件的检查点身份；常规 resume 仍拒绝未授权的源变化。发布 provenance 包含 source_repairs。恢复成功与实际续跑进度以远端修复记录和日志为准，不以脚本存在作完成判据。
+- 用户授权确实损坏数据的恢复或整条隔离排除，优先修复并留备份，不做任意截帧；每小时任务 `yam-lego` 已更新。当前恢复路径不需要丢弃 episode。
+- 本地转换/恢复回归测试 12 项通过，覆盖原件备份、错误哈希拒绝、并发写锁、已发布目标拒绝和未损坏视频断点复用。
