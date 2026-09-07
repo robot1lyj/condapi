@@ -1,0 +1,31 @@
+
+=========
+== JAX ==
+=========
+
+NVIDIA Release 26.05 (build 52078341)
+Container image Copyright (c) 2026, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+
+Various files include modifications (c) NVIDIA CORPORATION & AFFILIATES.  All rights reserved.
+
+GOVERNING TERMS: The software and materials are governed by the NVIDIA Software License Agreement
+(found at https://www.nvidia.com/en-us/agreements/enterprise-software/nvidia-software-license-agreement/)
+and the Product-Specific Terms for NVIDIA AI Products
+(found at https://www.nvidia.com/en-us/agreements/enterprise-software/product-specific-terms-for-ai-products/).
+
+E0907 10:40:05.447152     154 cuda_executor.cc:1526] Could not get kernel mode driver version: ( INVALID_ARGUMENT: Version does not match the format X.Y.Z )
+E0907 10:40:05.459651       1 cuda_executor.cc:1526] Could not get kernel mode driver version: ( INVALID_ARGUMENT: Version does not match the format X.Y.Z )
+MODEL_LOAD_START
+Traceback (most recent call last):
+  File "/bench/benchmark_suite.py", line 195, in <module>
+    main()
+  File "/bench/benchmark_suite.py", line 110, in main
+    policy = policy_config.create_trained_policy(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/openpi/policies/policy_config.py", line 63, in create_trained_policy
+    model = train_config.model.load(_model.restore_params(checkpoint_dir / "params", dtype=dtypes[jax_param_dtype]))
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dist-packages/openpi/models/model.py", line 317, in restore_params
+    item = {"params": metadata["params"]}
+                      ~~~~~~~~^^^^^^^^^^
+TypeError: 'StepMetadata' object is not subscriptable

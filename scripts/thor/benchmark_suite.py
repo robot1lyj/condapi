@@ -1,0 +1,195 @@
+"""Run a fixed recorded suite with one native JAX policy load per precision."""
+
+import argparse
+from collections import Counter
+import dataclasses
+import datetime
+import importlib.metadata
+import json
+from pathlib import Path
+import resource
+import sys
+import time
+
+from benchmark_pi05 import digest
+from benchmark_pi05 import read_observation
+import jax
+import numpy as np
+
+from openpi.policies import policy_config
+from openpi.shared import normalize
+from openpi.training import config
+
+
+def checked_path(root, name):
+    path = (root / name).resolve()
+    if not path.is_relative_to(root.resolve()):
+        raise ValueError("Suite paths must stay inside the fixture directory")
+    return path
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--checkpoint", type=Path, required=True)
+    parser.add_argument("--suite", type=Path, required=True)
+    parser.add_argument("--params-dtype", choices=("checkpoint", "float32", "bfloat16"), required=True)
+    parser.add_argument("--compute-dtype", choices=("float32", "bfloat16"), required=True)
+    parser.add_argument("--repeats", type=int, default=20)
+    parser.add_argument("--steps", type=int, default=10)
+    parser.add_argument("--seed", type=int, default=0)
+    parser.add_argument("--output", type=Path, required=True)
+    args = parser.parse_args()
+    if args.repeats < 2 or args.steps <= 0:
+        parser.error("Need at least two repeats and positive denoising steps")
+    if args.output.exists():
+        parser.error("Use a new run directory; existing experiments are immutable")
+    if (args.checkpoint / "model.safetensors").exists():
+        parser.error("Native JAX checkpoint required")
+    suite = json.loads(args.suite.read_text())
+    root = args.suite.parent
+    norm_path = checked_path(root, suite["norm_stats"])
+    if suite.get("source_kind") != "real_yam_recording" or not suite.get("source_files"):
+        parser.error("Real recorded source evidence required")
+    if digest(norm_path) != suite["norm_stats_sha256"]:
+        parser.error("Norm fingerprint mismatch")
+    samples = []
+    for entry in suite["samples"]:
+        path = checked_path(root, entry["sample"])
+        provenance_path = checked_path(root, entry["provenance"])
+        provenance = json.loads(provenance_path.read_text())
+        if (
+            provenance.get("source_kind") != "real_yam_recording"
+            or provenance.get("sample_sha256") != digest(path)
+            or provenance.get("norm_stats_sha256") != digest(norm_path)
+            or provenance.get("source_files") != suite["source_files"]
+        ):
+            parser.error("Sample provenance mismatch")
+        samples.append((path, read_observation(path), provenance))
+    if len(samples) != suite["observation_count"] or not samples:
+        parser.error("Suite size mismatch")
+    if any(d.platform != "gpu" for d in jax.devices()):
+        raise RuntimeError("GPU execution is required; no CPU fallback")
+    jax.config.update("jax_default_matmul_precision", "highest")
+    train_config = config.get_config("pi05_yam")
+    train_config = dataclasses.replace(
+        train_config, model=dataclasses.replace(train_config.model, dtype=args.compute_dtype)
+    )
+    args.output.mkdir(parents=True)
+    record = {
+        "run_id": args.output.name,
+        "phase": "evaluate",
+        "started_at": datetime.datetime.now(datetime.UTC).isoformat(),
+        "status": "running",
+        "command": sys.argv,
+        "config": "pi05_yam",
+        "params_dtype": args.params_dtype,
+        "compute_dtype": args.compute_dtype,
+        "matmul_precision": str(jax.config.jax_default_matmul_precision),
+        "checkpoint_metadata_sha256": digest(args.checkpoint / "params" / "_METADATA"),
+        "suite_sha256": digest(args.suite),
+        "norm_stats_sha256": digest(norm_path),
+        "suite": suite,
+        "steps": args.steps,
+        "horizon": 50,
+        "seed": args.seed,
+        "repeats": args.repeats,
+        "versions": {p: importlib.metadata.version(p) for p in ("jax", "jaxlib", "flax", "orbax-checkpoint")},
+        "devices": [str(d) for d in jax.devices()],
+        "precision_acceptance_threshold": None,
+        "limitations": [
+            "Base model is not YAM-finetuned; no robot execution or task success claim",
+            "Benchmark-only norms from the same recordings; not production training norms",
+            "Dataset units unchanged, not independently calibrated against hardware",
+            "No numerical tolerance approved yet; measured differences do not constitute acceptance",
+            "Same Thor JAX version reference, not a training-server JAX equivalence test",
+        ],
+    }
+    (args.output / "started.json").write_text(json.dumps(record, ensure_ascii=False, indent=2))
+    print("MODEL_LOAD_START", flush=True)
+    started = time.monotonic()
+    policy = policy_config.create_trained_policy(
+        train_config,
+        args.checkpoint,
+        norm_stats=normalize.deserialize_json(norm_path.read_text()),
+        sample_kwargs={"num_steps": args.steps},
+        jax_param_dtype=args.params_dtype,
+    )
+    record["load_s"] = time.monotonic() - started
+    # Inspect actual loaded leaves, not only the requested restoration dtype.
+    from flax import nnx  # noqa: PLC0415
+
+    leaves = jax.tree.leaves(nnx.state(policy._model, nnx.Param))  # noqa: SLF001
+    record["loaded_param_dtypes"] = dict(Counter(str(x.dtype) for x in leaves))
+    record["loaded_param_bytes"] = sum(x.size * x.dtype.itemsize for x in leaves)
+    print("MODEL_LOAD_OK", record["load_s"], record["loaded_param_dtypes"], flush=True)
+    raw = {}
+    output_transform = policy._output_transform  # noqa: SLF001
+
+    def capture_output(data):
+        raw["actions"] = np.asarray(data["actions"], dtype=np.float32).copy()
+        return output_transform(data)
+
+    policy._output_transform = capture_output  # noqa: SLF001
+    noise = np.random.default_rng(args.seed).standard_normal((50, 32)).astype(np.float32)
+    np.save(args.output / "noise.npy", noise, allow_pickle=False)
+    record["noise_sha256"] = digest(args.output / "noise.npy")
+    all_actions, all_raw, measurements = [], [], []
+    for sample_path, observation, provenance in samples:
+        actions, normalized, latencies, warmup = [], [], [], []
+        for repeat in range(args.repeats + 2):
+            start = time.monotonic()
+            action = np.asarray(policy.infer(observation, noise=noise)["actions"], dtype=np.float32)
+            elapsed_ms = (time.monotonic() - start) * 1000
+            if action.shape != (50, 14) or raw["actions"].shape != (50, 32):
+                raise RuntimeError("Action shape mismatch")
+            if not np.isfinite(action).all() or not np.isfinite(raw["actions"]).all():
+                raise RuntimeError("Non-finite model output")
+            if repeat < 2:
+                warmup.append(elapsed_ms)
+                print("WARMUP", sample_path.stem, repeat, round(elapsed_ms, 2), flush=True)
+            else:
+                actions.append(action.copy())
+                normalized.append(raw["actions"].copy())
+                latencies.append(elapsed_ms)
+        actions = np.stack(actions)
+        normalized = np.stack(normalized)
+        measurement = {
+            "sample": sample_path.name,
+            "sample_sha256": digest(sample_path),
+            "episode": provenance["episode"]["source_episode_index"],
+            "frame": provenance["frame_index"],
+            "phase": provenance["phase"],
+            "warmup_ms": warmup,
+            "latencies_ms": latencies,
+            "p50_ms": float(np.percentile(latencies, 50)),
+            "p95_ms": float(np.percentile(latencies, 95)),
+            "repeat_max_abs_difference": float(np.max(np.abs(actions - actions[0]))),
+        }
+        # Preserve completed observations even if a later sample fails.
+        np.savez_compressed(args.output / f"{sample_path.stem}.npz", actions=actions, normalized_actions=normalized)
+        (args.output / f"{sample_path.stem}.json").write_text(json.dumps(measurement, indent=2))
+        measurements.append(measurement)
+        all_actions.append(actions)
+        all_raw.append(normalized)
+        print("SAMPLE_OK", json.dumps(measurement), flush=True)
+    np.save(args.output / "actions.npy", np.stack(all_actions), allow_pickle=False)
+    np.save(args.output / "normalized_actions.npy", np.stack(all_raw), allow_pickle=False)
+    latencies = [value for m in measurements for value in m["latencies_ms"]]
+    record.update(
+        status="measured_not_accuracy_approved",
+        finished_at=datetime.datetime.now(datetime.UTC).isoformat(),
+        measurements=measurements,
+        p50_ms=float(np.percentile(latencies, 50)),
+        p95_ms=float(np.percentile(latencies, 95)),
+        repeat_max_abs_difference=max(m["repeat_max_abs_difference"] for m in measurements),
+        process_peak_rss_mib=resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024,
+        actions_sha256=digest(args.output / "actions.npy"),
+        normalized_actions_sha256=digest(args.output / "normalized_actions.npy"),
+        action_shape=list(np.stack(all_actions).shape),
+    )
+    (args.output / "result.json").write_text(json.dumps(record, ensure_ascii=False, indent=2))
+    print("SUITE_COMPLETE", record["p50_ms"], record["p95_ms"], flush=True)
+
+
+if __name__ == "__main__":
+    main()

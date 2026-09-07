@@ -14,10 +14,8 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 import orbax.checkpoint as ocp
-import safetensors
 import torch
 
-from openpi.models_pytorch import pi0_pytorch
 from openpi.shared import image_tools
 import openpi.shared.array_typing as at
 
@@ -241,6 +239,10 @@ class BaseModelConfig(abc.ABC):
         return nnx.merge(graphdef, state)
 
     def load_pytorch(self, train_config, weight_path: str):
+        import safetensors.torch  # noqa: PLC0415
+
+        from openpi.models_pytorch import pi0_pytorch  # noqa: PLC0415
+
         logger.info(f"train_config: {train_config}")
         model = pi0_pytorch.PI0Pytorch(config=train_config.model)
         safetensors.torch.load_model(model, weight_path)
@@ -312,6 +314,9 @@ def restore_params(
 
     with ocp.PyTreeCheckpointer() as ckptr:
         metadata = ckptr.metadata(params_path)
+        # New Orbax wraps tree metadata in StepMetadata; older training stacks
+        # return the tree directly. This does not change restoration dtype/shape.
+        metadata = getattr(metadata, "item_metadata", metadata)
         item = {"params": metadata["params"]}
 
         params = ckptr.restore(

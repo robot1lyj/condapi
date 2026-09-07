@@ -1,0 +1,49 @@
+{
+  "recommendations": [
+    {
+      "title": "固定当前可运行路径：原生 JAX，A 留作参考，C 优先扩样",
+      "detail": "Thor / JetPack 7.2.1 → Pi 系列 Docker → NVIDIA JAX 26.05 → 原始只读 JAX checkpoint → 本地三路图像、状态、文本 → (50,14) 输出。A 保留 FP32 权重与 FP32/highest 计算；C 在本轮 P50 为 177.39 ms，约比 A 快 6.94 倍，且本批误差未比 B 更大，因此列为性能候选，而非直接批准实机控制。B 保留作仅改变计算精度的对照。MAXN 仍只在推理期间使用。"
+    },
+    {
+      "title": "下一轮先扩充真实输入和噪声：300 个状态 × 3 个种子",
+      "detail": "从 Thor 本地的 3 条完整轨迹各均匀选 100 个状态，固定种子 0/1/2，同一输入、同一噪声分别跑 A/B/C，每组合预热后测 3 次；不把重复次数算成独立样本。保留去噪 10 步、horizon 50 和三相机配置，汇总逐维 MAE/P95/max、最差输入与轨迹相邻帧差异，重点查看本轮最大漂移出现的右夹爪。原始数据不改写，输出新 suite 目录；不能用这三条录像估计任务泛化。"
+    },
+    {
+      "title": "把训练栈差异和精度差异分开核验",
+      "detail": "在服务器实际训练环境的已分配 GPU 上，一次性用同一 checkpoint、输入和固定噪声导出参考动作，再把小结果文件带回 Thor 本地比较；不建立服务器实时推理链路，也不在登录节点运行模型。先确认 Thor 新版 JAX 与训练栈的差异，再判断转换误差，避免把框架版本造成的差异误归因于 BF16。"
+    },
+    {
+      "title": "独立验证 JAX → PyTorch FP32 转换，再改变运算精度",
+      "detail": "沿用 Jetson AI Lab 的 NVIDIA PyTorch 26.05 容器基底作为 Pi 系列的候选运行环境版本，依赖仍装在容器内。转换先保留 FP32，逐张量核对映射后的 key、shape、dtype 和数值；只做转置/重排的权重应可精确核对，不默认接受 BF16 转存。再用相同 suite/noise/norm 比较 FP32 前向，关闭 TF32 和自动混合精度以免参考名不副实，然后独立测 BF16 与 torch.compile。未来 LoRA 必须保留 adapter：先在 FP32 正确合并或实现等价加载，检查没有漏键，再比较合并前后的 JAX 输出；不把当前无 LoRA 基础模型的通过当成 LoRA 转换已通过。"
+    },
+    {
+      "title": "TensorRT 首轮选择保留 FP32 敏感运算的混合精度，不做全局 FP16",
+      "detail": "Jetson AI Lab 提醒其纯 FP16 导出会溢出；xuweiwu/openpi-thor 支持的是保留 RMSNorm 等 FP32 敏感运算、使用 strongly typed TensorRT 的定制混合 FP16 路径。下一轮可借鉴这条路径，但须独立对照 JAX A 与已验证 PyTorch，保持当前 horizon 50，不能拿教程 LIBERO horizon 10 的延迟作本机目标。转换误差、前向误差和 TensorRT 编译误差分开记录。"
+    },
+    {
+      "title": "FP8 / NVFP4 放在基线转换通过之后",
+      "detail": "先测 FP8；校准集和验证集分开，增加其他本地录像或任务后再判断泛化。仅对 FP8 有明显收益时再测 attention-side NVFP4，暂不采用全 attention+MLP 激进量化。社区作者报告过 ONNX/TensorRT 降低精度后误差放大，因此必须比较最终 engine，不只比较量化后的 PyTorch；保留逐维误差与最坏样本，余弦相似度不能单独作为机械臂精度验收。"
+    },
+    {
+      "title": "微调完成后再做模型任务验收与双 IPC 联调",
+      "detail": "使用微调 checkpoint 自带 YAM norm 和准确的单位合同，重新建立 A 参考并测 C/转换候选。动作容差与实际关节、夹爪要求绑定，基础模型阶段不虚设机器人安全阈值。之后只操作 Thor 服务端，配合用户现有 3588 通过网线直连验证数据协议和耗时，不读取或改动 3588 控制与采集代码。"
+    }
+  ],
+  "sources": [
+    {
+      "title": "Jetson AI Lab：OpenPi π₀.₅ on Jetson Thor",
+      "url": "https://www.jetson-ai-lab.com/tutorials/openpi_on_thor/",
+      "note": "2026-09-07 查阅。官方教程使用 NVIDIA PyTorch 26.05 容器，路线为 JAX → PyTorch → ONNX → TensorRT；教程的 LIBERO/horizon 10 性能不是本项目 YAM/horizon 50 实测。其纯 FP16 溢出警告适用于该导出实现。"
+    },
+    {
+      "title": "xuweiwu/openpi-thor：定制混合 FP16 与真实样本验证",
+      "url": "https://github.com/xuweiwu/openpi-thor",
+      "note": "2026-09-07 查阅。作者说明 FP16 路径保留 FP32 敏感运算并使用 strongly typed TensorRT；NVFP4 采用 attention-side 方案避免更广量化带来的漂移。其结果和阈值属于作者测试栈，不直接成为本项目验收标准；不照搬其宿主机 venv/uv 安装方式。"
+    },
+    {
+      "title": "NVIDIA JAX Toolbox",
+      "url": "https://github.com/NVIDIA/JAX-Toolbox",
+      "note": "原生 JAX 容器上游。实际使用版本以本报告采集的 JAX、jaxlib、Flax、Orbax 版本与镜像 ID 为准，不能仅凭 GPU 枚举认定完整模型可运行。"
+    }
+  ]
+}

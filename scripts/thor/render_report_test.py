@@ -22,3 +22,17 @@ def test_report_formats_real_measurements():
         }
     )
     assert "<td>12.500</td>" in page
+
+
+def test_extra_sections_escape_cells_and_do_not_expand_data_placeholders():
+    page = render(
+        {
+            "updated_at": "SOURCE",
+            "experiments": [],
+            "detail_tables": [{"title": "样本", "columns": ["维度"], "rows": [["<script>FACTS</script>"]]}],
+            "sources": [{"title": "unsafe", "url": "javascript:alert(1)", "note": "bad"}],
+        }
+    )
+    assert "更新于 SOURCE" in page
+    assert "&lt;script&gt;FACTS&lt;/script&gt;" in page
+    assert 'href="javascript:' not in page

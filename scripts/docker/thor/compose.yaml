@@ -1,6 +1,6 @@
 services:
   pi:
-    image: openpi-pi:thor-jax-candidate
+    image: ${THOR_PI_IMAGE:-openpi-pi:thor-jax-20260907}
     build:
       context: ../../..
       dockerfile: scripts/docker/thor/Dockerfile
@@ -12,7 +12,8 @@ services:
     volumes:
       - ${THOR_PI_ROOT:-/home/wuyan-lyj/thor/pi}/checkpoints:/checkpoints:ro
       - ${THOR_PI_ROOT:-/home/wuyan-lyj/thor/pi}/cache:/cache
-      - ${THOR_PI_ROOT:-/home/wuyan-lyj/thor/pi}/logs:/results
+      - ${THOR_PI_ROOT:-/home/wuyan-lyj/thor/pi}/results:/results
       - ${THOR_PI_ROOT:-/home/wuyan-lyj/thor/pi}/test-data:/test-data:ro
-    # Until a checkpoint replay passes, this runs a one-shot GPU smoke, not a policy service.
+    # Default is a one-shot GPU health check, not an automatically running policy.
+    # Recorded model inference uses run_suite_host.py for temporary MAXN and cleanup.
     restart: "no"

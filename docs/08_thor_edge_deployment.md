@@ -188,7 +188,9 @@ PR #960 作者给出的局部 checkpoint 对照如下；样本范围、硬件及
 
 尤其要保留 [FlashRT 2026-08-05 详细报告](https://github.com/flashrt-project/FlashRT/blob/054bea4d02ebc63f6a0c45991c6061b1e1caa46c/docs/pi05_thor_decoder_fp4_e2e.md) 的限制：23.01 ms 单视角 NVFP4+FA4 配置未过逐样本 fidelity gate；2/3 视角的 27.17/31.74 ms 配置在该报告中通过，但比较基准仍是同轮 FP8。作者将部分单视角偏差解释为去噪轨迹分岔，这是作者的归因，不能据此豁免 YAM gate。
 
-### 4.5 Thor 原生 JAX 必须保留为待验选项
+### 4.5 Thor 原生 JAX：安装前判断与实机验证边界
+
+以下保留安装前判断供追溯；2026-09-07 原生 JAX 完整模型三精度回放已完成，最新结果以第 7 节为准。原生回放通过不代表与服务器训练版 JAX 完全等价，也不代表 YAM 实机任务验收通过。
 
 [JAX 官方安装页](https://docs.jax.dev/en/latest/installation.html) 当前列出 Linux aarch64 与 CUDA 13 支持；它不能保证任意 wheel 含 Thor 所需全部 GPU kernels。[NVIDIA 论坛](https://forums.developer.nvidia.com/t/how-to-install-jax-0-5-3-on-jetson-thor-device/362519) 记录了旧 JAX 0.5.3/CUDA 13 构建不兼容，另有 0.9.1 能枚举 GPU 却在 warmup 报 `no kernel image`；NVIDIA 回复指向针对 Thor 的 0.10.0 构建配置，未给出本项目 Pi0.5 完整验收。
 
@@ -224,7 +226,35 @@ PR #960 作者给出的局部 checkpoint 对照如下；样本范围、硬件及
 
 ## 7. 当前状态
 
-### 2026-09-07 实机状态（替代下方早期安装进度）
+### 2026-09-07 18:52 完整 Pi0.5 三精度回放（最新）
+
+**当前固定可运行路径**：Thor JetPack 7.2.1 / L4T 39.2.1 → Pi 系列 Docker → NVIDIA JAX 26.05 ARM64 → 只读原始 `pi05_base` JAX checkpoint → 本地三路 RGB、14D state、prompt → YAM `(50,14)` 动作。只操作 Thor；这次容器使用 `--network none`，没有服务器实时数据流或机械臂执行。
+
+三组均已真实完成：同一 3 条 Lego sorting 录像的早/中/晚共 9 个输入，每输入 2 次预热、20 次正式推理，种子 0、同一 `(50,32)` 噪声、去噪 10 步、horizon 50。实际加载参数叶子为 A/B 各 51 个 FP32，C 为 51 个 BF16；原始磁盘权重保持不变。所有正式输出有限、形状正确，固定输入与噪声下重复差异为 0。
+
+| 模式 | 权重加载 / 计算 | P50 / P95（ms） | 相对 A 原单位 MAE / 最大误差 |
+| --- | --- | --- | --- |
+| A 数值参考 | 保留 FP32 / FP32，matmul highest | 1231.477 / 1232.370 | 0 / 0（自参考） |
+| B 计算精度对照 | 保留 FP32 / BF16 | 239.761 / 240.805 | 0.002699 / 0.022904 |
+| C 性能候选 | BF16 加载 / BF16 | 177.393 / 178.237 | 0.002170 / 0.018646 |
+
+逐维、逐样本、归一化误差、首次编译、温度和内存详见 [中文 HTML](reports/thor/index.html) 与 [机器可读结果](reports/thor/status.json)。C 比 A 约快 6.94 倍、比 B 约快 1.35 倍；本批平均/最大误差略小于 B **不能推导出 BF16 参数普遍更准确**，各样本/维度并不单调。保留 A 参考，C 作为下一轮扩样的首选，B 用于分离计算与参数精度影响。
+
+运行时 GPU 温度采样最高 A/B/C 分别约 54.9/55.8/57.8°C；GPU 实际频率 1572–1575 MHz。各次结束恢复 120W、动态频率、自动风扇，无模型容器常驻。MAXN 控制入口仍由下方约定持有，不设开机锁频。
+
+**环境适配已验证**：JAX `0.10.0.dev20260415+c98e1bb97`、jaxlib `0.10.0.dev20260521`、Flax `0.12.6`、Orbax `0.11.39`。保留 NVIDIA 栈，仅将 PyTorch/FAST 相关导入按需加载，避免 JAX 推理强制拉入 LeRobot/Transformers 训练依赖；`restore_params` 兼容新 Orbax `StepMetadata.item_metadata`，不改变恢复 dtype/shape。容器中的 CPU Torch 2.7.1 用于现有 IO/类型依赖，**不是已适配的 GPU PyTorch 推理后端**。直接依赖已锁定本次实测版本。
+
+实测镜像 ID 为 `sha256:876e8ae0cfb81c2b8f93735e44147ce14048898abaf4a503fd7324e2a5b9bfde`，保留标签 `openpi-pi:thor-jax-20260907`。这是 Pi 系列的一个运行环境版本，不是给每个 checkpoint 新开一套服务。重新构建会产生新的镜像 ID，不能沿用旧 ID 宣称已经测试。
+
+**结果边界**：当前模型没有 YAM 微调、没有 LoRA；本次 norm 是从本地同一组录像计算的 benchmark-only 统计，关节未来 50 步均相对当前 state、夹爪 absolute、末尾按轨迹内末帧补齐。它不是未来训练 norm，物理单位仍按原数据保留，不宣称弧度或毫米。没有实机闭环/成功率、生产动作容差、服务器 JAX 等价或 Thor↔3588 联调验收。
+
+**证据位置与重跑**：Thor `/home/wuyan-lyj/thor/pi/results/` 下 `pi05-A-20260907-r2`、`pi05-B-20260907-r1`、`pi05-C-20260907-r1`；原始 stdout/1 秒 tegrastats 在同级 `logs/`；工作站完整副本为 `/home/wuyan-lyj/thor-system/test-data/results/`。失败的 A/r1 Orbax 读取日志保留。操作步骤见 [真实录像精度回放](reference/thor/08_recorded_precision_replay.md)。
+
+**下一轮方案**：先扩为每轨迹 100 状态 × 3 固定噪声种子，保留 10 去噪步与 horizon 50；然后单独验证 JAX→PyTorch FP32 转换的每个张量与前向输出，未来 LoRA 必须正确保留/合并后再转换。TensorRT 借鉴保留 FP32 敏感运算、strongly typed 的混合 FP16 路线，不全局 `.half()`；FP8、attention-side NVFP4 排在基线转换之后。详细顺序与理由见 [测试方案](reports/thor/next_test_plan.json)，不在这一轮自动开始转换或量化。
+
+社区依据：[Jetson AI Lab 教程](https://www.jetson-ai-lab.com/tutorials/openpi_on_thor/) 是 PyTorch 26.05 → ONNX → TensorRT 路线，其 LIBERO/horizon 10 数据不能充当本项目 YAM/horizon 50 实测；[xuweiwu/openpi-thor](https://github.com/xuweiwu/openpi-thor) 的定制 FP16 保留 FP32 敏感运算并使用 strongly typed，不能理解为任意纯 FP16 转换均可用。查阅日期 2026-09-07；作者验证条件与阈值不直接替代本项目验收。
+
+### 2026-09-07 较早实机状态（安装与管理事实保留；推理进度以最新小节为准）
 
 以下为当日 SSH、系统查询和传输实测状态，不是模型部署通过结论；临时地址、进程与下载状态使用前复核。
 

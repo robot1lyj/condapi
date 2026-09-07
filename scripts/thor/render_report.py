@@ -7,6 +7,7 @@ import argparse
 import html
 import json
 from pathlib import Path
+import re
 
 
 def render(data: dict) -> str:
@@ -38,9 +39,31 @@ def render(data: dict) -> str:
         for item in data.get("stages", [])
     )
     notices = "".join(f"<li>{esc(item)}</li>" for item in data.get("limitations", []))
+    detail_tables = []
+    for table in data.get("detail_tables", []):
+        columns = "".join(f"<th>{esc(value)}</th>" for value in table["columns"])
+        cells = "".join("<tr>" + "".join(f"<td>{esc(value)}</td>" for value in row) + "</tr>" for row in table["rows"])
+        detail_tables.append(
+            f'<section class="panel"><h2>{esc(table["title"])}</h2><p class="sub">{esc(table.get("description", ""))}</p>'
+            f'<div class="tablewrap"><table><thead><tr>{columns}</tr></thead><tbody>{cells}</tbody></table></div></section>'
+        )
+    recommendations = "".join(
+        f"<li><strong>{esc(item['title'])}</strong><p>{esc(item['detail'])}</p></li>"
+        for item in data.get("recommendations", [])
+    )
+    sources = "".join(
+        f'<li><a href="{esc(item["url"])}" rel="noreferrer">{esc(item["title"])}</a>：{esc(item["note"])}</li>'
+        for item in data.get("sources", [])
+        if item["url"].startswith("https://")
+    )
+    next_plan = (
+        f'<section class="panel"><h2>下一轮推理测试方案</h2><ol>{recommendations}</ol>'
+        f"<h2>社区依据（不混入本机实测数字）</h2><ul>{sources}</ul></section>"
+        if recommendations or sources
+        else ""
+    )
     source = esc(json.dumps(data, ensure_ascii=False, indent=2))
-    return (
-        """<!doctype html><html lang="zh-CN"><meta charset="utf-8">
+    template = """<!doctype html><html lang="zh-CN"><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Thor · Pi0.5 推理实验室</title><style>
 :root{--bg:#f4f6fb;--ink:#172139;--muted:#66738b;--line:#e4e8f1;--accent:#6057e7}
@@ -67,19 +90,25 @@ footer{color:var(--muted);font-size:12px;margin-top:20px;text-align:center}@medi
 <main><section class="facts">FACTS</section><section class="panel"><h2>精度配置对照</h2>
 <p class="sub">参数存储精度不等于计算精度。延迟以预热后完整 policy 调用为准，首次编译单独记录；“—”表示尚无实测数据。</p>
 <div class="tablewrap"><table><thead><tr><th>配置</th><th>权重</th><th>计算</th><th>状态</th><th>P50 / ms</th><th>P95 / ms</th><th>最大绝对误差</th><th>说明</th></tr></thead><tbody>ROWS</tbody></table></div></section>
+DETAIL_TABLES
 <div class="grid"><section class="panel"><h2>执行进度与证据</h2><ul class="timeline">TIMELINE</ul></section>
 <section class="panel"><h2>结果解释边界</h2><p class="sub">性能数据只回答“多快”，不自动回答“动作是否正确”。</p>
 <div class="notice"><strong>当前限制</strong><ul>NOTICES</ul></div>
 <details><summary>展开原始记录 JSON</summary><pre>SOURCE</pre></details></section></div>
-<footer>本页为离线静态报告，无外部 CDN、无遥测。每次采集新结果后重新生成，不会自动冒充实时状态。</footer></main></html>""".replace(
-            "UPDATE", esc(data["updated_at"])
-        )
-        .replace("FACTS", facts)
-        .replace("ROWS", "".join(rows))
-        .replace("TIMELINE", timeline)
-        .replace("NOTICES", notices)
-        .replace("SOURCE", source)
-    )
+NEXT_PLAN
+<footer>本页为离线静态报告，无外部 CDN、无遥测。每次采集新结果后重新生成，不会自动冒充实时状态。</footer></main></html>"""
+    replacements = {
+        "UPDATE": esc(data["updated_at"]),
+        "FACTS": facts,
+        "ROWS": "".join(rows),
+        "TIMELINE": timeline,
+        "NOTICES": notices,
+        "SOURCE": source,
+        "DETAIL_TABLES": "".join(detail_tables),
+        "NEXT_PLAN": next_plan,
+    }
+    # A single substitution avoids interpreting placeholder words inside data.
+    return re.sub("|".join(replacements), lambda match: replacements[match[0]], template)
 
 
 def main():
