@@ -55,3 +55,39 @@ def test_comparison_rejects_confounded_inputs(monkeypatch, changed):
     monkeypatch.setattr(compare_suites, "read_run", lambda path: (reference if path == "ref" else candidate, {}))
     with pytest.raises(ValueError, match=f"Confounded comparison: {changed}"):
         compare_suites.compare("ref", "candidate")
+
+
+def test_cross_backend_reports_runtime_changes_but_rejects_changed_workload(monkeypatch):
+    keys = (
+        "suite_sha256",
+        "norm_stats_sha256",
+        "checkpoint_metadata_sha256",
+        "noise_sha256",
+        "seed",
+        "steps",
+        "horizon",
+        "repeats",
+        "config",
+    )
+    reference = {
+        **dict.fromkeys(keys, "same"),
+        "versions": {"jax": "reference"},
+        "matmul_precision": "highest",
+        "measurements": [{"sample": "one", "sample_sha256": "same"}],
+        "run_id": "reference",
+        "p50_ms": 200,
+    }
+    candidate = {
+        **reference,
+        "backend": "pytorch",
+        "versions": {"torch": "candidate"},
+        "matmul_precision": "TF32 disabled",
+    }
+    arrays = {"actions": np.zeros((1, 2, 50, 14)), "normalized_actions": np.zeros((1, 2, 50, 32))}
+    monkeypatch.setattr(compare_suites, "read_run", lambda path: (reference if path == "ref" else candidate, arrays))
+    result = compare_suites.compare("ref", "candidate", cross_backend=True)
+    assert set(result["runtime_differences"]) == {"versions", "matmul_precision", "backend"}
+    assert result["physical_dataset_units"]["max_abs"] == 0
+    candidate["horizon"] = 10
+    with pytest.raises(ValueError, match="Confounded comparison: horizon"):
+        compare_suites.compare("ref", "candidate", cross_backend=True)

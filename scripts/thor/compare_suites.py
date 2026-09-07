@@ -51,7 +51,7 @@ def read_run(path):
     return record, arrays
 
 
-def compare(reference_path, candidate_path):
+def compare(reference_path, candidate_path, *, cross_backend=False):
     ref, ref_arrays = read_run(reference_path)
     cand, cand_arrays = read_run(candidate_path)
     for key in (
@@ -64,11 +64,17 @@ def compare(reference_path, candidate_path):
         "horizon",
         "repeats",
         "config",
-        "versions",
-        "matmul_precision",
     ):
         if ref[key] != cand[key]:
             raise ValueError(f"Confounded comparison: {key}")
+    runtime_differences = {}
+    for key in ("versions", "matmul_precision", "backend"):
+        reference = ref.get(key, "jax")
+        candidate = cand.get(key, "jax")
+        if reference != candidate:
+            if not cross_backend:
+                raise ValueError(f"Confounded comparison: {key}")
+            runtime_differences[key] = {"reference": reference, "candidate": candidate}
     if [m["sample_sha256"] for m in ref["measurements"]] != [m["sample_sha256"] for m in cand["measurements"]]:
         raise ValueError("Sample ordering mismatch")
     # First measured repeat per observation for precision error; repeated runs
@@ -100,6 +106,8 @@ def compare(reference_path, candidate_path):
         "per_sample": per_sample,
         "speedup_p50": ref["p50_ms"] / cand["p50_ms"],
         "acceptance": "not_approved_no_task_level_tolerance",
+        "comparison_scope": "cross_backend_including_runtime_changes" if cross_backend else "same_runtime_precision",
+        "runtime_differences": runtime_differences,
     }
 
 
@@ -128,8 +136,11 @@ def main():
     parser.add_argument("--reference", type=Path, required=True)
     parser.add_argument("--candidate", type=Path, action="append", required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--cross-backend", action="store_true")
     args = parser.parse_args()
-    result = {"comparisons": [compare(args.reference, path) for path in args.candidate]}
+    result = {
+        "comparisons": [compare(args.reference, path, cross_backend=args.cross_backend) for path in args.candidate]
+    }
     with args.output.open("x") as output:
         json.dump(result, output, ensure_ascii=False, indent=2)
 

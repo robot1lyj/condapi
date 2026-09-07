@@ -1,4 +1,4 @@
-"""Run a fixed recorded suite with one native JAX policy load per precision."""
+"""Run the same recorded suite with a native JAX or converted PyTorch policy."""
 
 import argparse
 from collections import Counter
@@ -6,6 +6,7 @@ import dataclasses
 import datetime
 import importlib.metadata
 import json
+import os
 from pathlib import Path
 import resource
 import sys
@@ -15,6 +16,7 @@ from benchmark_pi05 import digest
 from benchmark_pi05 import read_observation
 import jax
 import numpy as np
+import torch
 
 from openpi.policies import policy_config
 from openpi.shared import normalize
@@ -34,17 +36,23 @@ def main():
     parser.add_argument("--suite", type=Path, required=True)
     parser.add_argument("--params-dtype", choices=("checkpoint", "float32", "bfloat16"), required=True)
     parser.add_argument("--compute-dtype", choices=("float32", "bfloat16"), required=True)
+    parser.add_argument("--backend", choices=("jax", "pytorch"), default="jax")
+    parser.add_argument("--compile", action=argparse.BooleanOptionalAction, default=True)
+    parser.add_argument("--warmups", type=int, default=2)
+    parser.add_argument("--attention", choices=("eager", "sdpa"), default="eager")
     parser.add_argument("--repeats", type=int, default=20)
     parser.add_argument("--steps", type=int, default=10)
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
-    if args.repeats < 2 or args.steps <= 0:
+    if args.repeats < 2 or args.steps <= 0 or args.warmups < 2:
         parser.error("Need at least two repeats and positive denoising steps")
     if args.output.exists():
         parser.error("Use a new run directory; existing experiments are immutable")
-    if (args.checkpoint / "model.safetensors").exists():
-        parser.error("Native JAX checkpoint required")
+    is_pytorch = args.backend == "pytorch"
+    weight_path = args.checkpoint / "model.safetensors"
+    if weight_path.exists() != is_pytorch:
+        parser.error("Checkpoint format does not match the selected backend")
     suite = json.loads(args.suite.read_text())
     root = args.suite.parent
     norm_path = checked_path(root, suite["norm_stats"])
@@ -67,8 +75,23 @@ def main():
         samples.append((path, read_observation(path), provenance))
     if len(samples) != suite["observation_count"] or not samples:
         parser.error("Suite size mismatch")
-    if any(d.platform != "gpu" for d in jax.devices()):
-        raise RuntimeError("GPU execution is required; no CPU fallback")
+    if is_pytorch:
+        if not torch.cuda.is_available():
+            raise RuntimeError("PyTorch CUDA execution is required; no CPU fallback")
+        if os.environ.get("TORCH_ALLOW_TF32_CUBLAS_OVERRIDE") == "1":
+            raise RuntimeError("Unset the vendor TF32 override before precision comparisons")
+        conversion = json.loads((args.checkpoint / "conversion_audit.json").read_text())
+        if conversion.get("output_precision") != "float32":
+            raise ValueError("Start from the audited FP32 conversion; select compute precision explicitly")
+        metadata_hash = conversion["checkpoint_metadata_sha256"]
+        devices = [torch.cuda.get_device_name(), str(torch.cuda.get_device_capability())]
+        packages = ("torch", "transformers", "jax", "jaxlib", "flax", "orbax-checkpoint")
+    else:
+        if any(d.platform != "gpu" for d in jax.devices()):
+            raise RuntimeError("GPU execution is required; no CPU fallback")
+        metadata_hash = digest(args.checkpoint / "params" / "_METADATA")
+        devices = [str(d) for d in jax.devices()]
+        packages = ("jax", "jaxlib", "flax", "orbax-checkpoint")
     jax.config.update("jax_default_matmul_precision", "highest")
     train_config = config.get_config("pi05_yam")
     train_config = dataclasses.replace(
@@ -82,10 +105,14 @@ def main():
         "status": "running",
         "command": sys.argv,
         "config": "pi05_yam",
-        "params_dtype": args.params_dtype,
+        "backend": args.backend,
+        "compiled": args.compile if is_pytorch else True,
+        "warmups_per_sample": args.warmups,
+        "attention": args.attention if is_pytorch else "jax_native",
+        "params_dtype": f"fp32_checkpoint_to_{args.compute_dtype}" if is_pytorch else args.params_dtype,
         "compute_dtype": args.compute_dtype,
         "matmul_precision": str(jax.config.jax_default_matmul_precision),
-        "checkpoint_metadata_sha256": digest(args.checkpoint / "params" / "_METADATA"),
+        "checkpoint_metadata_sha256": metadata_hash,
         "suite_sha256": digest(args.suite),
         "norm_stats_sha256": digest(norm_path),
         "suite": suite,
@@ -93,8 +120,8 @@ def main():
         "horizon": 50,
         "seed": args.seed,
         "repeats": args.repeats,
-        "versions": {p: importlib.metadata.version(p) for p in ("jax", "jaxlib", "flax", "orbax-checkpoint")},
-        "devices": [str(d) for d in jax.devices()],
+        "versions": {p: importlib.metadata.version(p) for p in packages},
+        "devices": devices,
         "precision_acceptance_threshold": None,
         "limitations": [
             "Base model is not YAM-finetuned; no robot execution or task success claim",
@@ -104,23 +131,53 @@ def main():
             "Same Thor JAX version reference, not a training-server JAX equivalence test",
         ],
     }
+    if is_pytorch:
+        record.update(
+            converted_weights_sha256=digest(weight_path),
+            conversion_audit=conversion,
+            precision_policy="selected BF16 backbone with FP32 stability layers"
+            if args.compute_dtype == "bfloat16"
+            else "FP32 / TF32 disabled",
+        )
     (args.output / "started.json").write_text(json.dumps(record, ensure_ascii=False, indent=2))
     print("MODEL_LOAD_START", flush=True)
     started = time.monotonic()
+    backend_options = (
+        {"pytorch_device": "cuda", "pytorch_precision": args.compute_dtype, "pytorch_compile": args.compile}
+        if is_pytorch
+        else {}
+    )
     policy = policy_config.create_trained_policy(
         train_config,
         args.checkpoint,
         norm_stats=normalize.deserialize_json(norm_path.read_text()),
         sample_kwargs={"num_steps": args.steps},
         jax_param_dtype=args.params_dtype,
+        **backend_options,
     )
     record["load_s"] = time.monotonic() - started
+    if is_pytorch:
+        policy._model.attention_implementation = args.attention  # noqa: SLF001
     # Inspect actual loaded leaves, not only the requested restoration dtype.
-    from flax import nnx  # noqa: PLC0415
+    if is_pytorch:
+        # The legacy constructor requests "high" matmul; override AFTER load.
+        torch.set_float32_matmul_precision("highest")
+        torch.backends.cuda.matmul.allow_tf32 = False
+        torch.backends.cudnn.allow_tf32 = False
+        leaves = list(policy._model.parameters())  # noqa: SLF001
+        if not all(x.is_cuda for x in leaves):
+            raise RuntimeError("Model parameters are not all on CUDA")
+        record["loaded_param_dtypes"] = dict(Counter(str(x.dtype) for x in leaves))
+        record["loaded_param_bytes"] = sum(x.numel() * x.element_size() for x in leaves)
+        record["matmul_precision"] = "FP32 highest; TF32 disabled"
+        torch.cuda.synchronize()
+        torch.cuda.reset_peak_memory_stats()
+    else:
+        from flax import nnx  # noqa: PLC0415
 
-    leaves = jax.tree.leaves(nnx.state(policy._model, nnx.Param))  # noqa: SLF001
-    record["loaded_param_dtypes"] = dict(Counter(str(x.dtype) for x in leaves))
-    record["loaded_param_bytes"] = sum(x.size * x.dtype.itemsize for x in leaves)
+        leaves = jax.tree.leaves(nnx.state(policy._model, nnx.Param))  # noqa: SLF001
+        record["loaded_param_dtypes"] = dict(Counter(str(x.dtype) for x in leaves))
+        record["loaded_param_bytes"] = sum(x.size * x.dtype.itemsize for x in leaves)
     print("MODEL_LOAD_OK", record["load_s"], record["loaded_param_dtypes"], flush=True)
     raw = {}
     output_transform = policy._output_transform  # noqa: SLF001
@@ -136,15 +193,17 @@ def main():
     all_actions, all_raw, measurements = [], [], []
     for sample_path, observation, provenance in samples:
         actions, normalized, latencies, warmup = [], [], [], []
-        for repeat in range(args.repeats + 2):
+        for repeat in range(args.repeats + args.warmups):
             start = time.monotonic()
             action = np.asarray(policy.infer(observation, noise=noise)["actions"], dtype=np.float32)
+            if is_pytorch:
+                torch.cuda.synchronize()
             elapsed_ms = (time.monotonic() - start) * 1000
             if action.shape != (50, 14) or raw["actions"].shape != (50, 32):
                 raise RuntimeError("Action shape mismatch")
             if not np.isfinite(action).all() or not np.isfinite(raw["actions"]).all():
                 raise RuntimeError("Non-finite model output")
-            if repeat < 2:
+            if repeat < args.warmups:
                 warmup.append(elapsed_ms)
                 print("WARMUP", sample_path.stem, repeat, round(elapsed_ms, 2), flush=True)
             else:
@@ -187,6 +246,9 @@ def main():
         normalized_actions_sha256=digest(args.output / "normalized_actions.npy"),
         action_shape=list(np.stack(all_actions).shape),
     )
+    if is_pytorch:
+        record["cuda_peak_allocated_bytes"] = torch.cuda.max_memory_allocated()
+        record["cuda_peak_reserved_bytes"] = torch.cuda.max_memory_reserved()
     (args.output / "result.json").write_text(json.dumps(record, ensure_ascii=False, indent=2))
     print("SUITE_COMPLETE", record["p50_ms"], record["p95_ms"], flush=True)
 

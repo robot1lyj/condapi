@@ -41,3 +41,23 @@ Thor 产物：
 已启动 Thor 直拉与本机下载备选，后者保存在 `/home/wuyan-lyj/thor-system/images/pytorch-26.05-arm64/`，必要时经 USB 传输。`scripts/docker/thor/pytorch.Dockerfile` 目前是候选配方，尚未构建验证；保留 NVIDIA 的 torch/CUDA/TensorRT 约束，不安装项目服务器训练整套依赖，不执行教程脚本来覆盖本项目代码。
 
 下一次实测先跑少量既有 9 输入，检查 FP32 / BF16 输出差异和实际同步延迟；候选速度有价值才扩大样本。FP32 禁用 TF32，记录实际参数 dtype、编译开关、输入与权重摘要、首次编译时间。当前没有新的 PyTorch / TensorRT 延迟结果，原 JAX 约 177 ms 最快结果仍未满足用户目标。
+
+### 统一回放入口
+
+`scripts/thor/run_suite_host.py` 保留 A/B/C 原生 JAX 路径，新增 D（PyTorch FP32 eager）、E（混合 BF16 eager）、F（混合 BF16 编译）、G（混合 BF16 编译 + SDPA）。使用新建的 GPU 候选镜像时显式传 `--image`，并选择 `--modes D E F G`；不能用 CPU 转换镜像冒充 GPU 后端。
+
+`benchmark_suite.py` 的 PyTorch 路径检查 CUDA 可用及实际参数设备；在旧模型构造器之后重新禁用 TF32，记录真实参数 dtype、完整 safetensors SHA-256、转换审计、编译/注意力设置和 CUDA 内存峰值。计时包含最终设备同步；没有 CPU 推理降级。默认仍为每组 9 输入、每输入 20 次正式调用。
+
+跨框架对照必须显式使用 `compare_suites.py --cross-backend`：只放开后端、运行库版本和 matmul 实现的差异，并将它们列在结果中；输入、原 checkpoint metadata、noise、norm、steps、horizon、重复次数和样本顺序仍须匹配。普通 A/B/C 比较仍拒绝运行时差异。
+
+### 镜像缓存复用
+
+官方 ARM64 manifest 固定为 `sha256:aa400d4373fa71f30e1714664beabcc64c2d198e72d65e9a3641440b07e7cc83`，压缩层总量约 10.140 GiB。现有 JAX 层中命中 37 个 manifest 条目、约 6.454 GiB。`skopeo copy` 的 dir 目标不能作为本次缓存复用的可靠入口：实机观察其重建了目标目录，因此改用 `download_ngc_image.py` 按 SHA-256 检查、复制缓存，只下载缺失层，最后才发布完整 manifest。
+
+原 JAX 缓存保持不变；停止的是本轮自己启动的两条重复 workstation skopeo 下载，已完成文件仍保留。新下载目录为本机 `/home/wuyan-lyj/thor-system/images/pytorch-26.05-arm64-cached/`，经 USB 同步到 Thor `/home/wuyan-lyj/thor/images/pytorch-26.05-arm64-cached/`。传输不包含 `.partial` 文件，最终镜像仍需完整指纹校验与导入验证。
+
+### 社区导出器的额外语义差异
+
+本机只读参考仓库 `/home/wuyan-lyj/thor-system/references/openpi-thor/` 固定提交 `40c88146e5e6b82526db6583c8a75520e02e551e`。其 [export.py](https://github.com/xuweiwu/openpi-thor/blob/40c88146e5e6b82526db6583c8a75520e02e551e/src/openpi_thor/export.py) 支持从 config 读取 action horizon，但公开导出入口将 compute dtype 固定为 FP16，并对 Gemma MLP 中间结果使用 `nan_to_num`。因此“最后输出有限”不能单独证明该路径没有溢出或精度变化。
+
+后续若借用该导出器，应单独核对 FP32 稳定层、溢出修正是否触发和原 JAX 动作偏差；不能直接覆盖项目源码、沿用它的环境降级或照搬社区的精度阈值。当前优先测试不依赖这种 FP16 修正的 PyTorch BF16/SDPA 路径，再决定 TensorRT 适配细节。

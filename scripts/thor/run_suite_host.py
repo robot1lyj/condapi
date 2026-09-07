@@ -11,6 +11,12 @@ import subprocess
 import sys
 
 MODES = {"A": ("checkpoint", "float32"), "B": ("checkpoint", "bfloat16"), "C": ("bfloat16", "bfloat16")}
+TORCH_MODES = {
+    "D": ("float32", "float32"),
+    "E": ("bfloat16", "bfloat16"),
+    "F": ("bfloat16", "bfloat16"),
+    "G": ("bfloat16", "bfloat16"),
+}
 
 
 def main():
@@ -18,7 +24,7 @@ def main():
     parser.add_argument("--root", type=Path, default=Path("/home/wuyan-lyj/thor/pi"))
     parser.add_argument("--image", default="openpi-pi:thor-jax-candidate")
     parser.add_argument("--batch-id", required=True)
-    parser.add_argument("--modes", nargs="+", choices=tuple(MODES), default=list(MODES))
+    parser.add_argument("--modes", nargs="+", choices=(*MODES, *TORCH_MODES), default=list(MODES))
     parser.add_argument("--code-commit", required=True)
     args = parser.parse_args()
     if os.geteuid() != 0:
@@ -30,7 +36,9 @@ def main():
     for mode in args.modes:
         label = f"pi05-{mode}-{args.batch_id}"
         prefix = args.root / "logs" / label
-        params, compute = MODES[mode]
+        is_pytorch = mode in TORCH_MODES
+        params, compute = (TORCH_MODES if is_pytorch else MODES)[mode]
+        checkpoint = "pi05_base_pytorch_fp32_v1" if is_pytorch else "pi05_base"
         command = [
             "docker",
             "run",
@@ -47,6 +55,10 @@ def main():
             "NVIDIA_DRIVER_CAPABILITIES=compute,utility",
             "-e",
             "PYTHONUNBUFFERED=1",
+            "-e",
+            "TORCHINDUCTOR_CACHE_DIR=/cache/torchinductor",
+            "-e",
+            "TRITON_CACHE_DIR=/cache/triton",
             "-v",
             f"{scripts}:/bench:ro",
             "-v",
@@ -61,7 +73,7 @@ def main():
             "python",
             "/bench/benchmark_suite.py",
             "--checkpoint",
-            "/checkpoints/pi05_base",
+            f"/checkpoints/{checkpoint}",
             "--suite",
             "/test-data/pi05-replay-v1/suite.json",
             "--params-dtype",
@@ -71,6 +83,10 @@ def main():
             "--output",
             f"/results/{label}",
         ]
+        if is_pytorch:
+            command.extend(["--backend", "pytorch", "--compile" if mode in ("F", "G") else "--no-compile"])
+            if mode == "G":
+                command.extend(["--attention", "sdpa"])
         prefix.parent.mkdir(parents=True, exist_ok=True)
         files = sorted([*scripts.glob("*.py"), *repo.glob("src/openpi/**/*.py"), *repo.glob("scripts/docker/thor/*")])
         hashes = {str(p.relative_to(repo)): hashlib.sha256(p.read_bytes()).hexdigest() for p in files if p.is_file()}
@@ -88,7 +104,7 @@ def main():
             "kernel": os.uname().release,
             "command": command,
             "power_before": subprocess.check_output(["nvpmodel", "-q"], text=True),
-            "checkpoint": "pi05_base; no LoRA; original read-only checkpoint",
+            "checkpoint": f"{checkpoint}; no LoRA; read-only checkpoint",
             "network": "disabled for inference container; all inputs local",
         }
         with prefix.with_suffix(".manifest.json").open("x") as output:
