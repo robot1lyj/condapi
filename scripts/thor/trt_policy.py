@@ -91,6 +91,24 @@ class TensorRTModel(torch.nn.Module):
             or self.outputs["actions"].dtype != torch.float32
         ):
             raise ValueError("Engine output must be exactly (1,50,32)")
+        self.unused_bindings = {}
+        # Pi0.5 encodes state in prompt tokens and retains the original state
+        # for output transforms. Its separate sampler state input is dead.
+        # TRT retains this unused ONNX DOUBLE input as FLOAT; bind a dummy
+        # only after proving it has no graph consumers. Never cast real state.
+        if "state" in self.inputs:
+            import onnx  # noqa: PLC0415
+
+            source = Path(report["source_export"])
+            onnx_path = source / "sampler.onnx"
+            if digest(onnx_path) != report["source_onnx_sha256"]:
+                raise ValueError("Source ONNX fingerprint mismatch")
+            graph = onnx.load(str(onnx_path), load_external_data=False).graph
+            used = {name for node in graph.node for name in node.input} | {item.name for item in graph.output}
+            if "state" not in used:
+                shape, dtype = self.inputs["state"]
+                self.unused_bindings["state"] = torch.zeros(shape, dtype=dtype, device=self.device)
+                self.io_contract["state"]["unused_binding"] = "zero dummy; original state untouched in policy"
 
     @torch.no_grad()
     def sample_actions(self, device, observation, *, noise=None, num_steps=10):
@@ -100,6 +118,10 @@ class TensorRTModel(torch.nn.Module):
         keepalive = []
         for name, (shape, dtype) in self.inputs.items():
             value = values[name]
+            if name in self.unused_bindings:
+                if tuple(value.shape) != shape or value.device != self.device:
+                    raise ValueError(f"Unused input shape/device mismatch: {name}")
+                value = self.unused_bindings[name]
             if tuple(value.shape) != shape or value.dtype != dtype or value.device != self.device:
                 raise ValueError(f"Input contract mismatch: {name}")
             value = value.contiguous()
