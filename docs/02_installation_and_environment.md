@@ -143,7 +143,7 @@ setuptools/packaging 被 pip 固定版本替换后采用；实际运行版本是
 本地 `pip check` 通过。独立前缀解压验证发现 conda-pack 会混入缓存中的原始 conda 文件，导致
 `packaging._ranges` 缺失；安装器必须先从压缩包同级 `repair-wheels/` 离线强制重装这两个精确版本，
 再安装 editable 包。修复 wheel 已同步服务器，本地独立前缀修复后 editable 安装、`pip check`、
-CPU 导入和 24 项转换/数据加载相关测试通过；服务器实际运行验收仍待上传结束。
+CPU 导入和 24 项转换/数据加载相关测试通过；服务器实际运行验收仍待安装结束。
 不得把忽略缺失文件选项作为未知错误的通用绕过方式。
 
 `scripts/conda/migrate_local_env.sh` 是本次迁移入口，使用 flock 避免重复执行，rsync 断点续传、有限重试。
@@ -151,17 +151,29 @@ CPU 导入和 24 项转换/数据加载相关测试通过；服务器实际运�
 `/home/wuyan-lyj/condapi-env-transfer/migration.log`。服务独立于对话，但上传期间本地电脑须保持开机和网络，
 当前用户未启用 linger，注销本地用户也可能停止用户服务。
 
+本次上传现已完成，远端 SHA-256 与上述值一致。原后台服务在传输结束后因运行中脚本被修改而疑似读取错位，
+报语法错误，未自动启动安装；2026-09-07 已直接在服务器启动下述 tmux 安装流程，不重传、不覆盖旧环境。
+当前处于共享盘解包阶段，尚无 `INSTALL_COMPLETE`；此后安装不再依赖本地电脑或连接。
+后续不要修改正在执行的 shell 脚本；脚本更新应在进程结束后生效。
+
 上传结束后自动启动远端 tmux `condapi-env-install`，执行 `scripts/conda/install_packed_env.sh`：
 核对压缩包 SHA-256 → 拒绝覆盖既有目标 → 解压 → conda-unpack → 离线修复 packaging/setuptools →
 离线重装本仓库和客户端 editable 包 →
 pip check → CPU 导入检查。目标为 `/home/wuyan/.conda/envs/condapi-yam`，
 日志 `/home/wuyan/lyj/YAM/env-transfer/install.log`；只有日志出现 `INSTALL_COMPLETE` 才能记录迁移成功。
-失败时保留目录与日志，不能自动删除目标；GPU gate 仍等待 Slurm 恢复。
+失败时保留目录与日志，不能自动删除目标；GPU gate 仍等待实际资源分配和设备验收。
 
 服务器直连内网 Gitea 曾超时，本次通过本地 SSH 反向隧道让服务器访问 Gitea，已 clone 到 `YAM_code`；
 服务器 origin 保留正式 Gitea 地址，未配置 GitHub。隧道只服务代码同步，不参与环境安装或作业运行。
 
 ## 3. Slurm 和 GPU 预检
+
+最新复核（2026-09-07）：调度接口已恢复，按官方四卡模板提交的作业 **2063** 已受理。
+申请 `gpu` 分区、单节点 4 GPU、64 CPU、480G、7 天，作业名 `yam-4gpu-workspace`。
+当前 `PENDING / Priority`，预计启动时间 `N/A`；尚无分配节点，不能宣称获得 4090 或 CUDA 验收通过。
+Slurm 独立持有该作业，不依赖 SSH/对话；运行后由现有有界 workspace 脚本保留资源，最长 7 天，不会自动续租。
+只保留此一个申请，不重复提交。节点显示 IDLE，但 `sdiag` 部分统计时间比登录节点当前时间晚约 5 小时，
+属于待平台核实的时间异常线索，不作为排队原因的确定结论。下文先前失败记录应视为历史观测。
 
 登录节点只用于提交/查看任务。每次创建作业先查看资源，GPU 型号和显存必须在实际分配后记录：
 
