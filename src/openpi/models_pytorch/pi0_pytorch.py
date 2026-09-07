@@ -89,6 +89,8 @@ class PI0Pytorch(nn.Module):
         # Preserve eager attention by default; recorded acceleration experiments
         # may explicitly select SDPA before the first compiled invocation.
         self.attention_implementation = "eager"
+        self.batch_vision = False
+        self.attention_mask_dtype = None
 
         paligemma_config = _gemma.get_config(config.paligemma_variant)
         action_expert_config = _gemma.get_config(config.action_expert_variant)
@@ -165,7 +167,12 @@ class PI0Pytorch(nn.Module):
     def _prepare_attention_masks_4d(self, att_2d_masks):
         """Helper method to prepare 4D attention masks for transformer."""
         att_2d_masks_4d = att_2d_masks[:, None, :, :]
-        return torch.where(att_2d_masks_4d, 0.0, -2.3819763e38)
+        bias = torch.where(att_2d_masks_4d, 0.0, -2.3819763e38)
+        # Fused attention requires bias/query dtype agreement. Opt-in keeps the
+        # legacy eager path unchanged; valid entries remain exactly zero.
+        if self.attention_mask_dtype is not None:
+            bias = bias.to(self.attention_mask_dtype)
+        return bias
 
     def _preprocess_observation(self, observation, *, train=True):
         """Helper method to preprocess observation."""
@@ -202,14 +209,19 @@ class PI0Pytorch(nn.Module):
         pad_masks = []
         att_masks = []
 
-        # Process images
-        for img, img_mask in zip(images, img_masks, strict=True):
+        def image_embed_func(img):
+            return self.paligemma_with_expert.embed_image(img)
 
-            def image_embed_func(img):
-                return self.paligemma_with_expert.embed_image(img)
+        if self.batch_vision:
+            # SigLIP encodes views independently. Batch them without dropping
+            # any view or changing their order in the PaliGemma prefix.
+            image_embeddings = self._apply_checkpoint(image_embed_func, torch.cat(images, dim=0)).chunk(
+                len(images), dim=0
+            )
+        else:
+            image_embeddings = [self._apply_checkpoint(image_embed_func, img) for img in images]
 
-            img_emb = self._apply_checkpoint(image_embed_func, img)
-
+        for img_emb, img_mask in zip(image_embeddings, img_masks, strict=True):
             bsize, num_img_embs = img_emb.shape[:2]
 
             embs.append(img_emb)

@@ -38,9 +38,9 @@ Thor 产物：
 
 官方底座 `nvcr.io/nvidia/pytorch:26.05-py3`，ARM64；[NVIDIA 26.05 说明](https://docs.nvidia.com/deeplearning/frameworks/pytorch-release-notes/rel-26-05.html) 对应 PyTorch 2.12.0a0、CUDA 13.2.1、TensorRT 10.16.1.11。首次查询 registry digest `sha256:222d8b18e671be5c3ef91cb41727a2572a0b23f59ded6c39f373a96946f6f2ba`；实际落地后另存 image ID 与完整包版本。
 
-已启动 Thor 直拉与本机下载备选，后者保存在 `/home/wuyan-lyj/thor-system/images/pytorch-26.05-arm64/`，必要时经 USB 传输。`scripts/docker/thor/pytorch.Dockerfile` 目前是候选配方，尚未构建验证；保留 NVIDIA 的 torch/CUDA/TensorRT 约束，不安装项目服务器训练整套依赖，不执行教程脚本来覆盖本项目代码。
+最初启动了 Thor 直拉与本机下载备选，后者保存在 `/home/wuyan-lyj/thor-system/images/pytorch-26.05-arm64/`；最终改用下方记录的内容缓存复用与 USB 传输。`scripts/docker/thor/pytorch.Dockerfile` 已完成候选构建与下方 D/E 实测；保留 NVIDIA 的 torch/CUDA/TensorRT 约束，不安装项目服务器训练整套依赖，不执行教程脚本来覆盖本项目代码。
 
-下一次实测先跑少量既有 9 输入，检查 FP32 / BF16 输出差异和实际同步延迟；候选速度有价值才扩大样本。FP32 禁用 TF32，记录实际参数 dtype、编译开关、输入与权重摘要、首次编译时间。当前没有新的 PyTorch / TensorRT 延迟结果，原 JAX 约 177 ms 最快结果仍未满足用户目标。
+首次转换阶段的安排是先跑既有 9 输入，检查 FP32 / BF16 输出差异和实际同步延迟；候选速度有价值才扩大样本。FP32 禁用 TF32，记录实际参数 dtype、编译开关、输入与权重摘要、首次编译时间。随后完成的实测见下方更新；原 JAX 约 177 ms 最快结果仍未满足用户目标。
 
 ### 统一回放入口
 
@@ -69,3 +69,21 @@ Thor 产物：
 随后停止本轮自己的剩余重复网络拉取，保留部分下载文件。Thor 安装了镜像工具 skopeo 1.13.3；直接写 docker-daemon 返回 `io: read/write on closed pipe`，因此使用已经验证过的 docker-archive → `docker load` 路径。该错误的底层原因没有进一步认定。
 
 下载器在文件齐备时现可完全离线校验/发布 manifest，不再为了检查本地缓存请求 NGC token。GPU 候选 Dockerfile 在装依赖前生成已装 torch / NVIDIA / TensorRT / NumPy / SciPy 版本约束；不依赖底座里内容为空的 `/etc/pip/constraint.txt` 来保证底层库不变。
+
+## PyTorch 第一轮实测（D/E 完成，F 首试失败）
+
+官方底座导入后的 Docker image ID 为 `sha256:9024018b27e9ad043d1b88984b4fb7b705df9778f3688ca7cbaf399031421cde`；格式转换后的 ID 不与 registry manifest ID 混用。Pi 候选镜像 `openpi-pi:thor-pytorch-candidate-20260907` 的实测 image ID 为 `sha256:4a878f9b56d4e35876a2db5fa3ca7c245143e0a6fd6ed5179b9e2948b896f2c2`。GPU 检查实测 PyTorch `2.12.0a0+5aff3928d8.nv26.05` / CUDA `13.2` / TensorRT `10.16.1.11`，设备 NVIDIA Thor `(11,0)`。
+
+全部维持原回放合同与噪声，每个完成配置含 9 输入 × 20 正式调用；MAXN / 锁频仅在测试期间启用。对照参考为原 JAX FP32（A）：
+
+| 配置 | P50 / P95（ms） | 动作 MAE | 动作最大绝对差 | 当前判断 |
+|---|---:|---:|---:|---|
+| D · PyTorch FP32 eager | 1249.229 / 1251.134 | 0.000001086 | 0.000015259 | 跨框架 FP32 数值接近；速度不合格 |
+| E · 混合 BF16 eager | 221.342 / 227.245 | 0.002794213 | 0.024288177 | 比原 JAX C 更慢，最大偏差也更大，不选作最终路线 |
+| F · 混合 BF16 compile，首次 | 无有效结果 | — | — | 融合注意力 bias/query dtype 不匹配；已退出并恢复 120W |
+
+D 的 812 个实际参数张量均为 FP32；E 为 122 个 FP32 / 690 个 BF16，保留既定稳定层。D/E 每个输入重复输出的最大变化均为 0。误差仍使用数据集原单位，不宣称机器人任务精度合格。完整结果及运行库差异进入 [中文测试页](../../reports/thor/index.html)，原始动作保存在 Thor 与本机 `test-data/results/pi05-{D,E}-20260907-r1/`。
+
+F 首次失败发生于编译器生成的 `aten._scaled_dot_product_efficient_attention`，错误为 `invalid dtype for bias - should match query's dtype`。原始失败日志保留在两端，Git 另存无损 [gzip 副本](../../reports/thor/evidence/20260907/acceleration/pi05-F-20260907-r1.log.gz)。不是 GPU 不支持 BF16，也不是得到了一组可用延迟。G 在该批次因 F 失败尚未启动。
+
+下一批增加显式 `--native-attention-mask`，让融合算子的 bias 与 query dtype 对齐；旧 eager 路径仍保留 FP32 掩码。另加 H 配置（SDPA + 编译 + 三相机视觉编码合批），合批不改变图像数量、视角顺序或 action horizon。掩码与合批均有小型 CPU 语义测试，但是否真正加速、是否影响完整动作精度，必须以重跑结果为准。

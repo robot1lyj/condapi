@@ -233,7 +233,7 @@ def attach_conversion(data, path):
         0,
         {
             "title": "100 ms 加速主线 · 权重转换进度",
-            "description": "FP32 转换已经完成；PyTorch GPU 容器准备中，尚无新延迟结果。首次加载使用数值相等检查（不区分正负零），不能据此宣称跨框架动作精度通过。",
+            "description": "FP32 转换已经完成；跨框架动作误差与延迟见实测表。首次权重加载检查数值相等（不区分正负零），不替代后续推理对照。",
             "columns": ["阶段", "实测结果", "下一步"],
             "rows": [
                 [
@@ -242,10 +242,119 @@ def attach_conversion(data, path):
                     "同输入 / 同噪声动作对照",
                 ],
                 ["LoRA", "当前基础模型不含 LoRA；转换器拒绝丢弃适配器", "微调后独立验证合并路径"],
-                ["PyTorch / TensorRT 延迟", "未实测，目标约 100 ms 或以下", "三相机 / H50 / 去噪 10，不缩减合同"],
+                ["加速目标", "完整调用约 100 ms 或以下", "三相机 / H50 / 去噪 10，不缩减合同"],
             ],
         },
     )
+
+
+def attach_additional_runs(data, reference, run_paths, logs):
+    rows = []
+    for path in run_paths:
+        record = read_run(path)[0]
+        comparison = compare(reference, path, cross_backend=True)
+        run_id = record["run_id"]
+        exit_record = json.loads((logs / f"{run_id}.exit.json").read_text())
+        if exit_record["exit_code"] != 0:
+            raise ValueError("Additional backend did not finish successfully")
+        stats = telemetry_metrics(logs / f"{run_id}.tegrastats")
+        name = f"{run_id.split('-')[1]} · {record['backend']} / {record['compute_dtype']}"
+        detail = (
+            f"compile={record['compiled']} / attention={record['attention']} / "
+            f"合批相机={record.get('batch_vision', False)} / 掩码={record.get('attention_mask', 'float32')} / TF32 关闭"
+        )
+        error = comparison["physical_dataset_units"]
+        normalized = comparison["normalized_active_14d"]
+        data["experiments"].append(
+            {
+                "name": name,
+                "weights": record["params_dtype"],
+                "compute": record["compute_dtype"],
+                "status": "已实测 · 非任务精度验收",
+                "scope": f"{len(record['measurements'])} 输入 / 每输入 {record['repeats']} 次",
+                "p50_ms": record["p50_ms"],
+                "p95_ms": record["p95_ms"],
+                "max_abs_error": error["max_abs"],
+                "note": detail,
+            }
+        )
+        rows.append(
+            [
+                name,
+                detail,
+                f"{record['p50_ms']:.2f}",
+                f"{record['p95_ms']:.2f}",
+                f"{error['mae']:.8f}",
+                f"{error['max_abs']:.8f}",
+                f"{normalized['max_abs']:.8f}",
+                f"{record['repeat_max_abs_difference']:.8f}",
+                f"{stats['gpu_temperature_max_c']:.1f} °C",
+            ]
+        )
+        data.setdefault("additional_comparisons", []).append(comparison)
+        data.setdefault("additional_telemetry", {})[run_id] = stats
+        data["measured_records"].append(record)
+        data["host_manifests"][run_id] = json.loads((logs / f"{run_id}.manifest.json").read_text())
+    if rows:
+        data["detail_tables"].insert(
+            0,
+            {
+                "title": "跨框架实测 · 保持三相机 / H50 / 去噪 10",
+                "description": "统一对照原 JAX FP32（A）。数据单位未做硬件校准，数值误差不等于任务成功率。所有数值来自完成的本地回放，不使用社区宣传延迟。",
+                "columns": [
+                    "配置",
+                    "实现",
+                    "P50 ms",
+                    "P95 ms",
+                    "动作 MAE",
+                    "动作最大误差",
+                    "归一化 14D 最大误差",
+                    "重复最大变化",
+                    "GPU 最高温度",
+                ],
+                "rows": rows,
+            },
+        )
+        data["facts"][0].update(
+            value=f"{len(data['experiments'])} 组已实测", detail="原生 JAX 与新增后端；精度资格分别说明"
+        )
+        count = sum(len(record["measurements"]) * record["repeats"] for record in data["measured_records"])
+        data["facts"][2].update(value=f"{count} 次", detail="正式调用总数；编译和预热另行记录")
+
+
+def attach_failed_runs(data, run_ids, logs):
+    for run_id in run_ids:
+        exit_record = json.loads((logs / f"{run_id}.exit.json").read_text())
+        if exit_record["exit_code"] == 0:
+            raise ValueError("Successful runs must not be listed as failed")
+        manifest = json.loads((logs / f"{run_id}.manifest.json").read_text())
+        log_path = logs / f"{run_id}.log"
+        error = next(
+            (line for line in reversed(log_path.read_text().splitlines()) if "Error:" in line),
+            "See raw log for failure details",
+        )
+        data.setdefault("failed_runs", []).append(
+            {
+                "run_id": run_id,
+                "exit": exit_record,
+                "manifest": manifest,
+                "error": error,
+                "log_sha256": hashlib.sha256(log_path.read_bytes()).hexdigest(),
+            }
+        )
+        data["experiments"].append(
+            {
+                "name": run_id,
+                "weights": manifest["checkpoint"],
+                "compute": "见实际命令",
+                "status": "失败 · 无有效延迟",
+                "scope": "不计入完成的推理调用",
+                "p50_ms": None,
+                "p95_ms": None,
+                "max_abs_error": None,
+                "note": error,
+            }
+        )
 
 
 def main():
@@ -256,10 +365,14 @@ def main():
     parser.add_argument("--json", type=Path, required=True)
     parser.add_argument("--html", type=Path, required=True)
     parser.add_argument("--conversion-audit", type=Path)
+    parser.add_argument("--additional-runs", type=Path, nargs="*", default=[])
+    parser.add_argument("--failed-runs", nargs="*", default=[])
     args = parser.parse_args()
     data = build(args.runs, args.logs, json.loads(args.plan.read_text()))
     if args.conversion_audit:
         attach_conversion(data, args.conversion_audit)
+    attach_additional_runs(data, args.runs[0], args.additional_runs, args.logs)
+    attach_failed_runs(data, args.failed_runs, args.logs)
     args.json.write_text(json.dumps(data, ensure_ascii=False, indent=2))
     args.html.write_text(render(data))
 

@@ -40,6 +40,8 @@ def main():
     parser.add_argument("--compile", action=argparse.BooleanOptionalAction, default=True)
     parser.add_argument("--warmups", type=int, default=2)
     parser.add_argument("--attention", choices=("eager", "sdpa"), default="eager")
+    parser.add_argument("--batch-vision", action="store_true")
+    parser.add_argument("--native-attention-mask", action="store_true")
     parser.add_argument("--repeats", type=int, default=20)
     parser.add_argument("--steps", type=int, default=10)
     parser.add_argument("--seed", type=int, default=0)
@@ -109,6 +111,8 @@ def main():
         "compiled": args.compile if is_pytorch else True,
         "warmups_per_sample": args.warmups,
         "attention": args.attention if is_pytorch else "jax_native",
+        "batch_vision": args.batch_vision if is_pytorch else False,
+        "attention_mask": "query_dtype" if is_pytorch and args.native_attention_mask else "float32",
         "params_dtype": f"fp32_checkpoint_to_{args.compute_dtype}" if is_pytorch else args.params_dtype,
         "compute_dtype": args.compute_dtype,
         "matmul_precision": str(jax.config.jax_default_matmul_precision),
@@ -158,6 +162,11 @@ def main():
     record["load_s"] = time.monotonic() - started
     if is_pytorch:
         policy._model.attention_implementation = args.attention  # noqa: SLF001
+        policy._model.batch_vision = args.batch_vision  # noqa: SLF001
+        if args.native_attention_mask:
+            policy._model.attention_mask_dtype = (  # noqa: SLF001
+                policy._model.paligemma_with_expert.paligemma.language_model.layers[0].self_attn.q_proj.weight.dtype  # noqa: SLF001
+            )
     # Inspect actual loaded leaves, not only the requested restoration dtype.
     if is_pytorch:
         # The legacy constructor requests "high" matmul; override AFTER load.
