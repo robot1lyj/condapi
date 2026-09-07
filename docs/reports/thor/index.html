@@ -21,7 +21,7 @@ details{margin-top:22px}summary{cursor:pointer;color:var(--accent)}pre{font-size
 footer{color:var(--muted);font-size:12px;margin-top:20px;text-align:center}@media(max-width:800px){.facts{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr;gap:0}h1{font-size:28px}main{padding:0 14px}.panel{padding:18px}}
 </style><header><div class="eyebrow">EDGE INFERENCE / 可复现实测</div><h1>Thor · Pi0.5 推理实验室</h1>
 <p>原始 JAX 权重 → 精度对照 → 真实样本离线回放。把可运行、数值一致与任务有效分开验收。</p>
-<div class="meta">更新于 2026-09-07T19:03:45.486318+08:00 · 基础模型 pi05_base · 不连接机械臂执行动作</div></header>
+<div class="meta">更新于 2026-09-07T19:25:54.292701+08:00 · 基础模型 pi05_base · 不连接机械臂执行动作</div></header>
 <main><section class="facts"><article class="fact"><div>完整模型模式</div><strong>3 / 3 完成</strong><small>A、B、C 均在 NVIDIA Thor GPU 上执行</small></article><article class="fact"><div>真实录像输入</div><strong>3 轨迹 · 9 组</strong><small>三路 RGB + 14D 状态 + 文本；来源见 suite 清单</small></article><article class="fact"><div>稳定推理调用</div><strong>540 次</strong><small>每配置 9 × 20；另有 54 次预热调用</small></article><article class="fact"><div>性能模式</div><strong>仅推理 MAXN</strong><small>结束恢复 120W；记录实际频率与温度</small></article></section><section class="panel"><h2>精度配置对照</h2>
 <p class="sub">参数存储精度不等于计算精度。延迟以预热后完整 policy 调用为准，首次编译单独记录；“—”表示尚无实测数据。</p>
 <div class="tablewrap"><table><thead><tr><th>配置</th><th>权重</th><th>计算</th><th>状态</th><th>P50 / ms</th><th>P95 / ms</th><th>最大绝对误差</th><th>说明</th></tr></thead><tbody><tr><td><strong>A · 原精度参考</strong><small>3 轨迹 / 9 输入 / 每输入 20 次</small></td><td>FP32</td><td>FP32 / highest</td><td><span class="badge">已实测 · 非任务精度验收</span></td><td>1231.477</td><td>1232.370</td><td>0.000</td><td>误差相对 A，采用数据集原始单位；原始 checkpoint 从未改写。</td></tr><tr><td><strong>B · 仅 BF16 计算</strong><small>3 轨迹 / 9 输入 / 每输入 20 次</small></td><td>FP32</td><td>BF16</td><td><span class="badge">已实测 · 非任务精度验收</span></td><td>239.761</td><td>240.805</td><td>0.023</td><td>误差相对 A，采用数据集原始单位；原始 checkpoint 从未改写。</td></tr><tr><td><strong>C · BF16 加载与计算</strong><small>3 轨迹 / 9 输入 / 每输入 20 次</small></td><td>原盘 FP32 → 内存 BF16</td><td>BF16</td><td><span class="badge">已实测 · 非任务精度验收</span></td><td>177.393</td><td>178.237</td><td>0.019</td><td>误差相对 A，采用数据集原始单位；原始 checkpoint 从未改写。</td></tr></tbody></table></div></section>
@@ -30,7 +30,7 @@ footer{color:var(--muted);font-size:12px;margin-top:20px;text-align:center}@medi
 <section class="panel"><h2>结果解释边界</h2><p class="sub">性能数据只回答“多快”，不自动回答“动作是否正确”。</p>
 <div class="notice"><strong>当前限制</strong><ul><li>模型为未针对 YAM 微调的 pi05_base；没有实机闭环、成功率或安全动作验收。</li><li>本次 norm 来自同一组回放录像，仅为可复现精度/性能对照；未来必须绑定微调 checkpoint 自己的 norm。</li><li>A 是本机新版 JAX 的数值参考，不代表已验证与服务器训练版 JAX 完全相同。</li><li>3 条轨迹、9 个状态、一个固定噪声种子；不足以评价泛化、动态闭环和所有极端输入。</li><li>BF16 会改变数值；目前未制定任务级容差，不因输出有限或推理更快就默认批准部署。</li><li>首次编译曾出现 CUDA autotune 计时警告；正式耗时使用预热后的同步主机计时，不采用编译器内部测量值。</li></ul></div>
 <details><summary>展开原始记录 JSON</summary><pre>{
-  &quot;updated_at&quot;: &quot;2026-09-07T19:03:45.486318+08:00&quot;,
+  &quot;updated_at&quot;: &quot;2026-09-07T19:25:54.292701+08:00&quot;,
   &quot;facts&quot;: [
     {
       &quot;label&quot;: &quot;完整模型模式&quot;,
@@ -415,12 +415,12 @@ footer{color:var(--muted);font-size:12px;margin-top:20px;text-align:center}@medi
   ],
   &quot;recommendations&quot;: [
     {
-      &quot;title&quot;: &quot;固定当前可运行路径：原生 JAX，A 留作参考，C 优先扩样&quot;,
-      &quot;detail&quot;: &quot;Thor / JetPack 7.2.1 → Pi 系列 Docker → NVIDIA JAX 26.05 → 原始只读 JAX checkpoint → 本地三路图像、状态、文本 → (50,14) 输出。A 保留 FP32 权重与 FP32/highest 计算；C 在本轮 P50 为 177.39 ms，约比 A 快 6.94 倍，且本批误差未比 B 更大，因此列为性能候选，而非直接批准实机控制。B 保留作仅改变计算精度的对照。MAXN 仍只在推理期间使用。&quot;
+      &quot;title&quot;: &quot;用户反馈后调整主线：原生 JAX 仅作参考，优先换加速后端&quot;,
+      &quot;detail&quot;: &quot;2026-09-07 用户明确不能接受当前最低 177.39 ms，目标是完整推理约 100 ms 或更低，同时保留模型精度。A/B/C 是在 MAXN 与锁频下取得的实测，不再将 C 视为可接受的最终部署方案。保留 A 数值参考和 B/C 精度对照，主线转为 PyTorch 编译、TensorRT 混合精度与 FlashRT 的低延迟适配；同时报告 P50/P95，不先承诺未经同合同实测的 30/50 ms。&quot;
     },
     {
-      &quot;title&quot;: &quot;下一轮先扩充真实输入和噪声：300 个状态 × 3 个种子&quot;,
-      &quot;detail&quot;: &quot;从 Thor 本地的 3 条完整轨迹各均匀选 100 个状态，固定种子 0/1/2，同一输入、同一噪声分别跑 A/B/C，每组合预热后测 3 次；不把重复次数算成独立样本。保留去噪 10 步、horizon 50 和三相机配置，汇总逐维 MAE/P95/max、最差输入与轨迹相邻帧差异，重点查看本轮最大漂移出现的右夹爪。原始数据不改写，输出新 suite 目录；不能用这三条录像估计任务泛化。&quot;
+      &quot;title&quot;: &quot;先用已有 9 输入筛后端，速度和误差有希望再扩样&quot;,
+      &quot;detail&quot;: &quot;复用本轮已经保存的输入、噪声、norm 和 JAX 参考动作，不先重跑大量慢速 JAX。每个候选保持三路 RGB、14D 输出、去噪 10 步和 horizon 50，先完成逐张量转换核对与 9 输入误差/延迟筛选；有明显提速且误差受控后再扩到每轨迹 100 状态 × 3 种子。最终性能用足够预热后的同步完整 policy P50/P95 衡量，编译/校准另计，不用减少相机或动作长度冒充同合同加速。&quot;
     },
     {
       &quot;title&quot;: &quot;把训练栈差异和精度差异分开核验&quot;,
@@ -435,6 +435,10 @@ footer{color:var(--muted);font-size:12px;margin-top:20px;text-align:center}@medi
       &quot;detail&quot;: &quot;Jetson AI Lab 提醒其纯 FP16 导出会溢出；xuweiwu/openpi-thor 支持的是保留 RMSNorm 等 FP32 敏感运算、使用 strongly typed TensorRT 的定制混合 FP16 路径。下一轮可借鉴这条路径，但须独立对照 JAX A 与已验证 PyTorch，保持当前 horizon 50，不能拿教程 LIBERO horizon 10 的延迟作本机目标。转换误差、前向误差和 TensorRT 编译误差分开记录。&quot;
     },
     {
+      &quot;title&quot;: &quot;FlashRT 列为高性能候选，但先补齐 YAM / horizon 50 合同&quot;,
+      &quot;detail&quot;: &quot;项目公布 Thor 三相机 FP8 约 54.8 ms、NVFP4+FA4 约 31.74 ms，但这不是本机 YAM 结果。2026-09-07 阅读其 Thor 前端发现 action 序列长度 Sa 固定为 10，而本项目为 50；其最新 NVFP4 报告主要对照 FP8，并不能单独证明相对原始 JAX 的精度。先确认 H50/14D/状态提示与模型权重映射支持，再将融合算子、CUDA Graph 和 FP8 分项对比；NVFP4 只有在前级误差通过后才考虑。&quot;
+    },
+    {
       &quot;title&quot;: &quot;FP8 / NVFP4 放在基线转换通过之后&quot;,
       &quot;detail&quot;: &quot;先测 FP8；校准集和验证集分开，增加其他本地录像或任务后再判断泛化。仅对 FP8 有明显收益时再测 attention-side NVFP4，暂不采用全 attention+MLP 激进量化。社区作者报告过 ONNX/TensorRT 降低精度后误差放大，因此必须比较最终 engine，不只比较量化后的 PyTorch；保留逐维误差与最坏样本，余弦相似度不能单独作为机械臂精度验收。&quot;
     },
@@ -444,6 +448,21 @@ footer{color:var(--muted);font-size:12px;margin-top:20px;text-align:center}@medi
     }
   ],
   &quot;sources&quot;: [
+    {
+      &quot;title&quot;: &quot;FlashRT：Thor 测试与前端代码&quot;,
+      &quot;url&quot;: &quot;https://github.com/flashrt-project/FlashRT/blob/main/examples/thor/README.md&quot;,
+      &quot;note&quot;: &quot;2026-09-07 查阅。列出了三相机 FP8 性能和 LIBERO 评估；属于社区报告，不能替代本项目 YAM 任务精度或 H50 延迟。&quot;
+    },
+    {
+      &quot;title&quot;: &quot;FlashRT：最新 Thor NVFP4 实测合同&quot;,
+      &quot;url&quot;: &quot;https://github.com/flashrt-project/FlashRT/blob/main/docs/pi05_thor_decoder_fp4_e2e.md&quot;,
+      &quot;note&quot;: &quot;2026-09-07 查阅。三视角约 31.74 ms 的对照参考为同轮 FP8，使用少量 LIBERO 观测；不可把其数值一致门槛解释为本项目机械臂任务成功率。&quot;
+    },
+    {
+      &quot;title&quot;: &quot;FlashRT：Pi0.5 Thor action 序列长度实现&quot;,
+      &quot;url&quot;: &quot;https://github.com/flashrt-project/FlashRT/blob/main/flash_rt/frontends/torch/pi05_thor.py&quot;,
+      &quot;note&quot;: &quot;2026-09-07 查阅。前端构造中 Sa 固定为 10，另有 steps=10 去噪循环，两者不是同一个含义；不能只改文档参数就声称已经支持本项目 horizon 50。&quot;
+    },
     {
       &quot;title&quot;: &quot;Jetson AI Lab：OpenPi π₀.₅ on Jetson Thor&quot;,
       &quot;url&quot;: &quot;https://www.jetson-ai-lab.com/tutorials/openpi_on_thor/&quot;,
@@ -5048,5 +5067,5 @@ footer{color:var(--muted);font-size:12px;margin-top:20px;text-align:center}@medi
     }
   }
 }</pre></details></section></div>
-<section class="panel"><h2>下一轮推理测试方案</h2><ol><li><strong>固定当前可运行路径：原生 JAX，A 留作参考，C 优先扩样</strong><p>Thor / JetPack 7.2.1 → Pi 系列 Docker → NVIDIA JAX 26.05 → 原始只读 JAX checkpoint → 本地三路图像、状态、文本 → (50,14) 输出。A 保留 FP32 权重与 FP32/highest 计算；C 在本轮 P50 为 177.39 ms，约比 A 快 6.94 倍，且本批误差未比 B 更大，因此列为性能候选，而非直接批准实机控制。B 保留作仅改变计算精度的对照。MAXN 仍只在推理期间使用。</p></li><li><strong>下一轮先扩充真实输入和噪声：300 个状态 × 3 个种子</strong><p>从 Thor 本地的 3 条完整轨迹各均匀选 100 个状态，固定种子 0/1/2，同一输入、同一噪声分别跑 A/B/C，每组合预热后测 3 次；不把重复次数算成独立样本。保留去噪 10 步、horizon 50 和三相机配置，汇总逐维 MAE/P95/max、最差输入与轨迹相邻帧差异，重点查看本轮最大漂移出现的右夹爪。原始数据不改写，输出新 suite 目录；不能用这三条录像估计任务泛化。</p></li><li><strong>把训练栈差异和精度差异分开核验</strong><p>在服务器实际训练环境的已分配 GPU 上，一次性用同一 checkpoint、输入和固定噪声导出参考动作，再把小结果文件带回 Thor 本地比较；不建立服务器实时推理链路，也不在登录节点运行模型。先确认 Thor 新版 JAX 与训练栈的差异，再判断转换误差，避免把框架版本造成的差异误归因于 BF16。</p></li><li><strong>独立验证 JAX → PyTorch FP32 转换，再改变运算精度</strong><p>沿用 Jetson AI Lab 的 NVIDIA PyTorch 26.05 容器基底作为 Pi 系列的候选运行环境版本，依赖仍装在容器内。转换先保留 FP32，逐张量核对映射后的 key、shape、dtype 和数值；只做转置/重排的权重应可精确核对，不默认接受 BF16 转存。再用相同 suite/noise/norm 比较 FP32 前向，关闭 TF32 和自动混合精度以免参考名不副实，然后独立测 BF16 与 torch.compile。未来 LoRA 必须保留 adapter：先在 FP32 正确合并或实现等价加载，检查没有漏键，再比较合并前后的 JAX 输出；不把当前无 LoRA 基础模型的通过当成 LoRA 转换已通过。</p></li><li><strong>TensorRT 首轮选择保留 FP32 敏感运算的混合精度，不做全局 FP16</strong><p>Jetson AI Lab 提醒其纯 FP16 导出会溢出；xuweiwu/openpi-thor 支持的是保留 RMSNorm 等 FP32 敏感运算、使用 strongly typed TensorRT 的定制混合 FP16 路径。下一轮可借鉴这条路径，但须独立对照 JAX A 与已验证 PyTorch，保持当前 horizon 50，不能拿教程 LIBERO horizon 10 的延迟作本机目标。转换误差、前向误差和 TensorRT 编译误差分开记录。</p></li><li><strong>FP8 / NVFP4 放在基线转换通过之后</strong><p>先测 FP8；校准集和验证集分开，增加其他本地录像或任务后再判断泛化。仅对 FP8 有明显收益时再测 attention-side NVFP4，暂不采用全 attention+MLP 激进量化。社区作者报告过 ONNX/TensorRT 降低精度后误差放大，因此必须比较最终 engine，不只比较量化后的 PyTorch；保留逐维误差与最坏样本，余弦相似度不能单独作为机械臂精度验收。</p></li><li><strong>微调完成后再做模型任务验收与双 IPC 联调</strong><p>使用微调 checkpoint 自带 YAM norm 和准确的单位合同，重新建立 A 参考并测 C/转换候选。动作容差与实际关节、夹爪要求绑定，基础模型阶段不虚设机器人安全阈值。之后只操作 Thor 服务端，配合用户现有 3588 通过网线直连验证数据协议和耗时，不读取或改动 3588 控制与采集代码。</p></li></ol><h2>社区依据（不混入本机实测数字）</h2><ul><li><a href="https://www.jetson-ai-lab.com/tutorials/openpi_on_thor/" rel="noreferrer">Jetson AI Lab：OpenPi π₀.₅ on Jetson Thor</a>：2026-09-07 查阅。官方教程使用 NVIDIA PyTorch 26.05 容器，路线为 JAX → PyTorch → ONNX → TensorRT；教程的 LIBERO/horizon 10 性能不是本项目 YAM/horizon 50 实测。其纯 FP16 溢出警告适用于该导出实现。</li><li><a href="https://github.com/xuweiwu/openpi-thor" rel="noreferrer">xuweiwu/openpi-thor：定制混合 FP16 与真实样本验证</a>：2026-09-07 查阅。作者说明 FP16 路径保留 FP32 敏感运算并使用 strongly typed TensorRT；NVFP4 采用 attention-side 方案避免更广量化带来的漂移。其结果和阈值属于作者测试栈，不直接成为本项目验收标准；不照搬其宿主机 venv/uv 安装方式。</li><li><a href="https://github.com/NVIDIA/JAX-Toolbox" rel="noreferrer">NVIDIA JAX Toolbox</a>：原生 JAX 容器上游。实际使用版本以本报告采集的 JAX、jaxlib、Flax、Orbax 版本与镜像 ID 为准，不能仅凭 GPU 枚举认定完整模型可运行。</li></ul></section>
+<section class="panel"><h2>下一轮推理测试方案</h2><ol><li><strong>用户反馈后调整主线：原生 JAX 仅作参考，优先换加速后端</strong><p>2026-09-07 用户明确不能接受当前最低 177.39 ms，目标是完整推理约 100 ms 或更低，同时保留模型精度。A/B/C 是在 MAXN 与锁频下取得的实测，不再将 C 视为可接受的最终部署方案。保留 A 数值参考和 B/C 精度对照，主线转为 PyTorch 编译、TensorRT 混合精度与 FlashRT 的低延迟适配；同时报告 P50/P95，不先承诺未经同合同实测的 30/50 ms。</p></li><li><strong>先用已有 9 输入筛后端，速度和误差有希望再扩样</strong><p>复用本轮已经保存的输入、噪声、norm 和 JAX 参考动作，不先重跑大量慢速 JAX。每个候选保持三路 RGB、14D 输出、去噪 10 步和 horizon 50，先完成逐张量转换核对与 9 输入误差/延迟筛选；有明显提速且误差受控后再扩到每轨迹 100 状态 × 3 种子。最终性能用足够预热后的同步完整 policy P50/P95 衡量，编译/校准另计，不用减少相机或动作长度冒充同合同加速。</p></li><li><strong>把训练栈差异和精度差异分开核验</strong><p>在服务器实际训练环境的已分配 GPU 上，一次性用同一 checkpoint、输入和固定噪声导出参考动作，再把小结果文件带回 Thor 本地比较；不建立服务器实时推理链路，也不在登录节点运行模型。先确认 Thor 新版 JAX 与训练栈的差异，再判断转换误差，避免把框架版本造成的差异误归因于 BF16。</p></li><li><strong>独立验证 JAX → PyTorch FP32 转换，再改变运算精度</strong><p>沿用 Jetson AI Lab 的 NVIDIA PyTorch 26.05 容器基底作为 Pi 系列的候选运行环境版本，依赖仍装在容器内。转换先保留 FP32，逐张量核对映射后的 key、shape、dtype 和数值；只做转置/重排的权重应可精确核对，不默认接受 BF16 转存。再用相同 suite/noise/norm 比较 FP32 前向，关闭 TF32 和自动混合精度以免参考名不副实，然后独立测 BF16 与 torch.compile。未来 LoRA 必须保留 adapter：先在 FP32 正确合并或实现等价加载，检查没有漏键，再比较合并前后的 JAX 输出；不把当前无 LoRA 基础模型的通过当成 LoRA 转换已通过。</p></li><li><strong>TensorRT 首轮选择保留 FP32 敏感运算的混合精度，不做全局 FP16</strong><p>Jetson AI Lab 提醒其纯 FP16 导出会溢出；xuweiwu/openpi-thor 支持的是保留 RMSNorm 等 FP32 敏感运算、使用 strongly typed TensorRT 的定制混合 FP16 路径。下一轮可借鉴这条路径，但须独立对照 JAX A 与已验证 PyTorch，保持当前 horizon 50，不能拿教程 LIBERO horizon 10 的延迟作本机目标。转换误差、前向误差和 TensorRT 编译误差分开记录。</p></li><li><strong>FlashRT 列为高性能候选，但先补齐 YAM / horizon 50 合同</strong><p>项目公布 Thor 三相机 FP8 约 54.8 ms、NVFP4+FA4 约 31.74 ms，但这不是本机 YAM 结果。2026-09-07 阅读其 Thor 前端发现 action 序列长度 Sa 固定为 10，而本项目为 50；其最新 NVFP4 报告主要对照 FP8，并不能单独证明相对原始 JAX 的精度。先确认 H50/14D/状态提示与模型权重映射支持，再将融合算子、CUDA Graph 和 FP8 分项对比；NVFP4 只有在前级误差通过后才考虑。</p></li><li><strong>FP8 / NVFP4 放在基线转换通过之后</strong><p>先测 FP8；校准集和验证集分开，增加其他本地录像或任务后再判断泛化。仅对 FP8 有明显收益时再测 attention-side NVFP4，暂不采用全 attention+MLP 激进量化。社区作者报告过 ONNX/TensorRT 降低精度后误差放大，因此必须比较最终 engine，不只比较量化后的 PyTorch；保留逐维误差与最坏样本，余弦相似度不能单独作为机械臂精度验收。</p></li><li><strong>微调完成后再做模型任务验收与双 IPC 联调</strong><p>使用微调 checkpoint 自带 YAM norm 和准确的单位合同，重新建立 A 参考并测 C/转换候选。动作容差与实际关节、夹爪要求绑定，基础模型阶段不虚设机器人安全阈值。之后只操作 Thor 服务端，配合用户现有 3588 通过网线直连验证数据协议和耗时，不读取或改动 3588 控制与采集代码。</p></li></ol><h2>社区依据（不混入本机实测数字）</h2><ul><li><a href="https://github.com/flashrt-project/FlashRT/blob/main/examples/thor/README.md" rel="noreferrer">FlashRT：Thor 测试与前端代码</a>：2026-09-07 查阅。列出了三相机 FP8 性能和 LIBERO 评估；属于社区报告，不能替代本项目 YAM 任务精度或 H50 延迟。</li><li><a href="https://github.com/flashrt-project/FlashRT/blob/main/docs/pi05_thor_decoder_fp4_e2e.md" rel="noreferrer">FlashRT：最新 Thor NVFP4 实测合同</a>：2026-09-07 查阅。三视角约 31.74 ms 的对照参考为同轮 FP8，使用少量 LIBERO 观测；不可把其数值一致门槛解释为本项目机械臂任务成功率。</li><li><a href="https://github.com/flashrt-project/FlashRT/blob/main/flash_rt/frontends/torch/pi05_thor.py" rel="noreferrer">FlashRT：Pi0.5 Thor action 序列长度实现</a>：2026-09-07 查阅。前端构造中 Sa 固定为 10，另有 steps=10 去噪循环，两者不是同一个含义；不能只改文档参数就声称已经支持本项目 horizon 50。</li><li><a href="https://www.jetson-ai-lab.com/tutorials/openpi_on_thor/" rel="noreferrer">Jetson AI Lab：OpenPi π₀.₅ on Jetson Thor</a>：2026-09-07 查阅。官方教程使用 NVIDIA PyTorch 26.05 容器，路线为 JAX → PyTorch → ONNX → TensorRT；教程的 LIBERO/horizon 10 性能不是本项目 YAM/horizon 50 实测。其纯 FP16 溢出警告适用于该导出实现。</li><li><a href="https://github.com/xuweiwu/openpi-thor" rel="noreferrer">xuweiwu/openpi-thor：定制混合 FP16 与真实样本验证</a>：2026-09-07 查阅。作者说明 FP16 路径保留 FP32 敏感运算并使用 strongly typed TensorRT；NVFP4 采用 attention-side 方案避免更广量化带来的漂移。其结果和阈值属于作者测试栈，不直接成为本项目验收标准；不照搬其宿主机 venv/uv 安装方式。</li><li><a href="https://github.com/NVIDIA/JAX-Toolbox" rel="noreferrer">NVIDIA JAX Toolbox</a>：原生 JAX 容器上游。实际使用版本以本报告采集的 JAX、jaxlib、Flax、Orbax 版本与镜像 ID 为准，不能仅凭 GPU 枚举认定完整模型可运行。</li></ul></section>
 <footer>本页为离线静态报告，无外部 CDN、无遥测。每次采集新结果后重新生成，不会自动冒充实时状态。</footer></main></html>

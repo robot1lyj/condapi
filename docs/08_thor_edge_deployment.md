@@ -226,7 +226,17 @@ PR #960 作者给出的局部 checkpoint 对照如下；样本范围、硬件及
 
 ## 7. 当前状态
 
-### 2026-09-07 18:52 完整 Pi0.5 三精度回放（最新）
+### 2026-09-07 用户反馈：转向低延迟后端（最新决策）
+
+用户明确不能接受当前原生 JAX 最快约 177 ms，要求完整推理约 100 ms 或更低，同时保证模型精度；下方 A/B/C 结果继续保留，但 C 不再作为可接受的最终部署选择。三组均已使用 MAXN + CPU/GPU/EMC 最高频率，不把重新开 MAXN 当作下一轮加速。下一轮同时记录完整 policy 的 P50/P95，优先无量化编译及保留高精度敏感运算；当前不以改小三相机、H50、10 去噪步来偷换对照合同。
+
+执行优先级改为：复用现有 9 输入与已保存 JAX 输出 → FP32 权重转换核对 / PyTorch 编译 → 保留 FP32 敏感运算的 strongly typed TensorRT；并行核对 FlashRT 的 YAM/H50 适配。先筛出显著提速且误差受控的候选，再做 300 状态 × 3 种子扩样，不再优先重复大量慢速 JAX。准确性至少分为映射后权重、完整动作输出、微调后任务三个层次，不以单个总体余弦值替代逐维误差。
+
+[FlashRT Thor 报告](https://github.com/flashrt-project/FlashRT/blob/main/examples/thor/README.md) 公布三视角 FP8 约 54.8 ms；[NVFP4 报告](https://github.com/flashrt-project/FlashRT/blob/main/docs/pi05_thor_decoder_fp4_e2e.md) 公布三视角约 31.74 ms，但对照为 FP8，不能直接证明原始 JAX 精度。[前端代码](https://github.com/flashrt-project/FlashRT/blob/main/flash_rt/frontends/torch/pi05_thor.py) 的 action 序列 `Sa` 固定为 10，另有 10 次去噪；先解决本项目 H50/14D/状态提示合同，才能做公平比较。查阅于 2026-09-07，以上均为社区结果而非本机新实测。详细候选顺序见 [下一轮方案](reports/thor/next_test_plan.json)。
+
+代码同步改为工作站提交 → Gitea → Thor 快进拉取，不设后台双向覆盖。Thor 已生成 Gitea 专用 Ed25519 密钥、校验并固定 Gitea 主机公钥、配置 `origin` 和 `pull.ff=only`；首次访问仍因公钥未授权失败，等待用户添加仓库只读部署密钥。Thor 原 rsync 副本已初始化空 Git 元数据，但还没有首次 checkout/HEAD；原代码文件未覆盖，不能误记为已经同步完成。入口及后续接入见 [Gitea 同步](reference/thor/09_gitea_code_sync.md)。
+
+### 2026-09-07 18:52 完整 Pi0.5 三精度基线回放
 
 **当前固定可运行路径**：Thor JetPack 7.2.1 / L4T 39.2.1 → Pi 系列 Docker → NVIDIA JAX 26.05 ARM64 → 只读原始 `pi05_base` JAX checkpoint → 本地三路 RGB、14D state、prompt → YAM `(50,14)` 动作。只操作 Thor；这次容器使用 `--network none`，没有服务器实时数据流或机械臂执行。
 

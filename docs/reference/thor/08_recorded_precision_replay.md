@@ -18,7 +18,7 @@ nvpmodel -q
 
 ## 一次运行三组
 
-`--batch-id` 每次使用新的名字；已有结果不覆盖。以下 `manual-01` 只是示例，第二次改为 `manual-02`。当前 Thor 代码通过 USB/rsync 同步，不带 `.git`，不要在 Thor 执行 `git rev-parse`。`--code-commit` 填工作站同步源码的提交；它是代码来源基点，启动器还会记录实际文件指纹和镜像 ID。下面已填本轮实现提交；以后更新源码时，从工作站仓库获取新提交并替换它。
+`--batch-id` 每次使用新的名字；已有结果不覆盖。以下 `manual-01` 只是示例，第二次改为 `manual-02`。Thor 最初通过 USB/rsync 接收代码；当前 Git 首次接入状态见 [Gitea 同步](09_gitea_code_sync.md)，没有有效 HEAD 时不能在 Thor 用 `git rev-parse` 获取版本。`--code-commit` 填工作站同步源码的提交；它是代码来源基点，启动器还会记录实际文件指纹和镜像 ID。下面已填本轮基线实现提交；以后更新源码时，从工作站仓库获取新提交并替换它。
 
 ```bash
 sudo python3 scripts/thor/run_suite_host.py \

@@ -1,12 +1,12 @@
 {
   "recommendations": [
     {
-      "title": "固定当前可运行路径：原生 JAX，A 留作参考，C 优先扩样",
-      "detail": "Thor / JetPack 7.2.1 → Pi 系列 Docker → NVIDIA JAX 26.05 → 原始只读 JAX checkpoint → 本地三路图像、状态、文本 → (50,14) 输出。A 保留 FP32 权重与 FP32/highest 计算；C 在本轮 P50 为 177.39 ms，约比 A 快 6.94 倍，且本批误差未比 B 更大，因此列为性能候选，而非直接批准实机控制。B 保留作仅改变计算精度的对照。MAXN 仍只在推理期间使用。"
+      "title": "用户反馈后调整主线：原生 JAX 仅作参考，优先换加速后端",
+      "detail": "2026-09-07 用户明确不能接受当前最低 177.39 ms，目标是完整推理约 100 ms 或更低，同时保留模型精度。A/B/C 是在 MAXN 与锁频下取得的实测，不再将 C 视为可接受的最终部署方案。保留 A 数值参考和 B/C 精度对照，主线转为 PyTorch 编译、TensorRT 混合精度与 FlashRT 的低延迟适配；同时报告 P50/P95，不先承诺未经同合同实测的 30/50 ms。"
     },
     {
-      "title": "下一轮先扩充真实输入和噪声：300 个状态 × 3 个种子",
-      "detail": "从 Thor 本地的 3 条完整轨迹各均匀选 100 个状态，固定种子 0/1/2，同一输入、同一噪声分别跑 A/B/C，每组合预热后测 3 次；不把重复次数算成独立样本。保留去噪 10 步、horizon 50 和三相机配置，汇总逐维 MAE/P95/max、最差输入与轨迹相邻帧差异，重点查看本轮最大漂移出现的右夹爪。原始数据不改写，输出新 suite 目录；不能用这三条录像估计任务泛化。"
+      "title": "先用已有 9 输入筛后端，速度和误差有希望再扩样",
+      "detail": "复用本轮已经保存的输入、噪声、norm 和 JAX 参考动作，不先重跑大量慢速 JAX。每个候选保持三路 RGB、14D 输出、去噪 10 步和 horizon 50，先完成逐张量转换核对与 9 输入误差/延迟筛选；有明显提速且误差受控后再扩到每轨迹 100 状态 × 3 种子。最终性能用足够预热后的同步完整 policy P50/P95 衡量，编译/校准另计，不用减少相机或动作长度冒充同合同加速。"
     },
     {
       "title": "把训练栈差异和精度差异分开核验",
@@ -21,6 +21,10 @@
       "detail": "Jetson AI Lab 提醒其纯 FP16 导出会溢出；xuweiwu/openpi-thor 支持的是保留 RMSNorm 等 FP32 敏感运算、使用 strongly typed TensorRT 的定制混合 FP16 路径。下一轮可借鉴这条路径，但须独立对照 JAX A 与已验证 PyTorch，保持当前 horizon 50，不能拿教程 LIBERO horizon 10 的延迟作本机目标。转换误差、前向误差和 TensorRT 编译误差分开记录。"
     },
     {
+      "title": "FlashRT 列为高性能候选，但先补齐 YAM / horizon 50 合同",
+      "detail": "项目公布 Thor 三相机 FP8 约 54.8 ms、NVFP4+FA4 约 31.74 ms，但这不是本机 YAM 结果。2026-09-07 阅读其 Thor 前端发现 action 序列长度 Sa 固定为 10，而本项目为 50；其最新 NVFP4 报告主要对照 FP8，并不能单独证明相对原始 JAX 的精度。先确认 H50/14D/状态提示与模型权重映射支持，再将融合算子、CUDA Graph 和 FP8 分项对比；NVFP4 只有在前级误差通过后才考虑。"
+    },
+    {
       "title": "FP8 / NVFP4 放在基线转换通过之后",
       "detail": "先测 FP8；校准集和验证集分开，增加其他本地录像或任务后再判断泛化。仅对 FP8 有明显收益时再测 attention-side NVFP4，暂不采用全 attention+MLP 激进量化。社区作者报告过 ONNX/TensorRT 降低精度后误差放大，因此必须比较最终 engine，不只比较量化后的 PyTorch；保留逐维误差与最坏样本，余弦相似度不能单独作为机械臂精度验收。"
     },
@@ -30,6 +34,21 @@
     }
   ],
   "sources": [
+    {
+      "title": "FlashRT：Thor 测试与前端代码",
+      "url": "https://github.com/flashrt-project/FlashRT/blob/main/examples/thor/README.md",
+      "note": "2026-09-07 查阅。列出了三相机 FP8 性能和 LIBERO 评估；属于社区报告，不能替代本项目 YAM 任务精度或 H50 延迟。"
+    },
+    {
+      "title": "FlashRT：最新 Thor NVFP4 实测合同",
+      "url": "https://github.com/flashrt-project/FlashRT/blob/main/docs/pi05_thor_decoder_fp4_e2e.md",
+      "note": "2026-09-07 查阅。三视角约 31.74 ms 的对照参考为同轮 FP8，使用少量 LIBERO 观测；不可把其数值一致门槛解释为本项目机械臂任务成功率。"
+    },
+    {
+      "title": "FlashRT：Pi0.5 Thor action 序列长度实现",
+      "url": "https://github.com/flashrt-project/FlashRT/blob/main/flash_rt/frontends/torch/pi05_thor.py",
+      "note": "2026-09-07 查阅。前端构造中 Sa 固定为 10，另有 steps=10 去噪循环，两者不是同一个含义；不能只改文档参数就声称已经支持本项目 horizon 50。"
+    },
     {
       "title": "Jetson AI Lab：OpenPi π₀.₅ on Jetson Thor",
       "url": "https://www.jetson-ai-lab.com/tutorials/openpi_on_thor/",

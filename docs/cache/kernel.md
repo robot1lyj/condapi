@@ -13,7 +13,7 @@
 
 - 服务器入口、环境、原始数据路径和作业保护对象见 [环境](../02_installation_and_environment.md)。作业/下载状态是历史观察，使用前重新核验；没有实时证据就标记未知。
 - Thor 已完成官方系统安装并从 NVMe 启动；2026-09-07 实机复核为 JetPack 7.2.1 / L4T 39.2.1。Wi-Fi 开机自动连接已配置、SSH 密钥登录可用；USB `192.168.55.1` 为临时管理/传输通道。HDMI 仍无显示，不能误记为安装未完成；详见 [Thor 当前状态](../08_thor_edge_deployment.md#7-当前状态)。
-- Pi0.5 原始 JAX 基础权重、分词器和 3 条完整 YAM 回放轨迹均在 Thor 本地。2026-09-07 已在 ARM64 JAX 26.05 容器完成 A/B/C 三种精度的完整模型回放（9 个真实输入、540 次正式调用）；A 为 FP32 参考，C 为扩样测试首选性能候选，不等于微调模型或机械臂任务精度已验收。固定路径、原始证据与下一轮方案见 [Thor 当前状态](../08_thor_edge_deployment.md#7-当前状态)、[回放操作](../reference/thor/08_recorded_precision_replay.md) 和 [中文测试报告](../reports/thor/index.html)。
+- Pi0.5 原始 JAX 基础权重、分词器和 3 条完整 YAM 回放轨迹均在 Thor 本地。2026-09-07 已完成原生 JAX A/B/C 三精度回放（9 输入、540 次正式调用）；用户不接受最低约 177 ms，要求完整推理约 100 ms 或更低且保留精度。原结果只作参考，优先调研与适配 PyTorch 编译、TensorRT 和 FlashRT，而非先扩大慢速 JAX 测试；不能以社区 H10/量化结果冒充本项目 H50 精度验收。详见 [Thor 当前状态](../08_thor_edge_deployment.md#7-当前状态) 与 [中文测试报告](../reports/thor/index.html)。
 - Thor 已安装 NoMachine 9.8.3 并配置自启动，无屏 GNOME / 1920×1080 输出已核对；USB 连接 `192.168.55.1:4000`，账户 `wuyan-lyj`。为此停用 GDM 本地登录画面；恢复方法及许可边界见 [Thor 当前状态](../08_thor_edge_deployment.md#7-当前状态)，客户端画面/重启回连不冒充已验收。
 - 用户指定 **仅推理/测试期间**使用 MAXN（模式 0）+ 最高 CPU/GPU/EMC 频率；结束后恢复日常 120W、动态调频和自动风扇，不设 MAXN/锁频开机常驻。入口 `scripts/thor/maxn_session.py` 负责临时切换与退出恢复；每次核对温度/降频，见 [Thor 当前状态](../08_thor_edge_deployment.md#7-当前状态)。
 - 新结果写回对应 owner，原因写入 [变更历史](../07_change_log.md)；候选经验、失效与预算协议见 [记忆系统](../09_memory_system.md)。
