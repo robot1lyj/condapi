@@ -1,5 +1,7 @@
 # 08 · Thor 端侧部署
 
+逐步安装指导的冷记忆入口：[Thor 安装系列 00](reference/thor/00_start_here.md)。该组按 G0–G5 持有设备预检、ISO/USB 制作、固件/NVMe 安装、宿主/容器检查、Pi 工程闸门及故障交接；本页继续持有版本、精度决策和当前状态。指导 agent 不得把下文安装概览当成跳过目标确认的操作脚本。
+
 本页是 NVIDIA Jetson AGX Thor IPC 的端侧系统、Pi0.5 转换/加速和推理验收的唯一 owner。训练仍在服务器 GPU 上进行；3588 IPC 负责相机采集、机械臂驱动、CAN、GUI、home pose、限位和急停，本仓库不读取或修改 3588 的实现。
 
 ## 1. 当前决策
@@ -45,6 +47,19 @@ PATH: /home/wuyan-lyj/thor-system/jetpack-7.2.1/jetsoninstaller-r39.2.1-2026-08-
 2026-09-05 下载正常退出；已核对官方 HTTP 文件长度 `5,035,601,920` bytes，识别为可启动 ISO 9660，并计算本地 SHA-256：`f31cf35023cd072707dfc46ef23ed71318449516333055fe3bb9455a615395d0`。这是本地文件摘要，尚未与 NVIDIA 发布的参考摘要或签名比对。介质约 4.69 GiB（5.04 GB），制作 USB 需要至少 16 GB U 盘和至少 25 GB 的下载/制作空间。
 
 ## 3. 从零安装顺序
+
+### 制盘电脑上的 Etcher 安装包
+
+2026-09-07 已按当前制盘电脑 Ubuntu 24.04 / x86_64 下载官方 Etcher 2.1.6 Debian 包，未安装或启动，未刷写任何磁盘。它安装在制盘电脑，不是在 ARM64 Thor 上。
+
+- 本地路径：`/home/wuyan-lyj/thor-system/tools/etcher-2.1.6/balena-etcher_2.1.6_amd64.deb`（仓库外，不提交二进制）。
+- 长度：`123910696` 字节；Debian 包元数据为 `balena-etcher / 2.1.6 / amd64`。
+- SHA-256：`2bdebb46c9f750a9abf11c188ff69a405b4a4fed114333d634c3b3fe59a64057`，与 [官方 v2.1.6 Release 资产](https://github.com/balena-io/etcher/releases/tag/v2.1.6) 发布的摘要一致。
+- 下载源：[官方 amd64 Debian 包](https://github.com/balena-io/etcher/releases/download/v2.1.6/balena-etcher_2.1.6_amd64.deb)。后续安装/制盘见 [冷手册 02](reference/thor/02_iso_and_usb.md)。
+
+### 安装概览
+
+本节为架构概览，真正指导用户操作须从 [冷手册 G0](reference/thor/01_preflight.md) 开始，逐阶段通过。尤其在 QSPI 更新进行中不得断电，在安装 NVMe 前必须确认唯一目标和备份；USB 与 NVMe 覆盖授权不能互相替代。
 
 1. 在任意 Windows、macOS 或 Linux 主机下载 ISO，用 Balena Etcher 或同类工具写入至少 16 GB U 盘；不要把 ISO 文件简单复制到 U 盘。
 2. Thor 插入 U 盘并上电，按官方 Quick Start 进入安装器；若提示 QSPI capsule update，确认 `Y`，否则新 ISO 与出厂 UEFI 可能不兼容。
@@ -208,6 +223,9 @@ PR #960 作者给出的局部 checkpoint 对照如下；样本范围、硬件及
 - 端口监听或容器启动不算通过；必须有真实 Thor 本地推理结果和 Thor↔3588 直连以太网 smoke。
 
 ## 7. 当前状态
+
+- 2026-09-07：已编写并核对 [Thor 安装冷手册](reference/thor/00_start_here.md)，未操作 Thor/3588 或烧录磁盘。本地 ISO 重新检查类型、字节数与 SHA-256，结果与第 2 节一致；尚未取得发布者 ISO 校验和/签名匹配证据。系统/容器安装步骤为官方资料核对状态，不能宣称用户设备已实测通过；原生 JAX 镜像仍有依赖兼容与模型验收阻断项，见手册 G5。
+- 制盘软件：官方 Etcher 2.1.6 amd64 Debian 包已下载并与 Release 资产摘要匹配，尚未安装；路径与身份见第 3 节。用户采用六步简洁指导主线，扩展诊断按异常展开，不重复要求正常步骤截图/填表。
 
 - 官方 JetPack 7.2.1 ISO：2026-09-05 已下载，长度/类型已核对且本地 SHA-256 已记录，详见第 2 节；USB 制作与刷写未完成。
 - 按模型系列隔离 Docker 容器方案：已确定，Pi 系列共用一个服务；首版候选为容器内原生 JAX。官方 Pi 教程基镜像已核实为 `nvcr.io/nvidia/pytorch:26.05-py3`，但项目 JAX 镜像选型、Dockerfile、Compose、构建与容器内验收仍待实施。

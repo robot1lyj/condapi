@@ -6,6 +6,8 @@
 
 ## Thor 端侧系统与从零安装
 
+本节是环境概览，不是安全烧录操作清单。实际指导用户从 [Thor 安装系列入口](reference/thor/00_start_here.md) 开始，按阶段核验设备、USB、NVMe 与固件；不可跳过其中的目标确认和停止条件。
+
 当前端侧目标暂按 Jetson AGX Thor Developer Kit（T5000 口径）记录；设备到手后先核对实际 SKU。官方最新系统基线是 JetPack 7.2.1 / Jetson Linux r39.2.1 / Ubuntu 24.04 / Kernel 6.8 / CUDA 13.2.1 / TensorRT 10.16.2。完整部署决策和 Pi0.5 调研见 [08 · Thor 端侧部署](08_thor_edge_deployment.md)。
 
 本次已从 NVIDIA 官方地址下载 Jetson ISO，原始文件放在仓库外；已核对文件长度、类型并记录本地摘要：

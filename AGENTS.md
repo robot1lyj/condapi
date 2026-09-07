@@ -23,7 +23,7 @@
 - `docs/03_training_and_evaluation.md`：训练、评估和 checkpoint gate。
 - `docs/04_data_contracts.md`：YAM 数据格式、动作维度、单位待核项和 norm stats。
 - `docs/05_inference_and_rollout.md`：训练后 policy 的 Thor 本地协议、Thor↔3588 网络通道和最小 smoke；不承载机械臂驱动说明。
-- `docs/08_thor_edge_deployment.md`：Thor 官方系统、容器环境、Pi0.5 转换/加速和端侧验收；不承载机械臂驱动说明。
+- `docs/08_thor_edge_deployment.md`：Thor 官方系统、容器环境、Pi0.5 转换/加速和端侧验收；下属 `docs/reference/thor/` 为按阶段读取的安装操作冷手册，不承载机械臂驱动说明。
 - `docs/09_memory_system.md`：记忆预算、证据生命周期、skill 接入与迭代验收。
 - `docs/06_openarm_research_plan.md`：历史 OpenArm/KAI0/Evo-RL 研究归档，不是当前 YAM 路线。
 - `docs/07_change_log.md`：按日期记录原因和结果。
