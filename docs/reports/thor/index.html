@@ -1,0 +1,123 @@
+<!doctype html><html lang="zh-CN"><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Thor · Pi0.5 推理实验室</title><style>
+:root{--bg:#f4f6fb;--ink:#172139;--muted:#66738b;--line:#e4e8f1;--accent:#6057e7}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.7 system-ui,"Noto Sans CJK SC",sans-serif}
+header{background:#172139;color:white;padding:42px max(6vw,24px) 56px;position:relative;overflow:hidden}
+header:after{content:"π";position:absolute;right:7%;top:-60px;font:280px Georgia;color:#ffffff08}
+.eyebrow{font-size:12px;letter-spacing:3px;color:#b2acf9}h1{font-size:36px;margin:12px 0 8px;letter-spacing:-1px}
+header p{color:#bcc6d9;margin:0;max-width:820px}.meta{font-size:12px;color:#9eabc2;margin-top:18px}
+main{max-width:1400px;margin:-22px auto 48px;padding:0 28px;position:relative}.facts{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.fact,.panel{background:white;border:1px solid var(--line);border-radius:16px;box-shadow:0 5px 22px #18223805}
+.fact{padding:22px}.fact>div{color:var(--muted);font-size:13px}.fact strong{display:block;font-size:25px;margin:6px 0}
+small{display:block;color:var(--muted);font-size:12px}.panel{margin-top:22px;padding:26px}h2{font-size:19px;margin:0 0 6px}
+.sub{color:var(--muted);margin:0 0 22px;font-size:13px}.tablewrap{overflow-x:auto}table{border-collapse:collapse;width:100%;min-width:950px;text-align:left}
+th{background:#f7f8fc;color:var(--muted);font-size:12px;font-weight:500}th,td{padding:15px 12px;border-bottom:1px solid var(--line)}td{font-size:13px}
+td:last-child{max-width:290px}.badge{white-space:nowrap;border-radius:20px;background:#eeecff;color:#5b52c9;padding:4px 10px;font-size:12px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:22px}.timeline{list-style:none;padding:0;margin:22px 0 0}.timeline li{position:relative;padding:0 0 22px 25px;border-left:1px solid var(--line);margin-left:5px}
+.timeline p{font-size:13px;color:var(--muted);margin:6px 0 0}.dot{position:absolute;width:9px;height:9px;border-radius:50%;background:var(--accent);left:-5px;top:8px}
+.notice{background:#fffbef;border:1px solid #f2e2af;padding:18px;border-radius:12px;font-size:13px}.notice ul{padding-left:20px;margin:8px 0}
+details{margin-top:22px}summary{cursor:pointer;color:var(--accent)}pre{font-size:12px;white-space:pre-wrap;overflow-wrap:anywhere;background:#f7f8fc;padding:16px;border-radius:10px}
+footer{color:var(--muted);font-size:12px;margin-top:20px;text-align:center}@media(max-width:800px){.facts{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr;gap:0}h1{font-size:28px}main{padding:0 14px}.panel{padding:18px}}
+</style><header><div class="eyebrow">EDGE INFERENCE / 可复现实测</div><h1>Thor · Pi0.5 推理实验室</h1>
+<p>原始 JAX 权重 → 精度对照 → 真实样本离线回放。把可运行、数值一致与任务有效分开验收。</p>
+<div class="meta">更新于 2026-09-07T17:39:00+08:00 · 基础模型 pi05_base · 不连接机械臂执行动作</div></header>
+<main><section class="facts"><article class="fact"><div>系统基线</div><strong>JetPack 7.2.1</strong><small>已启动 NVMe · L4T 39.2.1 · Ubuntu 24.04.4</small></article><article class="fact"><div>基础权重</div><strong>12.44 GB</strong><small>已通过 USB 传入 Thor，原始 checkpoint 未改写</small></article><article class="fact"><div>权重元数据</div><strong>51 / FP32</strong><small>Orbax metadata 实读，51 个叶子均为 float32</small></article><article class="fact"><div>已完成模型配置测试</div><strong>0 / 3</strong><small>模型推理尚未开始，容器镜像下载中</small></article></section><section class="panel"><h2>精度配置对照</h2>
+<p class="sub">参数存储精度不等于计算精度。延迟以预热后完整 policy 调用为准，首次编译单独记录；“—”表示尚无实测数据。</p>
+<div class="tablewrap"><table><thead><tr><th>配置</th><th>权重</th><th>计算</th><th>状态</th><th>P50 / ms</th><th>P95 / ms</th><th>最大绝对误差</th><th>说明</th></tr></thead><tbody><tr><td><strong>A · 全精度参考</strong><small>原生 JAX / 基础模型</small></td><td>保留 FP32</td><td>FP32 / highest</td><td><span class="badge">待测试</span></td><td>—</td><td>—</td><td>—</td><td>先建立参考输出，不使用 TF32 降精度作为基线</td></tr><tr><td><strong>B · 性能候选</strong><small>原生 JAX / 基础模型</small></td><td>保留 FP32</td><td>BF16</td><td><span class="badge">待测试</span></td><td>—</td><td>—</td><td>—</td><td>单独检查计算精度变化的影响，不预先认定准确性达标</td></tr><tr><td><strong>C · 默认路径对照</strong><small>原生 JAX / 基础模型</small></td><td>读取为 BF16</td><td>BF16</td><td><span class="badge">待测试</span></td><td>—</td><td>—</td><td>—</td><td>读取时舍入但不改写原始文件；与 B 比较权重精度的额外影响</td></tr></tbody></table></div></section>
+<div class="grid"><section class="panel"><h2>执行进度与证据</h2><ul class="timeline"><li><span class="dot"></span><strong>系统与管理网络 · 已核对</strong><p>Thor GPU 可被 nvidia-smi 识别；Wi-Fi 自动连接开启，失败无限重试，SSH 密钥登录已验证。未做重启回连实测。</p></li><li><span class="dot"></span><strong>USB 传输 · 已完成</strong><p>pi05_base 12,441,749,581 字节完成 rsync，约 30.10 MB/s；PaliGemma 分词器 4.1MB 已传入缓存。</p></li><li><span class="dot"></span><strong>精度入口 · 单元测试通过</strong><p>新增 checkpoint / float32 / bfloat16 读取选项，旧默认路径保持；4 项单元测试通过。此结果不是 GPU 或模型推理验收。</p></li><li><span class="dot"></span><strong>官方 JAX 容器 · 下载中</strong><p>候选 nvcr.io/nvidia/jax:26.05-py3，ARM64；Thor 直拉遇到 EOF，切换本机代理分层下载，之后经 USB 导入。</p></li><li><span class="dot"></span><strong>本地录像 · 已下载并复制到 Thor</strong><p>乐高分拣 train 轨迹 95/96/97，共 7,962 帧观测、9 路视频文件；连同 parquet 和原始 manifest 为 60,021,788 字节。11 个文件在服务器、本机和 Thor 的 SHA-256 一致。另已复制 7,485,274 字节的转换小样本。</p></li><li><span class="dot"></span><strong>录像结构 · 3 条通过</strong><p>本机 audit_yam_subset --limit 3 完整解码视频并核对时间戳、帧数、14D 有限状态/动作。只确认输入结构，不代表模型效果；耳机任务目前无三路齐全轨迹，未下载残缺样本。</p></li><li><span class="dot"></span><strong>回放路径 · Thor 本地离线</strong><p>数据位于 /home/wuyan-lyj/thor/pi/test-data，容器只读挂载 /test-data；服务器只作为一次性下载来源，推理计时不含服务器网络传输。下一步准备固定输入及匹配的 benchmark-only YAM norm_stats。</p></li><li><span class="dot"></span><strong>测试工具 · 11 项单元测试通过</strong><p>覆盖权重 dtype 选择、本地输入校验和中文 HTML 展示；尚未执行模型推理，不用单元测试替代真实 GPU 结果。</p></li></ul></section>
+<section class="panel"><h2>结果解释边界</h2><p class="sub">性能数据只回答“多快”，不自动回答“动作是否正确”。</p>
+<div class="notice"><strong>当前限制</strong><ul><li>当前只有官方基础模型，未进行 YAM 微调；输出一致性测试不能代表 YAM 任务成功率。</li><li>未运行完整模型，因此本页暂不展示延迟、动作误差或部署通过结论。</li><li>后续 JAX→PyTorch、FP16/BF16、TensorRT、量化各自独立建组；保留原始权重，验证键、形状、dtype 和 LoRA，禁止将阶段差异混在一起。</li><li>HDMI 仍报告 disconnected，显示器信息为空；目前使用 SSH 无屏管理。</li><li>USB 是临时管理通道，Wi-Fi 是管理网络；Thor↔3588 网线直连才是计划中的生产数据通道。</li></ul></div>
+<details><summary>展开原始记录 JSON</summary><pre>{
+  &quot;updated_at&quot;: &quot;2026-09-07T17:39:00+08:00&quot;,
+  &quot;facts&quot;: [
+    {
+      &quot;label&quot;: &quot;系统基线&quot;,
+      &quot;value&quot;: &quot;JetPack 7.2.1&quot;,
+      &quot;detail&quot;: &quot;已启动 NVMe · L4T 39.2.1 · Ubuntu 24.04.4&quot;
+    },
+    {
+      &quot;label&quot;: &quot;基础权重&quot;,
+      &quot;value&quot;: &quot;12.44 GB&quot;,
+      &quot;detail&quot;: &quot;已通过 USB 传入 Thor，原始 checkpoint 未改写&quot;
+    },
+    {
+      &quot;label&quot;: &quot;权重元数据&quot;,
+      &quot;value&quot;: &quot;51 / FP32&quot;,
+      &quot;detail&quot;: &quot;Orbax metadata 实读，51 个叶子均为 float32&quot;
+    },
+    {
+      &quot;label&quot;: &quot;已完成模型配置测试&quot;,
+      &quot;value&quot;: &quot;0 / 3&quot;,
+      &quot;detail&quot;: &quot;模型推理尚未开始，容器镜像下载中&quot;
+    }
+  ],
+  &quot;experiments&quot;: [
+    {
+      &quot;name&quot;: &quot;A · 全精度参考&quot;,
+      &quot;scope&quot;: &quot;原生 JAX / 基础模型&quot;,
+      &quot;weights&quot;: &quot;保留 FP32&quot;,
+      &quot;compute&quot;: &quot;FP32 / highest&quot;,
+      &quot;status&quot;: &quot;待测试&quot;,
+      &quot;note&quot;: &quot;先建立参考输出，不使用 TF32 降精度作为基线&quot;
+    },
+    {
+      &quot;name&quot;: &quot;B · 性能候选&quot;,
+      &quot;scope&quot;: &quot;原生 JAX / 基础模型&quot;,
+      &quot;weights&quot;: &quot;保留 FP32&quot;,
+      &quot;compute&quot;: &quot;BF16&quot;,
+      &quot;status&quot;: &quot;待测试&quot;,
+      &quot;note&quot;: &quot;单独检查计算精度变化的影响，不预先认定准确性达标&quot;
+    },
+    {
+      &quot;name&quot;: &quot;C · 默认路径对照&quot;,
+      &quot;scope&quot;: &quot;原生 JAX / 基础模型&quot;,
+      &quot;weights&quot;: &quot;读取为 BF16&quot;,
+      &quot;compute&quot;: &quot;BF16&quot;,
+      &quot;status&quot;: &quot;待测试&quot;,
+      &quot;note&quot;: &quot;读取时舍入但不改写原始文件；与 B 比较权重精度的额外影响&quot;
+    }
+  ],
+  &quot;stages&quot;: [
+    {
+      &quot;title&quot;: &quot;系统与管理网络 · 已核对&quot;,
+      &quot;detail&quot;: &quot;Thor GPU 可被 nvidia-smi 识别；Wi-Fi 自动连接开启，失败无限重试，SSH 密钥登录已验证。未做重启回连实测。&quot;
+    },
+    {
+      &quot;title&quot;: &quot;USB 传输 · 已完成&quot;,
+      &quot;detail&quot;: &quot;pi05_base 12,441,749,581 字节完成 rsync，约 30.10 MB/s；PaliGemma 分词器 4.1MB 已传入缓存。&quot;
+    },
+    {
+      &quot;title&quot;: &quot;精度入口 · 单元测试通过&quot;,
+      &quot;detail&quot;: &quot;新增 checkpoint / float32 / bfloat16 读取选项，旧默认路径保持；4 项单元测试通过。此结果不是 GPU 或模型推理验收。&quot;
+    },
+    {
+      &quot;title&quot;: &quot;官方 JAX 容器 · 下载中&quot;,
+      &quot;detail&quot;: &quot;候选 nvcr.io/nvidia/jax:26.05-py3，ARM64；Thor 直拉遇到 EOF，切换本机代理分层下载，之后经 USB 导入。&quot;
+    },
+    {
+      &quot;title&quot;: &quot;本地录像 · 已下载并复制到 Thor&quot;,
+      &quot;detail&quot;: &quot;乐高分拣 train 轨迹 95/96/97，共 7,962 帧观测、9 路视频文件；连同 parquet 和原始 manifest 为 60,021,788 字节。11 个文件在服务器、本机和 Thor 的 SHA-256 一致。另已复制 7,485,274 字节的转换小样本。&quot;
+    },
+    {
+      &quot;title&quot;: &quot;录像结构 · 3 条通过&quot;,
+      &quot;detail&quot;: &quot;本机 audit_yam_subset --limit 3 完整解码视频并核对时间戳、帧数、14D 有限状态/动作。只确认输入结构，不代表模型效果；耳机任务目前无三路齐全轨迹，未下载残缺样本。&quot;
+    },
+    {
+      &quot;title&quot;: &quot;回放路径 · Thor 本地离线&quot;,
+      &quot;detail&quot;: &quot;数据位于 /home/wuyan-lyj/thor/pi/test-data，容器只读挂载 /test-data；服务器只作为一次性下载来源，推理计时不含服务器网络传输。下一步准备固定输入及匹配的 benchmark-only YAM norm_stats。&quot;
+    },
+    {
+      &quot;title&quot;: &quot;测试工具 · 11 项单元测试通过&quot;,
+      &quot;detail&quot;: &quot;覆盖权重 dtype 选择、本地输入校验和中文 HTML 展示；尚未执行模型推理，不用单元测试替代真实 GPU 结果。&quot;
+    }
+  ],
+  &quot;limitations&quot;: [
+    &quot;当前只有官方基础模型，未进行 YAM 微调；输出一致性测试不能代表 YAM 任务成功率。&quot;,
+    &quot;未运行完整模型，因此本页暂不展示延迟、动作误差或部署通过结论。&quot;,
+    &quot;后续 JAX→PyTorch、FP16/BF16、TensorRT、量化各自独立建组；保留原始权重，验证键、形状、dtype 和 LoRA，禁止将阶段差异混在一起。&quot;,
+    &quot;HDMI 仍报告 disconnected，显示器信息为空；目前使用 SSH 无屏管理。&quot;,
+    &quot;USB 是临时管理通道，Wi-Fi 是管理网络；Thor↔3588 网线直连才是计划中的生产数据通道。&quot;
+  ]
+}</pre></details></section></div>
+<footer>本页为离线静态报告，无外部 CDN、无遥测。每次采集新结果后重新生成，不会自动冒充实时状态。</footer></main></html>

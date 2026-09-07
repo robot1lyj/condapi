@@ -13,5 +13,6 @@ services:
       - ${THOR_PI_ROOT:-/home/wuyan-lyj/thor/pi}/checkpoints:/checkpoints:ro
       - ${THOR_PI_ROOT:-/home/wuyan-lyj/thor/pi}/cache:/cache
       - ${THOR_PI_ROOT:-/home/wuyan-lyj/thor/pi}/logs:/results
+      - ${THOR_PI_ROOT:-/home/wuyan-lyj/thor/pi}/test-data:/test-data:ro
     # Until a checkpoint replay passes, this runs a one-shot GPU smoke, not a policy service.
     restart: "no"
