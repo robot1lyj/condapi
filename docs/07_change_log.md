@@ -1,5 +1,18 @@
 # 07 · 变更历史
 
+## 2026-09-08 · MolmoAct2原生后端与独立环境
+
+- 用户追加MolmoAct2安装/代码接入；确认固定LeRobot版本已有普通MolmoAct2，不含Think。新增模型声明、两端Conda profile、独立106-wheel哈希锁与实验占位，复用原生训练launcher，不新增第二套trainer。
+- 新增CPU导入/config/双夹爪mask与单标量优化器检查，记录真实结果到 [环境报告](reports/environments/molmoact2-20260908/README.md)。不下载权重或占用现有训练GPU；环境安装不等同YAM训练能力验收，模型保持planned。
+- 文档区分原作者FP32主权重AMP和LeRobot低显存BF16参数/优化器状态、LoRA与全量动作专家；保留模型特有horizon/统计规则。平台新增Molmo路由回归，总计170项通过。核心记忆按证据链接更新，不将临时安装状态固化为永久事实。
+
+## 2026-09-08 · Evo-1 独立环境与目录清理
+
+- 按用户要求为工作站和服务器新建独立 Conda 环境，固定 LeRobot `2774d9bddcbbda50e697e162e89e7eaada8d7105`，保留104个wheel的版本/哈希锁；不安装根目录 OpenPI 依赖到 Evo 环境，不修改既有训练环境、服务器项目检出或 Thor 服务。安装状态和实际CPU审计归 [环境证据](reports/environments/evo1-20260908/README.md)。
+- 服务器下载改用两并发curl、逐包SHA256验证和离线pip；基础环境用校验后的conda-pack迁移，未清理共享Conda缓存。新增下载完整性测试，环境锁加入控制层计划指纹。
+- 按用户授权删除非YAM上游示例、空plugins目录和未使用的ALOHA/LIBERO子模块。Pi转换器迁到 `adapters/openpi/` 并更新Docker入口与测试，转换逻辑不变；删除内容可从Git历史恢复，数据、权重和历史报告未删除。
+- 平台/Thor/记忆/下载完整性CPU回归168项通过，Ruff通过，保留1项既有pynvml弃用警告。未启动GPU训练或实际模型推理，Evo能力声明仍保持planned。
+
 ## 2026-09-08 · 收敛为共享 LeRobot/OpenPI 后端
 
 - 按用户确认撤销 `plugins/<family>/` 原型，模型声明迁入 `configs/models/`，入口按实现后端集中到 `adapters/`。项目 schema 升为2，实验/环境/交接元数据改用 model，不保留原型 plugin API；未改写历史权重和证据。

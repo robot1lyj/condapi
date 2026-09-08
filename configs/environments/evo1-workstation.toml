@@ -3,5 +3,6 @@ manager = "conda"
 model = "evo1"
 target = "workstation"
 prefix = "/home/wuyan-lyj/.conda/envs/vla-evo1-dev"
-spec = "environments/bootstrap.yml"
-# Only Python/pip bootstrap. No claim of a compatible EVO1 dependency lock.
+spec = "environments/evo1.yml"
+lock = "environments/evo1-wheels.lock.json"
+# Installed and CPU-audited; GPU/model acceptance remains separate. See docs/02.

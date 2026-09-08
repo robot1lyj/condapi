@@ -8,7 +8,7 @@ import torch
 
 
 def converter_function(name):
-    path = Path(__file__).resolve().parents[2] / "examples/convert_jax_model_to_pytorch.py"
+    path = Path(__file__).resolve().parents[2] / "adapters/openpi/convert_jax_model_to_pytorch.py"
     tree = ast.parse(path.read_text())
     node = next(node for node in tree.body if isinstance(node, ast.FunctionDef) and node.name == name)
     namespace = {"torch": torch}

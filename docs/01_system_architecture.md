@@ -24,6 +24,8 @@ Evo-1、FastWAM、VLA-JEPA 的模型声明共用 LeRobot 后端，不再为每�
 
 原型 `plugins/<family>/` 已撤销，项目配置升级为 schema 2；实验、环境和模型包用 `model` 字段替代 `plugin`，不提供旧控制层格式兼容。原始模型权重、历史报告、运行记录不迁移或改写。机器资源继续由 [02](02_installation_and_environment.md) 统一记录，当前执行器不自动 SSH 或复制服务器配置到各模型代码中。
 
+2026-09-08 目录清理：删除非 YAM 的 `examples/` 示例以及未初始化的 ALOHA/LIBERO `third_party/` 子模块和配置，移除空 `plugins/` 目录。唯一仍用于部署的 JAX→PyTorch 转换器迁至 `adapters/openpi/convert_jax_model_to_pytorch.py`，Docker 和回归入口随之更新。`src/` 是实际 Pi 后端，`packages/` 是控制层/客户端，`artifacts/` 和 `docs/reports/` 是历史证据，`skills/` 是记忆工具源码，均不因目录数量多而删除。旧示例可由 Git 历史或原上游获取；历史文档提及的示例路径不代表当前可运行入口。
+
 以下数据流和 32D/H50、delta 配置描述的是 **Pi 后端**，不是对所有模型的统一要求。
 
 ## 当前训练数据流

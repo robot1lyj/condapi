@@ -4,4 +4,4 @@ backend = "lerobot"
 policy_type = "evo1"
 status = "planned"
 contracts = []
-note = "LeRobot/RLinf implementations exist upstream; YAM adapter, Conda lock and Thor inference not integrated."
+note = "Native LeRobot dependency lock and CPU environment checks are recorded separately; real YAM training and Thor inference remain unintegrated."

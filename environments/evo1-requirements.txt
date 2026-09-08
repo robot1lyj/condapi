@@ -1,0 +1,6 @@
+# Build once locally, then use the same wheelhouse on workstation and server.
+# Do not install the root OpenPI requirements in this environment.
+lerobot[evo1,training] @ git+https://github.com/huggingface/lerobot.git@2774d9bddcbbda50e697e162e89e7eaada8d7105
+torch==2.10.0
+torchvision==0.25.0
+torchcodec==0.10.0

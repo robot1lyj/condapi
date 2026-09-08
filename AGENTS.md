@@ -39,7 +39,7 @@
 - `src/openpi/`：模型、策略、训练、数据 transform 和公共工具。
 - `packages/openpi-client/`：通用机器人侧 WebSocket/IO 客户端；YAM 机械臂控制不在本次训练适配范围。
 - `scripts/`：训练、数据准备、服务和审计入口。
-- `examples/`、`third_party/`：平台示例或 vendored 依赖，除非任务明确要求，不改其 README 来表达本项目事实。
+- 非 YAM 的上游 `examples/` 和 ALOHA/LIBERO 子模块已清理；需要原作者示例时查固定上游版本或 Git 历史，不再作为默认目录。Pi 转换器在 `adapters/openpi/convert_jax_model_to_pytorch.py`。
 
 ## 环境与常用命令
 

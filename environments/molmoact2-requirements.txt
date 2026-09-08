@@ -1,0 +1,7 @@
+lerobot[molmoact2,training] @ git+https://github.com/huggingface/lerobot.git@2774d9bddcbbda50e697e162e89e7eaada8d7105
+torch==2.10.0
+torchvision==0.25.0
+torchcodec==0.10.0
+transformers==5.5.4
+peft==0.20.0
+scipy==1.18.1

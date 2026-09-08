@@ -1,0 +1,11 @@
+{
+  "upstream": "https://github.com/huggingface/lerobot",
+  "revision": "2774d9bddcbbda50e697e162e89e7eaada8d7105",
+  "tracked_source_dirty_at_build": false,
+  "wheel": "lerobot-0.6.2-py3-none-any.whl",
+  "wheel_sha256": "fb1409560b540f370873914dbc4371e8785d2c0c2a760afec685286036d4c8ab",
+  "workstation_source_wheel": "/home/wuyan-lyj/evo1-install-2774d9b/source-wheel/lerobot-0.6.2-py3-none-any.whl",
+  "server_source_wheel": "/home/wuyan/lyj/evo1-install-2774d9b/lerobot-0.6.2-py3-none-any.whl",
+  "bootstrap_archive_sha256": "beeb19824c10ba39f5bc70474576c66ad652908930e5483d69543f3db0341419",
+  "scope": "Installation input provenance, not model or GPU training acceptance"
+}

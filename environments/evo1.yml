@@ -1,0 +1,8 @@
+channels:
+  - https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge
+dependencies:
+  - python=3.12
+  - pip
+  - ffmpeg=7
+# Install the pinned LeRobot wheel + dependency wheelhouse separately.
+# Do not install this repository's OpenPI root dependencies in this environment.

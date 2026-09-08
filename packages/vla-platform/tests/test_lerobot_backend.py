@@ -15,8 +15,11 @@ launcher = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(launcher)
 
 
-@pytest.mark.parametrize(("model", "policy"), [("evo1", "evo1"), ("fastwam", "fastwam"), ("vla-jepa", "vla_jepa")])
-def test_three_models_share_native_launcher(project, model, policy):  # noqa: F811
+@pytest.mark.parametrize(
+    ("model", "policy"),
+    [("evo1", "evo1"), ("fastwam", "fastwam"), ("vla-jepa", "vla_jepa"), ("molmoact2", "molmoact2")],
+)
+def test_models_share_native_launcher(project, model, policy):  # noqa: F811
     # Explicit test-only promotion. Real model declarations remain planned.
     declaration = project.root / f"configs/models/{model}.toml"
     text = declaration.read_text().replace('status = "planned"', 'status = "implemented"')
@@ -99,7 +102,7 @@ def test_launcher_delegates_without_implementing_training(tmp_path, monkeypatch)
 
 def test_backend_and_model_capabilities_are_separate(project):  # noqa: F811
     assert "train" in project.backends()["lerobot"][1]["operations"]
-    for model in ("evo1", "fastwam", "vla-jepa"):
+    for model in ("evo1", "fastwam", "vla-jepa", "molmoact2"):
         assert project.models()[model][1]["status"] == "planned"
         assert not project.models()[model][1].get("operations")
 

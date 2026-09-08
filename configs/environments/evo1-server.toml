@@ -1,0 +1,7 @@
+schema_version = 1
+manager = "conda"
+model = "evo1"
+target = "server"
+prefix = "/home/wuyan/.conda/envs/vla-evo1-train"
+spec = "environments/evo1.yml"
+lock = "environments/evo1-wheels.lock.json"

@@ -1,0 +1,7 @@
+schema_version = 1
+manager = "conda"
+model = "molmoact2"
+target = "server"
+prefix = "/home/wuyan/.conda/envs/vla-molmoact2-train"
+spec = "environments/molmoact2.yml"
+lock = "environments/molmoact2-wheels.lock.json"

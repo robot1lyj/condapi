@@ -156,6 +156,8 @@ class Project:
         sources.extend(file_sources)
         sources.extend(inside(self.root, path) for path in backend.get("sources", []))
         sources.append(inside(self.root, profile["spec"]))
+        if profile.get("lock"):
+            sources.append(inside(self.root, profile["lock"]))
         if profile["target"] == "thor" and operation in ("infer", "benchmark"):
             sources.append(self.root / "scripts/thor/maxn_session.py")
         return Plan(
@@ -188,6 +190,7 @@ class Project:
         return {
             "profile": str(path),
             "spec_sha256": digest(spec),
+            "dependency_lock_sha256": digest(inside(self.root, profile["lock"])) if profile.get("lock") else None,
             "status": "bootstrap_not_model_ready",
             "command": ["conda", "env", "create", "--prefix", str(prefix), "--file", str(spec)],
         }

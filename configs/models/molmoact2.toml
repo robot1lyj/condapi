@@ -1,0 +1,7 @@
+schema_version = 1
+id = "molmoact2"
+backend = "lerobot"
+policy_type = "molmoact2"
+status = "planned"
+contracts = []
+note = "Native regular MolmoAct2 only (not Think). Shared launcher and isolated environment; real YAM contract/checkpoint/GPU acceptance pending."

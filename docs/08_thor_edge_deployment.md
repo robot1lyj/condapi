@@ -138,7 +138,7 @@ JAX/PyTorch 是实现框架，Orbax/SafeTensors 是存储格式；BF16、FP32、
 
 | 环节 | 静态代码证据 | 对本项目的影响 |
 |---|---|---|
-| 转换时提前降精度 | [转换脚本](../examples/convert_jax_model_to_pytorch.py) 先以 FP32 restore，再用原 `model_config` 构造模型、加载权重，最后才 `.to(float32/bfloat16)`；[配置](../src/openpi/models/pi0_config.py) 默认 BF16 | 仅加 `--precision float32` 不能保证无损：FP32 值可能已在加载到 BF16 参数时舍入，之后升回 FP32 无法恢复 |
+| 转换时提前降精度 | [转换脚本](../adapters/openpi/convert_jax_model_to_pytorch.py) 先以 FP32 restore，再用原 `model_config` 构造模型、加载权重，最后才 `.to(float32/bfloat16)`；[配置](../src/openpi/models/pi0_config.py) 默认 BF16 | 仅加 `--precision float32` 不能保证无损：FP32 值可能已在加载到 BF16 参数时舍入，之后升回 FP32 无法恢复 |
 | BF16 并非整网单一精度 | [gemma_pytorch.py](../src/openpi/models_pytorch/gemma_pytorch.py) 将部分视觉 embedding、LayerNorm/RMSNorm 参数保留为 FP32；转换脚本最终整网 `.to(bfloat16)` | 在磁盘上先把这些参数降为 BF16，再加载为 FP32，也无法恢复被舍去的信息 |
 | LoRA 未合并且加载宽松 | 转换脚本没有 LoRA 合并步骤，`load_state_dict(..., strict=False)` 的返回值未检查 | adapter 更新可能被静默忽略；打印转换成功不证明保留了微调结果。不能用 `strict=False` 作为 dtype/shape 错误的修复办法 |
 | 默认加载器会改变 dtype | [policy_config.py](../src/openpi/policies/policy_config.py) 的 JAX 路径显式 BF16 restore，Torch 路径再次选择性 BF16 cast | 应保存“原生产 JAX 路径”作为行为基线，另建受控 FP32 诊断对照。一个 FP32 文件经默认 loader 加载后不等于全 FP32 运行 |

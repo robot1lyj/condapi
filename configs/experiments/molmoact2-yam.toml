@@ -1,0 +1,9 @@
+schema_version = 1
+model = "molmoact2"
+environment = "configs/environments/molmoact2-server.toml"
+contract = "configs/robots/yam.toml"
+
+[parameters]
+native_config = "/path/to/molmoact2-yam-train.json"
+# Registration/launcher is integrated; real YAM capability stays planned until
+# native data statistics, action semantics and checkpoint loading are checked.

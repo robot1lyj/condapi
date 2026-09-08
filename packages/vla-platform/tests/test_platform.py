@@ -72,7 +72,7 @@ def test_plan_is_read_only_and_uses_conda(project):
     assert plan.contract_id == "yam-bimanual-v1"
 
 
-@pytest.mark.parametrize("name", ["evo1", "vla-jepa", "fastwam"])
+@pytest.mark.parametrize("name", ["evo1", "vla-jepa", "fastwam", "molmoact2"])
 def test_unimplemented_models_fail_before_execution(project, name):
     path = experiment(project)
     path.write_text(path.read_text().replace('model = "pi"', f'model = "{name}"'))
@@ -277,13 +277,26 @@ def test_incomplete_bundle_not_published(recipe):
 def test_cli_models(capsys):
     assert main(["--root", str(ROOT), "models"]) == 0
     result = json.loads(capsys.readouterr().out)
-    assert {x["id"] for x in result} == {"pi", "evo1", "vla-jepa", "fastwam"}
+    assert {x["id"] for x in result} == {"pi", "evo1", "vla-jepa", "fastwam", "molmoact2"}
 
 
 def test_env_plan_no_install(project):
     result = project.environment_plan("configs/environments/pi-workstation.toml")
     assert result["command"][:3] == ["conda", "env", "create"]
     assert result["status"] == "bootstrap_not_model_ready"
+
+
+def test_environment_plan_records_dependency_lock(project):
+    profile = project.root / "configs/environments/evo1-workstation.toml"
+    profile.write_text(
+        profile.read_text().replace("/home/wuyan-lyj/.conda/envs/vla-evo1-dev", str(project.root / "envs/new"))
+    )
+    first = project.environment_plan("configs/environments/evo1-workstation.toml")
+    assert len(first["dependency_lock_sha256"]) == 64
+    lock = project.root / "environments/evo1-wheels.lock.json"
+    lock.write_text(lock.read_text() + "\n")
+    second = project.environment_plan("configs/environments/evo1-workstation.toml")
+    assert first["dependency_lock_sha256"] != second["dependency_lock_sha256"]
 
 
 def test_training_not_allowed_on_workstation(project):

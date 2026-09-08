@@ -63,6 +63,44 @@ export RAW_YAM_DATA="$DATA_ROOT/ABC-130k-two-tasks"
 
 ## 2. 环境方案
 
+### MolmoAct2 / LeRobot 独立环境
+
+2026-09-08接入官方LeRobot普通MolmoAct2，与Evo使用同一固定源码wheel，依赖分别安装。工作站prefix为 `/home/wuyan-lyj/.conda/envs/vla-molmoact2-dev`，服务器为 `/home/wuyan/.conda/envs/vla-molmoact2-train`。规格/版本/哈希锁在 `environments/molmoact2*`，profiles在 `configs/environments/molmoact2-*`。新环境专属动态库变量设为 `LD_LIBRARY_PATH=<prefix>/lib`，不修改系统或旧环境。
+
+本地安装和CPU检查已完成；服务器状态见带日期的 [环境证据](reports/environments/molmoact2-20260908/README.md)。具体复现、LoRA/FP32动作专家、YAM双夹爪与分位数统计差异见 [模型接入说明](reference/molmoact2_integration.md)。不把本次环境安装记作真实GPU训练/Thor部署验收。
+
+### Evo-1 / LeRobot 独立环境
+
+2026-09-08实际结果：本地与服务器CPU检查均通过，106个Python包版本一致。服务器新环境通过专属 `LD_LIBRARY_PATH=<prefix>/lib` 使用Conda FFmpeg，已写入该环境的Conda环境变量；不修改系统库，直接运行prefix内Python时也要传入。证据见 [报告](reports/environments/evo1-20260908/README.md)。
+
+Evo-1 不安装根目录 OpenPI 依赖，不克隆或更新正在训练的 `condapi-yam`。本地 prefix 为 `/home/wuyan-lyj/.conda/envs/vla-evo1-dev`，服务器 prefix 为 `/home/wuyan/.conda/envs/vla-evo1-train`。环境规格在 `environments/evo1.yml`，核心 Python 依赖和 LeRobot 固定提交在 `environments/evo1-requirements.txt`；本地、服务器 profile 分别为 `configs/environments/evo1-workstation.toml`、`configs/environments/evo1-server.toml`。
+
+固定 LeRobot 源码 `2774d9bddcbbda50e697e162e89e7eaada8d7105`（包版本0.6.2），仅安装 evo1/training extras。Python3.12、FFmpeg7、Torch2.10.0、TorchVision0.25.0、TorchCodec0.10.0 为本次环境组合，不要求其他模型跟随。源码检出 `/home/wuyan-lyj/lerobot-evo1-2774d9b`；安装包在本地 `/home/wuyan-lyj/evo1-install-2774d9b`、服务器 `/home/wuyan/lyj/evo1-install-2774d9b`，均不放入项目 Git。
+
+这套锁定包只适用于 Linux x86_64 / Python3.12，不是 Thor ARM 镜像。完整104个wheel版本、URL和SHA256在 `environments/evo1-wheels.lock.json`；包含从固定提交构建的 LeRobot wheel，不用 PyPI 上同版本号的其他构建替代。profile 的 lock 文件纳入运行计划哈希。
+
+2026-09-08 实际安装中，服务器 pip 直连清华/阿里镜像有大包低速问题，但同一地址的 curl 可明显更快（cuDNN706MB实测约32秒）。使用 `scripts/conda/fetch_locked_wheels.py` 两并发下载并校验，再用 pip 离线安装。服务器本次wheel暂存 `/tmp/evo1-wheels-wuyan-2774d9b`，该目录可能被系统清理，不能作为持久权重目录；固定源码wheel和报告仍在家目录，锁文件随 Git 保存。
+
+```bash
+# 在服务器登录节点运行；只安装新 prefix，不进入既有 condapi-yam。
+nice -n 15 /home/public/conda/miniforge3/bin/python \
+  /home/wuyan/lyj/evo1-install-2774d9b/fetch_locked_wheels.py \
+  /home/wuyan/lyj/evo1-install-2774d9b/evo1-wheels.lock.json \
+  /tmp/evo1-wheels-wuyan-2774d9b \
+  --source-wheel /home/wuyan/lyj/evo1-install-2774d9b/lerobot-0.6.2-py3-none-any.whl
+OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 nice -n 15 \
+  /home/wuyan/.conda/envs/vla-evo1-train/bin/python -m pip install \
+  --no-compile --no-index --find-links /tmp/evo1-wheels-wuyan-2774d9b \
+  '/home/wuyan/lyj/evo1-install-2774d9b/lerobot-0.6.2-py3-none-any.whl[evo1,training]' \
+  torch==2.10.0 torchvision==0.25.0 torchcodec==0.10.0
+```
+
+首次服务器 Conda 创建被中断后，离线重试发现该安装尝试缓存缺文件；没有清空或修复共享缓存。最终基础环境改用本地打包，哈希一致后解包到新prefix并运行 conda-unpack。后续需要 Conda 新包时优先用新的专用 package cache，或重建独立环境，不把这次不完整缓存误报为现有训练环境损坏。共享家目录小文件写入较慢，首次安装耗时不代表模型训练吞吐。
+
+服务器训练存在时，只允许低优先级下载、安装和 CPU 检查；不抢占 GPU、不更新驱动，不进入原训练环境执行 pip install。新 prefix 安装失败时，保留/隔离该次不完整目录，不用清理共享缓存来解决问题。可用本地 `conda-pack` 基础环境迁移后执行 `conda-unpack`；安装包直传慢时，传固定源码 wheel，大依赖从镜像下载并校验哈希。
+
+CPU 检查入口：在目标环境执行 `python scripts/conda/audit_evo1_environment.py --output <新建审计JSON>`。脚本强制隐藏 GPU、关闭 Hub 联网，只检查训练/Evo 模块导入、TorchCodec 动态库和合成14D/三相机 processor；不下载权重或初始化完整模型。检查通过不等于 GPU 前反向、真实 YAM 数据或训练效果已验收。实际安装结果与完整包清单归 `docs/reports/environments/evo1-20260908/`，模型 capability 仍由 [10](10_vla_platform.md) 区分。
+
 ### 2.1 创建项目环境
 
 本仓库的 `environment.pi-conda.yml` 已收敛为 Python 3.12；服务器 conda 已核实可以使用 conda-forge 镜像，pip 经大 wheel 实测选择腾讯云 PyPI 镜像。创建前确认 `CODE_ROOT` 是当前 `condapi` 仓库，而不是 `/home/wuyan-lyj/YAM/yam-abc-reproduce`：

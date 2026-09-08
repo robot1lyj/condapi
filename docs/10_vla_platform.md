@@ -2,19 +2,20 @@
 
 ## 当前状态
 
-观察日期：2026-09-08。此文描述功能分支，未合并到主目录、未部署到服务器/Thor。架构 owner 为 [01](01_system_architecture.md#多模型接入层)，设备信息归 [02](02_installation_and_environment.md)，模型精度与 Thor 验收归 [08](08_thor_edge_deployment.md)。
+观察日期：2026-09-08。此文描述功能分支，未合并到主目录，未同步本分支到服务器项目检出或Thor服务；独立Evo环境安装单独记录。架构 owner 为 [01](01_system_architecture.md#多模型接入层)，设备信息归 [02](02_installation_and_environment.md)，模型精度与 Thor 验收归 [08](08_thor_edge_deployment.md)。
 
 | 部分 | 状态 |
 |---|---|
 | 控制层 | 标准库实现；模型与后端分离、计划、Conda 子进程、运行记录、模型包哈希与离线 IO 检查 |
 | Pi | 现有 OpenPI 训练/参考推理/回放/ONNX 导出入口已接线；新环境 GPU 执行未验证 |
 | LeRobot 后端 | 共用原生训练 launcher 已实现并用替身测试；无自建 trainer/processor；尚无通用离线推理入口 |
-| Evo-1 | 声明选择 LeRobot；检查源码和 checkpoint 合同；未接入真实推理/训练 |
+| Evo-1 | 本地/服务器专用环境已安装并通过CPU检查；YAM真实训练/推理仍待接入 |
+| MolmoAct2 | 原生LeRobot共享后端已注册；本地环境CPU检查通过，服务器安装中；仅普通版，不含Think |
 | FastWAM、VLA-JEPA | 注册 planned；不得运行或报告已支持 |
-| Conda | 系列 prefix 配置和创建命令已有；bootstrap 只安装 Python/pip，无模型依赖锁 |
+| Conda | Evo-1已有独立环境规格和104个wheel的锁；Pi等bootstrap仍不代表模型环境已安装 |
 | Thor | 原 Pi 容器、TensorRT 引擎、报告保持原状；没有部署此次改造 |
 
-本次收敛架构 CPU 验证：平台测试49项；与 `scripts/thor`、`skills/mlops-memory/tests` 合跑163项通过。测试命令为 `python -m pytest -q packages/vla-platform/tests scripts/thor skills/mlops-memory/tests`；测试替身验证子进程、共用原生入口和失败记录，不冒充 Conda/LeRobot 模型运行。
+当前 CPU 回归：平台测试52项；与 `scripts/thor`、`skills/mlops-memory/tests` 和下载完整性测试合跑170项通过。测试命令为 `python -m pytest -q packages/vla-platform/tests scripts/thor skills/mlops-memory/tests scripts/conda/fetch_locked_wheels_test.py`。框架测试替身不冒充模型运行；独立Evo环境实际导入/processor检查见 [环境证据](reports/environments/evo1-20260908/README.md)，MolmoAct2的原生精度/数据差异见 [接入说明](reference/molmoact2_integration.md)。
 
 不复制 LeRobot 的 registry、trainer、processor 或 dataset 实现；`configs/models/*.toml` 只选后端、policy_type 和已接通能力，入口集中在 `adapters/<backend>/backend.toml`。具体模型在子进程中调用上游；Pi 调用既有 OpenPI。原作者代码用于对照，不强制每个模型维护双实现。RLinf 的 DAgger/RL 接入不是当前范围。
 
@@ -90,7 +91,7 @@ python3 scripts/vla.py bundle check /path/to/package/manifest.json
 4. `adapters/lerobot/train.py` 检查 policy.type，然后直接调用 `lerobot.scripts.lerobot_train`。只覆盖输出目录、禁用 W&B、禁用最终/中途 Hub 上传并限定本机执行，不修改 dtype、归一化或 loss。当前仅支持新运行；resume、分布式启动器和远端提交暂走独立原生工作流，不伪装为已接入功能。
 5. YAM 样例与保存重载验证后再开放该模型的 `train`；`infer` 需另行接通共享原生 policy + processor 路径，不能因 train launcher 存在就标为可推理。原生权重和 processors 是部署交接物，seal 仅补充哈希，不创造另一套权重格式。
 
-现有 `evo1-yam.toml` 是待替换路径的实验骨架，仍会明确拒绝执行；不是可直接训练的 YAM 配置。此改造没有安装 LeRobot、下载权重、发起训练或改变 Thor 服务。
+现有 `evo1-yam.toml` 是待替换路径的实验骨架，仍会明确拒绝执行；不是可直接训练的 YAM 配置。Evo环境安装与模型capability分开：安装位置、依赖和CPU检查见 [02](02_installation_and_environment.md#evo-1--lerobot-独立环境)，没有下载权重、发起训练或改变 Thor 服务。
 
 训练入口 API 依据固定源码：[原生训练入口](https://github.com/huggingface/lerobot/blob/2774d9bddcbbda50e697e162e89e7eaada8d7105/src/lerobot/scripts/lerobot_train.py)、[训练配置](https://github.com/huggingface/lerobot/blob/2774d9bddcbbda50e697e162e89e7eaada8d7105/src/lerobot/configs/train.py)。
 
