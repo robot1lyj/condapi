@@ -4,6 +4,7 @@ import logging
 import multiprocessing as mp
 import os
 import platform
+import time
 from typing import Any
 
 import jax
@@ -326,25 +327,39 @@ def main(config: _config.TrainConfig):
     )
 
     infos = []
+    interval_started = time.monotonic()
+    interval_steps = 0
     for step in pbar:
         with sharding.set_mesh(mesh):
             train_state, info = ptrain_step(train_rng, train_state, batch)
         infos.append(info)
+        interval_steps += 1
         if step % config.log_interval == 0:
             stacked_infos = common_utils.stack_forest(infos)
             reduced_info = jax.device_get(jax.tree.map(jnp.mean, stacked_infos))
+            if not all(np.isfinite(value) for value in reduced_info.values()):
+                raise FloatingPointError(f"Nonfinite training metrics at completed step {step + 1}: {reduced_info}")
             reduced_info["learning_rate"] = _learning_rate(config, step)
+            reduced_info["time"] = time.time()
+            if step > start_step:
+                reduced_info["step_seconds"] = (time.monotonic() - interval_started) / interval_steps
+                reduced_info["samples_per_second"] = config.batch_size / reduced_info["step_seconds"]
+            memory = [device.memory_stats() for device in jax.local_devices()]
+            if all(item is not None for item in memory):
+                reduced_info["gpu_memory_gib"] = max(item.get("bytes_in_use", 0) for item in memory) / 2**30
             info_str = ", ".join(f"{k}={v:.4f}" for k, v in reduced_info.items())
             if is_primary_process:
                 pbar.write(f"Step {step}: {info_str}")
                 wandb.log(reduced_info, step=step)
                 assert metric_logger is not None
-                metric_logger.log(step, reduced_info)
+                metric_logger.log(step + 1, reduced_info)
             infos = []
+            interval_started = time.monotonic()
+            interval_steps = 0
         batch = next(data_iter)
 
-        if (step % config.save_interval == 0 and step > start_step) or step == config.num_train_steps - 1:
-            _checkpoints.save_state(checkpoint_manager, train_state, data_loader, step)
+        if (step + 1) % config.save_interval == 0 or step == config.num_train_steps - 1:
+            _checkpoints.save_state(checkpoint_manager, train_state, data_loader, step + 1)
 
     if metric_logger is not None:
         metric_logger.flush()
