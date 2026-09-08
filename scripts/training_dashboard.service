@@ -1,0 +1,16 @@
+[Unit]
+Description=YAM training dashboard and read-only metric mirror
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/condapi
+ExecStart=/usr/bin/python3 %h/condapi/scripts/training_dashboard.py --metrics %h/condapi/artifacts/training_dashboard/live/metrics.jsonl --remote yam-server --remote-metrics /home/wuyan/lyj/YAM/training-runs/pi05_lego_full_b64/metrics/metrics.jsonl --interval 10
+Restart=on-failure
+RestartSec=10
+NoNewPrivileges=true
+MemoryMax=256M
+UMask=0077
+
+[Install]
+WantedBy=default.target

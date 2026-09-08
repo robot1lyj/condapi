@@ -2,14 +2,52 @@
 
 ## 2026-09-08 四张 4090 全参数短测
 
-`pi05_yam` 在 Slurm 2064/gpu001 的 4×4090 上通过真实 YAM 输入的 10 步全参数测试：
-FSDP=4、global batch=4、EMA=None、原 AdamW、三相机/文本200/H50/32D，33.53亿参数全部可训练。
-先按 FSDP 分片加载 checkpoint，修复原 replicated 权重输入导致的初始化 OOM。
-每卡 JAX 活跃分配峰值 13.62GiB、内存池约16GiB；固定真实 batch 编译后平均0.666秒/步。
-这是容量和计算短测，未包含持续取数/保存 checkpoint 开销，不保证收敛，未启动正式长训。
-默认 LoRA 配置仍保留；全量路线已验证的限定条件、失败对照、代码指纹与复现命令见
-[实测报告](reports/training/pi05-full-20260908/README.md)。全量训练集 norm 已完成，见
-[数据合同](04_data_contracts.md#2026-09-08-全量发布与归一化完成)。
+`pi05_yam` 在Slurm2064/gpu001的4×4090上通过全参数容量测试，33.53亿参数全部可训练。
+先分片加载checkpoint修复初始化OOM；随后预分配显存消除了batch32按需增长时的失败。
+固定FSDP4、EMA=None、原AdamW、三相机/文本200/H50/32D、JAX92%显存预算：
+global batch92通过3步、相邻96与128 OOM；这不是改变精度/卸载/预算后的硬件绝对上限。
+推荐batch64作为长训候选：固定batch10步通过，活跃峰值18.54GiB，3.3385秒/步；
+全部训练集随机取数、8worker的30步测试平均3.3895秒/步（去掉首步），平均取数等待0.0328秒。
+这是短测，不保证长期稳定或任务收敛；正式长训未启动，默认LoRA配置仍保留。
+用户随后确定阶段计划：batch64、原AdamW峰值2.5e-5、warmup1000、约162097步余弦至2.5e-6，
+首阶段累计40k，每20k完整保存，后续评估后续训向约一遍数据推进。不是每40k重置学习率。
+按3.3895秒/步，40k纯训练37.7小时（排期40–48小时），一遍约152.6小时，不含停机/评估。
+此计划替代短测报告中的最初30k/60k方案；正式训练尚未启动，验证/早停尚未接入循环。
+限定条件、保存证据、参数/步数解释与时间外推见[batch测试报告](reports/training/pi05-batch-limit-20260908/README.md)；
+初始化修复及最初batch4证据见[首轮报告](reports/training/pi05-full-20260908/README.md)。
+全量train-only norm见[数据合同](04_data_contracts.md#2026-09-08-全量发布与归一化完成)。
+
+## 训练看板与每小时巡检（2026-09-08）
+
+- 页面：[training_dashboard.html](../scripts/training_dashboard.html)，本地入口 `http://127.0.0.1:8765/`。
+  W&B风格的只读工作台，不使用W&B上传或外部CDN。主图loss，附验证loss、LR、梯度/参数范数、
+  单步耗时、吞吐、显存、GPU利用率、取数等待；日志未提供的指标明确留空。
+- 服务：[training_dashboard.py](../scripts/training_dashboard.py)，仅Python标准库、仅监听loopback。
+  10秒SSH拉取指定JSONL并原子替换本地缓存，页面10秒轮询；两者均不调用模型，不消耗模型token。
+  SSH失败保留上次数据并提示；忽略未完成的尾行、报告坏行、处理step回退，不读取/修改checkpoint。
+  单文件上限32MiB，最多展示最近20000条日志记录，超限明确提示；这不是训练步数上限。
+- 本机用户服务 `training_dashboard.service` 已启用，文件位于 `scripts/`；随用户服务管理器启动，
+  异常退出10秒重启。查看/恢复：`systemctl --user status training_dashboard.service` /
+  `systemctl --user restart training_dashboard.service`。本机休眠、断网或用户服务未运行时不能保证刷新。
+- 本地缓存 `artifacts/training_dashboard/live/metrics.jsonl`；预留远端
+  `/home/wuyan/lyj/YAM/training-runs/pi05_lego_full_b64/metrics/metrics.jsonl`。
+  **此路径尚无正式训练日志**，启动时必须绑定实际run，不能把页面等待状态写成训练已运行。
+  参数面板显示讨论计划，不冒充实际配置验真。原生LocalMetricLogger已有loss/grad_norm/param_norm/LR；
+  计时、GPU、验证等字段需训练/采集器实际写入。10秒刷新不等于每10秒新增loss，频率取决于log_interval。
+- 启动例：`python3 scripts/training_dashboard.py --metrics /absolute/run/metrics/metrics.jsonl`；
+  远端镜像加 `--remote yam-server --remote-metrics /absolute/remote/metrics.jsonl`。
+  服务内的参数与路径通过CLI设置；默认stage40k/total162097/save20k，不启动训练。
+- 每小时heartbeat `pi0-5`（“每小时巡检Pi0.5全量训练”）已设ACTIVE，无终止日期；
+  只在异常/修复/重要进展时通知。尚未启动训练时不自行首次启动；40k阶段结束不自行越过停止点。
+  巡检现场Slurm、计算进程、步数增量、有限loss/梯度、GPU、磁盘/NFS及完整checkpoint。
+  故障恢复先排除编译/保存/排队，确认无重复写进程、资源有效、配置/数据一致和恢复链路通过，
+  再用该run记录的启动器续训，验证多个新步数；不改batch/LR/精度/预算。同一修复两次失败停止盲重试。
+- 用户允许跳过部分经审计证实损坏的样本：保留原件和源ID/原因/哈希/排除清单，优先整轨迹隔离到
+  新数据版本、保持三相机/state/action对齐；自动修复单轮最多5条、累计不超过原train的1%，超出请确认。
+  不能把OOM、网络、存储或解码依赖故障当作数据损坏。数据集合改变需记录版本分支、验证采样/续训位置，
+  按合同重算验收norm，不能宣称原序列无缝续接。无法验证则保留现场报告。无限巡检不等于无限重启。
+- 验证：13项pytest覆盖日志追加/半行、非法值、续训回退、读取上限、HTTP路径隔离、镜像失败保留及成功发布；
+  JS语法检查、实际HTTP200与等待远端日志API通过。未宣称浏览器交互或正式训练的端到端验收。
 
 本页只描述当前 YAM 训练路线。服务器和环境先看 [02 · 服务器与环境](02_installation_and_environment.md)，动作/图像合同看 [04 · 数据合同](04_data_contracts.md)。
 
