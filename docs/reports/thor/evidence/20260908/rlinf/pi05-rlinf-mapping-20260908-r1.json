@@ -1,0 +1,33 @@
+{
+  "phase": "audit",
+  "finished_at": "2026-09-08T02:37:48.103463+00:00",
+  "comparison": "direct JAX-to-RLinf versus existing audited FP32 PyTorch-to-RLinf layout",
+  "tensor_count": 667,
+  "all_tensors_bit_equal": true,
+  "mismatches": [],
+  "direct_weights_sha256": "f6391204c480d6c54d31d63601e7963ef23301157df052a4b8183e7b019ce2f1",
+  "pytorch_weights_sha256": "0b8f56470a55039f4ff36eb2bde99bff2fd2b117025fd994c844f76d4c68618b",
+  "source_identity": {
+    "upstream_revision": "1c9eed00a60009d9b04337b85e4cc84d474e405e",
+    "files_sha256": {
+      "rlinf/models/embodiment/openpi_rlinf/pi0_model/__init__.py": "95ba98e540cd5ffd1543380a5197b48c3dc44ccba08cec968e15558a3967863b",
+      "rlinf/models/embodiment/openpi_rlinf/pi0_model/gemma.py": "048e748e0d816b06d841f65a282b0d07344abf77bb7b848833fcbc2025a62ef8",
+      "rlinf/models/embodiment/openpi_rlinf/pi0_model/lora.py": "d8424a9a768813af753e27a1e7c201cd7f83c9e00db8c5beaa302b8ff0f31304",
+      "rlinf/models/embodiment/openpi_rlinf/pi0_model/model.py": "21d851802c1576c6f3f4bcb1a9a58b7a3f5a08a966c43208f29f682ff0315ab2",
+      "rlinf/models/embodiment/openpi_rlinf/pi0_model/pi0.py": "7ea632f0349a6a0f63dc4273079725e6084f7859207fe5995b2834b7b181d625",
+      "rlinf/models/embodiment/openpi_rlinf/pi0_model/pi0_config.py": "cc24434b1fe66613be712c2f4072571aa3da49a7f6bda8781524fc99a8aab262",
+      "rlinf/models/embodiment/openpi_rlinf/pi0_model/pointnet.py": "46187b2b8448fb98d6cf75dd21a4bd652bcae08b50e7edf9f83bfe5f827ed653",
+      "rlinf/models/embodiment/openpi_rlinf/pi0_model/siglip.py": "5fafe0c7a3565bda289474131896747e37926816a4d5176a6d7bd961f01edf52",
+      "rlinf/models/embodiment/openpi_rlinf/pi0_model/utils.py": "1105077d8401a63e68a6b17a852c3fedfe5c41620ac19bcbf9945f2d423abf00",
+      "rlinf/utils/ckpt_convertor/openpi/__init__.py": "051ed7e9a41dc22a50ada3f40dc6334b8bcfa81ddeb79344774f2d0ff8210c28",
+      "rlinf/utils/ckpt_convertor/openpi/_core.py": "82bcbe8c051d6a7ce873de3478ba82dcde804342d150eb291ddb4f0bc7f71c5f",
+      "rlinf/utils/ckpt_convertor/openpi/convert.py": "5754370ff1ea9c393346aa43f063c3d7d5e039ef200d586ad055412c22759f0e",
+      "rlinf/utils/ckpt_convertor/openpi/jax_to_openpi_rlinf.py": "a254572a5ab134aeee246ec7959b99a27a09f84a221d0f04221cefb5f0b11f5a",
+      "rlinf/utils/ckpt_convertor/openpi/openpi_pytorch_to_openpi_rlinf.py": "249e4d692cfe644a48142809aff355b3ddef92ab62a1cbadd6ec8d05c84c46e4",
+      "rlinf/utils/ckpt_convertor/openpi/openpi_rlinf_to_openpi_pytorch.py": "640795803aaafb797639636891d6de03cbe316eef4b99bab4709443162efc5a8",
+      "rlinf/utils/ckpt_convertor/openpi/pt_to_safetensors.py": "4c4bd6bc323d9ab4d36b9dda0b6397e0034ad95d329b66d1ceaf2defb4d8c0c7",
+      "rlinf/utils/ckpt_convertor/openpi/sft2deploy.py": "255f6b61d3fd2404b7bcd925ed6abbba0147c35fc6662f5a4d33770c42cd1c11"
+    }
+  },
+  "probe_script_sha256": "5d0e9e63b26915d977ec1efb65df9049fab0111db0d2385915bc7b2304e54b31"
+}

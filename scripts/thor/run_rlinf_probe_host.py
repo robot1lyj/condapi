@@ -1,0 +1,138 @@
+"""Run the bounded RLinf probe inside the existing Pi image, with immutable logs."""
+
+import argparse
+import datetime
+import hashlib
+import json
+import os
+from pathlib import Path
+import re
+import subprocess
+import sys
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("phase", choices=("convert", "float32", "bfloat16", "audit-mapping"))
+    parser.add_argument("--run-id", required=True)
+    parser.add_argument("--artifact-id", default="pi05-rlinf-fp32-20260908-r2")
+    parser.add_argument("--gelu", choices=("upstream", "tanh"), default="upstream")
+    parser.add_argument("--root", type=Path, default=Path("/home/wuyan-lyj/thor/pi"))
+    args = parser.parse_args()
+    if not all(re.fullmatch(r"[A-Za-z0-9_-]+", name) for name in (args.run_id, args.artifact_id)):
+        parser.error("Use a filename-safe run ID")
+    if os.geteuid() != 0:
+        parser.error("Run with sudo on Thor")
+    scripts = Path(__file__).resolve().parent
+    image = "openpi-pi:thor-pytorch-onnx-v6-20260907"
+    source = args.root / "references/rlinf-1c9eed00"
+    command = [
+        "docker",
+        "run",
+        "--rm",
+        "--name",
+        args.run_id,
+        "--network",
+        "none",
+        "--shm-size=8g",
+        "-e",
+        "PYTHONUNBUFFERED=1",
+        "-e",
+        "PYTHONPATH=/probe",
+        "-e",
+        "TORCHDYNAMO_DISABLE=1",
+        "-e",
+        "TORCH_ALLOW_TF32_CUBLAS_OVERRIDE=0",
+        "-e",
+        "OMP_NUM_THREADS=8",
+        "-v",
+        f"{scripts.parent.parent}:/probe:ro",
+        "-v",
+        f"{source}:/rlinf:ro",
+        "-v",
+        f"{args.root / 'checkpoints'}:/checkpoints:ro",
+        "-v",
+        f"{args.root / 'artifacts'}:/artifacts",
+        "-v",
+        f"{args.root / 'test-data'}:/test-data:ro",
+        "-v",
+        f"{args.root / 'results'}:/results",
+        "-v",
+        f"{args.root / 'cache'}:/cache",
+    ]
+    gpu = args.phase in ("float32", "bfloat16")
+    if gpu:
+        command += ["--runtime=nvidia", "--gpus", "all", "-e", "NVIDIA_DRIVER_CAPABILITIES=compute,utility"]
+    output = f"/artifacts/{args.artifact_id}"
+    command += [
+        image,
+        "python",
+        "-m",
+        "scripts.thor.probe_rlinf",
+        "benchmark" if gpu else args.phase,
+        "--source",
+        "/rlinf",
+    ]
+    if args.phase == "convert":
+        command += [
+            "--checkpoint",
+            "/checkpoints/pi05_base",
+            "--output",
+            output,
+            "--norm",
+            "/test-data/pi05-replay-v1/norm_stats.json",
+        ]
+    elif args.phase == "audit-mapping":
+        command += [
+            "--checkpoint",
+            output,
+            "--pytorch-checkpoint",
+            "/checkpoints/pi05_base_pytorch_fp32_v1",
+            "--output",
+            f"/results/{args.run_id}.json",
+        ]
+    else:
+        command += [
+            "--checkpoint",
+            output,
+            "--suite",
+            "/test-data/pi05-replay-v1/suite.json",
+            "--dtype",
+            args.phase,
+            "--gelu",
+            args.gelu,
+            "--output",
+            f"/results/{args.run_id}",
+        ]
+        for reference in ("pi05-A-20260907-r2", "pi05-B-20260907-r1", "pi05-C-20260907-r1", "pi05-D-20260907-r1"):
+            command += ["--reference", f"/results/{reference}"]
+    prefix = args.root / "logs" / args.run_id
+    manifest = {
+        "run_id": args.run_id,
+        "phase": "evaluate" if gpu else args.phase,
+        "started_at": datetime.datetime.now(datetime.UTC).isoformat(),
+        "command": command,
+        "image_id": subprocess.check_output(
+            ["docker", "image", "inspect", "--format", "{{.Id}}", image], text=True
+        ).strip(),
+        "power_before": subprocess.check_output(["nvpmodel", "-q"], text=True),
+        "hardware": Path("/proc/device-tree/model").read_text().rstrip("\x00"),
+        "code_commit_base": "bef487d80ee3917104233678a0a0265149a8c923",
+        "probe_scripts_sha256": {
+            p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(scripts.glob("*.py"))
+        },
+        "scope": "offline core inference probe, no training, LoRA or robot execution; no new dependencies installed",
+        "power_policy": "CPU conversion at 120W; GPU inference MAXN with automatic restoration",
+    }
+    with prefix.with_suffix(".manifest.json").open("x") as stream:
+        json.dump(manifest, stream, indent=2)
+    logged = [sys.executable, str(scripts / "logged_command.py"), "--prefix", str(prefix), "--", *command]
+    wrapped = [sys.executable, str(scripts / "maxn_session.py"), "--", *logged] if gpu else logged
+    code = subprocess.call(wrapped)
+    with prefix.with_suffix(".power-after.json").open("x") as stream:
+        json.dump({"exit_code": code, "power_after": subprocess.check_output(["nvpmodel", "-q"], text=True)}, stream)
+    raise SystemExit(code)
+
+
+if __name__ == "__main__":
+    main()

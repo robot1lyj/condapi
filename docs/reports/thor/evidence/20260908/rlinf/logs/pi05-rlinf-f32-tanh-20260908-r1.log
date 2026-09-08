@@ -1,0 +1,39 @@
+
+=============
+== PyTorch ==
+=============
+
+NVIDIA Release 26.05 (build 313520560)
+PyTorch Version 2.12.0a0+5aff392
+Container image Copyright (c) 2026, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+Copyright (c) 2014-2024 Facebook Inc.
+Copyright (c) 2011-2014 Idiap Research Institute (Ronan Collobert)
+Copyright (c) 2012-2014 Deepmind Technologies    (Koray Kavukcuoglu)
+Copyright (c) 2011-2012 NEC Laboratories America (Koray Kavukcuoglu)
+Copyright (c) 2011-2013 NYU                      (Clement Farabet)
+Copyright (c) 2006-2010 NEC Laboratories America (Ronan Collobert, Leon Bottou, Iain Melvin, Jason Weston)
+Copyright (c) 2006      Idiap Research Institute (Samy Bengio)
+Copyright (c) 2001-2004 Idiap Research Institute (Ronan Collobert, Samy Bengio, Johnny Mariethoz)
+Copyright (c) 2015      Google Inc.
+Copyright (c) 2015      Yangqing Jia
+Copyright (c) 2013-2016 The Caffe contributors
+All rights reserved.
+
+Various files include modifications (c) NVIDIA CORPORATION & AFFILIATES.  All rights reserved.
+
+GOVERNING TERMS: The software and materials are governed by the NVIDIA Software License Agreement
+(found at https://www.nvidia.com/en-us/agreements/enterprise-software/nvidia-software-license-agreement/)
+and the Product-Specific Terms for NVIDIA AI Products
+(found at https://www.nvidia.com/en-us/agreements/enterprise-software/product-specific-terms-for-ai-products/).
+
+MODEL_LOAD_OK 7.129525643998932 {'torch.float32': 667}
+SAMPLE_OK episode-000095-early.npz 1146.3774320000084
+SAMPLE_OK episode-000095-middle.npz 1145.786273998965
+SAMPLE_OK episode-000095-late.npz 1146.8788070051232
+SAMPLE_OK episode-000096-early.npz 1145.9477429962135
+SAMPLE_OK episode-000096-middle.npz 1145.881318996544
+SAMPLE_OK episode-000096-late.npz 1146.0953479981981
+SAMPLE_OK episode-000097-early.npz 1145.8274079996045
+SAMPLE_OK episode-000097-middle.npz 1146.6817849941435
+SAMPLE_OK episode-000097-late.npz 1146.1028109988547
+PROBE_COMPLETE 1146.0953479981981 1147.0332429998962 [{"pi05-A-20260907-r2": 1.1092084824913254e-06}, {"pi05-B-20260907-r1": 0.002699288840229865}, {"pi05-C-20260907-r1": 0.002169997925071613}, {"pi05-D-20260907-r1": 3.5234801688357184e-07}]

@@ -1,0 +1,164 @@
+{
+  "run_id": "pi05-rlinf-bf16-20260908-r1",
+  "phase": "evaluate",
+  "status": "running",
+  "command": [
+    "/probe/scripts/thor/probe_rlinf.py",
+    "benchmark",
+    "--source",
+    "/rlinf",
+    "--checkpoint",
+    "/artifacts/pi05-rlinf-fp32-20260908-r2",
+    "--suite",
+    "/test-data/pi05-replay-v1/suite.json",
+    "--dtype",
+    "bfloat16",
+    "--output",
+    "/results/pi05-rlinf-bf16-20260908-r1",
+    "--reference",
+    "/results/pi05-A-20260907-r2",
+    "--reference",
+    "/results/pi05-B-20260907-r1",
+    "--reference",
+    "/results/pi05-C-20260907-r1",
+    "--reference",
+    "/results/pi05-D-20260907-r1"
+  ],
+  "started_at": "2026-09-08T02:34:02.605875+00:00",
+  "backend": "rlinf_pytorch_core",
+  "config": "pi05_yam",
+  "suite_sha256": "5dc74ebd1fbf296f21156ec685cf9edd6d7eb20c1a7eec858d8091369db1e15d",
+  "suite": {
+    "created_at": "2026-09-07T10:31:18.850029+00:00",
+    "source_kind": "real_yam_recording",
+    "source_root": "/home/wuyan-lyj/thor-system/test-data/ABC-130k-two-tasks/lego_sorting",
+    "source_files": {
+      "manifests/train.jsonl": "1fabf4a2b83224f85a724146fb37ccf17928f91c00bd0a697e470980e54fb3a6",
+      "train/data/source-file-000.parquet": "86c8358e45cc3888a5a8ad51d3165b8830a2ae21147fc2b7ee6cc1ac169b7b48",
+      "train/videos/left_wrist/episode-000095.mp4": "933af3b2463cfa8f79b036e54875d84b950a8fee646bd5d85f245b51d7ff8f21",
+      "train/videos/left_wrist/episode-000096.mp4": "84e438bc8fd5cf63df13973ec5364b34d2cd47e55993c2040c042a2319cc1013",
+      "train/videos/left_wrist/episode-000097.mp4": "516a6fb63a66ec5ad7984bb6d58c7a2358404ca06fc18097d2c61877e524c62b",
+      "train/videos/right_wrist/episode-000095.mp4": "6e7c239a40ea9a567d2a72b49f50880c0c60989b1ca2485bc1bfb8f1e92107b1",
+      "train/videos/right_wrist/episode-000096.mp4": "2055b5cd36bc75d7b359c013d56d96c620d5fe9bfa9f760e054c492a44ec332a",
+      "train/videos/right_wrist/episode-000097.mp4": "e52111ef360e949d4cc6aa9102e818a24c37792623c46ec2038156e1a2af49ea",
+      "train/videos/top/episode-000095.mp4": "9d04979383e8f4d81aebd04bdadfb9d6d77b2e33468f36bf765b3d39260699b9",
+      "train/videos/top/episode-000096.mp4": "fb29baaba91fc93573cf189707f608185c1273a3fad8884e141508622b6c40fb",
+      "train/videos/top/episode-000097.mp4": "8517f0b92104e1ce3faae39d5fa5c3f85c1f22b943d46ed00177dcece364ae8c"
+    },
+    "norm_stats_sha256": "d3fb4d94c095f9bf1fdc25ef032cd5a6a7575a983f4039e6f214f6b7af38dda9",
+    "normalization_scope": "benchmark_only_same_recordings_not_production_training_stats",
+    "normalization_method": "OpenPI RunningStats; 50 future actions relative to current state; endpoint clamp",
+    "joint_delta_mask": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      false
+    ],
+    "action_horizon": 50,
+    "units": "original_dataset_values_no_rescaling_no_robot_calibration_claim",
+    "base_model_only": true,
+    "samples": [
+      {
+        "sample": "episode-000095-early.npz",
+        "provenance": "episode-000095-early.json"
+      },
+      {
+        "sample": "episode-000095-middle.npz",
+        "provenance": "episode-000095-middle.json"
+      },
+      {
+        "sample": "episode-000095-late.npz",
+        "provenance": "episode-000095-late.json"
+      },
+      {
+        "sample": "episode-000096-early.npz",
+        "provenance": "episode-000096-early.json"
+      },
+      {
+        "sample": "episode-000096-middle.npz",
+        "provenance": "episode-000096-middle.json"
+      },
+      {
+        "sample": "episode-000096-late.npz",
+        "provenance": "episode-000096-late.json"
+      },
+      {
+        "sample": "episode-000097-early.npz",
+        "provenance": "episode-000097-early.json"
+      },
+      {
+        "sample": "episode-000097-middle.npz",
+        "provenance": "episode-000097-middle.json"
+      },
+      {
+        "sample": "episode-000097-late.npz",
+        "provenance": "episode-000097-late.json"
+      }
+    ],
+    "norm_stats": "norm_stats.json",
+    "observation_count": 9
+  },
+  "norm_stats_sha256": "d3fb4d94c095f9bf1fdc25ef032cd5a6a7575a983f4039e6f214f6b7af38dda9",
+  "noise_sha256": "42bca6ac77eb9aeaa872cdecc1b432e2c3d0f9a49f5da287515cecf556131d84",
+  "checkpoint_metadata_sha256": "250d0ad0f6540a5e4bdd70442d6864cef729724f2d23e2dd2cc669563a668d70",
+  "converted_weights_sha256": "f6391204c480d6c54d31d63601e7963ef23301157df052a4b8183e7b019ce2f1",
+  "conversion_audit_sha256": "973c751b5c25a601717961743706de257272790619d143d3e677f2faebc1e06e",
+  "storage_dtype": "float32",
+  "compute_dtype": "bfloat16",
+  "compiled": false,
+  "precision_policy": "BF16 parameters; upstream FP32 internal attention/stem/norm operations",
+  "steps": 10,
+  "horizon": 50,
+  "seed": 0,
+  "repeats": 3,
+  "warmups_per_sample": 2,
+  "text_bucket": 200,
+  "tf32": false,
+  "source_identity": {
+    "upstream_revision": "1c9eed00a60009d9b04337b85e4cc84d474e405e",
+    "files_sha256": {
+      "rlinf/models/embodiment/openpi_rlinf/pi0_model/__init__.py": "95ba98e540cd5ffd1543380a5197b48c3dc44ccba08cec968e15558a3967863b",
+      "rlinf/models/embodiment/openpi_rlinf/pi0_model/gemma.py": "048e748e0d816b06d841f65a282b0d07344abf77bb7b848833fcbc2025a62ef8",
+      "rlinf/models/embodiment/openpi_rlinf/pi0_model/lora.py": "d8424a9a768813af753e27a1e7c201cd7f83c9e00db8c5beaa302b8ff0f31304",
+      "rlinf/models/embodiment/openpi_rlinf/pi0_model/model.py": "21d851802c1576c6f3f4bcb1a9a58b7a3f5a08a966c43208f29f682ff0315ab2",
+      "rlinf/models/embodiment/openpi_rlinf/pi0_model/pi0.py": "7ea632f0349a6a0f63dc4273079725e6084f7859207fe5995b2834b7b181d625",
+      "rlinf/models/embodiment/openpi_rlinf/pi0_model/pi0_config.py": "cc24434b1fe66613be712c2f4072571aa3da49a7f6bda8781524fc99a8aab262",
+      "rlinf/models/embodiment/openpi_rlinf/pi0_model/pointnet.py": "46187b2b8448fb98d6cf75dd21a4bd652bcae08b50e7edf9f83bfe5f827ed653",
+      "rlinf/models/embodiment/openpi_rlinf/pi0_model/siglip.py": "5fafe0c7a3565bda289474131896747e37926816a4d5176a6d7bd961f01edf52",
+      "rlinf/models/embodiment/openpi_rlinf/pi0_model/utils.py": "1105077d8401a63e68a6b17a852c3fedfe5c41620ac19bcbf9945f2d423abf00",
+      "rlinf/utils/ckpt_convertor/openpi/__init__.py": "051ed7e9a41dc22a50ada3f40dc6334b8bcfa81ddeb79344774f2d0ff8210c28",
+      "rlinf/utils/ckpt_convertor/openpi/_core.py": "82bcbe8c051d6a7ce873de3478ba82dcde804342d150eb291ddb4f0bc7f71c5f",
+      "rlinf/utils/ckpt_convertor/openpi/convert.py": "5754370ff1ea9c393346aa43f063c3d7d5e039ef200d586ad055412c22759f0e",
+      "rlinf/utils/ckpt_convertor/openpi/jax_to_openpi_rlinf.py": "a254572a5ab134aeee246ec7959b99a27a09f84a221d0f04221cefb5f0b11f5a",
+      "rlinf/utils/ckpt_convertor/openpi/openpi_pytorch_to_openpi_rlinf.py": "249e4d692cfe644a48142809aff355b3ddef92ab62a1cbadd6ec8d05c84c46e4",
+      "rlinf/utils/ckpt_convertor/openpi/openpi_rlinf_to_openpi_pytorch.py": "640795803aaafb797639636891d6de03cbe316eef4b99bab4709443162efc5a8",
+      "rlinf/utils/ckpt_convertor/openpi/pt_to_safetensors.py": "4c4bd6bc323d9ab4d36b9dda0b6397e0034ad95d329b66d1ceaf2defb4d8c0c7",
+      "rlinf/utils/ckpt_convertor/openpi/sft2deploy.py": "255f6b61d3fd2404b7bcd925ed6abbba0147c35fc6662f5a4d33770c42cd1c11"
+    }
+  },
+  "probe_script_sha256": "009d58ca42b5f3db50c78489f6b76496412ae54e0488cc7ba209c6e60118c55a",
+  "versions": {
+    "torch": "2.12.0a0+5aff3928d8.nv26.05",
+    "cuda": "13.2",
+    "jax": "0.6.2"
+  },
+  "device": "NVIDIA Thor",
+  "precision_acceptance_threshold": null,
+  "limitations": [
+    "Exploratory core inference only; no SFT, optimizer, LoRA, task success or RLinf orchestration test",
+    "Original upstream core; IO adapter preserves project YAM transforms",
+    "Explicit core compute dtype, not the factory's fixed bfloat16 config",
+    "TorchDynamo disabled, including upstream decorated GELU; not an optimized speed comparison",
+    "Nine distinct recorded inputs; repeats estimate timing only; dataset physical units uncalibrated"
+  ]
+}

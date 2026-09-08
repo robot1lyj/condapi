@@ -43,6 +43,7 @@ section{scroll-margin-top:20px}.section-head{display:flex;gap:14px;align-items:c
 <article class="card"><h3>计算精度：执行运算时用什么格式？</h3><p>存成 FP32 的权重，也可以用 BF16 做主要计算。标注 <strong>BF16 + FP32</strong>，表示主要部分用 BF16，部分敏感运算仍保留 FP32，并非全模型都是 16 位。</p></article>
 </div>
 <p class="precision-key"><strong>FP32</strong> 是 32 位浮点，保留更多有效数字。<strong>BF16</strong> 是 16 位浮点，更省存储、适合加速，但有效数字更少；它<strong>不是 FP16</strong>。JAX、PyTorch、TensorRT 是执行模型的软件，不是三种模型。本页未展示 FP8 / FP4 量化方案。</p>
+<p class="precision-key"><a href="rlinf_probe.html">还是不清楚怎么选？查看 FP32 / BF16 通俗解释、RLinf 小测试与 ONNX 路线对照 →</a></p>
 </section>
 <section id="comparison">
 <div class="section-head"><span class="section-no">02</span><h2>7 组配置，一张表看清楚</h2></div>

@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Thor · 精度怎么选 / RLinf 小测试</title><style>{{STYLE}}</style></head>
+<body><header class="masthead"><div class="shell"><div class="brand">THOR / Pi0.5</div><a href="index.html">返回 7 组部署对照</a></div></header>
+<main class="shell">
+<div class="intro"><div><div class="eyebrow">2026-09-08 · 解释 + 真实回放</div><h1>不要只选“格式”，要选完整的计算路径</h1><p class="lead">本轮只测试 RLinf 的权重转换与推理核心，没有进行微调、LoRA 合并或机械臂任务测试。</p></div></div>
+<div class="overview"><h2>当前建议：保留 JAX 训练 + 现有 Thor 候选</h2><p style="margin-top:12px">RLinf 转换得到的权重与现有转换一致；原版计算仍存在算子差异。对齐 GELU 后，FP32 输出回到现有方案的误差水平。没有证据表明现在更换训练框架会更好。</p></div>
+<section><div class="section-head"><span class="section-no">01</span><h2>FP32、BF16 到底是什么意思？</h2></div>
+<div class="explain"><article class="card"><h3>FP32：数字记得更细</h3><p>每个数占 32 位，约 7 位十进制有效数字，不是固定 7 位小数。适合保存训练主权重和累计微小更新。</p></article><article class="card"><h3>BF16：范围大，但数字更粗</h3><p>每个数占 16 位，数值范围接近 FP32，但有效数字更少。例如 1.001 转成 BF16 会舍入为 1.0。它不是 FP16；FP16 的最大有限值只有 65504。</p></article></div>
+<p class="precision-key">BF16 少了部分有效数字，<strong>不等于模型“准确率减半”</strong>。输出还受算子实现、计算顺序、数据处理和训练更新影响。参见 <a href="https://docs.nvidia.com/deeplearning/tensorrt/latest/inference-library/accuracy-considerations.html">NVIDIA 精度说明</a>。</p>
+<div class="card" style="margin-top:16px"><h3>保存精度、训练计算、推理计算是三个开关</h3><p><strong>训练</strong>包含前向计算、反向梯度和更新权重；<strong>推理</strong>只做前向预测。推荐保存 FP32 主权重，训练用经过验证的 BF16/FP32 混合精度，部署再用 BF16/FP32 混合计算。不能把“训练用 BF16 计算”误写成“所有参数和更新都只存 BF16”。</p></div>
+</section>
+<section><div class="section-head"><span class="section-no">02</span><h2>0.002 大不大？先看比较对象</h2></div>
+<div class="card"><p>我们表里的 0.0025 是<strong>相对原始 JAX 输出的平均绝对差</strong>，不是对正确动作的误差，也不是损失了 0.25% 成功率。当前 JAX 自己从 FP32 改 BF16 计算，MAE 也约 0.0027；因此现有部署候选没有显示出数量级恶化，但这不构成任务验收。</p><p style="margin-top:10px">不同关节和夹爪须分别看，物理单位未核准前不换算成角度或毫米。现在只用了 9 个独立输入，无法据此承诺微调后的抓取、接触或释放效果。</p></div></section>
+<section><div class="section-head"><span class="section-no">03</span><h2>RLinf：实测，而不是只看宣传</h2></div>
+<div class="table-panel"><div class="table-intro">误差全部对照原 JAX FP32。内存权重与计算精度分列；所有磁盘主权重均为 FP32。窄屏可左右滑动。</div><div class="tablewrap" role="region" aria-label="RLinf 精度小测试对照" tabindex="0"><table><thead><tr><th scope="col">方案</th><th scope="col">内存权重</th><th scope="col">计算精度</th><th scope="col" class="numeric">P50 · ms</th><th scope="col" class="numeric">MAE</th><th scope="col" class="numeric">最大绝对差</th></tr></thead><tbody>{{ROWS}}</tbody></table></div>
+<div class="table-note">RLinf 每组 9 个输入 × 3 次正式调用，另每输入预热 2 次；历史组每输入测速 20 次。<strong>这里只比较数值表现，不能用未优化的 RLinf 延迟断言框架的性能上限。</strong>真实三路 YAM 录像，H50、10 步去噪、固定噪声，测试时 MAXN；计时包含 policy 输入输出处理与 GPU 同步，不含网络、相机采集和首次加载。</div></div>
+<div class="card" style="margin-top:18px"><h3>已经定位的差异：GELU 激活函数</h3><p>JAX 使用 tanh 近似形式；所测 RLinf 原版使用 PyTorch 默认的非近似 GELU。两者数学上接近，但不是同一个函数。仅把 RLinf 的视觉和语言部分 GELU 改成相同近似形式，FP32 的 MAE 就从约 0.000555 降到约 0.00000111。<strong>这里“更精确的数学函数”不等于“更忠实于训练模型”。</strong></p>
+<p style="margin-top:10px">独立核对了直接 JAX→RLinf 与现有 FP32 PyTorch→RLinf 的布局映射：667 个张量逐项完全相等。因此本轮观察到的原版 FP32 差异，不是转换后的权重值不同导致。原版与修改版分开保存，未修改上游仓库或当前部署服务。</p></div>
+<details><summary>证据、复现范围与限制</summary><div class="technical"><p>RLinf 源码固定为 <code>1c9eed00a60009d9b04337b85e4cc84d474e405e</code>；使用现有 Pi 系列镜像，未安装 Ray/FSDP 等完整训练依赖。关闭 TorchDynamo；显式指定核心计算 dtype，保留 YAM transforms。BF16 组使用 BF16 内存参数和上游显式 FP32 算子，并不是新增 FP32 主权重混合精度训练测试。</p><p style="margin-top:10px">测试入口：<code>scripts/thor/probe_rlinf.py</code> 和 <code>run_rlinf_probe_host.py</code>。原始权重、逐样本输出、日志、失败的初始导入尝试均保留。<a href="evidence/20260908/rlinf/pi05-rlinf-mapping-20260908-r1.json">权重一致性审计</a>；<a href="evidence/20260908/rlinf/pi05-rlinf-f32-20260908-r1/result.json">原版 FP32</a>；<a href="evidence/20260908/rlinf/pi05-rlinf-f32-tanh-20260908-r1/result.json">GELU 对齐 FP32</a>；<a href="evidence/20260908/rlinf/pi05-rlinf-bf16-20260908-r1/result.json">原版 BF16</a>；<a href="evidence/20260908/rlinf/pi05-rlinf-bf16-tanh-20260908-r1/result.json">GELU 对齐 BF16</a>。</p><p style="margin-top:10px">这不验证 RLinf 微调质量、未来 JAX LoRA 合并、梯度一致性或任务成功率。所测 attention LoRA 分支仍未实现；本轮不更换 JAX 训练路线。</p></div></details>
+</section>
+<section><div class="section-head"><span class="section-no">04</span><h2>ONNX 高速路线：我们已经在用其中一条</h2></div>
+<div class="card"><p>现有部署路径：<strong>JAX → FP32 PyTorch → ONNX → TensorRT → CUDA Graph</strong>。ONNX 是描述模型计算图的交换格式，不是一种精度，也不会仅凭文件格式就自动加速。</p><p style="margin-top:10px"><a href="https://www.jetson-ai-lab.com/tutorials/openpi_on_thor/">NVIDIA 教程</a>发布的约 54ms / 49ms 分别使用 FP8 / FP8＋NVFP4，示例是 Pi0.5 LIBERO、H10；我们是三路 YAM、H50、BF16＋FP32，不能直接当同条件对比。约 44ms 的 <a href="https://github.com/flashrt-project/FlashRT">FlashRT</a> 则走手写 CUDA 核函数和静态执行图，主线不是 ONNX；其文档也包含量化和默认两路图像的条件。本机尚未实测这些量化 / FlashRT 路线。</p></div></section>
+<section><div class="section-head"><span class="section-no">05</span><h2>接下来怎么做：只推进一条主线</h2></div>
+<div class="card"><p><strong>先得到一个确实学会 YAM 任务的 JAX 微调模型。</strong>保存 FP32 主权重和 LoRA；部署前验证合并，随后沿现有 ONNX/TensorRT 路线导出。对同一微调 checkpoint 比较 JAX 与 Thor 的动作、任务成功率和接管次数。104ms 候选可继续推进，但不等于任务已验收。</p><p style="margin-top:10px">RLinf 留作算子与精度对照，不因文档声明就整体迁移。若微调模型在现有混合精度下效果正常，再评估 FP8 等更快方案。DAgger 将人工纠偏数据送回原 JAX 训练流程，无需将 TensorRT 权重反向转换。</p></div></section>
+<footer><span>小测试结论仅适用于本轮基础模型与固定输入</span><a href="index.html">返回主报告</a></footer>
+</main></body></html>
