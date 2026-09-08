@@ -26,6 +26,8 @@
 
 本次服务器离线写入分Torch/CUDA类21个wheel和其余85个wheel，两组无wheel文件交集，各自 `pip install --no-deps --no-index --no-compile`，最高两并发、nice15；记录分别为缓存目录下的 `molmoact2-pip-heavy.json`、`molmoact2-pip-base.json`。完整性来自事先106个wheel的SHA256检查，完成后再统一检查依赖和两端版本。普通复现也可按同一锁单次串行安装；不对已有环境并发升级。
 
+首轮SSH中断后未全部安装完成，最终只补装44个缺失/版本不符包并通过检查，见环境报告。长安装应使用独立会话并落文件日志，SSH连接配置保活；不要仅凭pip report文件存在就判断成功，也不要在旧安装仍运行时重复安装。
+
 CPU检查命令（不会下载模型或使用GPU）：
 
 ```bash

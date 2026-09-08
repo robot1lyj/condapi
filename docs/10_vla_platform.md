@@ -10,7 +10,7 @@
 | Pi | 现有 OpenPI 训练/参考推理/回放/ONNX 导出入口已接线；新环境 GPU 执行未验证 |
 | LeRobot 后端 | 共用原生训练 launcher 已实现并用替身测试；无自建 trainer/processor；尚无通用离线推理入口 |
 | Evo-1 | 本地/服务器专用环境已安装并通过CPU检查；YAM真实训练/推理仍待接入 |
-| MolmoAct2 | 原生LeRobot共享后端已注册；本地环境CPU检查通过，服务器安装中；仅普通版，不含Think |
+| MolmoAct2 | 原生LeRobot共享后端已注册；两端独立环境CPU检查通过、108包版本一致；仅普通版，不含Think，真实YAM/GPU仍待验收 |
 | FastWAM、VLA-JEPA | 注册 planned；不得运行或报告已支持 |
 | Conda | Evo-1已有独立环境规格和104个wheel的锁；Pi等bootstrap仍不代表模型环境已安装 |
 | Thor | 原 Pi 容器、TensorRT 引擎、报告保持原状；没有部署此次改造 |

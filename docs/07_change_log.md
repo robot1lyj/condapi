@@ -2,6 +2,7 @@
 
 ## 2026-09-08 · MolmoAct2原生后端与独立环境
 
+- 08:53 UTC服务器安装补齐并通过pip check/CPU检查；两端108个Python包版本一致。首轮SSH中断后依赖不完整，保留原进程直到退出，再以脱离SSH且写文件日志的worker补齐44个缺失/版本不符包，未重装Torch/CUDA或改旧训练环境。最终实测与完成状态归环境报告。
 - 用户追加MolmoAct2安装/代码接入；确认固定LeRobot版本已有普通MolmoAct2，不含Think。新增模型声明、两端Conda profile、独立106-wheel哈希锁与实验占位，复用原生训练launcher，不新增第二套trainer。
 - 新增CPU导入/config/双夹爪mask与单标量优化器检查，记录真实结果到 [环境报告](reports/environments/molmoact2-20260908/README.md)。不下载权重或占用现有训练GPU；环境安装不等同YAM训练能力验收，模型保持planned。
 - 文档区分原作者FP32主权重AMP和LeRobot低显存BF16参数/优化器状态、LoRA与全量动作专家；保留模型特有horizon/统计规则。平台新增Molmo路由回归，总计170项通过。核心记忆按证据链接更新，不将临时安装状态固化为永久事实。

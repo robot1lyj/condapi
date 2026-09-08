@@ -67,7 +67,7 @@ export RAW_YAM_DATA="$DATA_ROOT/ABC-130k-two-tasks"
 
 2026-09-08接入官方LeRobot普通MolmoAct2，与Evo使用同一固定源码wheel，依赖分别安装。工作站prefix为 `/home/wuyan-lyj/.conda/envs/vla-molmoact2-dev`，服务器为 `/home/wuyan/.conda/envs/vla-molmoact2-train`。规格/版本/哈希锁在 `environments/molmoact2*`，profiles在 `configs/environments/molmoact2-*`。新环境专属动态库变量设为 `LD_LIBRARY_PATH=<prefix>/lib`，不修改系统或旧环境。
 
-本地安装和CPU检查已完成；服务器状态见带日期的 [环境证据](reports/environments/molmoact2-20260908/README.md)。具体复现、LoRA/FP32动作专家、YAM双夹爪与分位数统计差异见 [模型接入说明](reference/molmoact2_integration.md)。不把本次环境安装记作真实GPU训练/Thor部署验收。
+本地与服务器安装和CPU检查均已完成，两端108个Python包版本一致；实测与SSH中断后的补装记录见 [环境证据](reports/environments/molmoact2-20260908/README.md)。具体复现、LoRA/FP32动作专家、YAM双夹爪与分位数统计差异见 [模型接入说明](reference/molmoact2_integration.md)。不把本次环境安装记作真实GPU训练/Thor部署验收。
 
 ### Evo-1 / LeRobot 独立环境
 

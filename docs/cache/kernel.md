@@ -13,7 +13,7 @@
 
 ## 恢复任务
 
-- 2026-09-08 Evo-1本地/服务器独立Conda环境均安装并通过CPU检查，106个包版本一致；MolmoAct2已加入同一LeRobot共享后端，本地CPU检查通过，服务器安装状态以带时间报告为准。普通MolmoAct2不含Think，LoRA与FP32动作专家的精度规则不套Pi结论；尚未验收真实YAM模型/GPU训练。环境与动态库配置见 [02](../02_installation_and_environment.md)，实测见 [Evo报告](../reports/environments/evo1-20260908/README.md) / [Molmo报告](../reports/environments/molmoact2-20260908/README.md)，模型特有事项见 [Molmo接入](../reference/molmoact2_integration.md)。
+- 2026-09-08 Evo-1和MolmoAct2本地/服务器独立Conda环境均安装并通过CPU检查，两端分别106/108个包版本一致；MolmoAct2已加入同一LeRobot共享后端。普通MolmoAct2不含Think，LoRA与FP32动作专家参数的精度规则不套Pi结论；尚未验收真实YAM模型/GPU训练。环境与动态库配置见 [02](../02_installation_and_environment.md)，实测见 [Evo报告](../reports/environments/evo1-20260908/README.md) / [Molmo报告](../reports/environments/molmoact2-20260908/README.md)，模型特有事项见 [Molmo接入](../reference/molmoact2_integration.md)。
 
 - 服务器入口、环境、原始数据路径和作业保护对象见 [环境](../02_installation_and_environment.md)。作业/下载状态是历史观察，使用前重新核验；没有实时证据就标记未知。
 - Thor 已完成官方系统安装并从 NVMe 启动；2026-09-07 实机复核为 JetPack 7.2.1 / L4T 39.2.1。Wi-Fi 开机自动连接已配置、SSH 密钥登录可用；USB `192.168.55.1` 为临时管理/传输通道。HDMI 仍无显示，不能误记为安装未完成；详见 [Thor 当前状态](../08_thor_edge_deployment.md#7-当前状态)。
