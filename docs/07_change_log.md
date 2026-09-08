@@ -1,5 +1,12 @@
 # 07 · 变更历史
 
+## 2026-09-08 · 工作树多模型薄接入层与记忆同步
+
+- 用户要求在独立分支改造项目，环境先用 Conda，并复用 LeRobot 已有架构。新增零模型依赖控制包、声明式插件、配置校验、Conda 计划/执行、不可覆盖运行目录、文件哈希模型包和本地请求/响应合同。
+- Pi 接现有实现，不更换远端部署；Evo-1/FastWAM/VLA-JEPA 标为 planned。Conda bootstrap 只包含 Python/pip，没有宣称 GPU 环境安装或模型验证完成。
+- 2026-09-08 框架 38 项 CPU 合同/子进程测试通过；连同 Thor 和记忆系统回归共 152 项通过（现有 pynvml 弃用警告1项），Ruff 与 diff 检查通过。没有运行新模型或安装 Conda 模型依赖。
+- 记忆同步到 AGENTS、01、10、kernel/index、code-change mode；主工作树文档/运行任务不改动。Evo 源码检查固定 LeRobot `2774d9bddcbbda50e697e162e89e7eaada8d7105`，结论与接入缺口见 10。
+
 ## 2026-09-08 · 实时训练HTML与小时巡检
 
 - 新增本地W&B风格HTML、标准库只读服务和systemd用户服务，每10秒同步/刷新，不使用模型token。

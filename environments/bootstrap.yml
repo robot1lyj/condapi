@@ -1,0 +1,6 @@
+# Environment bootstrap only. Model packages are deliberately not mixed here.
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12
+  - pip

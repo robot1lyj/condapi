@@ -20,6 +20,8 @@ __pycache__/
 # Distribution / packaging
 .Python
 build/
+# Per-run platform logs/checkpoints; never commit model artifacts.
+/runs/platform/
 develop-eggs/
 dist/
 downloads/

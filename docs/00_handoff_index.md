@@ -4,6 +4,8 @@
 
 ## 推荐阅读顺序
 
+多模型工作树改造先读 [01 的多模型接入层](01_system_architecture.md#多模型接入层)，再读 [10 的当前状态](10_vla_platform.md#当前状态)。以下既有路径用于 Pi/YAM 后端，不代表 Evo-1 已完成适配。
+
 `README.md` → `01_system_architecture.md` → `02_installation_and_environment.md` → `08_thor_edge_deployment.md` → `03_training_and_evaluation.md` → `04_data_contracts.md` → `05_inference_and_rollout.md`。
 
 `06_openarm_research_plan.md` 是历史 OpenArm 研究归档；变更原因和结果只看 `07_change_log.md`。
@@ -22,6 +24,7 @@
 | 07 | 变更历史 | 按日期记录原因、结果和事故 |
 | 08 | Thor 端侧部署 | 官方系统、容器、Pi0.5 转换/加速和端侧验收，不承载机械臂驱动说明 |
 | 09 | 记忆系统 | 上下文准入、证据生命周期、skill 接入与迭代验收 |
+| 10 | 多模型接入操作 | Conda、插件操作、工作树使用和模型接入状态 |
 
 ## 状态词
 

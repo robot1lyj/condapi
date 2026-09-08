@@ -10,6 +10,8 @@
 
 ## Canonical Docs
 
+- 多模型薄接入层、Conda、工作树、Evo-1 接入状态 → `docs/10_vla_platform.md`
+
 - 交接入口 → `docs/00_handoff_index.md`
 - 架构 → `docs/01_system_architecture.md`
 - 服务器与环境 → `docs/02_installation_and_environment.md`
@@ -23,6 +25,8 @@
 - 旧方案指引 → `docs/reference/00_reference_index.md`
 
 ## Quick Route
+
+- 多模型架构改造 → `02_code_change.md`，再读 `docs/01_system_architecture.md#多模型接入层`；执行命令和模型状态按需读 `docs/10_vla_platform.md` 的相关章节，不加载所有模型文档。
 
 - 改代码/配置/文档、跑测试、提交 → `02_code_change.md`
 - 远端环境、训练、服务、GPU、tmux → `03_deployment.md`

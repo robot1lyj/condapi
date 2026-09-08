@@ -1,0 +1,9 @@
+schema_version = 1
+plugin = "evo1"
+environment = "configs/environments/evo1-workstation.toml"
+contract = "configs/robots/yam.toml"
+
+[parameters]
+checkpoint = "/path/to/evo1-checkpoint"
+dataset = "/path/to/audited-yam-dataset"
+# Intentionally cannot run until a real YAM adapter and entrypoint are registered.

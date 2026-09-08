@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "contract_id": "yam-bimanual-v1",
+  "request_id": "offline-001",
+  "session_id": "episode-001",
+  "timestamp_s": 0.0,
+  "prompt": "Pick up the object",
+  "reset": true,
+  "state": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  "images": {
+    "observation.images.top_rgb": "top.png",
+    "observation.images.left_rgb": "left.png",
+    "observation.images.right_rgb": "right.png"
+  }
+}

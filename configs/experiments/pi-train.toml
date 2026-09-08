@@ -1,0 +1,8 @@
+schema_version = 1
+plugin = "pi"
+environment = "configs/environments/pi-server.toml"
+contract = "configs/robots/yam.toml"
+
+[parameters]
+config = "pi05_yam_lora"
+dataset = "/path/to/audited-yam-lerobot"

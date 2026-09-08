@@ -1,0 +1,8 @@
+schema_version = 1
+id = "yam-bimanual-v1"
+state_dim = 14
+action_order = ["left_joint_1", "left_joint_2", "left_joint_3", "left_joint_4", "left_joint_5", "left_joint_6", "left_gripper", "right_joint_1", "right_joint_2", "right_joint_3", "right_joint_4", "right_joint_5", "right_joint_6", "right_gripper"]
+cameras = ["observation.images.top_rgb", "observation.images.left_rgb", "observation.images.right_rgb"]
+output_semantics = "absolute"
+units_status = "unverified"
+# Schema/semantic owner: docs/04_data_contracts.md. Audit actual dataset units before deployment.

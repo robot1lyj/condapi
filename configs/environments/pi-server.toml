@@ -1,0 +1,7 @@
+schema_version = 1
+manager = "conda"
+plugin = "pi"
+target = "server"
+prefix = "/home/wuyan/.conda/envs/condapi-yam"
+spec = "environments/bootstrap.yml"
+# Existing prefix reference; never update this environment automatically.

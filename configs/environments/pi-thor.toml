@@ -1,0 +1,7 @@
+schema_version = 1
+manager = "conda"
+plugin = "pi"
+target = "thor"
+prefix = "/home/wuyan-lyj/.conda/envs/vla-pi-infer"
+spec = "environments/bootstrap.yml"
+# Proposed isolated environment, NOT the existing validated Pi Docker image.

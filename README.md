@@ -1,4 +1,15 @@
-# OpenPI + YAM 双臂训练适配
+# YAM VLA 接入层 + OpenPI 后端
+
+本功能分支正在改造为 **LeRobot 原生能力 + Conda 薄接入层**。先读 [新架构](docs/01_system_architecture.md#多模型接入层) 和 [框架操作与 Evo-1 接入](docs/10_vla_platform.md)。Pi 已连接现有后端；其他模型仍待适配，未宣称可训练或可部署。
+
+无需安装模型依赖即可查看：
+
+```bash
+python3 scripts/vla.py models
+python3 scripts/vla.py plan configs/experiments/pi-reference.toml infer --run-id pi-plan-001
+```
+
+下面是既有 Pi/YAM 后端说明，不是所有模型都应遵循的输入变换或训练环境。
 
 本仓库当前用于 YAM 双臂（与 YAM-ABC 同硬件配置）的 VLA 后训练和 NVIDIA Jetson AGX Thor 端侧推理部署。首选模型是 Pi0.5，服务器训练优先走 LoRA；训练后模型在 Thor 本地推理，Thor 与负责相机/机械臂的 3588 IPC 通过网线直连交换 observation/action。OpenArm、Piper 和独立 YAM-ABC-Reproduce 代码只保留为 legacy/reference，不是本项目默认实现。
 

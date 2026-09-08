@@ -1,0 +1,15 @@
+schema_version = 1
+plugin = "pi"
+environment = "configs/environments/pi-workstation.toml"
+contract = "configs/robots/yam.toml"
+
+[parameters]
+# Replace these local paths before execution. Planning never downloads weights.
+checkpoint = "/path/to/pi05_checkpoint"
+config = "pi05_yam"
+backend = "jax"
+compute = "float32"
+request = "/path/to/request.json"
+suite = "/path/to/replay/suite.json"
+model_version = "replace-with-checkpoint-identity"
+action_dt_s = 0.1 # Example only: use the audited dataset's actual period.

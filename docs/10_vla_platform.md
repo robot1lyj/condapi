@@ -1,0 +1,83 @@
+# 10 · 多模型接入层操作
+
+## 当前状态
+
+观察日期：2026-09-08。此文描述功能分支，未合并到主目录、未部署到服务器/Thor。架构 owner 为 [01](01_system_architecture.md#多模型接入层)，设备信息归 [02](02_installation_and_environment.md)，模型精度与 Thor 验收归 [08](08_thor_edge_deployment.md)。
+
+| 部分 | 状态 |
+|---|---|
+| 控制层 | 标准库实现；注册、计划、Conda 子进程、运行记录、模型包哈希与离线 IO 检查 |
+| Pi | 现有 OpenPI 训练/参考推理/回放/ONNX 导出入口已接线；新环境 GPU 执行未验证 |
+| Evo-1 | LeRobot 接入方向确定；检查源码和 checkpoint 合同；未接入真实推理/训练 |
+| FastWAM、VLA-JEPA | 注册 planned；不得运行或报告已支持 |
+| Conda | 系列 prefix 配置和创建命令已有；bootstrap 只安装 Python/pip，无模型依赖锁 |
+| Thor | 原 Pi 容器、TensorRT 引擎、报告保持原状；没有部署此次改造 |
+
+本分支 CPU 验证：平台测试38项；与 `scripts/thor`、`skills/mlops-memory/tests` 合跑152项通过。测试命令为 `python -m pytest -q packages/vla-platform/tests scripts/thor skills/mlops-memory/tests`；测试替身验证子进程和失败记录，不冒充 Conda 模型运行。
+
+不追求复制 LeRobot 的 registry、trainer、processor 或 dataset 实现；本地插件注册只选进程入口和环境。支持模型在子进程里直接调用 LeRobot 原生 API；Pi 调用既有 OpenPI。原作者代码用于对照，不强制每个模型维护双实现。RLinf 的 DAgger/RL 接入不是当前范围。
+
+## 工作树与 Git
+
+主目录 `/home/wuyan-lyj/condapi` 的 main 与当前工作树分支是独立检出。用 `pwd`、`git branch --show-current`、`git worktree list` 确认当前目录。代码和版本化记忆随分支变化；未合并前主目录不会看到这里的更新。
+
+```bash
+git status --short
+git diff
+python3 scripts/vla.py models
+```
+
+只提交/备份当前分支，不自动合并 main 或同步 Thor。共享权重、Conda prefix、外部数据并不受工作树隔离保护，禁止因为处在工作树就修改正在使用的环境。本次不要求保留旧控制层 API；保留实验原件和 Pi 模型实现并不等于维护旧 API 兼容层。
+
+本活跃上下文的记忆预算沿用主检出 `docs/cache/runtime/thor-platform-20260908-c6.json`（运行计量，不是事实 owner），不因切换工作树重建预算。新任务应按实际保留上下文选择同一账本；文件记忆仍只读当前工作树版本。宿主完整 token 计量接口不可用，不能把字节预算称作完整上下文 token 限制。
+
+## 命令与环境
+
+所有命令在工作树根目录运行。控制层 Python 3.11+，模型环境独立。可选安装：`python -m pip install --no-deps -e packages/vla-platform`，随后使用 `vla`；不需要安装根目录 OpenPI 大依赖。
+
+```bash
+python3 scripts/vla.py models
+python3 scripts/vla.py plan configs/experiments/pi-reference.toml infer --run-id pi-plan-001
+python3 scripts/vla.py env plan configs/environments/evo1-workstation.toml
+```
+
+`plan` 只输出命令，不下载/安装/运行模型。先替换实验配置中的 `/path/to`、模型版本和 action_dt_s；0.1 只是示例，不是对 YAM 频率的确认。
+
+`env create` 显式创建不存在的 prefix，不更新现有环境；`env audit` 只列包，不证明 CUDA 可用。现有 `condapi-yam` 服务器 prefix 仅引用，不自动迁移。真正的模型环境还需锁定源码、Torch/CUDA/Transformers 和处理器依赖，x86 服务器与 ARM Thor 分别核对。
+
+```bash
+python3 scripts/vla.py run configs/experiments/pi-reference.toml infer --run-id pi-infer-001
+```
+
+`run` 是本机执行，不会自动 SSH。服务器训练在已审计计算节点的 Slurm allocation/tmux 内启动，框架不是 Slurm 提交器。Thor profile 必须在实机运行；infer/benchmark 包装现有 MAXN session，退出恢复 120W；不设置开机 MAXN。Conda 缺失或 profile 未安装时直接失败。
+
+输出位于 `runs/platform/<run-id>/`：plan、started、console.log、finished 以及模型产物。目录不可覆盖；成功退出标为 `command_succeeded_not_model_accepted`。运行元数据是命令与源码追溯，并非完整模型验收清单，数据/训练参数指纹仍由模型侧产物补齐。
+
+Pi `infer` 是一次本地请求的参考路径，图像为本机 RGB 文件，示例见 `configs/requests/pi-example.json`。每次新进程，不实现常驻缓存或网络服务。时间包含首调用编译，不能拿它与旧 TensorRT 稳态 104ms 比较。未合并 LoRA 的 PyTorch 推理会拒绝；JAX 保持 checkpoint 原始加载精度。
+
+## 模型包
+
+模型包保留原格式，不强制转换成 JAX。recipe JSON 必须包含 schema_version=1、plugin、model_version、code_revision、contract_id、format、precision.storage/compute，以及 files 列表（role/path）。必须包含 weights、model_config、preprocessing、normalization、contract、reference 六类文件；contract 为本版本 TOML。目录权重要逐个列文件，不能只记录目录名。LoRA adapter 还需 base_model_sha256。
+
+```bash
+python3 scripts/vla.py bundle seal /path/to/package/recipe.json --output /path/to/package/manifest.json
+python3 scripts/vla.py bundle check /path/to/package/manifest.json
+```
+
+路径只能在包内；检查每个文件 SHA256。seal 不复制、裁剪、量化或合并权重，也不覆盖 manifest。完整性通过不等于格式能加载、参考输出一致或可部署。模型精度批准记录与模型包分离。
+
+## Evo-1 接入判断
+
+已检查 LeRobot commit `2774d9bddcbbda50e697e162e89e7eaada8d7105` 的 `configuration_evo1.py`、`modeling_evo1.py`、`processor_evo1.py`；这个 commit 是 API 调研固定点，不是已经验收的依赖锁。
+
+- 配置支持 max_views=3，默认图像 448×448，内部 state/action padding 为 24D，chunk_size 默认 50。模型预测 padded chunk，必须经过原生后处理器裁回真实动作维度；不能直接把内部24D给控制侧。
+- 原生 processor 已做 padding、归一化、反归一化、动作裁剪；保存/重载原生 processors，不重新写一套。不要把 Pi norm 资产套给 Evo，也不要把内部24D改成32D来模仿 Pi。
+- YAM 需显式配置真实 state/action feature 为14D和三路相机。必须关闭 LIBERO 单夹爪二值化；不能只设置 gripper_index=6 而遗漏右夹爪13。
+- 动作表示属于训练产物合同。若用 YAM absolute 原始 action，则训练和部署都保持该语义；若实验选择 delta，必须明确 processor、转换顺序及对应统计，不能暗中沿用 Pi 的 delta norm。
+- stage1 默认冻结 VLM、训练动作头；stage2 默认解冻相关 VLM 分支，不是 LoRA。stage2 会重新应用阶段默认值，不能只沿用 stage1 checkpoint 的冻结状态。
+- 训练 FP32 主参数和 BF16 autocast 需检查真实配置；`vlm_dtype`、`use_amp` 是不同开关。当前未在本地跑 Evo backward 或推理。
+- LIBERO checkpoint 的7D语义不是 YAM14D。修改配置/裁剪输出不能把7D模型变成已训练的YAM策略；必须进行正确机器人适配和微调。
+
+接入顺序：固定 LeRobot 实现 → 专用 Conda 依赖审计 → 检查 checkpoint config/processors → YAM batch 经原生 processor → 一次真实前向/反向和保存重载 → 接通插件 → Thor 原生推理计时。只有相应步骤有证据才开放对应 capability。后续 FastWAM/VLA-JEPA 共用相同管理层，但视频帧采样、文本编码和动作头仍用各自原生实现。
+
+源码来源：[Evo config](https://github.com/huggingface/lerobot/blob/2774d9bddcbbda50e697e162e89e7eaada8d7105/src/lerobot/policies/evo1/configuration_evo1.py)、[模型](https://github.com/huggingface/lerobot/blob/2774d9bddcbbda50e697e162e89e7eaada8d7105/src/lerobot/policies/evo1/modeling_evo1.py)、[处理器](https://github.com/huggingface/lerobot/blob/2774d9bddcbbda50e697e162e89e7eaada8d7105/src/lerobot/policies/evo1/processor_evo1.py)。

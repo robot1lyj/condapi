@@ -1,0 +1,5 @@
+schema_version = 1
+id = "fastwam"
+status = "planned"
+contracts = []
+note = "Requires video/text preprocessing, Conda lock and YAM/Thor validation."

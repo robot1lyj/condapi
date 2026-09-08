@@ -1,0 +1,37 @@
+schema_version = 1
+id = "pi"
+status = "implemented"
+contracts = ["yam-bimanual-v1"]
+note = "Pi offline reference adapter and existing replay/export entrypoints; new Conda profile is not GPU-audited. TensorRT service and LoRA merge are not implemented in platform v1."
+sources = ["plugins/pi/infer.py", "scripts/thor/benchmark_suite.py", "scripts/thor/export_pi05_onnx.py"]
+
+[operations.infer]
+targets = ["workstation", "server", "thor"]
+required = ["checkpoint", "config", "backend", "compute", "request", "model_version", "action_dt_s"]
+command = ["python", "{root}/plugins/pi/infer.py", "--checkpoint", "{checkpoint}", "--config", "{config}", "--backend", "{backend}", "--compute", "{compute}", "--request", "{request}", "--contract", "{contract}", "--model-version", "{model_version}", "--action-dt", "{action_dt_s}", "--output", "{output}"]
+[operations.infer.choices]
+config = ["pi05_yam", "pi05_yam_lora"]
+backend = ["jax", "pytorch"]
+compute = ["float32", "bfloat16"]
+
+[operations.benchmark]
+targets = ["workstation", "server", "thor"]
+required = ["checkpoint", "suite", "backend", "compute"]
+command = ["python", "{root}/scripts/thor/benchmark_suite.py", "--checkpoint", "{checkpoint}", "--suite", "{suite}", "--backend", "{backend}", "--compute-dtype", "{compute}", "--params-dtype", "checkpoint", "--no-compile", "--output", "{output}"]
+[operations.benchmark.choices]
+backend = ["jax", "pytorch"]
+compute = ["float32", "bfloat16"]
+
+[operations.train]
+targets = ["server"]
+required = ["config", "dataset"]
+command = ["python", "{root}/scripts/train.py", "{config}", "--data.repo-id", "{dataset}", "--exp-name", "{run_id}", "--checkpoint-base-dir", "{output}", "--no-wandb-enabled"]
+[operations.train.choices]
+config = ["pi05_yam", "pi05_yam_lora"]
+
+[operations.export]
+targets = ["workstation", "server"]
+required = ["checkpoint", "suite", "compute"]
+command = ["python", "{root}/scripts/thor/export_pi05_onnx.py", "--checkpoint", "{checkpoint}", "--suite", "{suite}", "--compute-dtype", "{compute}", "--output", "{output}"]
+[operations.export.choices]
+compute = ["float32", "bfloat16"]

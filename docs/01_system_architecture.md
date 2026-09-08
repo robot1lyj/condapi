@@ -1,5 +1,27 @@
 # 01 · 系统架构
 
+## 多模型接入层
+
+2026-09-08 工作树改造：采用 **LeRobot 原生能力 + 薄接入层**，不是自研训练框架。LeRobot 负责其支持模型的网络、loss、数据集、处理器、优化器和 checkpoint；原版 OpenPI 是 Pi 的独立实现后端。RLinf 仅作为未来有具体 DAgger/RL 需求时的可选后端，不作为所有模型的强制依赖。
+
+```text
+scripts/vla.py / 安装后的 vla
+  -> configs：实验、Conda prefix、机器人合同
+  -> packages/vla-platform：插件注册、命令规划、运行记录、模型包完整性
+  -> plugins/<family>：调用选定实现，不把模型导入控制进程
+  -> 独立 Conda 子进程：LeRobot 或 OpenPI
+  -> checkpoint + 保存的 processors + 本模型 norm + 合同 + 参考样例
+  -> Thor 模型侧适配与数值/性能验收
+```
+
+代码边界：控制层只用标准库；模型依赖留在系列环境；数据和权重在外部目录，不复制进 Git。跨环境使用文件/进程合同，不共享 Python 模型对象。`configs/robots/yam.toml` 是 [04 数据合同](04_data_contracts.md) 的机器可读投影，修改语义时必须同步 owner，不从 TOML 猜测未审计单位。
+
+当前 Pi 插件连接现有 OpenPI JAX 训练和 JAX/PyTorch 离线推理、ONNX 导出及回放入口。并未把 TensorRT 常驻服务迁入此控制层，也没有新建网络服务。请求中的图像路径只适用于本地离线调用，不是 Thor↔3588 的图像传输协议；生产协议仍归 [05](05_inference_and_rollout.md)。
+
+Evo-1 优先接 LeRobot，FastWAM/VLA-JEPA 后续同样优先检查 LeRobot 实现；各模型原版用于对照或必要的替代，不同时维护两套默认训练实现。插件只有注册信息不算接入；具体状态、缺口和操作归 [10](10_vla_platform.md)。
+
+以下数据流和 32D/H50、delta 配置描述的是 **Pi 后端**，不是对所有模型的统一要求。
+
 ## 当前训练数据流
 
 ```text
