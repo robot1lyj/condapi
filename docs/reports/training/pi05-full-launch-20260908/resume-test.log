@@ -1,0 +1,80 @@
+Fatal Python error: Aborted
+
+Thread 0x00007effe3fff640 (most recent call first):
+  File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/threading.py", line 355 in wait
+  File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/multiprocessing/queues.py", line 251 in _feed
+  File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/threading.py", line 1012 in run
+  File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/threading.py", line 1075 in _bootstrap_inner
+  File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/threading.py", line 1032 in _bootstrap
+
+Thread 0x00007effe1efb640 (most recent call first):
+  File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/threading.py", line 355 in wait
+  File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/multiprocessing/queues.py", line 251 in _feed
+  File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/threading.py", line 1012 in run
+  File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/threading.py", line 1075 in _bootstrap_inner
+  File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/threading.py", line 1032 in _bootstrap
+
+Thread 0x00007effa3fff640 (most recent call first):
+  File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/concurrent/futures/thread.py", line 90 in _worker
+  File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/threading.py", line 1012 in run
+  File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/threading.py", line 1075 in _bootstrap_inner
+  File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/threading.py", line 1032 in _bootstrap
+
+Thread 0x00007effe93f9640 (most recent call first):
+  File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/threading.py", line 359 in wait
+  File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/threading.py", line 655 in wait
+  File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/tqdm/_monitor.py", line 69 in run
+  File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/threading.py", line 1075 in _bootstrap_inner
+  File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/threading.py", line 1032 in _bootstrap
+
+Thread 0x00007effeabfb640 (most recent call first):
+  File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/selectors.py", line 468 in select
+  File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/asyncio/base_events.py", line 1961 in _run_once
+  File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/asyncio/base_events.py", line 645 in run_forever
+  File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/asyncio/base_events.py", line 678 in run_until_complete
+  File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/asyncio/runners.py", line 118 in run
+  File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/asyncio/runners.py", line 195 in run
+  File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/wandb/sdk/lib/asyncio_compat.py", line 75 in run
+  File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/wandb/sdk/lib/asyncio_manager.py", line 233 in _main
+  File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/threading.py", line 1012 in run
+  File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/threading.py", line 1075 in _bootstrap_inner
+  File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/threading.py", line 1032 in _bootstrap
+
+Thread 0x00007f01289ab740 (most recent call first):
+  File "/home/wuyan/lyj/YAM/env-transfer/lego-full-f93a792/scripts/train.py", line 334 in main
+  File "/home/wuyan/lyj/YAM/env-transfer/lego-full-f93a792/scripts/train_test.py", line 30 in test_train
+  File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/_pytest/python.py", line 159 in pytest_pyfunc_call
+  File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/pluggy/_callers.py", line 121 in _multicall
+  File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/pluggy/_manager.py", line 120 in _hookexec
+  File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/pluggy/_hooks.py", line 512 in __call__
+  File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/_pytest/python.py", line 1627 in runtest
+  File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/_pytest/runner.py", line 174 in pytest_runtest_call
+  File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/pluggy/_callers.py", line 121 in _multicall
+  File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/pluggy/_manager.py", line 120 in _hookexec
+  File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/pluggy/_hooks.py", line 512 in __call__
+  File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/_pytest/runner.py", line 242 in <lambda>
+  File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/_pytest/runner.py", line 341 in from_call
+  File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/_pytest/runner.py", line 241 in call_and_report
+  File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/_pytest/runner.py", line 132 in runtestprotocol
+  File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/_pytest/runner.py", line 113 in pytest_runtest_protocol
+  File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/pluggy/_callers.py", line 121 in _multicall
+  File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/pluggy/_manager.py", line 120 in _hookexec
+  File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/pluggy/_hooks.py", line 512 in __call__
+  File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/_pytest/main.py", line 362 in pytest_runtestloop
+  File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/pluggy/_callers.py", line 121 in _multicall
+  File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/pluggy/_manager.py", line 120 in _hookexec
+  File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/pluggy/_hooks.py", line 512 in __call__
+  File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/_pytest/main.py", line 337 in _main
+  File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/_pytest/main.py", line 283 in wrap_session
+  File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/_pytest/main.py", line 330 in pytest_cmdline_main
+  File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/pluggy/_callers.py", line 121 in _multicall
+  File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/pluggy/_manager.py", line 120 in _hookexec
+  File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/pluggy/_hooks.py", line 512 in __call__
+  File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/_pytest/config/__init__.py", line 175 in main
+  File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/_pytest/config/__init__.py", line 201 in console_main
+  File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/pytest/__main__.py", line 9 in <module>
+  File "<frozen runpy>", line 88 in _run_code
+  File "<frozen runpy>", line 198 in _run_module_as_main
+
+Extension modules: numpy._core._multiarray_umath, numpy.linalg._umath_linalg, jaxlib.cpu_feature_guard, msgpack._cmsgpack, yaml._yaml, simplejson._speedups, google._upb._message, torch._C, torch._C._dynamo.autograd_compiler, torch._C._dynamo.eval_frame, torch._C._dynamo.guards, torch._C._dynamo.utils, torch._C._fft, torch._C._linalg, torch._C._nested, torch._C._nn, torch._C._sparse, torch._C._special, sentencepiece._sentencepiece, PIL._imaging, charset_normalizer.md, charset_normalizer.cd, requests.packages.charset_normalizer.md, requests.packages.chardet.md, requests.packages.charset_normalizer.cd, requests.packages.chardet.cd, pyarrow.lib, numpy.random._common, numpy.random.bit_generator, numpy.random._bounded_integers, numpy.random._mt19937, numpy.random.mtrand, numpy.random._philox, numpy.random._pcg64, numpy.random._sfc64, numpy.random._generator, _cyutility, pandas._libs._cyutility, pandas._libs.tslibs.ccalendar, pandas._libs.tslibs.np_datetime, pandas._libs.tslibs.dtypes, pandas._libs.tslibs.base, pandas._libs.tslibs.nattype, pandas._libs.tslibs.timezones, pandas._libs.properties, pandas._libs.tslibs.fields, pandas._libs.tslibs.timedeltas, pandas._libs.tslibs.tzconversion, pandas._libs.tslibs.timestamps, pandas._libs.tslibs.offsets, pandas._libs.tslibs.strptime, pandas._libs.tslibs.parsing, pandas._libs.tslibs.conversion, pandas._libs.tslibs.period, pandas._libs.tslibs.vectorized, pandas._libs.ops_dispatch, pandas._libs.missing, pandas._libs.hashtable, pandas._libs.algos, pandas._libs.interval, pandas._libs.lib, pyarrow._compute, pandas._libs.ops, pandas._libs.hashing, pandas._libs.arrays, pandas._libs.tslib, pandas._libs.sparse, pandas._libs.internals, pandas._libs.indexing, pandas._libs.index, pandas._libs.writers, pandas._libs.join, pandas._libs.window.aggregations, pandas._libs.window.indexers, pandas._libs.reshape, pandas._libs.groupby, pandas._libs.json, pandas._libs.parsers, pandas._libs.testing, pyarrow._parquet, pyarrow._fs, pyarrow._azurefs, pyarrow._hdfs, pyarrow._gcsfs, pyarrow._s3fs, pyarrow._acero, pyarrow._csv, pyarrow._json, pyarrow._substrait, pyarrow._dataset, pyarrow._dataset_orc, pyarrow._parquet_encryption, pyarrow._dataset_parquet_encryption, pyarrow._dataset_parquet, multidict._multidict, yarl._quoting_c, propcache._helpers_c, aiohttp._http_writer, aiohttp._http_parser, aiohttp._websocket.mask, aiohttp._websocket.reader_c, frozenlist._frozenlist, xxhash._xxhash, PIL._imagingft, av._core, av.logging, av.bytesource, av.buffer, av.audio.format, av.error, av.dictionary, av.container.pyio, av.utils, av.option, av.descriptor, av.format, av.stream, av.container.streams, av.sidedata.motionvectors, av.sidedata.sidedata, av.opaque, av.packet, av.container.input, av.container.output, av.container.core, av.codec.context, av.video.format, av.video.reformatter, av.plane, av.video.plane, av.video.frame, av.video.stream, av.codec.hwaccel, av.codec.codec, av.frame, av.audio.layout, av.audio.plane, av.audio.frame, av.audio.stream, av.filter.link, av.filter.context, av.filter.graph, av.filter.filter, av.filter.loudnorm, av.audio.resampler, av.audio.codeccontext, av.audio.fifo, av.bitstream, av.video.codeccontext, PIL._imagingmath, kiwisolver._cext (total: 151)
+srun: error: gpu001: task 0: Aborted (core dumped)

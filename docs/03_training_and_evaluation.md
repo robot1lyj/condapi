@@ -1,5 +1,24 @@
 # 03 · 训练与评估
 
+## 正式运行：2026-09-08 Lego全量微调
+
+用户已授权并于北京时间14:03启动，首个更新14:05:36完成。运行在Slurm2064的步骤2064.33、
+gpu001、tmux `yam-lego-full`；这些是启动观察，巡检必须重新查询。固定代码快照
+`/home/wuyan/lyj/YAM/env-transfer/lego-full-f93a792`（提交f93a792），从Gitea获取。
+batch64/FSDP4/EMA关闭、40k阶段终点、每20k完整保存，LR周期162097，详见
+[启动证据](reports/training/pi05-full-launch-20260908/README.md)与其中`initial_config.json`。
+
+- 正式run：`/home/wuyan/lyj/YAM/training-runs/pi05_yam/lego_full_b64`。
+- 控制日志：`/home/wuyan/lyj/YAM/training-runs/control/lego_full_b64/train.log`；配置和恢复测试证据同目录。
+- 启动器：固定快照的`scripts/launch_lego_full.sh 2064`，通过tmux启动；锁保护避免重复launcher。
+- 仅在无活跃训练、完整checkpoint和当前资源已核验后，使用同一快照启动器加`--resume`。
+  `--steps`表示累计停止点，不是额外步数；不得自动超过40k。不要使用overwrite或base权重冒充续训。
+- 全尺寸Pi0.5 checkpoint恢复30→31、GPU新进程训练入口恢复2→4并再次保存均已通过。
+  CPU同进程测试在第二次JAX调用Aborted仍未定位，不能写成已修复；正式运行/恢复使用GPU独立进程。
+- 已核对远端与看板步数1→11→21→31→41，loss和梯度有限，近期约3.37秒/步；
+  瞬时四卡利用率100%。只是启动验收，不是训练完成或任务效果验收。
+  第一份正式checkpoint须到20k才产生，此前只有恢复测试产物，不能混淆。
+
 ## 2026-09-08 四张 4090 全参数短测
 
 `pi05_yam` 在Slurm2064/gpu001的4×4090上通过全参数容量测试，33.53亿参数全部可训练。
@@ -12,7 +31,7 @@ global batch92通过3步、相邻96与128 OOM；这不是改变精度/卸载/预
 用户随后确定阶段计划：batch64、原AdamW峰值2.5e-5、warmup1000、约162097步余弦至2.5e-6，
 首阶段累计40k，每20k完整保存，后续评估后续训向约一遍数据推进。不是每40k重置学习率。
 按3.3895秒/步，40k纯训练37.7小时（排期40–48小时），一遍约152.6小时，不含停机/评估。
-此计划替代短测报告中的最初30k/60k方案；正式训练尚未启动，验证/早停尚未接入循环。
+此计划替代短测报告中的最初30k/60k方案；正式运行见本页顶部，验证/早停尚未接入循环。
 限定条件、保存证据、参数/步数解释与时间外推见[batch测试报告](reports/training/pi05-batch-limit-20260908/README.md)；
 初始化修复及最初batch4证据见[首轮报告](reports/training/pi05-full-20260908/README.md)。
 全量train-only norm见[数据合同](04_data_contracts.md#2026-09-08-全量发布与归一化完成)。
@@ -30,10 +49,11 @@ global batch92通过3步、相邻96与128 OOM；这不是改变精度/卸载/预
   异常退出10秒重启。查看/恢复：`systemctl --user status training_dashboard.service` /
   `systemctl --user restart training_dashboard.service`。本机休眠、断网或用户服务未运行时不能保证刷新。
 - 本地缓存 `artifacts/training_dashboard/live/metrics.jsonl`；预留远端
-  `/home/wuyan/lyj/YAM/training-runs/pi05_lego_full_b64/metrics/metrics.jsonl`。
-  **此路径尚无正式训练日志**，启动时必须绑定实际run，不能把页面等待状态写成训练已运行。
+  `/home/wuyan/lyj/YAM/training-runs/pi05_yam/lego_full_b64/metrics/metrics.jsonl`。
+  已绑定正式run并核对多次真实步数增长；不能仅凭页面在线断言训练健康。
   参数面板显示讨论计划，不冒充实际配置验真。原生LocalMetricLogger已有loss/grad_norm/param_norm/LR；
-  计时、GPU、验证等字段需训练/采集器实际写入。10秒刷新不等于每10秒新增loss，频率取决于log_interval。
+  正式入口已补记时间、近期步速/吞吐与JAX活跃分配（不是nvidia-smi显存或峰值）；验证loss和GPU利用率
+  仍需独立采集，留空不伪造。10秒刷新不等于每10秒新增loss，log_interval=10时约34秒更新一组。
 - 启动例：`python3 scripts/training_dashboard.py --metrics /absolute/run/metrics/metrics.jsonl`；
   远端镜像加 `--remote yam-server --remote-metrics /absolute/remote/metrics.jsonl`。
   服务内的参数与路径通过CLI设置；默认stage40k/total162097/save20k，不启动训练。

@@ -1,0 +1,142 @@
+/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/torch/cuda/__init__.py:61: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+14:02:03.354 [I] Running on: gpu001.hlink.local                                                   (843964:train.py:253)
+INFO:2026-09-08 14:02:03,971:jax._src.xla_bridge:925: Unable to initialize backend 'rocm': module 'jaxlib.xla_extension' has no attribute 'GpuAllocatorConfig'
+14:02:03.971 [I] Unable to initialize backend 'rocm': module 'jaxlib.xla_extension' has no attribute 'GpuAllocatorConfig' (843964:xla_bridge.py:925)
+INFO:2026-09-08 14:02:03,972:jax._src.xla_bridge:925: Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory
+14:02:03.972 [I] Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory (843964:xla_bridge.py:925)
+14:02:04.251 [I] Created BasePyTreeCheckpointHandler: use_ocdbt=True, use_zarr3=False, pytree_metadata_options=PyTreeMetadataOptions(support_rich_types=False), array_metadata_store=<orbax.checkpoint._src.metadata.array_metadata_store.Store object at 0x7f3927d61700> (843964:base_pytree_checkpoint_handler.py:334)
+14:02:04.251 [I] Created BasePyTreeCheckpointHandler: use_ocdbt=True, use_zarr3=False, pytree_metadata_options=PyTreeMetadataOptions(support_rich_types=False), array_metadata_store=<orbax.checkpoint._src.metadata.array_metadata_store.Store object at 0x7f3927d61700> (843964:base_pytree_checkpoint_handler.py:334)
+14:02:04.251 [I] [thread=MainThread] Failed to get flag value for EXPERIMENTAL_ORBAX_USE_DISTRIBUTED_PROCESS_ID. (843964:multihost.py:390)
+14:02:04.252 [I] [process=0][thread=MainThread] CheckpointManager init: checkpointers=None, item_names=None, item_handlers={'assets': <openpi.training.checkpoints.CallbackHandler object at 0x7f382ceccb00>, 'train_state': <orbax.checkpoint._src.handlers.pytree_checkpoint_handler.PyTreeCheckpointHandler object at 0x7f382cecf890>, 'params': <orbax.checkpoint._src.handlers.pytree_checkpoint_handler.PyTreeCheckpointHandler object at 0x7f382ce7d6a0>}, handler_registry=None (843964:checkpoint_manager.py:620)
+14:02:04.252 [I] Deferred registration for item: "assets". Adding handler `<openpi.training.checkpoints.CallbackHandler object at 0x7f382ceccb00>` for item "assets" and save args `<class 'openpi.training.checkpoints.CallbackSave'>` and restore args `<class 'openpi.training.checkpoints.CallbackRestore'>` to `_handler_registry`. (843964:composite_checkpoint_handler.py:234)
+14:02:04.252 [I] Deferred registration for item: "train_state". Adding handler `<orbax.checkpoint._src.handlers.pytree_checkpoint_handler.PyTreeCheckpointHandler object at 0x7f382cecf890>` for item "train_state" and save args `<class 'orbax.checkpoint._src.handlers.pytree_checkpoint_handler.PyTreeSaveArgs'>` and restore args `<class 'orbax.checkpoint._src.handlers.pytree_checkpoint_handler.PyTreeRestoreArgs'>` to `_handler_registry`. (843964:composite_checkpoint_handler.py:234)
+14:02:04.252 [I] Deferred registration for item: "params". Adding handler `<orbax.checkpoint._src.handlers.pytree_checkpoint_handler.PyTreeCheckpointHandler object at 0x7f382ce7d6a0>` for item "params" and save args `<class 'orbax.checkpoint._src.handlers.pytree_checkpoint_handler.PyTreeSaveArgs'>` and restore args `<class 'orbax.checkpoint._src.handlers.pytree_checkpoint_handler.PyTreeRestoreArgs'>` to `_handler_registry`. (843964:composite_checkpoint_handler.py:234)
+14:02:04.252 [I] Deferred registration for item: "metrics". Adding handler `<orbax.checkpoint._src.handlers.json_checkpoint_handler.JsonCheckpointHandler object at 0x7f382cecf650>` for item "metrics" and save args `<class 'orbax.checkpoint._src.handlers.json_checkpoint_handler.JsonSaveArgs'>` and restore args `<class 'orbax.checkpoint._src.handlers.json_checkpoint_handler.JsonRestoreArgs'>` to `_handler_registry`. (843964:composite_checkpoint_handler.py:234)
+14:02:04.252 [I] Initialized registry DefaultCheckpointHandlerRegistry({('assets', <class 'openpi.training.checkpoints.CallbackSave'>): <openpi.training.checkpoints.CallbackHandler object at 0x7f382ceccb00>, ('assets', <class 'openpi.training.checkpoints.CallbackRestore'>): <openpi.training.checkpoints.CallbackHandler object at 0x7f382ceccb00>, ('train_state', <class 'orbax.checkpoint._src.handlers.pytree_checkpoint_handler.PyTreeSaveArgs'>): <orbax.checkpoint._src.handlers.pytree_checkpoint_handler.PyTreeCheckpointHandler object at 0x7f382cecf890>, ('train_state', <class 'orbax.checkpoint._src.handlers.pytree_checkpoint_handler.PyTreeRestoreArgs'>): <orbax.checkpoint._src.handlers.pytree_checkpoint_handler.PyTreeCheckpointHandler object at 0x7f382cecf890>, ('params', <class 'orbax.checkpoint._src.handlers.pytree_checkpoint_handler.PyTreeSaveArgs'>): <orbax.checkpoint._src.handlers.pytree_checkpoint_handler.PyTreeCheckpointHandler object at 0x7f382ce7d6a0>, ('params', <class 'orbax.checkpoint._src.handlers.pytree_checkpoint_handler.PyTreeRestoreArgs'>): <orbax.checkpoint._src.handlers.pytree_checkpoint_handler.PyTreeCheckpointHandler object at 0x7f382ce7d6a0>, ('metrics', <class 'orbax.checkpoint._src.handlers.json_checkpoint_handler.JsonSaveArgs'>): <orbax.checkpoint._src.handlers.json_checkpoint_handler.JsonCheckpointHandler object at 0x7f382cecf650>, ('metrics', <class 'orbax.checkpoint._src.handlers.json_checkpoint_handler.JsonRestoreArgs'>): <orbax.checkpoint._src.handlers.json_checkpoint_handler.JsonCheckpointHandler object at 0x7f382cecf650>}). (843964:composite_checkpoint_handler.py:502)
+14:02:04.252 [I] orbax-checkpoint version: 0.11.13                                                (843964:abstract_checkpointer.py:35)
+14:02:04.252 [I] [process=0][thread=MainThread] Using barrier_sync_fn: <function get_barrier_sync_fn.<locals>.<lambda> at 0x7f382cea54e0> timeout: 7200 secs and primary_host=0 for async checkpoint writes (843964:async_checkpointer.py:170)
+14:02:04.255 [I] Read Metadata={'item_handlers': {'assets': 'openpi.training.checkpoints.CallbackHandler', 'params': 'orbax.checkpoint._src.handlers.pytree_checkpoint_handler.PyTreeCheckpointHandler', 'train_state': 'orbax.checkpoint._src.handlers.pytree_checkpoint_handler.PyTreeCheckpointHandler'}, 'metrics': {}, 'performance_metrics': {}, 'init_timestamp_nsecs': 1788847226777600047, 'commit_timestamp_nsecs': 1788847245343128745, 'custom_metadata': {}} from /home/wuyan/lyj/YAM/training-runs/verification/gpu-resume-20260908/debug/smoke/2/_CHECKPOINT_METADATA (843964:checkpoint.py:226)
+14:02:04.256 [W] Missing metrics for step 2                                                       (843964:checkpoint_manager.py:1654)
+14:02:04.257 [E] File /home/wuyan/lyj/YAM/training-runs/verification/gpu-resume-20260908/debug/smoke/2/metrics/metrics not found. (843964:checkpoint_manager.py:1655)
+14:02:04.257 [I] Found 1 checkpoint steps in /home/wuyan/lyj/YAM/training-runs/verification/gpu-resume-20260908/debug/smoke (843964:checkpoint_manager.py:1701)
+14:02:04.257 [I] [process=0][thread=MainThread] CheckpointManager created,  primary_host=0, CheckpointManagerOptions=CheckpointManagerOptions(save_interval_steps=1, max_to_keep=1, keep_time_interval=None, keep_period=5000, should_keep_fn=None, best_fn=None, best_mode='max', keep_checkpoints_without_metrics=True, step_prefix=None, step_format_fixed_length=None, step_name_format=None, create=False, cleanup_tmp_directories=False, save_on_steps=frozenset(), single_host_load_and_broadcast=False, todelete_subdir=None, enable_background_delete=False, read_only=False, enable_async_checkpointing=True, async_options=AsyncOptions(timeout_secs=7200, barrier_sync_fn=None, post_finalization_callback=None, create_directories_asynchronously=True), multiprocessing_options=MultiprocessingOptions(primary_host=0, active_processes=None, barrier_sync_key_prefix=None), should_save_fn=None, file_options=FileOptions(path_permission_mode=None), save_root_metadata=True, temporary_path_class=None, save_decision_policy=None, prevent_write_metrics=False), root_directory=/home/wuyan/lyj/YAM/training-runs/verification/gpu-resume-20260908/debug/smoke: <orbax.checkpoint.checkpoint_manager.CheckpointManager object at 0x7f382ceceed0> (843964:checkpoint_manager.py:801)
+14:02:04.294 [I] data_config: DataConfig(repo_id='fake', asset_id=None, norm_stats=None, repack_transforms=Group(inputs=(), outputs=()), data_transforms=Group(inputs=(), outputs=()), model_transforms=Group(inputs=(), outputs=()), use_quantile_norm=False, action_sequence_keys=('actions',), prompt_from_task=False, train_episodes=None, lerobot_tolerance_s=None, lerobot_video_backend=None, lerobot_torchcodec_tail_fallback=False, rlds_data_dir=None, action_space=None, datasets=()) (843964:data_loader.py:359)
+14:02:04.322 [I] local_batch_size: 4                                                              (843964:data_loader.py:454)
+14:02:04.739 [I] Initialized train state:
+['PaliGemma']['img']['Transformer']['encoder_norm']['bias'].value: (1152,)@float32
+['PaliGemma']['img']['Transformer']['encoder_norm']['scale'].value: (1152,)@float32
+['PaliGemma']['img']['Transformer']['encoderblock']['LayerNorm_0']['bias'].value: (27, 1152)@float32
+['PaliGemma']['img']['Transformer']['encoderblock']['LayerNorm_0']['scale'].value: (27, 1152)@float32
+['PaliGemma']['img']['Transformer']['encoderblock']['LayerNorm_1']['bias'].value: (27, 1152)@float32
+['PaliGemma']['img']['Transformer']['encoderblock']['LayerNorm_1']['scale'].value: (27, 1152)@float32
+['PaliGemma']['img']['Transformer']['encoderblock']['MlpBlock_0']['Dense_0']['bias'].value: (27, 4304)@float32
+['PaliGemma']['img']['Transformer']['encoderblock']['MlpBlock_0']['Dense_0']['kernel'].value: (27, 1152, 4304)@float32
+['PaliGemma']['img']['Transformer']['encoderblock']['MlpBlock_0']['Dense_1']['bias'].value: (27, 1152)@float32
+['PaliGemma']['img']['Transformer']['encoderblock']['MlpBlock_0']['Dense_1']['kernel'].value: (27, 4304, 1152)@float32
+['PaliGemma']['img']['Transformer']['encoderblock']['MultiHeadDotProductAttention_0']['key']['bias'].value: (27, 16, 72)@float32
+['PaliGemma']['img']['Transformer']['encoderblock']['MultiHeadDotProductAttention_0']['key']['kernel'].value: (27, 1152, 16, 72)@float32
+['PaliGemma']['img']['Transformer']['encoderblock']['MultiHeadDotProductAttention_0']['out']['bias'].value: (27, 1152)@float32
+['PaliGemma']['img']['Transformer']['encoderblock']['MultiHeadDotProductAttention_0']['out']['kernel'].value: (27, 16, 72, 1152)@float32
+['PaliGemma']['img']['Transformer']['encoderblock']['MultiHeadDotProductAttention_0']['query']['bias'].value: (27, 16, 72)@float32
+['PaliGemma']['img']['Transformer']['encoderblock']['MultiHeadDotProductAttention_0']['query']['kernel'].value: (27, 1152, 16, 72)@float32
+['PaliGemma']['img']['Transformer']['encoderblock']['MultiHeadDotProductAttention_0']['value']['bias'].value: (27, 16, 72)@float32
+['PaliGemma']['img']['Transformer']['encoderblock']['MultiHeadDotProductAttention_0']['value']['kernel'].value: (27, 1152, 16, 72)@float32
+['PaliGemma']['img']['embedding']['bias'].value: (1152,)@float32
+['PaliGemma']['img']['embedding']['kernel'].value: (14, 14, 3, 1152)@float32
+['PaliGemma']['img']['head']['bias'].value: (64,)@float32
+['PaliGemma']['img']['head']['kernel'].value: (1152, 64)@float32
+['PaliGemma']['img']['pos_embedding'].value: (1, 256, 1152)@float32
+['PaliGemma']['llm']['embedder']['input_embedding'].value: (257152, 64)@float32
+['PaliGemma']['llm']['final_norm']['scale'].value: (64,)@float32
+['PaliGemma']['llm']['final_norm_1']['scale'].value: (64,)@float32
+['PaliGemma']['llm']['layers']['attn']['attn_vec_einsum']['w'].value: (4, 8, 16, 64)@float32
+['PaliGemma']['llm']['layers']['attn']['attn_vec_einsum_1']['w'].value: (4, 8, 16, 64)@float32
+['PaliGemma']['llm']['layers']['attn']['kv_einsum']['w'].value: (4, 2, 1, 64, 16)@float32
+['PaliGemma']['llm']['layers']['attn']['kv_einsum_1']['w'].value: (4, 2, 1, 64, 16)@float32
+['PaliGemma']['llm']['layers']['attn']['q_einsum']['w'].value: (4, 8, 64, 16)@float32
+['PaliGemma']['llm']['layers']['attn']['q_einsum_1']['w'].value: (4, 8, 64, 16)@float32
+['PaliGemma']['llm']['layers']['mlp']['gating_einsum'].value: (4, 2, 64, 128)@float32
+['PaliGemma']['llm']['layers']['mlp']['linear'].value: (4, 128, 64)@float32
+['PaliGemma']['llm']['layers']['mlp_1']['gating_einsum'].value: (4, 2, 64, 128)@float32
+['PaliGemma']['llm']['layers']['mlp_1']['linear'].value: (4, 128, 64)@float32
+['PaliGemma']['llm']['layers']['pre_attention_norm']['scale'].value: (4, 64)@float32
+['PaliGemma']['llm']['layers']['pre_attention_norm_1']['scale'].value: (4, 64)@float32
+['PaliGemma']['llm']['layers']['pre_ffw_norm']['scale'].value: (4, 64)@float32
+['PaliGemma']['llm']['layers']['pre_ffw_norm_1']['scale'].value: (4, 64)@float32
+['action_in_proj']['bias'].value: (64,)@float32
+['action_in_proj']['kernel'].value: (32, 64)@float32
+['action_out_proj']['bias'].value: (32,)@float32
+['action_out_proj']['kernel'].value: (64, 32)@float32
+['action_time_mlp_in']['bias'].value: (64,)@float32
+['action_time_mlp_in']['kernel'].value: (128, 64)@float32
+['action_time_mlp_out']['bias'].value: (64,)@float32
+['action_time_mlp_out']['kernel'].value: (64, 64)@float32
+['state_proj']['bias'].value: (64,)@float32
+['state_proj']['kernel'].value: (32, 64)@float32 (843964:train.py:291)
+14:02:04.760 [I] Restoring checkpoint from /home/wuyan/lyj/YAM/training-runs/verification/gpu-resume-20260908/debug/smoke/2. (843964:checkpointer.py:298)
+14:02:07.085 [I] [process=0] /jax/checkpoint/read/bytes_per_sec: 2.8 GiB/s (total bytes: 6.4 GiB) (time elapsed: 2 seconds) (per-host) (843964:base_pytree_checkpoint_handler.py:114)
+14:02:09.529 [I] [process=0] /jax/checkpoint/read/bytes_per_sec: 7.9 GiB/s (total bytes: 19.2 GiB) (time elapsed: 2 seconds) (per-host) (843964:base_pytree_checkpoint_handler.py:114)
+14:02:09.530 [I] Finished restoring checkpoint in 4.77 seconds from /home/wuyan/lyj/YAM/training-runs/verification/gpu-resume-20260908/debug/smoke/2. (843964:checkpointer.py:309)
+14:02:09.531 [I] {'step': 2, 'event_type': 'restore', 'directory': '/home/wuyan/lyj/YAM/training-runs/verification/gpu-resume-20260908/debug/smoke', 'checkpointer_start_time': 1788847324.7605429, 'checkpointer_duration_secs': 4.770634412765503, 'checkpoint_manager_start_time': 1788847324.7603226, 'checkpoint_manager_duration_secs': 4.770859479904175} (843964:standard_logger.py:34)
+14:02:10.381 [I] Initialized data loader at training step 2:
+[0].images['base_0_rgb']: (4, 224, 224, 3)@float32
+[0].images['left_wrist_0_rgb']: (4, 224, 224, 3)@float32
+[0].images['right_wrist_0_rgb']: (4, 224, 224, 3)@float32
+[0].image_masks['base_0_rgb']: (4,)@bool
+[0].image_masks['left_wrist_0_rgb']: (4,)@bool
+[0].image_masks['right_wrist_0_rgb']: (4,)@bool
+[0].state: (4, 32)@float32
+[0].tokenized_prompt: (4, 48)@int32
+[0].tokenized_prompt_mask: (4, 48)@bool
+[1]: (4, 50, 32)@float32 (843964:train.py:300)
+wandb: WARNING Data passed to `wandb.Image` should consist of values in the range [0, 255], image data will be normalized to this range, but behavior will be removed in a future version of wandb.
+14:02:11.851 [I] Progress on: 2.00it/4.00it rate:- remaining:? elapsed:00:00 postfix:-            (843964:tqdm_logging.py:145)
+2026-09-08 14:02:19.742548: W external/xla/xla/hlo/transforms/simplifiers/hlo_rematerialization.cc:3021] Can't reduce memory use below 10.68GiB (11464907645 bytes) by rematerialization; only reduced to 11.20GiB (12021865340 bytes), down from 11.20GiB (12021866040 bytes) originally
+14:02:35.831 [I] Progress on: 2.00it/4.00it rate:- remaining:? elapsed:00:23 postfix:-            (843964:tqdm_logging.py:145)
+14:02:36.257 [I] [process=0][thread=MainThread][wait_until_finished] No Save Finalize thread to wait for. Returning. (843964:checkpoint_manager.py:1987)
+14:02:36.257 [I] [process=0] Saving checkpoint at step 4                                          (843964:checkpoint_manager.py:1408)
+14:02:36.258 [I] [process=0] Started async saving checkpoint to /home/wuyan/lyj/YAM/training-runs/verification/gpu-resume-20260908/debug/smoke/4. (843964:async_checkpointer.py:439)
+14:02:36.258 [I] Using ThreadSafeKeyValueSignalingClient                                          (843964:signaling_client.py:332)
+14:02:36.290 [I] Creating tmp directory /home/wuyan/lyj/YAM/training-runs/verification/gpu-resume-20260908/debug/smoke/4.orbax-checkpoint-tmp-0 (843964:atomicity.py:144)
+14:02:36.302 [I] Transferring arrays to host memory with options: use_replica_parallel=True, enable_pinned_host_transfer=False (843964:replica_slices.py:341)
+14:02:36.310 [I] Wrote Metadata={'item_handlers': None, 'metrics': {}, 'performance_metrics': {}, 'init_timestamp_nsecs': 1788847356308242907, 'commit_timestamp_nsecs': None, 'custom_metadata': {}}, json={"item_handlers": null, "metrics": {}, "performance_metrics": {}, "init_timestamp_nsecs": 1788847356308242907, "commit_timestamp_nsecs": null, "custom_metadata": {}} to /home/wuyan/lyj/YAM/training-runs/verification/gpu-resume-20260908/debug/smoke/4.orbax-checkpoint-tmp-0/_CHECKPOINT_METADATA (843964:checkpoint.py:186)
+14:02:36.312 [I] Creating tmp directory /home/wuyan/lyj/YAM/training-runs/verification/gpu-resume-20260908/debug/smoke/4.orbax-checkpoint-tmp-0/assets.orbax-checkpoint-tmp-1 (843964:atomicity.py:144)
+14:02:36.313 [I] Creating tmp directory /home/wuyan/lyj/YAM/training-runs/verification/gpu-resume-20260908/debug/smoke/4.orbax-checkpoint-tmp-0/params.orbax-checkpoint-tmp-2 (843964:atomicity.py:144)
+14:02:36.313 [I] Creating tmp directory /home/wuyan/lyj/YAM/training-runs/verification/gpu-resume-20260908/debug/smoke/4.orbax-checkpoint-tmp-0/train_state.orbax-checkpoint-tmp-3 (843964:atomicity.py:144)
+14:02:39.046 [I] Transferring arrays to host memory with options: use_replica_parallel=True, enable_pinned_host_transfer=False (843964:replica_slices.py:341)
+14:02:39.060 [I] [process=0][thread=array_type_handler] Wrote 50 array_metadata.ArrayMetadata to /home/wuyan/lyj/YAM/training-runs/verification/gpu-resume-20260908/debug/smoke/4.orbax-checkpoint-tmp-0/params.orbax-checkpoint-tmp-2/array_metadatas/process_0 (843964:array_metadata_store.py:198)
+14:02:39.417 [I] [process=0] /jax/checkpoint/write/blocking_bytes_per_sec: 518.9 MiB/s (total bytes: 1.6 GiB) (time elapsed: 3 seconds) (per-host) (843964:base_pytree_checkpoint_handler.py:114)
+14:02:39.426 [I] [process=0] /jax/checkpoint/write/blocking_bytes_per_sec: 1.5 GiB/s (total bytes: 4.8 GiB) (time elapsed: 3 seconds) (per-host) (843964:base_pytree_checkpoint_handler.py:114)
+14:02:39.437 [I] [process=0][thread=async_save] Background save thread started.                   (843964:async_checkpointer.py:77)
+14:02:39.437 [I] Finished blocking save in 3.18 seconds. Continuing to save asynchronously to /home/wuyan/lyj/YAM/training-runs/verification/gpu-resume-20260908/debug/smoke/4. (843964:async_checkpointer.py:548)
+14:02:39.438 [I] Deleting Checkpoint[step=2 | time=2026-09-08 06:00:45.343129+00:00]: (Reason: old checkpoint). (843964:checkpoint_manager.py:1963)
+14:02:39.438 [I] [process=0][thread=MainThread][step=4] Starting CheckpointManager Save Finalize thread=save_finalize (843964:checkpoint_manager.py:1453)
+14:02:39.439 [I] [process=0][thread=save_finalize] Waiting for background save thread=async_save. (843964:async_checkpointer.py:258)
+14:02:39.439 [I] {'step': 4, 'event_type': 'save', 'directory': '/home/wuyan/lyj/YAM/training-runs/verification/gpu-resume-20260908/debug/smoke', 'reached_preemption': False, 'preemption_received_at': None, 'synchronous': False, 'wait_for_prev_start_time': 1788847356.2574208, 'wait_for_prev_duration_secs': 0.00010323524475097656, 'checkpointer_blocking_start_time': 1788847356.2577605, 'checkpointer_blocking_duration_secs': 3.180758476257324, 'get_old_steps_start_time': 1788847359.4385414, 'get_old_steps_duration_secs': 8.916854858398438e-05, 'checkpoint_manager_blocking_start_time': 1788847356.2573242, 'checkpoint_manager_blocking_duration_secs': 3.181986093521118} (843964:standard_logger.py:34)
+14:02:39.439 [I] Progress on: 4.00it/4.00it rate:12.0s/it remaining:00:00 elapsed:00:27 postfix:- (843964:tqdm_logging.py:145)
+14:02:39.514 [I] [process=0][thread=array_type_handler] Wrote 153 array_metadata.ArrayMetadata to /home/wuyan/lyj/YAM/training-runs/verification/gpu-resume-20260908/debug/smoke/4.orbax-checkpoint-tmp-0/train_state.orbax-checkpoint-tmp-3/array_metadatas/process_0 (843964:array_metadata_store.py:198)
+14:02:41.105 [I] Waiting for checkpoint manager to finish                                         (843964:train.py:366)
+14:02:41.105 [I] [process=0][thread=MainThread][step=4][wait_until_finished] Waiting for Save Finalize thread (save_finalize) to complete. (843964:checkpoint_manager.py:1998)
+14:02:54.995 [I] [process=0] /jax/checkpoint/write/bytes_per_sec: 87.4 MiB/s (total bytes: 1.6 GiB) (time elapsed: 18 seconds) (per-host) (843964:base_pytree_checkpoint_handler.py:114)
+14:02:55.043 [I] [process=0] /jax/checkpoint/write/bytes_per_sec: 261.6 MiB/s (total bytes: 4.8 GiB) (time elapsed: 18 seconds) (per-host) (843964:base_pytree_checkpoint_handler.py:114)
+14:02:55.043 [I] [process=0][thread=async_save] 5 Handler Commit operations completed.            (843964:async_checkpointer.py:87)
+14:02:55.045 [I] Renaming /home/wuyan/lyj/YAM/training-runs/verification/gpu-resume-20260908/debug/smoke/4.orbax-checkpoint-tmp-0/assets.orbax-checkpoint-tmp-1 to /home/wuyan/lyj/YAM/training-runs/verification/gpu-resume-20260908/debug/smoke/4.orbax-checkpoint-tmp-0/assets (843964:atomicity.py:289)
+14:02:55.046 [I] Updated Metadata={'item_handlers': {'assets': 'openpi.training.checkpoints.CallbackHandler', 'params': 'orbax.checkpoint._src.handlers.pytree_checkpoint_handler.PyTreeCheckpointHandler', 'train_state': 'orbax.checkpoint._src.handlers.pytree_checkpoint_handler.PyTreeCheckpointHandler'}, 'metrics': {}, 'performance_metrics': {}, 'init_timestamp_nsecs': 1788847356308242907, 'commit_timestamp_nsecs': None, 'custom_metadata': {}} to /home/wuyan/lyj/YAM/training-runs/verification/gpu-resume-20260908/debug/smoke/4.orbax-checkpoint-tmp-0/_CHECKPOINT_METADATA (843964:checkpoint.py:245)
+14:02:55.050 [I] [process=0][thread=async_save] Skipped cross-host ArrayMetadata validation because only one process is found: process_index=0. (843964:array_metadata_store.py:362)
+14:02:55.168 [I] Renaming /home/wuyan/lyj/YAM/training-runs/verification/gpu-resume-20260908/debug/smoke/4.orbax-checkpoint-tmp-0/train_state.orbax-checkpoint-tmp-3 to /home/wuyan/lyj/YAM/training-runs/verification/gpu-resume-20260908/debug/smoke/4.orbax-checkpoint-tmp-0/train_state (843964:atomicity.py:289)
+14:02:55.170 [I] [process=0][thread=async_save] Skipped cross-host ArrayMetadata validation because only one process is found: process_index=0. (843964:array_metadata_store.py:362)
+14:02:55.290 [I] Renaming /home/wuyan/lyj/YAM/training-runs/verification/gpu-resume-20260908/debug/smoke/4.orbax-checkpoint-tmp-0/params.orbax-checkpoint-tmp-2 to /home/wuyan/lyj/YAM/training-runs/verification/gpu-resume-20260908/debug/smoke/4.orbax-checkpoint-tmp-0/params (843964:atomicity.py:289)
+14:02:55.290 [I] Renaming /home/wuyan/lyj/YAM/training-runs/verification/gpu-resume-20260908/debug/smoke/4.orbax-checkpoint-tmp-0 to /home/wuyan/lyj/YAM/training-runs/verification/gpu-resume-20260908/debug/smoke/4 (843964:atomicity.py:289)
+14:02:55.291 [I] [process=0][thread=async_save] Finished saving checkpoint (finalized tmp dir) to `/home/wuyan/lyj/YAM/training-runs/verification/gpu-resume-20260908/debug/smoke/4`. (843964:atomicity.py:573)
+14:02:55.292 [I] Finished asynchronous save (blocking + background) in 19.03 seconds to /home/wuyan/lyj/YAM/training-runs/verification/gpu-resume-20260908/debug/smoke/4 (843964:async_checkpointer.py:412)
+14:02:55.292 [I] [process=0][thread=async_save] Background save thread done.                      (843964:async_checkpointer.py:143)
+14:02:55.292 [I] [process=0][thread=save_finalize] Done with waiting for background save thread=async_save. (843964:async_checkpointer.py:266)
+14:02:55.292 [I] [process=0][thread=save_finalize] No errors found in background save thread=async_save. (843964:async_checkpointer.py:276)
+14:02:55.531 [I] Deleted step 2.                                                                  (843964:deleter.py:114)
+14:02:55.531 [I] [process=0][thread=save_finalize][step=4] CheckpointManager Save Finalize is syncing with other hosts... (843964:checkpoint_manager.py:2095)
+14:02:55.531 [I] [process=0][thread=save_finalize][step=4] CheckpointManager Save Finalize is done on all hosts. (843964:checkpoint_manager.py:2110)
+14:02:55.531 [I] [process=0][thread=MainThread][step=4][wait_until_finished] Done waiting for Save Finalize thread (save_finalize) running at step=4. (843964:checkpoint_manager.py:2010)
+Step 2: grad_norm=7.0098, loss=2.3468, param_norm=477.8696, learning_rate=0.0000, time=1788847355.8317, gpu_memory_gib=6.3993
+Step 3: grad_norm=9.7218, loss=2.4503, param_norm=477.8696, learning_rate=0.0000, time=1788847356.2002, step_seconds=0.3680, samples_per_second=10.8700, gpu_memory_gib=6.3993
+GPU_TRAIN_MAIN_RESUME_VERIFIED
