@@ -6,7 +6,7 @@
 
 - `docs/cache/modes/02_code_change.md`：YAM 代码、配置、数据 pipeline、测试、文档写回和提交。
 - `docs/cache/modes/03_deployment.md`：conda、SSH、远端训练/服务、GPU、checkpoint 和安全操作。
-- `docs/cache/modes/04_model_ops.md`：YAM 数据、Pi0.5 LoRA、norm、训练评估和实验归因。
+- `docs/cache/modes/04_model_ops.md`：YAM 数据、Pi0.5 全量微调、norm、训练评估和实验归因。
 
 ## Canonical Docs
 
@@ -28,7 +28,7 @@
 - 远端环境、训练、服务、GPU、tmux → `03_deployment.md`
 - Thor 系统盘、容器、JAX→PyTorch→TensorRT 和端侧 smoke → `08_thor_edge_deployment.md`
 - Thor 逐步安装指导/烧录交接 → `docs/reference/thor/00_start_here.md`，只按当前阶段读取；版本、精度与当前状态仍归 `08_thor_edge_deployment.md`
-- YAM 数据审计、SFT、Pi0.5 LoRA、评估 → `04_model_ops.md`
+- YAM 数据审计、SFT、Pi0.5 全量微调、评估 → `04_model_ops.md`
 - 记忆维护与任务恢复 → `skills/mlops-memory/SKILL.md`；先准入，再按需读取 owner 的相关章节。
 - 只需了解项目 → 从 `docs/00_handoff_index.md` 开始，按编号阅读。
 

@@ -21,3 +21,6 @@
 ## 结果写回
 
 稳定默认写入 `kernel.md`；当前训练/数据事实写入 `docs/03` 或 `docs/04`；历史原因写入 `docs/07_change_log.md`。不要恢复 OpenArm/KAI0 研究计划作为当前入口。
+> 2026-09-08当前路线覆盖：用户已明确切换并启动Pi0.5全量微调。以AGENTS.md与
+> docs/03_training_and_evaluation.md的正式运行章节为准；下文如有LoRA优先建议，仅属旧路线，
+> 不作为当前默认，不允许未经用户同意回退LoRA。历史产物与实现代码不删除。

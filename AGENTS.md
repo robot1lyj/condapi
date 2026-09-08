@@ -2,7 +2,7 @@
 
 ## 项目定位
 
-本仓库是 OpenPI 的 YAM 双臂训练适配分支，当前默认任务是使用 LeRobot 数据对 YAM（与 YAM-ABC 同硬件配置）进行 VLA 后训练，并把训练后 policy 部署到 NVIDIA Jetson AGX Thor 端侧推理。系统由两台 IPC 组成：Thor 只负责模型推理，3588 负责相机采集、机械臂控制和控制侧逻辑，两者通过网线直连交换数据。首选模型是 Pi0.5，首选低显存路线是 LoRA；训练仍在服务器 GPU 上，模型不再放在远程推理服务器。OpenArm、Piper 和独立 YAM-ABC-Reproduce 代码只作为 legacy/reference，不是本项目默认实现。
+本仓库是 OpenPI 的 YAM 双臂训练适配分支，当前默认任务是使用 LeRobot 数据对 YAM（与 YAM-ABC 同硬件配置）进行 VLA 后训练，并把训练后 policy 部署到 NVIDIA Jetson AGX Thor 端侧推理。系统由两台 IPC 组成：Thor 只负责模型推理，3588 负责相机采集、机械臂控制和控制侧逻辑，两者通过网线直连交换数据。当前训练路线已切换为 Pi0.5 全量微调，不再默认采用 LoRA；训练仍在服务器 GPU 上，模型不再放在远程推理服务器。OpenArm、Piper 和独立 YAM-ABC-Reproduce 代码只作为 legacy/reference，不是本项目默认实现。
 
 `/home/wuyan-lyj/YAM` 是外部 YAM 参考目录，只读查看训练数据合同和模型适配信息；本仓库自身始终是 `/home/wuyan-lyj/condapi`，不得把 YAM-ABC 的机械臂控制代码同步进来替代本项目。
 
@@ -67,7 +67,7 @@ conda run -p /home/wuyan/.conda/envs/condapi-yam python -m pytest --strict-marke
 - 双臂合同固定为 14D `[左臂6关节, 左夹爪, 右臂6关节, 右夹爪]`；YAM 数据的具体物理单位必须由数据 metadata/audit 确认，不能擅自套用 OpenArm degree 或 ROS 弧度。
 - 图像键固定为 `observation.images.top_rgb`、`observation.images.left_rgb`、`observation.images.right_rgb`；动作键为单数 `action`；状态键为 `observation.state`。
 - 训练默认将每臂 6 个关节动作转为相对当前状态的 delta，夹爪维度保持 absolute；mask 为 `(6,-1,6,-1)`。
-- `pi05_yam_lora` 是当前低显存首选配置；OpenPI 模型内部为 32D、action horizon 为 50，YAM policy 输出裁回 14D。
+- 当前使用 `pi05_yam` 的全量微调配置，正式入口为 `scripts/train_lego_full.py`；具体运行参数和续训边界归 `docs/03_training_and_evaluation.md`，不自动回退为 LoRA。OpenPI 模型内部为 32D、action horizon 为 50，YAM policy 输出裁回 14D。
 - YAM 训练只能使用 `LeRobotYamDataConfig`、`YamInputs`、`YamOutputs`；禁止把 OpenArm 16D 或 Piper 14D transform 当作 YAM 默认路径。
 
 ## 不可违反的边界
