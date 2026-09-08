@@ -1,5 +1,34 @@
 # 04 · 数据合同
 
+## 2026-09-08 全量发布与归一化完成
+
+实时核对 v3 续跑日志：`CONVERSION_COMPLETE` 为 2026-09-08 07:20:07 +08:00。
+已发布版本 `/home/wuyan/lyj/YAM/YAM_data/processed/lego_lerobot_v1_20260907/{train,val}`；
+train 共4,458轨迹、10,374,181帧。本节替代后文9月7日“尚在转换”的历史状态。
+
+`scripts/compute_yam_norm_stats.py` 通过只读数值列、逐集 H50 分块和同一 DeltaActions 计算全部训练帧，
+不包含 val，不裁掉最后不足 batch 的帧，不修改原始数据。12个代表性首中尾/边界样本与真实
+LeRobot→YamInputs→DeltaActions 逐值一致，三相机解码成功。统计为14D，模型变换随后补到32D。
+所有关节 delta，夹爪 absolute；源 metadata 合同为关节 radian、夹爪0闭1开，raw→port 单位保持
+仍是发布者文档与数值范围支撑的推断，不是独立机械臂标定结论。
+
+持久化资产目录（训练应设置 `data.assets.assets_dir=.../pi05_h50`，`asset_id=yam`）：
+
+```text
+服务器 /home/wuyan/lyj/YAM/training-assets/lego_lerobot_v1_20260907/pi05_h50/yam/norm_stats.json
+本地   assets/lego_lerobot_v1_20260907/pi05_h50/yam/norm_stats.json
+SHA256 c496b738470e432b9da02b22a45c8c309b3db8412d73723944a7cbdc62305be9
+```
+
+`assets_dir` 指 `yam` 的父目录。本地资产不进入 Git；数值文件、逐文件来源哈希、
+加载器对照与进度记录同目录保存。训练集 conversion manifest SHA256：
+`9844c0b86b93fd40adf251275d770899ba413800d2a0cba11d4e9bdae40544dc`。
+state计数10,374,181，action计数518,709,050；全量计算164.27秒。
+分位数使用原 RunningStats 的5000-bin近似直方图，累计改用float64。
+该数值路径只支持本仓库已发布的单episode/Parquet布局，遇到其他布局拒绝运行。
+旧转换 manifest 内 `norm_stats=not_computed` 是发布时的历史快照，保持不改；新 norm 的来源由独立
+`provenance.json` 记录。[详细证据](reports/training/pi05-full-20260908/README.md)。
+
 本页是当前 YAM 训练数据的唯一语义 owner。服务器路径见 [02](02_installation_and_environment.md)，训练流程见 [03](03_training_and_evaluation.md)。OpenArm 16D 合同只在历史文档中保留，不能套用到 YAM。
 
 ## YAM 双臂合同

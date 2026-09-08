@@ -1,5 +1,16 @@
 # 03 · 训练与评估
 
+## 2026-09-08 四张 4090 全参数短测
+
+`pi05_yam` 在 Slurm 2064/gpu001 的 4×4090 上通过真实 YAM 输入的 10 步全参数测试：
+FSDP=4、global batch=4、EMA=None、原 AdamW、三相机/文本200/H50/32D，33.53亿参数全部可训练。
+先按 FSDP 分片加载 checkpoint，修复原 replicated 权重输入导致的初始化 OOM。
+每卡 JAX 活跃分配峰值 13.62GiB、内存池约16GiB；固定真实 batch 编译后平均0.666秒/步。
+这是容量和计算短测，未包含持续取数/保存 checkpoint 开销，不保证收敛，未启动正式长训。
+默认 LoRA 配置仍保留；全量路线已验证的限定条件、失败对照、代码指纹与复现命令见
+[实测报告](reports/training/pi05-full-20260908/README.md)。全量训练集 norm 已完成，见
+[数据合同](04_data_contracts.md#2026-09-08-全量发布与归一化完成)。
+
 本页只描述当前 YAM 训练路线。服务器和环境先看 [02 · 服务器与环境](02_installation_and_environment.md)，动作/图像合同看 [04 · 数据合同](04_data_contracts.md)。
 
 ## 当前默认路线

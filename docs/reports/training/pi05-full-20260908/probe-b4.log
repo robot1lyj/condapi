@@ -1,0 +1,42 @@
+/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/torch/cuda/__init__.py:61: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+{"stage": "start", "time": 1788840390.1790986, "devices": [{"device": "cuda:0", "memory": {"num_allocs": 0, "bytes_in_use": 0, "peak_bytes_in_use": 0, "largest_alloc_size": 0, "bytes_limit": 23232507178, "bytes_reserved": 0, "peak_bytes_reserved": 0, "largest_free_block_bytes": 0, "pool_bytes": 0, "peak_pool_bytes": 0}}, {"device": "cuda:1", "memory": {"num_allocs": 0, "bytes_in_use": 0, "peak_bytes_in_use": 0, "largest_alloc_size": 0, "bytes_limit": 23232507178, "bytes_reserved": 0, "peak_bytes_reserved": 0, "largest_free_block_bytes": 0, "pool_bytes": 0, "peak_pool_bytes": 0}}, {"device": "cuda:2", "memory": {"num_allocs": 0, "bytes_in_use": 0, "peak_bytes_in_use": 0, "largest_alloc_size": 0, "bytes_limit": 23232507178, "bytes_reserved": 0, "peak_bytes_reserved": 0, "largest_free_block_bytes": 0, "pool_bytes": 0, "peak_pool_bytes": 0}}, {"device": "cuda:3", "memory": {"num_allocs": 0, "bytes_in_use": 0, "peak_bytes_in_use": 0, "largest_alloc_size": 0, "bytes_limit": 23232507178, "bytes_reserved": 0, "peak_bytes_reserved": 0, "largest_free_block_bytes": 0, "pool_bytes": 0, "peak_pool_bytes": 0}}], "batch_size": 4, "fsdp_devices": 4, "ema": null, "input": "synthetic", "checkpoint": "/home/wuyan/.cache/openpi/openpi-assets/checkpoints/pi05_base/params", "model": "Pi0Config(action_dim=32, action_horizon=50, max_token_len=200, dtype='bfloat16', paligemma_variant='gemma_2b', action_expert_variant='gemma_300m', pi05=True, discrete_state_input=True)"}
+/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/jax/_src/interpreters/mlir.py:1178: UserWarning: Some donated buffers were not usable: ShapedArray(float32[27,1152,4304]), ShapedArray(float32[27,4304,1152]), ShapedArray(float32[27,1152,16,72]), ShapedArray(float32[27,16,72,1152]), ShapedArray(float32[27,1152,16,72]), ShapedArray(float32[27,1152,16,72]), ShapedArray(float32[1152,2048]), ShapedArray(float32[257152,2048]), ShapedArray(float32[1024,3072]), ShapedArray(float32[18,8,256,2048]), ShapedArray(float32[18,8,256,1024]), ShapedArray(float32[18,2,1,2048,256]), ShapedArray(float32[18,2,1,1024,256]), ShapedArray(float32[18,8,2048,256]), ShapedArray(float32[18,8,1024,256]), ShapedArray(float32[18,2,2048,16384]), ShapedArray(float32[18,16384,2048]), ShapedArray(float32[18,2,1024,4096]), ShapedArray(float32[18,4096,1024]), ShapedArray(float32[18,1024,3072]), ShapedArray(float32[18,1024,3072]), ShapedArray(float32[1024,1024]), ShapedArray(float32[1024,1024]).
+See an explanation at https://jax.readthedocs.io/en/latest/faq.html#buffer-donation.
+  warnings.warn("Some donated buffers were not usable:"
+2026-09-08 12:06:34.332799: E external/xla/xla/service/gpu/gpu_hlo_schedule.cc:654] The byte size of input/output arguments (23482198444) exceeds the base limit (23232507178). This indicates an error in the calculation!
+2026-09-08 12:06:34.338626: W external/xla/xla/hlo/transforms/simplifiers/hlo_rematerialization.cc:3021] Can't reduce memory use below 0B (0 bytes) by rematerialization; only reduced to 9.38GiB (10074991180 bytes), down from 9.38GiB (10074991184 bytes) originally
+2026-09-08 12:06:48.100011: W external/xla/xla/tsl/framework/bfc_allocator.cc:501] Allocator (GPU_3_bfc) ran out of memory trying to allocate 34.17MiB (rounded to 35831808)requested by op 
+2026-09-08 12:06:48.100440: W external/xla/xla/tsl/framework/bfc_allocator.cc:512] ****************************************************************************************************
+E0908 12:06:48.100483  370900 pjrt_stream_executor_client.cc:3077] Execution of replica 0 failed: RESOURCE_EXHAUSTED: Out of memory while trying to allocate 35831808 bytes. [tf-allocator-allocation-error='']
+2026-09-08 12:06:48.102108: W external/xla/xla/tsl/framework/bfc_allocator.cc:501] Allocator (GPU_0_bfc) ran out of memory trying to allocate 34.17MiB (rounded to 35831808)requested by op 
+2026-09-08 12:06:48.102525: W external/xla/xla/tsl/framework/bfc_allocator.cc:512] ****************************************************************************************************
+E0908 12:06:48.102570  370891 pjrt_stream_executor_client.cc:3077] Execution of replica 0 failed: RESOURCE_EXHAUSTED: Out of memory while trying to allocate 35831808 bytes. [tf-allocator-allocation-error='']
+2026-09-08 12:06:48.103169: W external/xla/xla/tsl/framework/bfc_allocator.cc:501] Allocator (GPU_2_bfc) ran out of memory trying to allocate 34.17MiB (rounded to 35831808)requested by op 
+2026-09-08 12:06:48.103601: W external/xla/xla/tsl/framework/bfc_allocator.cc:512] ****************************************************************************************************
+E0908 12:06:48.103644  370897 pjrt_stream_executor_client.cc:3077] Execution of replica 0 failed: RESOURCE_EXHAUSTED: Out of memory while trying to allocate 35831808 bytes. [tf-allocator-allocation-error='']
+2026-09-08 12:06:48.104546: W external/xla/xla/tsl/framework/bfc_allocator.cc:501] Allocator (GPU_1_bfc) ran out of memory trying to allocate 34.17MiB (rounded to 35831808)requested by op 
+2026-09-08 12:06:48.104934: W external/xla/xla/tsl/framework/bfc_allocator.cc:512] ****************************************************************************************************
+E0908 12:06:48.104976  370894 pjrt_stream_executor_client.cc:3077] Execution of replica 0 failed: RESOURCE_EXHAUSTED: Out of memory while trying to allocate 35831808 bytes. [tf-allocator-allocation-error='']
+Traceback (most recent call last):
+  File "/home/wuyan/lyj/YAM/env-transfer/pi05-full-norm-20260908.mgkPSsmT/code/scripts/benchmark_pi05_full.py", line 93, in <module>
+    tyro.cli(main)
+  File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/tyro/_cli.py", line 230, in cli
+    return run_with_args_from_cli()
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/wuyan/lyj/YAM/env-transfer/pi05-full-norm-20260908.mgkPSsmT/code/scripts/benchmark_pi05_full.py", line 62, in main
+    state, state_sharding = train.init_train_state(config, jax.random.key(0), mesh, resume=False)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/jaxtyping/_decorator.py", line 559, in wrapped_fn
+    return wrapped_fn_impl(args, kwargs, bound, memos)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/jaxtyping/_decorator.py", line 483, in wrapped_fn_impl
+    out = fn(*args, **kwargs)
+          ^^^^^^^^^^^^^^^^^^^
+  File "/home/wuyan/lyj/YAM/env-transfer/pi05-full-norm-20260908.mgkPSsmT/code/scripts/train.py", line 178, in init_train_state
+    train_state = jax.jit(
+                  ^^^^^^^^
+jaxlib.xla_extension.XlaRuntimeError: RESOURCE_EXHAUSTED: Out of memory while trying to allocate 35831808 bytes.: while running replica 0 and partition 0 of a replicated computation (other replicas may have failed as well).
+--------------------
+For simplicity, JAX has removed its internal frames from the traceback of the following exception. Set JAX_TRACEBACK_FILTERING=off to include these.
+srun: error: gpu001: task 0: Exited with exit code 1
