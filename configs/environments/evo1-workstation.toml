@@ -1,6 +1,6 @@
 schema_version = 1
 manager = "conda"
-plugin = "evo1"
+model = "evo1"
 target = "workstation"
 prefix = "/home/wuyan-lyj/.conda/envs/vla-evo1-dev"
 spec = "environments/bootstrap.yml"

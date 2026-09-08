@@ -1,6 +1,6 @@
 schema_version = 1
 manager = "conda"
-plugin = "pi"
+model = "pi"
 target = "thor"
 prefix = "/home/wuyan-lyj/.conda/envs/vla-pi-infer"
 spec = "environments/bootstrap.yml"

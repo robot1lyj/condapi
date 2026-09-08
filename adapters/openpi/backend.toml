@@ -1,14 +1,13 @@
 schema_version = 1
-id = "pi"
+id = "openpi"
 status = "implemented"
-contracts = ["yam-bimanual-v1"]
-note = "Pi offline reference adapter and existing replay/export entrypoints; new Conda profile is not GPU-audited. TensorRT service and LoRA merge are not implemented in platform v1."
-sources = ["plugins/pi/infer.py", "scripts/thor/benchmark_suite.py", "scripts/thor/export_pi05_onnx.py"]
+note = "Existing OpenPI reference/replay/export entrypoints; new Conda profile is not GPU-audited. TensorRT service and LoRA merge are not implemented in this control layer."
+sources = ["adapters/openpi/infer.py", "scripts/thor/benchmark_suite.py", "scripts/thor/export_pi05_onnx.py", "scripts/train.py"]
 
 [operations.infer]
 targets = ["workstation", "server", "thor"]
 required = ["checkpoint", "config", "backend", "compute", "request", "model_version", "action_dt_s"]
-command = ["python", "{root}/plugins/pi/infer.py", "--checkpoint", "{checkpoint}", "--config", "{config}", "--backend", "{backend}", "--compute", "{compute}", "--request", "{request}", "--contract", "{contract}", "--model-version", "{model_version}", "--action-dt", "{action_dt_s}", "--output", "{output}"]
+command = ["python", "{root}/adapters/openpi/infer.py", "--checkpoint", "{checkpoint}", "--config", "{config}", "--backend", "{backend}", "--compute", "{compute}", "--request", "{request}", "--contract", "{contract}", "--model-version", "{model_version}", "--action-dt", "{action_dt_s}", "--output", "{output}"]
 [operations.infer.choices]
 config = ["pi05_yam", "pi05_yam_lora"]
 backend = ["jax", "pytorch"]

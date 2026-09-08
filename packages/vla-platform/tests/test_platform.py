@@ -24,14 +24,19 @@ ROOT = Path(__file__).resolve().parents[3]
 
 @pytest.fixture
 def project(tmp_path):
-    for path in ("vla.toml", "configs", "plugins", "environments"):
+    for path in ("vla.toml", "configs", "adapters", "environments"):
         source = ROOT / path
         if source.is_dir():
             shutil.copytree(source, tmp_path / path)
         else:
             shutil.copy2(source, tmp_path / path)
     # Only source provenance needs these files; no model code is executed.
-    for path in ("scripts/thor/benchmark_suite.py", "scripts/thor/export_pi05_onnx.py", "scripts/thor/maxn_session.py"):
+    for path in (
+        "scripts/thor/benchmark_suite.py",
+        "scripts/thor/export_pi05_onnx.py",
+        "scripts/thor/maxn_session.py",
+        "scripts/train.py",
+    ):
         file = tmp_path / path
         file.parent.mkdir(parents=True, exist_ok=True)
         file.write_text("# test source\n")
@@ -70,7 +75,7 @@ def test_plan_is_read_only_and_uses_conda(project):
 @pytest.mark.parametrize("name", ["evo1", "vla-jepa", "fastwam"])
 def test_unimplemented_models_fail_before_execution(project, name):
     path = experiment(project)
-    path.write_text(path.read_text().replace('plugin = "pi"', f'plugin = "{name}"'))
+    path.write_text(path.read_text().replace('model = "pi"', f'model = "{name}"'))
     with pytest.raises(ValueError, match="planned"):
         project.plan(path, "infer", "r1")
 
@@ -106,7 +111,7 @@ def test_symlink_escape_rejected(tmp_path):
 
 def test_environment_family_mismatch(project):
     path = project.root / "configs/environments/pi-workstation.toml"
-    path.write_text(path.read_text().replace('plugin = "pi"', 'plugin = "evo1"'))
+    path.write_text(path.read_text().replace('model = "pi"', 'model = "evo1"'))
     with pytest.raises(ValueError, match="another model family"):
         project.plan(experiment(project), "infer", "r1")
 
@@ -130,10 +135,10 @@ def test_source_change_cannot_execute_stale_plan(project):
     assert not Path(plan.output).exists()
 
 
-def test_second_plugin_uses_same_core(project):
-    directory = project.root / "plugins/test-double"
+def test_second_backend_uses_same_core(project):
+    directory = project.root / "adapters/test-double"
     directory.mkdir()
-    (directory / "plugin.toml").write_text("""schema_version = 1
+    (directory / "backend.toml").write_text("""schema_version = 1
 id = "test-double"
 status = "implemented"
 contracts = ["yam-bimanual-v1"]
@@ -141,10 +146,17 @@ contracts = ["yam-bimanual-v1"]
 targets = ["workstation"]
 command = ["python", "-c", "print(42)"]
 """)
+    (project.root / "configs/models/test-double.toml").write_text("""schema_version = 1
+id = "test-double"
+backend = "test-double"
+status = "implemented"
+contracts = ["yam-bimanual-v1"]
+operations = ["infer"]
+""")
     profile = project.root / "configs/environments/pi-workstation.toml"
-    profile.write_text(profile.read_text().replace('plugin = "pi"', 'plugin = "test-double"'))
+    profile.write_text(profile.read_text().replace('model = "pi"', 'model = "test-double"'))
     path = experiment(project)
-    path.write_text(path.read_text().replace('plugin = "pi"', 'plugin = "test-double"'))
+    path.write_text(path.read_text().replace('model = "pi"', 'model = "test-double"'))
     assert project.plan(path, "infer", "r1").command[-1] == "print(42)"
 
 
@@ -214,7 +226,7 @@ def recipe(tmp_path):
         files.append({"role": role, "path": file.name})
     manifest = {
         "schema_version": 1,
-        "plugin": "pi",
+        "model": "pi",
         "model_version": "fixture",
         "code_revision": "fixture",
         "contract_id": "yam-bimanual-v1",

@@ -1,5 +1,12 @@
 # 07 · 变更历史
 
+## 2026-09-08 · 收敛为共享 LeRobot/OpenPI 后端
+
+- 按用户确认撤销 `plugins/<family>/` 原型，模型声明迁入 `configs/models/`，入口按实现后端集中到 `adapters/`。项目 schema 升为2，实验/环境/交接元数据改用 model，不保留原型 plugin API；未改写历史权重和证据。
+- 新增 LeRobot 原生训练 launcher，原样引用上游 JSON，不重写训练循环或处理器；禁用 W&B/Hub 上传，只允许本机新运行。新增 native config、backend、model 和环境 spec 的计划哈希。
+- 三个 LeRobot 模型复用入口的 CPU 替身测试通过；模型声明仍 planned。平台49项、连同既有 Thor/记忆测试共163项通过，保留现有 pynvml 弃用警告。未安装模型依赖、未启动训练、未部署或测试新模型 GPU 性能。
+- 同步 AGENTS、架构 owner、操作手册和 kernel/mode；纠正将某个会话账本 ID 固化在长期手册的做法。既有 Pi 模型源码、Thor 脚本和远端服务不变。
+
 ## 2026-09-08 · 工作树多模型薄接入层与记忆同步
 
 - 用户要求在独立分支改造项目，环境先用 Conda，并复用 LeRobot 已有架构。新增零模型依赖控制包、声明式插件、配置校验、Conda 计划/执行、不可覆盖运行目录、文件哈希模型包和本地请求/响应合同。

@@ -6,16 +6,17 @@
 
 | 部分 | 状态 |
 |---|---|
-| 控制层 | 标准库实现；注册、计划、Conda 子进程、运行记录、模型包哈希与离线 IO 检查 |
+| 控制层 | 标准库实现；模型与后端分离、计划、Conda 子进程、运行记录、模型包哈希与离线 IO 检查 |
 | Pi | 现有 OpenPI 训练/参考推理/回放/ONNX 导出入口已接线；新环境 GPU 执行未验证 |
-| Evo-1 | LeRobot 接入方向确定；检查源码和 checkpoint 合同；未接入真实推理/训练 |
+| LeRobot 后端 | 共用原生训练 launcher 已实现并用替身测试；无自建 trainer/processor；尚无通用离线推理入口 |
+| Evo-1 | 声明选择 LeRobot；检查源码和 checkpoint 合同；未接入真实推理/训练 |
 | FastWAM、VLA-JEPA | 注册 planned；不得运行或报告已支持 |
 | Conda | 系列 prefix 配置和创建命令已有；bootstrap 只安装 Python/pip，无模型依赖锁 |
 | Thor | 原 Pi 容器、TensorRT 引擎、报告保持原状；没有部署此次改造 |
 
-本分支 CPU 验证：平台测试38项；与 `scripts/thor`、`skills/mlops-memory/tests` 合跑152项通过。测试命令为 `python -m pytest -q packages/vla-platform/tests scripts/thor skills/mlops-memory/tests`；测试替身验证子进程和失败记录，不冒充 Conda 模型运行。
+本次收敛架构 CPU 验证：平台测试49项；与 `scripts/thor`、`skills/mlops-memory/tests` 合跑163项通过。测试命令为 `python -m pytest -q packages/vla-platform/tests scripts/thor skills/mlops-memory/tests`；测试替身验证子进程、共用原生入口和失败记录，不冒充 Conda/LeRobot 模型运行。
 
-不追求复制 LeRobot 的 registry、trainer、processor 或 dataset 实现；本地插件注册只选进程入口和环境。支持模型在子进程里直接调用 LeRobot 原生 API；Pi 调用既有 OpenPI。原作者代码用于对照，不强制每个模型维护双实现。RLinf 的 DAgger/RL 接入不是当前范围。
+不复制 LeRobot 的 registry、trainer、processor 或 dataset 实现；`configs/models/*.toml` 只选后端、policy_type 和已接通能力，入口集中在 `adapters/<backend>/backend.toml`。具体模型在子进程中调用上游；Pi 调用既有 OpenPI。原作者代码用于对照，不强制每个模型维护双实现。RLinf 的 DAgger/RL 接入不是当前范围。
 
 ## 工作树与 Git
 
@@ -29,7 +30,7 @@ python3 scripts/vla.py models
 
 只提交/备份当前分支，不自动合并 main 或同步 Thor。共享权重、Conda prefix、外部数据并不受工作树隔离保护，禁止因为处在工作树就修改正在使用的环境。本次不要求保留旧控制层 API；保留实验原件和 Pi 模型实现并不等于维护旧 API 兼容层。
 
-本活跃上下文的记忆预算沿用主检出 `docs/cache/runtime/thor-platform-20260908-c6.json`（运行计量，不是事实 owner），不因切换工作树重建预算。新任务应按实际保留上下文选择同一账本；文件记忆仍只读当前工作树版本。宿主完整 token 计量接口不可用，不能把字节预算称作完整上下文 token 限制。
+记忆预算账本位于实际上下文对应的 `docs/cache/runtime/`，只记录运行计量，不把某次会话 ID 固化为长期操作步骤。只有真实压缩/新上下文后重建；文件记忆读取当前工作树版本。宿主完整 token 计量接口不可用，不能把字节预算称作完整上下文 token 限制。
 
 ## 命令与环境
 
@@ -37,6 +38,7 @@ python3 scripts/vla.py models
 
 ```bash
 python3 scripts/vla.py models
+python3 scripts/vla.py backends
 python3 scripts/vla.py plan configs/experiments/pi-reference.toml infer --run-id pi-plan-001
 python3 scripts/vla.py env plan configs/environments/evo1-workstation.toml
 ```
@@ -57,7 +59,7 @@ Pi `infer` 是一次本地请求的参考路径，图像为本机 RGB 文件，�
 
 ## 模型包
 
-模型包保留原格式，不强制转换成 JAX。recipe JSON 必须包含 schema_version=1、plugin、model_version、code_revision、contract_id、format、precision.storage/compute，以及 files 列表（role/path）。必须包含 weights、model_config、preprocessing、normalization、contract、reference 六类文件；contract 为本版本 TOML。目录权重要逐个列文件，不能只记录目录名。LoRA adapter 还需 base_model_sha256。
+模型包保留原格式，不强制转换成 JAX。recipe JSON 必须包含 schema_version=1、model、model_version、code_revision、contract_id、format、precision.storage/compute，以及 files 列表（role/path）。必须包含 weights、model_config、preprocessing、normalization、contract、reference 六类文件；contract 为本版本 TOML。目录权重要逐个列文件，不能只记录目录名。LoRA adapter 还需 base_model_sha256。旧原型 plugin 字段不再接受；不重写已经留存的历史记录。
 
 ```bash
 python3 scripts/vla.py bundle seal /path/to/package/recipe.json --output /path/to/package/manifest.json
@@ -78,6 +80,18 @@ python3 scripts/vla.py bundle check /path/to/package/manifest.json
 - 训练 FP32 主参数和 BF16 autocast 需检查真实配置；`vlm_dtype`、`use_amp` 是不同开关。当前未在本地跑 Evo backward 或推理。
 - LIBERO checkpoint 的7D语义不是 YAM14D。修改配置/裁剪输出不能把7D模型变成已训练的YAM策略；必须进行正确机器人适配和微调。
 
-接入顺序：固定 LeRobot 实现 → 专用 Conda 依赖审计 → 检查 checkpoint config/processors → YAM batch 经原生 processor → 一次真实前向/反向和保存重载 → 接通插件 → Thor 原生推理计时。只有相应步骤有证据才开放对应 capability。后续 FastWAM/VLA-JEPA 共用相同管理层，但视频帧采样、文本编码和动作头仍用各自原生实现。
+接入顺序：固定 LeRobot 实现 → 专用 Conda 依赖审计 → 检查 checkpoint config/processors → YAM batch 经原生 processor → 一次真实前向/反向和保存重载 → 开放模型声明中的对应操作 → Thor 原生推理计时。后续 FastWAM/VLA-JEPA 复用同一个 LeRobot 后端，但视频帧采样、文本编码和动作头仍用各自原生实现。
+
+## 接入一个 LeRobot 模型
+
+1. 在 `configs/models/` 声明模型的 `backend = "lerobot"` 和上游 `policy_type`，不新增 `plugins/<model>/` 或复制训练脚本。
+2. 选择该系列的 `configs/environments/`，固定其源码和依赖。共用后端不要求共用 Conda；不同系列可以固定不同的上游版本，接口变更时需重测共享入口。当前 backend 中的 revision 只是 API 参考，运行器未强制校验安装版本。
+3. 实验用 `model`、`environment`、`contract` 加 `[parameters].native_config` 指向上游原生训练 JSON；数据、图像采样、stage、精度、优化器和模型参数都留在原生配置内，不再翻译为自定义统一模型配置。路径相对项目根目录解析，文件哈希写入运行计划。
+4. `adapters/lerobot/train.py` 检查 policy.type，然后直接调用 `lerobot.scripts.lerobot_train`。只覆盖输出目录、禁用 W&B、禁用最终/中途 Hub 上传并限定本机执行，不修改 dtype、归一化或 loss。当前仅支持新运行；resume、分布式启动器和远端提交暂走独立原生工作流，不伪装为已接入功能。
+5. YAM 样例与保存重载验证后再开放该模型的 `train`；`infer` 需另行接通共享原生 policy + processor 路径，不能因 train launcher 存在就标为可推理。原生权重和 processors 是部署交接物，seal 仅补充哈希，不创造另一套权重格式。
+
+现有 `evo1-yam.toml` 是待替换路径的实验骨架，仍会明确拒绝执行；不是可直接训练的 YAM 配置。此改造没有安装 LeRobot、下载权重、发起训练或改变 Thor 服务。
+
+训练入口 API 依据固定源码：[原生训练入口](https://github.com/huggingface/lerobot/blob/2774d9bddcbbda50e697e162e89e7eaada8d7105/src/lerobot/scripts/lerobot_train.py)、[训练配置](https://github.com/huggingface/lerobot/blob/2774d9bddcbbda50e697e162e89e7eaada8d7105/src/lerobot/configs/train.py)。
 
 源码来源：[Evo config](https://github.com/huggingface/lerobot/blob/2774d9bddcbbda50e697e162e89e7eaada8d7105/src/lerobot/policies/evo1/configuration_evo1.py)、[模型](https://github.com/huggingface/lerobot/blob/2774d9bddcbbda50e697e162e89e7eaada8d7105/src/lerobot/policies/evo1/modeling_evo1.py)、[处理器](https://github.com/huggingface/lerobot/blob/2774d9bddcbbda50e697e162e89e7eaada8d7105/src/lerobot/policies/evo1/processor_evo1.py)。

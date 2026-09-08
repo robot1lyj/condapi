@@ -6,9 +6,9 @@
 
 ```text
 scripts/vla.py / 安装后的 vla
-  -> configs：实验、Conda prefix、机器人合同
-  -> packages/vla-platform：插件注册、命令规划、运行记录、模型包完整性
-  -> plugins/<family>：调用选定实现，不把模型导入控制进程
+  -> configs：模型选择、实验、Conda prefix、机器人合同
+  -> packages/vla-platform：命令规划、运行记录、模型包完整性
+  -> adapters/openpi 或 adapters/lerobot：按实现后端复用入口
   -> 独立 Conda 子进程：LeRobot 或 OpenPI
   -> checkpoint + 保存的 processors + 本模型 norm + 合同 + 参考样例
   -> Thor 模型侧适配与数值/性能验收
@@ -16,9 +16,13 @@ scripts/vla.py / 安装后的 vla
 
 代码边界：控制层只用标准库；模型依赖留在系列环境；数据和权重在外部目录，不复制进 Git。跨环境使用文件/进程合同，不共享 Python 模型对象。`configs/robots/yam.toml` 是 [04 数据合同](04_data_contracts.md) 的机器可读投影，修改语义时必须同步 owner，不从 TOML 猜测未审计单位。
 
-当前 Pi 插件连接现有 OpenPI JAX 训练和 JAX/PyTorch 离线推理、ONNX 导出及回放入口。并未把 TensorRT 常驻服务迁入此控制层，也没有新建网络服务。请求中的图像路径只适用于本地离线调用，不是 Thor↔3588 的图像传输协议；生产协议仍归 [05](05_inference_and_rollout.md)。
+当前 Pi 模型声明选择 OpenPI 后端，连接现有 JAX 训练和 JAX/PyTorch 离线推理、ONNX 导出及回放入口。并未把 TensorRT 常驻服务迁入此控制层，也没有新建网络服务。请求中的图像路径只适用于本地离线调用，不是 Thor↔3588 的图像传输协议；生产协议仍归 [05](05_inference_and_rollout.md)。
 
-Evo-1 优先接 LeRobot，FastWAM/VLA-JEPA 后续同样优先检查 LeRobot 实现；各模型原版用于对照或必要的替代，不同时维护两套默认训练实现。插件只有注册信息不算接入；具体状态、缺口和操作归 [10](10_vla_platform.md)。
+Evo-1、FastWAM、VLA-JEPA 的模型声明共用 LeRobot 后端，不再为每个系列建一个 Python 插件目录。模型声明只选择 backend、policy_type、已接通的操作和机器人合同，不允许自行定义训练循环。LeRobot 原生 JSON 配置直接传给上游；本地不重写 trainer、processor 或 checkpoint 格式。共享入口存在与具体模型可用是两件事，三个新模型仍为 planned；具体状态、缺口和操作归 [10](10_vla_platform.md)。
+
+目录职责：`configs/models/` 选择模型及后端，`configs/experiments/` 组合实验，`configs/environments/` 选择系列 Conda prefix，`configs/robots/` 持有机器人合同投影。`adapters/` 按后端组织代码，`packages/vla-platform/` 只做跨进程编排；已有 `src/openpi/` 和 `scripts/train.py` 是 Pi 原生实现，`scripts/thor/` 继续承载现有部署/评测，`docs/reports/thor/` 保存证据。不为凑目录树新建空的 deployment/evaluation 层，也不移动现有实机脚本导致远端路径失效。
+
+原型 `plugins/<family>/` 已撤销，项目配置升级为 schema 2；实验、环境和模型包用 `model` 字段替代 `plugin`，不提供旧控制层格式兼容。原始模型权重、历史报告、运行记录不迁移或改写。机器资源继续由 [02](02_installation_and_environment.md) 统一记录，当前执行器不自动 SSH 或复制服务器配置到各模型代码中。
 
 以下数据流和 32D/H50、delta 配置描述的是 **Pi 后端**，不是对所有模型的统一要求。
 

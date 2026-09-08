@@ -1,4 +1,4 @@
-"""Declarative plugin registry and dependency-free command planning."""
+"""Model selection and shared backend command planning, without model imports."""
 
 from dataclasses import asdict
 from dataclasses import dataclass
@@ -46,7 +46,7 @@ def render(template, values):
 @dataclass(frozen=True)
 class Plan:
     schema_version: int
-    plugin: str
+    model: str
     operation: str
     run_id: str
     cwd: str
@@ -56,6 +56,7 @@ class Plan:
     contract_id: str
     source_hashes: dict[str, str]
     target: str
+    implementation: str
     acceptance: str = "planned_not_executed"
 
     def to_dict(self):
@@ -67,18 +68,31 @@ class Project:
         self.root = Path(root).resolve()
         self.settings_path = self.root / "vla.toml"
         self.settings = read_toml(self.settings_path)
-        require(self.settings.get("schema_version") == 1, "Unsupported project version")
+        require(self.settings.get("schema_version") == 2, "Unsupported project version")
 
-    def plugins(self):
-        directory = inside(self.root, self.settings["plugins"])
+    def models(self):
+        directory = inside(self.root, self.settings["models"])
         found = {}
-        for path in sorted(directory.glob("*/plugin.toml")):
-            plugin = read_toml(path)
-            name = identifier(plugin["id"])
-            require(name not in found, f"Duplicate plugin: {name}")
-            require(plugin.get("schema_version") == 1, f"Invalid plugin schema: {name}")
-            require(plugin.get("status") in ("implemented", "planned"), f"Invalid plugin status: {name}")
-            found[name] = (path, plugin)
+        for path in sorted(directory.glob("*.toml")):
+            model = read_toml(path)
+            name = identifier(model["id"])
+            require(name not in found, f"Duplicate model: {name}")
+            require(model.get("schema_version") == 1, f"Invalid model schema: {name}")
+            require(model.get("status") in ("implemented", "planned"), f"Invalid model status: {name}")
+            require(model.get("backend") in self.backends(), f"Unknown backend for model: {name}")
+            require(isinstance(model.get("operations", []), list), "Model operations must be a capability list")
+            found[name] = (path, model)
+        return found
+
+    def backends(self):
+        found = {}
+        for path in sorted(inside(self.root, self.settings["backends"]).glob("*/backend.toml")):
+            backend = read_toml(path)
+            name = identifier(backend["id"])
+            require(name not in found, f"Duplicate backend: {name}")
+            require(backend.get("schema_version") == 1, f"Invalid backend schema: {name}")
+            require(backend.get("status") == "implemented", f"Backend is not implemented: {name}")
+            found[name] = (path, backend)
         return found
 
     def plan(self, experiment_path, operation, run_id):
@@ -86,17 +100,19 @@ class Project:
         experiment_path = Path(experiment_path).resolve()
         experiment = read_toml(experiment_path)
         require(experiment.get("schema_version") == 1, "Unsupported experiment version")
-        name = identifier(experiment["plugin"])
-        require(name in self.plugins(), f"Unknown plugin: {name}")
-        plugin_path, plugin = self.plugins()[name]
-        require(plugin["status"] == "implemented", f"{name}: planned, not integrated")
-        operations = plugin.get("operations", {})
-        require(operation in operations, f"{name} does not implement {operation}")
+        name = identifier(experiment["model"])
+        require(name in self.models(), f"Unknown model: {name}")
+        model_path, model = self.models()[name]
+        require(model["status"] == "implemented", f"{name}: planned, not integrated")
+        require(operation in model.get("operations", []), f"{name} does not implement {operation}")
+        backend_path, backend = self.backends()[model["backend"]]
+        operations = backend.get("operations", {})
+        require(operation in operations, f"Backend {model['backend']} does not implement {operation}")
         op = operations[operation]
         profile_path = inside(self.root, experiment["environment"])
         profile = read_toml(profile_path)
         require(profile.get("manager") == "conda", "Only Conda runtime profiles are supported")
-        require(profile.get("plugin") == name, "Environment belongs to another model family")
+        require(profile.get("model") == name, "Environment belongs to another model family")
         require(profile.get("target") in ("workstation", "server", "thor"), "Unsupported execution target")
         require(profile.get("target") in op["targets"], "Operation cannot run on this target")
         require(profile.get("schema_version") == 1, "Unsupported environment profile version")
@@ -105,16 +121,25 @@ class Project:
         require(prefix.name not in ("base", "miniconda3", "anaconda3"), "Do not use a base environment")
         contract_path = inside(self.root, experiment["contract"])
         contract = validate_contract(read_toml(contract_path))
-        require(contract["id"] in plugin["contracts"], "Model has no adapter for this robot contract")
+        require(contract["id"] in model["contracts"], "Model has no adapter for this robot contract")
         values = experiment.get("parameters", {})
         require(isinstance(values, dict), "parameters must be a table")
         require(all(type(v) in (str, int, float, bool) for v in values.values()), "Parameters must be scalar")
-        reserved = {"root", "output", "run_id", "contract"}
+        reserved = {"root", "output", "run_id", "contract", "policy_type"}
         require(not reserved.intersection(values), "Parameters overwrite platform fields")
         required = set(op.get("required", []))
         require(required.issubset(values), f"Missing parameters: {sorted(required - values.keys())}")
         for key, allowed in op.get("choices", {}).items():
             require(values.get(key) in allowed, f"Unsupported {key}: {values.get(key)}")
+        # Native configuration remains upstream JSON; record its hash, not a lossy translation.
+        file_sources = []
+        values = dict(values)
+        for key in op.get("file_parameters", []):
+            path = Path(values[key]).expanduser()
+            path = path.resolve() if path.is_absolute() else (self.root / path).resolve()
+            require(path.is_file(), f"Missing native configuration: {path}")
+            values[key] = str(path)
+            file_sources.append(path)
         output = inside(self.root, self.settings["runs"]) / run_id
         values = {
             **values,
@@ -122,16 +147,19 @@ class Project:
             "output": str(output / "artifacts"),
             "run_id": run_id,
             "contract": str(contract_path),
+            "policy_type": model.get("policy_type", ""),
         }
         args = [render(token, values) for token in op["command"]]
-        require(bool(args) and args[0] == "python", "Plugin entrypoint must run Python inside Conda")
+        require(bool(args) and args[0] == "python", "Model entrypoint must run Python inside Conda")
         command = ["conda", "run", "--no-capture-output", "--prefix", str(prefix), *args]
-        sources = [self.settings_path, experiment_path, plugin_path, profile_path, contract_path]
-        sources.extend(inside(self.root, path) for path in plugin.get("sources", []))
+        sources = [self.settings_path, experiment_path, model_path, backend_path, profile_path, contract_path]
+        sources.extend(file_sources)
+        sources.extend(inside(self.root, path) for path in backend.get("sources", []))
+        sources.append(inside(self.root, profile["spec"]))
         if profile["target"] == "thor" and operation in ("infer", "benchmark"):
             sources.append(self.root / "scripts/thor/maxn_session.py")
         return Plan(
-            1,
+            2,
             name,
             operation,
             run_id,
@@ -142,6 +170,7 @@ class Project:
             contract["id"],
             {str(p): digest(p) for p in sources},
             profile["target"],
+            model["backend"],
         )
 
     def environment_plan(self, profile_path):
@@ -150,7 +179,7 @@ class Project:
         require(profile.get("manager") == "conda", "Only Conda environments are supported")
         require(profile.get("schema_version") == 1, "Unsupported environment profile version")
         require(profile.get("target") in ("workstation", "server", "thor"), "Unsupported execution target")
-        require(profile.get("plugin") in self.plugins(), "Unknown environment plugin")
+        require(profile.get("model") in self.models(), "Unknown environment model")
         spec = inside(self.root, profile["spec"])
         prefix = Path(profile["prefix"])
         require(prefix.is_absolute() and len(prefix.parts) >= 4, "Use a dedicated absolute Conda prefix")

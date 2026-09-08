@@ -17,6 +17,7 @@ def main(argv=None):
     parser.add_argument("--root", type=Path, default=Path.cwd())
     sub = parser.add_subparsers(dest="action", required=True)
     sub.add_parser("models")
+    sub.add_parser("backends")
     for name in ("plan", "run"):
         p = sub.add_parser(name)
         p.add_argument("experiment", type=Path)
@@ -40,15 +41,17 @@ def main(argv=None):
                 result = validate_bundle(args.path)
         else:
             project = Project(args.root)
-            if args.action == "models":
+            if args.action in ("models", "backends"):
+                registry = project.models() if args.action == "models" else project.backends()
                 result = [
                     {
                         "id": key,
                         "status": value[1]["status"],
+                        "backend": value[1].get("backend", key),
                         "operations": sorted(value[1].get("operations", {})),
                         "note": value[1].get("note", ""),
                     }
-                    for key, value in project.plugins().items()
+                    for key, value in registry.items()
                 ]
             elif args.action in ("plan", "run"):
                 experiment = args.experiment if args.experiment.is_absolute() else project.root / args.experiment

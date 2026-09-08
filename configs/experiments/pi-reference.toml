@@ -1,5 +1,5 @@
 schema_version = 1
-plugin = "pi"
+model = "pi"
 environment = "configs/environments/pi-workstation.toml"
 contract = "configs/robots/yam.toml"
 

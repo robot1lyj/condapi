@@ -2,7 +2,7 @@
 
 ## 项目定位
 
-2026-09-08 起在独立工作树分支推进多模型接入层改造：复用 LeRobot 的模型、数据处理器和训练器，本仓库只增加配置、Conda 运行、模型交接与 Thor 部署适配；不重写第二套 LeRobot。下文 OpenPI 规则仍适用于 Pi 插件，不能套用到所有模型。当前阶段与操作见 `docs/10_vla_platform.md`，架构 owner 为 `docs/01_system_architecture.md`。
+2026-09-08 起在独立工作树分支推进多模型接入层改造：复用 LeRobot 的模型、数据处理器和训练器，本仓库只增加配置、Conda 运行、模型交接与 Thor 部署适配；不重写第二套 LeRobot。模型放 `configs/models/`，代码入口按 `adapters/openpi`、`adapters/lerobot` 后端组织，不再为每个模型复制插件/训练循环。下文 OpenPI 规则仍适用于 Pi 后端，不能套用到所有模型。当前阶段与操作见 `docs/10_vla_platform.md`，架构 owner 为 `docs/01_system_architecture.md`。
 
 本仓库是 OpenPI 的 YAM 双臂训练适配分支，当前默认任务是使用 LeRobot 数据对 YAM（与 YAM-ABC 同硬件配置）进行 VLA 后训练，并把训练后 policy 部署到 NVIDIA Jetson AGX Thor 端侧推理。系统由两台 IPC 组成：Thor 只负责模型推理，3588 负责相机采集、机械臂控制和控制侧逻辑，两者通过网线直连交换数据。首选模型是 Pi0.5，首选低显存路线是 LoRA；训练仍在服务器 GPU 上，模型不再放在远程推理服务器。OpenArm、Piper 和独立 YAM-ABC-Reproduce 代码只作为 legacy/reference，不是本项目默认实现。
 
@@ -27,13 +27,15 @@
 - `docs/05_inference_and_rollout.md`：训练后 policy 的 Thor 本地协议、Thor↔3588 网络通道和最小 smoke；不承载机械臂驱动说明。
 - `docs/08_thor_edge_deployment.md`：Thor 官方系统、容器环境、Pi0.5 转换/加速和端侧验收；下属 `docs/reference/thor/` 为按阶段读取的安装操作冷手册，不承载机械臂驱动说明。
 - `docs/09_memory_system.md`：记忆预算、证据生命周期、skill 接入与迭代验收。
-- `docs/10_vla_platform.md`：新接入层的操作、插件状态、Conda 工作流和模型接入验收；不是模型训练实现的第二份文档。
+- `docs/10_vla_platform.md`：新接入层的操作、模型/后端状态、Conda 工作流和模型接入验收；不是模型训练实现的第二份文档。
 - `docs/06_openarm_research_plan.md`：历史 OpenArm/KAI0/Evo-RL 研究归档，不是当前 YAM 路线。
 - `docs/07_change_log.md`：按日期记录原因和结果。
 - `docs/reference/`：长篇技术参考或 legacy；默认入口不依赖其中的旧结论。
 
 ## 代码与目录
 
+- `configs/`：模型选择、原生配置引用、系列环境、实验与机器人合同投影。
+- `adapters/`：共享 LeRobot/OpenPI 入口；`packages/vla-platform/` 只做无模型依赖的调度和交接。
 - `src/openpi/`：模型、策略、训练、数据 transform 和公共工具。
 - `packages/openpi-client/`：通用机器人侧 WebSocket/IO 客户端；YAM 机械臂控制不在本次训练适配范围。
 - `scripts/`：训练、数据准备、服务和审计入口。

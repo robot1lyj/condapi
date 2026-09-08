@@ -1,5 +1,7 @@
 schema_version = 1
 id = "evo1"
+backend = "lerobot"
+policy_type = "evo1"
 status = "planned"
 contracts = []
 note = "LeRobot/RLinf implementations exist upstream; YAM adapter, Conda lock and Thor inference not integrated."

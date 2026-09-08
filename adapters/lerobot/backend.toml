@@ -1,0 +1,13 @@
+schema_version = 1
+id = "lerobot"
+status = "implemented"
+note = "Shared native LeRobot launcher; per-model YAM capabilities remain planned until tested."
+sources = ["adapters/lerobot/train.py"]
+# API reference, not a validated CUDA dependency lock.
+upstream_revision = "2774d9bddcbbda50e697e162e89e7eaada8d7105"
+
+[operations.train]
+targets = ["server"]
+required = ["native_config"]
+file_parameters = ["native_config"]
+command = ["python", "{root}/adapters/lerobot/train.py", "--config", "{native_config}", "--policy-type", "{policy_type}", "--output", "{output}"]

@@ -1,3 +1,4 @@
-schema_version = 1
-plugins = "plugins"
+schema_version = 2
+models = "configs/models"
+backends = "adapters"
 runs = "runs/platform"

@@ -1,0 +1,7 @@
+schema_version = 1
+id = "pi"
+backend = "openpi"
+status = "implemented"
+contracts = ["yam-bimanual-v1"]
+operations = ["train", "infer", "benchmark", "export"]
+note = "Existing OpenPI entrypoints wired; new Conda environments are not GPU-audited."

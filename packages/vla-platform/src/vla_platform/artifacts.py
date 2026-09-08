@@ -21,7 +21,7 @@ def validate_bundle(path):
     validate_manifest(manifest, path.parent)
     return {
         "status": "integrity_verified_not_accuracy_or_deployment_accepted",
-        "plugin": manifest["plugin"],
+        "model": manifest["model"],
         "model_version": manifest["model_version"],
         "files": len(manifest["files"]),
         "manifest_sha256": digest(path),
@@ -47,7 +47,7 @@ def seal_bundle(recipe_path, output):
 def validate_manifest(manifest, root):
     require(manifest.get("schema_version") == 1, "Unsupported bundle version")
     require(manifest.get("acceptance") == "unverified", "Bundle integrity cannot grant deployment acceptance")
-    identifier(manifest.get("plugin"))
+    identifier(manifest.get("model"))
     for field in ("model_version", "code_revision", "contract_id"):
         require(isinstance(manifest.get(field), str) and bool(manifest[field]), f"Missing {field}")
     require(manifest.get("format") in ("jax", "pytorch", "tensorrt", "adapter"), "Unknown weight format")

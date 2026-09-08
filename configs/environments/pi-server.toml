@@ -1,6 +1,6 @@
 schema_version = 1
 manager = "conda"
-plugin = "pi"
+model = "pi"
 target = "server"
 prefix = "/home/wuyan/.conda/envs/condapi-yam"
 spec = "environments/bootstrap.yml"

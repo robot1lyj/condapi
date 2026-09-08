@@ -1,5 +1,7 @@
 schema_version = 1
 id = "fastwam"
+backend = "lerobot"
+policy_type = "fastwam"
 status = "planned"
 contracts = []
 note = "Requires video/text preprocessing, Conda lock and YAM/Thor validation."

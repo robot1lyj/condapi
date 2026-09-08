@@ -1,5 +1,7 @@
 schema_version = 1
 id = "vla-jepa"
+backend = "lerobot"
+policy_type = "vla_jepa"
 status = "planned"
 contracts = []
 note = "Requires model-specific temporal data adapter, Conda lock and YAM/Thor validation."

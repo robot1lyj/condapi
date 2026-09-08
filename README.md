@@ -1,11 +1,12 @@
-# YAM VLA 接入层 + OpenPI 后端
+# YAM VLA：LeRobot / OpenPI 后端与 Thor 部署
 
-本功能分支正在改造为 **LeRobot 原生能力 + Conda 薄接入层**。先读 [新架构](docs/01_system_architecture.md#多模型接入层) 和 [框架操作与 Evo-1 接入](docs/10_vla_platform.md)。Pi 已连接现有后端；其他模型仍待适配，未宣称可训练或可部署。
+本功能分支采用 **LeRobot 原生能力 + Conda 薄接入层**。模型选择在 `configs/models/`，共用入口在 `adapters/lerobot/`、`adapters/openpi/`；不同模型系列保持独立 Conda，不复制训练框架。先读 [新架构](docs/01_system_architecture.md#多模型接入层) 和 [框架操作与 Evo-1 接入](docs/10_vla_platform.md)。Pi 已连接现有后端；其他模型仍待真实适配，未宣称可训练或可部署。
 
 无需安装模型依赖即可查看：
 
 ```bash
 python3 scripts/vla.py models
+python3 scripts/vla.py backends
 python3 scripts/vla.py plan configs/experiments/pi-reference.toml infer --run-id pi-plan-001
 ```
 

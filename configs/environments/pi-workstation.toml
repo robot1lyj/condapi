@@ -1,6 +1,6 @@
 schema_version = 1
 manager = "conda"
-plugin = "pi"
+model = "pi"
 target = "workstation"
 prefix = "/home/wuyan-lyj/.conda/envs/vla-pi-dev"
 spec = "environments/bootstrap.yml"
