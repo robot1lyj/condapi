@@ -26,15 +26,15 @@ section{scroll-margin-top:20px}.section-head{display:flex;gap:14px;align-items:c
 <body>
 <header class="masthead"><div class="shell"><div class="brand">THOR / Pi0.5</div><nav class="nav" aria-label="页面导航"><a href="#comparison">方案比较</a><a href="#metrics">指标解释</a><a href="#method">测试条件</a></nav></div></header>
 <main class="shell">
-<div class="intro"><div><div class="eyebrow">推理测试 · 精简阅读版</div><h1>同一个模型，怎样运行更合适？</h1><p class="lead">只保留 7 组有代表性的配置。先看速度，再看它与原始模型的输出差多少。<br>这里比较的是运行框架与数值精度，<strong>不是 7 个不同模型</strong>。</p></div><div class="model">本页统一模型<strong>Pi0.5 · pi05_base</strong>基础权重 / 尚未微调</div></div>
+<div class="intro"><div><div class="eyebrow">推理测试 · 精简阅读版</div><h1>同一个模型，怎样运行更合适？</h1><p class="lead">只保留 {{CONFIG_COUNT}} 组有代表性的配置。先看速度，再看它与原始模型的输出差多少。<br>这里比较的是运行框架与数值精度，<strong>不是 {{CONFIG_COUNT}} 个不同模型</strong>。</p></div><div class="model">本页统一模型<strong>Pi0.5 · pi05_base</strong>基础权重 / 尚未微调</div></div>
 <section class="overview" aria-label="当前候选结果">
-<div class="overview-head"><span class="status">当前部署候选</span><span>TensorRT · BF16 + FP32 · 时间缓存 + GPU 执行图 + 无效填充消除</span></div>
+<div class="overview-head"><span class="status">当前部署候选</span><span>{{CANDIDATE_NOTE}}</span></div>
 <div class="metrics">
-<div class="metric"><div class="metric-label">典型等待时间 · P50</div><div class="value">104.25<span class="unit">ms</span></div><small>一半调用不超过这个时间</small></div>
-<div class="metric"><div class="metric-label">较慢情况下 · P95</div><div class="value">104.94<span class="unit">ms</span></div><small>95% 的调用不超过这个时间</small></div>
-<div class="metric"><div class="metric-label">平均输出偏差 · MAE</div><div class="value">0.002504</div><small>相对原 JAX；不是错误率或百分比</small></div>
+<div class="metric"><div class="metric-label">典型等待时间 · P50</div><div class="value">{{P50}}<span class="unit">ms</span></div><small>一半调用不超过这个时间</small></div>
+<div class="metric"><div class="metric-label">较慢情况下 · P95</div><div class="value">{{P95}}<span class="unit">ms</span></div><small>95% 的调用不超过这个时间</small></div>
+<div class="metric"><div class="metric-label">平均输出偏差 · MAE</div><div class="value">{{MAE}}</div><small>相对原 JAX；不是错误率或百分比</small></div>
 </div>
-<p class="summary-note">典型耗时接近 100ms，尚未低于 100ms。<strong>速度达标不代表任务成功率通过。</strong>当前结果来自基础模型的真实录像回放。</p>
+<p class="summary-note">{{PERFORMANCE_NOTE}}<strong>速度达标不代表任务成功率通过。</strong>当前结果来自基础模型的真实录像回放。</p>
 </section>
 <section id="precision">
 <div class="section-head"><span class="section-no">01</span><h2>先分清：权重精度 ≠ 计算精度</h2></div>
@@ -45,13 +45,13 @@ section{scroll-margin-top:20px}.section-head{display:flex;gap:14px;align-items:c
 <p class="precision-key"><strong>FP32</strong> 是 32 位浮点，保留更多有效数字。<strong>BF16</strong> 是 16 位浮点，更省存储、适合加速，但有效数字更少；它<strong>不是 FP16</strong>。JAX、PyTorch、TensorRT 是执行模型的软件，不是三种模型。本页未展示 FP8 / FP4 量化方案。</p>
 </section>
 <section id="comparison">
-<div class="section-head"><span class="section-no">02</span><h2>7 组配置，一张表看清楚</h2></div>
+<div class="section-head"><span class="section-no">02</span><h2>{{CONFIG_COUNT}} 组配置，一张表看清楚</h2></div>
 <div class="table-panel">
 <div class="table-intro">前几组回答“改变精度有什么影响”，后几组回答“加速后能到多快”。<strong>所有误差统一对照 JAX · 原始参考。</strong>窄屏可左右滑动表格。</div>
 <div class="tablewrap" role="region" aria-label="推理配置比较表，可横向滚动" tabindex="0"><table>
 <caption>同一 Pi0.5 基础模型的代表性运行配置、实际权重格式、计算精度、完整延迟与输出偏差</caption>
 <thead><tr><th scope="col">框架 / 运行方案<small>保留这一组的原因</small></th><th scope="col">内存 / 引擎权重<small>不是原磁盘文件</small></th><th scope="col">主要计算精度<small>混合精度明确标出</small></th><th scope="col" class="numeric">P50 · ms<small>典型耗时 ↓</small></th><th scope="col" class="numeric">P95 · ms<small>较慢耗时 ↓</small></th><th scope="col" class="numeric">平均偏差<small>MAE ↓</small></th><th scope="col" class="numeric">最大偏差<small>最不一致的点 ↓</small></th></tr></thead>
-<tbody><tr data-config="A"><th scope="row"><div class="row-title">JAX · 原始参考 </div><small>全部误差的比较基准</small></th><td><span class="precision fp32">FP32</span></td><td><span class="precision fp32">FP32</span></td><td class="numeric">1,231.48</td><td class="numeric">1,232.37</td><td class="numeric">基准</td><td class="numeric">基准</td></tr><tr data-config="B"><th scope="row"><div class="row-title">JAX · 只改计算精度 </div><small>保留 FP32 权重，只降低主计算精度</small></th><td><span class="precision fp32">FP32</span></td><td><span class="precision mixed">BF16 为主</span></td><td class="numeric">239.76</td><td class="numeric">240.81</td><td class="numeric">0.002699</td><td class="numeric">0.022904</td></tr><tr data-config="C"><th scope="row"><div class="row-title">JAX · 权重也用 BF16 </div><small>进一步降低内存中的权重精度</small></th><td><span class="precision mixed">BF16</span></td><td><span class="precision mixed">BF16 为主</span></td><td class="numeric">177.39</td><td class="numeric">178.24</td><td class="numeric">0.00217</td><td class="numeric">0.018646</td></tr><tr data-config="D"><th scope="row"><div class="row-title">PyTorch · FP32 对照 </div><small>检查转换后是否接近原 JAX 输出</small></th><td><span class="precision fp32">FP32</span></td><td><span class="precision fp32">FP32</span></td><td class="numeric">1,249.23</td><td class="numeric">1,251.13</td><td class="numeric">0.00000109</td><td class="numeric">0.00001526</td></tr><tr data-config="I"><th scope="row"><div class="row-title">PyTorch · 编译加速 </div><small>简单的非 TensorRT 备用路线</small></th><td><span class="precision mixed">BF16 + FP32</span></td><td><span class="precision mixed">BF16 + FP32</span></td><td class="numeric">124.15</td><td class="numeric">125.36</td><td class="numeric">0.002148</td><td class="numeric">0.01608</td></tr><tr data-config="V"><th scope="row"><div class="row-title">TensorRT · 时间缓存版 </div><small>固定时间预计算 + GPU 执行图</small></th><td><span class="precision mixed">BF16 + FP32</span></td><td><span class="precision mixed">BF16 + FP32</span></td><td class="numeric">108.85</td><td class="numeric">109.52</td><td class="numeric">0.002518</td><td class="numeric">0.017523</td></tr><tr class="candidate" data-config="W"><th scope="row"><div class="row-title">TensorRT · 填充优化版 <span class="badge">当前候选</span></div><small>在时间缓存版上去掉无效文本填充</small></th><td><span class="precision mixed">BF16 + FP32</span></td><td><span class="precision mixed">BF16 + FP32</span></td><td class="numeric">104.25</td><td class="numeric">104.94</td><td class="numeric">0.002504</td><td class="numeric">0.017282</td></tr></tbody></table></div>
+<tbody>{{ROWS}}</tbody></table></div>
 <div class="table-note"><strong>怎么选：</strong>原始 JAX 是数值参考；PyTorch FP32 用来检查转换；PyTorch 编译版是备用路线；“填充优化版”是当前性能候选。<strong>它遇到超长有效文本会拒绝，需显式使用“时间缓存版”，尚无自动切换。</strong>“基准”是自己与自己比较，不表示模型动作一定正确。</div>
 </div>
 </section>
@@ -63,24 +63,24 @@ section{scroll-margin-top:20px}.section-head{display:flex;gap:14px;align-items:c
 <article class="card"><h3>MAE · 平均偏差</h3><p>同一输入、同一噪声下，把输出动作与原 JAX 逐项相减，取绝对值，再求平均。</p><span class="example">0.50 与 0.51 的单项偏差是 0.01。</span></article>
 <article class="card"><h3>最大偏差 · 最坏差值</h3><p>从所有比较点中找出最大的绝对差，避免平均值掩盖某个关节或夹爪的明显变化。它容易受单个异常点影响，不能单独判定方案好坏。</p><span class="example">MAE 看整体；最大偏差看异常点。</span></article>
 </div>
-<p class="footnote"><strong>误差小 ≠ 抓取成功率高。</strong>这里的偏差沿用数据集单位，尚未校准成弧度、毫米等物理量；0.0025 不能读成“损失 0.25%”。误差统计使用 9 个不同输入，不把重复测速当成更多独立样本。</p>
+<p class="footnote"><strong>误差小 ≠ 抓取成功率高。</strong>这里的偏差沿用数据集单位，尚未校准成弧度、毫米等物理量；0.0025 不能读成“损失 0.25%”。误差统计使用 {{SAMPLES}} 个不同输入，不把重复测速当成更多独立样本。</p>
 <p class="precision-key">深入判断时，还要按关节 / 夹爪分别看偏差，以及<strong>误差 P95</strong>（95% 的输出比较点偏差不超过它）；它与上表以毫秒计的<strong>延迟 P95</strong>不是一回事。最终任务效果要看闭环执行成功率，本页尚未测试。</p>
 </section>
 <section id="method">
 <div class="section-head"><span class="section-no">04</span><h2>测试条件，保持一致</h2></div>
 <div class="card method">
 <div class="conditions"><span>Pi0.5 基础模型 · 未微调</span><span>3 路相机 · 224 × 224 RGB</span><span>一次预测 50 个动作 · H50</span><span>10 步去噪</span><span>单样本 · batch = 1</span><span>仅测试时 MAXN / 锁频</span></div>
-<p>3 条真实 YAM 录像，选取 9 个输入；每个输入预热后重复 20 次，每配置 180 次正式调用。policy 输出为双臂 14 维动作。同一组比较使用相同输入、固定噪声和归一化参数。</p>
+<p>{{EPISODES}} 条真实 YAM 录像，选取 {{SAMPLES}} 个输入；每个输入预热后重复 {{REPEATS}} 次，每配置 {{CALLS}} 次正式调用。policy 输出为双臂 14 维动作。同一组比较使用相同输入、固定噪声和归一化参数。</p>
 <p style="margin-top:10px">计时包含 Thor 上的预处理、模型计算、后处理和 GPU 同步；<strong>不含</strong>模型加载、首次编译、3588 相机采集或网线传输。50 个动作的预测长度与 10 步去噪是两回事。</p>
 <details><summary>工程补充与原始记录（需要复现时再看）</summary><div class="technical">
 <p><strong>时间缓存</strong>提前计算只依赖固定权重和去噪时间点的部分；<strong>CUDA Graph</strong>记录 GPU 执行流程、减少调度开销。二者都不是复用上一帧图像或动作。填充优化版另去掉末尾无效文本填充，实际图像、状态和文字仍参与推理。</p>
 <p style="margin-top:10px">填充优化不宣称与原 200 长度路径零差异：FP32 的原严格诊断为 8/9 通过；同文本桶的导出准备对照、同引擎图/非图对照分别零差异。最终输出对原 JAX 仍有表中的偏差。基础模型未验证未来 LoRA 合并或机械臂任务成功率。</p>
-<ul class="runs"><li><strong>JAX · 原始参考</strong><code>pi05-A-20260907-r2</code></li><li><strong>JAX · 只改计算精度</strong><code>pi05-B-20260907-r1</code></li><li><strong>JAX · 权重也用 BF16</strong><code>pi05-C-20260907-r1</code></li><li><strong>PyTorch · FP32 对照</strong><code>pi05-D-20260907-r1</code></li><li><strong>PyTorch · 编译加速</strong><code>pi05-I-20260907-r1</code></li><li><strong>TensorRT · 时间缓存版</strong><code>pi05-V-20260907-r1</code></li><li><strong>TensorRT · 填充优化版</strong><code>pi05-W-20260908-r1</code></li></ul>
-<p>完整历史共 18 组、3240 次正式调用，未删除。失败尝试、逐层分析、逐样本指标和版本指纹不再铺满本页，保留在 <a href="status.json">完整实验 JSON</a> 及仓库原始证据中。</p>
+<ul class="runs">{{EVIDENCE}}</ul>
+<p>完整历史共 {{TOTAL_CONFIGS}} 组、{{TOTAL_CALLS}} 次正式调用，未删除。失败尝试、逐层分析、逐样本指标和版本指纹不再铺满本页，保留在 <a href="status.json">完整实验 JSON</a> 及仓库原始证据中。</p>
 </div></details>
 </div>
 </section>
-<footer><span>离线静态报告 · 无外部资源 · 展示精简，原始数据保留</span><span class="updated">实测记录更新时间：2026-09-08T01:00:30.467061+08:00</span></footer>
+<footer><span>离线静态报告 · 无外部资源 · 展示精简，原始数据保留</span><span class="updated">实测记录更新时间：{{UPDATE}}</span></footer>
 </main>
 </body>
 </html>
