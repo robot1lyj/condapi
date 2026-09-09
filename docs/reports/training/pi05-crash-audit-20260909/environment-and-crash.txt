@@ -1,0 +1,7 @@
+No broken requirements found.
+6dae84dd539d12ed0c28bca9a34f08bd45e7702fc8d8494ae55b3a5b5c8a99e8  /home/wuyan/lyj/YAM/env-transfer/lego-full-a53bb00/scripts/train.py
+258a60f54ee4aabf462aceafe9a0976cf890d5b5ca88e054d0da8f86cf4ed8c4  /home/wuyan/lyj/YAM/env-transfer/lego-full-a53bb00/src/openpi/training/data_loader.py
+324:Fatal Python error: Fatal Python error: Segmentation faultSegmentation fault
+387:  File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/multiprocessing/queues.py", line 251E0909 09:33:17.682668 3091281 pjrt_stream_executor_client.cc:3077] Execution of replica 0 failed: INTERNAL: NCCL operation ncclGroupEnd() failed: unhandled cuda error (run with NCCL_DEBUG=INFO for details). Last NCCL warning(error) log entry (may be unrelated) 'Cuda failure 'an illegal memory access was encountered''.
+394:  File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/threading.py", line E0909 09:33:17.682653 3091278 pjrt_stream_executor_client.cc:3077] Execution of replica 0 failed: INTERNAL: NCCL operation ncclGroupEnd() failed: unhandled cuda error (run with NCCL_DEBUG=INFO for details). Last NCCL warning(error) log entry (may be unrelated) 'Cuda failure 'an illegal memory access was encountered''.
+415:  File "/home/wuyan/lyj/YAM/env-transfer/lego-full-a53bb00/scripts/train.py", line 334 in main

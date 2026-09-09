@@ -1,0 +1,11 @@
+{
+  "observed_at": "2026-09-09T17:04:35.395736+08:00",
+  "dataset": "/home/wuyan/lyj/YAM/YAM_data/processed/lego_lerobot_v1_20260907/train",
+  "provenance_sha256": "87c87d8319efe74a050388c2c7cefa68f06f5ba3ef8f780d2cef735c397b0f47",
+  "parquet_files": 4458,
+  "frames": 10374181,
+  "hashes_match": true,
+  "errors": [],
+  "seconds": 19.087335307034664,
+  "scope": "All published numeric Parquet hashes, Nx14 finite state/action, metadata hashes, norm finite; no video decode, no model execution, no training"
+}
