@@ -29,3 +29,12 @@
 
 代码验证：配置检查、无checkpoint拒绝resume/缺目录不创建、已有checkpoint允许resume的mock测试，
 加看板13项测试共17项通过。此测试不替代新运行GPU/完整checkpoint验收。
+
+## 新一轮启动验收（09:20 CST）
+
+- 快照a53bb001e4acb2cce486f2da83d6d8256439a188，从已配置Gitea获取；本地同提交已核对双远端。
+- 09:16:39启动新run `lego_full_b64_r2_20260909`，Slurm2064.63，PID3091182，tmux yam-lego-full-r2。
+- [实际配置](initial_config.json)与[早期指标快照](launch_metrics.jsonl)从新run只读复制，不是实时日志。
+- 21→31→41步，loss0.06119535→0.04840846→0.04490658，梯度有限，近期约3.36秒/步。
+- 四GPU100%、显存约22828MiB，温度56–61°C；本地API同步41步、保存间隔5000、无同步错误。
+- 仅短时运行恢复已验证，不代表驱动问题根治或40k已完成；首份5k checkpoint仍待产生并验收。

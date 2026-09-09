@@ -36,7 +36,16 @@ EDAC累计CE127134、UE0，并有CPU0_DIMM_B1单bit corrected ECC记录；未建
 原生崩溃启用 `PYTHONFAULTHANDLER=1`，`--resume` 无已提交checkpoint时强制拒绝。
 看板service同步新run和独立缓存 `artifacts/training_dashboard/recovery_20260909/metrics.jsonl`，
 显式传入save-interval5000；每10秒刷新不调用模型。每小时巡检`pi0-5`已更新为主动恢复模式。
-实际新快照/启动验收在本段补记后才算已启动，不以配置更改代替启动证据。
+9月9日09:16:39已提交新进程：Slurm2064.63、PID3091182、tmux `yam-lego-full-r2`，
+固定Gitea快照 `/home/wuyan/lyj/YAM/env-transfer/lego-full-a53bb00`（a53bb001e4acb2cce486f2da83d6d8256439a188）。
+启动命令：`LEGO_RUN_NAME=lego_full_b64_r2_20260909 bash scripts/launch_lego_full.sh 2064`。
+恢复时使用同一快照/环境/run，加`--resume`，先核验完整checkpoint与无重复进程。
+实际`initial_config.json`已核对save_interval=keep_period=5000、batch64、steps40000、resume=false。
+新控制目录 `/home/wuyan/lyj/YAM/training-runs/control/lego_full_b64_r2_20260909`，
+新run目录 `/home/wuyan/lyj/YAM/training-runs/pi05_yam/lego_full_b64_r2_20260909`。
+09:20启动验收：已核对真实日志21→31→41，step41 loss0.04490658、grad_norm0.28559217、
+3.364秒/步；四GPU100%、约22828MiB/卡、56–61°C。看板API已同步41步、save_interval5000、
+无同步错误。此为启动验收，首份完整checkpoint与长期稳定性仍须后续验证。
 
 ## 正式运行：2026-09-08 Lego全量微调（历史启动记录）
 
