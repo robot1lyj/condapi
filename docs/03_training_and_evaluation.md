@@ -19,6 +19,17 @@
 
 ## 2026-09-09 故障恢复与当前授权
 
+**09:41再次核验：r2已于09:33:21崩溃，下面09:20启动成功不代表当前在训。**
+最后logged step271，进度条278，SIGSEGV；NCCL报告illegal memory access，内核GPU1（PCI52:00.0）
+Xid13 Out Of Range Address，继发Xid43。CPU corrected ECC计数127141，UE0，不能直接归因硬件。
+gpu002四卡均已分配，无空闲替代四卡节点，不取消其他作业。原样重启已复现，不再盲重开正式run。
+09:43:27启动独立诊断 `lego_full_memcheck_20260909`、tmux `yam-lego-memcheck`，同a53bb00快照，
+使用`/usr/local/cuda-13.2/bin/compute-sanitizer --tool memcheck --error-exitcode 86`包裹正式入口，
+batch64/FSDP4不变、仅20步、Slurm限时30分钟，NCCL_DEBUG=INFO；不是40k正式训练或已修复。
+诊断日志 `/home/wuyan/lyj/YAM/training-runs/control/lego_full_memcheck_20260909/diagnostic.log`。
+下一次巡检先查诊断结果/实际步骤与退出码，再决定有证据支持的代码或环境修复，不重复启动诊断。
+插桩额外显存/超时不能当原训练OOM或训练健康验收；需管理员排查时提供GPU1 Xid13/43和DIMM_B1证据。
+
 以下取代旧运行的保存周期与“无checkpoint等待确认”边界：用户已授权主动排障、修复并恢复训练，
 保存/保留间隔均为5000步；batch64/FSDP4、LR、精度、数据和40k阶段终点不变。
 有完整checkpoint优先真续训；没有则允许保留旧现场，在新run从base重开，不能混接旧步数或loss。

@@ -1,5 +1,17 @@
 # 2026-09-09 Pi0.5 全量训练中断诊断
 
+## 09:41补充：第二轮再次崩溃
+
+原始日志保存在[r2_crash.log](r2_crash.log)。2064.63于09:33:21以0:11退出，最后logged271步，
+loss0.02552907；09:33:17 NCCL ncclGroupEnd报告CUDA illegal memory access。
+09:33:23内核GPU1（PCI52:00.0）Xid13 Out Of Range Address / Multiple Warp Errors，继发Xid43。
+因此崩溃涉及GPU非法地址访问，不再只有CPU栈线索；不能直接宣称是驱动自身bug或坏显卡。
+根据[NVIDIA Xid13排查说明](https://docs.nvidia.com/deploy/xid-errors/analyzing-xid-catalog.html)，
+先使用Compute Sanitizer定位非法读写；这类错误也可能来自应用，不能单凭Xid诊断硬件。
+09:43:27启动独立20步memcheck诊断，Slurm限时30分钟，正式两轮目录保留。
+诊断使用原数学参数，插桩若引入显存不足需单独识别；20步无错误也不足以排除长时偶发问题。
+gpu002现已分配全部4卡，未申请抢占、未取消他人作业。CPU CE计数127141、UE0，DIMM_B1持续有corrected报警。
+
 观察时间：2026-09-09 09:06–09:16 CST。只记录有证据的定位，不宣称根因已解决。
 
 - Slurm2064.33：2026-09-08 14:03:50 → 2026-09-09 05:21:05，15:17:15，ExitCode `0:11`。
