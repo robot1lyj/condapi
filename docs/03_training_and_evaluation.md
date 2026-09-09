@@ -17,7 +17,28 @@
 - 依据：`src/openpi/models/pi0.py::compute_loss`、`scripts/train.py::train_step/main`及
   `scripts/training_dashboard.html`的绘图逻辑；运行版本f93a792与启动证据见本页下文。
 
-## 正式运行：2026-09-08 Lego全量微调
+## 2026-09-09 故障恢复与当前授权
+
+以下取代旧运行的保存周期与“无checkpoint等待确认”边界：用户已授权主动排障、修复并恢复训练，
+保存/保留间隔均为5000步；batch64/FSDP4、LR、精度、数据和40k阶段终点不变。
+有完整checkpoint优先真续训；没有则允许保留旧现场，在新run从base重开，不能混接旧步数或loss。
+反复原样重试不构成修复，驱动/硬件需管理员权限时提供证据并寻求安全替代，不擅自升级系统驱动。
+
+9月9日09:06现场核验：旧步骤2064.33于05:21:05以SIGSEGV退出，最后日志16031步，loss0.01768966，
+旧run仅metrics、没有正式checkpoint。四卡allocation仍有效、GPU空闲。core虽然journal访问受限，
+其文件ACL允许本用户读取，已解压并通过GDB检查；PC `0x7fee0e2787c7` 落在
+`/usr/lib64/libcuda.so.595.45.04` 映射内。core截断为1GiB，栈页缺失，不能据此宣称已定位最终根因。
+EDAC累计CE127134、UE0，并有CPU0_DIMM_B1单bit corrected ECC记录；未建立与05:21退出的因果关系。
+无已见OOM/磁盘满证据。现场证据与管理员建议见
+[故障记录](reports/training/pi05-recovery-20260909/README.md)。
+
+本次恢复目标run为 `lego_full_b64_r2_20260909`，与旧run隔离。入口新增 `LEGO_RUN_NAME`，
+原生崩溃启用 `PYTHONFAULTHANDLER=1`，`--resume` 无已提交checkpoint时强制拒绝。
+看板service同步新run和独立缓存 `artifacts/training_dashboard/recovery_20260909/metrics.jsonl`，
+显式传入save-interval5000；每10秒刷新不调用模型。每小时巡检`pi0-5`已更新为主动恢复模式。
+实际新快照/启动验收在本段补记后才算已启动，不以配置更改代替启动证据。
+
+## 正式运行：2026-09-08 Lego全量微调（历史启动记录）
 
 用户已授权并于北京时间14:03启动，首个更新14:05:36完成。运行在Slurm2064的步骤2064.33、
 gpu001、tmux `yam-lego-full`；这些是启动观察，巡检必须重新查询。固定代码快照
