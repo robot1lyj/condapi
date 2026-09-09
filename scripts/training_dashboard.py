@@ -1,13 +1,16 @@
 """Read-only, local training dashboard; standard library only, no model/token usage.
 
-Serve a fixed JSONL path. Optionally mirror that one file over SSH every 10 seconds.
+Serve configured JSONL, CSV or Trainer-state sources. Optionally mirror one file over SSH.
 Never starts training, edits checkpoints, or exposes the repository as a file server.
 """
 
 import argparse
 from collections import deque
+import contextlib
+import csv
 from http.server import BaseHTTPRequestHandler
 from http.server import ThreadingHTTPServer
+import io
 import json
 import math
 from pathlib import Path
@@ -15,6 +18,8 @@ import re
 import subprocess
 import threading
 import time
+from urllib.parse import parse_qs
+from urllib.parse import urlsplit
 
 HTML = Path(__file__).with_name("training_dashboard.html")
 MAX_BYTES = 32 * 1024 * 1024
@@ -25,42 +30,111 @@ def number(value):
     return isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value)
 
 
-def read_metrics(path, batch_size):
-    """Ignore partial writes; a backward step invalidates the abandoned future branch."""
+ALIASES = {
+    "step": ("step", "global_step", "steps", "trainer/global_step"),
+    "loss": ("loss", "train/loss", "train_loss"),
+    "val_loss": ("val_loss", "eval_loss", "eval/loss", "validation/loss"),
+    "learning_rate": ("learning_rate", "lr", "train/lr"),
+}
+
+
+def flatten(value, prefix="", depth=0):
+    if depth > 8:
+        raise ValueError("metric nesting exceeds eight levels")
+    result = {}
+    for key, item in value.items():
+        name = f"{prefix}/{key}" if prefix else str(key)
+        if isinstance(item, dict):
+            result.update(flatten(item, name, depth + 1))
+        else:
+            result[name] = item
+    return result
+
+
+def normalize(source, field_map=None, *, csv_values=False):
+    """Names may be mapped, but units and numeric precision are never guessed."""
+    source = dict(source)
+    envelope = source.pop("metrics", None)
+    values = flatten(source)
+    if isinstance(envelope, dict):
+        values.update(flatten(envelope))
+    if csv_values:
+        for key, value in values.items():
+            with contextlib.suppress(TypeError, ValueError):
+                values[key] = float(value)
+    row = {key: value for key, value in values.items() if number(value)}
+    for target, names in ALIASES.items():
+        for name in names:
+            if name in row:
+                row.setdefault(target, row[name])
+                break
+    for target, name in (field_map or {}).items():
+        # Explicit mappings override aliases, including an absent/invalid source.
+        row.pop(target, None)
+        if number(values.get(name)):
+            row[target] = values[name]
+    for key in ("schema_version", "timestamp", "wall_time", "global_step", "steps", "trainer/global_step"):
+        row.pop(key, None)
+    bad = any(isinstance(value, float) and not math.isfinite(value) for value in values.values())
+    return row, bad
+
+
+def read_metrics(path, batch_size=None, *, source_format="auto", field_map=None):
+    """One run per source. Same-step train/eval events merge; rollback discards future."""
     if not path.exists():
         return {"rows": [], "modified_at": None, "invalid_lines": 0, "trimmed": False}
     with path.open("rb") as stream:
         raw = stream.read(MAX_BYTES + 1)
     if len(raw) > MAX_BYTES:
         raise ValueError("指标文件超过 32 MiB; 请归档旧日志或提高经过审核的读取上限")
-    rows = deque(maxlen=MAX_ROWS)
+    source_format = (
+        source_format
+        if source_format != "auto"
+        else {".csv": "csv", ".json": "trainer-state"}.get(path.suffix, "jsonl")
+    )
     invalid = 0
+    if source_format == "trainer-state":
+        # Rewritten JSON must be complete; a partial snapshot returns HTTP 503.
+        state = json.loads(raw)
+        if not isinstance(state, dict) or not isinstance(state.get("log_history"), list):
+            raise ValueError("expected a Trainer state object with log_history")
+        sources = state["log_history"]
+    elif source_format == "csv":
+        complete = b"".join(line for line in raw.splitlines(keepends=True) if line.endswith(b"\n"))
+        sources = list(csv.DictReader(io.StringIO(complete.decode("utf-8-sig"))))
+    else:
+        sources = []
+        for line in raw.splitlines(keepends=True):
+            if not line.endswith(b"\n"):
+                continue
+            try:
+                sources.append(json.loads(line))
+            except (ValueError, UnicodeDecodeError):
+                invalid += 1
+    rows = deque(maxlen=MAX_ROWS)
     count = 0
-    for line in raw.splitlines(keepends=True):
-        if not line.endswith(b"\n"):
-            continue
-        try:
-            source = json.loads(line)
-        except (ValueError, UnicodeDecodeError):
-            invalid += 1
-            continue
+    for source in sources:
         if not isinstance(source, dict):
             invalid += 1
             continue
-        if any(isinstance(value, float) and not math.isfinite(value) for value in source.values()):
-            invalid += 1
-        step = source.get("step")
+        row, bad = normalize(source, field_map, csv_values=source_format == "csv")
+        invalid += int(bad)
+        step = row.get("step")
         if not number(step) or step < 0 or int(step) != step:
+            invalid += int(not bad)
             continue
-        row = {key: value for key, value in source.items() if number(value)}
         row["step"] = int(step)
         seconds = row.get("step_seconds", row.get("seconds"))
         if seconds is not None and seconds > 0:
             row["step_seconds"] = seconds
-            row.setdefault("samples_per_second", batch_size / seconds)
-        while rows and rows[-1]["step"] >= step:
-            rows.pop()
-        rows.append(row)
+            if batch_size is not None:
+                row.setdefault("samples_per_second", batch_size / seconds)
+        if rows and rows[-1]["step"] == step:
+            rows[-1].update(row)
+        else:
+            while rows and rows[-1]["step"] >= step:
+                rows.pop()
+            rows.append(row)
         count += 1
     return {
         "rows": list(rows),
@@ -75,35 +149,99 @@ class Dashboard:
         self.args = args
         self.lock = threading.Lock()
         self.sync = {"enabled": bool(args.remote), "last_success": None, "error": None}
+        if args.runs_config:
+            value = json.loads(args.runs_config.read_text())
+            if (
+                not isinstance(value, dict)
+                or value.get("schema_version") != 1
+                or not isinstance(value.get("runs"), list)
+                or not value["runs"]
+            ):
+                raise ValueError("runs config requires schema_version=1 and nonempty runs")
+            specs = value["runs"]
+            base = args.runs_config.resolve().parent
+        else:
+            specs = [
+                {
+                    "id": "default",
+                    "metrics": str(args.metrics.resolve()),
+                    "name": args.name,
+                    "model": args.model,
+                    "backend": args.backend,
+                    "format": args.source_format,
+                    "batch_size": args.batch_size,
+                    "stage_steps": args.stage_steps,
+                    "total_steps": args.total_steps,
+                    "save_interval": args.save_interval,
+                }
+            ]
+            if args.metadata:
+                metadata = json.loads(args.metadata.read_text())
+                if not isinstance(metadata, dict) or set(metadata) - {"parameters", "metric_labels", "loss_semantics"}:
+                    raise ValueError("metadata accepts parameters, metric_labels and loss_semantics only")
+                specs[0].update(metadata)
+            base = Path.cwd()
+        self.runs = {}
+        for spec in specs:
+            if not isinstance(spec, dict) or not isinstance(spec.get("metrics"), str):
+                raise ValueError("each run requires a metrics path")
+            run = dict(spec)
+            for key in ("name", "model", "backend", "loss_semantics"):
+                if key in run and not isinstance(run[key], str):
+                    raise ValueError("run descriptions must be strings")
+            name = run.get("id", "")
+            if (
+                not isinstance(name, str)
+                or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_-]{0,95}", name)
+                or name in self.runs
+            ):
+                raise ValueError("run ids must be unique safe identifiers")
+            run["metrics"] = (base / run["metrics"]).resolve()
+            if run.get("format", "auto") not in ("auto", "jsonl", "csv", "trainer-state"):
+                raise ValueError("unsupported metric format")
+            for key in ("batch_size", "stage_steps", "total_steps", "save_interval"):
+                if run.get(key) is not None and (type(run[key]) is not int or run[key] <= 0):
+                    raise ValueError("run counts must be positive integers or omitted")
+            if run.get("stage_steps") and run.get("total_steps") and run["stage_steps"] > run["total_steps"]:
+                raise ValueError("stage exceeds total steps")
+            for key in ("field_map", "metric_labels", "parameters"):
+                values = run.get(key, {})
+                if not isinstance(values, dict) or any(
+                    not isinstance(k, str) or not isinstance(v, (str, int, float, bool)) for k, v in values.items()
+                ):
+                    raise ValueError("run maps must contain scalar values")
+                if key != "parameters" and any(not isinstance(v, str) for v in values.values()):
+                    raise ValueError("field names and labels must be strings")
+                if any(isinstance(v, float) and not math.isfinite(v) for v in values.values()):
+                    raise ValueError("metadata must be finite")
+            self.runs[name] = run
 
-    def snapshot(self):
+    def list_runs(self):
+        return [
+            {"id": key, "name": run.get("name", key), "model": run.get("model", "未声明")}
+            for key, run in self.runs.items()
+        ]
+
+    def snapshot(self, run_id=None):
+        run = self.runs[run_id or next(iter(self.runs))]
         with self.lock:
             sync = dict(self.sync)
         return {
-            **read_metrics(self.args.metrics, self.args.batch_size),
+            **read_metrics(
+                run["metrics"],
+                run.get("batch_size"),
+                source_format=run.get("format", "auto"),
+                field_map=run.get("field_map"),
+            ),
             "server_time": time.time(),
             "sync": sync,
             "run": {
-                "name": self.args.name,
-                "source": str(self.args.metrics),
-                "batch_size": self.args.batch_size,
-                "stage_steps": self.args.stage_steps,
-                "total_steps": self.args.total_steps,
-                "save_interval": self.args.save_interval,
-                "parameters": {
-                    "模型": "Pi0.5 base · 全量微调",
-                    "全局 batch": self.args.batch_size,
-                    "FSDP": "4 卡",
-                    "精度": "BF16 计算 / FP32 状态",
-                    "EMA": "关闭",
-                    "峰值学习率": "2.5e-5",
-                    "Warmup": "1,000 steps",
-                    "学习率周期": f"cosine / {self.args.total_steps:,} steps",
-                    "优化器": "AdamW · β 0.9 / 0.95",
-                    "梯度裁剪": "1.0",
-                    "数据": "YAM Lego · 4,458 train episodes",
-                    "Action horizon": "50",
-                },
+                **{key: value for key, value in run.items() if key not in ("metrics", "field_map")},
+                "name": run.get("name", run["id"]),
+                "source": str(run["metrics"]),
+                "parameters": run.get("parameters", {}),
+                "loss_semantics": run.get("loss_semantics", "生产者提供的数值; 未声明瞬时值或区间均值"),
+                "metric_labels": run.get("metric_labels", {}),
             },
         }
 
@@ -151,16 +289,23 @@ class Dashboard:
 def make_server(dashboard, port=8765):
     class Handler(BaseHTTPRequestHandler):
         def do_GET(self):
-            route = self.path.split("?", 1)[0]
+            parsed = urlsplit(self.path)
+            route = parsed.path
             if route == "/":
                 body, content_type, status = HTML.read_bytes(), "text/html; charset=utf-8", 200
             elif route == "/api/metrics":
                 try:
-                    data, status = dashboard.snapshot(), 200
+                    data, status = dashboard.snapshot(parse_qs(parsed.query).get("run", [None])[0]), 200
+                except KeyError:
+                    self.send_error(404, "unknown configured run")
+                    return
                 except (OSError, ValueError):
                     data, status = {"error": "无法读取指标文件, 请检查权限、格式或文件大小"}, 503
                 body = json.dumps(data, ensure_ascii=False, allow_nan=False).encode()
                 content_type = "application/json; charset=utf-8"
+            elif route == "/api/runs":
+                body = json.dumps(dashboard.list_runs(), ensure_ascii=False).encode()
+                content_type, status = "application/json; charset=utf-8", 200
             else:
                 self.send_error(404)
                 return
@@ -185,20 +330,34 @@ def make_server(dashboard, port=8765):
 
 def parse_args(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--metrics", type=Path, required=True)
-    parser.add_argument("--name", default="pi05 · lego sorting / full finetune")
+    parser.add_argument("--metrics", type=Path)
+    parser.add_argument(
+        "--runs-config", type=Path, help="Configured runs; relative metric paths resolve beside this JSON"
+    )
+    parser.add_argument("--metadata", type=Path, help="Single-run parameters and metric labels JSON")
+    parser.add_argument("--model", default="未声明")
+    parser.add_argument("--backend", default="未声明")
+    parser.add_argument("--source-format", choices=("auto", "jsonl", "csv", "trainer-state"), default="auto")
+    parser.add_argument("--name", default="本地训练指标")
     parser.add_argument("--port", type=int, default=8765)
-    parser.add_argument("--batch-size", type=int, default=64)
-    parser.add_argument("--stage-steps", type=int, default=40_000)
-    parser.add_argument("--total-steps", type=int, default=162_097)
-    parser.add_argument("--save-interval", type=int, default=20_000)
+    parser.add_argument("--batch-size", type=int)
+    parser.add_argument("--stage-steps", type=int)
+    parser.add_argument("--total-steps", type=int)
+    parser.add_argument("--save-interval", type=int)
     parser.add_argument("--remote", help="Optional SSH alias, e.g. yam-server")
     parser.add_argument("--remote-metrics", help="Absolute remote JSONL file; no shell metacharacters")
     parser.add_argument("--interval", type=int, default=10)
     args = parser.parse_args(argv)
-    if min(args.batch_size, args.stage_steps, args.total_steps, args.save_interval, args.interval) <= 0:
+    if bool(args.metrics) == bool(args.runs_config):
+        parser.error("choose exactly one of --metrics and --runs-config")
+    if args.runs_config and (args.remote or args.remote_metrics or args.metadata):
+        parser.error("multi-run sources are local; mirror each remote source separately")
+    if any(
+        value is not None and value <= 0
+        for value in (args.batch_size, args.stage_steps, args.total_steps, args.save_interval, args.interval)
+    ):
         parser.error("counts and interval must be positive")
-    if args.stage_steps > args.total_steps:
+    if args.stage_steps and args.total_steps and args.stage_steps > args.total_steps:
         parser.error("stage steps must not exceed total steps")
     if args.remote or args.remote_metrics:
         if not args.remote or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.@-]*", args.remote):

@@ -5,7 +5,7 @@ After=network.target
 [Service]
 Type=simple
 WorkingDirectory=%h/condapi
-ExecStart=/usr/bin/python3 %h/condapi/scripts/training_dashboard.py --metrics %h/condapi/artifacts/training_dashboard/live/metrics.jsonl --remote yam-server --remote-metrics /home/wuyan/lyj/YAM/training-runs/pi05_lego_full_b64/metrics/metrics.jsonl --interval 10
+ExecStart=/usr/bin/python3 %h/condapi/scripts/training_dashboard.py --metrics %h/condapi/artifacts/training_dashboard/recovery_20260909/metrics.jsonl --remote yam-server --remote-metrics /home/wuyan/lyj/YAM/training-runs/pi05_yam/lego_full_b64_r2_20260909/metrics/metrics.jsonl --interval 10 --save-interval 5000 --batch-size 64 --stage-steps 40000 --total-steps 162097 --model pi05 --backend OpenPI/JAX --metadata %h/condapi/configs/dashboards/pi-full-metadata.json --name "pi05 · lego full / r2 20260909"
 Restart=on-failure
 RestartSec=10
 NoNewPrivileges=true

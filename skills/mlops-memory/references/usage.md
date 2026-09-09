@@ -23,6 +23,15 @@ Mandatory selections are atomic: if they do not fit, no source text is returned 
 
 Do not use a series of new session IDs to evade the cumulative cap. Only the host can confirm that prior messages have actually left the context. Neither clearing a terminal nor starting a new user turn establishes that fact.
 
+When the user authorizes budget adjustment, resize the existing ledger explicitly:
+
+```bash
+python skills/mlops-memory/scripts/memory_gate.py resize --root . --session SESSION_ID \
+  --context-bytes 196608 --reason 'Specific authorized task need'
+```
+
+This preserves accounting and deduplication history and records the change. Maximum cumulative cap is 262,144 bytes; the packet cap is unchanged. A smaller cap cannot go below already consumed bytes. This does not enlarge the host model token window.
+
 Validate a candidate/verified record without printing its contents:
 
 ```bash

@@ -43,7 +43,7 @@ def test_resume_discards_abandoned_future(tmp_path):
     [
         ["--batch-size", "0"],
         ["--interval", "0"],
-        ["--stage-steps", "200000"],
+        ["--stage-steps", "200000", "--total-steps", "162097"],
         ["--remote", "-oProxyCommand=evil", "--remote-metrics", "/a"],
         ["--remote", "yam-server", "--remote-metrics", "/a;touch /b"],
         ["--remote", "yam-server"],
@@ -122,3 +122,49 @@ def test_successful_mirror_is_atomic(tmp_path, monkeypatch):
     assert app.snapshot()["rows"][0]["step"] == 2
     assert app.sync["source_modified_at"] == 1788842923
     assert not Path(str(path.with_suffix(".pending"))).exists()
+
+
+def test_formats_and_custom_metrics(tmp_path):
+    path = tmp_path / "metrics.jsonl"
+    path.write_text('{"step":2,"metrics":{"loss":0.125,"action":{"mse":0.002}}}\n{"step":2,"eval_loss":0.25}\n')
+    row = dashboard.read_metrics(path)["rows"][0]
+    assert row["loss"] == 0.125
+    assert row["val_loss"] == 0.25
+    assert row["action/mse"] == 0.002
+    csv = tmp_path / "metrics.csv"
+    csv.write_text("iteration,objective,time_ms\n2,0.125,123\n")
+    row = dashboard.read_metrics(csv, field_map={"step": "iteration", "loss": "objective"})["rows"][0]
+    assert row["loss"] == 0.125
+    assert "step_seconds" not in row
+    state = tmp_path / "trainer_state.json"
+    state.write_text(json.dumps({"log_history": [{"step": 2, "loss": 0.125}, {"step": 2, "eval_loss": 0.25}]}))
+    assert dashboard.read_metrics(state)["rows"][0]["val_loss"] == 0.25
+
+
+def test_multirun_isolation_and_metadata(tmp_path):
+    (tmp_path / "pi.jsonl").write_text('{"step":10,"loss":1}\n')
+    (tmp_path / "custom.jsonl").write_text('{"global_step":3,"custom_score":0.95}\n')
+    config = tmp_path / "runs.json"
+    config.write_text(
+        json.dumps(
+            {
+                "schema_version": 1,
+                "runs": [
+                    {"id": "pi", "metrics": "pi.jsonl", "model": "pi05"},
+                    {"id": "custom", "metrics": "custom.jsonl", "model": "anything"},
+                ],
+            }
+        )
+    )
+    app = dashboard.Dashboard(dashboard.parse_args(["--runs-config", str(config)]))
+    assert app.snapshot("pi")["rows"][0]["step"] == 10
+    assert app.snapshot("custom")["rows"][0]["custom_score"] == 0.95
+    assert "batch_size" not in app.snapshot("custom")["run"]
+    with pytest.raises(KeyError):
+        app.snapshot("../../AGENTS.md")
+
+
+def test_unknown_batch_does_not_invent_throughput(tmp_path):
+    path = tmp_path / "metrics.jsonl"
+    path.write_text('{"step":0,"step_seconds":2}\n')
+    assert "samples_per_second" not in dashboard.read_metrics(path)["rows"][0]

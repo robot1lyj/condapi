@@ -15,6 +15,7 @@ import tempfile
 
 PACKET_BYTES = 12_288
 CONTEXT_BYTES = 32_768
+MAX_CONTEXT_BYTES = 262_144
 MAX_SOURCE_BYTES = 2_097_152
 
 
@@ -216,12 +217,30 @@ def initialize(root: Path, session: str, preloaded: list[str], cap: int = CONTEX
 
 def load_state(path: Path, root: Path) -> dict:
     state = json.loads(read_text(path))
-    positive(state["cap"], CONTEXT_BYTES)
+    positive(state["cap"], MAX_CONTEXT_BYTES)
     if state["root"] != str(root.resolve()) or type(state["used"]) is not int:
         raise GateError("ledger does not match context root")
     if not 0 <= state["used"] <= state["cap"] or not isinstance(state["seen"], dict):
         raise GateError("invalid ledger accounting")
     return state
+
+
+def resize(root: Path, session: str, cap: int, reason: str) -> dict:
+    """Explicitly adjust a live ledger without erasing its accounting or history."""
+    positive(cap, MAX_CONTEXT_BYTES)
+    if not reason.strip():
+        raise GateError("budget adjustment requires a reason")
+    path = ledger_path(root, session)
+    with locked(path):
+        state = load_state(path, root)
+        if cap < state["used"]:
+            raise GateError("cannot lower cap below already admitted memory")
+        state.setdefault("adjustments", []).append(
+            {"old_cap": state["cap"], "new_cap": cap, "reason": reason, "at": dt.datetime.now(dt.UTC).isoformat()}
+        )
+        state["cap"] = cap
+        save(path, state)
+    return {"used_bytes": state["used"], "remaining_bytes": cap - state["used"]}
 
 
 def pack(
@@ -292,7 +311,7 @@ def guard_request(
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest="command", required=True)
-    for name in ("init", "pack", "audit", "validate-record"):
+    for name in ("init", "pack", "audit", "resize", "validate-record"):
         command = commands.add_parser(name)
         command.add_argument("--root", type=Path, required=True)
         if name != "validate-record":
@@ -300,6 +319,9 @@ def main() -> int:
         if name == "init":
             command.add_argument("--preloaded", nargs="+", required=True)
             command.add_argument("--context-bytes", type=int, default=CONTEXT_BYTES)
+        elif name == "resize":
+            command.add_argument("--context-bytes", type=int, required=True)
+            command.add_argument("--reason", required=True)
         elif name == "pack":
             command.add_argument("--required", action="append", default=[])
             command.add_argument("--optional", action="append", default=[])
@@ -328,6 +350,8 @@ def main() -> int:
                 output = pack(root, args.session, args.required, args.optional, scope, args.max_bytes, args.purpose)
                 sys.stdout.buffer.write(output)
                 return 0
+            elif args.command == "resize":
+                result = resize(root, args.session, args.context_bytes, args.reason)
             elif args.command == "audit":
                 with locked(ledger_path(root, args.session)):
                     state = load_state(ledger_path(root, args.session), root)

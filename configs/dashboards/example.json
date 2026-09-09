@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "runs": [
+    {
+      "id": "pi-history",
+      "name": "Pi0.5 · 已归档真实训练日志",
+      "model": "pi05",
+      "backend": "OpenPI / JAX",
+      "metrics": "../../docs/reports/training/pi05-full-launch-20260908/metrics.jsonl",
+      "batch_size": 64,
+      "stage_steps": 40000,
+      "total_steps": 162097,
+      "save_interval": 5000,
+      "loss_semantics": "每 10 步区间均值；历史证据，不代表当前作业仍运行"
+    },
+    {
+      "id": "native-example",
+      "name": "自定义模型 · 路径示例（等待数据）",
+      "model": "任意模型",
+      "backend": "原生训练器",
+      "metrics": "../../runs/example/artifacts.metrics/metrics.jsonl",
+      "metric_labels": {"action/mse": "动作均方误差（单位由生产者声明）"}
+    }
+  ]
+}

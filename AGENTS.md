@@ -4,7 +4,7 @@
 
 2026-09-08 起在独立工作树分支推进多模型接入层改造：复用 LeRobot 的模型、数据处理器和训练器，本仓库只增加配置、Conda 运行、模型交接与 Thor 部署适配；不重写第二套 LeRobot。模型放 `configs/models/`，代码入口按 `adapters/openpi`、`adapters/lerobot` 后端组织，不再为每个模型复制插件/训练循环。下文 OpenPI 规则仍适用于 Pi 后端，不能套用到所有模型。当前阶段与操作见 `docs/10_vla_platform.md`，架构 owner 为 `docs/01_system_architecture.md`。
 
-本仓库是 OpenPI 的 YAM 双臂训练适配分支，当前默认任务是使用 LeRobot 数据对 YAM（与 YAM-ABC 同硬件配置）进行 VLA 后训练，并把训练后 policy 部署到 NVIDIA Jetson AGX Thor 端侧推理。系统由两台 IPC 组成：Thor 只负责模型推理，3588 负责相机采集、机械臂控制和控制侧逻辑，两者通过网线直连交换数据。首选模型是 Pi0.5，首选低显存路线是 LoRA；训练仍在服务器 GPU 上，模型不再放在远程推理服务器。OpenArm、Piper 和独立 YAM-ABC-Reproduce 代码只作为 legacy/reference，不是本项目默认实现。
+本仓库是 OpenPI 的 YAM 双臂训练适配分支，当前默认任务是使用 LeRobot 数据对 YAM（与 YAM-ABC 同硬件配置）进行 VLA 后训练，并把训练后 policy 部署到 NVIDIA Jetson AGX Thor 端侧推理。系统由两台 IPC 组成：Thor 只负责模型推理，3588 负责相机采集、机械臂控制和控制侧逻辑，两者通过网线直连交换数据。当前训练路线已切换为 Pi0.5 全量微调，不再默认采用 LoRA；训练仍在服务器 GPU 上，模型不再放在远程推理服务器。OpenArm、Piper 和独立 YAM-ABC-Reproduce 代码只作为 legacy/reference，不是本项目默认实现。
 
 `/home/wuyan-lyj/YAM` 是外部 YAM 参考目录，只读查看训练数据合同和模型适配信息；主检出目录是 `/home/wuyan-lyj/condapi`，工作树以实际 cwd / `git rev-parse --show-toplevel` 为准，不得硬编码主目录来写文件。不得把 YAM-ABC 的机械臂控制代码同步进来替代本项目。
 
@@ -13,7 +13,7 @@
 - 唯一记忆系统是 `AGENTS.md` + `docs/cache/`；不要新增 `.agents`、`.codex` 或其他平行缓存。
 - 启动时依次读取本文件、`docs/cache/kernel.md`、`docs/cache/context_index.md`，然后按路由最多读取一个 mode；已由宿主注入的内容不重复读取。
 - 稳定事实只保留一个 owner：规则归本文件，路由归 index，操作边界归 mode，详细事实归编号化 `docs/`，历史原因归 `docs/07_change_log.md`。kernel 只保留带来源的摘要，不独立维护第二份事实。
-- 取消文档行数硬限制；长期信息完整保留，严格限制进入上下文的内容。记忆包最多 12,288 UTF-8 字节，同一活跃上下文累计最多 32,768 字节（含已加载记忆）；用 `skills/mlops-memory/scripts/memory_gate.py` 执行准入，超预算整段拒绝，不截掉必要条件。
+- 取消文档行数硬限制；记忆包最多 12,288 UTF-8 字节，同一活跃上下文累计默认 32,768 字节（含已加载记忆）。2026-09-09 用户授权：若预算阻碍实际工作，agent 可按需用 `memory_gate.py resize` 调整同一账本，上限 262,144 字节，记录理由且保留已用额度与历史；不要仅因默认额度耗尽停止任务。单包仍整段准入，不截掉必要条件。细节归 `docs/09_memory_system.md`。
 - 每个仍保留历史的上下文使用同一预算账本 `docs/cache/runtime/`，不得靠换会话 ID 或多次读取绕过累计限制；真实压缩/新上下文后才重建并重新计入保留内容。完整请求 token 限制需宿主按实际 tokenizer、消息/工具封装和输出预留执行；字节预算不能宣称为完整 token 限制。
 - 临时状态带观察时间并在使用前复核；经验先候选、再证据验证、再合并 owner；原始产物不因压缩而删除。通用 skill 源码在 `skills/mlops-memory/`，不承载项目记忆副本。设计与验收归 `docs/09_memory_system.md`。
 
@@ -28,6 +28,7 @@
 - `docs/08_thor_edge_deployment.md`：Thor 官方系统、容器环境、Pi0.5 转换/加速和端侧验收；下属 `docs/reference/thor/` 为按阶段读取的安装操作冷手册，不承载机械臂驱动说明。
 - `docs/09_memory_system.md`：记忆预算、证据生命周期、skill 接入与迭代验收。
 - `docs/10_vla_platform.md`：新接入层的操作、模型/后端状态、Conda 工作流和模型接入验收；不是模型训练实现的第二份文档。
+- `docs/11_training_dashboard.md`：模型无关的指标协议、多运行看板、原生训练器接入与显示语义。
 - `docs/06_openarm_research_plan.md`：历史 OpenArm/KAI0/Evo-RL 研究归档，不是当前 YAM 路线。
 - `docs/07_change_log.md`：按日期记录原因和结果。
 - `docs/reference/`：长篇技术参考或 legacy；默认入口不依赖其中的旧结论。
@@ -74,11 +75,12 @@ conda run -p /home/wuyan/.conda/envs/condapi-yam python -m pytest --strict-marke
 - 双臂合同固定为 14D `[左臂6关节, 左夹爪, 右臂6关节, 右夹爪]`；YAM 数据的具体物理单位必须由数据 metadata/audit 确认，不能擅自套用 OpenArm degree 或 ROS 弧度。
 - 图像键固定为 `observation.images.top_rgb`、`observation.images.left_rgb`、`observation.images.right_rgb`；动作键为单数 `action`；状态键为 `observation.state`。
 - 训练默认将每臂 6 个关节动作转为相对当前状态的 delta，夹爪维度保持 absolute；mask 为 `(6,-1,6,-1)`。
-- `pi05_yam_lora` 是当前低显存首选配置；OpenPI 模型内部为 32D、action horizon 为 50，YAM policy 输出裁回 14D。
+- 当前使用 `pi05_yam` 的全量微调配置，正式入口为 `scripts/train_lego_full.py`；具体运行参数和续训边界归 `docs/03_training_and_evaluation.md`，不自动回退为 LoRA。OpenPI 模型内部为 32D、action horizon 为 50，YAM policy 输出裁回 14D。
 - Pi 的 YAM 训练使用 `LeRobotYamDataConfig`、`YamInputs`、`YamOutputs`；其他模型使用独立适配器并保持 YAM 原始数据语义，不能强制复用 Pi 的 padding、delta 或 norm。禁止把 OpenArm 16D 或 Piper 14D transform 当作 YAM 默认路径。
 
 ## 不可违反的边界
 
+- 2026-09-09 用户明确要求：本地工作站禁止运行训练循环或训练 smoke（包括 CPU/debug 小模型），会造成卡顿；仅做静态检查、轻量配置/协议测试和看板验证。训练执行验证留待服务器恢复后在获准的计算资源上进行。
 - 不提交凭据、token、私钥、服务器密码；不删除远端数据/权重/缓存，除非用户明确授权。
 - 长训练使用 Slurm 作业或 tmux；端侧推理默认在 Thor 本地容器/进程执行，Thor↔3588 的直连以太网协议是生产数据通道。端口监听不等于推理可用，必须做真实本地推理和跨 IPC 直连 smoke。
 - 本任务只改 Thor 侧；不得读取、修改、同步或替代 3588 的机械臂控制、相机采集和系统部署。
@@ -89,7 +91,7 @@ conda run -p /home/wuyan/.conda/envs/condapi-yam python -m pytest --strict-marke
 
 ## Git 自动化
 
-独立工作树改造期间只在当前功能分支提交并向已配置的两个远端备份同名分支；不自动合并、推送或部署 `main`，不自动同步 Thor/服务器代码。验收合并后才使用下面的 main 同步流程。用户允许不兼容的架构改造，不等于授权删除原始权重、实验证据或正在使用的远端环境。
+独立工作树改造期间默认只提交/备份功能分支；用户明确授权合并后，先吸收最新 main 并验收，再将主检出快进到合并提交，使用下面的 main 双远端同步流程。2026-09-09 已授权本轮合并，但不自动同步 Thor/服务器代码，服务器故障期间不启动训练。用户允许不兼容的架构改造，不等于授权删除原始权重、实验证据或正在使用的远端环境。
 
 完成请求后执行 `git diff --check`，代码改动再执行 Ruff/pytest，然后 `git add -A` 和中文 commit，例如 `git commit -m "接入YAM双臂训练配置"`。本地工作站提交后把同一 `main` 提交同步到 Gitea 和 GitHub；服务器无法连接 GitHub，只从 Gitea 同步代码：
 

@@ -2,9 +2,13 @@
 
 import argparse
 import json
+import logging
 from pathlib import Path
 import runpy
 import sys
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from adapters.lerobot.metrics import TrackerMetrics
 
 
 def native_arguments(config, policy_type, output):
@@ -35,11 +39,14 @@ def main(argv=None):
     args = parser.parse_args(argv)
     native = native_arguments(args.config, args.policy_type, args.output)
     previous = sys.argv
+    capture = TrackerMetrics(Path(str(args.output.resolve()) + ".metrics") / "metrics.jsonl")
+    logging.getLogger().addFilter(capture)
     try:
         sys.argv = ["lerobot-train", *native]
         # All heavy imports and native processor/checkpoint behavior stay in this child.
         runpy.run_module("lerobot.scripts.lerobot_train", run_name="__main__")
     finally:
+        logging.getLogger().removeFilter(capture)
         sys.argv = previous
 
 

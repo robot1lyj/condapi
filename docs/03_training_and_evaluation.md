@@ -1,5 +1,97 @@
 # 03 · 训练与评估
 
+> 当前路线：用户于2026-09-08明确切换为 **Pi0.5全量微调**，正式训练已启动。
+> 旧LoRA低显存默认建议不再适用，不自动回退；保留的LoRA代码和历史记录不代表当前实施方案。
+> 当前配置为全局batch64/FSDP4/EMA关闭，首阶段40k、每20k保存、总LR周期162097，详见正式运行章节。
+
+## Loss日志与看板口径（2026-09-08用户确认）
+
+- 正式训练保持`log_interval=10`，不改成逐步记录。每一步先对batch、动作时间窗口和模型动作维度
+  求平均得到该步loss；日志再对最近10步的loss取算术平均，首条记录例外，仅包含第1步。
+- 当前JSONL使用已完成步数：step1对应第1次更新的loss；step11对应第2–11次更新的平均，
+  step21对应第12–21次更新的平均，以此类推。这是训练loss，不是关节物理误差或任务失败率。
+- 看板“原始曲线”指未经页面平滑的**日志均值**，不是逐步原始loss；平滑线是在这些日志均值上
+  再做指数平滑，仅影响显示，与模型权重EMA无关。看板10秒刷新不改变日志统计窗口。
+- 用户讨论论文中密集原始点形成的“厚毛边”后，明确决定无需调整记录方式，只需说明上述口径。
+  不人为添加噪声，不把线条厚度自动解释为置信区间，不尝试还原已被平均掉的历史逐步波动。
+- 依据：`src/openpi/models/pi0.py::compute_loss`、`scripts/train.py::train_step/main`及
+  `scripts/training_dashboard.html`的绘图逻辑；运行版本f93a792与启动证据见本页下文。
+
+## 2026-09-09 故障恢复与当前授权
+
+**11:42状态更新：**NCCL定向诊断2064.73在10:58:40 TIMEOUT，进度条到6步，约130秒/步；
+日志没有捕获非法访问或Internal Sanitizer Error，也无最终ERROR SUMMARY，不能记为通过。
+正式r2仍停在271步历史日志，没有完整checkpoint；当前没有训练/诊断进程，四卡空闲于allocation2064。
+gpu002仍全部分配；CPU CE131367、UE0。看板服务与镜像正常，仅展示历史值。
+两次有限插桩均未给出根因，不重复同类耗时测试或原样重开第三轮；后续优先复核管理员对
+CPU0_DIMM_B1和GPU1/Xid13/43的检查、健康替代节点或新的可验证软件修复证据，再恢复训练。
+
+**10:43诊断更新：**2064.71完整memcheck在10:13:40 TIMEOUT，只观察到step1；工具多次提示
+无法分配插桩内存、部分kernel未检查，因此既非通过，也不能解释为原训练OOM。CPU CE增至131365、UE0。
+启动独立`lego_ncclcheck_20260909`短测（tmux `yam-lego-ncclcheck`）：同快照、20步、15分钟上限，
+仅`--kernel-name kns=nccl`检查通信内核，`--force-synchronization-limit 100`限制诊断积压，
+XLA显存池从0.92降至0.85给工具留空间；batch64/精度/优化器不变。这不是正式第三轮。
+日志位于 `/home/wuyan/lyj/YAM/training-runs/control/lego_ncclcheck_20260909/diagnostic.log`。
+该过滤诊断即便通过也不能排除未插桩XLA计算kernel/硬件或长时问题；不要直接据此宣称全量训练恢复。
+
+**09:41再次核验：r2已于09:33:21崩溃，下面09:20启动成功不代表当前在训。**
+最后logged step271，进度条278，SIGSEGV；NCCL报告illegal memory access，内核GPU1（PCI52:00.0）
+Xid13 Out Of Range Address，继发Xid43。CPU corrected ECC计数127141，UE0，不能直接归因硬件。
+gpu002四卡均已分配，无空闲替代四卡节点，不取消其他作业。原样重启已复现，不再盲重开正式run。
+09:43:27启动独立诊断 `lego_full_memcheck_20260909`、tmux `yam-lego-memcheck`，同a53bb00快照，
+使用`/usr/local/cuda-13.2/bin/compute-sanitizer --tool memcheck --error-exitcode 86`包裹正式入口，
+batch64/FSDP4不变、仅20步、Slurm限时30分钟，NCCL_DEBUG=INFO；不是40k正式训练或已修复。
+诊断日志 `/home/wuyan/lyj/YAM/training-runs/control/lego_full_memcheck_20260909/diagnostic.log`。
+下一次巡检先查诊断结果/实际步骤与退出码，再决定有证据支持的代码或环境修复，不重复启动诊断。
+插桩额外显存/超时不能当原训练OOM或训练健康验收；需管理员排查时提供GPU1 Xid13/43和DIMM_B1证据。
+
+以下取代旧运行的保存周期与“无checkpoint等待确认”边界：用户已授权主动排障、修复并恢复训练，
+保存/保留间隔均为5000步；batch64/FSDP4、LR、精度、数据和40k阶段终点不变。
+有完整checkpoint优先真续训；没有则允许保留旧现场，在新run从base重开，不能混接旧步数或loss。
+反复原样重试不构成修复，驱动/硬件需管理员权限时提供证据并寻求安全替代，不擅自升级系统驱动。
+
+9月9日09:06现场核验：旧步骤2064.33于05:21:05以SIGSEGV退出，最后日志16031步，loss0.01768966，
+旧run仅metrics、没有正式checkpoint。四卡allocation仍有效、GPU空闲。core虽然journal访问受限，
+其文件ACL允许本用户读取，已解压并通过GDB检查；PC `0x7fee0e2787c7` 落在
+`/usr/lib64/libcuda.so.595.45.04` 映射内。core截断为1GiB，栈页缺失，不能据此宣称已定位最终根因。
+EDAC累计CE127134、UE0，并有CPU0_DIMM_B1单bit corrected ECC记录；未建立与05:21退出的因果关系。
+无已见OOM/磁盘满证据。现场证据与管理员建议见
+[故障记录](reports/training/pi05-recovery-20260909/README.md)。
+
+本次恢复目标run为 `lego_full_b64_r2_20260909`，与旧run隔离。入口新增 `LEGO_RUN_NAME`，
+原生崩溃启用 `PYTHONFAULTHANDLER=1`，`--resume` 无已提交checkpoint时强制拒绝。
+看板service同步新run和独立缓存 `artifacts/training_dashboard/recovery_20260909/metrics.jsonl`，
+显式传入save-interval5000；每10秒刷新不调用模型。每小时巡检`pi0-5`已更新为主动恢复模式。
+9月9日09:16:39已提交新进程：Slurm2064.63、PID3091182、tmux `yam-lego-full-r2`，
+固定Gitea快照 `/home/wuyan/lyj/YAM/env-transfer/lego-full-a53bb00`（a53bb001e4acb2cce486f2da83d6d8256439a188）。
+启动命令：`LEGO_RUN_NAME=lego_full_b64_r2_20260909 bash scripts/launch_lego_full.sh 2064`。
+恢复时使用同一快照/环境/run，加`--resume`，先核验完整checkpoint与无重复进程。
+实际`initial_config.json`已核对save_interval=keep_period=5000、batch64、steps40000、resume=false。
+新控制目录 `/home/wuyan/lyj/YAM/training-runs/control/lego_full_b64_r2_20260909`，
+新run目录 `/home/wuyan/lyj/YAM/training-runs/pi05_yam/lego_full_b64_r2_20260909`。
+09:20启动验收：已核对真实日志21→31→41，step41 loss0.04490658、grad_norm0.28559217、
+3.364秒/步；四GPU100%、约22828MiB/卡、56–61°C。看板API已同步41步、save_interval5000、
+无同步错误。此为启动验收，首份完整checkpoint与长期稳定性仍须后续验证。
+
+## 正式运行：2026-09-08 Lego全量微调（历史启动记录）
+
+用户已授权并于北京时间14:03启动，首个更新14:05:36完成。运行在Slurm2064的步骤2064.33、
+gpu001、tmux `yam-lego-full`；这些是启动观察，巡检必须重新查询。固定代码快照
+`/home/wuyan/lyj/YAM/env-transfer/lego-full-f93a792`（提交f93a792），从Gitea获取。
+batch64/FSDP4/EMA关闭、40k阶段终点、每20k完整保存，LR周期162097，详见
+[启动证据](reports/training/pi05-full-launch-20260908/README.md)与其中`initial_config.json`。
+
+- 正式run：`/home/wuyan/lyj/YAM/training-runs/pi05_yam/lego_full_b64`。
+- 控制日志：`/home/wuyan/lyj/YAM/training-runs/control/lego_full_b64/train.log`；配置和恢复测试证据同目录。
+- 启动器：固定快照的`scripts/launch_lego_full.sh 2064`，通过tmux启动；锁保护避免重复launcher。
+- 仅在无活跃训练、完整checkpoint和当前资源已核验后，使用同一快照启动器加`--resume`。
+  `--steps`表示累计停止点，不是额外步数；不得自动超过40k。不要使用overwrite或base权重冒充续训。
+- 全尺寸Pi0.5 checkpoint恢复30→31、GPU新进程训练入口恢复2→4并再次保存均已通过。
+  CPU同进程测试在第二次JAX调用Aborted仍未定位，不能写成已修复；正式运行/恢复使用GPU独立进程。
+- 已核对远端与看板步数1→11→21→31→41，loss和梯度有限，近期约3.37秒/步；
+  瞬时四卡利用率100%。只是启动验收，不是训练完成或任务效果验收。
+  第一份正式checkpoint须到20k才产生，此前只有恢复测试产物，不能混淆。
+
 ## 2026-09-08 四张 4090 全参数短测
 
 `pi05_yam` 在Slurm2064/gpu001的4×4090上通过全参数容量测试，33.53亿参数全部可训练。
@@ -12,7 +104,7 @@ global batch92通过3步、相邻96与128 OOM；这不是改变精度/卸载/预
 用户随后确定阶段计划：batch64、原AdamW峰值2.5e-5、warmup1000、约162097步余弦至2.5e-6，
 首阶段累计40k，每20k完整保存，后续评估后续训向约一遍数据推进。不是每40k重置学习率。
 按3.3895秒/步，40k纯训练37.7小时（排期40–48小时），一遍约152.6小时，不含停机/评估。
-此计划替代短测报告中的最初30k/60k方案；正式训练尚未启动，验证/早停尚未接入循环。
+此计划替代短测报告中的最初30k/60k方案；正式运行见本页顶部，验证/早停尚未接入循环。
 限定条件、保存证据、参数/步数解释与时间外推见[batch测试报告](reports/training/pi05-batch-limit-20260908/README.md)；
 初始化修复及最初batch4证据见[首轮报告](reports/training/pi05-full-20260908/README.md)。
 全量train-only norm见[数据合同](04_data_contracts.md#2026-09-08-全量发布与归一化完成)。
@@ -30,10 +122,11 @@ global batch92通过3步、相邻96与128 OOM；这不是改变精度/卸载/预
   异常退出10秒重启。查看/恢复：`systemctl --user status training_dashboard.service` /
   `systemctl --user restart training_dashboard.service`。本机休眠、断网或用户服务未运行时不能保证刷新。
 - 本地缓存 `artifacts/training_dashboard/live/metrics.jsonl`；预留远端
-  `/home/wuyan/lyj/YAM/training-runs/pi05_lego_full_b64/metrics/metrics.jsonl`。
-  **此路径尚无正式训练日志**，启动时必须绑定实际run，不能把页面等待状态写成训练已运行。
+  `/home/wuyan/lyj/YAM/training-runs/pi05_yam/lego_full_b64/metrics/metrics.jsonl`。
+  已绑定正式run并核对多次真实步数增长；不能仅凭页面在线断言训练健康。
   参数面板显示讨论计划，不冒充实际配置验真。原生LocalMetricLogger已有loss/grad_norm/param_norm/LR；
-  计时、GPU、验证等字段需训练/采集器实际写入。10秒刷新不等于每10秒新增loss，频率取决于log_interval。
+  正式入口已补记时间、近期步速/吞吐与JAX活跃分配（不是nvidia-smi显存或峰值）；验证loss和GPU利用率
+  仍需独立采集，留空不伪造。10秒刷新不等于每10秒新增loss，log_interval=10时约34秒更新一组。
 - 启动例：`python3 scripts/training_dashboard.py --metrics /absolute/run/metrics/metrics.jsonl`；
   远端镜像加 `--remote yam-server --remote-metrics /absolute/remote/metrics.jsonl`。
   服务内的参数与路径通过CLI设置；默认stage40k/total162097/save20k，不启动训练。

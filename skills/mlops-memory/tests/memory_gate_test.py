@@ -103,6 +103,21 @@ class MemoryGateTest(unittest.TestCase):
         output = gate.pack(self.root, "case", ["docs/current.md"], [])
         self.assertEqual(self.state()["used"], before + len(output))
 
+    def test_resize_preserves_accounting_and_is_bounded(self):
+        gate.pack(self.root, "case", ["docs/current.md"], [])
+        before = self.state()
+        gate.resize(self.root, "case", 196608, "user-authorized task expansion")
+        after = self.state()
+        for key in before:
+            if key != "cap":
+                self.assertEqual(after[key], before[key])
+        self.assertEqual(after["cap"], 196608)
+        self.assertEqual(after["adjustments"][0]["old_cap"], before["cap"])
+        for cap, reason in ((262145, "too large"), (1, "below used"), (65536, " ")):
+            with self.assertRaises(gate.GateError):
+                gate.resize(self.root, "case", cap, reason)
+            self.assertEqual(self.state(), after)
+
     def test_path_escape_and_budget_increase_rejected(self):
         with self.assertRaises(gate.GateError):
             gate.select(self.root, "../outside.md", {})

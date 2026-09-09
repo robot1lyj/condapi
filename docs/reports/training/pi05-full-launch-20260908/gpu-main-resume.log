@@ -1,0 +1,13 @@
+/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/torch/cuda/__init__.py:61: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+13:58:37.071 [I] Running on: gpu001.hlink.local                                                   (841649:train.py:253)
+INFO:2026-09-08 13:58:37,685:jax._src.xla_bridge:925: Unable to initialize backend 'rocm': module 'jaxlib.xla_extension' has no attribute 'GpuAllocatorConfig'
+13:58:37.685 [I] Unable to initialize backend 'rocm': module 'jaxlib.xla_extension' has no attribute 'GpuAllocatorConfig' (841649:xla_bridge.py:925)
+INFO:2026-09-08 13:58:37,685:jax._src.xla_bridge:925: Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory
+13:58:37.685 [I] Unable to initialize backend 'tpu': INTERNAL: Failed to open libtpu.so: libtpu.so: cannot open shared object file: No such file or directory (841649:xla_bridge.py:925)
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/home/wuyan/lyj/YAM/env-transfer/lego-full-f93a792/scripts/train.py", line 261, in main
+    raise ValueError(
+ValueError: Batch size 2 must be divisible by the number of devices 4.
+srun: error: gpu001: task 0: Exited with exit code 1

@@ -2,7 +2,7 @@
 
 ## 当前状态
 
-观察日期：2026-09-08。此文描述功能分支，未合并到主目录，未同步本分支到服务器项目检出或Thor服务；独立Evo环境安装单独记录。架构 owner 为 [01](01_system_architecture.md#多模型接入层)，设备信息归 [02](02_installation_and_environment.md)，模型精度与 Thor 验收归 [08](08_thor_edge_deployment.md)。
+观察日期：2026-09-09。本轮按用户授权将多模型工作树与 main 的 Pi 全量训练/续训修复整合，主检出通过快进接收合并结果；不部署服务器或 Thor。实际提交/远端同步以 Git 为准。架构 owner 为 [01](01_system_architecture.md#多模型接入层)，设备信息归 [02](02_installation_and_environment.md)，模型精度与 Thor 验收归 [08](08_thor_edge_deployment.md)，模型无关训练看板归 [11](11_training_dashboard.md)。
 
 | 部分 | 状态 |
 |---|---|
@@ -29,7 +29,9 @@ git diff
 python3 scripts/vla.py models
 ```
 
-只提交/备份当前分支，不自动合并 main 或同步 Thor。共享权重、Conda prefix、外部数据并不受工作树隔离保护，禁止因为处在工作树就修改正在使用的环境。本次不要求保留旧控制层 API；保留实验原件和 Pi 模型实现并不等于维护旧 API 兼容层。
+默认只提交/备份当前分支；明确授权合并时，先把最新 main 合入功能分支解决冲突并检查，再将干净的主检出 fast-forward 到验收提交，向两个已配置远端推送，不能 force push。不自动同步 Thor/服务器。工作树合并不是搬文件或删除目录，分支和工作树可保留。共享权重、Conda prefix、外部数据并不受工作树隔离保护。
+
+当前 Pi 正式全量入口仍为 `scripts/launch_lego_full.sh` → `scripts/train_lego_full.py`，每 5k 保存与 committed checkpoint 续训保护保留。`configs/experiments/pi-train.toml` 是通用全量配置示例，不替代已有 Lego 正式启动参数。服务器故障未解决，本地禁止运行训练循环，包括 debug/CPU smoke；仅做静态、配置和看板验证。多模型指标接入不提升尚未 GPU 验收的模型状态。
 
 记忆预算账本位于实际上下文对应的 `docs/cache/runtime/`，只记录运行计量，不把某次会话 ID 固化为长期操作步骤。只有真实压缩/新上下文后重建；文件记忆读取当前工作树版本。宿主完整 token 计量接口不可用，不能把字节预算称作完整上下文 token 限制。
 

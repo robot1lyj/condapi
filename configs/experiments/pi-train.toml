@@ -4,5 +4,5 @@ environment = "configs/environments/pi-server.toml"
 contract = "configs/robots/yam.toml"
 
 [parameters]
-config = "pi05_yam_lora"
+config = "pi05_yam"
 dataset = "/path/to/audited-yam-lerobot"

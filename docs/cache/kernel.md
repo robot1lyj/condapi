@@ -6,13 +6,14 @@
 
 - 2026-09-08 功能分支收敛为模型配置 + 共享后端：`configs/models/` 选择模型，`adapters/lerobot/` 共用原生入口、`adapters/openpi/` 保留 Pi；撤销按模型的 plugins 目录。系列环境仍独立 Conda，LeRobot 模型不重写 trainer/processor。控制层和合同测试已有，Evo-1/FastWAM/VLA-JEPA 尚未接通 GPU 训练或推理；共享入口不等于模型已支持。架构见 [01](../01_system_architecture.md#多模型接入层)，当前状态和 Evo 接入步骤见 [10](../10_vla_platform.md)。既有 Thor 容器/服务未改动。
 
-- YAM 双臂训练适配，首选 Pi0.5 LoRA / `pi05_yam_lora`；训练运行在服务器 GPU。训练关闭 W&B，使用本地日志、JSONL/CSV 指标与曲线，见 [训练](../03_training_and_evaluation.md)。
+- YAM 双臂当前路线为 Pi0.5 全量微调 / `pi05_yam`，已于2026-09-08启动正式训练，不再把 LoRA 作为默认方案。训练在服务器 GPU 上，关闭 W&B，使用本地日志与实时 HTML 看板；参数、续训和巡检边界见 [训练](../03_training_and_evaluation.md)，实时状态须现场复核。
 - YAM 为 14D `[左6关节, 左夹爪, 右6关节, 右夹爪]`；Pi 路径关节 delta、夹爪 absolute，mask `(6,-1,6,-1)`，内部 32D、horizon 50；这些模型内部规则不套用其他系列。物理单位仍须数据审计，不套用 OpenArm/Piper 合同，见 [数据合同](../04_data_contracts.md)。
 - Pi 当前训练产物为 JAX/Flax；新模型保留原生 LeRobot/PyTorch 格式。既有 Thor Pi 部署按系列隔离容器，新接入层环境采用独立 Conda；3588 采集/控制，两 IPC 网线直连，本项目不操作 3588。转换与量化须独立验收，既有部署事实见 [Thor 部署](../08_thor_edge_deployment.md)，新架构见 [01](../01_system_architecture.md)。
 - 主检出为 `/home/wuyan-lyj/condapi`，改造工作树以实际 cwd 为准，外部 YAM 参考只读；设备、功能分支提交、数据保护和 RTC 回退边界由 `AGENTS.md` 持有。
 
 ## 恢复任务
 
+- 2026-09-09 用户授权本轮工作树合并，保留 main 的 Pi 全量微调与 5k 续训修复；服务器故障期间不部署。严禁本地训练循环（含 CPU/debug）；只允许轻量配置/协议和看板验证。合并流程归 [10](../10_vla_platform.md)，多模型指标协议归 [11](../11_training_dashboard.md)，操作约束归 `AGENTS.md`。记忆额度可按用户授权在原账本记录理由后调整，见 [09](../09_memory_system.md)。
 - 2026-09-08 Evo-1和MolmoAct2本地/服务器独立Conda环境均安装并通过CPU检查，两端分别106/108个包版本一致；MolmoAct2已加入同一LeRobot共享后端。普通MolmoAct2不含Think，LoRA与FP32动作专家参数的精度规则不套Pi结论；尚未验收真实YAM模型/GPU训练。环境与动态库配置见 [02](../02_installation_and_environment.md)，实测见 [Evo报告](../reports/environments/evo1-20260908/README.md) / [Molmo报告](../reports/environments/molmoact2-20260908/README.md)，模型特有事项见 [Molmo接入](../reference/molmoact2_integration.md)。
 
 - 服务器入口、环境、原始数据路径和作业保护对象见 [环境](../02_installation_and_environment.md)。作业/下载状态是历史观察，使用前重新核验；没有实时证据就标记未知。

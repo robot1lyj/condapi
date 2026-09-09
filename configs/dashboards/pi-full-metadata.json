@@ -1,0 +1,14 @@
+{
+  "parameters": {
+    "配置": "pi05_yam / train_lego_full",
+    "训练方式": "全量微调",
+    "计划全局 batch": 64,
+    "计划 FSDP 设备数": 4,
+    "说明": "启动计划，不代表当前服务器运行状态"
+  },
+  "loss_semantics": "Pi 训练日志：每 10 步区间均值；不是单步瞬时损失",
+  "metric_labels": {
+    "gpu_memory_gib": "GPU 活跃分配 / GiB（非峰值）",
+    "step_seconds": "单步墙钟耗时 / 秒（区间均值）"
+  }
+}
