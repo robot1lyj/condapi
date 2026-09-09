@@ -19,6 +19,14 @@
 
 ## 2026-09-09 故障恢复与当前授权
 
+**10:43诊断更新：**2064.71完整memcheck在10:13:40 TIMEOUT，只观察到step1；工具多次提示
+无法分配插桩内存、部分kernel未检查，因此既非通过，也不能解释为原训练OOM。CPU CE增至131365、UE0。
+启动独立`lego_ncclcheck_20260909`短测（tmux `yam-lego-ncclcheck`）：同快照、20步、15分钟上限，
+仅`--kernel-name kns=nccl`检查通信内核，`--force-synchronization-limit 100`限制诊断积压，
+XLA显存池从0.92降至0.85给工具留空间；batch64/精度/优化器不变。这不是正式第三轮。
+日志位于 `/home/wuyan/lyj/YAM/training-runs/control/lego_ncclcheck_20260909/diagnostic.log`。
+该过滤诊断即便通过也不能排除未插桩XLA计算kernel/硬件或长时问题；不要直接据此宣称全量训练恢复。
+
 **09:41再次核验：r2已于09:33:21崩溃，下面09:20启动成功不代表当前在训。**
 最后logged step271，进度条278，SIGSEGV；NCCL报告illegal memory access，内核GPU1（PCI52:00.0）
 Xid13 Out Of Range Address，继发Xid43。CPU corrected ECC计数127141，UE0，不能直接归因硬件。
