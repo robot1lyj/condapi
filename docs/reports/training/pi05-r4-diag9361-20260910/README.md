@@ -32,6 +32,13 @@
 - 修正后的续训已推进到 step 5051；最近记录的 loss 约 `0.01781`、grad_norm 约 `0.04852`，仍为有限值，步速约 `3.38 s/step`。
 - 本地只读看板已切换到该 r4 run，小时巡检也已更新为跟踪该 run。
 
+## r4 同类故障与 r5 恢复
+
+- r4 在约 step 5191 后再次出现 `NCCL operation ncclGroupEnd() failed`，CUDA 报告 `illegal memory access`，随后进程段错误；没有新的完整 checkpoint，5000 checkpoint 保持可读。
+- r4 的普通梯度诊断记录到 step 5101 为止均有限，未记录到非有限梯度；这次故障属于此前的 GPU/NCCL 硬故障类别，不是 Python 非有限指标退出。
+- 按用户授权保留 r4 现场，用同一 5000 checkpoint 创建 `lego_full_b64_r5_diag9361_20260910` 并启动恢复；r5 已恢复成功并完成 step 5001，诊断仍识别 51 个可训练参数叶子。
+- r5 checkpoint 使用同一文件系统的硬链接复制，源 r4 checkpoint 不会被覆盖；后续保存由 r5 独立管理。
+
 ## 当前边界
 
 该 run 仍是诊断续训，不代表非有限梯度问题已经修复。若再次到达约 9361 步，优先读取 `diagnostics/gradient_diagnostics.jsonl`，按参数叶子和 batch 来源定位；不根据单次有限运行宣称数据或硬件根因已排除。
