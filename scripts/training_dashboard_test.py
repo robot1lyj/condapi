@@ -38,6 +38,27 @@ def test_resume_discards_abandoned_future(tmp_path):
     assert dashboard.read_metrics(path, 64)["rows"] == [{"step": 0, "loss": 99}]
 
 
+def test_resume_history_is_spliced_before_current_run(tmp_path):
+    parent = tmp_path / "parent.jsonl"
+    current = tmp_path / "current.jsonl"
+    parent.write_text("".join(json.dumps({"step": step, "loss": step}) + "\n" for step in [0, 10, 20, 30]))
+    current.write_text("".join(json.dumps({"step": step, "loss": -step}) + "\n" for step in [20, 30, 40]))
+    app = dashboard.Dashboard(
+        dashboard.parse_args(
+            [
+                "--metrics",
+                str(current),
+                "--history-metrics",
+                str(parent),
+            ]
+        )
+    )
+    rows = app.snapshot()["rows"]
+    assert [row["step"] for row in rows] == [0, 10, 20, 30, 40]
+    assert rows[2]["loss"] == -20
+    assert rows[3]["loss"] == -30
+
+
 @pytest.mark.parametrize(
     "extra",
     [
@@ -47,6 +68,8 @@ def test_resume_discards_abandoned_future(tmp_path):
         ["--remote", "-oProxyCommand=evil", "--remote-metrics", "/a"],
         ["--remote", "yam-server", "--remote-metrics", "/a;touch /b"],
         ["--remote", "yam-server"],
+        ["--history-remote-metrics", "/a"],
+        ["--remote", "yam-server", "--remote-metrics", "/a", "--history-remote-metrics", "/a;touch /b"],
     ],
 )
 def test_bad_arguments_rejected(extra):

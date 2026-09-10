@@ -144,11 +144,32 @@ def read_metrics(path, batch_size=None, *, source_format="auto", field_map=None)
     }
 
 
+def combine_history(current, history):
+    """Prepend parent-run rows and let the resumed run own overlapping steps."""
+    current_rows = current["rows"]
+    cutoff = current_rows[0]["step"] if current_rows else None
+    by_step = {}
+    for source in history:
+        for row in source["rows"]:
+            if cutoff is None or row["step"] < cutoff:
+                by_step[row["step"]] = row
+    for row in current_rows:
+        by_step[row["step"]] = row
+    rows = [by_step[step] for step in sorted(by_step)]
+    return {
+        **current,
+        "rows": rows[-MAX_ROWS:],
+        "invalid_lines": current["invalid_lines"] + sum(source["invalid_lines"] for source in history),
+        "trimmed": current["trimmed"] or any(source["trimmed"] for source in history) or len(rows) > MAX_ROWS,
+    }
+
+
 class Dashboard:
     def __init__(self, args):
         self.args = args
         self.lock = threading.Lock()
         self.sync = {"enabled": bool(args.remote), "last_success": None, "error": None}
+        self.history_remote_metrics = []
         if args.runs_config:
             value = json.loads(args.runs_config.read_text())
             if (
@@ -173,8 +194,14 @@ class Dashboard:
                     "stage_steps": args.stage_steps,
                     "total_steps": args.total_steps,
                     "save_interval": args.save_interval,
+                    "history_metrics": [str(path.resolve()) for path in args.history_metrics or []],
                 }
             ]
+            history_dir = args.metrics.parent / "history"
+            for index, remote_path in enumerate(args.history_remote_metrics or []):
+                local_path = history_dir / f"{index}.jsonl"
+                specs[0]["history_metrics"].append(str(local_path.resolve()))
+                self.history_remote_metrics.append((remote_path, local_path))
             if args.metadata:
                 metadata = json.loads(args.metadata.read_text())
                 if not isinstance(metadata, dict) or set(metadata) - {"parameters", "metric_labels", "loss_semantics"}:
@@ -197,6 +224,10 @@ class Dashboard:
             ):
                 raise ValueError("run ids must be unique safe identifiers")
             run["metrics"] = (base / run["metrics"]).resolve()
+            history_metrics = run.get("history_metrics", [])
+            if not isinstance(history_metrics, list) or any(not isinstance(path, str) for path in history_metrics):
+                raise ValueError("history_metrics must be a list of paths")
+            run["history_metrics"] = [(base / path).resolve() for path in history_metrics]
             if run.get("format", "auto") not in ("auto", "jsonl", "csv", "trainer-state"):
                 raise ValueError("unsupported metric format")
             for key in ("batch_size", "stage_steps", "total_steps", "save_interval"):
@@ -226,17 +257,31 @@ class Dashboard:
         run = self.runs[run_id or next(iter(self.runs))]
         with self.lock:
             sync = dict(self.sync)
-        return {
-            **read_metrics(
-                run["metrics"],
+        current = read_metrics(
+            run["metrics"],
+            run.get("batch_size"),
+            source_format=run.get("format", "auto"),
+            field_map=run.get("field_map"),
+        )
+        history = [
+            read_metrics(
+                path,
                 run.get("batch_size"),
                 source_format=run.get("format", "auto"),
                 field_map=run.get("field_map"),
-            ),
+            )
+            for path in run.get("history_metrics", [])
+        ]
+        return {
+            **combine_history(current, history),
             "server_time": time.time(),
             "sync": sync,
             "run": {
-                **{key: value for key, value in run.items() if key not in ("metrics", "field_map")},
+                **{
+                    key: value
+                    for key, value in run.items()
+                    if key not in ("metrics", "field_map", "history_metrics")
+                },
                 "name": run.get("name", run["id"]),
                 "source": str(run["metrics"]),
                 "parameters": run.get("parameters", {}),
@@ -249,31 +294,35 @@ class Dashboard:
         """Atomic local replacement. SSH failure retains the last successful snapshot."""
         while not stop.is_set():
             try:
-                result = subprocess.run(
-                    [
-                        "ssh",
-                        "-oBatchMode=yes",
-                        "-oConnectTimeout=8",
-                        self.args.remote,
-                        "test -f "
-                        + self.args.remote_metrics
-                        + " || exit 44; stat -c %Y "
-                        + self.args.remote_metrics
-                        + "; head -c 33554433 "
-                        + self.args.remote_metrics,
-                    ],
-                    capture_output=True,
-                    timeout=20,
-                    check=True,
-                )
-                timestamp, payload = result.stdout.split(b"\n", 1)
-                source_modified = float(timestamp)
-                if len(payload) > MAX_BYTES:
-                    raise ValueError("远端日志超过读取上限; 未替换本地缓存")
-                self.args.metrics.parent.mkdir(parents=True, exist_ok=True)
-                temporary = self.args.metrics.with_suffix(".pending")
-                temporary.write_bytes(payload)
-                temporary.replace(self.args.metrics)
+                sources = [(self.args.remote_metrics, self.args.metrics)] + self.history_remote_metrics
+                source_modified = None
+                for remote_path, local_path in sources:
+                    result = subprocess.run(
+                        [
+                            "ssh",
+                            "-oBatchMode=yes",
+                            "-oConnectTimeout=8",
+                            self.args.remote,
+                            "test -f "
+                            + remote_path
+                            + " || exit 44; stat -c %Y "
+                            + remote_path
+                            + "; head -c 33554433 "
+                            + remote_path,
+                        ],
+                        capture_output=True,
+                        timeout=20,
+                        check=True,
+                    )
+                    timestamp, payload = result.stdout.split(b"\n", 1)
+                    if len(payload) > MAX_BYTES:
+                        raise ValueError("远端日志超过读取上限; 未替换本地缓存")
+                    local_path.parent.mkdir(parents=True, exist_ok=True)
+                    temporary = local_path.with_suffix(".pending")
+                    temporary.write_bytes(payload)
+                    temporary.replace(local_path)
+                    if local_path == self.args.metrics:
+                        source_modified = float(timestamp)
                 with self.lock:
                     self.sync.update(last_success=time.time(), source_modified_at=source_modified, error=None)
             except (OSError, subprocess.SubprocessError, ValueError) as exc:
@@ -331,6 +380,7 @@ def make_server(dashboard, port=8765):
 def parse_args(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--metrics", type=Path)
+    parser.add_argument("--history-metrics", type=Path, action="append")
     parser.add_argument(
         "--runs-config", type=Path, help="Configured runs; relative metric paths resolve beside this JSON"
     )
@@ -346,11 +396,22 @@ def parse_args(argv=None):
     parser.add_argument("--save-interval", type=int)
     parser.add_argument("--remote", help="Optional SSH alias, e.g. yam-server")
     parser.add_argument("--remote-metrics", help="Absolute remote JSONL file; no shell metacharacters")
+    parser.add_argument(
+        "--history-remote-metrics",
+        action="append",
+        help="Parent-run JSONL files on the same SSH host; repeated options are prepended to the current run",
+    )
     parser.add_argument("--interval", type=int, default=10)
     args = parser.parse_args(argv)
     if bool(args.metrics) == bool(args.runs_config):
         parser.error("choose exactly one of --metrics and --runs-config")
-    if args.runs_config and (args.remote or args.remote_metrics or args.metadata):
+    if args.runs_config and (
+        args.remote
+        or args.remote_metrics
+        or args.metadata
+        or args.history_metrics
+        or args.history_remote_metrics
+    ):
         parser.error("multi-run sources are local; mirror each remote source separately")
     if any(
         value is not None and value <= 0
@@ -359,11 +420,15 @@ def parse_args(argv=None):
         parser.error("counts and interval must be positive")
     if args.stage_steps and args.total_steps and args.stage_steps > args.total_steps:
         parser.error("stage steps must not exceed total steps")
-    if args.remote or args.remote_metrics:
+    if args.remote or args.remote_metrics or args.history_remote_metrics:
         if not args.remote or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.@-]*", args.remote):
             parser.error("invalid SSH alias")
         if not args.remote_metrics or not re.fullmatch(r"/[A-Za-z0-9_./-]+", args.remote_metrics):
             parser.error("remote-metrics must be an absolute path without shell metacharacters")
+        if any(not re.fullmatch(r"/[A-Za-z0-9_./-]+", path) for path in args.history_remote_metrics or []):
+            parser.error("history remote metrics must be absolute paths without shell metacharacters")
+    if (args.history_metrics or args.history_remote_metrics) and not args.metrics:
+        parser.error("history metrics require a single --metrics source")
     return args
 
 
