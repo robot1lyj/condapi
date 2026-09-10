@@ -19,6 +19,7 @@
 - 每 100 步写入 `diagnostics/gradient_diagnostics.jsonl`，非有限指标时额外写完整记录。
 - `OPENPI_DIAGNOSTIC_BATCH=1`：保存当前 batch 的 LeRobot `index`、`episode_index`、`frame_index` 和 `task_index`。
 - 诊断日志不写入普通 metrics，不改变 checkpoint 内容。
+- 远端诊断补丁保存在 control 目录，SHA-256：`f40676059fb669a9a8e438773a7da94a40b193576001447adb90d2aff250b4b9`。
 
 ## 验收
 
