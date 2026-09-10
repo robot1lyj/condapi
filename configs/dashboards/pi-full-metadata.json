@@ -2,9 +2,9 @@
   "parameters": {
     "配置": "pi05_yam / train_lego_full",
     "训练方式": "全量微调",
-    "计划全局 batch": 64,
+    "当前全局 batch": 48,
     "计划 FSDP 设备数": 4,
-    "说明": "启动计划，不代表当前服务器运行状态"
+    "说明": "当前 batch48 诊断续训；看板参数随运行切换更新"
   },
   "loss_semantics": "Pi 训练日志：每 10 步区间均值；不是单步瞬时损失",
   "metric_labels": {
