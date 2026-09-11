@@ -13,7 +13,7 @@ python3 scripts/training_dashboard.py --metrics /absolute/run/metrics.jsonl --mo
 
 打开 `http://127.0.0.1:8765`。顶部切换运行；自动显示已有数值指标，默认至多添加八个辅助图，其余通过“添加指标”选择，× 可移除。训练损失图固定保留；没有 loss 的模型可通过自定义指标图观察。未知 batch、目标步数、精度、GPU 数留空，绝不套用 Pi 配置。
 
-当前 Pi 服务模板 `scripts/training_dashboard.service` 跟踪 batch48 诊断续训，并通过 `--history-remote-metrics` 继承 r3 的历史指标。恢复运行时，父 run 的记录会保留到当前 run 的第一条 step 之前；重叠 step 由当前 run 覆盖，避免同一训练步重复绘制。当前服务显式指定阶段 40k、总计划 162097 和每 5k 保存。
+当前 Pi 服务模板 `scripts/training_dashboard.service` 跟踪 batch32 续训，并通过 `--history-remote-metrics` 继承历史指标。恢复运行时，父 run 的记录会保留到当前 run 的第一条 step 之前；重叠 step 由当前 run 覆盖，避免同一训练步重复绘制。当前服务显式指定目标 80k、每 5k 保存；余弦学习率周期 162097 作为独立参数保留。
 
 单次运行也可以用 `--history-metrics /path/to/parent.jsonl` 指定本地父日志；远端父日志使用同一 SSH 主机上的重复 `--history-remote-metrics /absolute/parent.jsonl`。当前 run 尚无记录时，看板先显示父 run；当前 run 写入后自动拼接为连续曲线。父日志只读，镜像失败时保留上次缓存。
 

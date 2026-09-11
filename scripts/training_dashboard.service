@@ -5,7 +5,7 @@ After=network.target
 [Service]
 Type=simple
 WorkingDirectory=%h/condapi
-ExecStart=/usr/bin/python3 %h/condapi/scripts/training_dashboard.py --metrics %h/condapi/artifacts/training_dashboard/b32_after_xid13_20260910/metrics.jsonl --history-remote-metrics /home/wuyan/lyj/YAM/training-runs/pi05_yam/lego_full_b64_r3_20260909/metrics/metrics.jsonl --history-remote-metrics /home/wuyan/lyj/YAM/training-runs/pi05_yam/lego_full_b48_diag9361_20260910/metrics/metrics.jsonl --remote yam-server --remote-metrics /home/wuyan/lyj/YAM/training-runs/pi05_yam/lego_full_b32_after_xid13_20260910/metrics/metrics.jsonl --interval 10 --save-interval 5000 --batch-size 32 --stage-steps 40000 --total-steps 162097 --model pi05 --backend OpenPI/JAX --metadata %h/condapi/configs/dashboards/pi-full-metadata.json --name "pi05 · lego full / batch32 after Xid13 20260910"
+ExecStart=/usr/bin/python3 %h/condapi/scripts/training_dashboard.py --metrics %h/condapi/artifacts/training_dashboard/b32_after_xid13_20260910/metrics.jsonl --history-remote-metrics /home/wuyan/lyj/YAM/training-runs/pi05_yam/lego_full_b64_r3_20260909/metrics/metrics.jsonl --history-remote-metrics /home/wuyan/lyj/YAM/training-runs/pi05_yam/lego_full_b48_diag9361_20260910/metrics/metrics.jsonl --remote yam-server --remote-metrics /home/wuyan/lyj/YAM/training-runs/pi05_yam/lego_full_b32_after_xid13_20260910/metrics/metrics.jsonl --interval 10 --save-interval 5000 --batch-size 32 --stage-steps 80000 --total-steps 80000 --model pi05 --backend OpenPI/JAX --metadata %h/condapi/configs/dashboards/pi-full-metadata.json --name "pi05 · lego full / batch32 after Xid13 20260910"
 Restart=on-failure
 RestartSec=10
 NoNewPrivileges=true
