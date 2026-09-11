@@ -13,8 +13,9 @@
 - 唯一记忆系统是 `AGENTS.md` + `docs/cache/`；不要新增 `.agents`、`.codex` 或其他平行缓存。
 - 启动时依次读取本文件、`docs/cache/kernel.md`、`docs/cache/context_index.md`，然后按路由最多读取一个 mode；已由宿主注入的内容不重复读取。
 - 稳定事实只保留一个 owner：规则归本文件，路由归 index，操作边界归 mode，详细事实归编号化 `docs/`，历史原因归 `docs/07_change_log.md`。kernel 只保留带来源的摘要，不独立维护第二份事实。
-- 取消文档行数硬限制；记忆包最多 12,288 UTF-8 字节，同一活跃上下文累计默认 32,768 字节（含已加载记忆）。2026-09-09 用户授权：若预算阻碍实际工作，agent 可按需用 `memory_gate.py resize` 调整同一账本，上限 262,144 字节，记录理由且保留已用额度与历史；不要仅因默认额度耗尽停止任务。单包仍整段准入，不截掉必要条件。细节归 `docs/09_memory_system.md`。
-- 每个仍保留历史的上下文使用同一预算账本 `docs/cache/runtime/`，不得靠换会话 ID 或多次读取绕过累计限制；真实压缩/新上下文后才重建并重新计入保留内容。完整请求 token 限制需宿主按实际 tokenizer、消息/工具封装和输出预留执行；字节预算不能宣称为完整 token 限制。
+- 长期资料不设文档行数硬限制，完整证据和未完成事项继续保存在既有 owner。读取前明确当前决策与缺失事实，先取摘要和相关章节，必要时再展开原文；不预加载全部历史，不重复读取仍在上下文中的内容。摘要保留目标、用户约束、适用条件、单位/版本、反例、未知项、下一步和证据来源。
+- 本项目取消默认累计读取额度及旧固定上限，不因读取计数达到阈值而停止任务、要求压缩或新开对话。可选 `memory_gate.py` 用于章节选择、证据检查与去重；单包默认 12,288 UTF-8 字节是可调检索设置，先缩小无关选择，必要完整证据可用 `--max-bytes` 扩大，不截掉条件。普通工具也可做有界读取；搜索/日志先过滤再返回相关片段，原始产物保留。
+- `docs/cache/runtime/` 的可选账本仅记录已声明预加载和成功输出包，不代表当前上下文占用。按 2026-09-11 用户授权，对旧账本原位执行 `resize --no-total-limit`，保留计量、去重历史和带时间/理由的调整记录；不靠清空或换 ID 迁移。实际压缩后需要恢复时，只对缺失章节用 `--reload`。完整请求 token 限制只能由宿主按实际 tokenizer、完整消息/工具封装和输出预留执行，字节计量不能代替它。观察到上下文压力时在既有 cache 保存可恢复摘要；写摘要本身不会移除旧消息。细节归 `docs/09_memory_system.md`。
 - 临时状态带观察时间并在使用前复核；经验先候选、再证据验证、再合并 owner；原始产物不因压缩而删除。通用 skill 源码在 `skills/mlops-memory/`，不承载项目记忆副本。设计与验收归 `docs/09_memory_system.md`。
 
 ## 编号化文档所有权
@@ -26,7 +27,7 @@
 - `docs/04_data_contracts.md`：YAM 数据格式、动作维度、单位待核项和 norm stats。
 - `docs/05_inference_and_rollout.md`：训练后 policy 的 Thor 本地协议、Thor↔3588 网络通道和最小 smoke；不承载机械臂驱动说明。
 - `docs/08_thor_edge_deployment.md`：Thor 官方系统、容器环境、Pi0.5 转换/加速和端侧验收；下属 `docs/reference/thor/` 为按阶段读取的安装操作冷手册，不承载机械臂驱动说明。
-- `docs/09_memory_system.md`：记忆预算、证据生命周期、skill 接入与迭代验收。
+- `docs/09_memory_system.md`：按需检索、计量边界、证据生命周期、skill 接入与迭代验收。
 - `docs/10_vla_platform.md`：新接入层的操作、模型/后端状态、Conda 工作流和模型接入验收；不是模型训练实现的第二份文档。
 - `docs/11_training_dashboard.md`：模型无关的指标协议、多运行看板、原生训练器接入与显示语义。
 - `docs/06_openarm_research_plan.md`：历史 OpenArm/KAI0/Evo-RL 研究归档，不是当前 YAM 路线。

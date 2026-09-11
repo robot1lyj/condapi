@@ -24,7 +24,7 @@
 - Thor 端侧系统与 Pi0.5 部署 → `docs/08_thor_edge_deployment.md`
 - 历史 OpenArm 研究归档 → `docs/06_openarm_research_plan.md`
 - 变更历史 → `docs/07_change_log.md`
-- 记忆架构、严格加载预算、证据记录与 skill → `docs/09_memory_system.md`
+- 记忆架构、按需检索、账本迁移与证据记录 → `docs/09_memory_system.md`
 - 旧方案指引 → `docs/reference/00_reference_index.md`
 
 ## Quick Route
@@ -36,8 +36,8 @@
 - Thor 系统盘、容器、JAX→PyTorch→TensorRT 和端侧 smoke → `08_thor_edge_deployment.md`
 - Thor 逐步安装指导/烧录交接 → `docs/reference/thor/00_start_here.md`，只按当前阶段读取；版本、精度与当前状态仍归 `08_thor_edge_deployment.md`
 - YAM 数据审计、SFT、Pi0.5 全量微调、评估 → `04_model_ops.md`
-- 记忆维护与任务恢复 → `skills/mlops-memory/SKILL.md`；先准入，再按需读取 owner 的相关章节。
-- 只需了解项目 → 从 `docs/00_handoff_index.md` 开始，按编号阅读。
+- 记忆维护与任务恢复 → 当前安装的 `mlops-memory/SKILL.md`（本项目源码为 `skills/mlops-memory/SKILL.md`）；先明确决策与缺口，再按需读取 `docs/09_memory_system.md` 和相关 owner 章节；账本迁移只展开 skill 的 `references/usage.md`。
+- 只需了解项目 → 从 `docs/00_handoff_index.md` 的摘要和导航开始，只展开与当前问题相关的 owner 章节，不按编号加载全部文档。
 
 ## 状态词
 

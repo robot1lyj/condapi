@@ -33,7 +33,7 @@ python3 scripts/vla.py models
 
 当前 Pi 正式全量入口仍为 `scripts/launch_lego_full.sh` → `scripts/train_lego_full.py`，每 5k 保存与 committed checkpoint 续训保护保留。`configs/experiments/pi-train.toml` 是通用全量配置示例，不替代已有 Lego 正式启动参数。服务器故障未解决，本地禁止运行训练循环，包括 debug/CPU smoke；仅做静态、配置和看板验证。多模型指标接入不提升尚未 GPU 验收的模型状态。
 
-记忆预算账本位于实际上下文对应的 `docs/cache/runtime/`，只记录运行计量，不把某次会话 ID 固化为长期操作步骤。只有真实压缩/新上下文后重建；文件记忆读取当前工作树版本。宿主完整 token 计量接口不可用，不能把字节预算称作完整上下文 token 限制。
+文件记忆读取当前工作树版本，只按当前任务展开摘要与相关章节；检索与旧账本迁移规则归 [记忆系统](09_memory_system.md)。可选 `docs/cache/runtime/` 账本保留检索计量与去重历史，无默认累计额度，不把会话 ID 固化为长期操作步骤，也不将账本字节当作当前上下文占用。
 
 ## 命令与环境
 
