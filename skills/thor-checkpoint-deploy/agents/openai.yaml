@@ -1,0 +1,7 @@
+interface:
+  display_name: "Thor checkpoint 接入"
+  short_description: "沿用 Pi0.5 混合精度路线，将新全量微调权重转换为 Thor 推理候选"
+  default_prompt: "使用 $thor-checkpoint-deploy 将这个新的 Pi0.5 checkpoint 按既定路线接入 Thor，完成转换、构建与真实回放。"
+policy:
+  allow_implicit_invocation: true
+

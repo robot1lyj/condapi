@@ -30,7 +30,7 @@ sudo python3 scripts/thor/run_suite_host.py \
 
 复测先检查退出成功、180 次正式调用、P50/P95、finite、重复差和同引擎图/非图差，再运行 `compare_suites.py` 对 JAX A；报告继续保存所有误差，不把 observed error 自动当成容差。当前无需重新下载镜像、权重或构建引擎。超过 text80 的有效输入显式使用 V 的 200 桶（见下节），**自动路由尚未实现**。
 
-下一阶段优先用实际微调 checkpoint 完成 LoRA 合并与任务精度验证，再决定是否需要继续优化；本轮不为再省几毫秒默认降位量化。当前基础模型没有 LoRA，不能宣称该路径已经验证未来 LoRA 模型。
+下一阶段优先用实际全量微调 checkpoint 完成新权重转换、缓存/引擎重建与精度验证，不默认执行 LoRA 合并；按 [新 checkpoint 交接](12_checkpoint_handoff.md) 推进。本轮不为再省几毫秒默认降位量化。历史 LoRA 模型不属于当前已验证输入。
 
 本文持有候选复测顺序与下一轮测试规则；逐次成绩、误差和失败原因由 [加速执行记录](10_acceleration_execution.md) 持有，安装与容器环境按 [Thor 部署](../../08_thor_edge_deployment.md)。本方案只操作 Thor，不读写 3588。
 

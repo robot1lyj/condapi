@@ -13,6 +13,8 @@
 
 ## 恢复任务
 
+- 2026-09-11 用户确认保留 W 路线，新 Pi0.5 全量微调 checkpoint 优先用 `thor-checkpoint-deploy` 技能准备离线推理候选；不默认后台监听或切换线上模型。步骤、脚本硬编码边界和交付条件见 [checkpoint 交接](../reference/thor/12_checkpoint_handoff.md)。
+
 - 2026-09-09 用户授权本轮工作树合并，保留 main 的 Pi 全量微调与 5k 续训修复；服务器故障期间不部署。严禁本地训练循环（含 CPU/debug）；只允许轻量配置/协议和看板验证。合并流程归 [10](../10_vla_platform.md)，多模型指标协议归 [11](../11_training_dashboard.md)，操作约束归 `AGENTS.md`。记忆只按当前任务读取摘要和相关章节，必要时展开原文；无默认累计额度，完整证据和待办继续保留，见 [09](../09_memory_system.md)。
 - 2026-09-08 Evo-1和MolmoAct2本地/服务器独立Conda环境均安装并通过CPU检查，两端分别106/108个包版本一致；MolmoAct2已加入同一LeRobot共享后端。普通MolmoAct2不含Think，LoRA与FP32动作专家参数的精度规则不套Pi结论；尚未验收真实YAM模型/GPU训练。环境与动态库配置见 [02](../02_installation_and_environment.md)，实测见 [Evo报告](../reports/environments/evo1-20260908/README.md) / [Molmo报告](../reports/environments/molmoact2-20260908/README.md)，模型特有事项见 [Molmo接入](../reference/molmoact2_integration.md)。
 

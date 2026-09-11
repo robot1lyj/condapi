@@ -6,10 +6,12 @@
 
 ## 1. 当前决策
 
+- 2026-09-11 用户确认保留 W 混合精度路线作为新 checkpoint 的优先接入方案；自动接入技能及逐阶段步骤见 [新 checkpoint 交接](reference/thor/12_checkpoint_handoff.md)。它自动协助离线转换、构建与回放，不是后台监听或自动生产切换；现有基础模型宿主脚本的硬编码边界在该手册明确列出。
+
 - 默认推理目标是 Jetson AGX Thor Developer Kit（T5000 口径）；设备到手后仍需用 `jetson_release`/`cat /etc/nv_tegra_release` 核对实际 SKU。若实际是 T4000 或定制载板，不能直接套用开发套件 ISO。
 - 官方系统基线选 JetPack 7.2.1 / Jetson Linux r39.2.1。系统盘制作介质是 Jetson ISO USB 安装盘，实际 BSP 安装到 Thor 的 NVMe，不把 ISO 当作 Live USB。
 - 部署形式确定为 Docker + NVIDIA Container Toolkit，以 Docker Compose 按模型系列管理容器：Pi 系列共用一个服务，通过配置/checkpoint 选择模型，默认一次加载一个。首版在容器内验证原生 JAX；“原生 JAX”表示保留原模型实现与权重，不表示直接安装到宿主机。模型 Python 依赖、转换工具和开发环境均封装在系列镜像中。
-- 用户确认训练产物必定为 JAX/Flax（Orbax）checkpoint；当前 `pi05_yam_lora` 的两条 Gemma 分支均有 LoRA。原始 checkpoint、配置、norm 和原 JAX policy 行为是部署验收依据，必须完整保留。
+- 用户确认 Pi 训练产物为 JAX/Flax（Orbax）checkpoint；当前为 `pi05_yam` 全量微调，不默认执行 LoRA 合并。原始 checkpoint、配置、norm 和原 JAX policy 行为是部署验收依据，必须完整保留；历史 LoRA 输入另行处理。
 - 精度优先：先建立原 JAX golden，并验证 Thor 容器内原生 JAX 的可行性；需要转换时，先审计 LoRA 与权重映射，使用 FP32 中间产物，再验证与参考一致的未量化混合精度运行。容器部署形式已确定，模型后端的生产验收仍待实测，不预设 PyTorch BF16 → TensorRT FP8 为必经路线。
 - TensorRT BF16/FP32 混合精度是未量化候选，须另行验证 exporter 支持；FP8、NVFP4、定制 FP16 均为可选实验。只有逐层、逐去噪步、完整 action 与任务验收通过后才能晋级；cosine、有限输出或时延不能单独证明精度保持。
 - Thor 只在本地加载和执行模型；3588 通过直连以太网发送相机/状态/prompt observation，Thor 通过同一条直连链路返回 action chunk。WebSocket 或后续约定的直连协议是两 IPC 的生产数据通道，不等于远程模型推理；Thor 内部仍可用本地 direct API 做基准 smoke。
