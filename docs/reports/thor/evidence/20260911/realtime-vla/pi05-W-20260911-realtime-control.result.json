@@ -1,0 +1,872 @@
+{
+  "run_id": "pi05-W-20260911-realtime-control",
+  "phase": "evaluate",
+  "started_at": "2026-09-11T08:07:04.954955+00:00",
+  "status": "measured_not_accuracy_approved",
+  "command": [
+    "/bench/benchmark_suite.py",
+    "--checkpoint",
+    "/checkpoints/pi05_base_pytorch_fp32_v1",
+    "--suite",
+    "/test-data/pi05-replay-v1/suite.json",
+    "--params-dtype",
+    "bfloat16",
+    "--compute-dtype",
+    "bfloat16",
+    "--output",
+    "/results/pi05-W-20260911-realtime-control",
+    "--backend",
+    "tensorrt",
+    "--no-compile",
+    "--engine",
+    "/artifacts/pi05-trt-text80-20260908-r1",
+    "--engine-cuda-graph",
+    "--require-time-cache",
+    "--expected-text-bucket",
+    "80"
+  ],
+  "config": "pi05_yam",
+  "backend": "tensorrt",
+  "compiled": false,
+  "cuda_graph": false,
+  "compiled_graph_parts": false,
+  "graph_reference": null,
+  "static_denoising_loop": true,
+  "engine_cuda_graph": true,
+  "warmups_per_sample": 2,
+  "attention": "onnx_eager_lowered_to_tensorrt",
+  "batch_vision": true,
+  "attention_mask": "query_dtype",
+  "params_dtype": "fp32_checkpoint_to_bfloat16",
+  "compute_dtype": "bfloat16",
+  "matmul_precision": "FP32 highest; TF32 disabled",
+  "checkpoint_metadata_sha256": "250d0ad0f6540a5e4bdd70442d6864cef729724f2d23e2dd2cc669563a668d70",
+  "suite_sha256": "5dc74ebd1fbf296f21156ec685cf9edd6d7eb20c1a7eec858d8091369db1e15d",
+  "norm_stats_sha256": "d3fb4d94c095f9bf1fdc25ef032cd5a6a7575a983f4039e6f214f6b7af38dda9",
+  "suite": {
+    "created_at": "2026-09-07T10:31:18.850029+00:00",
+    "source_kind": "real_yam_recording",
+    "source_root": "/home/wuyan-lyj/thor-system/test-data/ABC-130k-two-tasks/lego_sorting",
+    "source_files": {
+      "manifests/train.jsonl": "1fabf4a2b83224f85a724146fb37ccf17928f91c00bd0a697e470980e54fb3a6",
+      "train/data/source-file-000.parquet": "86c8358e45cc3888a5a8ad51d3165b8830a2ae21147fc2b7ee6cc1ac169b7b48",
+      "train/videos/left_wrist/episode-000095.mp4": "933af3b2463cfa8f79b036e54875d84b950a8fee646bd5d85f245b51d7ff8f21",
+      "train/videos/left_wrist/episode-000096.mp4": "84e438bc8fd5cf63df13973ec5364b34d2cd47e55993c2040c042a2319cc1013",
+      "train/videos/left_wrist/episode-000097.mp4": "516a6fb63a66ec5ad7984bb6d58c7a2358404ca06fc18097d2c61877e524c62b",
+      "train/videos/right_wrist/episode-000095.mp4": "6e7c239a40ea9a567d2a72b49f50880c0c60989b1ca2485bc1bfb8f1e92107b1",
+      "train/videos/right_wrist/episode-000096.mp4": "2055b5cd36bc75d7b359c013d56d96c620d5fe9bfa9f760e054c492a44ec332a",
+      "train/videos/right_wrist/episode-000097.mp4": "e52111ef360e949d4cc6aa9102e818a24c37792623c46ec2038156e1a2af49ea",
+      "train/videos/top/episode-000095.mp4": "9d04979383e8f4d81aebd04bdadfb9d6d77b2e33468f36bf765b3d39260699b9",
+      "train/videos/top/episode-000096.mp4": "fb29baaba91fc93573cf189707f608185c1273a3fad8884e141508622b6c40fb",
+      "train/videos/top/episode-000097.mp4": "8517f0b92104e1ce3faae39d5fa5c3f85c1f22b943d46ed00177dcece364ae8c"
+    },
+    "norm_stats_sha256": "d3fb4d94c095f9bf1fdc25ef032cd5a6a7575a983f4039e6f214f6b7af38dda9",
+    "normalization_scope": "benchmark_only_same_recordings_not_production_training_stats",
+    "normalization_method": "OpenPI RunningStats; 50 future actions relative to current state; endpoint clamp",
+    "joint_delta_mask": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      false
+    ],
+    "action_horizon": 50,
+    "units": "original_dataset_values_no_rescaling_no_robot_calibration_claim",
+    "base_model_only": true,
+    "samples": [
+      {
+        "sample": "episode-000095-early.npz",
+        "provenance": "episode-000095-early.json"
+      },
+      {
+        "sample": "episode-000095-middle.npz",
+        "provenance": "episode-000095-middle.json"
+      },
+      {
+        "sample": "episode-000095-late.npz",
+        "provenance": "episode-000095-late.json"
+      },
+      {
+        "sample": "episode-000096-early.npz",
+        "provenance": "episode-000096-early.json"
+      },
+      {
+        "sample": "episode-000096-middle.npz",
+        "provenance": "episode-000096-middle.json"
+      },
+      {
+        "sample": "episode-000096-late.npz",
+        "provenance": "episode-000096-late.json"
+      },
+      {
+        "sample": "episode-000097-early.npz",
+        "provenance": "episode-000097-early.json"
+      },
+      {
+        "sample": "episode-000097-middle.npz",
+        "provenance": "episode-000097-middle.json"
+      },
+      {
+        "sample": "episode-000097-late.npz",
+        "provenance": "episode-000097-late.json"
+      }
+    ],
+    "norm_stats": "norm_stats.json",
+    "observation_count": 9
+  },
+  "steps": 10,
+  "horizon": 50,
+  "seed": 0,
+  "repeats": 20,
+  "versions": {
+    "torch": "2.12.0a0+5aff3928d8.nv26.5.50603568",
+    "transformers": "4.53.2",
+    "jax": "0.6.2",
+    "jaxlib": "0.6.2",
+    "flax": "0.10.2",
+    "orbax-checkpoint": "0.11.13",
+    "tensorrt": "10.16.1.11"
+  },
+  "devices": [
+    "NVIDIA Thor",
+    "(11, 0)"
+  ],
+  "precision_acceptance_threshold": null,
+  "limitations": [
+    "Base model is not YAM-finetuned; no robot execution or task success claim",
+    "Benchmark-only norms from the same recordings; not production training norms",
+    "Dataset units unchanged, not independently calibrated against hardware",
+    "No numerical tolerance approved yet; measured differences do not constitute acceptance",
+    "Same Thor JAX version reference, not a training-server JAX equivalence test",
+    "PyTorch allocator peak excludes TensorRT external allocations; use system telemetry"
+  ],
+  "converted_weights_sha256": "0b8f56470a55039f4ff36eb2bde99bff2fd2b117025fd994c844f76d4c68618b",
+  "conversion_audit": {
+    "mapped_tensor_count": 811,
+    "mapped_element_count": 3353433872,
+    "load_precision": "float32",
+    "mapped_to_loaded_bit_exact": true,
+    "missing_unused_language_heads": [
+      "paligemma_with_expert.gemma_expert.lm_head.weight",
+      "paligemma_with_expert.paligemma.lm_head.weight"
+    ],
+    "output_precision": "float32",
+    "checkpoint_metadata_sha256": "250d0ad0f6540a5e4bdd70442d6864cef729724f2d23e2dd2cc669563a668d70",
+    "checkpoint": "/checkpoint/pi05_base",
+    "lora": "absent; not a LoRA merge implementation",
+    "inference_equivalence": "not tested by tensor loading audit"
+  },
+  "precision_policy": "selected BF16 backbone with FP32 stability layers",
+  "engine_report": {
+    "run_id": "pi05-trt-text80-20260908-r1",
+    "phase": "engine_build_tactic_profile",
+    "started_at": "2026-09-07T16:50:12.242956+00:00",
+    "status": "built_not_inference_or_accuracy_validated",
+    "source_export": "/artifacts/pi05-onnx-text80-20260908-r1",
+    "source_export_report_sha256": "b5c4ea2afcd057510a5bbd0a372307d91e1757d810ffd601e3f476a222cd6527",
+    "source_onnx_sha256": "715e674d8b1104ecdfd012f29d5bdbe4c7bb5050cb3003f76fb9a6d6034f2d76",
+    "external_weights_sha256": {
+      "sampler.onnx.data": "62e9e88d6af44e42956fa5c4b5a1801f95486577af63f350083e9cdb50143b88"
+    },
+    "tensorrt_version": "10.16.1.11",
+    "command": [
+      "/usr/src/tensorrt/bin/trtexec",
+      "--onnx=/artifacts/pi05-onnx-text80-20260908-r1/sampler.onnx",
+      "--saveEngine=/artifacts/pi05-trt-text80-20260908-r1/sampler.engine",
+      "--stronglyTyped",
+      "--noTF32",
+      "--skipInference",
+      "--builderOptimizationLevel=3",
+      "--maxAuxStreams=0",
+      "--memPoolSize=workspace:8192",
+      "--profilingVerbosity=detailed",
+      "--exportLayerInfo=/artifacts/pi05-trt-text80-20260908-r1/layers.json",
+      "--timingCacheFile=/artifacts/pi05-trt-text80-20260908-r1/timing.cache"
+    ],
+    "tf32": false,
+    "quantization": null,
+    "strongly_typed": true,
+    "contract": {
+      "views": 3,
+      "image_resolution": [
+        224,
+        224
+      ],
+      "horizon": 50,
+      "steps": 10,
+      "action_dim": 32
+    },
+    "exit_code": 0,
+    "build_s": 475.603945062001,
+    "engine_sha256": "a0052cf5847f565d804fe633f4445cd58037bf19e094704286986498775b1e78",
+    "finished_at": "2026-09-07T16:58:12.688485+00:00"
+  },
+  "time_modulation_cache": {
+    "sha256": "ccc731e87c791ab1b29495aba5721ae674ddffc2804689d57e2164e6c6c1b8b2",
+    "modules": [
+      "layers.0.input_layernorm",
+      "layers.0.post_attention_layernorm",
+      "layers.1.input_layernorm",
+      "layers.1.post_attention_layernorm",
+      "layers.2.input_layernorm",
+      "layers.2.post_attention_layernorm",
+      "layers.3.input_layernorm",
+      "layers.3.post_attention_layernorm",
+      "layers.4.input_layernorm",
+      "layers.4.post_attention_layernorm",
+      "layers.5.input_layernorm",
+      "layers.5.post_attention_layernorm",
+      "layers.6.input_layernorm",
+      "layers.6.post_attention_layernorm",
+      "layers.7.input_layernorm",
+      "layers.7.post_attention_layernorm",
+      "layers.8.input_layernorm",
+      "layers.8.post_attention_layernorm",
+      "layers.9.input_layernorm",
+      "layers.9.post_attention_layernorm",
+      "layers.10.input_layernorm",
+      "layers.10.post_attention_layernorm",
+      "layers.11.input_layernorm",
+      "layers.11.post_attention_layernorm",
+      "layers.12.input_layernorm",
+      "layers.12.post_attention_layernorm",
+      "layers.13.input_layernorm",
+      "layers.13.post_attention_layernorm",
+      "layers.14.input_layernorm",
+      "layers.14.post_attention_layernorm",
+      "layers.15.input_layernorm",
+      "layers.15.post_attention_layernorm",
+      "layers.16.input_layernorm",
+      "layers.16.post_attention_layernorm",
+      "layers.17.input_layernorm",
+      "layers.17.post_attention_layernorm",
+      "norm"
+    ],
+    "dtype": "float32",
+    "batching": "ten independent batch-1 original GEMVs; no reduced precision",
+    "invalidated_by": "any checkpoint/LoRA weight or denoising schedule change"
+  },
+  "text_bucket": 80,
+  "padding_experiment": {
+    "status": "offline_experiment_supported_not_accuracy_approved",
+    "diagnostics": [
+      {
+        "path": "/artifacts/pi05-prepare-text200-fp32-20260908-r1",
+        "report_sha256": "450ed5c20f2846c81495ec3c80afbc20560264995149970849d5f8cec3a3a127",
+        "arrays_sha256": {
+          "episode-000095-early.npz": "879b4634096271da29aecde447ea1e7b6e841850eee7eea5c3cb1947229b929e",
+          "episode-000095-middle.npz": "6369725315bf2dc069fe8059f665ebb32c0e615ff7a6342659b30ea34a396855",
+          "episode-000095-late.npz": "1e167574baff75c26ac3f8f152e3bcbc000f88918e4cc671224a29661dae8b39",
+          "episode-000096-early.npz": "8b5629570568badeaf52b29e734de5d9e54798858616ce88cf82e182f708928e",
+          "episode-000096-middle.npz": "921a2b4599f0ba95a3a2e169a32c722674eb33e7ed69207154d1b75191d673c2",
+          "episode-000096-late.npz": "da06c8b2bff48524a5b03c2fcb070e0bcd0352dc5228c4f55922671ec27ec771",
+          "episode-000097-early.npz": "e7589fcf3495d3f7be030e1771b1f7400da59f607c0ea46f40474c4e87aca500",
+          "episode-000097-middle.npz": "cc7b0f9beb305812f3cec468d00909d75c7ed3147d7f4d63545af9f570e2c338",
+          "episode-000097-late.npz": "392372ed8c67418c42ef8699500331f7a1cb14353e1fa693d016470077198edf"
+        }
+      },
+      {
+        "path": "/artifacts/pi05-prepare-text80-fp32-20260908-r1",
+        "report_sha256": "d00f180f1c6f12d3a392c49b9bb6c85092d154d4b61375f3ca070ca325cd440c",
+        "arrays_sha256": {
+          "episode-000095-early.npz": "0f51fc2ad40d23da8fcb664c8192f2d29a45c763138f8739276026a6053b5a3a",
+          "episode-000095-middle.npz": "7e900788ba5db00e9a645fad0de691ecde15af130173c3c9b5f24dc65622c7e5",
+          "episode-000095-late.npz": "ca6cea8bd1fdf0fc2d8d1c4fefe7aec52a3c60da49ab699243ea24915208ab96",
+          "episode-000096-early.npz": "2177e94399e46be3541c65f1285c5dd94196a432473e35428e08f316fdd0075c",
+          "episode-000096-middle.npz": "ec5f5b790e80d31ab5ae954dafcb092ac12d2142d1464ef654ddedd866279389",
+          "episode-000096-late.npz": "a2e9ea2b378224ec5c0af712ac27c5b85a991e4ef994a3d1c5cb311bc4dcb9de",
+          "episode-000097-early.npz": "4a4dbb1ce067083f39de919208cf0a8016aa3005bb42a747de216c9418924b3a",
+          "episode-000097-middle.npz": "d1238293221956ae38d9eed2108141182b9ac97320438dfaf95bbb080f037925",
+          "episode-000097-late.npz": "56b30aeb55e9218503b58481d0e31b267fbf57a987d6973b2c3303102a052358"
+        }
+      },
+      {
+        "path": "/artifacts/pi05-prepare-text80-bf16-20260908-r1",
+        "report_sha256": "d810a251845df64d68b048eff80754c3b2291d94f115fede5fee9f28afd275c4",
+        "arrays_sha256": {
+          "episode-000095-early.npz": "63f21e448fd7a03efe18cacbebe4bbc4453c0cd91140d756876b60fc245146ed",
+          "episode-000095-middle.npz": "6399c56f646def9bdf1e178819ba4a40f0bf54329cc5b565b3b64452403a409b",
+          "episode-000095-late.npz": "508a2470002252a38e6956254e7b5d7c4b66442bb51674fff60dadfb93f7e367",
+          "episode-000096-early.npz": "15bf248ed06b9b72b9db22de13d19951267706d8151644adb321385988cd586b",
+          "episode-000096-middle.npz": "1a3b6c943c053d51e0a6913f728f44f924346f8e578e345a0340c4a7d4a4a599",
+          "episode-000096-late.npz": "7067c42440d3de6d9b4a6dff128b4311e8f105653d4e610d6cf3cef945b02cff",
+          "episode-000097-early.npz": "cb2aeeab14730adfd45d6c566e97a3f28ff66fd61cd5ae51d7915105a051f787",
+          "episode-000097-middle.npz": "74c5da4df622d323a188ec2c4ed96f70fd1c030dce94019ec18169656223e001",
+          "episode-000097-late.npz": "36193164a6ba72acb32683e76d3b5617bcdf0c00c98f3593b9534bfe3337f5bb"
+        }
+      }
+    ],
+    "text_bucket": 80,
+    "noise_sha256": "42bca6ac77eb9aeaa872cdecc1b432e2c3d0f9a49f5da287515cecf556131d84",
+    "framework_fp32_tolerance": {
+      "rtol": 1.3e-06,
+      "atol": 1e-05
+    },
+    "original_strict_pass_count": 8,
+    "comparisons": [
+      {
+        "sample": "episode-000095-early.npz",
+        "fp32_control_exact": true,
+        "framework_fp32_close": true,
+        "fp32_raw_max_abs": 1.043081283569336e-06,
+        "bf16_raw_max_abs": 0.00205819308757782
+      },
+      {
+        "sample": "episode-000095-middle.npz",
+        "fp32_control_exact": true,
+        "framework_fp32_close": true,
+        "fp32_raw_max_abs": 1.6093254089355469e-06,
+        "bf16_raw_max_abs": 0.002799689769744873
+      },
+      {
+        "sample": "episode-000095-late.npz",
+        "fp32_control_exact": true,
+        "framework_fp32_close": true,
+        "fp32_raw_max_abs": 1.3113021850585938e-06,
+        "bf16_raw_max_abs": 0.002317070960998535
+      },
+      {
+        "sample": "episode-000096-early.npz",
+        "fp32_control_exact": true,
+        "framework_fp32_close": true,
+        "fp32_raw_max_abs": 1.1920928955078125e-06,
+        "bf16_raw_max_abs": 0.0026264190673828125
+      },
+      {
+        "sample": "episode-000096-middle.npz",
+        "fp32_control_exact": true,
+        "framework_fp32_close": true,
+        "fp32_raw_max_abs": 5.960464477539062e-07,
+        "bf16_raw_max_abs": 0.0017785131931304932
+      },
+      {
+        "sample": "episode-000096-late.npz",
+        "fp32_control_exact": true,
+        "framework_fp32_close": true,
+        "fp32_raw_max_abs": 8.940696716308594e-07,
+        "bf16_raw_max_abs": 0.002558887004852295
+      },
+      {
+        "sample": "episode-000097-early.npz",
+        "fp32_control_exact": true,
+        "framework_fp32_close": true,
+        "fp32_raw_max_abs": 6.966292858123779e-07,
+        "bf16_raw_max_abs": 0.0025234222412109375
+      },
+      {
+        "sample": "episode-000097-middle.npz",
+        "fp32_control_exact": true,
+        "framework_fp32_close": true,
+        "fp32_raw_max_abs": 7.450580596923828e-07,
+        "bf16_raw_max_abs": 0.0021522045135498047
+      },
+      {
+        "sample": "episode-000097-late.npz",
+        "fp32_control_exact": true,
+        "framework_fp32_close": true,
+        "fp32_raw_max_abs": 2.7120113372802734e-06,
+        "bf16_raw_max_abs": 0.002271980047225952
+      }
+    ],
+    "scope": "mask/position mapping tested separately; full-text and JAX differences remain explicit"
+  },
+  "engine_io": {
+    "images": {
+      "shape": [
+        1,
+        9,
+        224,
+        224
+      ],
+      "dtype": "torch.float32",
+      "input": true
+    },
+    "img_masks": {
+      "shape": [
+        1,
+        3
+      ],
+      "dtype": "torch.bool",
+      "input": true
+    },
+    "lang_tokens": {
+      "shape": [
+        1,
+        200
+      ],
+      "dtype": "torch.int64",
+      "input": true
+    },
+    "lang_masks": {
+      "shape": [
+        1,
+        200
+      ],
+      "dtype": "torch.bool",
+      "input": true
+    },
+    "state": {
+      "shape": [
+        1,
+        32
+      ],
+      "dtype": "torch.float32",
+      "input": true,
+      "unused_binding": "zero dummy; original state untouched in policy"
+    },
+    "noise": {
+      "shape": [
+        1,
+        50,
+        32
+      ],
+      "dtype": "torch.float32",
+      "input": true
+    },
+    "actions": {
+      "shape": [
+        1,
+        50,
+        32
+      ],
+      "dtype": "torch.float32",
+      "input": false
+    }
+  },
+  "load_s": 11.598407598037738,
+  "loaded_param_dtypes": {},
+  "loaded_param_bytes": null,
+  "parameter_introspection": "TensorRT weights opaque, NOT zero parameters; inspect engine layer report",
+  "noise_sha256": "42bca6ac77eb9aeaa872cdecc1b432e2c3d0f9a49f5da287515cecf556131d84",
+  "finished_at": "2026-09-11T08:07:49.789105+00:00",
+  "measurements": [
+    {
+      "sample": "episode-000095-early.npz",
+      "sample_sha256": "3b2623cc18ee325742b2ec1baa187b89cb79353443b5585a31fec312bc72683e",
+      "episode": 95,
+      "frame": 100,
+      "phase": "early",
+      "warmup_ms": [
+        333.4018370369449,
+        108.63164399052039
+      ],
+      "latencies_ms": [
+        106.30811704322696,
+        106.03358101798221,
+        106.104321021121,
+        105.91196099994704,
+        105.88812700007111,
+        105.98008998204023,
+        107.05469100503251,
+        107.22914402140304,
+        106.3003659946844,
+        105.24772899225354,
+        104.9514509504661,
+        105.16795102739707,
+        104.9020069767721,
+        105.10395903838798,
+        105.06534000160173,
+        105.24672002065927,
+        105.64378497656435,
+        104.8609139979817,
+        105.06344097666442,
+        104.95925601571798
+      ],
+      "p50_ms": 105.44575698440894,
+      "p95_ms": 107.06341365585104,
+      "repeat_max_abs_difference": 0.0,
+      "engine_vs_export_eager": {
+        "reference_sha256": "b971e08795161ee1f72957359b781c5846abd3a075fced601a757513c3807540",
+        "normalized_32d_max_abs": 0.0225229412317276,
+        "normalized_14d_max_abs": 0.0225229412317276,
+        "normalized_14d_mae": 0.006989396258722991,
+        "exact": false,
+        "scope": "engine vs same BF16 eager export preparation; not JAX or task acceptance"
+      },
+      "engine_graph_vs_uncaptured_max_abs": 0.0
+    },
+    {
+      "sample": "episode-000095-middle.npz",
+      "sample_sha256": "c9ff7ede028e642a2a0d6791b812837f3de8fac5c6df36e356e6a252b0e95c6e",
+      "episode": 95,
+      "frame": 1714,
+      "phase": "middle",
+      "warmup_ms": [
+        107.05450602108613,
+        105.24594102753326
+      ],
+      "latencies_ms": [
+        107.28190303780138,
+        105.46847694786265,
+        105.70351401111111,
+        107.82570799347013,
+        105.42473598616198,
+        105.09471799014136,
+        105.41508899768814,
+        105.35545903258026,
+        105.45147699303925,
+        105.69454199867323,
+        105.57038401020691,
+        105.82553298445418,
+        105.4244950064458,
+        105.40480999043211,
+        105.41469894815236,
+        105.5758009897545,
+        105.64892104594037,
+        105.71864497615024,
+        105.44796701287851,
+        105.51182000199333
+      ],
+      "p50_ms": 105.49014847492799,
+      "p95_ms": 107.30909328558482,
+      "repeat_max_abs_difference": 0.0,
+      "engine_vs_export_eager": {
+        "reference_sha256": "6c0745d2f764ecd93466de7f907e97daed2a002726f70eaf0ec9608e110f2110",
+        "normalized_32d_max_abs": 0.020878002047538757,
+        "normalized_14d_max_abs": 0.020878002047538757,
+        "normalized_14d_mae": 0.002018981263572641,
+        "exact": false,
+        "scope": "engine vs same BF16 eager export preparation; not JAX or task acceptance"
+      },
+      "engine_graph_vs_uncaptured_max_abs": 0.0
+    },
+    {
+      "sample": "episode-000095-late.npz",
+      "sample_sha256": "6e7ef6a0d6f189b53ce6fa286e6707a79d4a01adf39ed7fb18c1dbe67a440c8b",
+      "episode": 95,
+      "frame": 3328,
+      "phase": "late",
+      "warmup_ms": [
+        106.09286499675363,
+        105.8100420050323
+      ],
+      "latencies_ms": [
+        105.13179103145376,
+        105.3176429704763,
+        104.91951397852972,
+        105.13982799602672,
+        105.39419896667823,
+        105.38052197080106,
+        105.38658802397549,
+        105.42892100056633,
+        105.33053101971745,
+        105.41167896008119,
+        105.23306799586862,
+        105.50152300857008,
+        105.3898999816738,
+        105.68249400239438,
+        106.03324399562553,
+        105.48704996472225,
+        105.89639097452164,
+        105.84082698915154,
+        105.76286399737,
+        105.30219797510654
+      ],
+      "p50_ms": 105.39204947417602,
+      "p95_ms": 105.90323362557683,
+      "repeat_max_abs_difference": 0.0,
+      "engine_vs_export_eager": {
+        "reference_sha256": "5ce963b934cb0f7cdbda27e4c4b49827b6350b2dff8329d6d225542400bbce95",
+        "normalized_32d_max_abs": 0.019933968782424927,
+        "normalized_14d_max_abs": 0.019933968782424927,
+        "normalized_14d_mae": 0.004552693941992142,
+        "exact": false,
+        "scope": "engine vs same BF16 eager export preparation; not JAX or task acceptance"
+      },
+      "engine_graph_vs_uncaptured_max_abs": 0.0
+    },
+    {
+      "sample": "episode-000096-early.npz",
+      "sample_sha256": "91726a0c81ecd77254ca9c7829793522ce8f50bc3bb9ec683f3a469ed7203f6f",
+      "episode": 96,
+      "frame": 100,
+      "phase": "early",
+      "warmup_ms": [
+        105.889901984483,
+        105.06144800456241
+      ],
+      "latencies_ms": [
+        105.17229000106454,
+        105.20509496564046,
+        105.4344839649275,
+        104.84041000017896,
+        105.05304002435878,
+        105.13142903801054,
+        105.03187298309058,
+        105.10221600998193,
+        104.92827300913632,
+        105.28768703807145,
+        105.44850304722786,
+        105.17216997686774,
+        105.07115902146325,
+        105.40809499798343,
+        105.53314903518185,
+        105.46854801941663,
+        105.3803070099093,
+        105.08093802491203,
+        105.31076102051884,
+        105.5565580027178
+      ],
+      "p50_ms": 105.1886924833525,
+      "p95_ms": 105.53431948355865,
+      "repeat_max_abs_difference": 0.0,
+      "engine_vs_export_eager": {
+        "reference_sha256": "092638dc8b9a48782c7f4f2d9962dc97b7d041f344940cdb1d82eca51110e06a",
+        "normalized_32d_max_abs": 0.028078079223632812,
+        "normalized_14d_max_abs": 0.028078079223632812,
+        "normalized_14d_mae": 0.0038412877829146702,
+        "exact": false,
+        "scope": "engine vs same BF16 eager export preparation; not JAX or task acceptance"
+      },
+      "engine_graph_vs_uncaptured_max_abs": 0.0
+    },
+    {
+      "sample": "episode-000096-middle.npz",
+      "sample_sha256": "74094522d58cdbe14446d3239d67f896b2e4549b1cff8c5b1acef41b9666925c",
+      "episode": 96,
+      "frame": 1162,
+      "phase": "middle",
+      "warmup_ms": [
+        106.16344498703256,
+        105.29943695291877
+      ],
+      "latencies_ms": [
+        105.17505800817162,
+        105.0439840182662,
+        105.23319500498474,
+        105.16651102807373,
+        105.10433500166982,
+        105.39242799859494,
+        105.7994450093247,
+        105.40926101384684,
+        105.52050999831408,
+        105.51760299131274,
+        105.43034301372245,
+        105.28549301670864,
+        105.37472297437489,
+        105.40239803958684,
+        105.66106502665207,
+        106.16121400380507,
+        105.46776000410318,
+        105.50470399903134,
+        105.29543500160798,
+        105.32498196698725
+      ],
+      "p50_ms": 105.39741301909089,
+      "p95_ms": 105.81753345904872,
+      "repeat_max_abs_difference": 0.0,
+      "engine_vs_export_eager": {
+        "reference_sha256": "d7b30be7d5bf74e4248b627e39c49c524b26449918c6fe5d3711f01694852462",
+        "normalized_32d_max_abs": 0.0101500004529953,
+        "normalized_14d_max_abs": 0.0101500004529953,
+        "normalized_14d_mae": 0.0027666660226116488,
+        "exact": false,
+        "scope": "engine vs same BF16 eager export preparation; not JAX or task acceptance"
+      },
+      "engine_graph_vs_uncaptured_max_abs": 0.0
+    },
+    {
+      "sample": "episode-000096-late.npz",
+      "sample_sha256": "79eb626b45284d513ac6411efbb5c809e31122690b899e655a8cf754e841461d",
+      "episode": 96,
+      "frame": 2224,
+      "phase": "late",
+      "warmup_ms": [
+        106.02316696895286,
+        105.24629603605717
+      ],
+      "latencies_ms": [
+        105.54804699495435,
+        105.2350559621118,
+        105.06508301477879,
+        105.07650004001334,
+        104.99500099103898,
+        105.34574004122987,
+        104.99966598581523,
+        105.13020399957895,
+        105.72752798907459,
+        105.78010097378865,
+        105.98625900456682,
+        105.2722770255059,
+        105.30968295643106,
+        105.27476901188493,
+        105.56189803173766,
+        105.42667499976233,
+        105.18694401253015,
+        105.25588801829144,
+        105.28711997903883,
+        105.86535197217017
+      ],
+      "p50_ms": 105.28094449546188,
+      "p95_ms": 105.87139732379,
+      "repeat_max_abs_difference": 0.0,
+      "engine_vs_export_eager": {
+        "reference_sha256": "1006646faedf74b253f3624cfd7b509e5f681723353c5491f0715743b071a9df",
+        "normalized_32d_max_abs": 0.021613240242004395,
+        "normalized_14d_max_abs": 0.021613240242004395,
+        "normalized_14d_mae": 0.006842844198628362,
+        "exact": false,
+        "scope": "engine vs same BF16 eager export preparation; not JAX or task acceptance"
+      },
+      "engine_graph_vs_uncaptured_max_abs": 0.0
+    },
+    {
+      "sample": "episode-000097-early.npz",
+      "sample_sha256": "1a3da5c6087e3e1841b8024421a2d21842e332370f7d11a2ba1bb61bc43d37dc",
+      "episode": 97,
+      "frame": 100,
+      "phase": "early",
+      "warmup_ms": [
+        106.34044400649145,
+        105.22450803546235
+      ],
+      "latencies_ms": [
+        105.14086904004216,
+        105.05574103444815,
+        105.03716499079019,
+        105.22338800365105,
+        105.33986100926995,
+        105.53826601244509,
+        105.26205401401967,
+        105.2372109843418,
+        105.00853601843119,
+        105.29124696040526,
+        105.31636903760955,
+        105.30528600793332,
+        105.13040598016232,
+        105.31572898617014,
+        105.48873100196943,
+        105.97034002421424,
+        105.49013700801879,
+        105.23772001033649,
+        105.39126599906012,
+        105.48907099291682
+      ],
+      "p50_ms": 105.29826648416929,
+      "p95_ms": 105.55986971303355,
+      "repeat_max_abs_difference": 0.0,
+      "engine_vs_export_eager": {
+        "reference_sha256": "51795658323472c34eafa6cafd6e428ec457df2bd1c723a4661bf27a6fc98d67",
+        "normalized_32d_max_abs": 0.03398854285478592,
+        "normalized_14d_max_abs": 0.03398854285478592,
+        "normalized_14d_mae": 0.003998417720888808,
+        "exact": false,
+        "scope": "engine vs same BF16 eager export preparation; not JAX or task acceptance"
+      },
+      "engine_graph_vs_uncaptured_max_abs": 0.0
+    },
+    {
+      "sample": "episode-000097-middle.npz",
+      "sample_sha256": "69a6950f558992dc9857d37e526cd03096835c823f38963837fd75483c96e147",
+      "episode": 97,
+      "frame": 1105,
+      "phase": "middle",
+      "warmup_ms": [
+        106.35435895528644,
+        105.56378500768915
+      ],
+      "latencies_ms": [
+        105.37198698148131,
+        105.3673870046623,
+        105.24121898924932,
+        105.16466398257762,
+        105.1632190356031,
+        105.05123803159222,
+        105.1428210339509,
+        104.92063697893173,
+        105.13676499249414,
+        105.34633102361113,
+        105.70380301214755,
+        105.0768670393154,
+        105.41271901456639,
+        105.42841401183978,
+        105.4167760303244,
+        105.29854299966246,
+        105.30008003115654,
+        105.20399699453264,
+        105.45883001759648,
+        105.96618999261409
+      ],
+      "p50_ms": 105.2993115154095,
+      "p95_ms": 105.71692236117087,
+      "repeat_max_abs_difference": 0.0,
+      "engine_vs_export_eager": {
+        "reference_sha256": "cfade11316fb69609e172c8dcbfe4cce6a002fb5c5280cb0c701a44cc5011286",
+        "normalized_32d_max_abs": 0.015299953520298004,
+        "normalized_14d_max_abs": 0.015299953520298004,
+        "normalized_14d_mae": 0.0019784862323597606,
+        "exact": false,
+        "scope": "engine vs same BF16 eager export preparation; not JAX or task acceptance"
+      },
+      "engine_graph_vs_uncaptured_max_abs": 0.0
+    },
+    {
+      "sample": "episode-000097-late.npz",
+      "sample_sha256": "b296dac1adbefa81ab4c7cb44a1968b2f922ec0261d0978cfa0ed9bc7b549cf3",
+      "episode": 97,
+      "frame": 2110,
+      "phase": "late",
+      "warmup_ms": [
+        105.76090303948149,
+        105.04246898926795
+      ],
+      "latencies_ms": [
+        105.02696898765862,
+        105.36159796174616,
+        105.14900501584634,
+        105.05252500297502,
+        105.50756100565195,
+        105.51783902337775,
+        105.40096799377352,
+        105.22951500024647,
+        105.10462702950463,
+        104.89821794908494,
+        105.08029197808355,
+        104.92696904111654,
+        105.62109597958624,
+        105.30825599562377,
+        105.67342001013458,
+        105.32079200493172,
+        105.66307802218944,
+        105.5774400010705,
+        105.6221800390631,
+        105.27532902779058
+      ],
+      "p50_ms": 105.31452400027774,
+      "p95_ms": 105.6635951215867,
+      "repeat_max_abs_difference": 0.0,
+      "engine_vs_export_eager": {
+        "reference_sha256": "23ade6bce7a8778df77223d601cb1bf2ebca4a320cc2b2f26af8230c7d37b0a9",
+        "normalized_32d_max_abs": 0.020815938711166382,
+        "normalized_14d_max_abs": 0.020815938711166382,
+        "normalized_14d_mae": 0.004897037171093481,
+        "exact": false,
+        "scope": "engine vs same BF16 eager export preparation; not JAX or task acceptance"
+      },
+      "engine_graph_vs_uncaptured_max_abs": 0.0
+    }
+  ],
+  "p50_ms": 105.3585284971632,
+  "p95_ms": 106.03326084674336,
+  "repeat_max_abs_difference": 0.0,
+  "process_peak_rss_mib": 7307.15234375,
+  "actions_sha256": "d919b4cd6f13aad4aae29cc6cad2d78ae843876a42a0df97902a4b4fd0a476d1",
+  "normalized_actions_sha256": "8a963f471b2fff158743fd74810c0706c39b6b896570e2948ae7f866392f8423",
+  "action_shape": [
+    9,
+    20,
+    50,
+    14
+  ],
+  "cuda_peak_allocated_bytes": 7255552,
+  "cuda_peak_reserved_bytes": 25165824
+}

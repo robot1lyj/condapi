@@ -1,5 +1,66 @@
 # 10 · 100 ms 加速实验执行记录
 
+## 2026-09-11 · Dexmal realtime-vla 复现：跑通但不替换 W
+
+用户指定优先复现 `https://github.com/dexmal/realtime-vla`。固定版本
+`b86a942a073ea241f9bd6916a705f81906f4638b`，完整读取 README、Pi0.5 转换器、
+Pi0.5 推理、依赖的 Pi0 内核、benchmark/test；没有把随机/未加载真实权重的官方 benchmark
+当作精度或正式时延证据。只在 Thor Pi 容器执行，未操作3588或训练服务器。
+
+| 本轮配置 | P50 / P95 ms | 对原 JAX FP32 MAE | 最大差（数据集单位） |
+|---|---:|---:|---:|
+| 上游 BF16，text200 | 135.372 / 136.340 | 0.005956043 | 0.045227002 |
+| 仅修正 suffix 位置，text200 | 135.910 / 136.865 | 0.002516567 | 0.027190492 |
+| 位置＋显式时间广播，text200 | 135.794 / 136.700 | 0.002516567 | 0.027190492 |
+| 位置＋时间广播，text80 | 124.160 / 124.654 | 0.002521605 | 0.023289707 |
+| 现有 W 同日复测 | 105.359 / 106.033 | 0.002504219 | 0.017282486 |
+
+全部保持三相机、H50、10步、基础JAX权重、原录像与噪声；每配置9输入×20次，
+四组有效Dexmal共720次，W对照180次。每输入逐token比对原OpenPI，64–70个有效token
+全部相同；text80超长输入在调用前拒绝，不静默截断。完整时间包含Thor预处理、分词、
+GPU执行、动作取回和YAM输出还原，不含相机/网络。均非任务成功率验收。
+
+复现适配与发现：
+
+- 原始权重不动，调用上游 `convert_from_jax_pi05.py` 生成独立BF16布局；用已有原始
+  SentencePiece文件创建本地GemmaTokenizer，避免下载另一份分词器。产物
+  `/home/wuyan-lyj/thor/pi/artifacts/realtime-vla-b86a942-20260911/converted.pkl`，
+  SHA-256 `d0a1ba257e3d84f7c08d108166562a82c6a7684311d7777619560efdce946159`。
+- 上游 `forward()` 返回None；包装器取最终 `diffusion_noise` 缓冲区，不改变其采样内核。
+  YAM输入/输出使用本仓库原合同，而不是上游test.py的示例机器人变换。
+- 上游 `get_decoder_rope_weights()` 从有效前缀长度−1开始；原JAX的第一动作位置是
+  有效前缀长度。`--position-offset 0` 独立对照显著降低本批MAE，不能推广为所有任务已修复。
+- 首层时间MLP只写输出首行，诊断增加 `--fix-time-broadcast` 显式扩展到H50。
+  本批该版本与仅位置修正版动作逐值相同，不能把它当成已观察到的精度收益。
+- 原始上游源码保留不修改；修正由显式包装参数控制。原版和修正版分别记录，不冒称原版结果。
+- `realtime-vla-upstream-20260911-r1` 是本地包装漏做uint8→[-1,1]归一化的无效首轮，
+  明确排除；r2已修正。无效产物保留，不归因于上游、不计有效复现次数。
+- W本日全部动作与2026-09-08原W逐值相同；新时延略有变化，不覆盖历史成绩。
+
+环境沿用 `openpi-pi:thor-pytorch-onnx-v6-20260907`；Torch2.12 NVIDIA26.05、Triton3.7，
+Thor SM110。模型依赖未安装到宿主，无FP8/FP4。所有测试临时MAXN、CPU2601MHz、
+GPU GPC1575MHz/NVD1692MHz、EMC4266MHz；退出恢复120W/动态频率/自动风扇。
+前3次直接调用既有MAXN+日志包装器，恢复记录在执行回显；后两次有完整host manifest与power-after。
+
+复跑入口 `scripts/thor/prepare_realtime_vla.py`、`benchmark_realtime_vla.py`、
+`run_realtime_vla_host.py`。Thor隔离代码目录为
+`/home/wuyan-lyj/thor/pi/probes/realtime-vla-20260911`，没有自动更新Thor主检出的代码。
+示例（label须更换，原结果拒绝覆盖）：
+
+```bash
+sudo python3 /home/wuyan-lyj/thor/pi/probes/realtime-vla-20260911/run_realtime_vla_host.py \
+  --scripts /home/wuyan-lyj/thor/pi/probes/realtime-vla-20260911 \
+  --label realtime-vla-manual-001 --position-offset 0 --fix-time-broadcast --text-capacity 80
+```
+
+JSON/退出/遥测日志归 `docs/reports/thor/evidence/20260911/realtime-vla/`；完整数组归Thor
+`thor/pi/results/realtime-vla-*`，工作站副本
+`/home/wuyan-lyj/thor-system/test-data/realtime-vla-20260911/`。
+[中文对照页](../../reports/thor/realtime_vla.html)。本次使用记忆技能保留原始证据、失败归因及独立配置。
+
+**决策：保留W；Dexmal是已跑通的实验后端，不是生产替代。** 当前全量微调路线不改变。
+后续若继续，应针对Thor内核调优并用实际全量微调checkpoint重新验收，不能把4090/5090论文数字当Thor速度。
+
 ## 最新完成：W · 104.25 ms（2026-09-08）
 
 `pi05-W-20260908-r1` 完成 9 输入 × 20 次正式调用：P50 **104.254448 ms** / P95 **104.939629 ms**。相对原 JAX A 的动作 MAE **0.002504218922**、P95 绝对差 0.008970573545、最大差 **0.017282485962** 数据集单位；归一化 14D 最大差 0.025593705475。相对 V 本身 MAE 0.000262102675、最大差 0.002154350281，因此不能称为新旧引擎相同。对同桶 BF16 eager 的归一化 14D 最大差 0.033988542855。

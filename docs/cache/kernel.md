@@ -22,3 +22,4 @@
 - Thor 已安装 NoMachine 9.8.3 并配置自启动，无屏 GNOME / 1920×1080 输出已核对；USB 连接 `192.168.55.1:4000`，账户 `wuyan-lyj`。为此停用 GDM 本地登录画面；恢复方法及许可边界见 [Thor 当前状态](../08_thor_edge_deployment.md#7-当前状态)，客户端画面/重启回连不冒充已验收。
 - 用户指定 **仅推理/测试期间**使用 MAXN（模式 0）+ 最高 CPU/GPU/EMC 频率；结束后恢复日常 120W、动态调频和自动风扇，不设 MAXN/锁频开机常驻。入口 `scripts/thor/maxn_session.py` 负责临时切换与退出恢复；每次核对温度/降频，见 [Thor 当前状态](../08_thor_edge_deployment.md#7-当前状态)。
 - 新结果写回对应 owner，原因写入 [变更历史](../07_change_log.md)；候选经验、失效与检索协议见 [记忆系统](../09_memory_system.md)。
+- 2026-09-11 已在Thor复现Dexmal realtime-vla原版与独立修正版；本轮未优于既有W，保留W候选，不改变全量微调路线。有效/无效运行、精度与延迟边界见 [Thor执行记录](../reference/thor/10_acceleration_execution.md)，可视报告见 [对照页](../reports/thor/realtime_vla.html)。

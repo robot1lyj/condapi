@@ -1,0 +1,58 @@
+{
+  "W_vs_JAX": {
+    "mae": 0.002504218922049548,
+    "rmse": 0.0037977038305075025,
+    "p95_abs": 0.008970573544502253,
+    "max_abs": 0.017282485961914062,
+    "worst_index": [
+      2,
+      49,
+      2
+    ],
+    "per_dimension_max_abs": [
+      0.013691842555999756,
+      0.01364123821258545,
+      0.017282485961914062,
+      0.011408567428588867,
+      0.008827656507492065,
+      0.003088768571615219,
+      0.00415918231010437,
+      0.012263346463441849,
+      0.008850634098052979,
+      0.012754321098327637,
+      0.010839879512786865,
+      0.010867059230804443,
+      0.0036412589251995087,
+      0.012778937816619873
+    ],
+    "per_dimension_mae": [
+      0.0027334992960095406,
+      0.003711685745252503,
+      0.004789048922765586,
+      0.002839203082645933,
+      0.00152028641766972,
+      0.0004507918200559086,
+      0.0006512176990509034,
+      0.004752286408458733,
+      0.002563188804520501,
+      0.002228240633590354,
+      0.0028496866756015354,
+      0.002520147745979355,
+      0.0012483068390025033,
+      0.0022014748180905976
+    ]
+  },
+  "W_exact_vs_20260908": true,
+  "time_broadcast_exact_vs_position_only": true,
+  "array_sha256": {
+    "/home/wuyan-lyj/thor-system/test-data/results/pi05-A-20260907-r2/actions.npy": "3aedba689abab6df5c9ad835018a8005b61a568d0da82f641a66b71b7de512d1",
+    "/home/wuyan-lyj/thor-system/test-data/results/pi05-W-20260908-r1/actions.npy": "d919b4cd6f13aad4aae29cc6cad2d78ae843876a42a0df97902a4b4fd0a476d1",
+    "/home/wuyan-lyj/thor-system/test-data/realtime-vla-20260911/pi05-W-20260911-realtime-control/actions.npy": "d919b4cd6f13aad4aae29cc6cad2d78ae843876a42a0df97902a4b4fd0a476d1",
+    "/home/wuyan-lyj/thor-system/test-data/realtime-vla-20260911/realtime-vla-position-20260911-r1/actions.npy": "88b66da9ff59d6e3022a8a138faada5d1939e36d89018aae9d3a49e081cc1cf0",
+    "/home/wuyan-lyj/thor-system/test-data/realtime-vla-20260911/realtime-vla-time-position-20260911-r1/actions.npy": "88b66da9ff59d6e3022a8a138faada5d1939e36d89018aae9d3a49e081cc1cf0"
+  },
+  "excluded_runs": {
+    "realtime-vla-upstream-20260911-r1": "harness omitted image normalization; invalid"
+  },
+  "scope": "offline base-model replay; no robot accuracy acceptance"
+}
