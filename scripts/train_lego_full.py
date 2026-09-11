@@ -18,6 +18,9 @@ from openpi.training import weight_loaders
 
 def make_config(*, resume=False, steps=40_000, run_name="lego_full_b64"):
     config = configs.get_config("pi05_yam")
+    batch_size = int(os.environ.get("LEGO_BATCH_SIZE", "64"))
+    if batch_size < 1:
+        raise ValueError("LEGO_BATCH_SIZE must be positive")
     save_interval = int(os.environ.get("LEGO_SAVE_INTERVAL", "5000"))
     keep_period = int(os.environ.get("LEGO_KEEP_PERIOD", str(save_interval)))
     if save_interval <= 0 or keep_period <= 0:
@@ -26,7 +29,7 @@ def make_config(*, resume=False, steps=40_000, run_name="lego_full_b64"):
         config,
         exp_name=run_name,
         checkpoint_base_dir="/home/wuyan/lyj/YAM/training-runs",
-        batch_size=64,
+        batch_size=batch_size,
         fsdp_devices=4,
         num_workers=8,
         ema_decay=None,
