@@ -1,6 +1,6 @@
 # Selective retrieval CLI
 
-Use this optional helper for reproducible section selection, structured evidence checks and duplicate suppression. It does not rank relevance, summarize sources or control the model's retained messages. Decide what is needed before calling it. Ordinary bounded searches/reads are also valid; they still require semantic, evidence, scope and freshness checks.
+Use this optional helper for reproducible section selection, structured evidence checks and duplicate suppression. `search` adds lexical discovery over existing records; it does not understand semantic relevance, generate summaries or control retained model messages. Decide what is needed before calling it. Ordinary bounded searches/reads are also valid; they still require semantic, evidence, scope and freshness checks.
 
 ## Retrieval and measurement
 
@@ -23,6 +23,28 @@ Required selections are atomic: if they do not fit, no source text is emitted an
 The ledger suppresses unchanged selections; changed selections are checked and counted again. An all-unchanged/empty packet returns exit 2 without emitting source text. Reuse the ledger across retrieval calls. After actual compaction, or when a needed excerpt is no longer available, use `pack --reload` with just those selectors. This repeats evidence/scope checks and counts the new packet, preserves history, and still deduplicates within the packet. Do not reload everything or assume the ledger knows which messages the host retained.
 
 `init --preloaded path.md ...` optionally records exact project-relative excerpts known to be already loaded; omit it when unknown. Repeated selectors are counted once. This cannot discover hidden instructions, transformed summaries or history. Report `tracked_bytes` as **declared preload text bytes plus serialized successful packets**, never active context occupancy or remaining model capacity. `context_tokens` stays null and `exact_token_enforcement` false. The helper's 2 MiB source-read bound limits a single input file for local processing; it is not a long-term storage cap. Inspect larger logs using filtered tools or a sourced evidence receipt while retaining originals.
+
+## Discover records by problem/action
+
+When the project has JSON memory records, search their claims, optional problem terms and attempt symptoms before expanding full records:
+
+```bash
+python skills/mlops-memory/scripts/memory_gate.py search --root . --session TASK_ID \
+  --query '推理延迟 频率' --scope project=PROJECT --scope platform=PLATFORM --top 5
+python skills/mlops-memory/scripts/memory_gate.py pack --root . --session TASK_ID \
+  --required 'docs/cache/records/MATCHED_ID.json' \
+  --scope project=PROJECT --scope platform=PLATFORM
+```
+
+Replace scope values with the actual project and include **all** scope fields of the records (contract/version etc. where recorded). An explicit project scope is required. `--records-dir` defaults to the existing `docs/cache/records`; override it to the actual record owner. The command reads that directory recursively without creating a database or embedding index. If the project only has Markdown memory, use its current index and bounded text search; do not convert everything just to use this command.
+
+Use short keywords, separated by spaces, and add useful aliases to `retrieval.terms` when recording experience. Ranking counts case-insensitive keyword substring matches in claim/symptom/terms, with source path breaking ties; it is not a confidence or quality score. The search does not read arbitrary logs for keywords or follow related sources recursively.
+
+Results contain bounded discovery metadata: full claim, scope, source, status, admission label, capability presence and attempt verdict. They omit invocation recipes and evidence bodies. The default is five results within the configurable `--max-bytes` limit; entries are omitted whole, not truncated. Always load a selected record before acting on it. A matched keyword does not establish causality or suitability.
+
+Current search applies the same schema/evidence/dependency/scope gates as `pack`. `search --purpose review` permits historical/candidate/broken evidence as explicitly unverified discovery data while still filtering scope; it never upgrades status. Exclusion counts distinguish keyword mismatch, scope mismatch, non-current status, invalid records/evidence, top-result limits and byte limits. If results were omitted for size, narrow the query or adjust the retrieval size where allowed rather than interpreting omissions as absence of evidence.
+
+Search output, including empty-result diagnostics, is charged to the same ledger and respects an explicit cumulative quota. Search does **not** mark full records as already loaded, so a subsequent `pack` still emits them. Search metadata is not deduplicated across calls; avoid repeating an unchanged search without a reason. Neither command runs capability invocations or assumption checks.
 
 ## Explicit transfer quotas and existing ledgers
 

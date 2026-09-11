@@ -1,6 +1,6 @@
 interface:
   display_name: "训练部署自进化记忆"
-  short_description: "按任务分层检索、保留本地证据并通过反馈验证维护训练部署记忆"
-  default_prompt: "使用 $mlops-memory 恢复当前训练部署任务，按需读取相关证据、保留关键条件并记录可验证的经验。"
+  short_description: "按问题检索训练部署经验，复用已验证工具并保留失败尝试与证据"
+  default_prompt: "使用 $mlops-memory 恢复当前训练部署任务，按需查找相关工具与历史尝试、核对适用条件并记录可验证的经验。"
 policy:
   allow_implicit_invocation: true

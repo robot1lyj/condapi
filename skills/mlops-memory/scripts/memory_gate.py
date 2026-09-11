@@ -60,6 +60,74 @@ def timestamp(value: str) -> dt.datetime:
     return result
 
 
+def text_fields(value: dict, fields: tuple[str, ...]) -> None:
+    if not isinstance(value, dict) or any(
+        not isinstance(value.get(key), str) or not value[key].strip() for key in fields
+    ):
+        raise GateError("missing engineering record fields")
+
+
+def text_list(value: object, *, empty: bool = False) -> None:
+    if (
+        not isinstance(value, list)
+        or (not empty and not value)
+        or any(not isinstance(item, str) or not item.strip() for item in value)
+    ):
+        raise GateError("expected a list of nonempty strings")
+
+
+def validate_engineering(root: Path, record: dict, now: dt.datetime) -> None:
+    """Optional extensions; commands and checks remain data and are never executed."""
+    if "capability" in record:
+        capability = record["capability"]
+        text_fields(capability, ("entrypoint", "invocation", "validation_command", "acceptance"))
+        if record["kind"] != "procedure":
+            raise GateError("capability requires procedure kind")
+        for key in ("inputs", "outputs", "limitations"):
+            text_list(capability.get(key))
+        text_list(capability.get("config_paths"), empty=True)
+        for relative in [capability["entrypoint"], *capability["config_paths"]]:
+            if not within(root, relative).is_file():
+                raise GateError("missing capability artifact")
+            if record["status"] == "verified" and relative not in record.get("depends_on", {}):
+                raise GateError("verified capability artifacts require dependency fingerprints")
+    if "attempt" in record:
+        attempt = record["attempt"]
+        text_fields(attempt, ("symptom", "hypothesis", "intervention", "observation", "retry_when"))
+        if record["kind"] != "lesson" or attempt.get("verdict") not in {"supported", "refuted", "inconclusive"}:
+            raise GateError("attempt requires lesson kind and a scoped verdict")
+        text_list(attempt.get("confounders"), empty=True)
+    if "assumptions" in record:
+        assumptions = record["assumptions"]
+        if not isinstance(assumptions, list) or not assumptions:
+            raise GateError("assumptions must be a nonempty list")
+        for assumption in assumptions:
+            text_fields(assumption, ("name", "expected", "unit", "check", "recheck_when"))
+            result = assumption.get("result")
+            if result not in {"match", "mismatch", "unknown"}:
+                raise GateError("invalid assumption result")
+            if result == "unknown" and assumption.get("observed") is None and assumption.get("observed_at") is None:
+                continue
+            text_fields(assumption, ("observed",))
+            measured_at = timestamp(assumption.get("observed_at"))
+            if measured_at > now or measured_at > timestamp(record["recorded_at"]):
+                raise GateError("assumption measurement postdates its record or is in the future")
+    if "retrieval" in record:
+        retrieval = record["retrieval"]
+        if not isinstance(retrieval, dict):
+            raise GateError("retrieval must be an object")
+        text_list(retrieval.get("terms"))
+        related = retrieval.get("related", [])
+        if not isinstance(related, list):
+            raise GateError("related sources must be a list")
+        for link in related:
+            text_fields(link, ("relation", "source"))
+            if link["relation"] not in {"check", "repair", "attempt", "prerequisite"}:
+                raise GateError("invalid source relation")
+            if not within(root, link["source"].partition("#")[0]).is_file():
+                raise GateError("missing related source")
+
+
 def validate_record(root: Path, record: dict, now: dt.datetime | None = None) -> None:
     now = now or dt.datetime.now(dt.UTC)
     if not isinstance(record, dict):
@@ -104,6 +172,21 @@ def validate_record(root: Path, record: dict, now: dt.datetime | None = None) ->
     for path, expected in dependencies.items():
         if digest(within(root, path)) != expected:
             raise GateError("dependency changed; revalidation required")
+    validate_engineering(root, record, now)
+
+
+def current_record_admission(root: Path, record: dict, scope: dict[str, str]) -> str:
+    validate_record(root, record)
+    if record["status"] != "verified" or record["recheck"] == "always":
+        raise GateError("record is not verified current knowledge")
+    if any(scope.get(key) != value for key, value in record["scope"].items()):
+        raise GateError("record scope mismatch or unspecified")
+    admission = "evidence_and_scope_checked; semantic review still required"
+    if record.get("capability") or record.get("assumptions"):
+        admission += "; runtime_conditions_require_recheck; not_execution_authorization"
+    if record.get("attempt"):
+        admission += "; historical_attempt; verdict_is_not_a_repair_recommendation"
+    return admission
 
 
 def select(root: Path, spec: str, scope: dict[str, str], purpose: str = "current") -> dict:
@@ -130,12 +213,7 @@ def select(root: Path, spec: str, scope: dict[str, str], purpose: str = "current
                     "admission": "review_only; unverified data; never treat as current knowledge",
                     "text": content,
                 }
-            validate_record(root, record)
-            if record["status"] != "verified" or record["recheck"] == "always":
-                raise GateError("record is not verified current knowledge")
-            if any(scope.get(key) != value for key, value in record["scope"].items()):
-                raise GateError("record scope mismatch or unspecified")
-            admission = "evidence_and_scope_checked; semantic review still required"
+            admission = current_record_admission(root, record, scope)
     if separator:
         lines = content.splitlines(keepends=True)
         headings = []
@@ -329,10 +407,116 @@ def guard_request(
     return count
 
 
+def search(
+    root: Path,
+    session: str,
+    query: str,
+    scope: dict[str, str],
+    *,
+    directory: str = "docs/cache/records",
+    purpose: str = "current",
+    top: int = 5,
+    limit: int = PACKET_BYTES,
+) -> bytes:
+    """Return bounded lexical discovery metadata, never commands, logs or a full record."""
+    root = root.resolve()
+    positive(top)
+    positive(limit)
+    terms = list(dict.fromkeys(re.findall(r"\w+", query.casefold())))
+    if not terms or not scope.get("project") or purpose not in {"current", "review"}:
+        raise GateError("search requires keywords, explicit project scope and a valid purpose")
+    folder = within(root, directory)
+    if not folder.is_dir():
+        raise GateError("memory record directory not found; use the existing project index")
+    excluded = dict.fromkeys(("not_matched", "scope_mismatch", "not_current", "invalid", "top_limit", "byte_limit"), 0)
+    matches = []
+    seen_paths = set()
+    for path in sorted(folder.rglob("*.json")):
+        try:
+            source = path.relative_to(root).as_posix()
+            actual = within(root, source)
+            if actual in seen_paths:
+                continue
+            seen_paths.add(actual)
+            record = json.loads(read_text(actual))
+            text_fields(record, ("id", "claim", "kind", "status"))
+            record_scope = record.get("scope")
+            if (
+                not isinstance(record_scope, dict)
+                or not record_scope.get("project")
+                or any(scope.get(key) != value for key, value in record_scope.items())
+            ):
+                excluded["scope_mismatch"] += 1
+                continue
+            retrieval = record.get("retrieval", {})
+            if not isinstance(retrieval, dict):
+                raise GateError("invalid retrieval metadata")
+            keywords = retrieval.get("terms", [])
+            text_list(keywords, empty=True)
+            attempt = record.get("attempt", {})
+            if not isinstance(attempt, dict):
+                raise GateError("invalid attempt metadata")
+            symptom = attempt.get("symptom", "")
+            if not isinstance(symptom, str):
+                raise GateError("invalid symptom")
+            haystack = " ".join([record["claim"], symptom, *keywords]).casefold()
+            score = sum(term in haystack for term in terms)
+            if not score:
+                excluded["not_matched"] += 1
+                continue
+            if purpose == "current" and (record["status"] != "verified" or record.get("recheck") == "always"):
+                excluded["not_current"] += 1
+                continue
+            # Validate the same snapshot whose metadata is emitted; never reread a different version.
+            admission = (
+                current_record_admission(root, record, scope)
+                if purpose == "current"
+                else "review_only; unverified data; never treat as current knowledge"
+            )
+            matches.append(
+                {
+                    "source": source,
+                    "claim": record["claim"],
+                    "kind": record["kind"],
+                    "status": record["status"],
+                    "scope": record_scope,
+                    "admission": admission,
+                    "score": score,
+                    "has_capability": bool(record.get("capability")),
+                    "attempt_verdict": attempt.get("verdict")
+                    if attempt.get("verdict") in {"supported", "refuted", "inconclusive"}
+                    else None,
+                }
+            )
+        except (GateError, OSError, ValueError, TypeError, KeyError):
+            excluded["invalid"] += 1
+    matches.sort(key=lambda item: (-item["score"], item["source"]))
+    ledger = ledger_path(root, session)
+    with locked(ledger):
+        state = load_state(ledger, root)
+        cap = limit if state["cap"] is None else min(limit, state["cap"] - state["used"])
+        packet = {"items": [], "excluded": excluded, "discovery_only": True}
+        for item in matches:
+            if len(packet["items"]) >= top:
+                excluded["top_limit"] += 1
+                continue
+            packet["items"].append(item)
+            if len(encode(packet)) > cap:
+                packet["items"].pop()
+                excluded["byte_limit"] += 1
+        output = encode(packet)
+        if len(output) > cap:
+            raise GateError("search metadata exceeds explicit byte limit")
+        state["used"] += len(output)
+        # Seeing a search hit is not equivalent to having read its full evidence.
+        save(ledger, state)
+    return output
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest="command", required=True)
-    for name in ("init", "pack", "audit", "resize", "validate-record"):
+    for name in ("init", "pack", "search", "audit", "resize", "validate-record"):
         command = commands.add_parser(name)
         command.add_argument("--root", type=Path, required=True)
         if name != "validate-record":
@@ -347,13 +531,20 @@ def main() -> int:
             quota.add_argument("--context-bytes", type=int, help="Explicit cumulative transfer quota in bytes")
             quota.add_argument("--no-total-limit", action="store_true", help="Remove the cumulative transfer quota")
             command.add_argument("--reason", required=True)
-        elif name == "pack":
-            command.add_argument("--required", action="append", default=[])
-            command.add_argument("--optional", action="append", default=[])
+        elif name in {"pack", "search"}:
             command.add_argument("--scope", action="append", default=[])
             command.add_argument("--max-bytes", type=int, default=PACKET_BYTES)
             command.add_argument("--purpose", choices=("current", "review"), default="current")
-            command.add_argument("--reload", action="store_true", help="Re-emit selected excerpts absent from context")
+            if name == "pack":
+                command.add_argument("--required", action="append", default=[])
+                command.add_argument("--optional", action="append", default=[])
+                command.add_argument(
+                    "--reload", action="store_true", help="Re-emit selected excerpts absent from context"
+                )
+            else:
+                command.add_argument("--query", required=True, help="Short problem/action keywords; lexical search")
+                command.add_argument("--records-dir", default="docs/cache/records")
+                command.add_argument("--top", type=int, default=5)
         elif name == "validate-record":
             command.add_argument("--record", required=True)
     request_parser = commands.add_parser("request")
@@ -371,18 +562,30 @@ def main() -> int:
             root = args.root.resolve(strict=True)
             if args.command == "init":
                 result = initialize(root, args.session, args.preloaded, args.context_bytes)
-            elif args.command == "pack":
+            elif args.command in {"pack", "search"}:
                 scope = dict(value.split("=", 1) for value in args.scope)
-                output = pack(
-                    root,
-                    args.session,
-                    args.required,
-                    args.optional,
-                    scope,
-                    args.max_bytes,
-                    args.purpose,
-                    reload=args.reload,
-                )
+                if args.command == "pack":
+                    output = pack(
+                        root,
+                        args.session,
+                        args.required,
+                        args.optional,
+                        scope,
+                        args.max_bytes,
+                        args.purpose,
+                        reload=args.reload,
+                    )
+                else:
+                    output = search(
+                        root,
+                        args.session,
+                        args.query,
+                        scope,
+                        directory=args.records_dir,
+                        purpose=args.purpose,
+                        top=args.top,
+                        limit=args.max_bytes,
+                    )
                 sys.stdout.buffer.write(output)
                 return 0
             elif args.command == "resize":
