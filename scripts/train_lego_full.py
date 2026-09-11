@@ -18,6 +18,10 @@ from openpi.training import weight_loaders
 
 def make_config(*, resume=False, steps=40_000, run_name="lego_full_b64"):
     config = configs.get_config("pi05_yam")
+    save_interval = int(os.environ.get("LEGO_SAVE_INTERVAL", "5000"))
+    keep_period = int(os.environ.get("LEGO_KEEP_PERIOD", str(save_interval)))
+    if save_interval <= 0 or keep_period <= 0:
+        raise ValueError("LEGO_SAVE_INTERVAL and LEGO_KEEP_PERIOD must be positive")
     return dataclasses.replace(
         config,
         exp_name=run_name,
@@ -27,8 +31,8 @@ def make_config(*, resume=False, steps=40_000, run_name="lego_full_b64"):
         num_workers=8,
         ema_decay=None,
         num_train_steps=steps,
-        save_interval=5_000,
-        keep_period=5_000,
+        save_interval=save_interval,
+        keep_period=keep_period,
         log_interval=10,
         seed=42,
         wandb_enabled=False,
