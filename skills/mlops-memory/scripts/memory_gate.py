@@ -1,4 +1,4 @@
-"""Offline context admission and evidence checks. No model or network dependencies."""
+"""Offline selective retrieval and evidence checks; byte accounting is not context usage."""
 
 import argparse
 from collections.abc import Callable
@@ -14,8 +14,6 @@ import sys
 import tempfile
 
 PACKET_BYTES = 12_288
-CONTEXT_BYTES = 32_768
-MAX_CONTEXT_BYTES = 262_144
 MAX_SOURCE_BYTES = 2_097_152
 
 
@@ -27,8 +25,8 @@ def encode(value: object) -> bytes:
     return (json.dumps(value, ensure_ascii=False, separators=(",", ":"), allow_nan=False) + "\n").encode()
 
 
-def positive(value: int, ceiling: int) -> int:
-    if type(value) is not int or not 0 < value <= ceiling:
+def positive(value: int, ceiling: int | None = None) -> int:
+    if type(value) is not int or value <= 0 or (ceiling is not None and value > ceiling):
         raise GateError("invalid budget")
     return value
 
@@ -198,49 +196,68 @@ def locked(path: Path):
         yield
 
 
-def initialize(root: Path, session: str, preloaded: list[str], cap: int = CONTEXT_BYTES) -> dict:
-    positive(cap, CONTEXT_BYTES)
+def usage(state: dict) -> dict:
+    """Report only what this helper observes, never an estimate of active context."""
+    return {
+        "tracked_bytes": state["used"],
+        "measurement": "declared_preloads_and_serialized_packets",
+        "transfer_limit_bytes": state["cap"],
+        "remaining_transfer_bytes": None if state["cap"] is None else state["cap"] - state["used"],
+        "context_tokens": None,
+        "exact_token_enforcement": False,
+    }
+
+
+def initialize(root: Path, session: str, preloaded: list[str], cap: int | None = None) -> dict:
+    if cap is not None:
+        positive(cap)
     path = ledger_path(root, session)
     with locked(path):
         if path.exists():
-            raise GateError("context already initialized; reuse its ledger")
-        items = [select(root, spec, {}) for spec in preloaded]
+            raise GateError("retrieval ledger already initialized; reuse it")
+        items = [select(root, spec, {}) for spec in dict.fromkeys(preloaded)]
         used = sum(len(item["text"].encode()) for item in items)
-        if used >= cap:
-            raise GateError("preloaded memory exhausts context budget")
+        if cap is not None and used > cap:
+            raise GateError("declared preloads exceed explicit transfer limit")
         state = {"root": str(root.resolve()), "cap": cap, "used": used, "seen": {}}
         for item in items:
             state["seen"][item["source"]] = item["sha256"]
         save(path, state)
-    return {"used_bytes": used, "remaining_bytes": cap - used}
+    return usage(state)
 
 
 def load_state(path: Path, root: Path) -> dict:
     state = json.loads(read_text(path))
-    positive(state["cap"], MAX_CONTEXT_BYTES)
+    if state["cap"] is not None:
+        positive(state["cap"])
     if state["root"] != str(root.resolve()) or type(state["used"]) is not int:
         raise GateError("ledger does not match context root")
-    if not 0 <= state["used"] <= state["cap"] or not isinstance(state["seen"], dict):
+    if (
+        state["used"] < 0
+        or (state["cap"] is not None and state["used"] > state["cap"])
+        or not isinstance(state["seen"], dict)
+    ):
         raise GateError("invalid ledger accounting")
     return state
 
 
-def resize(root: Path, session: str, cap: int, reason: str) -> dict:
-    """Explicitly adjust a live ledger without erasing its accounting or history."""
-    positive(cap, MAX_CONTEXT_BYTES)
+def resize(root: Path, session: str, cap: int | None, reason: str) -> dict:
+    """Adjust/remove an explicit transfer quota without erasing accounting or history."""
+    if cap is not None:
+        positive(cap)
     if not reason.strip():
         raise GateError("budget adjustment requires a reason")
     path = ledger_path(root, session)
     with locked(path):
         state = load_state(path, root)
-        if cap < state["used"]:
+        if cap is not None and cap < state["used"]:
             raise GateError("cannot lower cap below already admitted memory")
         state.setdefault("adjustments", []).append(
             {"old_cap": state["cap"], "new_cap": cap, "reason": reason, "at": dt.datetime.now(dt.UTC).isoformat()}
         )
         state["cap"] = cap
         save(path, state)
-    return {"used_bytes": state["used"], "remaining_bytes": cap - state["used"]}
+    return usage(state)
 
 
 def pack(
@@ -251,14 +268,17 @@ def pack(
     scope: dict[str, str] | None = None,
     limit: int = PACKET_BYTES,
     purpose: str = "current",
+    *,
+    reload: bool = False,
 ) -> bytes:
-    positive(limit, PACKET_BYTES)
+    positive(limit)
     path = ledger_path(root, session)
     with locked(path):
         state = load_state(path, root)
-        cap = min(limit, state["cap"] - state["used"])
+        cap = limit if state["cap"] is None else min(limit, state["cap"] - state["used"])
         packet = {"items": [], "omitted": 0, "unchanged": 0}
         staged = dict(state["seen"])
+        emitted = set()
         for mandatory, specs in ((True, required), (False, optional)):
             for spec in specs:
                 try:
@@ -270,20 +290,21 @@ def pack(
                     continue
                 # A prior review is not a successful admission as current knowledge.
                 cache_key = spec if purpose == "current" else f"review:{spec}"
-                if staged.get(cache_key) == item["sha256"]:
+                if cache_key in emitted or (not reload and staged.get(cache_key) == item["sha256"]):
                     packet["unchanged"] += 1
                     continue
                 packet["items"].append(item)
                 if len(encode(packet)) > cap:
                     packet["items"].pop()
                     if mandatory:
-                        raise GateError("required memory exceeds budget; narrow selection or compact context")
+                        raise GateError("required excerpts exceed packet or explicit transfer limit")
                     packet["omitted"] += 1
                     continue
                 staged[cache_key] = item["sha256"]
+                emitted.add(cache_key)
         output = encode(packet)
         if not packet["items"] or len(output) > cap:
-            raise GateError("no admissible packet within remaining budget")
+            raise GateError("no new admissible excerpts, or explicit byte limit exceeded")
         state["used"] += len(output)
         state["seen"] = staged
         save(path, state)
@@ -317,10 +338,14 @@ def main() -> int:
         if name != "validate-record":
             command.add_argument("--session", required=True)
         if name == "init":
-            command.add_argument("--preloaded", nargs="+", required=True)
-            command.add_argument("--context-bytes", type=int, default=CONTEXT_BYTES)
+            command.add_argument("--preloaded", nargs="+", default=[])
+            command.add_argument(
+                "--context-bytes", type=int, help="Optional cumulative transfer quota in bytes; not model context"
+            )
         elif name == "resize":
-            command.add_argument("--context-bytes", type=int, required=True)
+            quota = command.add_mutually_exclusive_group(required=True)
+            quota.add_argument("--context-bytes", type=int, help="Explicit cumulative transfer quota in bytes")
+            quota.add_argument("--no-total-limit", action="store_true", help="Remove the cumulative transfer quota")
             command.add_argument("--reason", required=True)
         elif name == "pack":
             command.add_argument("--required", action="append", default=[])
@@ -328,15 +353,16 @@ def main() -> int:
             command.add_argument("--scope", action="append", default=[])
             command.add_argument("--max-bytes", type=int, default=PACKET_BYTES)
             command.add_argument("--purpose", choices=("current", "review"), default="current")
+            command.add_argument("--reload", action="store_true", help="Re-emit selected excerpts absent from context")
         elif name == "validate-record":
             command.add_argument("--record", required=True)
     request_parser = commands.add_parser("request")
     request_parser.add_argument("--input", type=Path, required=True)
-    request_parser.add_argument("--max-bytes", type=int, default=98_304)
+    request_parser.add_argument("--max-bytes", type=int, required=True)
     args = parser.parse_args()
     try:
         if args.command == "request":
-            positive(args.max_bytes, 98_304)
+            positive(args.max_bytes)
             raw = args.input.read_bytes()
             if len(raw) > args.max_bytes or not isinstance(json.loads(raw), dict):
                 raise GateError("supplied full request exceeds byte cap or is not an object")
@@ -347,7 +373,16 @@ def main() -> int:
                 result = initialize(root, args.session, args.preloaded, args.context_bytes)
             elif args.command == "pack":
                 scope = dict(value.split("=", 1) for value in args.scope)
-                output = pack(root, args.session, args.required, args.optional, scope, args.max_bytes, args.purpose)
+                output = pack(
+                    root,
+                    args.session,
+                    args.required,
+                    args.optional,
+                    scope,
+                    args.max_bytes,
+                    args.purpose,
+                    reload=args.reload,
+                )
                 sys.stdout.buffer.write(output)
                 return 0
             elif args.command == "resize":
@@ -355,7 +390,7 @@ def main() -> int:
             elif args.command == "audit":
                 with locked(ledger_path(root, args.session)):
                     state = load_state(ledger_path(root, args.session), root)
-                result = {"used_bytes": state["used"], "remaining_bytes": state["cap"] - state["used"]}
+                result = usage(state)
             else:
                 validate_record(root, json.loads(read_text(within(root, args.record))))
                 result = {"schema_and_local_evidence_valid": True, "semantic_truth_checked": False}

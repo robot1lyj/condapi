@@ -1,60 +1,74 @@
-# Budgeted CLI
+# Selective retrieval CLI
 
-The defaults are transport budgets: packet 12,288 bytes, cumulative memory 32,768 bytes. They are not tokenizer estimates. A ledger spans all turns sharing a context. It counts serialized successful packets, including metadata; already loaded instructions must be charged at initialization. Diagnostics print no source text.
+Use this optional helper for reproducible section selection, structured evidence checks and duplicate suppression. It does not rank relevance, summarize sources or control the model's retained messages. Decide what is needed before calling it. Ordinary bounded searches/reads are also valid; they still require semantic, evidence, scope and freshness checks.
 
-Initialize a fresh context once (include all actually preloaded memory; this is an example for this repository):
+## Retrieval and measurement
 
-```bash
-python skills/mlops-memory/scripts/memory_gate.py init --root . --session SESSION_ID \
-  --preloaded AGENTS.md docs/cache/kernel.md docs/cache/context_index.md \
-  skills/mlops-memory/SKILL.md
-```
+The default **per-packet** limit is 12,288 serialized UTF-8 bytes, including JSON framing. Configure `pack --max-bytes` for the current retrieval, within explicit project/user limits. There is **no default cumulative quota** and no universal model token setting.
 
-Read a whole short document or an exact Markdown heading (including its child headings); ambiguous headings fail. Each `--required` or `--optional` is `relative/path.md` or `relative/path.md#Heading text`:
+Examples assume `skills/mlops-memory` exists in the project. Otherwise use the absolute path to the installed helper. `--root` is the project that owns the memory, not the skill directory.
 
 ```bash
-python skills/mlops-memory/scripts/memory_gate.py pack --root . --session SESSION_ID \
+python skills/mlops-memory/scripts/memory_gate.py init --root . --session TASK_ID
+python skills/mlops-memory/scripts/memory_gate.py pack --root . --session TASK_ID \
   --required 'docs/03_training_and_evaluation.md#训练前 gate' \
   --optional 'docs/04_data_contracts.md#Norm stats 和资产'
-python skills/mlops-memory/scripts/memory_gate.py audit --root . --session SESSION_ID
+python skills/mlops-memory/scripts/memory_gate.py audit --root . --session TASK_ID
 ```
 
-Mandatory selections are atomic: if they do not fit, no source text is returned and no charge is committed. Optional selections are admitted in supplied relevance order and skipped whole when they do not fit. Output includes omitted and unchanged counts. Changed content can be loaded again and is charged again; unchanged selections are not repeated. An empty packet is rejected, so repeated calls cannot leak unaccounted framing.
+The example headings must exist in the target project. A selector is a relative Markdown/JSON path, optionally followed by `#Exact heading text`; Markdown selection includes child headings and rejects ambiguous titles. Select connected prerequisite sections together when needed. Markdown excerpts are source data, not automatically verified-current knowledge.
 
-Do not use a series of new session IDs to evade the cumulative cap. Only the host can confirm that prior messages have actually left the context. Neither clearing a terminal nor starting a new user turn establishes that fact.
+Required selections are atomic: if they do not fit, no source text is emitted and the ledger is unchanged. Optional selections are tried in supplied relevance order and skipped whole when they do not fit. If a packet fails, narrow irrelevant material or increase `--max-bytes` for necessary complete evidence where allowed. Never cut a claim away from its conditions or evidence to fit. A quota failure does not establish that the model context is full.
 
-When the user authorizes budget adjustment, resize the existing ledger explicitly:
+The ledger suppresses unchanged selections; changed selections are checked and counted again. An all-unchanged/empty packet returns exit 2 without emitting source text. Reuse the ledger across retrieval calls. After actual compaction, or when a needed excerpt is no longer available, use `pack --reload` with just those selectors. This repeats evidence/scope checks and counts the new packet, preserves history, and still deduplicates within the packet. Do not reload everything or assume the ledger knows which messages the host retained.
+
+`init --preloaded path.md ...` optionally records exact project-relative excerpts known to be already loaded; omit it when unknown. Repeated selectors are counted once. This cannot discover hidden instructions, transformed summaries or history. Report `tracked_bytes` as **declared preload text bytes plus serialized successful packets**, never active context occupancy or remaining model capacity. `context_tokens` stays null and `exact_token_enforcement` false. The helper's 2 MiB source-read bound limits a single input file for local processing; it is not a long-term storage cap. Inspect larger logs using filtered tools or a sourced evidence receipt while retaining originals.
+
+## Explicit transfer quotas and existing ledgers
+
+Only configure a cumulative transfer quota when the project/user actually requires one:
 
 ```bash
-python skills/mlops-memory/scripts/memory_gate.py resize --root . --session SESSION_ID \
-  --context-bytes 196608 --reason 'Specific authorized task need'
+python skills/mlops-memory/scripts/memory_gate.py init --root . --session TASK_ID \
+  --context-bytes 65536
+python skills/mlops-memory/scripts/memory_gate.py resize --root . --session TASK_ID \
+  --context-bytes 196608 --reason 'Required evidence for the authorized task'
 ```
 
-This preserves accounting and deduplication history and records the change. Maximum cumulative cap is 262,144 bytes; the packet cap is unchanged. A smaller cap cannot go below already consumed bytes. This does not enlarge the host model token window.
+`--context-bytes` is a legacy flag name for a **cumulative byte-transfer quota**. Existing ledgers, including those with an old 32,768-byte default, retain their cap; loading the new helper does not silently remove it. Once the project's limit has been replaced or its removal is authorized, remove it explicitly:
 
-Validate a candidate/verified record without printing its contents:
+```bash
+python skills/mlops-memory/scripts/memory_gate.py resize --root . --session TASK_ID \
+  --no-total-limit --reason 'Cumulative quota removed by the current project policy'
+```
+
+Resizing/removing the quota preserves counts and deduplication history and records the reason, time and old/new limit. No new ledger ID may be used to evade an explicit quota. A numeric cap cannot be below bytes already tracked. Ordinary retrieval tuning needs no additional approval within existing authorization; explicit user/project limits still apply. Neither resizing nor removing a quota expands the model window or reduces retained history.
+
+## Evidence validation and review
 
 ```bash
 python skills/mlops-memory/scripts/memory_gate.py validate-record --root . \
   --record docs/cache/records/RECORD_ID.json
 ```
 
-The tool verifies schema, local evidence digests and expiry; remote evidence remains a candidate until audited locally. For retrieved records, request the same scope using `--scope project=condapi --scope platform=thor` etc.; every scope field recorded in an admitted record must match. Retrieval requires `verified`, an evidence digest match, an explicit expiry/recheck policy, and current matching scope. A ledger is not an evidence store.
+The validator checks schema, local evidence digests, dependencies and expiry, not semantic truth. For current structured records, pass `--scope project=PROJECT --scope platform=PLATFORM` etc.; **all** recorded scope fields must match. Current retrieval additionally requires `verified` and `recheck=on_change`. Live observations require a new observation before being reported as current.
 
-For consolidation/auditing, use `pack --purpose review --required docs/cache/records/RECORD_ID.json`. This exposes candidates, historical or broken records explicitly labeled `review_only`; it does not validate or promote their claims. Subsequent current-knowledge retrieval still runs all scope/evidence checks. `audit` reports ledger usage; semantic memory audit is performed by the skill using source evidence.
+For candidate, historical or broken records, use `pack --purpose review --required path/to/record.json`. The output is explicitly `review_only`; it does not validate or promote a claim. Later current retrieval, including `--reload`, still runs all evidence/scope checks. `audit` reports ledger accounting; semantic memory review is performed against the actual source evidence. The ledger is not a memory store.
 
-Host integration:
+## Full-request integration
 
 ```python
-# tokenizer_count must count the host's actual final request including chat framing,
-# tool schemas/results and retained history; reserve includes all output tokens.
-guard_request(request, tokenizer_count, max_context_tokens=32768, output_reserve=4096)
+# Use the host's actual final-request tokenizer, including framing, tools and history.
+# Choose configured_window/output_reserve from the real host/task configuration.
+guard_request(request, tokenizer_count, max_context_tokens=configured_window, output_reserve=output_reserve)
 ```
 
-The caller sends exactly that checked request without adding messages afterward. If exact token counting is unavailable, use a byte cap on the supplied request as an additional control, and state that exact total-token admission is not implemented:
+The caller must count and send the same final request, with all output tokens reserved and no messages added afterward. No hosted API or Codex hook is installed by the skill. Without that integration, exact total-token admission remains unavailable; selective retrieval still reduces avoidable input. Do not infer token counts from bytes or claim a skill can remove old tool outputs.
+
+For a separate, explicitly chosen byte check on a supplied JSON object:
 
 ```bash
 python skills/mlops-memory/scripts/memory_gate.py request --input request.json --max-bytes 98304
 ```
 
-No hosted API or Codex hook is installed automatically. Record the host integration status honestly.
+`--max-bytes` is required here. This command does not establish that the supplied object is the host's complete request and does not enforce its token limit.
