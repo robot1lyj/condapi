@@ -17,6 +17,21 @@ python3 scripts/training_dashboard.py --metrics /absolute/run/metrics.jsonl --mo
 
 单次运行也可以用 `--history-metrics /path/to/parent.jsonl` 指定本地父日志；远端父日志使用同一 SSH 主机上的重复 `--history-remote-metrics /absolute/parent.jsonl`。当前 run 尚无记录时，看板先显示父 run；当前 run 写入后自动拼接为连续曲线。父日志只读，镜像失败时保留上次缓存。
 
+## 工具复用与配置实测边界
+
+- 入口：[training_dashboard.py](../scripts/training_dashboard.py)，Python 3.11+ 标准库；配置 [example.json](../configs/dashboards/example.json)，页面依赖 [training_dashboard.html](../scripts/training_dashboard.html)。运行方式见上节；优先本地归档日志回放，只有需要且获准时使用 SSH 镜像参数。
+- 输入：单 run 指标或 runs-config，续训按需提供只读 `--history-metrics` 父日志；输出：localhost 页面及 `/api/runs`、`/api/metrics`。作用是查看/拼接日志，不生成 checkpoint 或训练结果。
+- 验证方法：在有 pytest 的 Python 环境运行 `python -m pytest --strict-markers -m 'not manual' scripts/training_dashboard_test.py`。测试覆盖部分追加、无效数值、父子日志重叠与回退等；验收为当前 run 覆盖重叠 step、保留较早父记录、缺失值不伪造。执行前确认仅做轻量日志/HTTP测试。
+- 范围限制：单元测试不证明服务器进程健康；本轮未重跑完整 pytest 套件，当前标准库解释器未安装 pytest。已有测试源码是复验入口，不冒充本轮测试结果；本轮轻量回放结果记录在变更历史。
+
+| 配置/预期 | 需要的实际证据 | 当前记忆边界与复核触发 |
+|---|---|---|
+| service 参数 batch32、80k阶段、324,194总体目标、每5k保存 | 对应 run 的启动配置、实际日志、已提交 checkpoint | 是展示/计划值，今天训练实际状态未知；切换 run、续训或参数变化时重核 |
+| `--interval 10`、页面持续刷新 | 指标源时间、镜像错误、源端最新 step | HTTP刷新不等于新训练更新；缓存可在同步失败后保留，使用前查新鲜度 |
+| 原始 loss / 页面平滑线 | 训练器日志聚合代码与该 run 的 log_interval | Pi日志均值与显示平滑分开，不能恢复未保存的逐步loss；换后端/版本须重新确认统计口径 |
+
+遇到续训断线先检查父日志配置和当前 run 起始 step，再用上述拼接测试复核；不要拼接无关的从base重开运行。失败缓存保留用于诊断，只有源日志或拼接条件改变才重复检查对应问题。
+
 ## 任意框架的接入合同
 
 每个文件只承载一次运行，rank 0 单写者，以追加并换行结束的 JSONL 为首选：

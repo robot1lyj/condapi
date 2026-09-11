@@ -39,6 +39,17 @@
 - 记忆维护与任务恢复 → 当前安装的 `mlops-memory/SKILL.md`（本项目源码为 `skills/mlops-memory/SKILL.md`）；先明确决策与缺口，再按需读取 `docs/09_memory_system.md` 和相关 owner 章节；账本迁移只展开 skill 的 `references/usage.md`。
 - 只需了解项目 → 从 `docs/00_handoff_index.md` 的摘要和导航开始，只展开与当前问题相关的 owner 章节，不按编号加载全部文档。
 
+## 问题与行动路由
+
+只展开当前问题所需的一条，再按缺口查看关联；下列是导航，不是运行授权。
+
+| 问题 / 别名 | 检查与前置条件 | 历史尝试 / 修复或工具入口 |
+|---|---|---|
+| 训练崩溃、Xid、illegal memory access、memcheck | [训练故障经验](../03_training_and_evaluation.md#故障诊断复用与重试条件)；先匹配快照、故障窗口和插桩范围 | 同节关联全量数据复核及两次超时；[故障恢复记录](../03_training_and_evaluation.md#2026-09-09-故障恢复与当前授权)持有历史启动器/续训保护，运行前重新核验当前授权和 checkpoint |
+| 续训曲线缺段、重复 step、配置与 loss 不符 | [看板复用与验证](../11_training_dashboard.md#工具复用与配置实测边界)；区分显示参数与源日志 | 同节定位本地父日志拼接、测试入口；[loss 口径](../03_training_and_evaluation.md#loss日志与看板口径2026-09-08用户确认)解释统计窗口 |
+| Thor 延迟、realtime-vla、位置偏移、时间广播 | [复用与重试](../reference/thor/10_acceleration_execution.md#realtime-vla-工具复用与重试条件)；先核对真实权重/输入合同/频率证据 | 同节关联离线审计、报告回放和无效归一化首轮；完整数值仍归其上方原复现记录 |
+| W&B 配置、旧证据指纹失效 | [证据复核规则](../09_memory_system.md#工程经验的增量整理) | `docs/cache/records/yam-local-logging.json` 为待复验历史，不能当作当前 verified 事实 |
+
 ## 状态词
 
 - **已实现**：仓库代码或可复核产物已经存在。

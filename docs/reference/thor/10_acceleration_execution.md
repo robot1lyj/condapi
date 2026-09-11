@@ -61,6 +61,26 @@ JSON/退出/遥测日志归 `docs/reports/thor/evidence/20260911/realtime-vla/`�
 **决策：保留W；Dexmal是已跑通的实验后端，不是生产替代。** 当前全量微调路线不改变。
 后续若继续，应针对Thor内核调优并用实际全量微调checkpoint重新验收，不能把4090/5090论文数字当Thor速度。
 
+## realtime-vla 工具复用与重试条件
+
+此节是上方 2026-09-11 复现的复用导航，数值与原始证据仍以上方记录和 JSON 为准；不自动授权新推理或部署。
+
+| 工具 | 配置、输入输出与适用条件 | 验证方法与限制 |
+|---|---|---|
+| [prepare_realtime_vla.py](../../../scripts/thor/prepare_realtime_vla.py) | Thor系列镜像内使用；`--source` 固定上游revision目录、`--checkpoint` 原JAX权重、`--tokenizer-model` 原分词器、`--output` 新目录；产出独立BF16布局和本地tokenizer | 原权重保留；转换产物校验后仍须真实输入/逐token/动作对照，转换成功不是精度通过 |
+| [run_realtime_vla_host.py](../../../scripts/thor/run_realtime_vla_host.py) + [benchmark_realtime_vla.py](../../../scripts/thor/benchmark_realtime_vla.py) | 仅Thor，镜像/权重/录像/噪声路径见上节；`--position-offset`、`--fix-time-broadcast`、`--text-capacity` 显式分组，label唯一；产出结果、数组及宿主记录 | `python -m pytest scripts/thor/run_realtime_vla_host_test.py` 只验证宿主包装逻辑；实际复跑需核对三相机/H50/10步、完整耗时、输出有限、频率/温度及退出恢复。MAXN是设置，不是功耗实测；今天硬件状态未知 |
+| [audit_realtime_vla.py](../../../scripts/thor/audit_realtime_vla.py) | Python+NumPy；`--runs-root` 本轮数组目录、`--old-results` 原A/W数组目录、`--evidence` 已存在的新输出目录；保存数组哈希/差异及结果副本 | 离线工具，无GPU；与 [array-audit.json](../../reports/thor/evidence/20260911/realtime-vla/array-audit.json) 的来源哈希核对后重算，不能仅复读JSON冒充复测。脚本硬编码本轮run名，只适用该组布局，写入可覆盖同名文件，必须用新目录 |
+| [render_realtime_vla.py](../../../scripts/thor/render_realtime_vla.py) | 标准库，读取同目录result JSON与array-audit，生成HTML；输入列表固定为本轮有效配置 | `python -m pytest scripts/thor/render_realtime_vla_test.py` 核对报告实测值和无效首轮排除；验证显示逻辑，不证明数组审计或当前Thor性能 |
+
+| 症状 / 假设 | 实际干预与结果 | 结论与重试条件 |
+|---|---|---|
+| 首轮异常差异可能反映上游精度问题 | 发现本地包装漏做uint8→[-1,1]；r1无效，修复预处理后独立r2 | r1不能用于判断上游精度；更换预处理时先核对输入，保留无效轮，不重用其性能/误差作对照 |
+| suffix位置偏移可能放大误差 | 仅改 `--position-offset 0`，本批MAE从0.005956043降至0.002516567 | 支持该样本/版本下的局部改善；其他任务与全量微调checkpoint仍未知。版本/权重/输入合同改变时重新与JAX对照 |
+| 显式H50时间广播可能进一步改善动作 | 在位置修正上加广播；归档数组与仅位置修正版逐值一致 | 本批未见精度收益，不能推广为所有输入均无效。内核/输入/权重变化或有具体广播缺陷证据才重试；保持位置修正作为独立对照 |
+| text80可能达到或超过W速度 | 保留全部真实token，实测P50 124.160ms，对照W 105.359ms | 本批未胜出；不是所有硬件/实现的结论。仅在Thor内核、执行策略等有实质变化后新建run复测；有效token超80先拒绝，不静默截断 |
+
+前3次功耗恢复证据是执行回显，后两次有host manifest/power-after；不补造缺失的统一记录。任务成功率、全量微调模型精度及生产IPC闭环仍未在本复现中验收。后续新证据独立留存，不覆盖本轮失败、未定或成功结果。
+
 ## 最新完成：W · 104.25 ms（2026-09-08）
 
 `pi05-W-20260908-r1` 完成 9 输入 × 20 次正式调用：P50 **104.254448 ms** / P95 **104.939629 ms**。相对原 JAX A 的动作 MAE **0.002504218922**、P95 绝对差 0.008970573545、最大差 **0.017282485962** 数据集单位；归一化 14D 最大差 0.025593705475。相对 V 本身 MAE 0.000262102675、最大差 0.002154350281，因此不能称为新旧引擎相同。对同桶 BF16 eager 的归一化 14D 最大差 0.033988542855。

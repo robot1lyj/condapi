@@ -8,7 +8,7 @@
     "platform": "training",
     "contract": "yam14-h50"
   },
-  "status": "verified",
+  "status": "stale",
   "observed_at": "2026-09-05T02:45:45Z",
   "recorded_at": "2026-09-05T02:45:45Z",
   "evidence": [
@@ -22,5 +22,24 @@
   "depends_on": {
     "src/openpi/training/config.py": "76492f1218a8e0687ad3a8a28a0baad36dd282c1b3fe5eacd7eb07bfcd9c591a"
   },
-  "supersedes": []
+  "supersedes": [],
+  "retrieval": {
+    "terms": [
+      "W&B",
+      "wandb_enabled",
+      "日志配置",
+      "配置实测",
+      "指纹失效"
+    ],
+    "related": [
+      {
+        "relation": "check",
+        "source": "docs/09_memory_system.md#工程经验的增量整理"
+      },
+      {
+        "relation": "prerequisite",
+        "source": "docs/03_training_and_evaluation.md#Loss日志与看板口径（2026-09-08用户确认）"
+      }
+    ]
+  }
 }
