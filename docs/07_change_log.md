@@ -1,5 +1,11 @@
 # 07 · 变更历史
 
+## 2026-09-14 · Thor↔3588 2.5GbE 直连网络基线
+
+- 经用户明确授权，仅配置 3588 的独立网络接口，不读取或修改机械臂、相机和控制实现。Thor `enP2p1s0=192.168.250.1/24`、3588 `lan1=192.168.250.2/24`，两端保存同名 `yam-thor-direct` NetworkManager 连接并自动启用。
+- 直连不设 gateway/DNS，IPv4 `never-default`，IPv6 disabled，MTU 1500；两机公网默认路由仍走 Wi-Fi，绑定 Wi-Fi 的 HTTPS 实测成功。
+- 实机链路为 2500 Mb/s full duplex，双向各 10 次 Ping 均 0% 丢包、平均约 0.24 ms，双方 SSH 端口可达。这里只通过网络层基线，尚未启动或验收 policy observation/action、模型输出及机器人闭环。
+
 ## 2026-09-14 · 记忆技能的冷热分层与容量治理
 
 - 用户明确要求更新共享mlops-memory，防止热记忆逐任务追加。技能现规定热项准入、项目UTF-8文件/默认加载路径预算、按主题替换、超限降级及写回后的大小/续作检查；详细方法放references/layers.md按需读取，项目事实不进入技能。

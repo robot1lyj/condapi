@@ -266,6 +266,13 @@ PR #960 作者给出的局部 checkpoint 对照如下；样本范围、硬件及
 
 社区依据：[Jetson AI Lab 教程](https://www.jetson-ai-lab.com/tutorials/openpi_on_thor/) 是 PyTorch 26.05 → ONNX → TensorRT 路线，其 LIBERO/horizon 10 数据不能充当本项目 YAM/horizon 50 实测；[xuweiwu/openpi-thor](https://github.com/xuweiwu/openpi-thor) 的定制 FP16 保留 FP32 敏感运算并使用 strongly typed，不能理解为任意纯 FP16 转换均可用。查阅日期 2026-09-07；作者验证条件与阈值不直接替代本项目验收。
 
+### 2026-09-14 Thor↔3588 直连网络状态
+
+- Thor 的 `enP2p1s0` 固定为 `192.168.250.1/24`，3588 的 `lan1` 固定为 `192.168.250.2/24`；两端 NetworkManager 连接名均为 `yam-thor-direct` 且 autoconnect=yes，配置绑定接口/MAC。
+- 直连链路无默认网关、DNS、IPv6、IP 转发或巨帧；MTU 1500。公网与管理流量继续走 Wi-Fi，实测两端 Wi-Fi 网关可达、绑定 Wi-Fi 的 HTTPS 返回 HTTP 200，直连启用后未增加默认路由。
+- 网线实机协商为 2500 Mb/s full duplex，双向各 10 次 ICMP 均 0% 丢包、平均约 0.24 ms，双方 TCP/22 可达。详细实测值与服务层边界见 [05 的直连网络基线](05_inference_and_rollout.md#2026-09-14-直连网络基线)。
+- 当前只通过 L1/L2/L3 和基础 TCP 验收；policy 端口、真实 observation/action 往返、模型输出和闭环安全均未验收。用户本轮明确授权的 3588 操作仅限独立网口配置与网络测试，未读取或修改控制、相机或机器人代码。
+
 ### 2026-09-07 较早实机状态（安装与管理事实保留；推理进度以最新小节为准）
 
 以下为当日 SSH、系统查询和传输实测状态，不是模型部署通过结论；临时地址、进程与下载状态使用前复核。

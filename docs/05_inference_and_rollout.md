@@ -74,6 +74,17 @@ actions: float array, shape (50, 14), all finite
 
 Thor 服务端在 Pi 系列容器内加载当前配置对应的只读 checkpoint，3588 通过 Thor 直连网卡上发布的 policy 端口发送 observation 并接收 action。生产生命周期由 Compose 管理；切换模型时更改配置/checkpoint 并重启该系列服务，重新预热和验收，不假定支持热切换。GPU 接入与端口规则见 [08](08_thor_edge_deployment.md)。以下是容器内手动调试入口，路径均为容器内部路径，不能据此把模型依赖安装到宿主；正式启动命令待 Compose 实施时纳入服务配置：
 
+### 2026-09-14 直连网络基线
+
+用户授权本轮仅对 3588 的独立网口进行联调，不读取或修改其机械臂、相机和控制实现。两端 NetworkManager 均已保存 `yam-thor-direct`，自动连接并绑定物理接口和 MAC：
+
+- Thor `enP2p1s0`：`192.168.250.1/24`；
+- 3588 `lan1`：`192.168.250.2/24`。
+
+直连配置不设 gateway、DNS 或附加 route，`ipv4.never-default=yes`、IPv6 disabled、MTU 1500、自动协商。实机插线后两端均为 `UP/LOWER_UP`，协商 2500 Mb/s、full duplex；双向各 10 次 ICMP 为 0% 丢包，Thor→3588 平均 0.245 ms、3588→Thor 平均 0.235 ms，双方 TCP/22 均可达。两台机器到公网的路由仍分别使用 Wi-Fi，绑定 Wi-Fi 接口的 HTTPS 请求均返回 HTTP 200。Thor 当次 Wi-Fi DHCP 地址为 `192.168.110.250/23`，3588 为 `192.168.110.140/23`；DHCP 地址是临时观察值，直连服务应只使用 `192.168.250.0/24`。
+
+这只证明物理链路、IP 路由和基础 TCP 双向可用；尚未启动 policy 端口，也没有完成 observation/action、模型输出或机器人闭环 smoke。
+
 ```bash
 export THOR_REPO_ROOT=/path/to/condapi-on-thor
 export CHECKPOINT_DIR=/path/to/complete/yam_pi05_lora_checkpoint
