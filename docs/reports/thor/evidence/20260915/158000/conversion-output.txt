@@ -1,0 +1,55 @@
+
+=============
+== PyTorch ==
+=============
+
+NVIDIA Release 26.05 (build 313520560)
+PyTorch Version 2.12.0a0+5aff392
+Container image Copyright (c) 2026, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+Copyright (c) 2014-2024 Facebook Inc.
+Copyright (c) 2011-2014 Idiap Research Institute (Ronan Collobert)
+Copyright (c) 2012-2014 Deepmind Technologies    (Koray Kavukcuoglu)
+Copyright (c) 2011-2012 NEC Laboratories America (Koray Kavukcuoglu)
+Copyright (c) 2011-2013 NYU                      (Clement Farabet)
+Copyright (c) 2006-2010 NEC Laboratories America (Ronan Collobert, Leon Bottou, Iain Melvin, Jason Weston)
+Copyright (c) 2006      Idiap Research Institute (Samy Bengio)
+Copyright (c) 2001-2004 Idiap Research Institute (Ronan Collobert, Samy Bengio, Johnny Mariethoz)
+Copyright (c) 2015      Google Inc.
+Copyright (c) 2015      Yangqing Jia
+Copyright (c) 2013-2016 The Caffe contributors
+All rights reserved.
+
+Various files include modifications (c) NVIDIA CORPORATION & AFFILIATES.  All rights reserved.
+
+GOVERNING TERMS: The software and materials are governed by the NVIDIA Software License Agreement
+(found at https://www.nvidia.com/en-us/agreements/enterprise-software/nvidia-software-license-agreement/)
+and the Product-Specific Terms for NVIDIA AI Products
+(found at https://www.nvidia.com/en-us/agreements/enterprise-software/product-specific-terms-for-ai-products/).
+
+ERROR: The NVIDIA Driver is present, but CUDA failed to initialize.  GPU functionality will not be available.
+   [[ Unable to initialize CUDA driver (error ???) ]]
+
+Failed to detect NVIDIA driver version.
+
+NOTE: The SHMEM allocation limit is set to the default of 64MB.  This may be
+   insufficient for PyTorch.  NVIDIA recommends the use of the following flags:
+   docker run --gpus all --ipc=host --ulimit memlock=-1 --ulimit stack=67108864 ...
+
+W0915 10:39:29.297000 1 torch/utils/_pytree.py:630] <enum 'KernelPreference'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+Converting PI0 checkpoint from /checkpoints/lego-full-20260915/158000 to /checkpoints/lego-full-20260915/158000-pytorch-fp32
+Model config: Pi0Config(action_dim=32, action_horizon=50, max_token_len=200, dtype='float32', paligemma_variant='gemma_2b', action_expert_variant='gemma_300m', pi05=True, discrete_state_input=True)
+Traceback (most recent call last):
+  File "/probe/convert_jax_model_to_pytorch.py", line 658, in <module>
+    tyro.cli(main)
+  File "/usr/local/lib/python3.12/dist-packages/tyro/_cli.py", line 238, in cli
+    return run_with_args_from_cli()
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/probe/convert_jax_model_to_pytorch.py", line 654, in main
+    convert_pi0_checkpoint(checkpoint_dir, precision, output_path, model_config)
+  File "/probe/convert_jax_model_to_pytorch.py", line 544, in convert_pi0_checkpoint
+    conversion_audit = load_mapped_parameters(pi0_model, all_params)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/probe/convert_jax_model_to_pytorch.py", line 612, in load_mapped_parameters
+    raise ValueError(f"Invalid source tensor: {key}")
+ValueError: Invalid source tensor: paligemma_with_expert.paligemma.model.language_model.embed_tokens.weight
+

@@ -2,6 +2,27 @@
 
 ## 默认路线与触发
 
+### 2026-09-15 · 158000首次实际接入结果
+
+用户限定今天只做158000转换和测试，不部署服务、不联调3588、不拉其他checkpoint。
+源端与Thor的16个params/assets文件SHA-256逐项一致，norm SHA为
+`044aad51d9439e4b69dcf87c2d0f5b22ee077bbd83acf785c034b598fc4d4dcc`。
+实际FP32转换在词嵌入参数有效性检查处退出1，未生成输出目录。
+随后在同一Pi v6镜像、Thor CPU上用原生restore_params(dtype=None)只读审计原始JAX：
+`PaliGemma/llm/embedder/input_embedding`（257152×2048、FP32）含9个NaN，
+全部参数合计9个非有限元素，无Inf。源metadata SHA为
+`2912d15ba42fe0d742b5ac46e88804dacce69644369b4cf9b7405cf7d8fe7247`。
+这不是BF16/引擎舍入，尚未定位训练原因或受影响token；禁止静默清零后声称保真。
+因此未继续导出、构建引擎或推理测速。全程120W，无MAXN会话；容器GPU警告来自有意使用CPU转换，真正失败为参数检查。
+
+复用入口：`scripts/thor/prepare_checkpoint_suite.py`将不可变真实输入绑定checkpoint自身norm，
+`scripts/thor/audit_checkpoint_finite.py`对原始参数输出逐张量shape/dtype/NaN/Inf计数。
+Thor scoped脚本目录为`/home/wuyan-lyj/thor/pi/probes/finetune-158000-20260915`；
+回放为`/home/wuyan-lyj/thor/pi/test-data/pi05-158000-replay-20260915`，旧回放不修改。
+转换容器`pi05-convert-158000-20260915`退出1，审计容器`pi05-audit-158000-20260915`退出0，保留日志。
+证据与状态页：[158000报告](../../reports/thor/158000.html)。当前阻塞不通过扩大容差解决；
+换用有效checkpoint或另行获准定位/修复源权重后，才重新创建run继续。未操作训练或3588。
+
 2026-09-11 用户确认保留现有 W 路线，并要求新 checkpoint 优先自动接入。
 技能源码为 `skills/thor-checkpoint-deploy/`，安装到本机 Codex skills 目录供自动选择。
 这是 agent 收到新权重交接后的工作流，不是已安装的目录监听器或自动生产发布器。
