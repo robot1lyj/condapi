@@ -228,6 +228,15 @@ PR #960 作者给出的局部 checkpoint 对照如下；样本范围、硬件及
 
 ## 7. 当前状态
 
+### 2026-09-15 17:08 +08:00 · 网络复核与新权重下载
+
+- 当前 Thor Wi-Fi 地址为 `192.168.110.250/23`，USB `192.168.55.1`；两者 SSH 实测可用。本机 `thor` 别名已从旧 `.108` 更新为 `.250`，这是当前 DHCP 地址，不是静态地址保证。下方 2026-09-07 的 `.108` / NoMachine 地址为历史观察；当前无线 NoMachine 应使用 `.250:4000`，本轮未重新验证 NoMachine。
+- `thor-admin-wifi` 为系统连接，IPv4 DHCP；autoconnect=yes、priority=100、retries=0（无限），NetworkManager enabled。重新保存这些设置；持久关闭 Wi-Fi 省电（powersave=2），并通过 `iw` 对当前连接关闭，实测 `Power save: off`。NetworkManager 不支持对 powersave 热 reapply，未重连中断下载；持久配置供下次连接使用。未做重启验证。
+- Wi-Fi DHCP 服务器/默认网关 `192.168.111.254`，租期 21600 秒（6小时），当前 client ID 对应 MAC `a8:e2:91:00:20:44`。有线 `yam-thor-direct` 为 `192.168.250.1/24`、无网关、never-default=yes；实际默认公网路由仍走 Wi-Fi。因此未发现有线配置抢占默认路由或更改 Wi-Fi 地址的证据。历史 DHCP 租约/路由器日志未取到，不能确定本次换号的具体触发；长期固定地址应在路由器为该 MAC 做 DHCP 保留，尚未执行。
+- 158000 有 Orbax commit 时间标记及 `assets/yam/norm_stats.json`，推理 params 约12GiB，完整目录含 train_state 约31GiB。按推理范围仅拉 params/assets/完成元数据，未取优化器续训状态。源：`yam-server:/home/wuyan/lyj/YAM/training-runs/pi05_yam/lego_full_b32_xid13_recovery_20260915_cuda_illegal_152230_hl13/158000/`；目标：`/home/wuyan-lyj/thor/pi/checkpoints/lego-full-20260915/158000/`。用户所给154000地址不存在，在同一正确父目录找到了154000，后续仍按158000→156000→154000顺序，不并发。
+- 当前为服务器直传Thor；用本机已有SSH agent临时转发完成认证，未复制私钥；服务器host key匹配本机已有可信记录。下载依赖当前SSH会话，不宣称离线自治。停止本任务原本机rsync，部分文件仍保留；未停止其他任务。17:08附近观察目标315MiB、rsync PID92906/93126运行，尚未完成传输/完整性校验，未开始微调推理。源→Thor初期约2MiB/s只是短时观测。
+- 已创建本任务每10分钟下载监督（automation ID `thor`），正常增长不通知；完成、失败、连续两次无增长或设备不可达时提醒，完成后暂停。进程消失不等于成功，须核对源目标与退出证据。新 checkpoint 的转换/引擎/真实测试仍按 [交接手册](reference/thor/12_checkpoint_handoff.md)，旧基础模型成绩不作新模型成绩。
+
 ### 2026-09-07 用户反馈：转向低延迟后端（最新决策）
 
 用户明确不能接受当前原生 JAX 最快约 177 ms，要求完整推理约 100 ms 或更低，同时保证模型精度；下方 A/B/C 结果继续保留，但 C 不再作为可接受的最终部署选择。三组均已使用 MAXN + CPU/GPU/EMC 最高频率，不把重新开 MAXN 当作下一轮加速。下一轮同时记录完整 policy 的 P50/P95，优先无量化编译及保留高精度敏感运算；当前不以改小三相机、H50、10 去噪步来偷换对照合同。
