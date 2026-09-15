@@ -1,0 +1,145 @@
+{
+  "run_id": "pi05-A-100000-20260915-r1",
+  "phase": "evaluate",
+  "started_at": "2026-09-15T11:51:41.431143+00:00",
+  "status": "running",
+  "command": [
+    "/bench/benchmark_suite.py",
+    "--checkpoint",
+    "/checkpoints/lego-full-20260913/100000",
+    "--suite",
+    "/test-data/pi05-100000-replay-20260915/suite.json",
+    "--warmups",
+    "2",
+    "--repeats",
+    "2",
+    "--params-dtype",
+    "checkpoint",
+    "--compute-dtype",
+    "float32",
+    "--output",
+    "/results/pi05-A-100000-20260915-r1"
+  ],
+  "config": "pi05_yam",
+  "backend": "jax",
+  "compiled": true,
+  "cuda_graph": false,
+  "compiled_graph_parts": false,
+  "graph_reference": null,
+  "static_denoising_loop": false,
+  "engine_cuda_graph": false,
+  "warmups_per_sample": 2,
+  "attention": "jax_native",
+  "batch_vision": false,
+  "attention_mask": "float32",
+  "params_dtype": "checkpoint",
+  "compute_dtype": "float32",
+  "matmul_precision": "highest",
+  "checkpoint_metadata_sha256": "2912d15ba42fe0d742b5ac46e88804dacce69644369b4cf9b7405cf7d8fe7247",
+  "suite_sha256": "06b2ed3bc3bcf19c8b37b4600643f55627d38e03e33fc6e159e0334a14352fc3",
+  "norm_stats_sha256": "044aad51d9439e4b69dcf87c2d0f5b22ee077bbd83acf785c034b598fc4d4dcc",
+  "suite": {
+    "created_at": "2026-09-07T10:31:18.850029+00:00",
+    "source_kind": "real_yam_recording",
+    "source_root": "/home/wuyan-lyj/thor-system/test-data/ABC-130k-two-tasks/lego_sorting",
+    "source_files": {
+      "manifests/train.jsonl": "1fabf4a2b83224f85a724146fb37ccf17928f91c00bd0a697e470980e54fb3a6",
+      "train/data/source-file-000.parquet": "86c8358e45cc3888a5a8ad51d3165b8830a2ae21147fc2b7ee6cc1ac169b7b48",
+      "train/videos/left_wrist/episode-000095.mp4": "933af3b2463cfa8f79b036e54875d84b950a8fee646bd5d85f245b51d7ff8f21",
+      "train/videos/left_wrist/episode-000096.mp4": "84e438bc8fd5cf63df13973ec5364b34d2cd47e55993c2040c042a2319cc1013",
+      "train/videos/left_wrist/episode-000097.mp4": "516a6fb63a66ec5ad7984bb6d58c7a2358404ca06fc18097d2c61877e524c62b",
+      "train/videos/right_wrist/episode-000095.mp4": "6e7c239a40ea9a567d2a72b49f50880c0c60989b1ca2485bc1bfb8f1e92107b1",
+      "train/videos/right_wrist/episode-000096.mp4": "2055b5cd36bc75d7b359c013d56d96c620d5fe9bfa9f760e054c492a44ec332a",
+      "train/videos/right_wrist/episode-000097.mp4": "e52111ef360e949d4cc6aa9102e818a24c37792623c46ec2038156e1a2af49ea",
+      "train/videos/top/episode-000095.mp4": "9d04979383e8f4d81aebd04bdadfb9d6d77b2e33468f36bf765b3d39260699b9",
+      "train/videos/top/episode-000096.mp4": "fb29baaba91fc93573cf189707f608185c1273a3fad8884e141508622b6c40fb",
+      "train/videos/top/episode-000097.mp4": "8517f0b92104e1ce3faae39d5fa5c3f85c1f22b943d46ed00177dcece364ae8c"
+    },
+    "norm_stats_sha256": "044aad51d9439e4b69dcf87c2d0f5b22ee077bbd83acf785c034b598fc4d4dcc",
+    "normalization_scope": "checkpoint_training_norm",
+    "normalization_method": "unaltered checkpoint assets/yam/norm_stats.json",
+    "joint_delta_mask": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      false
+    ],
+    "action_horizon": 50,
+    "units": "original_dataset_values_no_rescaling_no_robot_calibration_claim",
+    "base_model_only": false,
+    "samples": [
+      {
+        "sample": "episode-000095-early.npz",
+        "provenance": "episode-000095-early.json"
+      },
+      {
+        "sample": "episode-000095-middle.npz",
+        "provenance": "episode-000095-middle.json"
+      },
+      {
+        "sample": "episode-000095-late.npz",
+        "provenance": "episode-000095-late.json"
+      },
+      {
+        "sample": "episode-000096-early.npz",
+        "provenance": "episode-000096-early.json"
+      },
+      {
+        "sample": "episode-000096-middle.npz",
+        "provenance": "episode-000096-middle.json"
+      },
+      {
+        "sample": "episode-000096-late.npz",
+        "provenance": "episode-000096-late.json"
+      },
+      {
+        "sample": "episode-000097-early.npz",
+        "provenance": "episode-000097-early.json"
+      },
+      {
+        "sample": "episode-000097-middle.npz",
+        "provenance": "episode-000097-middle.json"
+      },
+      {
+        "sample": "episode-000097-late.npz",
+        "provenance": "episode-000097-late.json"
+      }
+    ],
+    "norm_stats": "norm_stats.json",
+    "observation_count": 9,
+    "parent_suite_sha256": "5dc74ebd1fbf296f21156ec685cf9edd6d7eb20c1a7eec858d8091369db1e15d",
+    "checkpoint_metadata_sha256": "2912d15ba42fe0d742b5ac46e88804dacce69644369b4cf9b7405cf7d8fe7247",
+    "validation_scope": "real training replay; conversion parity and latency, not holdout task success"
+  },
+  "steps": 10,
+  "horizon": 50,
+  "seed": 0,
+  "repeats": 2,
+  "versions": {
+    "jax": "0.10.0.dev20260415+c98e1bb97",
+    "jaxlib": "0.10.0.dev20260521",
+    "flax": "0.12.6",
+    "orbax-checkpoint": "0.11.39"
+  },
+  "devices": [
+    "cuda:0"
+  ],
+  "precision_acceptance_threshold": null,
+  "limitations": [
+    "Finetuned checkpoint, training replay only; no robot execution or held-out task success claim",
+    "Checkpoint training norms; not independently calibrated against hardware",
+    "Dataset units unchanged, not independently calibrated against hardware",
+    "No numerical tolerance approved yet; measured differences do not constitute acceptance",
+    "Same Thor JAX version reference, not a training-server JAX equivalence test"
+  ]
+}

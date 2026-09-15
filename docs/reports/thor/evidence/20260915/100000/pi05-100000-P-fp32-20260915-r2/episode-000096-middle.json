@@ -1,0 +1,18 @@
+{
+  "sample": "episode-000096-middle.npz",
+  "sample_sha256": "74094522d58cdbe14446d3239d67f896b2e4549b1cff8c5b1acef41b9666925c",
+  "episode": 96,
+  "frame": 1162,
+  "phase": "middle",
+  "warmup_ms": [
+    1442.8768389916513,
+    1440.3545419918373
+  ],
+  "latencies_ms": [
+    1442.9268770036288,
+    1440.6297460081987
+  ],
+  "p50_ms": 1441.7783115059137,
+  "p95_ms": 1442.8120204538573,
+  "repeat_max_abs_difference": 0.0
+}

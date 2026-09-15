@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>100000 · Thor 微调模型测试</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#eef2f7;color:#17283f;font:16px/1.7 system-ui,sans-serif}
+main{max-width:1050px;margin:48px auto;padding:0 24px}header{margin-bottom:28px}h1{font-size:36px;line-height:1.25;margin:12px 0}
+.eyebrow{color:#3269aa;letter-spacing:2px;font-size:13px}section{background:#fff;border:1px solid #dfe6ee;border-radius:18px;padding:26px;margin:20px 0}
+h2{font-size:21px;margin:0 0 14px}.good{border-left:5px solid #19826b}.pending{color:#855c11}small,.muted{color:#63738a}
+table{border-collapse:collapse;width:100%;font-size:15px}th,td{text-align:left;padding:13px 10px;border-bottom:1px solid #e8edf3}th{color:#63738a;font-weight:500}
+.scroll{overflow:auto}code{overflow-wrap:anywhere}a{color:#245bb1}.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.metric{background:#f2f6fa;padding:18px;border-radius:12px}.value{font-size:25px;font-weight:600}
+@media(max-width:650px){main{margin:24px auto;padding:0 16px}h1{font-size:28px}.metrics{grid-template-columns:1fr}section{padding:20px}}
+</style>
+<main><header><div class="eyebrow">THOR / PI0.5 / 全量微调</div><h1>100000：转换已完成，加速测试进行中</h1>
+<p class="muted">2026-09-15 · 三相机 · 14D 状态 · 50 步动作 · 10 步去噪 · 不涉及机械臂控制</p></header>
+<section class="good"><h2>先看结论</h2><p>原始权重没有 NaN / Inf；服务器与 Thor 的 17 个文件哈希完全一致。
+FP32 转换后的模型已完成 9 组真实回放，输出全部有限。<strong>TensorRT 的精度与延迟仍在测试，尚未完成最终验收。</strong></p>
+<div class="metrics"><div class="metric"><div class="muted">JAX → PyTorch FP32 平均绝对差</div><div class="value">2.63 × 10⁻⁷</div></div>
+<div class="metric"><div class="muted">JAX → PyTorch FP32 最大绝对差</div><div class="value">2.74 × 10⁻⁶</div></div>
+<div class="metric"><div class="muted">有效动作输出</div><div class="value">50 × 14</div></div></div>
+<p><small>误差按原数据数值统计，关节与夹爪分别保留在原始 JSON；这是数值一致性，不代表抓取成功率。</small></p></section>
+<section><h2>为什么一个 30 多 GB，一个约 12 GB？</h2><div class="scroll"><table><tr><th>保存内容</th><th>100000</th><th>158000</th><th>Thor 推理需要？</th></tr>
+<tr><td>模型参数 params</td><td>约 12G</td><td>约 12G</td><td>需要</td></tr><tr><td>续训状态 train_state</td><td>约 19G</td><td>约 19G</td><td>不需要</td></tr><tr><td>归一化 assets</td><td>约 12K</td><td>约 12K</td><td>需要</td></tr></table></div>
+<p>大小差异来自下载范围，不是模型损坏，也不是训练步数越高模型越大。158000 的异常依据是权重中查到的 9 个 NaN，不是目录大小。</p></section>
+<section><h2>当前各阶段</h2><div class="scroll"><table><tr><th>阶段 / 精度</th><th>结果</th><th>用途与边界</th></tr>
+<tr><td>原始 JAX FP32</td><td>9 组输出有限；MAXN 下完成</td><td>同模型精度参考</td></tr>
+<tr><td>PyTorch FP32</td><td>转换逐位加载一致；回放输出有限</td><td>首轮 120W，仅作数值诊断，不作最终性能</td></tr>
+<tr><td>FP32 时间缓存 / 200 桶</td><td>9 / 9 与原采样器逐位一致</td><td>缓存优化没有改变本轮输出</td></tr>
+<tr><td>BF16 / FP32 TensorRT + CUDA Graph</td><td class="pending">执行中，未报告延迟</td><td>本次新权重重新构建，不能沿用基础模型分数</td></tr></table></div></section>
+<section><h2>这些指标怎么看？</h2><p><strong>MAE</strong>：平均每个动作数值差多少；<strong>最大绝对差</strong>：最偏的一个值；<strong>P95 绝对差</strong>：95% 的差值不超过它。FP32 对照 P95 为 8.05 × 10⁻⁷，RMSE 为 3.85 × 10⁻⁷。</p>
+<p><strong>延迟 P50 / P95</strong>：分别是一半 / 95% 调用能在多少毫秒内完成。正式延迟应包含 Thor 预处理、推理和后处理，不含 IPC 网络与动作执行。</p>
+<p class="muted">样本来自 3 条训练轨迹的早、中、晚，共 9 组，不是独立测试集。没有做实机任务成功率测试，也未设定机器人任务误差阈值。仅推理期间 MAXN，结束恢复 120W。</p></section>
+<section><h2>证据与复现入口</h2><p><a href="evidence/20260915/100000/transfer-sha256.json">传输校验</a> · <a href="evidence/20260915/100000/source-finite-audit.json">原始权重审计</a> · <a href="evidence/20260915/100000/conversion_audit.json">FP32 转换审计</a> · <a href="evidence/20260915/100000/jax-pytorch-fp32.json">逐维精度对照</a></p>
+<p>Thor 原件：<code>/home/wuyan-lyj/thor/pi/checkpoints/lego-full-20260913/100000</code><br>转换后：<code>100000-pytorch-fp32</code>（同父目录）</p></section></main></html>

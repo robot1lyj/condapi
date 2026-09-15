@@ -1,0 +1,18 @@
+{
+  "sample": "episode-000097-late.npz",
+  "sample_sha256": "b296dac1adbefa81ab4c7cb44a1968b2f922ec0261d0978cfa0ed9bc7b549cf3",
+  "episode": 97,
+  "frame": 2110,
+  "phase": "late",
+  "warmup_ms": [
+    1441.4843099948484,
+    1447.4635490041692
+  ],
+  "latencies_ms": [
+    1444.8314649926033,
+    1444.131259995629
+  ],
+  "p50_ms": 1444.4813624941162,
+  "p95_ms": 1444.7964547427546,
+  "repeat_max_abs_difference": 0.0
+}

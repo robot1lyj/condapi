@@ -1,0 +1,19 @@
+{
+  "command": [
+    "rsync",
+    "-a",
+    "--partial",
+    "--info=progress2",
+    "--exclude=train_state",
+    "--log-file=/home/wuyan-lyj/thor/pi/logs/download-100000-20260915.rsync.log",
+    "-e",
+    "ssh -o BatchMode=yes -o UserKnownHostsFile=/home/wuyan-lyj/thor/pi/server-known-hosts -o StrictHostKeyChecking=yes -o ServerAliveInterval=30 -o ServerAliveCountMax=6",
+    "wuyan@10.18.31.234:/home/wuyan/lyj/YAM/training-runs/pi05_yam/lego_full_b32_xid13_recovery_20260913_nccl_96261_hl9/100000/",
+    "/home/wuyan-lyj/thor/pi/checkpoints/lego-full-20260913/100000/"
+  ],
+  "started_at": "2026-09-15T10:56:03.627556+00:00",
+  "status": "transfer_exited_needs_verification",
+  "pid": 103004,
+  "exit_code": 0,
+  "finished_at": "2026-09-15T11:32:58.520484+00:00"
+}

@@ -38,7 +38,16 @@ def main():
     parser.add_argument("--modes", nargs="+", choices=(*MODES, *TORCH_MODES), default=list(MODES))
     parser.add_argument("--code-commit", required=True)
     parser.add_argument("--engine-id")
+    parser.add_argument("--checkpoint", help="Relative path under checkpoints; defaults to base model for selected backend")
+    parser.add_argument("--suite", default="pi05-replay-v1/suite.json")
+    parser.add_argument("--warmups", type=int, default=5)
+    parser.add_argument("--repeats", type=int, default=20)
     args = parser.parse_args()
+    for value in (args.checkpoint, args.suite):
+        if value is not None and (not value or Path(value).is_absolute() or ".." in Path(value).parts):
+            parser.error("Checkpoint and suite must be relative paths inside their mounted roots")
+    if args.warmups < 2 or args.repeats < 2:
+        parser.error("Need at least two warmups and repeats")
     if os.geteuid() != 0:
         parser.error("Run with sudo on Thor")
     if not re.fullmatch(r"[a-zA-Z0-9_-]+", args.batch_id):
@@ -54,7 +63,7 @@ def main():
         prefix = args.root / "logs" / label
         is_pytorch = mode in TORCH_MODES
         params, compute = (TORCH_MODES if is_pytorch else MODES)[mode]
-        checkpoint = "pi05_base_pytorch_fp32_v1" if is_pytorch else "pi05_base"
+        checkpoint = args.checkpoint or ("pi05_base_pytorch_fp32_v1" if is_pytorch else "pi05_base")
         inductor_cache = "/cache/torchinductor-thor-triton-v1" if mode == "N" else "/cache/torchinductor"
         command = [
             "docker",
@@ -72,6 +81,10 @@ def main():
             "NVIDIA_DRIVER_CAPABILITIES=compute,utility",
             "-e",
             "PYTHONUNBUFFERED=1",
+            "-e",
+            "OPENPI_DATA_HOME=/cache",
+            "-e",
+            "TORCH_ALLOW_TF32_CUBLAS_OVERRIDE=0",
             "-e",
             f"TORCHINDUCTOR_CACHE_DIR={inductor_cache}",
             "-e",
@@ -92,7 +105,11 @@ def main():
             "--checkpoint",
             f"/checkpoints/{checkpoint}",
             "--suite",
-            "/test-data/pi05-replay-v1/suite.json",
+            f"/test-data/{args.suite}",
+            "--warmups",
+            str(args.warmups),
+            "--repeats",
+            str(args.repeats),
             "--params-dtype",
             params,
             "--compute-dtype",

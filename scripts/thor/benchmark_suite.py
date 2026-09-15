@@ -159,8 +159,12 @@ def main():
         "devices": devices,
         "precision_acceptance_threshold": None,
         "limitations": [
-            "Base model is not YAM-finetuned; no robot execution or task success claim",
-            "Benchmark-only norms from the same recordings; not production training norms",
+            "Base model is not YAM-finetuned; no robot execution or task success claim"
+            if suite.get("base_model_only", True)
+            else "Finetuned checkpoint, training replay only; no robot execution or held-out task success claim",
+            "Checkpoint training norms; not independently calibrated against hardware"
+            if suite.get("normalization_scope") == "checkpoint_training_norm"
+            else "Benchmark-only norms from the same recordings; not production training norms",
             "Dataset units unchanged, not independently calibrated against hardware",
             "No numerical tolerance approved yet; measured differences do not constitute acceptance",
             "Same Thor JAX version reference, not a training-server JAX equivalence test",

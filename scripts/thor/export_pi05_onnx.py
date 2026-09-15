@@ -98,7 +98,10 @@ def main():
         "quantization": None,
         "tf32": False,
         "nonfinite_sanitization": False,
-        "scope": "base model only; no LoRA; export preparation is not engine/task accuracy acceptance",
+        "scope": (
+            ("base model" if suite.get("base_model_only", True) else "finetuned checkpoint")
+            + "; no LoRA; export preparation is not engine/task accuracy acceptance"
+        ),
     }
 
     def save_report():

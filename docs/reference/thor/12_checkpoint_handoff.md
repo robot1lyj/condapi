@@ -2,6 +2,27 @@
 
 ## 默认路线与触发
 
+### 2026-09-15 · 100000替代候选实测（进行中）
+
+100000直传已于19:32:58 +08完成，退出0；params/assets共17个文件两端SHA-256全部一致。
+Thor原始参数全量扫描非有限元素0，FP32转换成功，811个映射张量/3353433872个元素加载逐位一致。
+原件在`/home/wuyan-lyj/thor/pi/checkpoints/lego-full-20260913/100000`，
+转换目录为相邻`100000-pytorch-fp32`，已补齐自身assets（转换器现优先读checkpoint内assets，兼容父级回退）。
+100000和158000的服务器目录构成均为params约12G、train_state约19G、assets约12K；
+30多GB是完整续训检查点，Thor仅需params/assets，因此大小差别不是NaN原因。
+`_METADATA`哈希在这两个模型中相同，仅说明结构元数据相同，不可当权重身份；用实际参数文件SHA清单区分。
+
+同9组真实训练回放、同噪声/训练norm：JAX FP32与PyTorch FP32动作MAE
+2.6340315733770177e-7、RMSE3.8481208646959624e-7、P95绝对差8.046627044677734e-7、最大差2.7418136596679688e-6。
+完整数组形状9×2×50×14且全部有限；未做闭环/独立留出任务评估。
+JAX参考`pi05-A-100000-20260915-r1`使用MAXN/锁频，结束恢复120W。
+PyTorch首个完成诊断`pi05-100000-P-fp32-20260915-r2`实际为120W，不能当MAXN正式性能；
+其历史result内base-model/benchmark-norm文案是脚本旧硬编码，实际suite和norm明确绑定100000，后续脚本已修正文案。
+先前r1因未挂本地tokenizer缓存退出，保留失败，不安装联网依赖绕过离线要求。
+200桶FP32时间缓存准备9/9与原采样器逐位一致，80桶/混合精度/新TensorRT引擎仍在执行，不借用基础模型成绩。
+下载完成后的10分钟监控已删除，不再声称仍在下载。
+证据：[100000目录](../../reports/thor/evidence/20260915/100000/)。
+
 ### 2026-09-15 · 158000首次实际接入结果
 
 后续只读追查：154000/156000/158000完整词嵌入均为相同9个NaN；
@@ -86,7 +107,7 @@ python adapters/openpi/convert_jax_model_to_pytorch.py
 
 上面是参数示意，执行时组成一个命令；入口 CLI 以当前源码/--help 为准。
 **precision 必须显式 float32**，转换器默认 bfloat16 不适合保真中间产物。
-核对源目录层级及 assets 位置；转换器现从源目录父级查 assets，不能仅凭成功退出认定 norm 已随附。
+核对源目录层级及 assets 位置；转换器优先checkpoint内assets、缺失时兼容父级，仍须核对实际norm身份。
 保留转换审计：参数覆盖、预期例外、dtype 和加载值一致性。
 
 用同次权重生成 JAX FP32 golden，并与新 PyTorch FP32 输出对照；固定输入、噪声、预处理与 norm。
@@ -110,11 +131,12 @@ tokenizer 接口保持 200，只裁掉 mask=false 的尾部；先核对本次任
 保持 strongly typed/noTF32，无 FP8/FP4、FP16 修补或非有限值截断。
 engine 必须在目标 Thor/兼容容器环境构建；记录 ONNX 外部权重及引擎指纹。
 
-**现有宿主封装的适用边界：**截至本次写入，`run_suite_host.py` 和
-`run_export_host.py` 仍硬编码基础 checkpoint 与旧 suite。
-它们的现成命令只用于基础模型复测，不能原样当新权重流水线。
-新 checkpoint 首次接入时，使用其容器/电源包装结构调用上述已参数化的底层入口，
-显式挂载本次权重、suite、norm 和结果目录；或先对封装补相应参数并做轻量命令构造测试。
+**宿主封装参数：**`run_suite_host.py`和`run_export_host.py`已支持
+`--checkpoint <相对checkpoints目录>`、`--suite <相对test-data目录>`；默认仍为基础模型，仅供旧复测。
+新checkpoint必须显式指定两项；本地tokenizer通过`OPENPI_DATA_HOME=/cache`读取，禁用TF32覆盖。
+`run_suite_host.py`还支持`--warmups`/`--repeats`，默认5/20。
+轻量命令构造/路径越界测试见`checkpoint_host_test.py`。每阶段复用MAXN恢复包装器，
+显式挂载本次权重、suite、norm和结果目录。
 不整体同步/替换远端主检出，不复用与当前代码不一致的镜像内旧转换器。
 
 ## 5. 最小有效测试与交付

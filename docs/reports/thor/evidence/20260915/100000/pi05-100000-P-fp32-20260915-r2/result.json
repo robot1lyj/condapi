@@ -1,0 +1,355 @@
+{
+  "run_id": "pi05-100000-P-fp32-20260915-r2",
+  "phase": "evaluate",
+  "started_at": "2026-09-15T11:46:00.555805+00:00",
+  "status": "measured_not_accuracy_approved",
+  "command": [
+    "/bench/benchmark_suite.py",
+    "--checkpoint",
+    "/checkpoints/lego-full-20260913/100000-pytorch-fp32",
+    "--suite",
+    "/test-data/pi05-100000-replay-20260915/suite.json",
+    "--params-dtype",
+    "float32",
+    "--compute-dtype",
+    "float32",
+    "--backend",
+    "pytorch",
+    "--no-compile",
+    "--warmups",
+    "2",
+    "--repeats",
+    "2",
+    "--steps",
+    "10",
+    "--output",
+    "/results/pi05-100000-P-fp32-20260915-r2"
+  ],
+  "config": "pi05_yam",
+  "backend": "pytorch",
+  "compiled": false,
+  "cuda_graph": false,
+  "compiled_graph_parts": false,
+  "graph_reference": null,
+  "static_denoising_loop": false,
+  "engine_cuda_graph": false,
+  "warmups_per_sample": 2,
+  "attention": "eager",
+  "batch_vision": false,
+  "attention_mask": "float32",
+  "params_dtype": "fp32_checkpoint_to_float32",
+  "compute_dtype": "float32",
+  "matmul_precision": "FP32 highest; TF32 disabled",
+  "checkpoint_metadata_sha256": "2912d15ba42fe0d742b5ac46e88804dacce69644369b4cf9b7405cf7d8fe7247",
+  "suite_sha256": "06b2ed3bc3bcf19c8b37b4600643f55627d38e03e33fc6e159e0334a14352fc3",
+  "norm_stats_sha256": "044aad51d9439e4b69dcf87c2d0f5b22ee077bbd83acf785c034b598fc4d4dcc",
+  "suite": {
+    "created_at": "2026-09-07T10:31:18.850029+00:00",
+    "source_kind": "real_yam_recording",
+    "source_root": "/home/wuyan-lyj/thor-system/test-data/ABC-130k-two-tasks/lego_sorting",
+    "source_files": {
+      "manifests/train.jsonl": "1fabf4a2b83224f85a724146fb37ccf17928f91c00bd0a697e470980e54fb3a6",
+      "train/data/source-file-000.parquet": "86c8358e45cc3888a5a8ad51d3165b8830a2ae21147fc2b7ee6cc1ac169b7b48",
+      "train/videos/left_wrist/episode-000095.mp4": "933af3b2463cfa8f79b036e54875d84b950a8fee646bd5d85f245b51d7ff8f21",
+      "train/videos/left_wrist/episode-000096.mp4": "84e438bc8fd5cf63df13973ec5364b34d2cd47e55993c2040c042a2319cc1013",
+      "train/videos/left_wrist/episode-000097.mp4": "516a6fb63a66ec5ad7984bb6d58c7a2358404ca06fc18097d2c61877e524c62b",
+      "train/videos/right_wrist/episode-000095.mp4": "6e7c239a40ea9a567d2a72b49f50880c0c60989b1ca2485bc1bfb8f1e92107b1",
+      "train/videos/right_wrist/episode-000096.mp4": "2055b5cd36bc75d7b359c013d56d96c620d5fe9bfa9f760e054c492a44ec332a",
+      "train/videos/right_wrist/episode-000097.mp4": "e52111ef360e949d4cc6aa9102e818a24c37792623c46ec2038156e1a2af49ea",
+      "train/videos/top/episode-000095.mp4": "9d04979383e8f4d81aebd04bdadfb9d6d77b2e33468f36bf765b3d39260699b9",
+      "train/videos/top/episode-000096.mp4": "fb29baaba91fc93573cf189707f608185c1273a3fad8884e141508622b6c40fb",
+      "train/videos/top/episode-000097.mp4": "8517f0b92104e1ce3faae39d5fa5c3f85c1f22b943d46ed00177dcece364ae8c"
+    },
+    "norm_stats_sha256": "044aad51d9439e4b69dcf87c2d0f5b22ee077bbd83acf785c034b598fc4d4dcc",
+    "normalization_scope": "checkpoint_training_norm",
+    "normalization_method": "unaltered checkpoint assets/yam/norm_stats.json",
+    "joint_delta_mask": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      false
+    ],
+    "action_horizon": 50,
+    "units": "original_dataset_values_no_rescaling_no_robot_calibration_claim",
+    "base_model_only": false,
+    "samples": [
+      {
+        "sample": "episode-000095-early.npz",
+        "provenance": "episode-000095-early.json"
+      },
+      {
+        "sample": "episode-000095-middle.npz",
+        "provenance": "episode-000095-middle.json"
+      },
+      {
+        "sample": "episode-000095-late.npz",
+        "provenance": "episode-000095-late.json"
+      },
+      {
+        "sample": "episode-000096-early.npz",
+        "provenance": "episode-000096-early.json"
+      },
+      {
+        "sample": "episode-000096-middle.npz",
+        "provenance": "episode-000096-middle.json"
+      },
+      {
+        "sample": "episode-000096-late.npz",
+        "provenance": "episode-000096-late.json"
+      },
+      {
+        "sample": "episode-000097-early.npz",
+        "provenance": "episode-000097-early.json"
+      },
+      {
+        "sample": "episode-000097-middle.npz",
+        "provenance": "episode-000097-middle.json"
+      },
+      {
+        "sample": "episode-000097-late.npz",
+        "provenance": "episode-000097-late.json"
+      }
+    ],
+    "norm_stats": "norm_stats.json",
+    "observation_count": 9,
+    "parent_suite_sha256": "5dc74ebd1fbf296f21156ec685cf9edd6d7eb20c1a7eec858d8091369db1e15d",
+    "checkpoint_metadata_sha256": "2912d15ba42fe0d742b5ac46e88804dacce69644369b4cf9b7405cf7d8fe7247",
+    "validation_scope": "real training replay; conversion parity and latency, not holdout task success"
+  },
+  "steps": 10,
+  "horizon": 50,
+  "seed": 0,
+  "repeats": 2,
+  "versions": {
+    "torch": "2.12.0a0+5aff3928d8.nv26.5.50603568",
+    "transformers": "4.53.2",
+    "jax": "0.6.2",
+    "jaxlib": "0.6.2",
+    "flax": "0.10.2",
+    "orbax-checkpoint": "0.11.13"
+  },
+  "devices": [
+    "NVIDIA Thor",
+    "(11, 0)"
+  ],
+  "precision_acceptance_threshold": null,
+  "limitations": [
+    "Base model is not YAM-finetuned; no robot execution or task success claim",
+    "Benchmark-only norms from the same recordings; not production training norms",
+    "Dataset units unchanged, not independently calibrated against hardware",
+    "No numerical tolerance approved yet; measured differences do not constitute acceptance",
+    "Same Thor JAX version reference, not a training-server JAX equivalence test"
+  ],
+  "converted_weights_sha256": "f2ed6d5278d5579f025ffeb66c709fe0c58ce8988312cf322589247ebd2ad746",
+  "conversion_audit": {
+    "mapped_tensor_count": 811,
+    "mapped_element_count": 3353433872,
+    "load_precision": "float32",
+    "mapped_to_loaded_bit_exact": true,
+    "missing_unused_language_heads": [
+      "paligemma_with_expert.gemma_expert.lm_head.weight",
+      "paligemma_with_expert.paligemma.lm_head.weight"
+    ],
+    "output_precision": "float32",
+    "checkpoint_metadata_sha256": "2912d15ba42fe0d742b5ac46e88804dacce69644369b4cf9b7405cf7d8fe7247",
+    "checkpoint": "/checkpoints/lego-full-20260913/100000",
+    "lora": "absent; not a LoRA merge implementation",
+    "inference_equivalence": "not tested by tensor loading audit"
+  },
+  "precision_policy": "FP32 / TF32 disabled",
+  "load_s": 69.95870851200016,
+  "loaded_param_dtypes": {
+    "torch.float32": 812
+  },
+  "loaded_param_bytes": 14467030080,
+  "noise_sha256": "42bca6ac77eb9aeaa872cdecc1b432e2c3d0f9a49f5da287515cecf556131d84",
+  "finished_at": "2026-09-15T11:48:13.102055+00:00",
+  "measurements": [
+    {
+      "sample": "episode-000095-early.npz",
+      "sample_sha256": "3b2623cc18ee325742b2ec1baa187b89cb79353443b5585a31fec312bc72683e",
+      "episode": 95,
+      "frame": 100,
+      "phase": "early",
+      "warmup_ms": [
+        2125.495412008604,
+        1444.8117669962812
+      ],
+      "latencies_ms": [
+        1447.0934189885156,
+        1444.4459160004044
+      ],
+      "p50_ms": 1445.76966749446,
+      "p95_ms": 1446.96104383911,
+      "repeat_max_abs_difference": 0.0
+    },
+    {
+      "sample": "episode-000095-middle.npz",
+      "sample_sha256": "c9ff7ede028e642a2a0d6791b812837f3de8fac5c6df36e356e6a252b0e95c6e",
+      "episode": 95,
+      "frame": 1714,
+      "phase": "middle",
+      "warmup_ms": [
+        1450.0881010026205,
+        1446.1136230092961
+      ],
+      "latencies_ms": [
+        1448.8068339996971,
+        1448.1633230025182
+      ],
+      "p50_ms": 1448.4850785011076,
+      "p95_ms": 1448.7746584498382,
+      "repeat_max_abs_difference": 0.0
+    },
+    {
+      "sample": "episode-000095-late.npz",
+      "sample_sha256": "6e7ef6a0d6f189b53ce6fa286e6707a79d4a01adf39ed7fb18c1dbe67a440c8b",
+      "episode": 95,
+      "frame": 3328,
+      "phase": "late",
+      "warmup_ms": [
+        1443.6088900110917,
+        1449.2538440099452
+      ],
+      "latencies_ms": [
+        1440.760343990405,
+        1445.1787920115748
+      ],
+      "p50_ms": 1442.96956800099,
+      "p95_ms": 1444.9578696105164,
+      "repeat_max_abs_difference": 0.0
+    },
+    {
+      "sample": "episode-000096-early.npz",
+      "sample_sha256": "91726a0c81ecd77254ca9c7829793522ce8f50bc3bb9ec683f3a469ed7203f6f",
+      "episode": 96,
+      "frame": 100,
+      "phase": "early",
+      "warmup_ms": [
+        1439.2631020018598,
+        1448.919158996432
+      ],
+      "latencies_ms": [
+        1446.165113011375,
+        1440.92060100229
+      ],
+      "p50_ms": 1443.5428570068325,
+      "p95_ms": 1445.9028874109208,
+      "repeat_max_abs_difference": 0.0
+    },
+    {
+      "sample": "episode-000096-middle.npz",
+      "sample_sha256": "74094522d58cdbe14446d3239d67f896b2e4549b1cff8c5b1acef41b9666925c",
+      "episode": 96,
+      "frame": 1162,
+      "phase": "middle",
+      "warmup_ms": [
+        1442.8768389916513,
+        1440.3545419918373
+      ],
+      "latencies_ms": [
+        1442.9268770036288,
+        1440.6297460081987
+      ],
+      "p50_ms": 1441.7783115059137,
+      "p95_ms": 1442.8120204538573,
+      "repeat_max_abs_difference": 0.0
+    },
+    {
+      "sample": "episode-000096-late.npz",
+      "sample_sha256": "79eb626b45284d513ac6411efbb5c809e31122690b899e655a8cf754e841461d",
+      "episode": 96,
+      "frame": 2224,
+      "phase": "late",
+      "warmup_ms": [
+        1443.500157998642,
+        1447.5812630116707
+      ],
+      "latencies_ms": [
+        1448.0054729938274,
+        1445.3953619959066
+      ],
+      "p50_ms": 1446.700417494867,
+      "p95_ms": 1447.8749674439314,
+      "repeat_max_abs_difference": 0.0
+    },
+    {
+      "sample": "episode-000097-early.npz",
+      "sample_sha256": "1a3da5c6087e3e1841b8024421a2d21842e332370f7d11a2ba1bb61bc43d37dc",
+      "episode": 97,
+      "frame": 100,
+      "phase": "early",
+      "warmup_ms": [
+        1441.709186998196,
+        1447.6322190021165
+      ],
+      "latencies_ms": [
+        1444.2232720030006,
+        1445.1353269978426
+      ],
+      "p50_ms": 1444.6792995004216,
+      "p95_ms": 1445.0897242481005,
+      "repeat_max_abs_difference": 0.0
+    },
+    {
+      "sample": "episode-000097-middle.npz",
+      "sample_sha256": "69a6950f558992dc9857d37e526cd03096835c823f38963837fd75483c96e147",
+      "episode": 97,
+      "frame": 1105,
+      "phase": "middle",
+      "warmup_ms": [
+        1442.3328559932997,
+        1440.8439349936089
+      ],
+      "latencies_ms": [
+        1439.7675459913444,
+        1442.431742005283
+      ],
+      "p50_ms": 1441.0996439983137,
+      "p95_ms": 1442.298532204586,
+      "repeat_max_abs_difference": 0.0
+    },
+    {
+      "sample": "episode-000097-late.npz",
+      "sample_sha256": "b296dac1adbefa81ab4c7cb44a1968b2f922ec0261d0978cfa0ed9bc7b549cf3",
+      "episode": 97,
+      "frame": 2110,
+      "phase": "late",
+      "warmup_ms": [
+        1441.4843099948484,
+        1447.4635490041692
+      ],
+      "latencies_ms": [
+        1444.8314649926033,
+        1444.131259995629
+      ],
+      "p50_ms": 1444.4813624941162,
+      "p95_ms": 1444.7964547427546,
+      "repeat_max_abs_difference": 0.0
+    }
+  ],
+  "p50_ms": 1444.6386904965038,
+  "p95_ms": 1448.259849652095,
+  "repeat_max_abs_difference": 0.0,
+  "process_peak_rss_mib": 31012.3046875,
+  "actions_sha256": "3dce080a6635b9b3cc54226f15113a0834afee9f54f9eca1de687efe7ad4dc31",
+  "normalized_actions_sha256": "56c1499617e23706f9305b4ed4bfe19b670d9ab164e5eb4932a0dc2e6eeaea41",
+  "action_shape": [
+    9,
+    2,
+    50,
+    14
+  ],
+  "cuda_peak_allocated_bytes": 14788597760,
+  "cuda_peak_reserved_bytes": 15089008640
+}

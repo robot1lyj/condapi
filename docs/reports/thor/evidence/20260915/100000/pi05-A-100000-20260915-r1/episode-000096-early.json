@@ -1,0 +1,18 @@
+{
+  "sample": "episode-000096-early.npz",
+  "sample_sha256": "91726a0c81ecd77254ca9c7829793522ce8f50bc3bb9ec683f3a469ed7203f6f",
+  "episode": 96,
+  "frame": 100,
+  "phase": "early",
+  "warmup_ms": [
+    1240.9190420003142,
+    1241.139090998331
+  ],
+  "latencies_ms": [
+    1242.4244430003455,
+    1243.6788410122972
+  ],
+  "p50_ms": 1243.0516420063213,
+  "p95_ms": 1243.6161211116996,
+  "repeat_max_abs_difference": 0.0
+}

@@ -25,7 +25,12 @@ def main():
     parser.add_argument("--prepare-only", action="store_true")
     parser.add_argument("--padding-evidence", nargs=3)
     parser.add_argument("--root", type=Path, default=Path("/home/wuyan-lyj/thor/pi"))
+    parser.add_argument("--checkpoint", default="pi05_base_pytorch_fp32_v1")
+    parser.add_argument("--suite", default="pi05-replay-v1/suite.json")
     args = parser.parse_args()
+    for value in (args.checkpoint, args.suite):
+        if not value or Path(value).is_absolute() or ".." in Path(value).parts:
+            parser.error("Checkpoint and suite must be relative paths inside their mounted roots")
     if os.geteuid() != 0 or not re.fullmatch(r"[a-zA-Z0-9_-]+", args.run_id):
         parser.error("Run with sudo and a filename-safe run-id")
     if args.stage == "engine" and (not args.source_export or not re.fullmatch(r"[a-zA-Z0-9_-]+", args.source_export)):
@@ -61,6 +66,10 @@ def main():
         "-e",
         "PYTHONUNBUFFERED=1",
         "-e",
+        "OPENPI_DATA_HOME=/cache",
+        "-e",
+        "TORCH_ALLOW_TF32_CUBLAS_OVERRIDE=0",
+        "-e",
         "NVIDIA_DRIVER_CAPABILITIES=compute,utility",
         "-v",
         f"{scripts}:/bench:ro",
@@ -76,9 +85,9 @@ def main():
         "python",
         "/bench/export_pi05_onnx.py",
         "--checkpoint",
-        "/checkpoints/pi05_base_pytorch_fp32_v1",
+        f"/checkpoints/{args.checkpoint}",
         "--suite",
-        "/test-data/pi05-replay-v1/suite.json",
+        f"/test-data/{args.suite}",
         "--output",
         f"/artifacts/{args.run_id}",
     ]
@@ -107,7 +116,7 @@ def main():
             "--engine",
             f"/artifacts/{args.source_engine}",
             "--suite",
-            "/test-data/pi05-replay-v1/suite.json",
+            f"/test-data/{args.suite}",
             "--output",
             f"/artifacts/{args.run_id}",
         ]
