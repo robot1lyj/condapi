@@ -62,7 +62,6 @@ def compare(reference_path, candidate_path, *, cross_backend=False):
         "seed",
         "steps",
         "horizon",
-        "repeats",
         "config",
     ):
         if ref[key] != cand[key]:
@@ -108,6 +107,8 @@ def compare(reference_path, candidate_path, *, cross_backend=False):
         "acceptance": "not_approved_no_task_level_tolerance",
         "comparison_scope": "cross_backend_including_runtime_changes" if cross_backend else "same_runtime_precision",
         "runtime_differences": runtime_differences,
+        "timing_repeats": {"reference": ref["repeats"], "candidate": cand["repeats"]},
+        "precision_sampling": "first repeat per unique observation; timing repeat counts may differ",
     }
 
 

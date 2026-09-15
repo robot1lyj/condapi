@@ -1,0 +1,5 @@
+2026-09-15; source server read-only du -sb (apparent bytes including directory entries)
+12439691451	/home/wuyan/lyj/YAM/training-runs/pi05_yam/lego_full_b32_xid13_recovery_20260913_nccl_96261_hl9/100000/params
+19823844006	/home/wuyan/lyj/YAM/training-runs/pi05_yam/lego_full_b32_xid13_recovery_20260913_nccl_96261_hl9/100000/train_state
+12439651316	/home/wuyan/lyj/YAM/training-runs/pi05_yam/lego_full_b32_xid13_recovery_20260915_cuda_illegal_152230_hl13/158000/params
+19814680967	/home/wuyan/lyj/YAM/training-runs/pi05_yam/lego_full_b32_xid13_recovery_20260915_cuda_illegal_152230_hl13/158000/train_state

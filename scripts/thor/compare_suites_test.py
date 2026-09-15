@@ -88,6 +88,11 @@ def test_cross_backend_reports_runtime_changes_but_rejects_changed_workload(monk
     result = compare_suites.compare("ref", "candidate", cross_backend=True)
     assert set(result["runtime_differences"]) == {"versions", "matmul_precision", "backend"}
     assert result["physical_dataset_units"]["max_abs"] == 0
+    reference["repeats"] = 2
+    candidate["repeats"] = 20
+    result = compare_suites.compare("ref", "candidate", cross_backend=True)
+    assert result["timing_repeats"] == {"reference": 2, "candidate": 20}
+    assert result["physical_dataset_units"]["max_abs"] == 0
     candidate["horizon"] = 10
     with pytest.raises(ValueError, match="Confounded comparison: horizon"):
         compare_suites.compare("ref", "candidate", cross_backend=True)

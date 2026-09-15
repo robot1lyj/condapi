@@ -1,0 +1,98 @@
+{
+  "run_id": "pi05-W-100000-20260915-r1",
+  "p50_ms": 104.33888750412734,
+  "p95_ms": 105.05514599062735,
+  "formal_calls": 180,
+  "warmup_calls": 45,
+  "action_shape": [
+    9,
+    20,
+    50,
+    14
+  ],
+  "all_finite": true,
+  "joint_dimension_indices": [0, 1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12],
+  "gripper_dimension_indices": [6, 13],
+  "joint_error_original_dataset_units": {
+    "mae": 0.001364712527266184,
+    "rmse": 0.0019712481866639665,
+    "p95_abs": 0.004302534461021424,
+    "max_abs": 0.010577201843261719,
+    "worst_index": [
+      4,
+      45,
+      8
+    ],
+    "per_dimension_max_abs": [
+      0.004491329193115234,
+      0.00607609748840332,
+      0.008508086204528809,
+      0.009172439575195312,
+      0.00510832667350769,
+      0.002913743257522583,
+      0.005544297397136688,
+      0.007169246673583984,
+      0.010577201843261719,
+      0.005523502826690674,
+      0.008068382740020752,
+      0.0036606565117836
+    ],
+    "per_dimension_mae": [
+      0.0009902241494920518,
+      0.001796493132909139,
+      0.001717625856399536,
+      0.001563033838238981,
+      0.0009925096834518222,
+      0.0007759081521039156,
+      0.001184801512087385,
+      0.0017231984933217365,
+      0.001822042465209961,
+      0.0014665150090068992,
+      0.00128640651754621,
+      0.0010577915174265703
+    ]
+  },
+  "gripper_error_original_dataset_units": {
+    "mae": 0.0009885415316320076,
+    "rmse": 0.0014501114588018405,
+    "p95_abs": 0.003209336847066876,
+    "max_abs": 0.005816221237182617,
+    "worst_index": [
+      2,
+      48,
+      0
+    ],
+    "per_dimension_max_abs": [
+      0.005816221237182617,
+      0.005668431520462036
+    ],
+    "per_dimension_mae": [
+      0.0009081343126793702,
+      0.001068948750584645
+    ]
+  },
+  "gripper_min": [
+    0.007839609868824482,
+    -0.0007569475565105677
+  ],
+  "gripper_max": [
+    1.0011394023895264,
+    1.0013329982757568
+  ],
+  "graph_vs_uncaptured_max_abs": 0.0,
+  "telemetry": {
+    "samples": 49,
+    "system_ram_peak_mib": 23019,
+    "gpu_temperature_max_c": 55.5,
+    "gpu_clock_min_mhz": 1573,
+    "gpu_clock_max_mhz": 1575,
+    "input_power_max_w": 144.616,
+    "scope": "whole_inference_process_including_loading_and_warmup; RAM includes OS/desktop",
+    "telemetry_sha256": "d01554b3b5f0b7b6305cc5d75b9cb287d8f6d23f27f38939f920641fae96fbe4"
+  },
+  "power_after": {
+    "exit_code": 0,
+    "power_after": "NV Power Mode: 120W\n1\n"
+  },
+  "task_success": "not evaluated; real training replay only"
+}
