@@ -24,7 +24,7 @@
   "recheck": "on_change",
   "valid_until": null,
   "depends_on": {
-    "docs/02_installation_and_environment.md": "3936d9898f853701942e1bbb619d33e945b2dad08b4a47eae358e0bc10b400d1",
+    "docs/02_installation_and_environment.md": "076b3362cad76985504ff6b07b43e37458478d6c88c4ec7c57e0bccb45ea128d",
     "environments/evo1-wheels.lock.json": "f034214d2b73280534659da5fafcd7300071a9459824129f7f10c2cd9e04f9bb"
   },
   "supersedes": [],

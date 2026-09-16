@@ -130,13 +130,13 @@ OpenPI官方将全量微调列为>70GB显存量级；本项目FSDP4已实现4×4
 
 Evo-1论文约0.77B参数、VLM初始化加两阶段动作学习，不依赖大规模机器人预训练；Pi本项目实测约3.35B。Evo值得测试成本，但参数比例不保证速度比例，论文结果不能当YAM乐高成绩。“微调Evo”须明确起点：只加载InternVL属于新机器人动作学习，模拟器动作权重不是已会YAM的基座。[Evo-1论文](https://arxiv.org/abs/2511.04555)、[原作者代码](https://github.com/MINT-SJTU/Evo-1)。
 
-Evo专用环境已通过CPU验收，并完成FlashAttention GPU kernel/dispatch smoke；完整GPU模型前向反向、YAM、训练和Thor仍未接通。复用LeRobot原生trainer/processors；当前官方说明stage1冻结VLM，stage2加载stage1后新建优化器/调度并应用阶段默认规则。默认448图像的计算量须实测，将224源视频放大不增加细节。接入范围与版本差异归 [10](10_vla_platform.md#2026-09-16--evo-1对照实验的范围)，FlashAttention环境证据见 [报告](reports/environments/evo1-flash-attn-20260916/README.md)，来源为 [LeRobot Evo-1](https://huggingface.co/docs/lerobot/evo1)。
+Evo专用环境已通过CPU验收，并完成FlashAttention GPU kernel/dispatch smoke及完整基座 VLM 权重加载；完整Evo policy前向反向、YAM、训练和Thor仍未接通。复用LeRobot原生trainer/processors；当前官方说明stage1冻结VLM，stage2加载stage1后新建优化器/调度并应用阶段默认规则。默认448图像的计算量须实测，将224源视频放大不增加细节。接入范围与版本差异归 [10](10_vla_platform.md#2026-09-16--evo-1对照实验的范围)，FlashAttention环境证据见 [报告](reports/environments/evo1-flash-attn-20260916/README.md)，模型权重交接证据见 [报告](reports/environments/evo1-model-transfer-20260916/README.md)，来源为 [LeRobot Evo-1](https://huggingface.co/docs/lerobot/evo1)。
 
 ### 采集期间的Evo-1四卡试验
 
 **2026-09-16最新用户意图与推荐，尚未执行。** 可以在现场采集期间用服务器4×4090准备并训练Evo，现场继续以Thor上的Pi100000评估控制和数据。新数据齐备后先给Pi现场适配安排四卡时段，Evo保留完整checkpoint接续；不要让两次训练各自占满同一组卡。当前问题同时有物体差异和控制时序混杂，Evo更小只提供成本试验机会，不保证抓16 mm积木更准。
 
-起点采用固定LeRobot原生Evo实现和预训练 `OpenGVLab/InternVL3-1B-hf`，新初始化机器人动作部分，走stage1→stage2；不继承Pi100000，也不把LIBERO 7D策略改成14D即视为YAM预训练。数据先用上述D1约2小时成功完整示范，约100条只是长度估计，另留独立episode/采集组验证。精选数据覆盖两臂、闭合/抬升/放置及场景变化，保持原fps与动作时间关系。D1模型用于先学YAM分拣动作，仍需新物体现场适配。
+起点采用固定LeRobot原生Evo实现和预训练 `OpenGVLab/InternVL3-1B-hf`（revision `014c0583a0d4bedf29fbe2dbff4f865eb998e171`，权重已交接到服务器），新初始化机器人动作部分，走stage1→stage2；不继承Pi100000，也不把LIBERO 7D策略改成14D即视为YAM预训练。数据先用上述D1约2小时成功完整示范，约100条只是长度估计，另留独立episode/采集组验证。精选数据覆盖两臂、闭合/抬升/放置及场景变化，保持原fps与动作时间关系。D1模型用于先学YAM分拣动作，仍需新物体现场适配。
 
 下面是**容量验收后的候选起步配置**，均为建议，不是4090实测速率或收敛保证。先用DDP，每卡一份模型；不直接照搬Pi的FSDP4。主训练参数FP32、计算使用BF16 AMP；stage1冻结VLM可按BF16加载，stage2解冻后显式以FP32加载VLM并启用原生梯度检查点。
 

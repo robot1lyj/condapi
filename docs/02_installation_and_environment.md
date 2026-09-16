@@ -77,6 +77,8 @@ export RAW_YAM_DATA="$DATA_ROOT/ABC-130k-two-tasks"
 
 2026-09-16后续已修复该环境缺项：安装 `flash_attn==2.8.3` 的精确 Python3.12/Linux x86_64 wheel（Torch2.10/cu12/CXX11 ABI），`pip check`通过；在GPU节点 RTX 4090 上实测 Transformers 与 Evo dispatch 均选择 `flash_attention_2`，前向/反向 finite。下载优先使用阿里云镜像探测并保留源码包；由于系统 CUDA13.2 与 Torch cu128不适合直接编译，实际安装使用上游 issue记录的社区预编译 wheel，并通过镜像传输后做SHA256校验。完整来源、哈希、GPU microbenchmark 和未覆盖的完整模型验收见 [FlashAttention环境报告](reports/environments/evo1-flash-attn-20260916/README.md)。
 
+2026-09-16随后按当前 Evo-1 配置通过 ModelScope 镜像下载 `OpenGVLab/InternVL3-1B-hf`，固定 revision 为 `014c0583a0d4bedf29fbe2dbff4f865eb998e171`；本地 16 个文件共 `1,892,380,781` bytes，主权重 `model.safetensors` SHA256 为 `fdf8d51c7db5e31938300642b1bebce7f28592a2adefafc931cb8c21a8395517`。权重已传到服务器 `/home/wuyan/lyj/evo1-install-2774d9b/models/OpenGVLab--InternVL3-1B-hf-014c0583`，服务器端 16 个文件逐项与镜像 API SHA256 一致；离线 config/tokenizer/safetensors 读取及 RTX 4090 上完整 VLM 权重加载通过。该目录是基座 VLM，不是已训练的 YAM policy；证据和未覆盖的完整 Evo/YAM 验收见 [模型交接报告](reports/environments/evo1-model-transfer-20260916/README.md)。
+
 Evo-1 不安装根目录 OpenPI 依赖，不克隆或更新正在训练的 `condapi-yam`。本地 prefix 为 `/home/wuyan-lyj/.conda/envs/vla-evo1-dev`，服务器 prefix 为 `/home/wuyan/.conda/envs/vla-evo1-train`。环境规格在 `environments/evo1.yml`，核心 Python 依赖和 LeRobot 固定提交在 `environments/evo1-requirements.txt`；本地、服务器 profile 分别为 `configs/environments/evo1-workstation.toml`、`configs/environments/evo1-server.toml`。
 
 固定 LeRobot 源码 `2774d9bddcbbda50e697e162e89e7eaada8d7105`（包版本0.6.2），仅安装 evo1/training extras。Python3.12、FFmpeg7、Torch2.10.0、TorchVision0.25.0、TorchCodec0.10.0 为本次环境组合，不要求其他模型跟随。源码检出 `/home/wuyan-lyj/lerobot-evo1-2774d9b`；安装包在本地 `/home/wuyan-lyj/evo1-install-2774d9b`、服务器 `/home/wuyan/lyj/evo1-install-2774d9b`，均不放入项目 Git。

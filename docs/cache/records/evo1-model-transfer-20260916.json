@@ -1,0 +1,52 @@
+{
+  "id": "evo1-model-transfer-20260916",
+  "kind": "observation",
+  "claim": "服务器 Evo-1 独立环境已获得固定 revision 的 OpenGVLab/InternVL3-1B-hf 基座 VLM；本地下载、服务器传输、逐文件 SHA256、离线资产读取和 RTX 4090 完整 VLM 权重加载均通过。",
+  "owner": "docs/02_installation_and_environment.md",
+  "scope": {
+    "project": "condapi",
+    "platform": "server-gpu",
+    "model": "evo1",
+    "environment": "/home/wuyan/.conda/envs/vla-evo1-train",
+    "model_id": "OpenGVLab/InternVL3-1B-hf",
+    "revision": "014c0583a0d4bedf29fbe2dbff4f865eb998e171",
+    "lerobot_revision": "2774d9bddcbbda50e697e162e89e7eaada8d7105"
+  },
+  "status": "verified",
+  "observed_at": "2026-09-16T17:52:17+08:00",
+  "recorded_at": "2026-09-16T17:52:17+08:00",
+  "evidence": [
+    {
+      "path": "docs/reports/environments/evo1-model-transfer-20260916/model-transfer.json",
+      "sha256": "1d89d689bda2d3eeb8c6782f7c130712a266a0a69d75ce24e839701321eadae8"
+    }
+  ],
+  "recheck": "on_change",
+  "valid_until": null,
+  "depends_on": {
+    "docs/02_installation_and_environment.md": "076b3362cad76985504ff6b07b43e37458478d6c88c4ec7c57e0bccb45ea128d",
+    "environments/evo1-wheels.lock.json": "f034214d2b73280534659da5fafcd7300071a9459824129f7f10c2cd9e04f9bb"
+  },
+  "supersedes": [],
+  "retrieval": {
+    "terms": [
+      "Evo-1",
+      "InternVL3-1B",
+      "OpenGVLab/InternVL3-1B-hf",
+      "模型权重",
+      "ModelScope",
+      "服务器交接",
+      "完整 VLM 加载"
+    ],
+    "related": [
+      {
+        "relation": "check",
+        "source": "docs/reports/environments/evo1-model-transfer-20260916/README.md"
+      },
+      {
+        "relation": "prerequisite",
+        "source": "docs/10_vla_platform.md#四卡训练落地前的固定版本检查"
+      }
+    ]
+  }
+}

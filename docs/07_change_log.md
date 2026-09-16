@@ -1,5 +1,11 @@
 # 07 · 变更历史
 
+## 2026-09-16 · Evo-1基座VLM权重本地下载与服务器交接
+
+- 按当前固定 LeRobot Evo-1 配置从 ModelScope 镜像下载 `OpenGVLab/InternVL3-1B-hf`，revision 为 `014c0583a0d4bedf29fbe2dbff4f865eb998e171`；16 个文件共 `1,892,380,781` bytes，主权重 SHA256 为 `fdf8d51c7db5e31938300642b1bebce7f28592a2adefafc931cb8c21a8395517`。
+- 本地下载并校验后，使用可续传分块 rsync 传到服务器并拼接；服务器正式目录的 16 个文件逐项与 ModelScope API SHA256 一致。离线 config/tokenizer/safetensors 读取及 RTX 4090 上 BF16 完整 VLM 权重加载通过。
+- 本次只完成基座 VLM 的完整性和加载验收，未运行完整 Evo policy、YAM batch、训练或 Thor 推理，也未修改 3588。证据归 [模型交接报告](reports/environments/evo1-model-transfer-20260916/README.md)，环境事实归 [02](02_installation_and_environment.md)，接入边界归 [10](10_vla_platform.md)。
+
 ## 2026-09-16 · Evo-1 FlashAttention环境修复与GPU实测
 
 - 服务器Evo独立环境原先缺少`flash_attn`，固定LeRobot实现会回退`eager`；优先检查阿里云PyPI镜像并下载源码包留证。由于系统CUDA13.2与Torch2.10/cu128不适合直接编译，采用与Python3.12、Torch2.10、CXX11 ABI匹配的社区预编译FlashAttention2.8.3 wheel，经镜像传输后SHA256校验并离线安装。

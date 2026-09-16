@@ -77,7 +77,7 @@ python3 scripts/vla.py bundle check /path/to/package/manifest.json
 
 用户提出Pi0.5成本高、100000抓取效果差，随后提出在采集现场数据期间训练Evo-1；建议提前做独立小预算试验。数据划分、两阶段预算、现场衔接和成功率准则归 [四卡试验](03_training_and_evaluation.md#采集期间的evo-1四卡试验)。模型仍为planned，未完成YAM真实训练/Thor推理，不因研究推荐开放capability。
 
-本轮核对 [官方LeRobot文档](https://huggingface.co/docs/lerobot/evo1)：原生实现使用 `OpenGVLab/InternVL3-1B-hf`，阶段切换默认重应用冻结规则；stage2加载stage1策略后新建优化器/调度，不是训练状态原样resume。其公开LIBERO参考使用2×H100，不能推导本项目4×4090速度。在线文档可能晚于已安装版本，运行前核对支持字段，不直接升级既有环境。
+本轮核对 [官方LeRobot文档](https://huggingface.co/docs/lerobot/evo1)：原生实现使用 `OpenGVLab/InternVL3-1B-hf`，阶段切换默认重应用冻结规则；stage2加载stage1策略后新建优化器/调度，不是训练状态原样resume。该 VLM 已按参考配方固定到 revision `014c0583a0d4bedf29fbe2dbff4f865eb998e171`，并完成本地下载、服务器交接和 RTX 4090 完整 VLM 权重加载；交接证据见 [模型报告](reports/environments/evo1-model-transfer-20260916/README.md)。其公开LIBERO参考使用2×H100，不能推导本项目4×4090速度。在线文档可能晚于已安装版本，运行前核对支持字段，不直接升级既有环境。
 
 优先VLM起点的原生stage1→stage2并明确动作头是否新初始化；模拟器checkpoint先验身份/processor/动作语义。三图、真实14D、双夹爪连续语义、24D padding和Evo独立统计遵守下方规则，Pi32D/delta norm不迁入。先在获准服务器验短GPU容量/吞吐和保存重载，再在Thor原生路径计时；Pi TensorRT经验不能当Evo已可部署。
 
@@ -97,7 +97,7 @@ python3 scripts/vla.py bundle check /path/to/package/manifest.json
 
 ### 四卡训练落地前的固定版本检查
 
-以下为2026-09-16核查，固定源码仍为`2774d9bddcbbda50e697e162e89e7eaada8d7105`；本地源码/安装包与服务器配置、trainer两个文件哈希一致，服务器观察与范围见 [只读快照](reports/training/redesign-20260916/evo1-readiness-20260916.json)。FlashAttention依赖已完成GPU kernel/dispatch smoke，但完整Evo模型、YAM batch和训练仍未验收；环境安装证据归 [02](02_installation_and_environment.md#evo-1--lerobot-独立环境)，详细实测归 [FlashAttention报告](reports/environments/evo1-flash-attn-20260916/README.md)。
+以下为2026-09-16核查，固定源码仍为`2774d9bddcbbda50e697e162e89e7eaada8d7105`；本地源码/安装包与服务器配置、trainer两个文件哈希一致，服务器观察与范围见 [只读快照](reports/training/redesign-20260916/evo1-readiness-20260916.json)。FlashAttention依赖和完整 VLM 权重加载已完成 GPU smoke，但完整Evo policy、YAM batch和训练仍未验收；环境安装证据归 [02](02_installation_and_environment.md#evo-1--lerobot-独立环境)，详细实测归 [FlashAttention报告](reports/environments/evo1-flash-attn-20260916/README.md) 和 [模型交接报告](reports/environments/evo1-model-transfer-20260916/README.md)。
 
 - **注意力实现：** `internvl3_embedder.py`仅在`use_flash_attn`且`is_flash_attn_2_available()`时选择`flash_attention_2`，否则为`eager`，不是自动选择SDPA。服务器环境已安装并在GPU节点确认检测为True、实际选择`flash_attention_2`；BF16 `(1,2048,16,128)` kernel前向P50约0.263ms，强制math-only SDPA约3.733ms，约14.18倍差异。这是kernel微基准，不是完整Evo训练吞吐。
 - **图像/token：** 基础VLM的448图像与`image_seq_length`绑定，单改`image_resolution=224`会被原生校验拒绝。保持三图448，明确top/left/right输入映射；三图token和指令须完整容纳，不能随意把`max_text_length=1024`大幅缩短。ABC224视频放大到448不恢复细节，现场640×480的等比补边/缩放几何须与训练样本对齐，不能假设两种源图直接resize就等价。
@@ -116,7 +116,7 @@ python3 scripts/vla.py bundle check /path/to/package/manifest.json
 4. `adapters/lerobot/train.py` 检查 policy.type，然后直接调用 `lerobot.scripts.lerobot_train`。只覆盖输出目录、禁用 W&B、禁用最终/中途 Hub 上传并限定本机执行，不修改 dtype、归一化或 loss。当前仅支持新运行；resume、分布式启动器和远端提交暂走独立原生工作流，不伪装为已接入功能。
 5. YAM 样例与保存重载验证后再开放该模型的 `train`；`infer` 需另行接通共享原生 policy + processor 路径，不能因 train launcher 存在就标为可推理。原生权重和 processors 是部署交接物，seal 仅补充哈希，不创造另一套权重格式。
 
-现有 `evo1-yam.toml` 是待替换路径的实验骨架，仍会明确拒绝执行；不是可直接训练的 YAM 配置。Evo环境安装与模型capability分开：安装位置、依赖和CPU检查见 [02](02_installation_and_environment.md#evo-1--lerobot-独立环境)，没有下载权重、发起训练或改变 Thor 服务。
+现有 `evo1-yam.toml` 是待替换路径的实验骨架，仍会明确拒绝执行；不是可直接训练的 YAM 配置。Evo环境安装与模型capability分开：安装位置、依赖和CPU检查见 [02](02_installation_and_environment.md#evo-1--lerobot-独立环境)；基座 VLM 已完成权重交接，但尚未发起训练，也未改变 Thor 服务或 3588 控制侧。
 
 训练入口 API 依据固定源码：[原生训练入口](https://github.com/huggingface/lerobot/blob/2774d9bddcbbda50e697e162e89e7eaada8d7105/src/lerobot/scripts/lerobot_train.py)、[训练配置](https://github.com/huggingface/lerobot/blob/2774d9bddcbbda50e697e162e89e7eaada8d7105/src/lerobot/configs/train.py)。
 
