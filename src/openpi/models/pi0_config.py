@@ -32,7 +32,14 @@ class Pi0Config(_model.BaseModelConfig):
     # This config option is not used directly by the model, but it is read by the ModelTransformFactory.
     discrete_state_input: bool = None  # type: ignore
 
+    # Inclusive delay bound; zero preserves the original training objective.
+    rtc_training_max_delay: int = 0
+
     def __post_init__(self):
+        if type(self.rtc_training_max_delay) is not int or not 0 <= self.rtc_training_max_delay < self.action_horizon:
+            raise ValueError("rtc_training_max_delay must be in [0, action_horizon)")
+        if self.rtc_training_max_delay and not self.pi05:
+            raise ValueError("Training-time RTC is supported only for Pi0.5")
         if self.max_token_len is None:
             object.__setattr__(self, "max_token_len", 200 if self.pi05 else 48)
         if self.discrete_state_input is None:

@@ -13,6 +13,7 @@ import time
 
 import numpy as np
 import pyarrow.parquet as pq
+from select_lego_rtc_episodes import read_episode_ids
 import tyro
 
 from openpi import transforms
@@ -80,7 +81,24 @@ def verify_loader(root: pathlib.Path, episodes: list[dict], files: list[pathlib.
     return checked
 
 
-def main(dataset: pathlib.Path, output: pathlib.Path, horizon: int = 50, block_size: int = 1024):
+def select_episode_sources(episodes, files, ids):
+    """Preserve source episode IDs and the converter's file mapping; never renumber."""
+    if ids is None:
+        return episodes, files
+    wanted = set(ids)
+    if not wanted <= {ep["episode_index"] for ep in episodes}:
+        raise ValueError("Selected episode missing from train conversion manifest")
+    pairs = [(ep, path) for ep, path in zip(episodes, files, strict=True) if ep["episode_index"] in wanted]
+    return [ep for ep, _ in pairs], [path for _, path in pairs]
+
+
+def main(
+    dataset: pathlib.Path,
+    output: pathlib.Path,
+    horizon: int = 50,
+    block_size: int = 1024,
+    train_episodes_file: pathlib.Path | None = None,
+):
     if horizon != 50 or block_size < 1:
         raise ValueError("This version is gated for Pi0.5 H=50 and positive block size")
     dataset = dataset.resolve()
@@ -107,6 +125,10 @@ def main(dataset: pathlib.Path, output: pathlib.Path, horizon: int = 50, block_s
         raise ValueError("Episode order mismatch")
     if sum(ep["length"] for ep in episodes) != info["total_frames"]:
         raise ValueError("Frame count mismatch")
+    selection_bytes = train_episodes_file.read_bytes() if train_episodes_file else None
+    selected_ids = read_episode_ids(train_episodes_file) if train_episodes_file else None
+    episodes, files = select_episode_sources(episodes, files, selected_ids)
+    selected_frames = sum(ep["length"] for ep in episodes)
     output.mkdir(parents=True, exist_ok=False)
     initial = {str(p.relative_to(dataset)): (p.stat().st_size, p.stat().st_mtime_ns) for p in files}
     started = time.monotonic()
@@ -130,7 +152,7 @@ def main(dataset: pathlib.Path, output: pathlib.Path, horizon: int = 50, block_s
                 "episodes": i + 1,
                 "total_episodes": len(episodes),
                 "frames": counts,
-                "total_frames": info["total_frames"],
+                "total_frames": selected_frames,
                 "seconds": time.monotonic() - started,
             }
             print(json.dumps(progress), flush=True)
@@ -138,6 +160,8 @@ def main(dataset: pathlib.Path, output: pathlib.Path, horizon: int = 50, block_s
     current = {str(p.relative_to(dataset)): (p.stat().st_size, p.stat().st_mtime_ns) for p in files}
     if current != initial or manifest_path.read_bytes() != manifest_bytes or info_path.read_bytes() != info_bytes:
         raise ValueError("Source changed during computation")
+    if train_episodes_file and train_episodes_file.read_bytes() != selection_bytes:
+        raise ValueError("Episode selection changed during computation")
     result = {key: value.get_statistics() for key, value in stats.items()}
     for value in result.values():
         if any(x.shape != (14,) or not np.isfinite(x).all() for x in (value.mean, value.std, value.q01, value.q99)):
@@ -149,6 +173,8 @@ def main(dataset: pathlib.Path, output: pathlib.Path, horizon: int = 50, block_s
         "split": "train",
         "frames": counts,
         "episodes": len(episodes),
+        "selected_episode_ids": selected_ids,
+        "selection_sha256": hashlib.sha256(selection_bytes).hexdigest() if selection_bytes is not None else None,
         "action_vectors": counts * horizon,
         "horizon": horizon,
         "block_size": block_size,

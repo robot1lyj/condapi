@@ -76,7 +76,7 @@ train为4458集、10,374,181帧、30fps、1个task；val为69集、165,142帧。
 
 验证10条按独立布局/采集段隔离，不能随机拆同条视频的帧；现场候选另用固定20次机器人试验，分别报告抓稳并抬升、正确分色放置、完整任务成功。源模型与适配模型使用同一控制版本。50条有清晰收益时，再针对剩余失败扩到约100条训练数据；无收益则暂停加量，回查控制、标签、图像和过拟合。不是每次失败都要求成倍追加同一种数据。针对策略会访问的偏差状态收集专家纠正，是受DAgger思想启发的采集策略，不宣称已经实现完整DAgger训练。[DAgger](https://proceedings.mlr.press/v15/ross11a.html)和[数据覆盖研究](https://www.roboticsproceedings.org/rss20/p013.html)支持考虑访问状态/变化因素；不提供YAM的固定样本保证。OpenPI自定义DROID教程使用30条示范说明流程，同样不是30条一定足够的任务结果：[官方教程](https://github.com/Physical-Intelligence/openpi/blob/main/examples/droid/README_train.md#fine-tuning-on-custom-droid-datasets)。
 
-**具体训练定义：100000权重初始化的新现场SFT run。** 学习内容继承，新增步数从0计量并记录parent_checkpoint=100000；不使用原run的`--resume`直接换数据。实现入口沿用OpenPI训练器：`CheckpointWeightLoader(.../100000/params)`、`resume=False`、独立exp_name/输出目录，创建新优化器/调度；原始JAX权重作为起点，不能用Thor TensorRT引擎做训练。源码依据 `src/openpi/training/weight_loaders.py` 与 `scripts/train.py::init_train_state`。当前`train_lego_full.py`硬绑定ABC全量和base初始化，只支持其原实验的续训，尚无已验收的现场适配入口，不能给它一个新run_name就冒充上述方案。
+**具体训练定义：100000权重初始化的新现场SFT run。** 学习内容继承，新增步数从0计量并记录parent_checkpoint=100000；不使用原run的`--resume`直接换数据。实现入口沿用OpenPI训练器：`CheckpointWeightLoader(.../100000/params)`、`resume=False`、独立exp_name/输出目录，创建新优化器/调度；原始JAX权重作为起点，不能用Thor TensorRT引擎做训练。源码依据 `src/openpi/training/weight_loaders.py` 与 `scripts/train.py::init_train_state`。2026-09-16后续已为`train_lego_full.py`加入显式parent初始化、完整episode子集和RTC目标，见下方training-time RTC章节；当前入口仍固定原ABC train repo，尚未实现现场/ABC双数据源混合，不能把新增参数视为现场混合采样已完成。
 
 | 项目 | 首轮候选设置，均未开训 |
 |---|---|
@@ -451,3 +451,63 @@ batch 4 × 30000 steps 约采样 120000 个训练窗口；manifest 声明数据�
 ```
 
 该入口只做数据/动作合同、首步误差和 chunk 连续性的离线诊断；DAgger 只有在纠正数据、采集协议和安全 rollout 均单独留痕后才进入第二阶段。
+
+
+## 2026-09-16 · Pi0.5 training-time RTC：基础权重与随机10小时
+
+**最新用户决定。** 不使用100000初始化；从官方Pi0.5基础权重开始，随机抽取原乐高分拣train的10小时完整示范，联合进行RTC目标训练与全量微调。该决定替代本节先前的100000→2h短适配建议；100000仅保留历史业务基线。这里“重新训练”仍继承Pi0.5预训练模型，不是随机初始化全部参数。只实现/准备代码，本次未启动训练或同步服务器/Thor。
+
+**实现范围。** 原OpenPI/JAX模型与`train_lego_full.py`加入前缀条件训练，不复制训练器。默认`rtc_training_max_delay=0`保留普通目标；`rtc_mode=off`及旧推理路径不变，本轮没有实现trained RTC前缀采样器或TensorRT导出。训练结果不能直接交给旧inference-time guidance并当作同一算法验收。
+
+**固定参考。** [PI论文2512.05964v1](https://arxiv.org/html/2512.05964v1)；[Xense JAX实现a4e7a304](https://github.com/XenseRobotics-AI/xense-openpi/blob/a4e7a304123957e5fa2fd239a181fe88cdf1089a/src/openpi/models/pi0.py)；[LeRobot Pi05实现2774d9b](https://github.com/huggingface/lerobot/blob/2774d9bddcbbda50e697e162e89e7eaada8d7105/src/lerobot/policies/pi05/modeling_pi05.py)。采用JAX前缀条件思路，但保留本项目Beta(1.5,1)噪声时间分布和原32D动作损失均值。Xense参考的delay为右开区间、loss按动作维求和后仍由trainer平均时间；本实现明确使用包含上界的delay，并按每个样本有效后缀长度归一化，避免直接移植导致loss尺度变化。
+
+**模型实现。** `Pi0Config.rtc_training_max_delay`仅允许Pi05、0≤dmax<H。每个样本均匀抽d∈{0,…,dmax}，同一示范动作块前d步保持干净，OpenPI约定对应flow time=0，其余位置正常加噪。时间嵌入和Gemma adaRMS支持[B,H,D]条件，不新增参数；前缀预测不计loss，输出[B,H]已按H/(H-d)缩放，使现有trainer的mean等于逐样本后缀均值的batch mean。32D含padding的原损失口径保持不变，未同时切到14D损失。原LeRobot episode末端动作重复补齐行为也未改动，本轮未引入额外action_is_pad传播；不得把该实现表述为已屏蔽所有数据尾部补齐标签。未来DAgger数据必须按连续专家片段分episode，不跨人工/模型/hold边界构造H50。
+
+**数据与norm。** 从已修复、转换的原ABC train中固定seed42，随机打乱完整episode，累计达到10小时；最后一条保留完整，因此可能略超10h。保留原30fps、三视角、完整接近/下降/闭合/抬升/放置，不抽散帧、不取前N条、不复制原数据。继续使用独立的原val，不参与抽样和统计。随机选择不证明每条成功或任务均衡：复核抽样任务与质量分布，若排除确实异常的episode，更新清单后重算统计。用户决定是随机10h，不把人工精选2h当作当前方案。
+
+`select_lego_rtc_episodes.py`纯标准库读取已发布v3转换manifest（也兼容v2 episodes.jsonl），输出原train episode ID列表、源元数据哈希、实际帧数与episode记录；不访问Hub、视频或设备，不修改源数据，拒绝覆盖现有输出目录。ID是转换后train repo的episode_index，不是原始ABC UUID。可选`--candidates`仅在明确需要限制来源时使用。
+
+`compute_yam_norm_stats.py --train-episodes-file`按同一清单仅统计所选episode，保持H50、关节delta/夹爪absolute及episode尾帧重复规则。保留完整源manifest核验、LeRobot真实样本等价验证，写入selected_episode_ids、选择文件哈希和所选Parquet哈希；不把全量或val统计混入子集。输出为新目录。此工具是数据统计，不是训练，但10小时计算仍应在服务器合适资源上运行，不在本地工作站进行大规模任务。
+
+**准备命令（服务器，不启动训练）。** 从Gitea固定代码快照运行，输出路径为新实验示例；已有同名目录时另选明确的新目录，不删除旧产物：
+
+```bash
+python3 scripts/select_lego_rtc_episodes.py \
+  --repo /home/wuyan/lyj/YAM/YAM_data/processed/lego_lerobot_v1_20260907/train \
+  --hours 10 --seed 42 \
+  --output /home/wuyan/lyj/YAM/training-assets/lego_rtc_10h_20260916
+
+/home/wuyan/.conda/envs/condapi-yam/bin/python scripts/compute_yam_norm_stats.py \
+  --dataset /home/wuyan/lyj/YAM/YAM_data/processed/lego_lerobot_v1_20260907/train \
+  --train-episodes-file /home/wuyan/lyj/YAM/training-assets/lego_rtc_10h_20260916/episodes.json \
+  --output /home/wuyan/lyj/YAM/training-assets/lego_rtc_10h_20260916/norm/yam
+```
+
+查看`selection.json`与norm的`provenance.json`，核对实际帧数、被选ID、等价验证结果以及统计有限性。训练入口`--assets-dir`指向**norm根目录**，不是其yam子目录；显式子集norm必须附带provenance并与训练episode列表一致。不继承100000的norm。
+
+**启动配置。** 在tmux内，由已获准、有效的四卡GPU allocation执行。`JOB_ID`必须替换为当时有效的作业号，本次未查询/派发作业：
+
+```bash
+export LEGO_RUN_NAME=lego_pi05_rtc_base_10h_20260916
+export LEGO_BATCH_SIZE=32 LEGO_NUM_WORKERS=2
+export LEGO_PEAK_LR=1e-5 LEGO_DECAY_LR=1e-6
+export LEGO_SAVE_INTERVAL=1000 LEGO_KEEP_PERIOD=5000
+bash scripts/launch_lego_full.sh JOB_ID \
+  --init-params /home/wuyan/.cache/openpi/openpi-assets/checkpoints/pi05_base/params \
+  --assets-dir /home/wuyan/lyj/YAM/training-assets/lego_rtc_10h_20260916/norm \
+  --train-episodes-file /home/wuyan/lyj/YAM/training-assets/lego_rtc_10h_20260916/episodes.json \
+  --rtc-training-max-delay 10 \
+  --warmup-steps 1000 --decay-steps 30000 --steps 10000
+```
+
+初次不加`--resume`。这从官方基础权重新建优化器/run，先停在本run的10000次更新；不是从100000恢复。global32、FSDP4、全量微调、EMA off、Adam eps1e-6沿用现有路线；LR1e-5和1000步warmup是当前保守候选，不代表新目标已通过GPU稳定性验收。入口对于显式parent的缺省LR仍为适配用3e-6，因此本方案必须显式设置上述环境变量，防止继承旧值。
+
+约10h×30fps=1080000帧，1遍起点样本等效量约33750步；10k约0.30遍、30k约0.89遍。实际值按selection帧数计算，不乘H50，不等于独立覆盖率。先看1k/2k/5k/10k诊断，必要时在完全相同配置下增加`--resume`并将`--steps`提高到20000/30000；保持`--decay-steps 30000`。保存每1k、长期保留每5k；若要永久保留2k则及时单独保留或将keep_period设1000并评估磁盘容量。不能预设10k已经充分拟合，也不因数据从96h减少到10h就假定每步更快。
+
+**恢复与追溯。** `training_contract.json`固定模型、parent路径、repo、episode列表、norm SHA256、batch、优化器/学习率和seed，变化时拒绝`--resume`，要求新run；参数加载仍由原trainer做树/形状/dtype检查。续训保留相同parent、assets、subset和delay参数。合同不提供全权重内容指纹，源数据完整性由既有审计及norm provenance提供。不使用没有合同的旧RTC实验恢复；旧非RTC legacy run兼容原恢复方式。若未来重新做100000适配，`--init-params .../100000/params`不传assets-dir时仍可读取其配套assets，但这不是当前计划。
+
+**后续评价。** d∈{0,…,10}覆盖0到约333ms，为初始工程候选，之后以真实端到端接替延迟复核；不把人为旧预测滞后当纯推理耗时。RTC解决前缀条件/动作衔接，不能保证新16mm物体抓取能力。现场专家/DAgger数据可以成为后续独立适配阶段，当前入口尚未接双数据源混合。DAgger只能用有效连续专家纠正，不跨模型/人工/hold边界拼H50。普通SFT对照应使用相同基础权重、10h清单、norm和预算，仅将RTC delay改0并另起run。
+
+**验证边界。** 本地只做轻量张量/配置测试、完整模型抽象shape追踪与静态检查；没有分配全量模型训练权重或执行优化器更新。真实基础权重完整加载/有限性、数据读取、四卡前后向、保存重载、显存/吞吐留给获准服务器验收；trained RTC推理/导出另行实现后才能评价任务成功率。不能直接比较不同loss mask下的训练loss高低。
+
+本轮本地结果：RTC/入口/子集选择/子集norm与既有YAM审计共41项轻量测试通过；完整Pi05仅作抽象shape追踪，参数名称、形状、dtype一致。新增/修改入口、norm、选择工具、helper、测试与Gemma通过Ruff；Pi0/Pi0Config原有4/1项lint与HEAD对照无新增。全仓Ruff/format存在历史差异，未批量修复无关代码；本次文件格式与`git diff --check`通过。遵守本地禁止训练边界，未执行包含训练/设备操作的全仓pytest。

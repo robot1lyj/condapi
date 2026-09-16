@@ -34,3 +34,15 @@ def test_reject_nonfinite():
     actions[0, 6] = np.nan
     with pytest.raises(ValueError, match="nonfinite"):
         action_chunks(np.zeros((1, 14)), actions, np.array([0]), 50)
+
+
+def test_subset_norm_preserves_source_ids_and_file_mapping():
+    from compute_yam_norm_stats import select_episode_sources  # noqa: PLC0415
+
+    episodes = [{"episode_index": i, "length": 100 + i} for i in range(4)]
+    selected, files = select_episode_sources(episodes, ["a", "b", "c", "d"], [1, 3])
+    assert [ep["episode_index"] for ep in selected] == [1, 3]
+    assert files == ["b", "d"]
+    assert sum(ep["length"] for ep in selected) == 204
+    with pytest.raises(ValueError, match="missing"):
+        select_episode_sources(episodes, ["a", "b", "c", "d"], [4])
