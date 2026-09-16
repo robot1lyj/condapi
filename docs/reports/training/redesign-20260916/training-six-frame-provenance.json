@@ -1,0 +1,205 @@
+{
+  "dataset_root": "/home/wuyan/lyj/YAM/YAM_data/processed/lego_lerobot_v1_20260907/train",
+  "revision": "68651e4929d9fb00f798937b2d62617cab5c771d",
+  "selection": "six evenly spaced converted episode indices, frame 100; not representative statistical audit",
+  "frames": [
+    {
+      "converted_episode_index": 0,
+      "episode_length": 3428,
+      "episode_frame_requested": 100,
+      "video_relative_path": "videos/observation.images.top_rgb/chunk-000/file-000.mp4",
+      "episode_from_timestamp": 0.0,
+      "requested_video_timestamp": 3.3333333333333335,
+      "decoded_video_timestamp": 3.3333333333333335,
+      "image_sha256": "5602ad0e4e0fd755642967bdfbd3778cb410a837732ecf3fd1a4cfaa142c54c0",
+      "file": "episode-0000-top_rgb.png"
+    },
+    {
+      "converted_episode_index": 0,
+      "episode_length": 3428,
+      "episode_frame_requested": 100,
+      "video_relative_path": "videos/observation.images.left_rgb/chunk-000/file-000.mp4",
+      "episode_from_timestamp": 0.0,
+      "requested_video_timestamp": 3.3333333333333335,
+      "decoded_video_timestamp": 3.3333333333333335,
+      "image_sha256": "24877f509958f3f9d10450ef6cf29d63e963c37be6c2f8aca35aa8502ce880d1",
+      "file": "episode-0000-left_rgb.png"
+    },
+    {
+      "converted_episode_index": 0,
+      "episode_length": 3428,
+      "episode_frame_requested": 100,
+      "video_relative_path": "videos/observation.images.right_rgb/chunk-000/file-000.mp4",
+      "episode_from_timestamp": 0.0,
+      "requested_video_timestamp": 3.3333333333333335,
+      "decoded_video_timestamp": 3.3333333333333335,
+      "image_sha256": "05c2d7cfd6e5b2b2dccc6b6e12737c1ebe56be203b68e9a1cf5605b5060c6b17",
+      "file": "episode-0000-right_rgb.png"
+    },
+    {
+      "converted_episode_index": 891,
+      "episode_length": 2693,
+      "episode_frame_requested": 100,
+      "video_relative_path": "videos/observation.images.top_rgb/chunk-000/file-891.mp4",
+      "episode_from_timestamp": 0.0,
+      "requested_video_timestamp": 3.3333333333333335,
+      "decoded_video_timestamp": 3.3333333333333335,
+      "image_sha256": "359d1f508256652bcaeb1bbfcfb32f3b59c2a1c0e524d9455b724733b36b615e",
+      "file": "episode-0891-top_rgb.png"
+    },
+    {
+      "converted_episode_index": 891,
+      "episode_length": 2693,
+      "episode_frame_requested": 100,
+      "video_relative_path": "videos/observation.images.left_rgb/chunk-000/file-891.mp4",
+      "episode_from_timestamp": 0.0,
+      "requested_video_timestamp": 3.3333333333333335,
+      "decoded_video_timestamp": 3.3333333333333335,
+      "image_sha256": "ce94a9fa788147b4fe65708c257ff78c8e31605b8abdd0e86999098e1e506683",
+      "file": "episode-0891-left_rgb.png"
+    },
+    {
+      "converted_episode_index": 891,
+      "episode_length": 2693,
+      "episode_frame_requested": 100,
+      "video_relative_path": "videos/observation.images.right_rgb/chunk-000/file-891.mp4",
+      "episode_from_timestamp": 0.0,
+      "requested_video_timestamp": 3.3333333333333335,
+      "decoded_video_timestamp": 3.3333333333333335,
+      "image_sha256": "dd41ba0ee38fd00ac9089d9a570c745014084783f40685d693503a48c4ddf20b",
+      "file": "episode-0891-right_rgb.png"
+    },
+    {
+      "converted_episode_index": 1782,
+      "episode_length": 2194,
+      "episode_frame_requested": 100,
+      "video_relative_path": "videos/observation.images.top_rgb/chunk-001/file-782.mp4",
+      "episode_from_timestamp": 0.0,
+      "requested_video_timestamp": 3.3333333333333335,
+      "decoded_video_timestamp": 3.3333333333333335,
+      "image_sha256": "a4bc21c36efdc65260ca3896f1060cf13b7d20a1e8d402e7f1f90db1b32372b9",
+      "file": "episode-1782-top_rgb.png"
+    },
+    {
+      "converted_episode_index": 1782,
+      "episode_length": 2194,
+      "episode_frame_requested": 100,
+      "video_relative_path": "videos/observation.images.left_rgb/chunk-001/file-782.mp4",
+      "episode_from_timestamp": 0.0,
+      "requested_video_timestamp": 3.3333333333333335,
+      "decoded_video_timestamp": 3.3333333333333335,
+      "image_sha256": "6c495259010c2992f6ffa1918387196418dcf77d4e6172504df31baf534aa260",
+      "file": "episode-1782-left_rgb.png"
+    },
+    {
+      "converted_episode_index": 1782,
+      "episode_length": 2194,
+      "episode_frame_requested": 100,
+      "video_relative_path": "videos/observation.images.right_rgb/chunk-001/file-782.mp4",
+      "episode_from_timestamp": 0.0,
+      "requested_video_timestamp": 3.3333333333333335,
+      "decoded_video_timestamp": 3.3333333333333335,
+      "image_sha256": "ac6560d7a0fdb12340aa6e7f3f4a7062e7e2067f15d5bdeff1393ee86c3791a3",
+      "file": "episode-1782-right_rgb.png"
+    },
+    {
+      "converted_episode_index": 2673,
+      "episode_length": 2046,
+      "episode_frame_requested": 100,
+      "video_relative_path": "videos/observation.images.top_rgb/chunk-002/file-673.mp4",
+      "episode_from_timestamp": 0.0,
+      "requested_video_timestamp": 3.3333333333333335,
+      "decoded_video_timestamp": 3.3333333333333335,
+      "image_sha256": "dac2411b46b960ad7391622d5ffac04109088a65445fb072a5d802c8e702f6a5",
+      "file": "episode-2673-top_rgb.png"
+    },
+    {
+      "converted_episode_index": 2673,
+      "episode_length": 2046,
+      "episode_frame_requested": 100,
+      "video_relative_path": "videos/observation.images.left_rgb/chunk-002/file-673.mp4",
+      "episode_from_timestamp": 0.0,
+      "requested_video_timestamp": 3.3333333333333335,
+      "decoded_video_timestamp": 3.3333333333333335,
+      "image_sha256": "55c536eaeb133a8de4bb4024cc50aaea564aa48c212e594ab321795a211a998d",
+      "file": "episode-2673-left_rgb.png"
+    },
+    {
+      "converted_episode_index": 2673,
+      "episode_length": 2046,
+      "episode_frame_requested": 100,
+      "video_relative_path": "videos/observation.images.right_rgb/chunk-002/file-673.mp4",
+      "episode_from_timestamp": 0.0,
+      "requested_video_timestamp": 3.3333333333333335,
+      "decoded_video_timestamp": 3.3333333333333335,
+      "image_sha256": "ac45dcba58787eabc5d45858b2e79f4ff0e0e93c46bfe419c234c2b10752c134",
+      "file": "episode-2673-right_rgb.png"
+    },
+    {
+      "converted_episode_index": 3564,
+      "episode_length": 2533,
+      "episode_frame_requested": 100,
+      "video_relative_path": "videos/observation.images.top_rgb/chunk-003/file-564.mp4",
+      "episode_from_timestamp": 0.0,
+      "requested_video_timestamp": 3.3333333333333335,
+      "decoded_video_timestamp": 3.3333333333333335,
+      "image_sha256": "26205990c1563a270a4912578b6fd3b6a8423417c92a0cfface3fe49f48f2acf",
+      "file": "episode-3564-top_rgb.png"
+    },
+    {
+      "converted_episode_index": 3564,
+      "episode_length": 2533,
+      "episode_frame_requested": 100,
+      "video_relative_path": "videos/observation.images.left_rgb/chunk-003/file-564.mp4",
+      "episode_from_timestamp": 0.0,
+      "requested_video_timestamp": 3.3333333333333335,
+      "decoded_video_timestamp": 3.3333333333333335,
+      "image_sha256": "da5f22dacb17bef2a93f66e2648bc4be773a9faced0899c2f873bcf00a8e3688",
+      "file": "episode-3564-left_rgb.png"
+    },
+    {
+      "converted_episode_index": 3564,
+      "episode_length": 2533,
+      "episode_frame_requested": 100,
+      "video_relative_path": "videos/observation.images.right_rgb/chunk-003/file-564.mp4",
+      "episode_from_timestamp": 0.0,
+      "requested_video_timestamp": 3.3333333333333335,
+      "decoded_video_timestamp": 3.3333333333333335,
+      "image_sha256": "1707382037a449403a4af7ae67feb7fc0cccafdffb477aa3adf0b1d4f8f7e806",
+      "file": "episode-3564-right_rgb.png"
+    },
+    {
+      "converted_episode_index": 4457,
+      "episode_length": 2534,
+      "episode_frame_requested": 100,
+      "video_relative_path": "videos/observation.images.top_rgb/chunk-004/file-457.mp4",
+      "episode_from_timestamp": 0.0,
+      "requested_video_timestamp": 3.3333333333333335,
+      "decoded_video_timestamp": 3.3333333333333335,
+      "image_sha256": "3d4096eae919be5ac59bb1e7998bff54d054a1d604e6c060c039e2011136cba9",
+      "file": "episode-4457-top_rgb.png"
+    },
+    {
+      "converted_episode_index": 4457,
+      "episode_length": 2534,
+      "episode_frame_requested": 100,
+      "video_relative_path": "videos/observation.images.left_rgb/chunk-004/file-457.mp4",
+      "episode_from_timestamp": 0.0,
+      "requested_video_timestamp": 3.3333333333333335,
+      "decoded_video_timestamp": 3.3333333333333335,
+      "image_sha256": "e45f990d92283c1af50d93b189b02eeb486747bdc5e5ca1e73dda1a7080cdeab",
+      "file": "episode-4457-left_rgb.png"
+    },
+    {
+      "converted_episode_index": 4457,
+      "episode_length": 2534,
+      "episode_frame_requested": 100,
+      "video_relative_path": "videos/observation.images.right_rgb/chunk-004/file-457.mp4",
+      "episode_from_timestamp": 0.0,
+      "requested_video_timestamp": 3.3333333333333335,
+      "decoded_video_timestamp": 3.3333333333333335,
+      "image_sha256": "ed6a3b46e836139449499b6ba1980b4f6f851f6bf762a38fd33e7569cb6729fb",
+      "file": "episode-4457-right_rgb.png"
+    }
+  ]
+}

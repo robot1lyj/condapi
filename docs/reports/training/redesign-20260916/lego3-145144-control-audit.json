@@ -1,0 +1,283 @@
+{
+  "scope": "Read-only code review and fixed recorded-input replay; no training, hardware, inference or counterfactual task-success estimate.",
+  "yam_head_observed": "13e5afd",
+  "gripper_change_commit": "fd966c0fbac40a1ab1c4f2bf67e23eb39eb44fd0",
+  "high_rate_change_commit": "a678f3a82ffc5f8f6bfa155753a1cf6a2b90a271",
+  "source_sha256": {
+    "yam_abc_reproduce/hil/action_buffer.py": "de62cafc3eab82ddd1ad4810bd7a3b86e530215be4ac8249e8dcd5d750009bfa",
+    "yam_abc_reproduce/hil/trajectory.py": "c0f71677a6323761e6c523fd2aa628875c088adab524e62b53806e8d1b520a6c",
+    "yam_abc_reproduce/hil/core.py": "b4afd82b0393dfd69cab16a5a07ac9ebc4b24fcdfe479627de2866010215f346",
+    "yam_abc_reproduce/hil/station.py": "3dc5bb8ce1fe4d373ae9a523df12007e4c5d9799e0c30c4d61ba478d0e2d1743",
+    "yam_abc_reproduce/hil/run.py": "9f7684d763bd170a00f897d761b5985e9cad243fe1d480d96842001c4d920b72",
+    "configs/station_hil.yaml": "2b858a7ed157007f94247b03afc7fb1dd50a96d7ccf7cb2acfa87c2e98d34a03"
+  },
+  "parameters_from_recording_or_reviewed_config": {
+    "action_dt": 0.03333333333333333,
+    "ensemble_chunks": 3,
+    "ensemble_decay": 0.01,
+    "max_action_age": 1.5,
+    "policy_trajectory_hz": 100,
+    "max_joint_speed": 3,
+    "max_gripper_speed": 1,
+    "natural_frequency": 10,
+    "max_joint_acceleration": 30
+  },
+  "parameters_note": "Episode manifest lacks full control/version fingerprint. Array replay match verifies selection behavior, not remote source identity or every 100Hz motor write.",
+  "valid_rows": 1364,
+  "replayed_policy_max_abs_error": 0.0,
+  "latest_prediction_observation_age_s": {
+    "min": 0.1488505609886488,
+    "p50": 0.3217913039989071,
+    "p95": 0.48579484146102914,
+    "max": 0.5066013309988193
+  },
+  "gripper_prediction_observation_age_s": {
+    "min": 0.22353828100312967,
+    "p50": 1.0236735894941376,
+    "p95": 1.1908059336004952,
+    "max": 1.2373874990007607
+  },
+  "gripper_extra_prediction_age_s": {
+    "min": 0.0,
+    "p50": 0.7003421419940423,
+    "p95": 0.7349810970044928,
+    "max": 0.7485610669973539
+  },
+  "gripper_fractional_model_index": {
+    "min": 5.9999999999126885,
+    "p50": 30.002196279965574,
+    "p95": 35.002203685718996,
+    "max": 36.45683200971689
+  },
+  "gripper_selected_minus_newest_abs_difference": {
+    "left": {
+      "min": 0.0,
+      "p50": 0.02959659442862149,
+      "p95": 0.4149782165872913,
+      "max": 0.5446693970805602
+    },
+    "right": {
+      "min": 0.0,
+      "p50": 0.03018352043021047,
+      "p95": 0.39677725454635576,
+      "max": 0.6078456116169639
+    }
+  },
+  "old_close_below_0_3_new_open_above_0_7_rows": {
+    "left": 1,
+    "right": 12
+  },
+  "old_open_above_0_7_new_close_below_0_3_rows": {
+    "left": 0,
+    "right": 0
+  },
+  "old_plan_joint_vs_ensemble_max_rad": {
+    "min": 0.0,
+    "p50": 0.09552195715803793,
+    "p95": 0.3560309750150121,
+    "max": 1.0666394535676027
+  },
+  "policy_submitted_joint_per_row_max_abs_rad": {
+    "min": 0.008850421852549722,
+    "p50": 0.043267669682481136,
+    "p95": 0.34060556836789313,
+    "max": 0.6305914780393476
+  },
+  "submitted_measured_joint_per_row_max_abs_rad": {
+    "min": 0.0,
+    "p50": 0.03745327932331932,
+    "p95": 0.0646908686355015,
+    "max": 0.07526865647264508
+  },
+  "examples": [
+    {
+      "row": 236,
+      "time_s": 7.988686775002861,
+      "replay_max_abs_error": 0.0,
+      "newest_request_id": 23,
+      "gripper_source_request_id": 21,
+      "newest_observation_age_s": 0.19481953399372287,
+      "gripper_source_observation_age_s": 0.9283857039990835,
+      "gripper_source_age_minus_newest_s": 0.7335661700053606,
+      "gripper_source_fractional_model_index": 27.006985100306338,
+      "selected_grippers": [
+        0.9837286146567654,
+        0.22450602851356669
+      ],
+      "newest_grippers_same_target_time": [
+        0.9841372752410174,
+        0.465836669051528
+      ],
+      "old_plan_joint_vs_ensemble_max_rad": 0.08878944401988376
+    },
+    {
+      "row": 266,
+      "time_s": 8.990501011008746,
+      "replay_max_abs_error": 0.0,
+      "newest_request_id": 25,
+      "gripper_source_request_id": 23,
+      "newest_observation_age_s": 0.4965827550040558,
+      "gripper_source_observation_age_s": 1.1966337699996075,
+      "gripper_source_age_minus_newest_s": 0.7000510149955517,
+      "gripper_source_fractional_model_index": 35.00153044966282,
+      "selected_grippers": [
+        0.9867679376928784,
+        0.10106220581031658
+      ],
+      "newest_grippers_same_target_time": [
+        0.9819306140626073,
+        0.5557527636194229
+      ],
+      "old_plan_joint_vs_ensemble_max_rad": 0.25200679807469006
+    },
+    {
+      "row": 588,
+      "time_s": 19.72370195700205,
+      "replay_max_abs_error": 0.0,
+      "newest_request_id": 56,
+      "gripper_source_request_id": 54,
+      "newest_observation_age_s": 0.18824043999484275,
+      "gripper_source_observation_age_s": 0.92598724499112,
+      "gripper_source_age_minus_newest_s": 0.7377468049962772,
+      "gripper_source_fractional_model_index": 27.132404150033835,
+      "selected_grippers": [
+        0.9822663554648885,
+        0.03561882042331433
+      ],
+      "newest_grippers_same_target_time": [
+        0.9867606687541008,
+        0.395766580377996
+      ],
+      "old_plan_joint_vs_ensemble_max_rad": 0.13098436234822497
+    },
+    {
+      "row": 596,
+      "time_s": 19.9885241130105,
+      "replay_max_abs_error": 0.0,
+      "newest_request_id": 56,
+      "gripper_source_request_id": 54,
+      "newest_observation_age_s": 0.45306259600329213,
+      "gripper_source_observation_age_s": 1.1908094009995693,
+      "gripper_source_age_minus_newest_s": 0.7377468049962772,
+      "gripper_source_fractional_model_index": 35.13240414991742,
+      "selected_grippers": [
+        0.9799616118140695,
+        0.04142300325465431
+      ],
+      "newest_grippers_same_target_time": [
+        0.9875720840935708,
+        0.39496994404882196
+      ],
+      "old_plan_joint_vs_ensemble_max_rad": 0.193234733198405
+    },
+    {
+      "row": 1046,
+      "time_s": 34.99085570900934,
+      "replay_max_abs_error": 0.0,
+      "newest_request_id": 99,
+      "gripper_source_request_id": 97,
+      "newest_observation_age_s": 0.2890390039974591,
+      "gripper_source_observation_age_s": 1.0220420760015259,
+      "gripper_source_age_minus_newest_s": 0.7330030720040668,
+      "gripper_source_fractional_model_index": 29.990092160005588,
+      "selected_grippers": [
+        0.5943169285849653,
+        0.9716472998249785
+      ],
+      "newest_grippers_same_target_time": [
+        0.46168206876406076,
+        0.9732226781736016
+      ],
+      "old_plan_joint_vs_ensemble_max_rad": 0.0760792237818696
+    },
+    {
+      "row": 1091,
+      "time_s": 36.48851295100758,
+      "replay_max_abs_error": 0.0,
+      "newest_request_id": 103,
+      "gripper_source_request_id": 101,
+      "newest_observation_age_s": 0.38541508199705277,
+      "gripper_source_observation_age_s": 1.0873701920063468,
+      "gripper_source_age_minus_newest_s": 0.701955110009294,
+      "gripper_source_fractional_model_index": 32.05865330033703,
+      "selected_grippers": [
+        0.1418305307337464,
+        0.9756868148252044
+      ],
+      "newest_grippers_same_target_time": [
+        0.425046004707098,
+        0.9752795826871992
+      ],
+      "old_plan_joint_vs_ensemble_max_rad": 0.06302857075957613
+    },
+    {
+      "row": 1103,
+      "time_s": 36.88852232899808,
+      "replay_max_abs_error": 0.0,
+      "newest_request_id": 104,
+      "gripper_source_request_id": 102,
+      "newest_observation_age_s": 0.42014092099270783,
+      "gripper_source_observation_age_s": 1.120962912988034,
+      "gripper_source_age_minus_newest_s": 0.7008219919953262,
+      "gripper_source_fractional_model_index": 33.024659759685164,
+      "selected_grippers": [
+        0.04387168109647309,
+        0.9698688110027096
+      ],
+      "newest_grippers_same_target_time": [
+        0.1111437889429629,
+        0.9776854029479027
+      ],
+      "old_plan_joint_vs_ensemble_max_rad": 0.082561948459704
+    },
+    {
+      "row": 1106,
+      "time_s": 36.992264101005276,
+      "replay_max_abs_error": 0.0,
+      "newest_request_id": 105,
+      "gripper_source_request_id": 103,
+      "newest_observation_age_s": 0.18946948400116526,
+      "gripper_source_observation_age_s": 0.88916623199475,
+      "gripper_source_age_minus_newest_s": 0.6996967479935847,
+      "gripper_source_fractional_model_index": 25.99090243995306,
+      "selected_grippers": [
+        0.4803042810962349,
+        0.9740658841768302
+      ],
+      "newest_grippers_same_target_time": [
+        0.06873947120824457,
+        0.9763208473924399
+      ],
+      "old_plan_joint_vs_ensemble_max_rad": 0.1350061944661909
+    },
+    {
+      "row": 1196,
+      "time_s": 39.98865037600626,
+      "replay_max_abs_error": 0.0,
+      "newest_request_id": 113,
+      "gripper_source_request_id": 111,
+      "newest_observation_age_s": 0.42022607500257436,
+      "gripper_source_observation_age_s": 1.1202996369975153,
+      "gripper_source_age_minus_newest_s": 0.700073561994941,
+      "gripper_source_fractional_model_index": 33.002206859673606,
+      "selected_grippers": [
+        0.13311367012097805,
+        0.9786766023059833
+      ],
+      "newest_grippers_same_target_time": [
+        0.3907010448026955,
+        0.9815218671609164
+      ],
+      "old_plan_joint_vs_ensemble_max_rad": 0.046717431261341424
+    }
+  ],
+  "isolated_filter_step_response": {
+    "joint_step_rad": 0.1,
+    "dt_s": 0.01,
+    "joint_t50_s": 0.16,
+    "joint_t90_s": 0.4,
+    "joint_t95_s": 0.49,
+    "gripper_first_filter_step_value": 1.0,
+    "scope": "TrajectoryFilter only, as instantiated by TrajectoryExecutor; upstream feedback-relative gripper slew and SDK tracking not included. This is not measured robot latency."
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "mock": false,
+  "rtc": false,
+  "streaming": true,
+  "action_dt": 0.03333333333333333,
+  "policy_fusion": "ensemble",
+  "smooth_steps": 8,
+  "ensemble_chunks": 3,
+  "ensemble_decay": 0.01,
+  "expected_policy_latency": 0.2,
+  "prefetch_margin": 0.067,
+  "operator_task": "sort the legos into containers by color",
+  "task": "sort the legos into containers by color",
+  "collection_task": {
+    "id": "5dbcd16f-6d45-4e60-9791-10cdbe6f1191",
+    "created_at": "2026-09-16T05:52:57.852712+00:00",
+    "name": "乐高分拣3",
+    "instruction": "test",
+    "task": "sort the legos into containers by color"
+  },
+  "collection_mode": "inference",
+  "video_encoder": "h264_rkmpp",
+  "recording_error": "episode queue full",
+  "schema": "yam_hil_v2",
+  "episode_id": "30c4c51fa1124393a37f4489e3155d1c",
+  "fps": 30.0,
+  "steps": 1370,
+  "segments": [
+    {
+      "path": "segment_000000",
+      "steps": 1370,
+      "start_frame": 0,
+      "video_frames": {
+        "top": 1370,
+        "left": 1370,
+        "right": 1370
+      },
+      "files": {
+        "left.mp4": {
+          "bytes": 12976528
+        },
+        "right.mp4": {
+          "bytes": 14846460
+        },
+        "top.mp4": {
+          "bytes": 15690190
+        },
+        "samples.h5": {
+          "bytes": 5682290
+        }
+      },
+      "state": "committed"
+    }
+  ],
+  "outcome": "aborted",
+  "error": null,
+  "clock": "RK host monotonic; camera arrival alignment",
+  "action_semantics": "absolute submitted follower target after constraints"
+}

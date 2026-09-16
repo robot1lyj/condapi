@@ -1,0 +1,36 @@
+{
+  "method": "Manual approximate bounding boxes on decoded 640x480 RGB; x0,y0,x1,y1; not millimetre calibration, not dataset statistics.",
+  "resize_scale": 0.35,
+  "examples": [
+    {
+      "view": "top",
+      "row": 0,
+      "bbox_xyxy": [
+        260,
+        283,
+        274,
+        293
+      ],
+      "extent_224_px": [
+        4.8999999999999995,
+        3.5
+      ]
+    },
+    {
+      "view": "left",
+      "row": 1196,
+      "bbox_xyxy": [
+        267,
+        294,
+        329,
+        377
+      ],
+      "extent_224_px": [
+        21.7,
+        29.049999999999997
+      ]
+    }
+  ],
+  "user_confirmed": "2026-09-16: site 2x2 brick base approximately 16 mm, ordinary small LEGO-type brick.",
+  "abc_physical_size": "Not measured; six extracted training frames visually include larger/thicker brick forms. Exact dimensions and corpus-wide frequency unknown."
+}

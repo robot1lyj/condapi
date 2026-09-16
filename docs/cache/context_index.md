@@ -47,7 +47,7 @@
 
 | 问题 / 别名 | 检查与前置条件 | 历史尝试 / 修复或工具入口 |
 |---|---|---|
-| 乐高接近但不抓、异步夹爪不闭合、数据覆盖、Evo对照 | [训练重设计](../03_training_and_evaluation.md#2026-09-16--训练重设计先复现乐高分拣再比较模型)；先区分原始预测、近期选择、提交与反馈，再确定数据预算 | [乐高分拣3原始证据](../reports/training/redesign-20260916/README.md)；2小时子集与模型对照仍为计划，未自动开训/切模型 |
+| 乐高接近但不抓、16 mm小颗粒补采、100000现场适配、控制时序 | [训练重设计](../03_training_and_evaluation.md#2026-09-16--训练重设计先复现乐高分拣再比较模型)；区分预测来源年龄、滤波响应、提交与反馈，先验收再适配 | [乐高分拣3原始证据/控制重放](../reports/training/redesign-20260916/README.md)；现场50+10集、原D1及Evo均为计划，未开训/切模型 |
 | 训练崩溃、Xid、illegal memory access、memcheck | [训练故障经验](../03_training_and_evaluation.md#故障诊断复用与重试条件)；先匹配快照、故障窗口和插桩范围 | 同节关联全量数据复核及两次超时；[故障恢复记录](../03_training_and_evaluation.md#2026-09-09-故障恢复与当前授权)持有历史启动器/续训保护，运行前重新核验当前授权和 checkpoint |
 | 续训曲线缺段、重复 step、配置与 loss 不符 | [看板复用与验证](../11_training_dashboard.md#工具复用与配置实测边界)；区分显示参数与源日志 | 同节定位本地父日志拼接、测试入口；[loss 口径](../03_training_and_evaluation.md#loss日志与看板口径2026-09-08用户确认)解释统计窗口 |
 | Thor 延迟、realtime-vla、位置偏移、时间广播 | [复用与重试](../reference/thor/10_acceleration_execution.md#realtime-vla-工具复用与重试条件)；先核对真实权重/输入合同/频率证据 | 同节关联离线审计、报告回放和无效归一化首轮；完整数值仍归其上方原复现记录 |
