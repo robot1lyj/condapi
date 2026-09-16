@@ -1,0 +1,26 @@
+{
+  "observed_at_utc": "2026-09-16T07:50:41.785361+00:00",
+  "host_alias": "yam-server",
+  "python_prefix": "/home/wuyan/.conda/envs/vla-evo1-train",
+  "source_revision": "2774d9bddcbbda50e697e162e89e7eaada8d7105",
+  "scope": "Read-only package metadata, source file hashes, module discovery and current-user scheduler query; no Torch/CUDA import, model initialization, training or environment change.",
+  "packages": {
+    "lerobot": "0.6.2",
+    "torch": "2.10.0",
+    "transformers": "5.5.4",
+    "accelerate": "1.14.0"
+  },
+  "source_hashes": {
+    "policies/evo1/configuration_evo1.py": "c87a6d0de041440245c89e974bcdd32e0985d54fb912b5b538bbe325bd222658",
+    "scripts/lerobot_train.py": "ddf6eca625080bc89f1c9bbb7d08c116867d5ebee727234ddd087426b7254b18"
+  },
+  "flash_attn_discoverable": false,
+  "flash_attn_check": "importlib.util.find_spec('flash_attn') is not None; this is not an import or GPU kernel test",
+  "squeue": "",
+  "squeue_exit": 0,
+  "limitations": [
+    "An empty current-user queue does not establish GPU availability or allocation permission.",
+    "Matching package metadata and two source hashes does not establish full environment or runtime equivalence.",
+    "GPU memory, throughput, backward, checkpoint reload and Thor inference remain unmeasured."
+  ]
+}

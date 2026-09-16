@@ -73,6 +73,8 @@ export RAW_YAM_DATA="$DATA_ROOT/ABC-130k-two-tasks"
 
 2026-09-08实际结果：本地与服务器CPU检查均通过，106个Python包版本一致。服务器新环境通过专属 `LD_LIBRARY_PATH=<prefix>/lib` 使用Conda FFmpeg，已写入该环境的Conda环境变量；不修改系统库，直接运行prefix内Python时也要传入。证据见 [报告](reports/environments/evo1-20260908/README.md)。
 
+2026-09-16 15:50+08只读复核：服务器prefix中LeRobot0.6.2/Torch2.10.0/Transformers5.5.4/Accelerate1.14.0仍可由包metadata确认，Evo config及trainer文件与固定源码哈希一致；`importlib.util.find_spec('flash_attn')`为None。此为模块发现检查，没有执行导入或GPU验收；注意力回退和训练影响归 [10](10_vla_platform.md#四卡训练落地前的固定版本检查)。同次用户`squeue`为空，仅表示该时刻查不到该用户作业，不证明四卡空闲或可分配。原始结果及限制见 [快照](reports/training/redesign-20260916/evo1-readiness-20260916.json)。
+
 Evo-1 不安装根目录 OpenPI 依赖，不克隆或更新正在训练的 `condapi-yam`。本地 prefix 为 `/home/wuyan-lyj/.conda/envs/vla-evo1-dev`，服务器 prefix 为 `/home/wuyan/.conda/envs/vla-evo1-train`。环境规格在 `environments/evo1.yml`，核心 Python 依赖和 LeRobot 固定提交在 `environments/evo1-requirements.txt`；本地、服务器 profile 分别为 `configs/environments/evo1-workstation.toml`、`configs/environments/evo1-server.toml`。
 
 固定 LeRobot 源码 `2774d9bddcbbda50e697e162e89e7eaada8d7105`（包版本0.6.2），仅安装 evo1/training extras。Python3.12、FFmpeg7、Torch2.10.0、TorchVision0.25.0、TorchCodec0.10.0 为本次环境组合，不要求其他模型跟随。源码检出 `/home/wuyan-lyj/lerobot-evo1-2774d9b`；安装包在本地 `/home/wuyan-lyj/evo1-install-2774d9b`、服务器 `/home/wuyan/lyj/evo1-install-2774d9b`，均不放入项目 Git。

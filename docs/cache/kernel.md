@@ -6,7 +6,7 @@
 
 - 2026-09-08 功能分支收敛为模型配置 + 共享后端：`configs/models/` 选择模型，`adapters/lerobot/` 共用原生入口、`adapters/openpi/` 保留 Pi；撤销按模型的 plugins 目录。系列环境仍独立 Conda，LeRobot 模型不重写 trainer/processor。控制层和合同测试已有，Evo-1/FastWAM/VLA-JEPA 尚未接通 GPU 训练或推理；共享入口不等于模型已支持。架构见 [01](../01_system_architecture.md#多模型接入层)，当前状态和 Evo 接入步骤见 [10](../10_vla_platform.md)。
 
-- YAM 已实现路线为 Pi0.5 全量微调 / `pi05_yam`。2026-09-16用户暂停训练，完整基线100000；后确认现场16 mm小颗粒与ABC不同。14:51夹爪已能闭合；只读控制重放发现夹爪旧预测/关节融合与滤波响应需验收。当前计划先验控制时序，再采50条train+10条val，以100000权重另开现场SFT，Evo后置，均未开训/切模型。状态、预算和证据归 [训练](../03_training_and_evaluation.md#2026-09-16--训练重设计先复现乐高分拣再比较模型)，恢复前复核；不自动回退LoRA。
+- YAM 已实现路线为 Pi0.5 全量微调 / `pi05_yam`。2026-09-16用户暂停训练，完整基线100000；后确认现场16 mm小颗粒与ABC不同。14:51夹爪已能闭合；只读控制重放发现夹爪旧预测/关节融合与滤波响应需验收。现场计划先验控制，再采50条train+10条val，以100000权重另开SFT；用户随后提出采集窗口训练Evo，建议D1小预算两阶段与采集并行，四卡训练按时段串行。均未开训/切模型。状态、预算和证据归 [训练](../03_training_and_evaluation.md#2026-09-16--训练重设计先复现乐高分拣再比较模型)，Evo版本/计数陷阱归 [10](../10_vla_platform.md#四卡训练落地前的固定版本检查)；不自动回退LoRA。
 - YAM 为 14D `[左6关节, 左夹爪, 右6关节, 右夹爪]`；Pi 路径关节 delta、夹爪 absolute，mask `(6,-1,6,-1)`，内部 32D、horizon 50；这些模型内部规则不套用其他系列。物理单位仍须数据审计，不套用 OpenArm/Piper 合同，见 [数据合同](../04_data_contracts.md)。
 - Pi 当前训练产物为 JAX/Flax；新模型保留原生 LeRobot/PyTorch 格式。既有 Thor Pi 部署按系列隔离容器，新接入层环境采用独立 Conda；3588 采集/控制，两 IPC 网线直连，本项目不操作 3588。转换与量化须独立验收，既有部署事实见 [Thor 部署](../08_thor_edge_deployment.md)，新架构见 [01](../01_system_architecture.md)。
 - 主检出为 `/home/wuyan-lyj/condapi`，改造工作树以实际 cwd 为准，外部 YAM 参考只读；设备、功能分支提交、数据保护和 RTC 回退边界由 `AGENTS.md` 持有。

@@ -75,7 +75,7 @@ python3 scripts/vla.py bundle check /path/to/package/manifest.json
 
 ### 2026-09-16 · Evo-1对照实验的范围
 
-用户提出Pi0.5成本高、100000抓取效果差，后续建议以Evo-1作为轻量对照；划分、成本和成功率准则归 [训练重设计](03_training_and_evaluation.md#2026-09-16--训练重设计先复现乐高分拣再比较模型)。模型仍为planned，未完成YAM真实训练/Thor推理，不因研究推荐开放capability。
+用户提出Pi0.5成本高、100000抓取效果差，随后提出在采集现场数据期间训练Evo-1；建议提前做独立小预算试验。数据划分、两阶段预算、现场衔接和成功率准则归 [四卡试验](03_training_and_evaluation.md#采集期间的evo-1四卡试验)。模型仍为planned，未完成YAM真实训练/Thor推理，不因研究推荐开放capability。
 
 本轮核对 [官方LeRobot文档](https://huggingface.co/docs/lerobot/evo1)：原生实现使用 `OpenGVLab/InternVL3-1B-hf`，阶段切换默认重应用冻结规则；stage2加载stage1策略后新建优化器/调度，不是训练状态原样resume。其公开LIBERO参考使用2×H100，不能推导本项目4×4090速度。在线文档可能晚于已安装版本，运行前核对支持字段，不直接升级既有环境。
 
@@ -94,6 +94,19 @@ python3 scripts/vla.py bundle check /path/to/package/manifest.json
 - LIBERO checkpoint 的7D语义不是 YAM14D。修改配置/裁剪输出不能把7D模型变成已训练的YAM策略；必须进行正确机器人适配和微调。
 
 接入顺序：固定 LeRobot 实现 → 专用 Conda 依赖审计 → 检查 checkpoint config/processors → YAM batch 经原生 processor → 一次真实前向/反向和保存重载 → 开放模型声明中的对应操作 → Thor 原生推理计时。后续 FastWAM/VLA-JEPA 复用同一个 LeRobot 后端，但视频帧采样、文本编码和动作头仍用各自原生实现。
+
+### 四卡训练落地前的固定版本检查
+
+以下为2026-09-16静态核查，固定源码仍为`2774d9bddcbbda50e697e162e89e7eaada8d7105`；本地源码/安装包与服务器配置、trainer两个文件哈希一致，服务器观察与范围见 [只读快照](reports/training/redesign-20260916/evo1-readiness-20260916.json)。环境缺项归 [02](02_installation_and_environment.md#evo-1--lerobot-独立环境)，尚未进行GPU前反向。
+
+- **注意力实现：** `internvl3_embedder.py`仅在`use_flash_attn`且`is_flash_attn_2_available()`时选择`flash_attention_2`，否则为`eager`，不是自动选择SDPA。配置True不证明内核可用。先在Evo独立环境解决版本兼容并确认真实attention backend，再测容量和速度。
+- **图像/token：** 基础VLM的448图像与`image_seq_length`绑定，单改`image_resolution=224`会被原生校验拒绝。保持三图448，明确top/left/right输入映射；三图token和指令须完整容纳，不能随意把`max_text_length=1024`大幅缩短。ABC224视频放大到448不恢复细节，现场640×480的等比补边/缩放几何须与训练样本对齐，不能假设两种源图直接resize就等价。
+- **精度/冻结：** stage1的`vlm_dtype=bfloat16`用于冻结VLM，stage2显式改为`float32`且`use_amp=True`；仅打开AMP不会将已有BF16主权重升为FP32。保留`apply_training_stage_defaults=True`，stage2加载stage1后应实查视觉、语言、动作参数的requires_grad/dtype。有效梯度检查点开关是`policy.enable_gradient_checkpointing`，stage1无VLM梯度时原生实现会禁用该分支的checkpointing。
+- **DDP/步数：** 原生`torchrun`入口可用，4进程候选`parallelism.dp_replicate=4, dp_shard=1`；`batch_size`按进程，累积为`accelerator.gradient_accumulation.steps`。`lerobot_train.py`每microbatch递增step并调用scheduler，累积同步才更新优化器；`AcceleratorConfig.build`设`step_scheduler_with_optimizer=False`。因此训练上限/保存/warmup按microstep换算，两个计数都要记录。现有共享launcher未接通分布式，不能把其骨架当可运行命令。
+- **14D/统计：** 第一条路线保留原始absolute action；显式14D输入输出、`postprocess_action_dim=14`、`binarize_gripper=False`，内部24D padding/MIN_MAX用Evo原生processor。双夹爪6/13维及单位逐值验收，不复用Pi delta/32D norm。native trainer在`pretrained_path`且`resume=False`时，会用当前dataset stats覆盖normalizer/unnormalizer；stage1→stage2用同一D1及stats较直接，改现场数据时必须审计这种变化，不能把加载旧processor等同于冻结旧统计。
+- **部署：** 训练H50与一次实际执行多少步分开配置。原生默认flow采样32次，不能拿Pi的10次去噪/约100ms TensorRT成绩推导Evo在Thor更快；训练可先完成，但机器人成功率比较前仍须接通Evo原生推理和同一控制合同。
+
+固定依据：[embedder](https://github.com/huggingface/lerobot/blob/2774d9bddcbbda50e697e162e89e7eaada8d7105/src/lerobot/policies/evo1/internvl3_embedder.py)、[训练器](https://github.com/huggingface/lerobot/blob/2774d9bddcbbda50e697e162e89e7eaada8d7105/src/lerobot/scripts/lerobot_train.py)、[Accelerator配置](https://github.com/huggingface/lerobot/blob/2774d9bddcbbda50e697e162e89e7eaada8d7105/src/lerobot/configs/accelerator.py)。这里记录候选配置及验收条件，没有修改依赖锁、实现新trainer或开放Evo能力声明。
 
 ## 接入一个 LeRobot 模型
 
