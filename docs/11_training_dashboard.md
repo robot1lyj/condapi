@@ -13,7 +13,7 @@ python3 scripts/training_dashboard.py --metrics /absolute/run/metrics.jsonl --mo
 
 打开 `http://127.0.0.1:8765`。顶部切换运行；自动显示已有数值指标，默认至多添加八个辅助图，其余通过“添加指标”选择，× 可移除。训练损失图固定保留；没有 loss 的模型可通过自定义指标图观察。未知 batch、目标步数、精度、GPU 数留空，绝不套用 Pi 配置。
 
-当前 Pi 服务模板 `scripts/training_dashboard.service` 跟踪 batch32 续训，并通过 `--history-remote-metrics` 继承历史指标。恢复运行时，父 run 的记录会保留到当前 run 的第一条 step 之前；重叠 step 由当前 run 覆盖，避免同一训练步重复绘制。当前服务显式指定本轮目标 120k、每 2k 保存；余弦学习率周期 162097 作为独立参数保留。
+当前 Pi 服务模板 `scripts/training_dashboard.service` 跟踪 batch32 训练，并通过 `--history-remote-metrics` 继承历史指标（需要续训时启用）。恢复运行时，父 run 的记录会保留到当前 run 的第一条 step 之前；重叠 step 由当前 run 覆盖，避免同一训练步重复绘制。当前服务显式指定 RTC 子集本轮目标 30k、每 1k 保存；余弦学习率周期按运行配置保留。
 
 单次运行也可以用 `--history-metrics /path/to/parent.jsonl` 指定本地父日志；远端父日志使用同一 SSH 主机上的重复 `--history-remote-metrics /absolute/parent.jsonl`。当前 run 尚无记录时，看板先显示父 run；当前 run 写入后自动拼接为连续曲线。父日志只读，镜像失败时保留上次缓存。
 
@@ -26,7 +26,7 @@ python3 scripts/training_dashboard.py --metrics /absolute/run/metrics.jsonl --mo
 
 | 配置/预期 | 需要的实际证据 | 当前记忆边界与复核触发 |
 |---|---|---|
-| service 参数 batch32、120k总体目标、每2k保存 | 对应 run 的启动配置、实际日志、已提交 checkpoint | 是展示/计划值，今天训练实际状态未知；切换 run、续训或参数变化时重核 |
+| service 参数 batch32、30k总体目标、每1k保存 | 对应 run 的启动配置、实际日志、已提交 checkpoint | 是展示/计划值，今天训练实际状态未知；切换 run、续训或参数变化时重核 |
 | `--interval 10`、页面持续刷新 | 指标源时间、镜像错误、源端最新 step | HTTP刷新不等于新训练更新；缓存可在同步失败后保留，使用前查新鲜度 |
 | 原始 loss / 页面平滑线 | 训练器日志聚合代码与该 run 的 log_interval | Pi日志均值与显示平滑分开，不能恢复未保存的逐步loss；换后端/版本须重新确认统计口径 |
 

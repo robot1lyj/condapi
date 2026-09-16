@@ -5,7 +5,7 @@ After=network.target
 [Service]
 Type=simple
 WorkingDirectory=%h/condapi
-ExecStart=/usr/bin/python3 %h/condapi/scripts/training_dashboard.py --metrics %h/condapi/artifacts/training_dashboard/stable_20260916/metrics.jsonl --history-remote-metrics /home/wuyan/lyj/YAM/training-runs/pi05_yam/lego_full_b32_xid13_recovery_20260913_nccl_96261_hl9/metrics/metrics.jsonl --remote yam-server --remote-metrics /home/wuyan/lyj/YAM/training-runs/pi05_yam/lego_full_b32_stable_20260916/metrics/metrics.jsonl --interval 10 --save-interval 2000 --batch-size 32 --stage-steps 120000 --total-steps 120000 --model pi05 --backend OpenPI/JAX --metadata %h/condapi/configs/dashboards/pi-full-metadata.json --name "pi05 · lego full / batch32 stable 20260916 / target120k"
+ExecStart=/usr/bin/python3 %h/condapi/scripts/training_dashboard.py --metrics %h/condapi/artifacts/training_dashboard/pi05_rtc_20260916/metrics.jsonl --remote yam-server --remote-metrics /home/wuyan/lyj/YAM/training-runs/pi05_yam/lego_pi05_rtc_base_10h_20260916/metrics/metrics.jsonl --interval 10 --save-interval 1000 --batch-size 32 --stage-steps 30000 --total-steps 30000 --model pi05 --backend OpenPI/JAX --metadata %h/condapi/configs/dashboards/pi05-rtc-metadata.json --name "pi05 · RTC subset 468 / batch32 / target30k"
 Restart=on-failure
 RestartSec=10
 NoNewPrivileges=true
