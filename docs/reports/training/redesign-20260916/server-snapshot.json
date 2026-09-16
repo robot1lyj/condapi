@@ -1,0 +1,269 @@
+{
+  "observed_at_utc": "2026-09-16T06:15:09.348177+00:00",
+  "scope": "Read-only metadata/config/last metric/scheduler snapshot; no training, GPU initialization or service changes.",
+  "dataset_root": "/home/wuyan/lyj/YAM/YAM_data/processed/lego_lerobot_v1_20260907",
+  "splits": {
+    "train": {
+      "codebase_version": "v3.0",
+      "robot_type": "yam",
+      "total_frames": 10374181,
+      "total_episodes": 4458,
+      "total_tasks": 1,
+      "fps": 30
+    },
+    "val": {
+      "codebase_version": "v3.0",
+      "robot_type": "yam",
+      "total_frames": 165142,
+      "total_episodes": 69,
+      "total_tasks": 1,
+      "fps": 30
+    }
+  },
+  "control_root": "/home/wuyan/lyj/YAM/training-runs/control/lego_full_b32_stable_20260916",
+  "image_features": {
+    "observation.images.top_rgb": {
+      "dtype": "video",
+      "shape": [
+        224,
+        224,
+        3
+      ],
+      "names": [
+        "height",
+        "width",
+        "channels"
+      ],
+      "info": {
+        "video.height": 224,
+        "video.width": 224,
+        "video.codec": "av1",
+        "video.pix_fmt": "yuv420p",
+        "video.is_depth_map": false,
+        "video.fps": 30,
+        "video.channels": 3,
+        "has_audio": false
+      }
+    },
+    "observation.images.left_rgb": {
+      "dtype": "video",
+      "shape": [
+        224,
+        224,
+        3
+      ],
+      "names": [
+        "height",
+        "width",
+        "channels"
+      ],
+      "info": {
+        "video.height": 224,
+        "video.width": 224,
+        "video.codec": "av1",
+        "video.pix_fmt": "yuv420p",
+        "video.is_depth_map": false,
+        "video.fps": 30,
+        "video.channels": 3,
+        "has_audio": false
+      }
+    },
+    "observation.images.right_rgb": {
+      "dtype": "video",
+      "shape": [
+        224,
+        224,
+        3
+      ],
+      "names": [
+        "height",
+        "width",
+        "channels"
+      ],
+      "info": {
+        "video.height": 224,
+        "video.width": 224,
+        "video.codec": "av1",
+        "video.pix_fmt": "yuv420p",
+        "video.is_depth_map": false,
+        "video.fps": 30,
+        "video.channels": 3,
+        "has_audio": false
+      }
+    }
+  },
+  "task": "sort the legos into containers by color",
+  "source_revision": "68651e4929d9fb00f798937b2d62617cab5c771d",
+  "source_repo": "lerobot/abc_130k_v3_train",
+  "pause_20260916.json": {
+    "status": "paused",
+    "paused_at": "2026-09-16T13:58:20+08:00",
+    "job_id": "2130",
+    "observed_step": 100531,
+    "latest_complete_checkpoint": 100000,
+    "resume_command": "scripts/train_lego_full.py --resume --run-name lego_full_b32_stable_20260916 --steps 120000",
+    "reason": "user requested pause because model quality is mediocre",
+    "source_checkpoint_preserved": true
+  },
+  "source_checkpoint.json": {
+    "source": "/home/wuyan/lyj/YAM/training-runs/pi05_yam/lego_full_b32_xid13_recovery_20260913_nccl_96261_hl9/100000",
+    "destination": "/home/wuyan/lyj/YAM/training-runs/pi05_yam/lego_full_b32_stable_20260916/100000",
+    "method": "hardlink_copy_same_filesystem",
+    "source_preserved": true,
+    "target_steps": 324194,
+    "batch_size": 32,
+    "num_workers": 2,
+    "save_interval": 2000,
+    "keep_period": 20000,
+    "peak_lr": 1.25e-05,
+    "decay_lr": 1.25e-06,
+    "adam_eps": 1e-06
+  },
+  "target_update_20260916.json": {
+    "old_target_steps": 324194,
+    "new_target_steps": 120000,
+    "reason": "user requested current round stop at 120k because observed quality is mediocre",
+    "interrupted_at_observed_step": 100450,
+    "source_checkpoint": "/home/wuyan/lyj/YAM/training-runs/pi05_yam/lego_full_b32_stable_20260916/100000",
+    "source_preserved": true
+  },
+  "resume_config.json": {
+    "name": "pi05_yam",
+    "project_name": "openpi",
+    "exp_name": "lego_full_b32_stable_20260916",
+    "model": {
+      "action_dim": 32,
+      "action_horizon": 50,
+      "max_token_len": 200,
+      "dtype": "bfloat16",
+      "paligemma_variant": "gemma_2b",
+      "action_expert_variant": "gemma_300m",
+      "pi05": true,
+      "discrete_state_input": true
+    },
+    "weight_loader": {
+      "params_path": "/home/wuyan/.cache/openpi/openpi-assets/checkpoints/pi05_base/params"
+    },
+    "pytorch_weight_path": null,
+    "pytorch_training_precision": "bfloat16",
+    "pytorch_gradient_checkpointing": true,
+    "lr_schedule": {
+      "warmup_steps": 1000,
+      "peak_lr": 1.25e-05,
+      "decay_steps": 162097,
+      "decay_lr": 1.25e-06
+    },
+    "optimizer": {
+      "b1": 0.9,
+      "b2": 0.95,
+      "eps": 1e-06,
+      "weight_decay": 1e-10,
+      "clip_gradient_norm": 1.0
+    },
+    "ema_decay": null,
+    "freeze_filter": "Nothing()",
+    "data": {
+      "repo_id": "/home/wuyan/lyj/YAM/YAM_data/processed/lego_lerobot_v1_20260907/train",
+      "assets": {
+        "assets_dir": "/home/wuyan/lyj/YAM/training-assets/lego_lerobot_v1_20260907/pi05_h50",
+        "asset_id": "yam"
+      },
+      "base_config": {
+        "repo_id": null,
+        "asset_id": null,
+        "norm_stats": null,
+        "repack_transforms": {
+          "inputs": [],
+          "outputs": []
+        },
+        "data_transforms": {
+          "inputs": [],
+          "outputs": []
+        },
+        "model_transforms": {
+          "inputs": [],
+          "outputs": []
+        },
+        "use_quantile_norm": false,
+        "action_sequence_keys": [
+          "action"
+        ],
+        "prompt_from_task": true,
+        "train_episodes": null,
+        "lerobot_tolerance_s": null,
+        "lerobot_video_backend": null,
+        "lerobot_torchcodec_tail_fallback": false,
+        "rlds_data_dir": null,
+        "action_space": null,
+        "datasets": []
+      },
+      "base_image_key": "observation.images.top_rgb",
+      "left_wrist_image_key": "observation.images.left_rgb",
+      "right_wrist_image_key": "observation.images.right_rgb",
+      "state_key": "observation.state",
+      "action_key": "action",
+      "prompt_key": "prompt",
+      "action_sequence_keys": [
+        "action"
+      ],
+      "num_arms": 2,
+      "use_delta_joint_actions": true,
+      "default_prompt": null
+    },
+    "assets_base_dir": "./assets",
+    "checkpoint_base_dir": "/home/wuyan/lyj/YAM/training-runs",
+    "seed": 42,
+    "batch_size": 32,
+    "num_workers": 2,
+    "num_train_steps": 120000,
+    "log_interval": 10,
+    "save_interval": 2000,
+    "keep_period": 20000,
+    "overwrite": false,
+    "resume": true,
+    "wandb_enabled": false,
+    "policy_metadata": {
+      "robot": "YAM",
+      "hardware_family": "YAM-ABC-compatible",
+      "num_arms": 2,
+      "robot_action_dim": 14,
+      "model_action_dim": 32,
+      "action_horizon": 50,
+      "action_layout": "[left 6 joints, left gripper, right 6 joints, right gripper]",
+      "image_keys": [
+        "observation.images.top_rgb",
+        "observation.images.left_rgb",
+        "observation.images.right_rgb"
+      ]
+    },
+    "fsdp_devices": 4
+  },
+  "code_manifest.json": {
+    "code_root": "/home/wuyan/lyj/YAM/env-transfer/lego-full-a53bb00-diag9361-b48-horizon324194-save2k-v2",
+    "worktree_head": "a53bb001e4acb2cce486f2da83d6d8256439a188",
+    "local_config_commit": "0ac1712",
+    "worktree_status": [
+      " M scripts/train.py",
+      " M scripts/train_lego_full.py",
+      " M src/openpi/training/data_loader.py",
+      "?? .COPY_COMPLETE"
+    ],
+    "note": "diagnostic worktree preserved; wrapper and finite checkpoint gate applied before launch"
+  },
+  "last_metric": {
+    "gpu_memory_gib": 9.401082277297974,
+    "grad_norm": 0.06668810546398163,
+    "learning_rate": 4.840057954424992e-06,
+    "loss": 0.012133419513702393,
+    "param_norm": 1824.5184326171875,
+    "samples_per_second": 13.946449384785689,
+    "step": 100531,
+    "step_seconds": 2.2944908139063047,
+    "time": 1789538289.9609458
+  },
+  "squeue": {
+    "returncode": 0,
+    "stdout": "          JOBID    STATE                     NAME         TIME NODELIST(REASON)\n",
+    "stderr": ""
+  }
+}

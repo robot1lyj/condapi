@@ -73,6 +73,16 @@ python3 scripts/vla.py bundle check /path/to/package/manifest.json
 
 ## Evo-1 接入判断
 
+### 2026-09-16 · Evo-1对照实验的范围
+
+用户提出Pi0.5成本高、100000抓取效果差，后续建议以Evo-1作为轻量对照；划分、成本和成功率准则归 [训练重设计](03_training_and_evaluation.md#2026-09-16--训练重设计先复现乐高分拣再比较模型)。模型仍为planned，未完成YAM真实训练/Thor推理，不因研究推荐开放capability。
+
+本轮核对 [官方LeRobot文档](https://huggingface.co/docs/lerobot/evo1)：原生实现使用 `OpenGVLab/InternVL3-1B-hf`，阶段切换默认重应用冻结规则；stage2加载stage1策略后新建优化器/调度，不是训练状态原样resume。其公开LIBERO参考使用2×H100，不能推导本项目4×4090速度。在线文档可能晚于已安装版本，运行前核对支持字段，不直接升级既有环境。
+
+优先VLM起点的原生stage1→stage2并明确动作头是否新初始化；模拟器checkpoint先验身份/processor/动作语义。三图、真实14D、双夹爪连续语义、24D padding和Evo独立统计遵守下方规则，Pi32D/delta norm不迁入。先在获准服务器验短GPU容量/吞吐和保存重载，再在Thor原生路径计时；Pi TensorRT经验不能当Evo已可部署。
+
+### 固定源码检查与YAM合同
+
 已检查 LeRobot commit `2774d9bddcbbda50e697e162e89e7eaada8d7105` 的 `configuration_evo1.py`、`modeling_evo1.py`、`processor_evo1.py`；这个 commit 是 API 调研固定点，不是已经验收的依赖锁。
 
 - 配置支持 max_views=3，默认图像 448×448，内部 state/action padding 为 24D，chunk_size 默认 50。模型预测 padded chunk，必须经过原生后处理器裁回真实动作维度；不能直接把内部24D给控制侧。

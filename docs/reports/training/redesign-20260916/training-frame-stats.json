@@ -1,0 +1,41 @@
+{
+  "source_dataset": "lego_lerobot_v1_20260907/train",
+  "source_revision": "68651e4929d9fb00f798937b2d62617cab5c771d",
+  "source_episode_index": 95,
+  "converted_episode_index": 0,
+  "frame_index": 100,
+  "video_relative_pattern": "videos/observation.images.{view}/chunk-000/file-000.mp4",
+  "views": {
+    "top_rgb": {
+      "shape": [
+        224,
+        224,
+        3
+      ],
+      "first28_mean": 0.09188988095238096,
+      "last28_mean": 0.024766156462585034,
+      "black_fraction": 0.2308673469387755
+    },
+    "left_rgb": {
+      "shape": [
+        224,
+        224,
+        3
+      ],
+      "first28_mean": 0.0818983843537415,
+      "last28_mean": 0.05213647959183673,
+      "black_fraction": 0.2301299426020408
+    },
+    "right_rgb": {
+      "shape": [
+        224,
+        224,
+        3
+      ],
+      "first28_mean": 0.10756802721088435,
+      "last28_mean": 0.1754357993197279,
+      "black_fraction": 0.2045001594387755
+    }
+  },
+  "scope": "Three camera frames from one episode; not a dataset-wide visual audit or current-site image comparison."
+}

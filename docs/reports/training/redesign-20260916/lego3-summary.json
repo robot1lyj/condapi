@@ -1,0 +1,163 @@
+{
+  "analyzed_at_utc": "2026-09-16T06:25:24.608963+00:00",
+  "source_host": "linux@192.168.110.140",
+  "source_path": "/data/YAM/data/episodes/5dbcd16f-6d45-4e60-9791-10cdbe6f1191/session_20260916_141405_f47544/episode_000001/segment_000000/samples.h5",
+  "source_sha256": "7ef27ef77e4410ef922e4c3163ee8f18c259c4c0ff0bcbe8e7dfe1eebfe188ee",
+  "task": "乐高分拣3",
+  "rows": 1325,
+  "committed_rows": 1325,
+  "policy_valid_rows": 1318,
+  "duration_seconds": 44.25748623999243,
+  "reply_count": 126,
+  "recording_error": "episode queue full",
+  "action_indices": [
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15
+  ],
+  "warm_timing_excludes_first_reply": true,
+  "timing": {
+    "infer_ms": {
+      "p50": 109.80435699457303,
+      "p95": 110.23797699599527,
+      "max": 110.93087398330681
+    },
+    "rtt_ms": {
+      "p50": 122.50001600477844,
+      "p95": 128.80237939825747,
+      "max": 219.10764899803326
+    },
+    "observation_to_received_ms": {
+      "p50": 161.18547599762678,
+      "p95": 164.59066579700448,
+      "max": 223.80920499563217
+    }
+  },
+  "grippers": {
+    "left": {
+      "policy_under_threshold_rows": {
+        "0.7": 8,
+        "0.5": 4,
+        "0.3": 0
+      },
+      "submitted_feedback_abs_error": {
+        "p50": 0.0019032106685806238,
+        "p95": 0.01183537949290187,
+        "max": 0.05084175664959578
+      },
+      "policy_submitted_abs_difference": {
+        "p50": 0.0007329614400565787,
+        "p95": 0.007008906897506141,
+        "max": 0.37056386370999495
+      },
+      "full_chunks_below_diagnostic_0_3": 0,
+      "policy_min_event": {
+        "row": 151,
+        "time_rel_s": 5.033352450991515,
+        "policy": 0.47253242481091623,
+        "submitted": 0.8279958605486988,
+        "feedback": 0.8461776737044976,
+        "request_id": 14,
+        "action_index": 14
+      },
+      "policy_action": {
+        "min": 0.47253242481091623,
+        "p05": 0.9369354613320441,
+        "median": 0.9741472900052369,
+        "max": 0.9964186327968836
+      },
+      "selected_action": {
+        "min": 0.47253242481091623,
+        "p05": 0.9369354613320441,
+        "median": 0.9741472900052369,
+        "max": 0.9964186327968836
+      },
+      "submitted_action": {
+        "min": 0.8128443403711643,
+        "p05": 0.9366370176928819,
+        "median": 0.9738489685312808,
+        "max": 0.9964186327968836
+      },
+      "measured_state": {
+        "min": 0.8168173946049192,
+        "p05": 0.9378005997202911,
+        "median": 0.974325864361601,
+        "max": 0.9848309183513582
+      }
+    },
+    "right": {
+      "policy_under_threshold_rows": {
+        "0.7": 57,
+        "0.5": 0,
+        "0.3": 0
+      },
+      "submitted_feedback_abs_error": {
+        "p50": 0.016759968989365936,
+        "p95": 0.04225084851750856,
+        "max": 0.052743579862304046
+      },
+      "policy_submitted_abs_difference": {
+        "p50": 0.023347156054866036,
+        "p95": 0.14924543036118612,
+        "max": 0.2843341099186918
+      },
+      "full_chunks_below_diagnostic_0_3": 17,
+      "policy_min_event": {
+        "row": 1160,
+        "time_rel_s": 38.7908581590018,
+        "policy": 0.5066241153856517,
+        "submitted": 0.7368604782142099,
+        "feedback": 0.7555614718564729,
+        "request_id": 110,
+        "action_index": 14
+      },
+      "policy_action": {
+        "min": 0.5066241153856517,
+        "p05": 0.7101679691334307,
+        "median": 0.9020000948645175,
+        "max": 1.0
+      },
+      "selected_action": {
+        "min": 0.5066241153856517,
+        "p05": 0.7101679691334307,
+        "median": 0.9020000948645175,
+        "max": 1.0
+      },
+      "submitted_action": {
+        "min": 0.67123891398742,
+        "p05": 0.7572757588346097,
+        "median": 0.873963943342738,
+        "max": 1.0
+      },
+      "measured_state": {
+        "min": 0.6765020446480879,
+        "p05": 0.7559758059650721,
+        "median": 0.874075957874708,
+        "max": 0.9826613562454312
+      }
+    }
+  },
+  "raw_at_selected_index_vs_policy_gripper_max_abs": [
+    0.0,
+    0.0001418707213403092
+  ],
+  "scope": [
+    "Values use gripper channels 6/13 and only policy-valid rows; all minima in summary columns need not occur together.",
+    "0.3/0.5/0.7 are analysis thresholds, not physical contact labels.",
+    "No sustained near-zero gripper command reaches recorded submission; full stroke calibration/reversal cannot be accepted or rejected from this motion alone.",
+    "Submitted target vs feedback match at observed partial positions does not prove full-range mapping.",
+    "Recording is 30 Hz; it does not reconstruct every possible 100 Hz motor write.",
+    "Manifest records streaming=true, rtc=false, ensemble with 3 chunks; current /status reports trajectory_hz=100, inactive in HOLD. Manifest does not independently record high-rate activation throughout the episode.",
+    "Episode ended aborted with episode queue full, not a complete task success evaluation.",
+    "No software edits, service restart, robot command, or model inference performed by this audit."
+  ]
+}

@@ -1,0 +1,230 @@
+{
+  "threshold_scope": "0.5 is an analysis threshold only, not calibrated contact/closed detection. Target times assume action[0] at observation reference time and 30 Hz. Old 90-frame trace, not latest optimized test.",
+  "requests": [
+    {
+      "request_id": 1,
+      "observed_rel_s": -0.028067143008229323,
+      "received_rel_s": 0.26340624899603426,
+      "executed_action_indices": [
+        8,
+        9,
+        10,
+        11
+      ],
+      "right_gripper_full_min": 0.945635390930593,
+      "right_gripper_selected_min": 0.978948293214798,
+      "first_index_below_diagnostic_0_5": null,
+      "predicted_target_time_below_0_5_rel_s": null
+    },
+    {
+      "request_id": 2,
+      "observed_rel_s": 0.2293063849938335,
+      "received_rel_s": 0.3965035139990505,
+      "executed_action_indices": [
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "right_gripper_full_min": 0.969429537914157,
+      "right_gripper_selected_min": 0.9814240158104897,
+      "first_index_below_diagnostic_0_5": null,
+      "predicted_target_time_below_0_5_rel_s": null
+    },
+    {
+      "request_id": 3,
+      "observed_rel_s": 0.47246201199595816,
+      "received_rel_s": 0.6297076600021683,
+      "executed_action_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "right_gripper_full_min": 0.6904526561724544,
+      "right_gripper_selected_min": 0.9819691110007167,
+      "first_index_below_diagnostic_0_5": null,
+      "predicted_target_time_below_0_5_rel_s": null
+    },
+    {
+      "request_id": 4,
+      "observed_rel_s": 0.6624098820029758,
+      "received_rel_s": 0.8299666289967718,
+      "executed_action_indices": [
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "right_gripper_full_min": 0.8083316512974501,
+      "right_gripper_selected_min": 0.9825780300620198,
+      "first_index_below_diagnostic_0_5": null,
+      "predicted_target_time_below_0_5_rel_s": null
+    },
+    {
+      "request_id": 5,
+      "observed_rel_s": 0.8731219899927964,
+      "received_rel_s": 1.029770897992421,
+      "executed_action_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "right_gripper_full_min": 0.6790297922549844,
+      "right_gripper_selected_min": 0.9757463729599715,
+      "first_index_below_diagnostic_0_5": null,
+      "predicted_target_time_below_0_5_rel_s": null
+    },
+    {
+      "request_id": 6,
+      "observed_rel_s": 1.107525737999822,
+      "received_rel_s": 1.2630972499900963,
+      "executed_action_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "right_gripper_full_min": 0.5092131238626838,
+      "right_gripper_selected_min": 0.8494997763322593,
+      "first_index_below_diagnostic_0_5": null,
+      "predicted_target_time_below_0_5_rel_s": null
+    },
+    {
+      "request_id": 7,
+      "observed_rel_s": 1.3397143199981656,
+      "received_rel_s": 1.4963941439928021,
+      "executed_action_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "right_gripper_full_min": 0.6083618687778711,
+      "right_gripper_selected_min": 0.9437005324375034,
+      "first_index_below_diagnostic_0_5": null,
+      "predicted_target_time_below_0_5_rel_s": null
+    },
+    {
+      "request_id": 8,
+      "observed_rel_s": 1.5397455009951955,
+      "received_rel_s": 1.6963935349922394,
+      "executed_action_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "right_gripper_full_min": 0.1859153608776927,
+      "right_gripper_selected_min": 0.9563727590600253,
+      "first_index_below_diagnostic_0_5": 38,
+      "predicted_target_time_below_0_5_rel_s": 2.8064121676579816
+    },
+    {
+      "request_id": 9,
+      "observed_rel_s": 1.7747672800032888,
+      "received_rel_s": 1.9297300949983764,
+      "executed_action_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "right_gripper_full_min": 0.3014394279790521,
+      "right_gripper_selected_min": 0.7689735974671841,
+      "first_index_below_diagnostic_0_5": 17,
+      "predicted_target_time_below_0_5_rel_s": 2.3414339466689853
+    },
+    {
+      "request_id": 10,
+      "observed_rel_s": 1.998895803000778,
+      "received_rel_s": 2.163037196994992,
+      "executed_action_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "right_gripper_full_min": 0.9535857237635852,
+      "right_gripper_selected_min": 0.9809333288315535,
+      "first_index_below_diagnostic_0_5": null,
+      "predicted_target_time_below_0_5_rel_s": null
+    },
+    {
+      "request_id": 11,
+      "observed_rel_s": 2.1986612809996586,
+      "received_rel_s": 2.3630596279981546,
+      "executed_action_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "right_gripper_full_min": 0.1808231575317979,
+      "right_gripper_selected_min": 0.9791945305960179,
+      "first_index_below_diagnostic_0_5": 35,
+      "predicted_target_time_below_0_5_rel_s": 3.365327947671176
+    },
+    {
+      "request_id": 12,
+      "observed_rel_s": 2.432037798993406,
+      "received_rel_s": 2.5986801870021736,
+      "executed_action_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "right_gripper_full_min": 0.9218758077614307,
+      "right_gripper_selected_min": 0.9788090844726564,
+      "first_index_below_diagnostic_0_5": null,
+      "predicted_target_time_below_0_5_rel_s": null
+    },
+    {
+      "request_id": 13,
+      "observed_rel_s": 2.673703911001212,
+      "received_rel_s": 2.829728955999599,
+      "executed_action_indices": [
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "right_gripper_full_min": 0.76938484726578,
+      "right_gripper_selected_min": 0.952343988934815,
+      "first_index_below_diagnostic_0_5": null,
+      "predicted_target_time_below_0_5_rel_s": null
+    }
+  ]
+}

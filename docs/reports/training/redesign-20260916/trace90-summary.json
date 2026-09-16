@@ -1,0 +1,108 @@
+{
+  "analyzed_at": "2026-09-16T06:14:46.156237+00:00",
+  "source_original": "/tmp/yam_inference_90_samples.h5",
+  "archived_file": "trace90-samples.h5",
+  "source_sha256": "b302836ea15373f3d48dfd61a12cf8162afec76be306f8dc6374fcc2ac0eac14",
+  "schema": "yam_samples_v2",
+  "rows": 90,
+  "policy_valid_rows": 82,
+  "duration_seconds": 2.9634010849986225,
+  "reply_count": 13,
+  "tick_seconds": {
+    "p50": 0.03333396099333186,
+    "p95": 0.034410016212495974,
+    "max": 0.03641186199092772
+  },
+  "timing_excludes_first_reply": true,
+  "worker_elapsed_ms": {
+    "p50": 122.43719350226456,
+    "p95": 130.0323870011198,
+    "max": 135.06247800251003
+  },
+  "server_infer_ms": {
+    "p50": 109.6677605091827,
+    "p95": 110.26674034364987,
+    "max": 110.46335598803125
+  },
+  "observation_to_received_ms": {
+    "p50": 156.96273600042332,
+    "p95": 167.35895710007753,
+    "max": 167.55674699379597
+  },
+  "action_indices": [
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11
+  ],
+  "any_joint_constraint_rows": 70,
+  "joint_constraint_fraction_in_policy_valid_rows": 0.27439024390243905,
+  "grippers_0_closed_1_open": {
+    "policy_action": {
+      "min": [
+        0.9487279584277869,
+        0.7689735974671841
+      ],
+      "max": [
+        0.9953764146071077,
+        0.9896929912565947
+      ]
+    },
+    "selected_action": {
+      "min": [
+        0.9487279584277869,
+        0.7689735974671841
+      ],
+      "max": [
+        0.9953764146071077,
+        0.9896929912565947
+      ]
+    },
+    "submitted_action": {
+      "min": [
+        0.9487279584277869,
+        0.8539191957427722
+      ],
+      "max": [
+        0.9953764146071077,
+        0.9896929912565947
+      ]
+    },
+    "measured_state": {
+      "min": [
+        0.9485346100149533,
+        0.8590330168147557
+      ],
+      "max": [
+        0.9849655985307141,
+        0.9842291069266174
+      ]
+    },
+    "full_50_action_predictions_min": [
+      0.8258481752867103,
+      0.1808231575317979
+    ],
+    "first_10_action_predictions_min": [
+      0.9487279584277869,
+      0.8148388256936073
+    ]
+  },
+  "adjacent_chunk_joint_disagreement_rad": {
+    "definition": "At every overlapping new-block target time, linearly interpolate the previous raw block at that time, then take max absolute difference across joints 0..5 and 7..12; pool all adjacent pairs. Includes unexecuted far-horizon points. Assumes action_dt=1/30 and first action at observation reference time.",
+    "overlap_points": 512,
+    "p50": 0.693810691330351,
+    "p95": 1.216938488082076,
+    "max": 1.3972073856327767
+  },
+  "scope": [
+    "Older 90-row/13-reply trace; not the later 188/190/203-row runs.",
+    "3-second trace does not establish task success/failure or causal attribution.",
+    "No RGB pixels, model weight hash, noise realization, or expert targets in this file.",
+    "Recorded policy_action is a selected near-term action; raw 50-step model chunks are details.policy_reply.actions.",
+    "Input observations and sampling noise change across chunks; no fixed-input stochastic-variance experiment performed."
+  ]
+}

@@ -1,0 +1,3717 @@
+{
+  "threshold_scope": "0.3 diagnostic threshold, not calibrated closure; indices refer to raw 50-action blocks.",
+  "requests": [
+    {
+      "request_id": 1,
+      "observed_rel_s": -0.031491088011534885,
+      "received_rel_s": 0.23325430999102537,
+      "executed_indices": [
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.945595880915165,
+          "selected_min": 0.9820944346243143,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.7300681508272291,
+          "selected_min": 0.9240358673831821,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 2,
+      "observed_rel_s": 0.30303682399971876,
+      "received_rel_s": 0.46666844899300486,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9836902101795674,
+          "selected_min": 0.9858416288477183,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.7789552695096732,
+          "selected_min": 0.9151638725613356,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 3,
+      "observed_rel_s": 0.6704155420011375,
+      "received_rel_s": 0.8337315909884637,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        9,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.7210545635519028,
+          "selected_min": 0.9776608507211209,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.6227889836874605,
+          "selected_min": 0.9256973141857983,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 4,
+      "observed_rel_s": 1.0033326169941574,
+      "received_rel_s": 1.1665845019888366,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9683199202862979,
+          "selected_min": 0.9683199202862979,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.7778581663663388,
+          "selected_min": 0.9439931925970316,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 5,
+      "observed_rel_s": 1.3690783319907496,
+      "received_rel_s": 1.5332506949926028,
+      "executed_indices": [
+        4,
+        6,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9607210060973168,
+          "selected_min": 0.96100943516922,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.7571052179006339,
+          "selected_min": 0.890647639820695,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 6,
+      "observed_rel_s": 1.7036307439993834,
+      "received_rel_s": 1.8668114629981574,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9550695244787336,
+          "selected_min": 0.97884472095716,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.8041666520692706,
+          "selected_min": 0.9901891607716085,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 7,
+      "observed_rel_s": 2.069473581999773,
+      "received_rel_s": 2.23324841199792,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9769788113145232,
+          "selected_min": 0.9826956066237689,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.7499980037679077,
+          "selected_min": 0.9801964640641809,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 8,
+      "observed_rel_s": 2.40357858799689,
+      "received_rel_s": 2.5666184360015905,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9194606314337254,
+          "selected_min": 0.9618676904364825,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.7326895181856752,
+          "selected_min": 0.9184809260737896,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 9,
+      "observed_rel_s": 2.7365965779899852,
+      "received_rel_s": 2.9001401220011758,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9674455749675036,
+          "selected_min": 0.968381241260469,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.4500062930736244,
+          "selected_min": 0.8789643554395438,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 10,
+      "observed_rel_s": 3.103246439000941,
+      "received_rel_s": 3.2666537780023646,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        8,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9620324048899412,
+          "selected_min": 0.9620324048899412,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.35682287517106537,
+          "selected_min": 0.6896760430185199,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 11,
+      "observed_rel_s": 3.4694952669960912,
+      "received_rel_s": 3.633446551990346,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        15
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9647405393410922,
+          "selected_min": 0.9877614699593783,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.5165137165777087,
+          "selected_min": 0.9418199629701376,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 12,
+      "observed_rel_s": 3.836204626990366,
+      "received_rel_s": 4.0028234319906915,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9833450487778187,
+          "selected_min": 0.9904854560909272,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.3852818260576129,
+          "selected_min": 0.6607032831530572,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 13,
+      "observed_rel_s": 4.2025112039991654,
+      "received_rel_s": 4.366587027994683,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        11,
+        12,
+        12,
+        13
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9816070848412515,
+          "selected_min": 0.9819612447533012,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.3533592532077134,
+          "selected_min": 0.7668664562371373,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 14,
+      "observed_rel_s": 4.557248222990893,
+      "received_rel_s": 4.699988843000028,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.33894447400429845,
+          "selected_min": 0.47253242481091623,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.28297716651642324,
+          "selected_min": 0.7986413283732534,
+          "first_index_below_diagnostic_0_3": 45
+        }
+      }
+    },
+    {
+      "request_id": 15,
+      "observed_rel_s": 4.902785124999355,
+      "received_rel_s": 5.066584164000233,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9280669020341635,
+          "selected_min": 0.9932610495729447,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.6372985750093461,
+          "selected_min": 0.9071908348778487,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 16,
+      "observed_rel_s": 5.269316865000292,
+      "received_rel_s": 5.433487185990089,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        14
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9198091300313473,
+          "selected_min": 0.9938137726394535,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.8053779349856973,
+          "selected_min": 0.9819977751295567,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 17,
+      "observed_rel_s": 5.603157044999534,
+      "received_rel_s": 5.770276337992982,
+      "executed_indices": [
+        5,
+        6,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9814544081300498,
+          "selected_min": 0.9840580764318109,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.530705142028749,
+          "selected_min": 0.9207057630511523,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 18,
+      "observed_rel_s": 5.972334430000046,
+      "received_rel_s": 6.133294161001686,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9732278627457619,
+          "selected_min": 0.975017314847231,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.40351328466993575,
+          "selected_min": 0.8290743498044014,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 19,
+      "observed_rel_s": 6.304058909998275,
+      "received_rel_s": 6.467098174995044,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9778029199168683,
+          "selected_min": 0.9813714549754858,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.5857084468551278,
+          "selected_min": 0.8992788202046157,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 20,
+      "observed_rel_s": 6.669752128000255,
+      "received_rel_s": 6.833358087998931,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        9,
+        9,
+        10,
+        12,
+        12,
+        13
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9806482369555235,
+          "selected_min": 0.9809187881923914,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.5481928827036023,
+          "selected_min": 0.92399766840899,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 21,
+      "observed_rel_s": 7.003033779998077,
+      "received_rel_s": 7.166583157988498,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9841931136791111,
+          "selected_min": 0.9841931136791111,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.47175929783481363,
+          "selected_min": 0.8209257517808676,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 22,
+      "observed_rel_s": 7.337352281989297,
+      "received_rel_s": 7.49991818399576,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.972174679483831,
+          "selected_min": 0.9768206520672441,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.5113407650102377,
+          "selected_min": 0.9129973173261882,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 23,
+      "observed_rel_s": 7.703303326998139,
+      "received_rel_s": 7.866596337000374,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9796750868017674,
+          "selected_min": 0.9796750868017674,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.591070069175005,
+          "selected_min": 0.8919701228710414,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 24,
+      "observed_rel_s": 8.070476718989084,
+      "received_rel_s": 8.233620981991407,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9759069159185887,
+          "selected_min": 0.9759069159185887,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.560675365903616,
+          "selected_min": 0.9101605816483498,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 25,
+      "observed_rel_s": 8.446457361002103,
+      "received_rel_s": 8.600035183000728,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.976950504742384,
+          "selected_min": 0.9777900478756428,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.6658900602462888,
+          "selected_min": 0.7564499356538058,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 26,
+      "observed_rel_s": 8.80416260099446,
+      "received_rel_s": 8.966656171993236,
+      "executed_indices": [
+        4,
+        5,
+        7,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9673349111686349,
+          "selected_min": 0.9735515707454682,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.38998295176211,
+          "selected_min": 0.9418153147330285,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 27,
+      "observed_rel_s": 9.171070290991338,
+      "received_rel_s": 9.337657597992802,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9638901503212453,
+          "selected_min": 0.9645218338258267,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.27453614670449494,
+          "selected_min": 0.8875393398286701,
+          "first_index_below_diagnostic_0_3": 36
+        }
+      }
+    },
+    {
+      "request_id": 28,
+      "observed_rel_s": 9.503800124002737,
+      "received_rel_s": 9.66655560399522,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        13,
+        13,
+        14
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9706449923254252,
+          "selected_min": 0.9713406188866497,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.3864014850694835,
+          "selected_min": 0.9008138111207485,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 29,
+      "observed_rel_s": 9.870375321988831,
+      "received_rel_s": 10.033330006001052,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9752574737645389,
+          "selected_min": 0.9765929480416775,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.4832002183656693,
+          "selected_min": 0.8967087026399374,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 30,
+      "observed_rel_s": 10.204221335996408,
+      "received_rel_s": 10.366657449994818,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9716211221183539,
+          "selected_min": 0.9716211221183539,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.930732844794631,
+          "selected_min": 0.930732844794631,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 31,
+      "observed_rel_s": 10.537967602998833,
+      "received_rel_s": 10.699918977989,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9770388212474586,
+          "selected_min": 0.9772682534637451,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.4623087166784406,
+          "selected_min": 0.8433681556574106,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 32,
+      "observed_rel_s": 10.90397056499205,
+      "received_rel_s": 11.066711754989228,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9805379903061391,
+          "selected_min": 0.9876748816450239,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.6517632333725095,
+          "selected_min": 0.8973852595104576,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 33,
+      "observed_rel_s": 11.238733849997516,
+      "received_rel_s": 11.399919325995143,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        8,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9756458995270729,
+          "selected_min": 0.9763699518460036,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.5290348159013987,
+          "selected_min": 0.9255719905622006,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 34,
+      "observed_rel_s": 11.57079082299606,
+      "received_rel_s": 11.733349433998228,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9781881872618795,
+          "selected_min": 0.9790065153642298,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.38643572112357616,
+          "selected_min": 0.9153021278189422,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 35,
+      "observed_rel_s": 11.939959461000399,
+      "received_rel_s": 12.100057920994004,
+      "executed_indices": [
+        4,
+        5,
+        7,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9741809897242785,
+          "selected_min": 0.9747518885897398,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.4111787044052482,
+          "selected_min": 0.8437391207343936,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 36,
+      "observed_rel_s": 12.272374300999218,
+      "received_rel_s": 12.43600126200181,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9720211088808776,
+          "selected_min": 0.9720211088808776,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.4053258587713838,
+          "selected_min": 0.7845874430664183,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 37,
+      "observed_rel_s": 12.604796724990592,
+      "received_rel_s": 12.76661422799225,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9739813538997174,
+          "selected_min": 0.9743964772292376,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.4934690978280008,
+          "selected_min": 0.8030903468073607,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 38,
+      "observed_rel_s": 12.97115376200236,
+      "received_rel_s": 13.133310757999425,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9709321103560925,
+          "selected_min": 0.9709692366601825,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.8860307485156059,
+          "selected_min": 0.9366720999644995,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 39,
+      "observed_rel_s": 13.304666701995302,
+      "received_rel_s": 13.470111869988614,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        14
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9769277998918892,
+          "selected_min": 0.980689117604971,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.5231495517933369,
+          "selected_min": 0.967499268065393,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 40,
+      "observed_rel_s": 13.638908207998611,
+      "received_rel_s": 13.799937064002734,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9703276011607648,
+          "selected_min": 0.9711259656806589,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.7706573319708109,
+          "selected_min": 0.8391427889395953,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 41,
+      "observed_rel_s": 13.971354548993986,
+      "received_rel_s": 14.133256924993475,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.972254474220872,
+          "selected_min": 0.9731222643334866,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.45927839384356145,
+          "selected_min": 0.7868941009354592,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 42,
+      "observed_rel_s": 14.34071364099509,
+      "received_rel_s": 14.500043577994802,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9762461180419922,
+          "selected_min": 0.9792593675444127,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.7695343655594588,
+          "selected_min": 0.9703447638823987,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 43,
+      "observed_rel_s": 14.706838808997418,
+      "received_rel_s": 14.866690233990084,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9633365333629847,
+          "selected_min": 0.9714034892731905,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.5284719024689197,
+          "selected_min": 0.8809381876130105,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 44,
+      "observed_rel_s": 15.038700954988599,
+      "received_rel_s": 15.199919097998645,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        10,
+        10,
+        11,
+        12,
+        13
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.979000615678668,
+          "selected_min": 0.9798387881779075,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.6502994558326006,
+          "selected_min": 0.820208969781518,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 45,
+      "observed_rel_s": 15.372193479997804,
+      "received_rel_s": 15.533252376000746,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9509147156165243,
+          "selected_min": 0.9611171789216996,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.43591674148589377,
+          "selected_min": 0.756052570973754,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 46,
+      "observed_rel_s": 15.739728239990654,
+      "received_rel_s": 15.899919741001213,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.958426803120017,
+          "selected_min": 0.9622102893485427,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.5072446550397277,
+          "selected_min": 0.8790722183775902,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 47,
+      "observed_rel_s": 16.071867462989758,
+      "received_rel_s": 16.23602728699916,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9546594069430232,
+          "selected_min": 0.956301128534317,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.4953718060144186,
+          "selected_min": 0.9359447104496956,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 48,
+      "observed_rel_s": 16.441241138993064,
+      "received_rel_s": 16.60160530199937,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9486492959536315,
+          "selected_min": 0.9486492959536315,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.6996926960248947,
+          "selected_min": 0.8626094735780955,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 49,
+      "observed_rel_s": 16.772458425999503,
+      "received_rel_s": 16.933252495000488,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9410329806718827,
+          "selected_min": 0.9410329806718827,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.48240090036123995,
+          "selected_min": 0.9166931425702572,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 50,
+      "observed_rel_s": 17.13978348299861,
+      "received_rel_s": 17.30040751499473,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9384799662360549,
+          "selected_min": 0.9407996749246716,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.30009203514522315,
+          "selected_min": 0.8896505333679915,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 51,
+      "observed_rel_s": 17.506137896998553,
+      "received_rel_s": 17.66674851300195,
+      "executed_indices": [
+        4,
+        5,
+        7,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9471872466044426,
+          "selected_min": 0.9743926632910968,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.43973777116799356,
+          "selected_min": 0.9305473920525313,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 52,
+      "observed_rel_s": 17.841290840995498,
+      "received_rel_s": 18.000208372002817,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9632560235125422,
+          "selected_min": 0.9774166394945384,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.3442485594917536,
+          "selected_min": 0.8664390250282288,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 53,
+      "observed_rel_s": 18.17283449599927,
+      "received_rel_s": 18.33336869699997,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9798695380541683,
+          "selected_min": 0.9798695380541683,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.44316989834529164,
+          "selected_min": 0.8776310265026093,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 54,
+      "observed_rel_s": 18.54069095799059,
+      "received_rel_s": 18.700421635992825,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9820894288305044,
+          "selected_min": 0.9843340506119729,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.5883308868836761,
+          "selected_min": 0.8668930028525591,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 55,
+      "observed_rel_s": 18.90585773299972,
+      "received_rel_s": 19.06655905599473,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9721314151230455,
+          "selected_min": 0.9721314151230455,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.3146711116526127,
+          "selected_min": 0.719722784027338,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 56,
+      "observed_rel_s": 19.239612752993708,
+      "received_rel_s": 19.39995999999519,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9644051511558295,
+          "selected_min": 0.9644051511558295,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.3260731180958748,
+          "selected_min": 0.8283085825370551,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 57,
+      "observed_rel_s": 19.6065291959967,
+      "received_rel_s": 19.770154989993898,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9623383542401791,
+          "selected_min": 0.9675436050962807,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.37341469793951515,
+          "selected_min": 0.8031091185341478,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 58,
+      "observed_rel_s": 19.972821486997418,
+      "received_rel_s": 20.133442602993455,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9700672998826504,
+          "selected_min": 0.9700672998826504,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.33545346915695073,
+          "selected_min": 0.8905792868980765,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 59,
+      "observed_rel_s": 20.3421388729912,
+      "received_rel_s": 20.502789154998027,
+      "executed_indices": [
+        4,
+        5,
+        7,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9694048069090248,
+          "selected_min": 0.9747428304866553,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.1784074746654332,
+          "selected_min": 0.8301180578137637,
+          "first_index_below_diagnostic_0_3": 30
+        }
+      }
+    },
+    {
+      "request_id": 60,
+      "observed_rel_s": 20.70725023400155,
+      "received_rel_s": 20.86697012199147,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9742147192397118,
+          "selected_min": 0.9764396754026413,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.29775921604424715,
+          "selected_min": 0.671204127524972,
+          "first_index_below_diagnostic_0_3": 42
+        }
+      }
+    },
+    {
+      "request_id": 61,
+      "observed_rel_s": 21.041628238992416,
+      "received_rel_s": 21.201643577995128,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9743311635385752,
+          "selected_min": 0.9749577220637798,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.37216104455405474,
+          "selected_min": 0.8971636935415864,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 62,
+      "observed_rel_s": 21.373245101000066,
+      "received_rel_s": 21.533255773989367,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9763132791089416,
+          "selected_min": 0.9784280482152701,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.3778738471468091,
+          "selected_min": 0.8487329363948107,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 63,
+      "observed_rel_s": 21.713754668991896,
+      "received_rel_s": 21.866808672988554,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9806974605946541,
+          "selected_min": 0.9838133288701774,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.37351624404251577,
+          "selected_min": 0.6922530733460784,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 64,
+      "observed_rel_s": 22.074136768002063,
+      "received_rel_s": 22.297945972997695,
+      "executed_indices": [
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9797443336161376,
+          "selected_min": 0.9797443336161376,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.3266302212319672,
+          "selected_min": 0.8671679639554024,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 65,
+      "observed_rel_s": 22.428116351002245,
+      "received_rel_s": 22.59081962700293,
+      "executed_indices": [
+        4,
+        6,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9855188743325473,
+          "selected_min": 0.9885258665927052,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.4083577608150244,
+          "selected_min": 0.8988039849060774,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 66,
+      "observed_rel_s": 22.761234385994612,
+      "received_rel_s": 22.924152906998643,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9779776459579468,
+          "selected_min": 0.9781181657413245,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.3266523301546276,
+          "selected_min": 0.7833600700984598,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 67,
+      "observed_rel_s": 23.127409430991975,
+      "received_rel_s": 23.290861105997465,
+      "executed_indices": [
+        4,
+        5,
+        7,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9799184637293816,
+          "selected_min": 0.9807674225224257,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.48058513804587727,
+          "selected_min": 0.797025291271627,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 68,
+      "observed_rel_s": 23.49444428899733,
+      "received_rel_s": 23.657643386992277,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        8,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9805142723783256,
+          "selected_min": 0.980741559254408,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.4429739870696962,
+          "selected_min": 0.6871269021136165,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 69,
+      "observed_rel_s": 23.861412065991317,
+      "received_rel_s": 24.024152673999197,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        9,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9823272040364743,
+          "selected_min": 0.9823272040364743,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.40282057815510036,
+          "selected_min": 0.6603999558852911,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 70,
+      "observed_rel_s": 24.196803005994298,
+      "received_rel_s": 24.3575241619983,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9760789006916285,
+          "selected_min": 0.9760789006916285,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.48551027302336697,
+          "selected_min": 0.6656229653908611,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 71,
+      "observed_rel_s": 24.561284965995583,
+      "received_rel_s": 24.724145154992584,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        13,
+        13,
+        14
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9711864523558618,
+          "selected_min": 0.9711864523558618,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.3843980650790334,
+          "selected_min": 0.606771218201995,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 72,
+      "observed_rel_s": 24.928979559001164,
+      "received_rel_s": 25.09081893900293,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9686246777808667,
+          "selected_min": 0.9689145370795728,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.47792509497097135,
+          "selected_min": 0.6598144567878843,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 73,
+      "observed_rel_s": 25.2612511979969,
+      "received_rel_s": 25.424325173997204,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9628185528892279,
+          "selected_min": 0.9628185528892279,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.45560256197834015,
+          "selected_min": 0.8344201800366641,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 74,
+      "observed_rel_s": 25.59590511499846,
+      "received_rel_s": 25.757512916999985,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9579659125328065,
+          "selected_min": 0.9579659125328065,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.14496516665196418,
+          "selected_min": 0.7289897598178983,
+          "first_index_below_diagnostic_0_3": 28
+        }
+      }
+    },
+    {
+      "request_id": 75,
+      "observed_rel_s": 25.96141138499661,
+      "received_rel_s": 26.124150242991163,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        8,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9629988210591675,
+          "selected_min": 0.9868033967798353,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.38793725069180135,
+          "selected_min": 0.840818061267972,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 76,
+      "observed_rel_s": 26.29589467999176,
+      "received_rel_s": 26.457520564988954,
+      "executed_indices": [
+        4,
+        5,
+        7,
+        8,
+        9,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9805376327494383,
+          "selected_min": 0.9810509053933025,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.41258130995294456,
+          "selected_min": 0.6800609261870385,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 77,
+      "observed_rel_s": 26.629042465996463,
+      "received_rel_s": 26.79096263599058,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9796535142141581,
+          "selected_min": 0.9824067604023815,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.3753408856826127,
+          "selected_min": 0.6648658986698985,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 78,
+      "observed_rel_s": 26.99617765599396,
+      "received_rel_s": 27.157561171989073,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        11,
+        11,
+        12,
+        13
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9797033337811232,
+          "selected_min": 0.9797033337811232,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.3977076067241728,
+          "selected_min": 0.7894494394898415,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 79,
+      "observed_rel_s": 27.341340365994256,
+      "received_rel_s": 27.49090553598944,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9816712066762447,
+          "selected_min": 0.9816712066762447,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.40665885994800927,
+          "selected_min": 0.7101682730566263,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 80,
+      "observed_rel_s": 27.695984060002957,
+      "received_rel_s": 27.85819384799106,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9798439727500677,
+          "selected_min": 0.9810293923984766,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.40857938637667895,
+          "selected_min": 0.765467754016757,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 81,
+      "observed_rel_s": 28.065169909998076,
+      "received_rel_s": 28.224260104994755,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9779045852054358,
+          "selected_min": 0.9783515906741024,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.36775937258639935,
+          "selected_min": 0.770770558259368,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 82,
+      "observed_rel_s": 28.42870222798956,
+      "received_rel_s": 28.590861849996145,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9825213573249579,
+          "selected_min": 0.9830647243244649,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.4548369436929524,
+          "selected_min": 0.6584926888509393,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 83,
+      "observed_rel_s": 28.797424338990822,
+      "received_rel_s": 28.957492178000393,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        8,
+        9,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9735498425547481,
+          "selected_min": 0.9735498425547481,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.3842582008162737,
+          "selected_min": 0.8379038549716473,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 84,
+      "observed_rel_s": 29.164994685997954,
+      "received_rel_s": 29.32448299699172,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9631503655074836,
+          "selected_min": 0.9658679156184197,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.15862222361379863,
+          "selected_min": 0.9049301230448484,
+          "first_index_below_diagnostic_0_3": 42
+        }
+      }
+    },
+    {
+      "request_id": 85,
+      "observed_rel_s": 29.496058563992847,
+      "received_rel_s": 29.660242304991698,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9722419597363472,
+          "selected_min": 0.9840731534060241,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.22700631325793266,
+          "selected_min": 0.7742041752562523,
+          "first_index_below_diagnostic_0_3": 31
+        }
+      }
+    },
+    {
+      "request_id": 86,
+      "observed_rel_s": 29.863567078995402,
+      "received_rel_s": 30.02420686298865,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9782853830916882,
+          "selected_min": 0.9782853830916882,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.34602347095406055,
+          "selected_min": 0.7130554838220478,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 87,
+      "observed_rel_s": 30.19575967999117,
+      "received_rel_s": 30.357632892992115,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.973463433018744,
+          "selected_min": 0.973463433018744,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.32450496379575133,
+          "selected_min": 0.640675459676385,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 88,
+      "observed_rel_s": 30.53131541000039,
+      "received_rel_s": 30.69088130199816,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9719860683242083,
+          "selected_min": 0.9719860683242083,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.38077273809778694,
+          "selected_min": 0.8960877458363772,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 89,
+      "observed_rel_s": 30.89593270199839,
+      "received_rel_s": 31.057562670990592,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        14,
+        14
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9728616054986716,
+          "selected_min": 0.9737516833122969,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.3042036988322139,
+          "selected_min": 0.776135338996768,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 90,
+      "observed_rel_s": 31.26456994099135,
+      "received_rel_s": 31.424152166990098,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9694853763522506,
+          "selected_min": 0.9694853763522506,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.32136087833726407,
+          "selected_min": 0.6966094250019194,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 91,
+      "observed_rel_s": 31.5962640959915,
+      "received_rel_s": 31.75760940500186,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9695447903573513,
+          "selected_min": 0.9709307993148566,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.35844114700207114,
+          "selected_min": 0.6539231738086939,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 92,
+      "observed_rel_s": 31.929836540002725,
+      "received_rel_s": 32.09085635599331,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9668762851071955,
+          "selected_min": 0.9668762851071955,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.4506662533539534,
+          "selected_min": 0.7634469031371475,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 93,
+      "observed_rel_s": 32.296240832001786,
+      "received_rel_s": 32.457484642989584,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9618600029674172,
+          "selected_min": 0.9618600029674172,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.29677122728741173,
+          "selected_min": 0.6415959298095704,
+          "first_index_below_diagnostic_0_3": 46
+        }
+      }
+    },
+    {
+      "request_id": 94,
+      "observed_rel_s": 32.63041497000086,
+      "received_rel_s": 32.7920671049942,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9610270746331215,
+          "selected_min": 0.9610270746331215,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.27263892105415466,
+          "selected_min": 0.9154449121280909,
+          "first_index_below_diagnostic_0_3": 38
+        }
+      }
+    },
+    {
+      "request_id": 95,
+      "observed_rel_s": 32.963129643001594,
+      "received_rel_s": 33.124241040990455,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        12,
+        12,
+        13,
+        14,
+        15
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9578978575741053,
+          "selected_min": 0.958844786903143,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.5479207820543647,
+          "selected_min": 0.7026530271356106,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 96,
+      "observed_rel_s": 33.34332185899257,
+      "received_rel_s": 33.524148582990165,
+      "executed_indices": [
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9443086767926216,
+          "selected_min": 0.9470885609550477,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.29177711366307735,
+          "selected_min": 0.6144136351228953,
+          "first_index_below_diagnostic_0_3": 26
+        }
+      }
+    },
+    {
+      "request_id": 97,
+      "observed_rel_s": 33.69800522099831,
+      "received_rel_s": 33.85748507399694,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9445694548130036,
+          "selected_min": 0.9445694548130036,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.2403710974133313,
+          "selected_min": 0.882130162467599,
+          "first_index_below_diagnostic_0_3": 28
+        }
+      }
+    },
+    {
+      "request_id": 98,
+      "observed_rel_s": 34.03095701299026,
+      "received_rel_s": 34.19086764799431,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9436187711386085,
+          "selected_min": 0.9436187711386085,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.2799233939212561,
+          "selected_min": 0.8071651821541787,
+          "first_index_below_diagnostic_0_3": 33
+        }
+      }
+    },
+    {
+      "request_id": 99,
+      "observed_rel_s": 34.39730209899426,
+      "received_rel_s": 34.5577534710028,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9286648560233116,
+          "selected_min": 0.936974831304431,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.36447345630329847,
+          "selected_min": 0.8022329258390666,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 100,
+      "observed_rel_s": 34.76354743799311,
+      "received_rel_s": 34.92423797099036,
+      "executed_indices": [
+        4,
+        6,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9356082495943309,
+          "selected_min": 0.9358301731199027,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.12722204110363128,
+          "selected_min": 0.9092197307832242,
+          "first_index_below_diagnostic_0_3": 35
+        }
+      }
+    },
+    {
+      "request_id": 101,
+      "observed_rel_s": 35.13322794499982,
+      "received_rel_s": 35.290864800001145,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9377790955098868,
+          "selected_min": 0.9392745168178082,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.3742634779542089,
+          "selected_min": 0.7088218337073326,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 102,
+      "observed_rel_s": 35.49895004599239,
+      "received_rel_s": 35.657583502994385,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9350844290277959,
+          "selected_min": 0.9368159569437504,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.33207542243063454,
+          "selected_min": 0.8622857655783892,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 103,
+      "observed_rel_s": 35.831041151002864,
+      "received_rel_s": 35.99087303799752,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        8,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9369917556549311,
+          "selected_min": 0.9400001185491086,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.360020981487751,
+          "selected_min": 0.6781358409104348,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 104,
+      "observed_rel_s": 36.17716692399699,
+      "received_rel_s": 36.324225279997336,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9349713219248057,
+          "selected_min": 0.935133056739092,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.3988314074344933,
+          "selected_min": 0.720589561062634,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 105,
+      "observed_rel_s": 36.53381257299043,
+      "received_rel_s": 36.69081448500219,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9346860512704254,
+          "selected_min": 0.9376066935873628,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.36905542623728516,
+          "selected_min": 0.816760335403204,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 106,
+      "observed_rel_s": 36.89882156699605,
+      "received_rel_s": 37.05748156498885,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9385603569009304,
+          "selected_min": 0.9467887496615053,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.5141817913684845,
+          "selected_min": 0.7628781496118904,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 107,
+      "observed_rel_s": 37.234470337993116,
+      "received_rel_s": 37.392685845989035,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9445685013284684,
+          "selected_min": 0.945304055054605,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.3659790083844066,
+          "selected_min": 0.7251218306152225,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 108,
+      "observed_rel_s": 37.597720623001806,
+      "received_rel_s": 37.76241301999835,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.945765124420166,
+          "selected_min": 0.948581598551631,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.5413811295912266,
+          "selected_min": 0.7855164349676371,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 109,
+      "observed_rel_s": 37.94395780999912,
+      "received_rel_s": 38.091047373993206,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9456772250645757,
+          "selected_min": 0.9458920570489169,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.4517281669586599,
+          "selected_min": 0.8193658510812522,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 110,
+      "observed_rel_s": 38.299585567991016,
+      "received_rel_s": 38.45769053699041,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9433518550615311,
+          "selected_min": 0.943987829246521,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.36800939410936834,
+          "selected_min": 0.5066241153856517,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 111,
+      "observed_rel_s": 38.66634976999194,
+      "received_rel_s": 38.82425232799142,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9234719408733846,
+          "selected_min": 0.932589398370266,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.3562935124756694,
+          "selected_min": 0.7796442216791512,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 112,
+      "observed_rel_s": 39.03537666899501,
+      "received_rel_s": 39.190816451999126,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9253492327376605,
+          "selected_min": 0.9272372513029575,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.35600526218211653,
+          "selected_min": 0.791874269848466,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 113,
+      "observed_rel_s": 39.39795963698998,
+      "received_rel_s": 39.557524072995875,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.932373136159122,
+          "selected_min": 0.9399675212965608,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.4017327118932009,
+          "selected_min": 0.7885519721710682,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 114,
+      "observed_rel_s": 39.73398756700044,
+      "received_rel_s": 39.89100289599446,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9039594161952138,
+          "selected_min": 0.925089050645113,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.21481511958342792,
+          "selected_min": 0.803037011266172,
+          "first_index_below_diagnostic_0_3": 32
+        }
+      }
+    },
+    {
+      "request_id": 115,
+      "observed_rel_s": 40.06478282799071,
+      "received_rel_s": 40.224375263002,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        15
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.918697367063284,
+          "selected_min": 0.9217227734935284,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.31518027239441876,
+          "selected_min": 0.809703477172494,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 116,
+      "observed_rel_s": 40.43407747099991,
+      "received_rel_s": 40.59558261100028,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9215880938029289,
+          "selected_min": 0.9537659919335246,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.38859467827883365,
+          "selected_min": 0.6900331825697422,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 117,
+      "observed_rel_s": 40.79931308499363,
+      "received_rel_s": 40.95777883900155,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9667460152825713,
+          "selected_min": 0.9669105509576797,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.1352344994133711,
+          "selected_min": 0.6007697481662035,
+          "first_index_below_diagnostic_0_3": 20
+        }
+      }
+    },
+    {
+      "request_id": 118,
+      "observed_rel_s": 41.16574042200227,
+      "received_rel_s": 41.3241810920008,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9622670812711717,
+          "selected_min": 0.9622670812711717,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.377522547688365,
+          "selected_min": 0.8338666822639704,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 119,
+      "observed_rel_s": 41.53370742998959,
+      "received_rel_s": 41.691162873990834,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9608061045920849,
+          "selected_min": 0.9608061045920849,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.3834629053247273,
+          "selected_min": 0.8051226990941763,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 120,
+      "observed_rel_s": 41.865248173999134,
+      "received_rel_s": 42.02414762599801,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9577981588473916,
+          "selected_min": 0.9617711501272918,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.44532072108560805,
+          "selected_min": 0.6593372973707915,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 121,
+      "observed_rel_s": 42.23496776599495,
+      "received_rel_s": 42.390817622988834,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9668955931690336,
+          "selected_min": 0.9685517362139225,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.2233364406710565,
+          "selected_min": 0.9314658360310794,
+          "first_index_below_diagnostic_0_3": 35
+        }
+      }
+    },
+    {
+      "request_id": 122,
+      "observed_rel_s": 42.598960909992456,
+      "received_rel_s": 42.757603701000335,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9691502861309051,
+          "selected_min": 0.9703637143875361,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.39208973543545605,
+          "selected_min": 0.5249369777401686,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 123,
+      "observed_rel_s": 42.93553336898913,
+      "received_rel_s": 43.09091744599573,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9599345005413294,
+          "selected_min": 0.965011209763527,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.4437443131849766,
+          "selected_min": 0.9375024658091069,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 124,
+      "observed_rel_s": 43.29893590298889,
+      "received_rel_s": 43.45746232099191,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.9643045585373641,
+          "selected_min": 0.9643045585373641,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.43673405651092534,
+          "selected_min": 0.7417441052960158,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 125,
+      "observed_rel_s": 43.66618280299008,
+      "received_rel_s": 43.824216900000465,
+      "executed_indices": [
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.964462300635159,
+          "selected_min": 0.9659316798967124,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.42659940979331734,
+          "selected_min": 0.816898113918543,
+          "first_index_below_diagnostic_0_3": null
+        }
+      }
+    },
+    {
+      "request_id": 126,
+      "observed_rel_s": 44.03474742299295,
+      "received_rel_s": 44.190894772997126,
+      "executed_indices": [
+        4,
+        5,
+        6
+      ],
+      "grippers": {
+        "left": {
+          "full_min": 0.965363283928156,
+          "selected_min": 0.9695853134500981,
+          "first_index_below_diagnostic_0_3": null
+        },
+        "right": {
+          "full_min": 0.14485873394072057,
+          "selected_min": 0.9715425788297654,
+          "first_index_below_diagnostic_0_3": 40
+        }
+      }
+    }
+  ]
+}
