@@ -1,0 +1,57 @@
+{
+  "observed_at": "2026-09-16",
+  "host": "gpu001.hlink.local",
+  "gpu": "NVIDIA GeForce RTX 4090",
+  "compute_capability": [8, 9],
+  "environment": "/home/wuyan/.conda/envs/vla-evo1-train",
+  "python": "3.12",
+  "torch": "2.10.0+cu128",
+  "torch_cuda": "12.8",
+  "cxx11_abi": true,
+  "flash_attn": "2.8.3",
+  "flash_attn_wheel_sha256": "d4a497a7bd837bf47f7a8f6a7aa6887695f2ea819fa597f307552552018ee9d7",
+  "transformers_flash_attn_2_available": true,
+  "evo_flash_attn_2_available": true,
+  "evo_selected_attention": "flash_attention_2",
+  "dtype": "bfloat16",
+  "shape_b_s_heads_head_dim": [1, 2048, 16, 128],
+  "flash_forward": {
+    "p50_ms": 0.26326195802539587,
+    "p95_ms": 508.48314398899674,
+    "samples_ms": [
+      508.48314398899674,
+      0.35585497971624136,
+      0.26326195802539587,
+      0.24774810299277306,
+      0.24445599410682917
+    ]
+  },
+  "forced_math_sdpa_forward": {
+    "p50_ms": 3.7329590413719416,
+    "p95_ms": 76.41854509711266,
+    "samples_ms": [
+      76.41854509711266,
+      3.7533040158450603,
+      3.7329590413719416,
+      3.7069160025566816,
+      3.721327055245638
+    ]
+  },
+  "math_over_flash_p50_ratio": 14.179637154456769,
+  "status": "passed_flash_vs_forced_math_gpu_microbenchmark",
+  "raw_logs": {
+    "final_smoke": {
+      "path": "/home/wuyan/lyj/evo1-install-2774d9b/flash-attn-gpu-final-20260916.log",
+      "sha256": "d920e06f93a45f52b2710c9f4adac26f8e28c7d4c6e290e119193361f2895fd9"
+    },
+    "forced_math": {
+      "path": "/home/wuyan/lyj/evo1-install-2774d9b/flash-attn-gpu-math-20260916.log",
+      "sha256": "3844a0d69169d3e2ff318128a15a08e74a1a2a8a1fe7c547be9a5782d7fcad94"
+    }
+  },
+  "limitations": [
+    "未加载完整 Evo 权重",
+    "未运行真实 YAM batch、保存重载或正式训练",
+    "微基准不代表完整模型训练吞吐"
+  ]
+}

@@ -97,9 +97,9 @@ python3 scripts/vla.py bundle check /path/to/package/manifest.json
 
 ### 四卡训练落地前的固定版本检查
 
-以下为2026-09-16静态核查，固定源码仍为`2774d9bddcbbda50e697e162e89e7eaada8d7105`；本地源码/安装包与服务器配置、trainer两个文件哈希一致，服务器观察与范围见 [只读快照](reports/training/redesign-20260916/evo1-readiness-20260916.json)。环境缺项归 [02](02_installation_and_environment.md#evo-1--lerobot-独立环境)，尚未进行GPU前反向。
+以下为2026-09-16核查，固定源码仍为`2774d9bddcbbda50e697e162e89e7eaada8d7105`；本地源码/安装包与服务器配置、trainer两个文件哈希一致，服务器观察与范围见 [只读快照](reports/training/redesign-20260916/evo1-readiness-20260916.json)。FlashAttention依赖已完成GPU kernel/dispatch smoke，但完整Evo模型、YAM batch和训练仍未验收；环境安装证据归 [02](02_installation_and_environment.md#evo-1--lerobot-独立环境)，详细实测归 [FlashAttention报告](reports/environments/evo1-flash-attn-20260916/README.md)。
 
-- **注意力实现：** `internvl3_embedder.py`仅在`use_flash_attn`且`is_flash_attn_2_available()`时选择`flash_attention_2`，否则为`eager`，不是自动选择SDPA。配置True不证明内核可用。先在Evo独立环境解决版本兼容并确认真实attention backend，再测容量和速度。
+- **注意力实现：** `internvl3_embedder.py`仅在`use_flash_attn`且`is_flash_attn_2_available()`时选择`flash_attention_2`，否则为`eager`，不是自动选择SDPA。服务器环境已安装并在GPU节点确认检测为True、实际选择`flash_attention_2`；BF16 `(1,2048,16,128)` kernel前向P50约0.263ms，强制math-only SDPA约3.733ms，约14.18倍差异。这是kernel微基准，不是完整Evo训练吞吐。
 - **图像/token：** 基础VLM的448图像与`image_seq_length`绑定，单改`image_resolution=224`会被原生校验拒绝。保持三图448，明确top/left/right输入映射；三图token和指令须完整容纳，不能随意把`max_text_length=1024`大幅缩短。ABC224视频放大到448不恢复细节，现场640×480的等比补边/缩放几何须与训练样本对齐，不能假设两种源图直接resize就等价。
 - **精度/冻结：** stage1的`vlm_dtype=bfloat16`用于冻结VLM，stage2显式改为`float32`且`use_amp=True`；仅打开AMP不会将已有BF16主权重升为FP32。保留`apply_training_stage_defaults=True`，stage2加载stage1后应实查视觉、语言、动作参数的requires_grad/dtype。有效梯度检查点开关是`policy.enable_gradient_checkpointing`，stage1无VLM梯度时原生实现会禁用该分支的checkpointing。
 - **DDP/步数：** 原生`torchrun`入口可用，4进程候选`parallelism.dp_replicate=4, dp_shard=1`；`batch_size`按进程，累积为`accelerator.gradient_accumulation.steps`。`lerobot_train.py`每microbatch递增step并调用scheduler，累积同步才更新优化器；`AcceleratorConfig.build`设`step_scheduler_with_optimizer=False`。因此训练上限/保存/warmup按microstep换算，两个计数都要记录。现有共享launcher未接通分布式，不能把其骨架当可运行命令。

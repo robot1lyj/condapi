@@ -1,0 +1,52 @@
+{
+  "id": "evo1-flash-attn-gpu-20260916",
+  "kind": "observation",
+  "claim": "服务器 Evo-1 独立环境在 RTX 4090 GPU 节点可导入 flash_attn 2.8.3；Transformers 与 Evo dispatch 检测通过并选择 flash_attention_2，FlashAttention BF16 前向/反向 smoke 有限，pip check 通过。",
+  "owner": "docs/02_installation_and_environment.md",
+  "scope": {
+    "project": "condapi",
+    "platform": "server-gpu",
+    "model": "evo1",
+    "environment": "/home/wuyan/.conda/envs/vla-evo1-train",
+    "lerobot_revision": "2774d9bddcbbda50e697e162e89e7eaada8d7105",
+    "torch": "2.10.0+cu128",
+    "gpu": "NVIDIA GeForce RTX 4090"
+  },
+  "status": "verified",
+  "observed_at": "2026-09-16T16:46:43+08:00",
+  "recorded_at": "2026-09-16T16:46:43+08:00",
+  "evidence": [
+    {
+      "path": "docs/reports/environments/evo1-flash-attn-20260916/gpu-smoke.json",
+      "sha256": "a1a4440d774058da578338f870b1ab91ac75774ca5c7f32588dcacf0b388694d"
+    }
+  ],
+  "recheck": "on_change",
+  "valid_until": null,
+  "depends_on": {
+    "docs/02_installation_and_environment.md": "3936d9898f853701942e1bbb619d33e945b2dad08b4a47eae358e0bc10b400d1",
+    "environments/evo1-wheels.lock.json": "f034214d2b73280534659da5fafcd7300071a9459824129f7f10c2cd9e04f9bb"
+  },
+  "supersedes": [],
+  "retrieval": {
+    "terms": [
+      "Evo-1",
+      "flash_attn",
+      "FlashAttention",
+      "flash_attention_2",
+      "RTX 4090",
+      "GPU smoke",
+      "eager fallback"
+    ],
+    "related": [
+      {
+        "relation": "repair",
+        "source": "docs/reports/environments/evo1-flash-attn-20260916/README.md"
+      },
+      {
+        "relation": "prerequisite",
+        "source": "docs/10_vla_platform.md#四卡训练落地前的固定版本检查"
+      }
+    ]
+  }
+}

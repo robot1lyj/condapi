@@ -75,11 +75,13 @@ export RAW_YAM_DATA="$DATA_ROOT/ABC-130k-two-tasks"
 
 2026-09-16 15:50+08只读复核：服务器prefix中LeRobot0.6.2/Torch2.10.0/Transformers5.5.4/Accelerate1.14.0仍可由包metadata确认，Evo config及trainer文件与固定源码哈希一致；`importlib.util.find_spec('flash_attn')`为None。此为模块发现检查，没有执行导入或GPU验收；注意力回退和训练影响归 [10](10_vla_platform.md#四卡训练落地前的固定版本检查)。同次用户`squeue`为空，仅表示该时刻查不到该用户作业，不证明四卡空闲或可分配。原始结果及限制见 [快照](reports/training/redesign-20260916/evo1-readiness-20260916.json)。
 
+2026-09-16后续已修复该环境缺项：安装 `flash_attn==2.8.3` 的精确 Python3.12/Linux x86_64 wheel（Torch2.10/cu12/CXX11 ABI），`pip check`通过；在GPU节点 RTX 4090 上实测 Transformers 与 Evo dispatch 均选择 `flash_attention_2`，前向/反向 finite。下载优先使用阿里云镜像探测并保留源码包；由于系统 CUDA13.2 与 Torch cu128不适合直接编译，实际安装使用上游 issue记录的社区预编译 wheel，并通过镜像传输后做SHA256校验。完整来源、哈希、GPU microbenchmark 和未覆盖的完整模型验收见 [FlashAttention环境报告](reports/environments/evo1-flash-attn-20260916/README.md)。
+
 Evo-1 不安装根目录 OpenPI 依赖，不克隆或更新正在训练的 `condapi-yam`。本地 prefix 为 `/home/wuyan-lyj/.conda/envs/vla-evo1-dev`，服务器 prefix 为 `/home/wuyan/.conda/envs/vla-evo1-train`。环境规格在 `environments/evo1.yml`，核心 Python 依赖和 LeRobot 固定提交在 `environments/evo1-requirements.txt`；本地、服务器 profile 分别为 `configs/environments/evo1-workstation.toml`、`configs/environments/evo1-server.toml`。
 
 固定 LeRobot 源码 `2774d9bddcbbda50e697e162e89e7eaada8d7105`（包版本0.6.2），仅安装 evo1/training extras。Python3.12、FFmpeg7、Torch2.10.0、TorchVision0.25.0、TorchCodec0.10.0 为本次环境组合，不要求其他模型跟随。源码检出 `/home/wuyan-lyj/lerobot-evo1-2774d9b`；安装包在本地 `/home/wuyan-lyj/evo1-install-2774d9b`、服务器 `/home/wuyan/lyj/evo1-install-2774d9b`，均不放入项目 Git。
 
-这套锁定包只适用于 Linux x86_64 / Python3.12，不是 Thor ARM 镜像。完整104个wheel版本、URL和SHA256在 `environments/evo1-wheels.lock.json`；包含从固定提交构建的 LeRobot wheel，不用 PyPI 上同版本号的其他构建替代。profile 的 lock 文件纳入运行计划哈希。
+这套锁定包只适用于 Linux x86_64 / Python3.12，不是 Thor ARM 镜像。完整104个wheel版本、URL和SHA256在 `environments/evo1-wheels.lock.json`；包含从固定提交构建的 LeRobot wheel，不用 PyPI 上同版本号的其他构建替代。profile 的 lock 文件纳入运行计划哈希。上述104个wheel是Evo基础环境锁；本次二进制 FlashAttention 因为是独立的GPU运行时兼容包，未把社区构建物伪装进基础PyPI锁。正式重装须使用报告中记录的完整wheel文件名和SHA256，不得改用未匹配Torch/Python/ABI的构建。
 
 2026-09-08 实际安装中，服务器 pip 直连清华/阿里镜像有大包低速问题，但同一地址的 curl 可明显更快（cuDNN706MB实测约32秒）。使用 `scripts/conda/fetch_locked_wheels.py` 两并发下载并校验，再用 pip 离线安装。服务器本次wheel暂存 `/tmp/evo1-wheels-wuyan-2774d9b`，该目录可能被系统清理，不能作为持久权重目录；固定源码wheel和报告仍在家目录，锁文件随 Git 保存。
 

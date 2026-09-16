@@ -130,7 +130,7 @@ OpenPI官方将全量微调列为>70GB显存量级；本项目FSDP4已实现4×4
 
 Evo-1论文约0.77B参数、VLM初始化加两阶段动作学习，不依赖大规模机器人预训练；Pi本项目实测约3.35B。Evo值得测试成本，但参数比例不保证速度比例，论文结果不能当YAM乐高成绩。“微调Evo”须明确起点：只加载InternVL属于新机器人动作学习，模拟器动作权重不是已会YAM的基座。[Evo-1论文](https://arxiv.org/abs/2511.04555)、[原作者代码](https://github.com/MINT-SJTU/Evo-1)。
 
-Evo专用环境已通过CPU验收，GPU/YAM/Thor仍未接通。复用LeRobot原生trainer/processors；当前官方说明stage1冻结VLM，stage2加载stage1后新建优化器/调度并应用阶段默认规则。默认448图像的计算量须实测，将224源视频放大不增加细节。接入范围与版本差异归 [10](10_vla_platform.md#2026-09-16--evo-1对照实验的范围)，来源为 [LeRobot Evo-1](https://huggingface.co/docs/lerobot/evo1)。
+Evo专用环境已通过CPU验收，并完成FlashAttention GPU kernel/dispatch smoke；完整GPU模型前向反向、YAM、训练和Thor仍未接通。复用LeRobot原生trainer/processors；当前官方说明stage1冻结VLM，stage2加载stage1后新建优化器/调度并应用阶段默认规则。默认448图像的计算量须实测，将224源视频放大不增加细节。接入范围与版本差异归 [10](10_vla_platform.md#2026-09-16--evo-1对照实验的范围)，FlashAttention环境证据见 [报告](reports/environments/evo1-flash-attn-20260916/README.md)，来源为 [LeRobot Evo-1](https://huggingface.co/docs/lerobot/evo1)。
 
 ### 采集期间的Evo-1四卡试验
 

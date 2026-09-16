@@ -1,5 +1,11 @@
 # 07 · 变更历史
 
+## 2026-09-16 · Evo-1 FlashAttention环境修复与GPU实测
+
+- 服务器Evo独立环境原先缺少`flash_attn`，固定LeRobot实现会回退`eager`；优先检查阿里云PyPI镜像并下载源码包留证。由于系统CUDA13.2与Torch2.10/cu128不适合直接编译，采用与Python3.12、Torch2.10、CXX11 ABI匹配的社区预编译FlashAttention2.8.3 wheel，经镜像传输后SHA256校验并离线安装。
+- `pip check`通过；GPU节点RTX4090上的Transformers/Evo检测均为true，Evo实际选择`flash_attention_2`，BF16 attention kernel前向/反向有限。`(1,2048,16,128)`前向P50约0.263ms，强制math-only SDPA约3.733ms，约14.18倍差异；该结果不是完整模型训练吞吐。
+- 保留wheel、源码包、未完成直连下载和Slurm原始日志；移除仅用于探路的`ninja`与`nvidia-cuda-nvcc-cu12`。未加载完整权重、未跑YAM/正式训练、未改Thor或3588。证据与限制归[环境报告](reports/environments/evo1-flash-attn-20260916/README.md)，环境owner归02，Evo接入边界归10。
+
 ## 2026-09-16 · 采集窗口的Evo四卡试验设计
 
 - 根据用户提出“采集期间先训练Evo”，将独立Evo小预算试验提前到采集窗口；现场保留Pi100000基线，服务器训练按时段串行。03记录D1约2小时、冻结VLM→全量两阶段、global32候选、优化器更新预算及后续现场混合适配；均为计划，未筛集或开训。
