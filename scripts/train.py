@@ -123,6 +123,18 @@ def _learning_rate(config: _config.TrainConfig, step: int) -> float:
     return float(jax.device_get(schedule(step)))
 
 
+def _tree_is_finite(tree: Any) -> bool:
+    """Check floating-point leaves on device without copying model tensors to host."""
+    checks = []
+    for leaf in jax.tree.leaves(tree):
+        dtype = getattr(leaf, "dtype", None)
+        if dtype is not None and jnp.issubdtype(dtype, jnp.inexact):
+            checks.append(jnp.all(jnp.isfinite(leaf)))
+    if not checks:
+        return True
+    return bool(np.all(np.asarray(jax.device_get(jnp.stack(checks)))))
+
+
 def _load_weights_and_validate(loader: _weight_loaders.WeightLoader, params_shape: at.Params) -> at.Params:
     """Loads and validates the weights. Returns a loaded subset of the weights."""
     loaded_params = loader.load(params_shape)
@@ -359,6 +371,10 @@ def main(config: _config.TrainConfig):
         batch = next(data_iter)
 
         if (step + 1) % config.save_interval == 0 or step == config.num_train_steps - 1:
+            if not _tree_is_finite(train_state.params):
+                raise FloatingPointError(f"Nonfinite model parameters at checkpoint step {step + 1}")
+            if not _tree_is_finite(train_state.opt_state):
+                raise FloatingPointError(f"Nonfinite optimizer state at checkpoint step {step + 1}")
             _checkpoints.save_state(checkpoint_manager, train_state, data_loader, step + 1)
 
     if metric_logger is not None:

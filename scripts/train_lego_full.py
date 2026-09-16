@@ -16,22 +16,29 @@ from openpi.training import optimizer
 from openpi.training import weight_loaders
 
 
-def make_config(*, resume=False, steps=40_000, run_name="lego_full_b64"):
+def make_config(*, resume=False, steps=40_000, run_name="lego_full_b32"):
     config = configs.get_config("pi05_yam")
-    batch_size = int(os.environ.get("LEGO_BATCH_SIZE", "64"))
-    if batch_size < 1:
-        raise ValueError("LEGO_BATCH_SIZE must be positive")
-    save_interval = int(os.environ.get("LEGO_SAVE_INTERVAL", "5000"))
-    keep_period = int(os.environ.get("LEGO_KEEP_PERIOD", str(save_interval)))
+    batch_size = int(os.environ.get("LEGO_BATCH_SIZE", "32"))
+    num_workers = int(os.environ.get("LEGO_NUM_WORKERS", "2"))
+    save_interval = int(os.environ.get("LEGO_SAVE_INTERVAL", "2000"))
+    keep_period = int(os.environ.get("LEGO_KEEP_PERIOD", "20000"))
+    peak_lr = float(os.environ.get("LEGO_PEAK_LR", "1.25e-5"))
+    decay_lr = float(os.environ.get("LEGO_DECAY_LR", "1.25e-6"))
+    if batch_size < 32:
+        raise ValueError("LEGO_BATCH_SIZE must be at least 32")
+    if num_workers < 0:
+        raise ValueError("LEGO_NUM_WORKERS must be non-negative")
     if save_interval <= 0 or keep_period <= 0:
         raise ValueError("LEGO_SAVE_INTERVAL and LEGO_KEEP_PERIOD must be positive")
+    if peak_lr <= 0 or decay_lr <= 0:
+        raise ValueError("LEGO_PEAK_LR and LEGO_DECAY_LR must be positive")
     return dataclasses.replace(
         config,
         exp_name=run_name,
         checkpoint_base_dir="/home/wuyan/lyj/YAM/training-runs",
         batch_size=batch_size,
         fsdp_devices=4,
-        num_workers=8,
+        num_workers=num_workers,
         ema_decay=None,
         num_train_steps=steps,
         save_interval=save_interval,
@@ -42,8 +49,9 @@ def make_config(*, resume=False, steps=40_000, run_name="lego_full_b64"):
         resume=resume,
         overwrite=False,
         lr_schedule=optimizer.CosineDecaySchedule(
-            warmup_steps=1000, peak_lr=2.5e-5, decay_steps=162_097, decay_lr=2.5e-6
+            warmup_steps=1000, peak_lr=peak_lr, decay_steps=162_097, decay_lr=decay_lr
         ),
+        optimizer=dataclasses.replace(config.optimizer, eps=1e-6),
         weight_loader=weight_loaders.CheckpointWeightLoader(
             "/home/wuyan/.cache/openpi/openpi-assets/checkpoints/pi05_base/params"
         ),
@@ -72,7 +80,7 @@ def require_resume_checkpoint(config):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--resume", action="store_true")
-    parser.add_argument("--run-name", default=os.environ.get("LEGO_RUN_NAME", "lego_full_b64"))
+    parser.add_argument("--run-name", default=os.environ.get("LEGO_RUN_NAME", "lego_full_b32"))
     parser.add_argument("--steps", type=int, default=40_000, help="Cumulative stop step, not additional steps")
     args = parser.parse_args()
     if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_-]{0,95}", args.run_name):
