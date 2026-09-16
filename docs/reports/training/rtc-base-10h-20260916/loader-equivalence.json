@@ -1,0 +1,278 @@
+[
+  {
+    "episode": 3,
+    "frame": 0,
+    "state_actions_equal": true,
+    "images": {
+      "base_0_rgb": [
+        224,
+        224,
+        3
+      ],
+      "left_wrist_0_rgb": [
+        224,
+        224,
+        3
+      ],
+      "right_wrist_0_rgb": [
+        224,
+        224,
+        3
+      ]
+    },
+    "task": "sort the legos into containers by color"
+  },
+  {
+    "episode": 3,
+    "frame": 1560,
+    "state_actions_equal": true,
+    "images": {
+      "base_0_rgb": [
+        224,
+        224,
+        3
+      ],
+      "left_wrist_0_rgb": [
+        224,
+        224,
+        3
+      ],
+      "right_wrist_0_rgb": [
+        224,
+        224,
+        3
+      ]
+    },
+    "task": "sort the legos into containers by color"
+  },
+  {
+    "episode": 3,
+    "frame": 3070,
+    "state_actions_equal": true,
+    "images": {
+      "base_0_rgb": [
+        224,
+        224,
+        3
+      ],
+      "left_wrist_0_rgb": [
+        224,
+        224,
+        3
+      ],
+      "right_wrist_0_rgb": [
+        224,
+        224,
+        3
+      ]
+    },
+    "task": "sort the legos into containers by color"
+  },
+  {
+    "episode": 3,
+    "frame": 3119,
+    "state_actions_equal": true,
+    "images": {
+      "base_0_rgb": [
+        224,
+        224,
+        3
+      ],
+      "left_wrist_0_rgb": [
+        224,
+        224,
+        3
+      ],
+      "right_wrist_0_rgb": [
+        224,
+        224,
+        3
+      ]
+    },
+    "task": "sort the legos into containers by color"
+  },
+  {
+    "episode": 2330,
+    "frame": 0,
+    "state_actions_equal": true,
+    "images": {
+      "base_0_rgb": [
+        224,
+        224,
+        3
+      ],
+      "left_wrist_0_rgb": [
+        224,
+        224,
+        3
+      ],
+      "right_wrist_0_rgb": [
+        224,
+        224,
+        3
+      ]
+    },
+    "task": "sort the legos into containers by color"
+  },
+  {
+    "episode": 2330,
+    "frame": 1405,
+    "state_actions_equal": true,
+    "images": {
+      "base_0_rgb": [
+        224,
+        224,
+        3
+      ],
+      "left_wrist_0_rgb": [
+        224,
+        224,
+        3
+      ],
+      "right_wrist_0_rgb": [
+        224,
+        224,
+        3
+      ]
+    },
+    "task": "sort the legos into containers by color"
+  },
+  {
+    "episode": 2330,
+    "frame": 2761,
+    "state_actions_equal": true,
+    "images": {
+      "base_0_rgb": [
+        224,
+        224,
+        3
+      ],
+      "left_wrist_0_rgb": [
+        224,
+        224,
+        3
+      ],
+      "right_wrist_0_rgb": [
+        224,
+        224,
+        3
+      ]
+    },
+    "task": "sort the legos into containers by color"
+  },
+  {
+    "episode": 2330,
+    "frame": 2810,
+    "state_actions_equal": true,
+    "images": {
+      "base_0_rgb": [
+        224,
+        224,
+        3
+      ],
+      "left_wrist_0_rgb": [
+        224,
+        224,
+        3
+      ],
+      "right_wrist_0_rgb": [
+        224,
+        224,
+        3
+      ]
+    },
+    "task": "sort the legos into containers by color"
+  },
+  {
+    "episode": 4456,
+    "frame": 0,
+    "state_actions_equal": true,
+    "images": {
+      "base_0_rgb": [
+        224,
+        224,
+        3
+      ],
+      "left_wrist_0_rgb": [
+        224,
+        224,
+        3
+      ],
+      "right_wrist_0_rgb": [
+        224,
+        224,
+        3
+      ]
+    },
+    "task": "sort the legos into containers by color"
+  },
+  {
+    "episode": 4456,
+    "frame": 1398,
+    "state_actions_equal": true,
+    "images": {
+      "base_0_rgb": [
+        224,
+        224,
+        3
+      ],
+      "left_wrist_0_rgb": [
+        224,
+        224,
+        3
+      ],
+      "right_wrist_0_rgb": [
+        224,
+        224,
+        3
+      ]
+    },
+    "task": "sort the legos into containers by color"
+  },
+  {
+    "episode": 4456,
+    "frame": 2746,
+    "state_actions_equal": true,
+    "images": {
+      "base_0_rgb": [
+        224,
+        224,
+        3
+      ],
+      "left_wrist_0_rgb": [
+        224,
+        224,
+        3
+      ],
+      "right_wrist_0_rgb": [
+        224,
+        224,
+        3
+      ]
+    },
+    "task": "sort the legos into containers by color"
+  },
+  {
+    "episode": 4456,
+    "frame": 2795,
+    "state_actions_equal": true,
+    "images": {
+      "base_0_rgb": [
+        224,
+        224,
+        3
+      ],
+      "left_wrist_0_rgb": [
+        224,
+        224,
+        3
+      ],
+      "right_wrist_0_rgb": [
+        224,
+        224,
+        3
+      ]
+    },
+    "task": "sort the legos into containers by color"
+  }
+]

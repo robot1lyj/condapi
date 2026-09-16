@@ -710,3 +710,7 @@ text80 实验完成 ONNX、TensorRT 构建和 W 正式回放。完整 policy P50
 按用户要求参考Xense OpenPI JAX与LeRobot Pi05实现前缀条件训练；保留默认普通目标、参数形状、原时间采样和YAM合同，修正参考代码不能直接沿用的delay边界和loss尺度。现有全量入口新增parent权重/配套norm、完整episode选择、短学习率及resume合同保护；新增元数据候选子集工具。操作、数据选择、命令与验证边界归[训练文档](03_training_and_evaluation.md#2026-09-16--pi05-training-time-rtc基础权重与随机10小时)。未启动训练、操作3588或部署Thor；真实GPU训练和trained RTC推理仍待验收。
 
 同轮用户改为官方Pi0.5 base→随机10h RTC全量微调，替代100000→2h适配。入口增加显式新norm目录与subset provenance核对，既有norm工具支持同清单统计，选集工具适配实际v3 conversion manifest；当前推荐10k诊断、30k学习率计划。未实际抽样/统计远端数据或开训。
+
+## 2026-09-16 18:15：启动Pi0.5 base随机10h RTC训练
+
+用户明确要求启动并需resume，监控另交其他agent。Gitea经临时SSH转发获取固定3dd9c82，独立快照与新run；随机468完整episode/1082232帧，subset norm完成及12个样本数值等价。Slurm2140/gpu001 4×4090已完成真实更新至21，loss/梯度有限、约2.27秒/步。每1000保存，初始10000止步，resume批处理与防并发锁已交接；截至快照尚无首个完整检查点，不宣称已验证真实恢复。证据及接管操作归[运行交接](reports/training/rtc-base-10h-20260916/README.md)。未改旧训练、下载、Thor或3588。

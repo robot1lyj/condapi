@@ -1,0 +1,33 @@
+{
+  "observed_at": "2026-09-16T18:15:21.951858+08:00",
+  "job_id": 2140,
+  "node": "gpu001",
+  "run": "lego_pi05_rtc_base_10h_20260916",
+  "code_commit": "3dd9c82046eef4edfda776771290ba9994da30ae",
+  "state": "RUNNING",
+  "latest_metrics": {
+    "gpu_memory_gib": 9.39659070968628,
+    "grad_norm": 0.9214310646057129,
+    "learning_rate": 2.0978950487915426e-07,
+    "loss": 0.06391789764165878,
+    "param_norm": 1802.3865966796875,
+    "samples_per_second": 14.094858727080009,
+    "step": 21,
+    "step_seconds": 2.270331375405658,
+    "time": 1789553721.9518583
+  },
+  "gpu_memory_used_mib": [
+    22826,
+    22824,
+    22824,
+    22824
+  ],
+  "gpu_utilization_percent": [
+    100,
+    100,
+    100,
+    100
+  ],
+  "completed_checkpoint_observed": false,
+  "resume_runtime_tested": false
+}
