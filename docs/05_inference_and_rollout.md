@@ -9,9 +9,9 @@ Thor 系统、容器、Pi0.5 转换和 TensorRT 方案见 [08 · Thor 端侧部�
 必须同时满足：
 
 1. checkpoint 参数元数据完整，且有与训练数据绑定的 `assets/yam/norm_stats.json`。
-2. 配置是 `pi05_yam_lora`（或明确记录的 YAM 配置），数据和 checkpoint 属于同一 14D 合同。
+2. 当前全量微调配置是 `pi05_yam`，数据和 checkpoint 属于同一 14D 合同；旧 LoRA 配置不是默认入口。
 3. Thor 已核验 JetPack/L4T、GPU、Docker runtime 和 Pi 系列容器内的 CUDA/JAX；采用其他候选后端时额外核验其依赖。镜像、只读模型挂载与端口发布按 [08](08_thor_edge_deployment.md) 记录。
-4. 原 JAX checkpoint 与 LoRA、golden 输入/噪声/输出已保存；任何候选后端均需按 [08](08_thor_edge_deployment.md) 做分阶段精度验收，不能只与转换后的 Torch 比较。
+4. 原 JAX checkpoint、golden 输入/噪声/输出已保存；任何候选后端均需按 [08](08_thor_edge_deployment.md) 做分阶段精度验收，不能只与转换后的 Torch 比较。
 5. Thor 本地推理 smoke 确认输入键、输出 shape、有限值和 checkpoint/norm 绑定；随后必须做 3588↔Thor 的真实直连以太网 smoke，验证 observation/action 往返。
 
 ## 2. Thor 本地推理边界
@@ -22,18 +22,18 @@ Thor 系统、容器、Pi0.5 转换和 TensorRT 方案见 [08 · Thor 端侧部�
 3588 camera/state/prompt
   == direct Ethernet / WebSocket or agreed transport ==>
 Thor Pi 系列容器：YamInputs + norm
-  -> 已通过原 JAX 精度验收的本地 policy（runtime 待实测确定）
+  -> 已完成离线原 JAX 对照的 TensorRT policy（当前 100000）
   -> YamOutputs + absolute action
   == direct Ethernet / action response ==>
 3588 controller: 有限的 (50,14) YAM action chunk
 ```
 
-端侧 bundle 必须来自当前 `pi05_yam_lora` checkpoint。成熟案例的 `pi05_libero` 是 7D、horizon 10；不能直接复用其权重资产、TensorRT engine 或 49/54 ms benchmark 来代表 YAM。YAM 需要三路图像、模型内部 horizon 50 和真实 14D 输出，详见 [数据合同](04_data_contracts.md)。
+端侧 bundle 必须来自当前指定的 `pi05_yam` 全量微调 checkpoint。成熟案例的 `pi05_libero` 是 7D、horizon 10；不能直接复用其权重资产、TensorRT engine 或 49/54 ms benchmark 来代表 YAM。YAM 需要三路图像、模型内部 horizon 50 和真实 14D 输出，详见 [数据合同](04_data_contracts.md)。
 
 首个端侧运行顺序固定为：
 
-1. 原 JAX policy 以实际 YAM 样本和同一份噪声数组生成 golden；保留原始 LoRA checkpoint。
-2. 在 Pi 系列容器内核验 Thor 原生 JAX 可行性；若转换到 Torch，构建该系列的新候选镜像并临时验证，先审计 LoRA 合并、FP32 构造/存储、norm 绑定和未量化计算对齐。不同 checkpoint 通过配置选择，不各自建立常驻容器。
+1. 原 JAX policy 以实际 YAM 样本和同一份噪声数组生成 golden；保留原始全量 checkpoint。
+2. 在 Pi 系列容器内核验 Thor 原生 JAX 可行性；若转换到 Torch，先审计 FP32 构造/存储、norm 绑定和未量化计算对齐。不同 checkpoint 通过配置选择，不各自建立常驻容器。
 3. 精度通过后再按延迟需求决定是否导出 engine；FP8/NVFP4 和定制 FP16 是独立候选，必须与原 JAX 比较。
 4. 在 Thor 本地用回放样本直接调用 policy，验证三路图像、14D state、prompt 和 `(50,14)` 输出；再用 3588 的真实 observation 做跨 IPC 直连 smoke。
 
@@ -68,11 +68,21 @@ actions: float array, shape (50, 14), all finite
 - 记录 engine/backend、config、checkpoint、训练 commit、norm 路径、JetPack/L4T、CUDA/TensorRT、warmup、时延和功耗模式；
 - 端侧本地路径通过后，才允许进入低速、限位和人工急停可用的机器人侧测试。
 
-当前仓库尚未提供独立的 YAM Thor 本地 smoke 脚本；先用 `yam_policy_test.py` 验证 14D transform，再在 Thor 容器内补充真实样本和 golden comparison。不要把旧 OpenArm 16D 工具重新作为默认入口。
+当前 100000 服务使用 [serve_pi05_trt.py](../scripts/thor/serve_pi05_trt.py) 与 [smoke_pi05_ws.py](../scripts/thor/smoke_pi05_ws.py)；独立真实回放和原 JAX 对照见 [100000 报告](reports/thor/100000.html)。不要把旧 OpenArm 16D 工具重新作为默认入口。
 
 ## 5. Thor↔3588 网络推理通道
 
-Thor 服务端在 Pi 系列容器内加载当前配置对应的只读 checkpoint，3588 通过 Thor 直连网卡上发布的 policy 端口发送 observation 并接收 action。生产生命周期由 Compose 管理；切换模型时更改配置/checkpoint 并重启该系列服务，重新预热和验收，不假定支持热切换。GPU 接入与端口规则见 [08](08_thor_edge_deployment.md)。以下是容器内手动调试入口，路径均为容器内部路径，不能据此把模型依赖安装到宿主；正式启动命令待 Compose 实施时纳入服务配置：
+Thor 服务端在 Pi 系列容器内加载已验收的 TensorRT engine 与训练 norm，3588 通过 Thor 直连网卡上发布的 policy 端口发送 observation 并接收 action。当前 100000 使用 Docker `pi05-infer`、`--restart unless-stopped`，**尚未实施 Compose**。切换模型时更改配置/checkpoint 并重启该系列服务，重新预热和验收，不假定支持热切换。GPU 接入与端口规则见 [08](08_thor_edge_deployment.md)。
+
+### 2026-09-16 · 100000 服务已启动
+
+- Thor 直连 URL：`ws://192.168.250.1:8000`；只绑定该网口，不绑定 Wi-Fi 管理地址。宿主 `curl http://192.168.250.1:8000/healthz` 返回 `OK`；`docker inspect pi05-infer` 为 running、restart=unless-stopped、当次重启0。运行状态在使用前复核。
+- 入口为 `python /service/serve_pi05_trt.py`，Pi v6 镜像，独立服务目录 `/home/wuyan-lyj/thor/pi/services/pi05-100000-20260916`；容器只读挂载对应 100000 FP32 checkpoint、训练 norm、100000 W/80 engine、真实回放，tokenizer 缓存本地挂载。新请求由 Thor 生成 `(50,32)` FP32 噪声，客户端只发标准 observation；服务关闭 RTC。
+- 握手 metadata 声明 `checkpoint_step=100000`、`backend=tensorrt`、`norm_stats_sha256=044aad51…4dcc`、`engine_sha256=70b366c5…9d54`、`precision=BF16 main/FP32 sensitive+time cache, no quantization, TF32 off`、`action_horizon=50`、`robot_action_dim=14`、`denoising_steps=10`。完整字段及哈希在 [Thor 本机 WebSocket smoke 回执](reports/thor/evidence/20260916/100000-service/local-ws-smoke-20260916.json)。未核实第 0 步相对 observation 的物理时间偏移，不在握手中臆造 `action_dt_s`/时间偏移。
+- 返回 `actions` 为训练逆变换后的 50×14 **绝对目标**，顺序 `[左 6 关节, 左夹爪, 右 6 关节, 右夹爪]`。根据当前数据发布合同，关节数值按弧度、夹爪名义 0 闭 1 开；这是数据语义，不宣称硬件标定/限位。模型输出未裁夹爪；机器人侧不能把本服务输出视为已做安全约束。
+- Thor 本机经直连地址发送一条真实记录的三路 224×224 RGB、14D 状态和 prompt，普通 WebSocket 握手及推理成功，返回有限 50×14。初次 `120W` 的服务端推理 `174.71 ms`、请求往返 `177.07 ms`；按用户 2026-09-16 明确要求切入 **MAXN 推理/测试阶段**，同一路 WebSocket 复测服务端 `106.10 ms`、请求往返 `107.16 ms`，GPU 1575 MHz、EMC 4266 MHz 锁到该模式上限。MAXN 原始回执见 [本轮 MAXN smoke](reports/thor/evidence/20260916/100000-service/local-ws-smoke-maxn-20260916.json)；这仍只是单次在线协议 smoke，不等于离线 180 次 P50 `104.34 ms`，也不是 3588↔Thor 跨 IPC、真机闭环或任务效果验收。
+- **电源阶段规则**：以后推理和测试阶段启用 MAXN＋`jetson_clocks`；准备、下载、安装和日常空闲为 120W/动态调频/自动风扇。当前在 MAXN 测试阶段，Thor 宿主运行 `maxn_session.py -- docker wait pi05-infer` 保持模式；该容器停止或 session 被正常终止时恢复旧时钟配置及 120W。若主机断电/SIGKILL，Python 清理无法执行，重启后先检查 `nvpmodel -q`。**Docker 容器有开机自动重启策略，但 MAXN session 不设开机自启动**；重启机器后再次推理/测试须先启动新的 MAXN 会话并核对模式，不能只看容器在运行。
+- 当前 W/80 engine 仅接受有效 token ≤80 的 prompt；更长文本需为**本次 100000**另建 200 桶引擎，当前没有自动路由。检查日志用 `ssh thor 'docker logs --tail 100 pi05-infer'`；结束本轮推理阶段用 `ssh thor 'docker stop pi05-infer'`，随后核对 `nvpmodel -q` 回到 120W。若只是暂停请求但仍保留容器，MAXN session 仍认为该服务处于推理阶段；正式结束测试应明确停止容器或正常终止 session。
 
 ### 2026-09-14 直连网络基线
 
@@ -83,28 +93,7 @@ Thor 服务端在 Pi 系列容器内加载当前配置对应的只读 checkpoint
 
 直连配置不设 gateway、DNS 或附加 route，`ipv4.never-default=yes`、IPv6 disabled、MTU 1500、自动协商。实机插线后两端均为 `UP/LOWER_UP`，协商 2500 Mb/s、full duplex；双向各 10 次 ICMP 为 0% 丢包，Thor→3588 平均 0.245 ms、3588→Thor 平均 0.235 ms，双方 TCP/22 均可达。两台机器到公网的路由仍分别使用 Wi-Fi，绑定 Wi-Fi 接口的 HTTPS 请求均返回 HTTP 200。Thor 当次 Wi-Fi DHCP 地址为 `192.168.110.250/23`，3588 为 `192.168.110.140/23`；DHCP 地址是临时观察值，直连服务应只使用 `192.168.250.0/24`。
 
-这只证明物理链路、IP 路由和基础 TCP 双向可用；尚未启动 policy 端口，也没有完成 observation/action、模型输出或机器人闭环 smoke。
-
-```bash
-export THOR_REPO_ROOT=/path/to/condapi-on-thor
-export CHECKPOINT_DIR=/path/to/complete/yam_pi05_lora_checkpoint
-export PORT=8000
-
-cd "$THOR_REPO_ROOT"
-```
-
-在容器内前台执行，正式部署由 Compose 承接该进程的日志与生命周期：
-
-```bash
-"$PYTHON" scripts/serve_policy.py \
-  --port "$PORT" \
-  --rtc-mode off \
-  policy:checkpoint \
-  --policy.config=pi05_yam_lora \
-  --policy.dir="$CHECKPOINT_DIR"
-```
-
-`--policy.repo-id` 不是当前 CLI 参数；如服务构造 transform 需要覆盖数据 repo，使用已有的 `--policy-repo-id`，但不能替代 checkpoint 内 norm stats。RTC 首轮保持 `off`，任何 RTC 改动都必须保留普通推理路径并能自动回退。
+这是 2026-09-14 的网络层基线；当时尚未启动 policy 端口，也没有完成 observation/action 或机器人闭环 smoke。上面的 100000 服务是 2026-09-16 的新事实，不能回写为网络基线当天的结果。旧 `scripts/serve_policy.py` 载入的是普通 policy，不是本次 W TensorRT engine，不作为 100000 默认启动入口。
 
 使用真实 `openpi-client` WebSocket 协议（或后续核定的等价直连协议）从 3588 发送三路图像、14D state 和 prompt，检查：
 
@@ -113,7 +102,7 @@ cd "$THOR_REPO_ROOT"
 - metadata 的 `robot_action_dim/output_action_dim=14`、`model_action_dim/action_dim=32`、`action_horizon=50` 与 checkpoint config 一致；
 - 日志记录 commit、checkpoint、config、端口、prompt 和 smoke 结果。
 
-服务停止前保存 Thor 容器日志和跨 IPC 直连 smoke 报告，通过 Compose 停止对应模型服务；容器内前台调试可用 `Ctrl-c`。不要触碰 3588 的系统、控制进程、相机进程或其他用户任务。
+跨 IPC 直连 smoke 由 3588 侧测试者执行并保存报告；本仓库只提供 Thor 推理服务和上述 Thor 本机回执。不要触碰 3588 的系统、控制进程、相机进程或其他用户任务。
 
 ## 6. 停止条件
 

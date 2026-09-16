@@ -1,5 +1,11 @@
 # 07 · 变更历史
 
+## 2026-09-16 · 100000 TensorRT 常驻推理服务启动
+
+- 用户授权实际运行100000，由Thor Pi v6 Docker `pi05-infer` 在直连 `192.168.250.1:8000` 提供普通WebSocket推理，restart unless-stopped，RTC关闭；没有操作3588或改模型。脚本、输入输出和握手归[05](05_inference_and_rollout.md)。
+- 本机真实三相机/14D/prompt请求通过，返回有限50×14绝对目标；120W下本次服务推理174.71ms、请求往返177.07ms，不能冒充MAXN离线104.34ms或跨IPC/闭环验收。原始回执归[证据](reports/thor/evidence/20260916/100000-service/local-ws-smoke-20260916.json)。
+- 用户明确要求以后推理/测试阶段统一MAXN、其他阶段120W；Thor宿主启动`maxn_session.py -- docker wait pi05-infer`，核实MAXN/GPU1575MHz/EMC4266MHz，同WebSocket复测服务106.10ms/往返107.16ms。session随容器正常停止恢复120W，不随Docker开机重启；本轮维持MAXN供用户测试。[MAXN回执](reports/thor/evidence/20260916/100000-service/local-ws-smoke-maxn-20260916.json)。
+
 ## 2026-09-15 · 100000新引擎完成180次MAXN回放
 
 - 以本次权重重建FP32时间缓存、80桶ONNX和非量化强类型TensorRT引擎。180次正式调用P50 104.34ms / P95 105.06ms，全部50×14输出有限，同引擎图/非图零差异；相对本次JAX MAE0.001311、最大差0.010577（原数据数值）。未做闭环任务验收，未部署服务/操作3588。

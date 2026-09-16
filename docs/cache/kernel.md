@@ -4,7 +4,7 @@
 
 ## 当前默认
 
-- 2026-09-08 功能分支收敛为模型配置 + 共享后端：`configs/models/` 选择模型，`adapters/lerobot/` 共用原生入口、`adapters/openpi/` 保留 Pi；撤销按模型的 plugins 目录。系列环境仍独立 Conda，LeRobot 模型不重写 trainer/processor。控制层和合同测试已有，Evo-1/FastWAM/VLA-JEPA 尚未接通 GPU 训练或推理；共享入口不等于模型已支持。架构见 [01](../01_system_architecture.md#多模型接入层)，当前状态和 Evo 接入步骤见 [10](../10_vla_platform.md)。既有 Thor 容器/服务未改动。
+- 2026-09-08 功能分支收敛为模型配置 + 共享后端：`configs/models/` 选择模型，`adapters/lerobot/` 共用原生入口、`adapters/openpi/` 保留 Pi；撤销按模型的 plugins 目录。系列环境仍独立 Conda，LeRobot 模型不重写 trainer/processor。控制层和合同测试已有，Evo-1/FastWAM/VLA-JEPA 尚未接通 GPU 训练或推理；共享入口不等于模型已支持。架构见 [01](../01_system_architecture.md#多模型接入层)，当前状态和 Evo 接入步骤见 [10](../10_vla_platform.md)。
 
 - YAM 双臂当前路线为 Pi0.5 全量微调 / `pi05_yam`，已于2026-09-08启动正式训练，不再把 LoRA 作为默认方案。训练在服务器 GPU 上，关闭 W&B，使用本地日志与实时 HTML 看板；参数、续训和巡检边界见 [训练](../03_training_and_evaluation.md)，实时状态须现场复核。
 - YAM 为 14D `[左6关节, 左夹爪, 右6关节, 右夹爪]`；Pi 路径关节 delta、夹爪 absolute，mask `(6,-1,6,-1)`，内部 32D、horizon 50；这些模型内部规则不套用其他系列。物理单位仍须数据审计，不套用 OpenArm/Piper 合同，见 [数据合同](../04_data_contracts.md)。
@@ -13,7 +13,7 @@
 
 ## 恢复任务
 
-- 2026-09-11 用户确认保留 W 路线，新 Pi0.5 全量微调 checkpoint 优先用 `thor-checkpoint-deploy` 技能准备离线推理候选；不默认后台监听或切换线上模型。步骤、脚本硬编码边界和交付条件见 [checkpoint 交接](../reference/thor/12_checkpoint_handoff.md)。
+- 2026-09-16 用户授权100000 W/80作为 Thor 常驻推理服务：Docker `pi05-infer` 只监听直连 `ws://192.168.250.1:8000`，本机真实WebSocket smoke返回有限50×14绝对目标；初次120W服务174.71ms/往返177.07ms，切MAXN后同协议106.10ms/107.16ms（均单次）。以后推理/测试阶段均MAXN、其他阶段120W；当前宿主MAXN session与运行容器绑定，容器停止正常恢复，但Docker自动重启**不**自动重启MAXN session。3588跨IPC与真机任务尚未验收。握手、指纹、运行/电源检查和回执归[05](../05_inference_and_rollout.md#2026-09-16--100000-服务已启动)，100000转换与离线对照归[交接](../reference/thor/12_checkpoint_handoff.md)。新checkpoint仍先走 `thor-checkpoint-deploy` 离线准备，不能自动切换线上。
 
 - 2026-09-09 用户授权本轮工作树合并，保留 main 的 Pi 全量微调与 5k 续训修复；服务器故障期间不部署。严禁本地训练循环（含 CPU/debug）；只允许轻量配置/协议和看板验证。合并流程归 [10](../10_vla_platform.md)，多模型指标协议归 [11](../11_training_dashboard.md)，操作约束归 `AGENTS.md`。记忆只按当前任务读取摘要和相关章节，必要时展开原文；无默认累计额度，完整证据和待办继续保留，见 [09](../09_memory_system.md)。
 - 2026-09-08 Evo-1和MolmoAct2本地/服务器独立Conda环境均安装并通过CPU检查，两端分别106/108个包版本一致；MolmoAct2已加入同一LeRobot共享后端。普通MolmoAct2不含Think，LoRA与FP32动作专家参数的精度规则不套Pi结论；尚未验收真实YAM模型/GPU训练。环境与动态库配置见 [02](../02_installation_and_environment.md)，实测见 [Evo报告](../reports/environments/evo1-20260908/README.md) / [Molmo报告](../reports/environments/molmoact2-20260908/README.md)，模型特有事项见 [Molmo接入](../reference/molmoact2_integration.md)。

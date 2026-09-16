@@ -1,0 +1,69 @@
+{
+  "observed_at": "2026-09-16T01:50:03.506083+00:00",
+  "url": "ws://192.168.250.1:8000",
+  "status": "passed",
+  "observation_keys": [
+    "observation.state",
+    "prompt",
+    "observation.images.top_rgb",
+    "observation.images.left_rgb",
+    "observation.images.right_rgb"
+  ],
+  "input_state_shape": [
+    14
+  ],
+  "input_images": {
+    "observation.images.top_rgb": [
+      224,
+      224,
+      3
+    ],
+    "observation.images.left_rgb": [
+      224,
+      224,
+      3
+    ],
+    "observation.images.right_rgb": [
+      224,
+      224,
+      3
+    ]
+  },
+  "output_shape": [
+    50,
+    14
+  ],
+  "output_all_finite": true,
+  "server_infer_ms": 174.70888400566764,
+  "roundtrip_ms": 177.07468502339907,
+  "connect_and_handshake_ms": 3.6621219769585878,
+  "metadata": {
+    "robot": "YAM",
+    "hardware_family": "YAM-ABC-compatible",
+    "num_arms": 2,
+    "robot_action_dim": 14,
+    "model_action_dim": 32,
+    "action_horizon": 50,
+    "action_layout": "[left 6 joints, left gripper, right 6 joints, right gripper]",
+    "image_keys": [
+      "observation.images.top_rgb",
+      "observation.images.left_rgb",
+      "observation.images.right_rgb"
+    ],
+    "config": "pi05_yam",
+    "checkpoint_step": 100000,
+    "checkpoint_weights_sha256": "f2ed6d5278d5579f025ffeb66c709fe0c58ce8988312cf322589247ebd2ad746",
+    "checkpoint_metadata_sha256": "2912d15ba42fe0d742b5ac46e88804dacce69644369b4cf9b7405cf7d8fe7247",
+    "norm_stats_sha256": "044aad51d9439e4b69dcf87c2d0f5b22ee077bbd83acf785c034b598fc4d4dcc",
+    "engine_sha256": "70b366c53819a3e77b763f2b4a4b944c83d2577ab32170d0332fd490a0b19d54",
+    "backend": "tensorrt",
+    "precision": "BF16 main compute; FP32 sensitive/time cache; nonquantized; TF32 off",
+    "text_bucket": 80,
+    "denoising_steps": 10,
+    "output_action_dim": 14,
+    "action_mode": "absolute target after checkpoint inverse transforms",
+    "joint_unit": "radian (dataset contract; hardware calibration not claimed)",
+    "gripper_unit": "continuous; nominal 0 closed, 1 open; outputs not clipped",
+    "rtc_mode": "off"
+  }
+}

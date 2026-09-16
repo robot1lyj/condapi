@@ -2,6 +2,47 @@
 
 ## 默认路线与触发
 
+### 2026-09-16 · 100000 已作为 Thor 常驻服务启动
+
+按用户新授权，将已完成 JAX↔PyTorch↔W 对照的 100000 W/80 引擎接入 Pi v6 Docker `pi05-infer`。
+只监听直连 `ws://192.168.250.1:8000`，Docker `--restart unless-stopped`；100000 转换权重、训练 norm、
+engine、服务脚本和本地 tokenizer 缓存按各自路径挂载，未覆盖原件/其他 checkpoint。服务普通 WebSocket
+请求由 Thor 生成采样噪声，RTC 关闭，返回逆变换后的有限 50×14 绝对目标。
+Thor 本机用一条真实三相机/14D/prompt 回放通过协议 smoke：初次120W下服务推理174.71ms、
+请求往返177.07ms；切入MAXN并核实GPU1575MHz/EMC4266MHz后同协议复测106.10ms/107.16ms。
+`/healthz` 为 OK，容器当次 running、restart unless-stopped、重启0。
+两个都是在线服务单次 smoke，不能冒充旧 MAXN 离线 P50，也不证明3588跨 IPC、机械臂闭环或任务效果。
+完整握手、哈希、输入和测试回执归 [05服务 owner](../../05_inference_and_rollout.md#2026-09-16--100000-服务已启动)
+和 [120W原始回执](../../reports/thor/evidence/20260916/100000-service/local-ws-smoke-20260916.json)／
+[MAXN原始回执](../../reports/thor/evidence/20260916/100000-service/local-ws-smoke-maxn-20260916.json)。
+当前仅 W/80；有效 prompt token>80 要重新导出同100000的200桶，不截断。按用户新规则，
+推理/测试阶段均MAXN，其他阶段120W；当前通过Thor宿主 `maxn_session.py -- docker wait pi05-infer`
+维持性能，容器正常停止时恢复120W。Docker自动重启并不自动重启MAXN session，重启后实际推理前须重启会话。
+运行条件：Thor宿主已有 Docker NVIDIA runtime、Pi v6 镜像、下列全部目录和直连 IP；若重建服务容器，
+先确认没有同名运行容器/端口冲突，再按**当前100000**参数启动，不覆盖其他系列：
+
+```bash
+docker run -d --name pi05-infer --restart unless-stopped \
+  --runtime=nvidia --gpus all --network host --ipc=host --shm-size=8g \
+  -e JAX_PLATFORMS=cpu -e OPENPI_DATA_HOME=/cache -e HF_HUB_OFFLINE=1 \
+  -e TORCH_ALLOW_TF32_CUBLAS_OVERRIDE=0 -e PYTHONUNBUFFERED=1 -e PYTHONPATH=/service \
+  -v /home/wuyan-lyj/thor/pi/services/pi05-100000-20260916:/service:ro \
+  -v /home/wuyan-lyj/thor/pi/artifacts:/artifacts:ro \
+  -v /home/wuyan-lyj/thor/pi/checkpoints:/checkpoints:ro \
+  -v /home/wuyan-lyj/thor/pi/cache:/cache \
+  -v /home/wuyan-lyj/thor/pi/test-data:/test-data:ro \
+  openpi-pi:thor-pytorch-onnx-v6-20260907 \
+  python /service/serve_pi05_trt.py \
+    --engine /artifacts/pi05-100000-trt-80-20260915-r1 \
+    --checkpoint /checkpoints/lego-full-20260913/100000-pytorch-fp32 \
+    --norm /checkpoints/lego-full-20260913/100000-pytorch-fp32/assets/yam/norm_stats.json \
+    --warmup-sample /test-data/pi05-100000-replay-20260915/episode-000095-early.npz \
+    --host 192.168.250.1 --port 8000
+```
+
+上面是已执行的 Docker 参数，不是已生成 Compose。服务代码在本仓库 `scripts/thor/serve_pi05_trt.py`、
+普通协议 smoke 在 `scripts/thor/smoke_pi05_ws.py`；后者在独立客户端容器从 Thor 本机访问直连 URL。
+
 ### 2026-09-15 · 100000替代候选转换与离线测试完成
 
 100000直传已于19:32:58 +08完成，退出0；params/assets共17个文件两端SHA-256全部一致。
