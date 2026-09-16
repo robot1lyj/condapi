@@ -301,6 +301,65 @@ class Pi0(_model.BaseModel):
         x_0, _ = jax.lax.while_loop(cond, step, (noise, 1.0))
         return x_0
 
+    def sample_actions_trained_rtc(
+        self,
+        rng: at.KeyArrayLike,
+        observation: _model.Observation,
+        *,
+        previous_actions: _model.Actions | None,
+        delay_steps: int,
+        num_steps: int = 10,
+        noise: at.Float[at.Array, "b ah ad"] | None = None,
+    ) -> _model.Actions:
+        """Sample a postfix conditioned on a clean, committed action prefix.
+
+        previous_actions must already be aligned to the observation and expressed
+        in the same normalized 32D action space as the checkpoint. This is the
+        training-time RTC reference, not the older gradient-guidance RTC path.
+        """
+        if not 0 <= delay_steps <= self.rtc_training_max_delay or delay_steps >= self.action_horizon:
+            raise ValueError("RTC delay exceeds the checkpoint's trained range")
+        if delay_steps == 0:
+            return self.sample_actions(rng, observation, num_steps=num_steps, noise=noise)
+        if previous_actions is None:
+            raise ValueError("RTC previous_actions are required for a nonzero delay")
+        observation = _model.preprocess_observation(None, observation, train=False)
+        batch_size = observation.state.shape[0]
+        if previous_actions.shape != (batch_size, self.action_horizon, self.action_dim):
+            raise ValueError("RTC previous_actions must be aligned H50/32D model actions")
+        if noise is None:
+            noise = jax.random.normal(rng, (batch_size, self.action_horizon, self.action_dim))
+        mask = jnp.arange(self.action_horizon)[None, :] < delay_steps
+        mask = jnp.broadcast_to(mask, (batch_size, self.action_horizon))
+        fixed = mask[..., None]
+        prefix_tokens, prefix_mask, prefix_ar_mask = self.embed_prefix(observation)
+        prefix_attn_mask = make_attn_mask(prefix_mask, prefix_ar_mask)
+        positions = jnp.cumsum(prefix_mask, axis=1) - 1
+        _, kv_cache = self.PaliGemma.llm([prefix_tokens, None], mask=prefix_attn_mask, positions=positions)
+        dt = -1.0 / num_steps
+
+        def step(carry):
+            actions, time = carry
+            token_time = jnp.where(mask, 0.0, time)
+            velocity = self._velocity(
+                observation,
+                actions,
+                token_time,
+                prefix_tokens=prefix_tokens,
+                prefix_mask=prefix_mask,
+                kv_cache=kv_cache,
+            )
+            updated = jnp.where(fixed, previous_actions, actions + dt * velocity)
+            return updated, time + dt
+
+        def cond(carry):
+            _, time = carry
+            return time >= -dt / 2
+
+        initial = jnp.where(fixed, previous_actions, noise)
+        actions, _ = jax.lax.while_loop(cond, step, (initial, 1.0))
+        return actions
+
     def sample_actions_rtc(
         self,
         rng: at.KeyArrayLike,

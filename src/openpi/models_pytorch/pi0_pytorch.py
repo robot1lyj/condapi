@@ -29,8 +29,8 @@ def create_sinusoidal_pos_embedding(
     if dimension % 2 != 0:
         raise ValueError(f"dimension ({dimension}) must be divisible by 2")
 
-    if time.ndim != 1:
-        raise ValueError("The time tensor is expected to be of shape `(batch_size, )`.")
+    if time.ndim not in (1, 2):
+        raise ValueError("The time tensor must be [batch] or [batch, action_horizon].")
 
     dtype = get_safe_dtype(torch.float64, device.type)
     fraction = torch.linspace(0.0, 1.0, dimension // 2, dtype=dtype, device=device)
@@ -38,8 +38,8 @@ def create_sinusoidal_pos_embedding(
 
     # Compute the outer product
     scaling_factor = 1.0 / period * 2 * math.pi
-    sin_input = scaling_factor[None, :] * time[:, None]
-    return torch.cat([torch.sin(sin_input), torch.cos(sin_input)], dim=1)
+    sin_input = scaling_factor * time[..., None]
+    return torch.cat([torch.sin(sin_input), torch.cos(sin_input)], dim=-1)
 
 
 def sample_beta(alpha, beta, bsize, device):
@@ -465,6 +465,49 @@ class PI0Pytorch(nn.Module):
             x_t = x_t + dt * v_t
             time += dt
         return x_t
+
+    @torch.no_grad()
+    def sample_actions_trained_rtc(
+        self, device, observation, *, previous_actions, prefix_mask, noise=None, num_steps=10
+    ) -> Tensor:
+        """Eager trained-RTC reference: clean prefix at t=0, denoise only postfix.
+
+        The prefix is already aligned and normalized to the checkpoint's 32D
+        action space. This is not inference-time gradient guidance.
+        """
+        batch = observation.state.shape[0]
+        horizon, action_dim = self.config.action_horizon, self.config.action_dim
+        if previous_actions.shape != (batch, horizon, action_dim) or prefix_mask.shape != (batch, horizon):
+            raise ValueError("RTC previous actions/mask must match batch, horizon and action dimension")
+        if prefix_mask.dtype != torch.bool:
+            raise ValueError("RTC prefix mask must be boolean")
+        if noise is None:
+            noise = self.sample_noise((batch, horizon, action_dim), device)
+        if noise.shape != previous_actions.shape:
+            raise ValueError("RTC noise shape must equal previous actions shape")
+        images, img_masks, lang_tokens, lang_masks, state = self._preprocess_observation(observation, train=False)
+        prefix_embs, prefix_pad_masks, prefix_att_masks = self.embed_prefix(images, img_masks, lang_tokens, lang_masks)
+        prefix_att_2d_masks = make_att_2d_masks(prefix_pad_masks, prefix_att_masks)
+        prefix_position_ids = torch.cumsum(prefix_pad_masks, dim=1) - 1
+        prefix_att_2d_masks_4d = self._prepare_attention_masks_4d(prefix_att_2d_masks)
+        self.paligemma_with_expert.paligemma.language_model.config._attn_implementation = self.attention_implementation  # noqa: SLF001
+        _, cache = self.paligemma_with_expert.forward(
+            attention_mask=prefix_att_2d_masks_4d,
+            position_ids=prefix_position_ids,
+            past_key_values=None,
+            inputs_embeds=[prefix_embs, None],
+            use_cache=True,
+        )
+        fixed = prefix_mask[..., None]
+        actions = torch.where(fixed, previous_actions, noise)
+        dt = torch.tensor(-1.0 / num_steps, dtype=torch.float32, device=device)
+        time = torch.tensor(1.0, dtype=torch.float32, device=device)
+        for _ in range(num_steps):
+            token_time = torch.where(prefix_mask, 0.0, time)
+            velocity = self.denoise_step(state, prefix_pad_masks, cache, actions, token_time)
+            actions = torch.where(fixed, previous_actions, actions + dt * velocity)
+            time = time + dt
+        return actions
 
     def denoise_step(
         self,

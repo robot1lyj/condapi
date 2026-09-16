@@ -27,6 +27,12 @@ def main():
         row["exact"] and row["finite"] for row in export["wrapper_comparisons"]
     ):
         raise ValueError("Export preparation did not pass its own equivalence checks")
+    if export.get("rtc_mode") == "trained" and (
+        not export.get("jax_comparisons")
+        or not all(row["numeric_gate_1e-4"] for row in export["jax_comparisons"])
+        or not {"previous_actions", "prefix_mask"}.issubset(export.get("onnx_inputs", []))
+    ):
+        raise ValueError("Trained RTC requires original-JAX agreement and dynamic prefix ONNX inputs")
     if export["tf32"] or export["nonfinite_sanitization"]:
         raise ValueError("Non-quantized reference cannot enable TF32 or sanitize non-finite activations")
     if export.get("text_bucket", 200) < 200 and (

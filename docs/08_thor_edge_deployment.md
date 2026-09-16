@@ -2,6 +2,8 @@
 
 逐步安装指导的冷记忆入口：[Thor 安装系列 00](reference/thor/00_start_here.md)。该组按 G0–G5 持有设备预检、ISO/USB 制作、固件/NVMe 安装、宿主/容器检查、Pi 工程闸门及故障交接；本页继续持有版本、精度决策和当前状态。指导 agent 不得把下文安装概览当成跳过目标确认的操作脚本。
 
+训练时 RTC 的完整 Thor 候选（原始 JAX FP32 → PyTorch FP32 → 动态前缀 ONNX/TensorRT → 严格 RTC WebSocket）见 [13 · trained RTC 推理](reference/thor/13_trained_rtc_inference.md)。截至 2026-09-16 已通过隔离容器合约测试，尚无完整 RTC checkpoint 的真实精度/延迟验收；不得把现行 100000 W/80 普通服务称为 RTC 服务。
+
 本页是 NVIDIA Jetson AGX Thor IPC 的端侧系统、Pi0.5 转换/加速和推理验收的唯一 owner。训练仍在服务器 GPU 上进行；3588 IPC 负责相机采集、机械臂驱动、CAN、GUI、home pose、限位和急停，本仓库不读取或修改 3588 的实现。
 
 ## 1. 当前决策

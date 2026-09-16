@@ -41,7 +41,7 @@ def compare_export_reference(path, normalized):
 
 
 class TensorRTModel(torch.nn.Module):
-    def __init__(self, engine_dir):
+    def __init__(self, engine_dir, *, input_names=INPUT_NAMES):
         super().__init__()
         import tensorrt as trt  # noqa: PLC0415
 
@@ -59,6 +59,9 @@ class TensorRTModel(torch.nn.Module):
         if digest(source_report) != report["source_export_report_sha256"]:
             raise ValueError("Source export report fingerprint mismatch")
         export = json.loads(source_report.read_text())
+        self.input_names = tuple(input_names)
+        if ("previous_actions" in self.input_names) != (export.get("rtc_mode") == "trained"):
+            raise ValueError("RTC runtime and exported engine route disagree")
         self.text_bucket = export.get("text_bucket", 200)
         if not 1 <= self.text_bucket <= 200:
             raise ValueError("Unsupported text bucket")
@@ -95,7 +98,9 @@ class TensorRTModel(torch.nn.Module):
                 self.outputs[name] = torch.empty(shape, dtype=dtype, device=self.device)
                 self.context.set_tensor_address(name, self.outputs[name].data_ptr())
         required = {"images", "img_masks", "lang_tokens", "lang_masks", "noise"}
-        if not required.issubset(self.inputs) or not set(self.inputs).issubset(INPUT_NAMES):
+        if "previous_actions" in self.input_names:
+            required |= {"previous_actions", "prefix_mask"}
+        if not required.issubset(self.inputs) or not set(self.inputs).issubset(self.input_names):
             raise ValueError("Engine dropped required model inputs or added unknown inputs")
         if (
             set(self.outputs) != {"actions"}
@@ -152,6 +157,12 @@ class TensorRTModel(torch.nn.Module):
         if self.text_bucket < 200:
             check_text_bucket(observation.tokenized_prompt, observation.tokenized_prompt_mask, self.text_bucket)
         values = dict(zip(INPUT_NAMES, flat_inputs(observation, noise), strict=True))
+        return self.run_flat_inputs(values)
+
+    @torch.no_grad()
+    def run_flat_inputs(self, values):
+        if set(values) != set(getattr(self, "input_names", INPUT_NAMES)):
+            raise ValueError("Input names do not match the engine route")
         keepalive = []
         for name, (shape, dtype) in self.inputs.items():
             value = values[name]

@@ -107,6 +107,13 @@ class WebsocketPolicyServer:
                 raise
 
     def _infer(self, obs: dict, rtc_payload: dict | None) -> tuple[dict, bool, list[str], str | None]:
+        if self._rtc_mode == "trained":
+            if rtc_payload is None:
+                raise RequestError("Trained RTC requires an explicit aligned rtc payload.")
+            try:
+                return self._policy.infer_rtc(obs, rtc_payload), True, [], None
+            except (ValueError, TypeError) as exc:
+                raise RequestError(f"Trained RTC request rejected: {exc}") from exc
         rtc_used = False
         rtc_warnings: list[str] = []
         rtc_error: str | None = None

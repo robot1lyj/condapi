@@ -86,9 +86,13 @@ class GemmaRMSNorm(nn.Module):
         
         #self.dense.to(dtype=torch.bfloat16).to(dtype=torch.float32)
         modulation = self.dense(cond)
-        # Reshape modulation to broadcast properly: [batch, 1, features] for [batch, seq, features]
-        if len(x.shape) == 3:  # [batch, seq, features]
+        # Scalar-time inference uses [B,D]; trained RTC supplies per-token [B,H,D].
+        if x.ndim == 3 and modulation.ndim == 2:
             modulation = modulation.unsqueeze(1)
+        if x.ndim == 3 and modulation.ndim == 3 and (
+            modulation.shape[0] != x.shape[0] or modulation.shape[1] not in (1, x.shape[1])
+        ):
+            raise ValueError("Per-token RTC modulation must match action token shape")
         
         scale, shift, gate = torch.chunk(modulation, 3, dim=-1)
         
