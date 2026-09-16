@@ -1,0 +1,14 @@
+# Same Pi series base; the currently serving 100000 container/image is untouched.
+# Build context contains the explicitly staged files listed below. No model
+# weights, norms, credentials or controller code are baked into this image.
+FROM openpi-pi:thor-pytorch-onnx-v6-20260907
+
+COPY pi0.py /usr/local/lib/python3.12/dist-packages/openpi/models/pi0.py
+COPY pi0_config.py /usr/local/lib/python3.12/dist-packages/openpi/models/pi0_config.py
+COPY rtc_training.py /usr/local/lib/python3.12/dist-packages/openpi/models/rtc_training.py
+COPY pi0_pytorch.py /usr/local/lib/python3.12/dist-packages/openpi/models_pytorch/pi0_pytorch.py
+COPY modeling_gemma.py /usr/local/lib/python3.12/dist-packages/transformers/models/gemma/modeling_gemma.py
+COPY training_config.py /usr/local/lib/python3.12/dist-packages/openpi/training/config.py
+COPY websocket_policy_server.py /usr/local/lib/python3.12/dist-packages/openpi/serving/websocket_policy_server.py
+
+RUN JAX_PLATFORMS=cpu python -c "from openpi.models.pi0 import Pi0; from openpi.models.pi0_config import Pi0Config; from openpi.models_pytorch.pi0_pytorch import PI0Pytorch; from openpi.serving.websocket_policy_server import WebsocketPolicyServer; assert hasattr(Pi0, 'sample_actions_trained_rtc') and hasattr(PI0Pytorch, 'sample_actions_trained_rtc') and hasattr(Pi0Config(), 'rtc_training_max_delay')"

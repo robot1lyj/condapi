@@ -1,6 +1,6 @@
 # 13 · Pi0.5 training-time RTC：Thor 转换与推理候选
 
-2026-09-16 状态：**代码候选与 Thor 隔离容器 CPU 合约测试已完成；尚未取得该训练 run 的完整 RTC checkpoint，未做真实 JAX→Torch→TensorRT 精度/延迟验收，也未启动 RTC 服务。** 现行 `pi05-infer` 的 100000 W/80 服务不变。RTC 新服务预留独立 8001 端口，验收前不得以它替换 8000。
+2026-09-16 状态：**代码候选、Pi 系列 RTC 候选镜像与 Thor 隔离容器 CPU 合约测试已完成；尚未取得该训练 run 的完整 RTC checkpoint，未做真实 JAX→Torch→TensorRT 精度/延迟验收，也未启动 RTC 服务。** 现行 `pi05-infer` 的 100000 W/80 服务不变。RTC 新服务预留独立 8001 端口，验收前不得以它替换 8000。
 
 ## 算法合同：没有兼容降级
 
@@ -24,3 +24,5 @@ RTC WebSocket 用 `{"type":"infer","obs":{...},"rtc":{"delay_steps":d,"target_st
 JAX参考采样 `src/openpi/models/pi0.py::sample_actions_trained_rtc`；Torch eager `src/openpi/models_pytorch/pi0_pytorch.py::sample_actions_trained_rtc`；固定形状 RTC wrapper `scripts/thor/rtc_onnx_sampler.py`；绝对动作/归一化往返 `scripts/thor/rtc_action_space.py`；严格请求与现有 policy transform 复用 `scripts/thor/rtc_policy.py`；TensorRT适配及服务见同目录 `rtc_trt_policy.py`、`serve_pi05_rtc_trt.py`。现有100000 `serve_pi05_trt.py`、旧 W engine、旧 WebSocket `rtc_mode=off` 均未改为 RTC。
 
 2026-09-16 在 Thor 原 Pi v6 镜像的**隔离 CPU 测试容器**覆盖 6 项：标量/逐 token 时间嵌入、adaRMS 逐 token 调制、clean prefix 与十步后缀、eager/wrapper 同值、条件缓存选择、YAM 绝对动作往返和请求 tick 校验；6/6 通过。容器故意不挂 GPU，因此 NVIDIA 启动横幅的 CUDA 初始化提示不是推理故障。它不覆盖真权重、ONNX、TRT、CUDA Graph 或机械臂。首个完整 RTC 保存点到来后再执行上述真实链路，不得用非 RTC 100000 冒充。
+
+同日已在 Thor 用 `scripts/thor/Dockerfile.pi05-rtc` 基于原 Pi v6 镜像构建 `openpi-pi:thor-trained-rtc-candidate-20260916`，镜像 ID `sha256:a6227665c32d1c7b2b7ca01a2d1a29e18d64bf764e5914db6eb06db5419a8e56`。Dockerfile 只 overlay 新的 OpenPI JAX/Torch、配置、Gemma norm 和 WebSocket 源文件，不内置模型/凭据；构建时 RTC 方法 import 检查通过。在新镜像中再次隔离 CPU 测试 6/6、RTC 转换/参考/导出/服务模块 import 通过。构建上下文的具名源文件暂存于 Thor `/home/wuyan-lyj/thor/pi/probes/rtc-candidate-20260916/`；重建时用本仓库同名文件生成上下文，不把旧暂存内容当权威源码。旧 `pi05-infer` 检查仍为 running，镜像仍是 `openpi-pi:thor-pytorch-onnx-v6-20260907`、restart unless-stopped；没有更换、重启或修改原服务。
