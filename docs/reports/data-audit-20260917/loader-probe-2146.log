@@ -1,0 +1,16 @@
+/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/torch/cuda/__init__.py:61: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+Traceback (most recent call last):
+  File "/home/wuyan/lyj/YAM/training-runs/control/yam-loader-probe-20260917/probe.py", line 298, in <module>
+  File "/home/wuyan/lyj/YAM/training-runs/control/yam-loader-probe-20260917/probe.py", line 264, in main
+  File "/home/wuyan/lyj/YAM/training-runs/control/yam-loader-probe-20260917/probe.py", line 32, in digest
+  File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/pathlib.py", line 1013, in open
+OSError: [Errno 24] Too many open files: '/home/wuyan/lyj/YAM/YAM_data/processed/lego_lerobot_v1_20260907/train/meta/info.json'
+Exception ignored in atexit callback: <bound method TemporaryDirectory.cleanup of <TemporaryDirectory '/tmp/tmppw9z540q'>>
+Traceback (most recent call last):
+  File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/tempfile.py", line 954, in cleanup
+  File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/tempfile.py", line 934, in _rmtree
+  File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/shutil.py", line 759, in rmtree
+  File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/shutil.py", line 703, in _rmtree_safe_fd
+  File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/shutil.py", line 674, in _rmtree_safe_fd
+OSError: [Errno 24] Too many open files: '/tmp/tmppw9z540q'
