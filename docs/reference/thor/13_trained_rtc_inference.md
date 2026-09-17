@@ -1,6 +1,6 @@
 # 13 · Pi0.5 training-time RTC：Thor 转换与推理候选
 
-2026-09-17 状态：**代码候选、Pi 系列 RTC 候选镜像与 Thor 隔离容器 CPU 合约测试已完成；服务器 20000 保存点已确认提交，正在向 Thor 续传，尚未完成真实 JAX→Torch→TensorRT 精度/延迟验收，也未启动 RTC 服务。** 现行 `pi05-infer` 的 100000 W/80 服务不变。RTC 新服务预留独立 8001 端口，验收前不得以它替换 8000。
+2026-09-17 状态：**代码候选、Pi 系列 RTC 候选镜像与 Thor 隔离容器 CPU 合约测试已完成；服务器 20000 保存点已完整传至 Thor 并核对来源，尚未完成真实 JAX→Torch→TensorRT 精度/延迟验收，也未启动 RTC 服务。** 现行 `pi05-infer` 的 100000 W/80 服务不变。RTC 新服务预留独立 8001 端口，验收前不得以它替换 8000。
 
 ## 算法合同：没有兼容降级
 
@@ -31,9 +31,9 @@ JAX参考采样 `src/openpi/models/pi0.py::sample_actions_trained_rtc`；Torch e
 
 同日已在 Thor 用 `scripts/thor/Dockerfile.pi05-rtc` 基于原 Pi v6 镜像构建 `openpi-pi:thor-trained-rtc-candidate-20260916`，镜像 ID `sha256:a6227665c32d1c7b2b7ca01a2d1a29e18d64bf764e5914db6eb06db5419a8e56`。Dockerfile 只 overlay 新的 OpenPI JAX/Torch、配置、Gemma norm 和 WebSocket 源文件，不内置模型/凭据；构建时 RTC 方法 import 检查通过。在新镜像中再次隔离 CPU 测试 6/6、RTC 转换/参考/导出/服务模块 import 通过。构建上下文的具名源文件暂存于 Thor `/home/wuyan-lyj/thor/pi/probes/rtc-candidate-20260916/`；重建时用本仓库同名文件生成上下文，不把旧暂存内容当权威源码。旧 `pi05-infer` 检查仍为 running，镜像仍是 `openpi-pi:thor-pytorch-onnx-v6-20260907`、restart unless-stopped；没有更换、重启或修改原服务。
 
-## 2026-09-17 · 20000 保存点首次接入中
+## 2026-09-17 · 20000 保存点首次接入
 
-服务器原件：`yam-server:/home/wuyan/lyj/YAM/training-runs/pi05_yam/lego_pi05_rtc_base_10h_20260916/20000`，`_CHECKPOINT_METADATA` 已含 `commit_timestamp_nsecs=1789600432477436453`，params 16个文件约12.44GB；本次只取 params/assets/完成元数据与训练合同，不取 train_state。Thor 独立目标：`/home/wuyan-lyj/thor/pi/checkpoints/lego-pi05-rtc-base-10h-20260916/20000`，六个大 OCDBT 文件经本机 SSH agent 转发、Thor 直接从服务器 `rsync --partial --append-verify` 并行续传。源端仍在训练，选旧 20000 避开最新保存窗口；传输中不能恢复/转换。`thor-rtc-20000` 当前线程心跳负责续传、完成后核验与继续测试；状态不变静默，完成后停用。
+服务器原件：`yam-server:/home/wuyan/lyj/YAM/training-runs/pi05_yam/lego_pi05_rtc_base_10h_20260916/20000`，`_CHECKPOINT_METADATA` 含 `commit_timestamp_nsecs=1789600432477436453`，params 16个文件；本次只取 params/assets/完成元数据与训练合同，不取 train_state。Thor 独立目标：`/home/wuyan-lyj/thor/pi/checkpoints/lego-pi05-rtc-base-10h-20260916/20000`。六个大 OCDBT 文件经本机 SSH agent 转发、Thor 直接从服务器 `rsync --partial --append-verify` 并行续传；传输期间将管理 Wi-Fi 从2.4 GHz切为5 GHz，完成后两端 params/assets 共17个文件、文件字节总和 `12440600720`、逐文件 SHA256 全部一致，`_CHECKPOINT_METADATA` SHA256 均为 `68188c321087001dec95ca5b4cd0ca10fe485407c912e75c130106c4e5d4faad`，训练合同 SHA256 均为 `ef773631bb5dac8d4de055dc1d7161cf57c691b68ae50ec983e3a6297cb5ed5f`。服务器与Thor `du -sb` 目录大小因文件系统目录项开销不同而略有差异，不是权重差异。源端仍在训练，选旧 20000 避开最新保存窗口；后续真权重恢复/审计与转换尚未完成。`thor-rtc-20000` 当前线程心跳继续测试，状态不变静默，全部完成后停用。
 
 发现一个可验证的 norm 序列化差异：训练源 `training_contract.json` 的 norm SHA256 是 `606d5c69e56aadb273ed3882ba9b62e11978a4222d8ff1e827e541bddd112893`；保存点 `assets/yam/norm_stats.json` 是 `b38ac082a729a4825c1a946c965183125382f10ccb5a75da89c2427019d1fefe`。服务器 `cmp` 核实前3416字节逐字节相同，训练源只多一个末尾换行；不是 norm 数值改变。`rtc_norm_identity.py` 仅接受原字节完全一致或**恰好少这一个末尾换行**，分别记录两种哈希；不接受任意 JSON 语义近似。旧 100000 norm 不能用于本次 RTC 回放。
 

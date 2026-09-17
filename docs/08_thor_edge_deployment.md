@@ -232,6 +232,12 @@ PR #960 作者给出的局部 checkpoint 对照如下；样本范围、硬件及
 
 ## 7. 当前状态
 
+### 2026-09-17 · Thor 管理 Wi-Fi 切换为 5 GHz
+
+用户指定切换到与本机相同的 `琶洲模方`（无 `_2.4G` 后缀）。Thor `wlP1p1s0` 实测连接该 SSID 的 5745 MHz BSSID，IPv4 DHCP **仍为** `192.168.110.250/23`；本机 `thor` SSH 别名和无线 NoMachine 目标 IP 因此暂不需改，但 DHCP 不是固定地址保证。新系统连接 `thor-5g` 已保存且 autoconnect=yes、priority=200、retries=0（无限）、powersave=disable，当前 `iw` 亦显示 `Power save: off`；旧 `thor-admin-wifi`（`琶洲模方_2.4G`，priority=100）保留作回退。首次交互连接因旧 Wi-Fi 先断开、密码提示无法送达而失败，旧连接自动恢复；预存新连接凭据后第二次切换成功，临时5分钟回退 timer 已停用。**不在文档或仓库记录密码**，开机自动回连尚未重启验证。
+
+Thor 直连网口仍是 `192.168.250.1/24`，其邻居 `192.168.250.2` 可达、两次 ping 均成功且约0.13 ms；没有修改3588控制/采集/网络配置。Thor 20000 RTC checkpoint 传输在切换后续传至目标参数字节数约12.44 GB，源目标 SHA 核对另见 [RTC冷手册](reference/thor/13_trained_rtc_inference.md)；旧 `pi05-infer` 容器保持 running。切换前 Thor 从训练服务器和本机接收文件的实测吞吐均约1 MB/s，切到5 GHz 后剩余传输明显加快；链路协商速率不是实测文件吞吐，不将具体无线干扰或路由策略写成已定位根因。
+
 ### 2026-09-16 · 100000 Pi 系列推理服务
 
 Thor Pi v6 容器 `pi05-infer` 已运行于直连 `ws://192.168.250.1:8000`，Docker restart unless-stopped；
