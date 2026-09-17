@@ -54,9 +54,14 @@ def main():
         parser.error("Use a new immutable conversion directory")
     contract = json.loads(args.training_contract.read_text())
     delay, norm = validate(args.checkpoint, contract)
-    mapper = args.converter or Path(__file__).resolve().parents[2] / "adapters/openpi/convert_jax_model_to_pytorch.py"
-    if not mapper.is_file() and args.converter is None:
-        mapper = Path(__file__).with_name("convert_jax_model_to_pytorch.py")
+    script = Path(__file__).resolve()
+    repo_mapper = (
+        script.parents[2] / "adapters/openpi/convert_jax_model_to_pytorch.py"
+        if len(script.parents) > 2 else None
+    )
+    mapper = args.converter or (
+        repo_mapper if repo_mapper and repo_mapper.is_file() else script.with_name("convert_jax_model_to_pytorch.py")
+    )
     if not mapper.is_file():
         parser.error("The audited converter is not mounted in this container")
     subprocess.run(
