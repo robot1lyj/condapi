@@ -33,10 +33,15 @@ def validate_request(observation, rtc, *, max_delay):
     delay = rtc.get("delay_steps")
     if isinstance(delay, bool) or not isinstance(delay, int) or not 0 <= delay <= max_delay or delay >= 50:
         raise ValueError("RTC delay_steps exceeds trained range")
+    observed_tick = rtc.get("observation_policy_tick")
     target_tick, committed_tick = rtc.get("target_start_tick"), rtc.get("committed_start_tick")
+    if isinstance(observed_tick, bool) or not isinstance(observed_tick, int) or observed_tick < 0:
+        raise ValueError("RTC observation_policy_tick must be a nonnegative 30Hz policy tick")
     if isinstance(target_tick, bool) or not isinstance(target_tick, int) or target_tick < 0:
-        raise ValueError("RTC target_start_tick must be a nonnegative control tick")
-    if delay and committed_tick != target_tick:
+        raise ValueError("RTC target_start_tick must be a nonnegative 30Hz policy tick")
+    if target_tick != observed_tick:
+        raise ValueError("RTC action[0] must target the observation's policy tick")
+    if committed_tick != target_tick:
         raise ValueError("RTC committed_start_tick must equal target_start_tick")
     absolute_prefix = np.asarray(rtc.get("committed_actions"), dtype=np.float32)
     if delay == 0 and absolute_prefix.size == 0:

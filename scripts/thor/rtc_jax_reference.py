@@ -13,6 +13,7 @@ import jax.numpy as jnp
 import numpy as np
 from rtc_action_space import encode_committed_actions
 from rtc_provenance import source_params_sha256
+from rtc_norm_identity import checkpoint_norm_identity
 
 from openpi.models import model as model_api
 from openpi.policies import policy_config
@@ -36,8 +37,7 @@ def main():
     if not 0 < max_delay < 50:
         parser.error("Original checkpoint must have trained RTC delay")
     norm_path = args.checkpoint / "assets" / "yam" / "norm_stats.json"
-    if digest(norm_path) != contract["norm_sha256"]:
-        raise ValueError("JAX checkpoint norm differs from training contract")
+    norm_identity = checkpoint_norm_identity(norm_path, contract["norm_sha256"])
     case_set = json.loads(args.cases.read_text())
     if case_set.get("source_kind") != "real_yam_recording" or case_set.get("norm_stats_sha256") != digest(norm_path):
         raise ValueError("RTC reference needs real cases and matching norm")
@@ -65,7 +65,11 @@ def main():
         ):
             raise ValueError("RTC JAX case provenance mismatch")
         delay = row["delay_steps"]
-        if not 0 <= delay <= max_delay or row["target_start_tick"] != row["committed_start_tick"]:
+        if (
+            not 0 <= delay <= max_delay
+            or row["observation_policy_tick"] != row["target_start_tick"]
+            or row["target_start_tick"] != row["committed_start_tick"]
+        ):
             raise ValueError("RTC JAX case has invalid delay or tick alignment")
         physical_prefix = np.load(prefix_path, allow_pickle=False)
         if physical_prefix.shape != (delay, 14) or not np.isfinite(physical_prefix).all():
@@ -97,6 +101,7 @@ def main():
         "source_params_files_sha256": source_params_sha256(args.checkpoint),
         "training_contract_sha256": digest(args.training_contract),
         "norm_stats_sha256": digest(norm_path),
+        "norm_identity": norm_identity,
         "cases_sha256": digest(args.cases),
         "noise_seed": 0,
         "precision": "FP32 original checkpoint/compute",

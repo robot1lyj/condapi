@@ -80,6 +80,7 @@ def main():
         committed = np.load(prefix_path, allow_pickle=False)
         rtc = {
             "delay_steps": row["delay_steps"],
+            "observation_policy_tick": row["observation_policy_tick"],
             "target_start_tick": row["target_start_tick"],
             "committed_start_tick": row["committed_start_tick"],
             "committed_actions": committed,

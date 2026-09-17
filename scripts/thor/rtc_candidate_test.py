@@ -1,6 +1,9 @@
 """Small CPU contract tests; no model checkpoint, GPU run, or training loop."""
 
+import hashlib
+import tempfile
 import unittest
+from pathlib import Path
 from types import SimpleNamespace
 
 import numpy as np
@@ -12,6 +15,7 @@ from rtc_action_space import encode_committed_actions
 from rtc_onnx_sampler import CachedRtcProjection
 from rtc_onnx_sampler import Pi05RtcOnnxSampler
 from rtc_onnx_sampler import validate_trained_prefix
+from rtc_norm_identity import checkpoint_norm_identity
 from rtc_policy import validate_request
 
 from openpi.models_pytorch.pi0_pytorch import PI0Pytorch
@@ -54,6 +58,20 @@ class FakeModel(nn.Module):
 
 
 class RtcCandidateTest(unittest.TestCase):
+    def test_norm_identity_allows_only_the_missing_final_newline(self):
+        source = b'{"action":{"mean":[1]}}\n'
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "norm_stats.json"
+            path.write_bytes(source[:-1])
+            expected = hashlib.sha256(source).hexdigest()
+            self.assertEqual(
+                checkpoint_norm_identity(path, expected)["identity_relation"],
+                "checkpoint_omitted_one_final_newline",
+            )
+            path.write_bytes(b'{"action":{"mean":[2]}}')
+            with self.assertRaises(ValueError):
+                checkpoint_norm_identity(path, expected)
+
     def test_physical_request_requires_aligned_committed_ticks(self):
         obs = {
             "observation.state": np.zeros(14, dtype=np.float32),
@@ -63,6 +81,7 @@ class RtcCandidateTest(unittest.TestCase):
         }
         rtc = {
             "delay_steps": 3,
+            "observation_policy_tick": 103,
             "target_start_tick": 103,
             "committed_start_tick": 103,
             "committed_actions": np.ones((3, 14), dtype=np.float32),
@@ -70,11 +89,14 @@ class RtcCandidateTest(unittest.TestCase):
         state, prefix, delay = validate_request(obs, rtc, max_delay=10)
         self.assertEqual((state.shape, prefix.shape, delay), ((14,), (3, 14), 3))
         _, empty, zero_delay = validate_request(
-            obs, {"delay_steps": 0, "target_start_tick": 103, "committed_actions": []}, max_delay=10
+            obs, {"delay_steps": 0, "observation_policy_tick": 103, "target_start_tick": 103,
+                  "committed_start_tick": 103, "committed_actions": []}, max_delay=10
         )
         self.assertEqual((empty.shape, zero_delay), ((0, 14), 0))
         with self.assertRaisesRegex(ValueError, "committed_start_tick"):
             validate_request(obs, {**rtc, "committed_start_tick": 102}, max_delay=10)
+        with self.assertRaisesRegex(ValueError, r"action\[0\]"):
+            validate_request(obs, {**rtc, "target_start_tick": 104, "committed_start_tick": 104}, max_delay=10)
         with self.assertRaisesRegex(ValueError, "trained range"):
             validate_request(obs, {**rtc, "delay_steps": 11}, max_delay=10)
         with self.assertRaisesRegex(ValueError, "committed_actions"):

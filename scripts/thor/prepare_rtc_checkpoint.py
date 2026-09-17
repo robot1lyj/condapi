@@ -13,6 +13,7 @@ import subprocess
 import sys
 
 from rtc_provenance import source_params_sha256
+from rtc_norm_identity import checkpoint_norm_identity
 
 
 def sha256(path):
@@ -25,8 +26,9 @@ def validate(checkpoint, contract):
     if not (checkpoint / "params" / "_METADATA").is_file():
         raise ValueError("Incomplete Orbax params: missing _METADATA")
     norm = checkpoint / "assets" / "yam" / "norm_stats.json"
-    if not norm.is_file() or sha256(norm) != contract.get("norm_sha256"):
-        raise ValueError("Checkpoint's YAM norm does not match RTC training contract")
+    if not norm.is_file():
+        raise ValueError("Checkpoint's YAM norm is missing")
+    checkpoint_norm_identity(norm, contract.get("norm_sha256"))
     model = contract.get("model", {})
     delay = model.get("rtc_training_max_delay")
     if (
@@ -46,12 +48,17 @@ def main():
     parser.add_argument("--checkpoint", type=Path, required=True)
     parser.add_argument("--training-contract", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--converter", type=Path, help="Audited JAX-to-PyTorch converter; defaults to repo or sibling")
     args = parser.parse_args()
     if args.output.exists():
         parser.error("Use a new immutable conversion directory")
     contract = json.loads(args.training_contract.read_text())
     delay, norm = validate(args.checkpoint, contract)
-    mapper = Path(__file__).resolve().parents[2] / "adapters/openpi/convert_jax_model_to_pytorch.py"
+    mapper = args.converter or Path(__file__).resolve().parents[2] / "adapters/openpi/convert_jax_model_to_pytorch.py"
+    if not mapper.is_file() and args.converter is None:
+        mapper = Path(__file__).with_name("convert_jax_model_to_pytorch.py")
+    if not mapper.is_file():
+        parser.error("The audited converter is not mounted in this container")
     subprocess.run(
         [sys.executable, str(mapper), "--checkpoint_dir", str(args.checkpoint), "--config_name", "pi05_yam",
          "--output_path", str(args.output), "--precision", "float32"],
@@ -69,6 +76,7 @@ def main():
         "source_params_files_sha256": source_params_sha256(args.checkpoint),
         "training_contract_sha256": sha256(args.training_contract),
         "norm_stats_sha256": sha256(norm),
+        "norm_identity": checkpoint_norm_identity(norm, contract["norm_sha256"]),
         "conversion_audit_sha256": sha256(args.output / "conversion_audit.json"),
         "model_weights_sha256": sha256(args.output / "model.safetensors"),
         "precision": "FP32 preserved; BF16 compute is a later separately compared candidate",

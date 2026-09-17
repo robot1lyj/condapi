@@ -76,12 +76,14 @@ def main():
         "engine_sha256": report["engine_sha256"],
         "compute_dtype": export["compute_dtype"],
         "action_horizon": 50,
+        "action_dt_s": 1 / 30,
         "action_dim": 14,
         "action_mode": "absolute physical target after checkpoint inverse transforms",
         "joint_unit": "radian (dataset contract; hardware calibration not claimed)",
         "gripper_unit": "continuous; nominal 0 closed, 1 open; outputs not clipped",
-        "target_tick_semantics": "controller tick; committed_start_tick must equal target_start_tick",
-        "first_step_observation_offset_s": None,
+        "target_tick_semantics": "30Hz policy tick; observation_policy_tick == target_start_tick == committed_start_tick",
+        "action_0_relative_to_observation_policy_tick": 0,
+        "camera_exposure_to_policy_tick_offset_s": None,
     }
     logging.info("READY ws://%s:%d trained-RTC", args.host, args.port)
     WebsocketPolicyServer(serving, host=args.host, port=args.port, rtc_mode="trained", metadata=metadata).serve_forever()

@@ -54,6 +54,8 @@ model action: internal 32D, horizon 50
 policy output: real YAM 14D
 ```
 
+RTC时间索引：当前 `create_torch_dataset` 按 `[0,1,…,49]/fps` 加载50步 `action`，YAM发布集为30fps，故样本中 `action[0]` 与 observation/state 对齐同一 LeRobot 行时间戳，步距约33.33ms。这是训练数据索引，不证明真实部署中相机曝光→控制命令的物理延迟为0。3588异步部署应把同步观测归属的30Hz policy tick 显式传给Thor，完整协议见 [RTC冷手册](reference/thor/13_trained_rtc_inference.md)。
+
 YAM 与 YAM-ABC 使用同硬件配置；本仓库只实现训练数据和 policy transform，不实现机械臂控制。YAM state/action 的物理单位、正负方向、夹爪开闭范围必须从当前数据的 `meta/info.json`、feature metadata 和样本审计中确认；在证据完成前不写成 degree、弧度或归一化值。
 
 ## 图像和 prompt
