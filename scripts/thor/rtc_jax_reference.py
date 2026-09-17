@@ -11,8 +11,8 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 from rtc_action_space import encode_committed_actions
-from rtc_provenance import source_params_sha256
 from rtc_norm_identity import checkpoint_norm_identity
+from rtc_provenance import source_params_sha256
 
 from openpi.models import model as model_api
 from openpi.policies import policy_config
@@ -54,6 +54,9 @@ def main():
     train = dataclasses.replace(train, model=dataclasses.replace(
         train.model, dtype="float32", rtc_training_max_delay=max_delay,
     ))
+    use_quantiles = train.data.create(train.assets_dirs, train.model).use_quantile_norm
+    if not use_quantiles:
+        raise ValueError("pi05_yam RTC reference must use quantile normalization")
     stats = normalize.deserialize_json(norm_path.read_text())
     policy = policy_config.create_trained_policy(
         train, args.checkpoint, norm_stats=stats, jax_param_dtype="checkpoint",
@@ -87,7 +90,7 @@ def main():
         state = observation["observation.state"]
         absolute = np.broadcast_to(state, (50, 14)).copy()
         absolute[:delay] = physical_prefix
-        previous = encode_committed_actions(absolute, state, stats)
+        previous = encode_committed_actions(absolute, state, stats, use_quantiles=use_quantiles)
         transformed = policy._input_transform(dict(observation))  # noqa: SLF001
         inputs = jax.tree.map(lambda x: jnp.asarray(x)[None], transformed)
         model_obs = model_api.Observation.from_dict(inputs)
@@ -115,6 +118,7 @@ def main():
         "noise_seed": 0,
         "num_steps": args.num_steps,
         "precision": "FP32 original checkpoint/compute",
+        "prefix_use_quantiles": use_quantiles,
         "jax_default_matmul_precision": "highest",
         "cases": results,
     }, ensure_ascii=False, indent=2) + "\n")

@@ -9,14 +9,35 @@ import time
 
 import jax
 import numpy as np
-import torch
-
 from rtc_action_space import encode_committed_actions
 from rtc_onnx_sampler import Pi05RtcOnnxSampler
 from rtc_onnx_sampler import RtcFlatSamplerAdapter
 from rtc_onnx_sampler import validate_trained_prefix
+import torch
 
 from openpi.models import model as model_api
+
+JOINT_INDICES = np.asarray([0, 1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12])
+
+
+def reject_large_joint_step(actions, state, delay, *, max_step_rad):
+    """Fail closed on new RTC joint targets; the committed prefix is not rewritten."""
+    if not np.isfinite(max_step_rad) or max_step_rad <= 0:
+        raise ValueError("RTC joint-step limit must be positive and finite")
+    if delay:
+        steps = np.diff(actions[delay - 1 :, JOINT_INDICES], axis=0)
+        start_tick = delay
+    else:
+        steps = np.diff(np.vstack((state[JOINT_INDICES], actions[:, JOINT_INDICES])), axis=0)
+        start_tick = 0
+    magnitude = np.abs(steps)
+    worst = np.unravel_index(int(np.argmax(magnitude)), magnitude.shape)
+    if magnitude[worst] > max_step_rad:
+        raise ValueError(
+            f"RTC joint-step guard rejected action[{start_tick + worst[0]}] "
+            f"joint[{JOINT_INDICES[worst[1]]}]: {magnitude[worst]:.6f} rad "
+            f"> {max_step_rad:.6f} rad/tick"
+        )
 
 
 def validate_request(observation, rtc, *, max_delay):
@@ -78,7 +99,8 @@ class RtcEagerAdapter:
 class TrainedRtcInference:
     """Policy transforms + a dedicated RTC sampler; the ordinary path is untouched."""
 
-    def __init__(self, policy, norm_stats, *, max_delay, text_bucket=200, num_steps=10, sampler=None):
+    def __init__(self, policy, norm_stats, *, max_delay, use_quantiles, text_bucket=200,
+                 num_steps=10, sampler=None, max_joint_step_rad=None):
         if not 0 < max_delay < 50:
             raise ValueError("A trained RTC checkpoint must specify 0 < max_delay < 50")
         self.policy = policy
@@ -88,7 +110,10 @@ class TrainedRtcInference:
             raise ValueError("RTC inference supports 5, 6, 7, 8 or 10 denoising steps")
         self.num_steps = num_steps
         self.device = torch.device(policy._pytorch_device)  # noqa: SLF001
-        self.use_quantiles = False  # pi05_yam contract; assert before serving a different config.
+        if not isinstance(use_quantiles, bool):
+            raise ValueError("RTC prefix normalization mode must be explicit")
+        self.use_quantiles = use_quantiles
+        self.max_joint_step_rad = max_joint_step_rad
         self.noise_rng = np.random.default_rng()
         self.sampler = sampler or RtcFlatSamplerAdapter(
             Pi05RtcOnnxSampler(
@@ -136,6 +161,8 @@ class TrainedRtcInference:
         # The controller's already committed commands are authoritative, not a
         # floating-point normalize/inverse-normalize round trip.
         actions[:delay] = physical_prefix
+        if self.max_joint_step_rad is not None:
+            reject_large_joint_step(actions, state, delay, max_step_rad=self.max_joint_step_rad)
         outputs["actions"] = actions
         outputs["policy_timing"] = {"infer_ms": infer_ms}
         return outputs

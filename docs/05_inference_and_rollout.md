@@ -86,6 +86,8 @@ Thor 服务端在 Pi 系列容器内加载已验收的 TensorRT engine 与训练
 
 ### 2026-09-17 · 固定8000的 RTC 30000 服务
 
+> 2026-09-17 晚间勘误：本节记录的是**事故前历史**，不是当前在线状态。旧 RTC 前缀误用均值/标准差，而训练/输入transform使用分位数；JAX旧对照也有同一错误。`pi05-rtc-infer` 已停止，8000无监听、Thor日常120W。正确前缀下的事故回放和9例重测、运行闸门见[事故报告](reports/thor/rtc-prefix-quantile-incident-20260917.md)；不得直接重启旧容器或旧10步回退。
+
 - 旧100000容器已停、权重与引擎保留。当前 `pi05-rtc-infer` 只监听 `ws://192.168.250.1:8000`；曾短暂试验的8001已停且无监听。后续Pi系列模型共用此固定URL，通过握手metadata区分实际 checkpoint/backend/模式。
 - 握手 `rtc_mode=trained`、`backend=tensorrt_cuda_graph`、`rtc_max_delay_steps=10`，`checkpoint_weights_sha256=fc60f64cfd05906edda9f446e113c159e1df6ece4ea479e27ba22b01791d5f60`、`norm_stats_sha256=b38ac082a729a4825c1a946c965183125382f10ccb5a75da89c2427019d1fefe`，`action_dt_s=1/30`、第0步相对**observation数据行的30Hz policy tick**为0；相机曝光到物理控制tick的偏移未知。输出为 `(50,14)` 绝对目标，关节rad、夹爪连续值名义0闭1开，未裁剪。
 - 2026-09-17 18:40 CST，用户指定的7步版本已替换固定8000上的旧10步FP32服务：checkpoint仍为30000，FP32权重、TF32计算、80-token文本桶、时间条件缓存、CUDA Graph，握手 `denoising_steps=7`、`precision_mode=fp32_weights_tf32_compute`、engine SHA256 `0b5cc53e2c4eaba58021b4018d471c3d8954633507d4d477088731f4a12455ce`。旧10步容器/引擎以 `pi05-rtc-infer-fp32-10step-preserved-20260917` 保留并停止；8001预检容器也已停止，无8001监听。上线前临时8001与上线后固定8000各完成9/9真实三相机/状态/prompt、d=0/1/10协议smoke：有限50×14、前缀逐位不变。固定8000本机MAXN服务/往返P50约194.26/195.03ms；首个请求约211.96ms往返，9例P95含该首请求约205.41ms。原10步FP32约1033ms为历史结果，不是当前服务。原始收据在Thor `/home/wuyan-lyj/thor/pi/artifacts/rtc-30000-trt-tf32-cache80-7step-20260917-r1/ws-smoke-fixed-8000-20260917-r1.json`；数值与回退见[RTC冷手册](reference/thor/13_trained_rtc_inference.md)。3588→Thor跨IPC和真机闭环尚未验收。

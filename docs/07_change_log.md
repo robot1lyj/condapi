@@ -736,3 +736,7 @@ text80 实验完成 ONNX、TensorRT 构建和 W 正式回放。完整 policy P50
 ## 2026-09-17 18:40 CST：按用户要求上线Thor RTC 7步
 
 在原30000 checkpoint/norm和既有固定WebSocket地址不变下，仅替换为已离线验证的7步FP32权重＋TF32 TensorRT引擎。服务入口新增显式`--allow-validated-tf32-7step`，用9例回放/前缀、同JAX指纹、checkpoint及引擎SHA放行；22项相关代码测试通过。临时8001和正式8000各9/9真实协议smoke通过，固定8000握手7步，服务/本机往返P50约194/195ms，首请求约212ms；未做3588直连或真机。首次临时容器漏写Python入口、退出126；修正入口后正常，旧8000未受影响。切换期间旧MAXN会话随旧容器结束并恢复120W，新容器启动后重新以临时systemd unit维持MAXN、GPU/EMC锁频，实测active；该unit与`--restart no`容器均非持久开机。旧10步容器与权重、引擎保留供回退。详细指纹、命令边界及回执见[RTC冷手册](reference/thor/13_trained_rtc_inference.md)。
+
+## 2026-09-17 晚间：RTC 前缀归一化事故与停服
+
+用户指出训练Pi0.5使用分位数归一化而旧Thor服务/JAX参考的RTC前缀硬编码均值/标准差。核查代码和最新乐高分拣3逐帧记录后确认；旧历史数值验收不再可用于RTC条件正确性。先停固定8000服务，再用实际42帧集重建4次观测/前缀，在MAXN下同噪声重放：现场最大关节交界2.505rad，正确分位数JAX/TRT最高约0.104rad；原9例d10错误参考0.71–1.11rad降为0.04–0.05rad。新版9例JAX↔TRT最大单关节差0.00452rad（动作49）、P99 0.000507。主机代码强制显式归一化、旧验证回执不能启服务、超过0.2rad/tick新关节目标直接拒绝。服务保持停止、120W，未做新版WebSocket/真机验收；原请求噪声未存，归因是强支持而非逐位复现。完整证据见[事故报告](reports/thor/rtc-prefix-quantile-incident-20260917.md)。

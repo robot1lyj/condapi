@@ -13,7 +13,7 @@ from openpi.policies.yam_policy import YamOutputs
 YAM_DELTA_MASK = transforms.make_bool_mask(6, -1, 6, -1)
 
 
-def encode_committed_actions(absolute_actions, observation_state, norm_stats, *, use_quantiles=False):
+def encode_committed_actions(absolute_actions, observation_state, norm_stats, *, use_quantiles):
     absolute = np.asarray(absolute_actions, dtype=np.float32)
     state = np.asarray(observation_state, dtype=np.float32)
     if absolute.shape != (50, 14) or state.shape != (14,):
@@ -30,7 +30,7 @@ def encode_committed_actions(absolute_actions, observation_state, norm_stats, *,
     return encoded
 
 
-def decode_model_actions(model_actions, observation_state, norm_stats, *, use_quantiles=False):
+def decode_model_actions(model_actions, observation_state, norm_stats, *, use_quantiles):
     """Reference inverse for prefix round-trip checks, not a robot safety clamp."""
     actions = np.asarray(model_actions, dtype=np.float32)
     state = np.asarray(observation_state, dtype=np.float32)

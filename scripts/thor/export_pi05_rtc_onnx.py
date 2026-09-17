@@ -17,8 +17,8 @@ from benchmark_pi05 import read_observation
 from benchmark_suite import checked_path
 import numpy as np
 import onnx
-from rtc_onnx_sampler import Pi05RtcOnnxSampler
 from rtc_onnx_sampler import RTC_INPUT_NAMES
+from rtc_onnx_sampler import Pi05RtcOnnxSampler
 from rtc_onnx_sampler import RtcFlatSamplerAdapter
 from rtc_policy import RtcEagerAdapter
 from rtc_policy import TrainedRtcInference
@@ -62,6 +62,7 @@ def main():
     reference_manifest = json.loads((args.jax_reference / "reference_manifest.json").read_text())
     if (
         reference_manifest.get("status") != "original_jax_trained_rtc_reference"
+        or reference_manifest.get("prefix_use_quantiles") is not True
         or reference_manifest.get("training_contract_sha256") != manifest["training_contract_sha256"]
         or reference_manifest.get("source_params_files_sha256") != manifest["source_params_files_sha256"]
         or reference_manifest.get("norm_stats_sha256") != digest(norm_path)
@@ -102,6 +103,9 @@ def main():
     train = config.get_config("pi05_yam")
     train = dataclasses.replace(train, model=dataclasses.replace(train.model, dtype=args.compute_dtype))
     stats = normalize.deserialize_json(norm_path.read_text())
+    use_quantiles = train.data.create(train.assets_dirs, train.model).use_quantile_norm
+    if not use_quantiles:
+        raise ValueError("pi05_yam RTC export must use quantile normalization")
     policy = policy_config.create_trained_policy(
         train, args.checkpoint, norm_stats=stats, pytorch_device="cuda",
         pytorch_precision=args.compute_dtype, pytorch_compile=False,
@@ -123,9 +127,12 @@ def main():
         num_steps=args.num_steps,
     ).eval()
     prepared = RtcFlatSamplerAdapter(wrapper, max_delay=max_delay)
-    eager_policy = TrainedRtcInference(policy, stats, max_delay=max_delay, num_steps=args.num_steps, sampler=eager)
+    eager_policy = TrainedRtcInference(
+        policy, stats, max_delay=max_delay, use_quantiles=use_quantiles, num_steps=args.num_steps, sampler=eager
+    )
     prepared_policy = TrainedRtcInference(
-        policy, stats, max_delay=max_delay, num_steps=args.num_steps, sampler=prepared
+        policy, stats, max_delay=max_delay, use_quantiles=use_quantiles,
+        num_steps=args.num_steps, sampler=prepared
     )
     noise = np.random.default_rng(0).standard_normal((1, 50, 32)).astype(np.float32)
     args.output.mkdir(parents=True)
@@ -133,6 +140,7 @@ def main():
         "phase": "rtc_export",
         "status": "started",
         "rtc_mode": "trained",
+        "prefix_use_quantiles": use_quantiles,
         "max_delay_steps": max_delay,
         "started_at": datetime.datetime.now(datetime.UTC).isoformat(),
         "converted_weights_sha256": digest(args.checkpoint / "model.safetensors"),

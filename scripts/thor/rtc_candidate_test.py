@@ -1,28 +1,30 @@
 """Small CPU contract tests; no model checkpoint, GPU run, or training loop."""
 
 import hashlib
-import tempfile
-import unittest
 from pathlib import Path
+import tempfile
 from types import SimpleNamespace
+import unittest
 
 import numpy as np
-import torch
-from torch import nn
-
 from rtc_action_space import decode_model_actions
 from rtc_action_space import encode_committed_actions
+from rtc_norm_identity import checkpoint_norm_identity
 from rtc_onnx_sampler import CachedRtcProjection
 from rtc_onnx_sampler import Pi05RtcOnnxSampler
 from rtc_onnx_sampler import validate_trained_prefix
-from rtc_norm_identity import checkpoint_norm_identity
+from rtc_policy import reject_large_joint_step
 from rtc_policy import validate_request
 from serve_pi05_rtc_trt import check_validated_tf32_7step
+import torch
+from torch import nn
+from transformers.models.gemma.modeling_gemma import GemmaRMSNorm
 
 from openpi.models_pytorch.pi0_pytorch import PI0Pytorch
 from openpi.models_pytorch.pi0_pytorch import create_sinusoidal_pos_embedding
+from openpi.serving.websocket_policy_server import RequestError
+from openpi.serving.websocket_policy_server import WebsocketPolicyServer
 from openpi.shared.normalize import NormStats
-from transformers.models.gemma.modeling_gemma import GemmaRMSNorm
 
 
 class FakeModel(nn.Module):
@@ -59,6 +61,46 @@ class FakeModel(nn.Module):
 
 
 class RtcCandidateTest(unittest.TestCase):
+    def test_trained_rtc_guard_error_cannot_fall_back_to_ordinary_inference(self):
+        class RejectingPolicy:
+            def infer_rtc(self, _observation, _rtc):
+                raise ValueError("RTC joint-step guard rejected")
+
+            def infer(self, _observation):
+                raise AssertionError("Ordinary fallback must not run")
+
+        server = WebsocketPolicyServer(RejectingPolicy(), rtc_mode="trained")
+        with self.assertRaisesRegex(RequestError, "joint-step guard rejected"):
+            server._infer({}, {"delay_steps": 9})  # noqa: SLF001
+
+    def test_joint_step_guard_rejects_suffix_jump_without_rewriting_prefix(self):
+        state = np.zeros(14, dtype=np.float32)
+        actions = np.zeros((50, 14), dtype=np.float32)
+        actions[:9, 0] = 0.1
+        actions[9:, 0] = 0.31
+        with self.assertRaisesRegex(ValueError, r"action\[9\] joint\[0\]"):
+            reject_large_joint_step(actions, state, 9, max_step_rad=0.2)
+        actions[9:, 0] = 0.2
+        reject_large_joint_step(actions, state, 9, max_step_rad=0.2)
+        actions[0, 7] = 0.3
+        with self.assertRaisesRegex(ValueError, r"action\[0\] joint\[7\]"):
+            reject_large_joint_step(actions, state, 0, max_step_rad=0.2)
+
+    def test_quantile_prefix_encoding_is_not_mean_std_encoding(self):
+        stats = {
+            "state": NormStats(mean=np.zeros(14), std=np.ones(14), q01=-np.ones(14), q99=np.ones(14)),
+            "actions": NormStats(mean=np.full(14, 0.3), std=np.full(14, 0.2),
+                                 q01=-np.ones(14), q99=np.ones(14)),
+        }
+        state = np.zeros(14, dtype=np.float32)
+        absolute = np.full((50, 14), 0.1, dtype=np.float32)
+        quantile = encode_committed_actions(absolute, state, stats, use_quantiles=True)
+        mean_std = encode_committed_actions(absolute, state, stats, use_quantiles=False)
+        self.assertAlmostEqual(float(quantile[0, 0]), 0.1, places=5)
+        self.assertLess(float(mean_std[0, 0]), -0.9)
+        with self.assertRaises(TypeError):
+            encode_committed_actions(absolute, state, stats)
+
     def test_seven_step_tf32_service_requires_matching_validation(self):
         report = {
             "status": "built_experiment_not_accuracy_validated", "exit_code": 0,
@@ -67,14 +109,18 @@ class RtcCandidateTest(unittest.TestCase):
         }
         export = {
             "compute_dtype": "float32", "contract": {"steps": 7},
-            "jax_reference_manifest_sha256": "jax",
+            "cases_sha256": "cases",
         }
-        manifest = {"model_weights_sha256": "weights"}
+        manifest = {"model_weights_sha256": "weights", "checkpoint_metadata_sha256": "metadata",
+                    "norm_stats_sha256": "norm"}
         validation = {
             "status": "compared_not_robot_task_validated", "engine_sha256": "engine",
             "engine_tf32": True, "num_steps": 7,
             "checkpoint_weights_sha256": "weights", "jax_reference_manifest_sha256": "jax",
+            "prefix_use_quantiles": True, "checkpoint_metadata_sha256": "metadata",
+            "norm_stats_sha256": "norm", "cases_sha256": "cases",
             "physical_max_abs": 0.0009,
+            "physical_p99_abs": 0.0005,
             "cases": [
                 {"delay_steps": delay, "finite": True, "prefix_exact": True}
                 for delay in (0, 1, 10) for _ in range(3)
@@ -84,9 +130,13 @@ class RtcCandidateTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             check_validated_tf32_7step(report, export, manifest, {**validation, "engine_sha256": "other"})
         with self.assertRaises(ValueError):
-            check_validated_tf32_7step(report, export, manifest, {**validation, "physical_max_abs": 0.0021})
+            check_validated_tf32_7step(report, export, manifest, {**validation, "physical_max_abs": 0.0051})
+        with self.assertRaises(ValueError):
+            check_validated_tf32_7step(report, export, manifest, {**validation, "physical_p99_abs": 0.0011})
         with self.assertRaises(ValueError):
             check_validated_tf32_7step(report, {**export, "contract": {"steps": 8}}, manifest, validation)
+        with self.assertRaises(ValueError):
+            check_validated_tf32_7step(report, export, manifest, {**validation, "prefix_use_quantiles": False})
 
     def test_norm_identity_allows_only_the_missing_final_newline(self):
         source = b'{"action":{"mean":[1]}}\n'

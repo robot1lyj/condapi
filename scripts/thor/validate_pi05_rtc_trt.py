@@ -11,8 +11,8 @@ from benchmark_pi05 import digest
 from benchmark_pi05 import read_observation
 import numpy as np
 from rtc_policy import TrainedRtcInference
-from rtc_trt_policy import create_rtc_transform_policy
 from rtc_trt_policy import RtcTensorRTAdapter
+from rtc_trt_policy import create_rtc_transform_policy
 import torch
 
 from openpi.shared import normalize
@@ -52,7 +52,10 @@ def main():
         or export["rtc_manifest_sha256"] != digest(args.checkpoint / "rtc_manifest.json")
         or export["norm_stats_sha256"] != digest(norm_path)
         or export["cases_sha256"] != digest(args.cases)
-        or export["jax_reference_manifest_sha256"] != digest(args.jax_reference / "reference_manifest.json")
+        or references.get("prefix_use_quantiles") is not True
+        or references.get("checkpoint_metadata_sha256") != manifest["checkpoint_metadata_sha256"]
+        or references.get("norm_stats_sha256") != digest(norm_path)
+        or references.get("cases_sha256") != digest(args.cases)
         or case_set["source_kind"] != "real_yam_recording"
         or len(references["cases"]) != len(case_set["cases"])
         or references.get("num_steps", 10) != export["contract"]["steps"]
@@ -63,13 +66,16 @@ def main():
         train.model, dtype=export["compute_dtype"], rtc_training_max_delay=manifest["max_delay_steps"],
     ))
     stats = normalize.deserialize_json(norm_path.read_text())
+    use_quantiles = train.data.create(train.assets_dirs, train.model).use_quantile_norm
+    if not use_quantiles:
+        raise ValueError("pi05_yam RTC validation must use quantile normalization")
     policy = create_rtc_transform_policy(train, stats)
     backend = RtcTensorRTAdapter(
         args.engine, max_delay=manifest["max_delay_steps"], allow_experimental=args.allow_experimental
     )
     backend.enable_cuda_graph()
     serving = TrainedRtcInference(
-        policy, stats, max_delay=manifest["max_delay_steps"],
+        policy, stats, max_delay=manifest["max_delay_steps"], use_quantiles=use_quantiles,
         num_steps=export["contract"]["steps"], sampler=backend,
     )
     noise = np.random.default_rng(0).standard_normal((1, 50, 32)).astype(np.float32)
@@ -139,6 +145,10 @@ def main():
         "num_steps": export["contract"]["steps"],
         "checkpoint_weights_sha256": manifest["model_weights_sha256"],
         "jax_reference_manifest_sha256": digest(args.jax_reference / "reference_manifest.json"),
+        "checkpoint_metadata_sha256": manifest["checkpoint_metadata_sha256"],
+        "norm_stats_sha256": digest(norm_path),
+        "cases_sha256": digest(args.cases),
+        "prefix_use_quantiles": True,
         "cases": rows,
         "physical_max_abs": max(row["physical_max_abs"] for row in rows),
         "physical_mean_abs": float(np.mean([row["physical_mean_abs"] for row in rows])),
