@@ -78,17 +78,23 @@ class RtcEagerAdapter:
 class TrainedRtcInference:
     """Policy transforms + a dedicated RTC sampler; the ordinary path is untouched."""
 
-    def __init__(self, policy, norm_stats, *, max_delay, text_bucket=200, sampler=None):
+    def __init__(self, policy, norm_stats, *, max_delay, text_bucket=200, num_steps=10, sampler=None):
         if not 0 < max_delay < 50:
             raise ValueError("A trained RTC checkpoint must specify 0 < max_delay < 50")
         self.policy = policy
         self.norm_stats = norm_stats
         self.max_delay = max_delay
+        if num_steps not in (5, 6, 7, 8, 10):
+            raise ValueError("RTC inference supports 5, 6, 7, 8 or 10 denoising steps")
+        self.num_steps = num_steps
         self.device = torch.device(policy._pytorch_device)  # noqa: SLF001
         self.use_quantiles = False  # pi05_yam contract; assert before serving a different config.
         self.noise_rng = np.random.default_rng()
         self.sampler = sampler or RtcFlatSamplerAdapter(
-            Pi05RtcOnnxSampler(policy._model, cache_time_modulation=False, text_bucket=text_bucket).eval(),  # noqa: SLF001
+            Pi05RtcOnnxSampler(
+                policy._model,  # noqa: SLF001
+                cache_time_modulation=False, text_bucket=text_bucket, num_steps=num_steps,
+            ).eval(),
             max_delay=max_delay,
         )
 
@@ -116,7 +122,8 @@ class TrainedRtcInference:
         start = time.monotonic()
         with torch.no_grad():
             result = self.sampler(
-                self.device, observation, noise=noise, previous_actions=previous, prefix_mask=mask, num_steps=10
+                self.device, observation, noise=noise, previous_actions=previous,
+                prefix_mask=mask, num_steps=self.num_steps,
             )
         if self.device.type == "cuda":
             torch.cuda.synchronize(self.device)

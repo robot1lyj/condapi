@@ -33,6 +33,7 @@ def main():
     parser.add_argument("--training-contract", type=Path, required=True)
     parser.add_argument("--cases", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--num-steps", type=int, choices=(5, 6, 7, 8, 10), default=10)
     args = parser.parse_args()
     if args.output.exists() or (args.checkpoint / "model.safetensors").exists():
         parser.error("Use a new output directory and the original JAX checkpoint")
@@ -92,7 +93,7 @@ def main():
         model_obs = model_api.Observation.from_dict(inputs)
         raw = policy._model.sample_actions_trained_rtc(  # noqa: SLF001
             jax.random.key(0), model_obs, previous_actions=jnp.asarray(previous[None]),
-            delay_steps=delay, num_steps=10, noise=jnp.asarray(noise),
+            delay_steps=delay, num_steps=args.num_steps, noise=jnp.asarray(noise),
         )
         raw = np.asarray(raw[0], dtype=np.float32)
         outputs = policy._output_transform({"state": np.asarray(inputs["state"][0]), "actions": raw})  # noqa: SLF001
@@ -112,6 +113,7 @@ def main():
         "norm_identity": norm_identity,
         "cases_sha256": digest(args.cases),
         "noise_seed": 0,
+        "num_steps": args.num_steps,
         "precision": "FP32 original checkpoint/compute",
         "jax_default_matmul_precision": "highest",
         "cases": results,

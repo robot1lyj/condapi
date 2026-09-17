@@ -40,8 +40,10 @@ def create_rtc_transform_policy(train_config, norm_stats):
 
 
 class RtcTensorRTAdapter:
-    def __init__(self, engine_dir, *, max_delay):
-        self.model = TensorRTModel(engine_dir, input_names=RTC_INPUT_NAMES)
+    def __init__(self, engine_dir, *, max_delay, allow_experimental=False):
+        self.model = TensorRTModel(
+            engine_dir, input_names=RTC_INPUT_NAMES, allow_experimental=allow_experimental
+        )
         if not 0 < max_delay < 50:
             raise ValueError("RTC max_delay must be a trained nonzero delay")
         self.max_delay = max_delay
@@ -51,10 +53,12 @@ class RtcTensorRTAdapter:
 
     @torch.no_grad()
     def __call__(self, device, observation, *, noise, previous_actions, prefix_mask, num_steps=10):
-        if num_steps != 10 or noise is None:
-            raise ValueError("RTC TensorRT engine requires ten steps and explicit noise")
+        if num_steps != self.model.num_steps or noise is None:
+            raise ValueError("RTC TensorRT engine requires matching steps and explicit noise")
         validate_trained_prefix(previous_actions, prefix_mask, max_delay=self.max_delay)
         if self.model.text_bucket < 200:
             check_text_bucket(observation.tokenized_prompt, observation.tokenized_prompt_mask, self.model.text_bucket)
-        values = dict(zip(RTC_INPUT_NAMES, (*flat_inputs(observation, noise), previous_actions, prefix_mask), strict=True))
+        values = dict(zip(
+            RTC_INPUT_NAMES, (*flat_inputs(observation, noise), previous_actions, prefix_mask), strict=True
+        ))
         return self.model.run_flat_inputs(values)

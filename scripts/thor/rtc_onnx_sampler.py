@@ -35,8 +35,8 @@ class CachedRtcProjection(nn.Module):
 
     def __init__(self, original, clean_condition, step_conditions):
         super().__init__()
-        if any(p.dtype != torch.float32 for p in original.parameters()) or len(step_conditions) != 10:
-            raise ValueError("RTC modulation cache requires FP32 projection and ten steps")
+        if any(p.dtype != torch.float32 for p in original.parameters()) or len(step_conditions) not in (5, 6, 7, 8, 10):
+            raise ValueError("RTC modulation cache requires FP32 projection and supported steps")
         self.original = original
         self.step = None
         self.mask = None
@@ -59,8 +59,8 @@ class CachedRtcProjection(nn.Module):
 class Pi05RtcOnnxSampler(Pi05OnnxSampler):
     """Separate trained-RTC engine candidate; never modifies the ordinary W sampler."""
 
-    def __init__(self, model, *, cache_time_modulation=False, text_bucket=200):
-        super().__init__(model, cache_time_modulation=False, text_bucket=text_bucket)
+    def __init__(self, model, *, cache_time_modulation=False, text_bucket=200, num_steps=10):
+        super().__init__(model, cache_time_modulation=False, text_bucket=text_bucket, num_steps=num_steps)
         self.clean_time_embedding = create_sinusoidal_pos_embedding(
             torch.zeros(1, dtype=torch.float32, device=self.times.device),
             model.action_in_proj.out_features,
@@ -107,7 +107,7 @@ class Pi05RtcOnnxSampler(Pi05OnnxSampler):
         fixed_prefix = prefix_mask[..., None]
         actions = torch.where(fixed_prefix, previous_actions, noise)
         try:
-            for step in range(10):
+            for step in range(self.num_steps):
                 for projection in self.cached_modulations:
                     projection.step = step
                     projection.mask = prefix_mask
@@ -135,8 +135,8 @@ class RtcFlatSamplerAdapter:
 
     @torch.no_grad()
     def __call__(self, device, observation, *, noise, previous_actions, prefix_mask, num_steps=10):
-        if num_steps != 10 or noise is None:
-            raise ValueError("RTC export requires ten denoising steps and explicit noise")
+        if num_steps != self.sampler.num_steps or noise is None:
+            raise ValueError("RTC export requires matching denoising steps and explicit noise")
         validate_trained_prefix(previous_actions, prefix_mask, max_delay=self.max_delay)
         inputs = (*flat_inputs(observation, noise), previous_actions, prefix_mask)
         check_text_bucket(inputs[2], inputs[3], self.sampler.text_bucket)

@@ -31,8 +31,15 @@ def test_fixed_schedule_keeps_original_fp32_recurrence():
         index += 1
     assert index == 10
     assert torch.equal(dt, old_dt)
-    with pytest.raises(ValueError, match="ten"):
-        fixed_time_schedule(5, width=8, device=device)
+    for steps in (5, 6, 7, 8):
+        candidate_dt, candidate_times, candidate_embeddings = fixed_time_schedule(
+            steps, width=8, device=device
+        )
+        assert candidate_times.shape == (steps,)
+        assert candidate_embeddings.shape == (steps, 8)
+        assert torch.equal(candidate_dt, torch.tensor(-1.0 / steps, dtype=torch.float32))
+    with pytest.raises(ValueError, match="5, 6, 7, 8 or 10"):
+        fixed_time_schedule(9, width=8, device=device)
 
 
 def test_flat_inputs_keeps_all_views_masks_state_and_noise():
@@ -76,7 +83,7 @@ def test_adaptive_rmsnorm_repr_does_not_require_nonexistent_weight():
     source = (
         Path(__file__).resolve().parents[2]
         / "src/openpi/models_pytorch/transformers_replace/models/gemma/modeling_gemma.py"
-    )
+    ) if len(Path(__file__).resolve().parents) > 2 else Path(__file__).with_name("modeling_gemma.py")
     cls = next(
         n for n in ast.parse(source.read_text()).body if isinstance(n, ast.ClassDef) and n.name == "GemmaRMSNorm"
     )

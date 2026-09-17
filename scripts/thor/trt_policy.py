@@ -41,7 +41,7 @@ def compare_export_reference(path, normalized):
 
 
 class TensorRTModel(torch.nn.Module):
-    def __init__(self, engine_dir, *, input_names=INPUT_NAMES):
+    def __init__(self, engine_dir, *, input_names=INPUT_NAMES, allow_experimental=False):
         super().__init__()
         import tensorrt as trt  # noqa: PLC0415
 
@@ -51,22 +51,47 @@ class TensorRTModel(torch.nn.Module):
         engine_dir = Path(engine_dir)
         self.build_report = json.loads((engine_dir / "engine_report.json").read_text())
         report = self.build_report
-        if report["status"] != "built_not_inference_or_accuracy_validated" or report["exit_code"] != 0:
+        candidate_kind = report.get("precision_candidate_kind") or ("tf32" if report["tf32"] else None)
+        experimental = bool(
+            allow_experimental
+            and report["status"] == "built_experiment_not_accuracy_validated"
+            and candidate_kind in ("tf32", "bf16")
+        )
+        if (not (report["status"] == "built_not_inference_or_accuracy_validated" or experimental)
+                or report["exit_code"] != 0):
             raise ValueError("A successful engine build is required")
-        if report["tf32"] or report["quantization"] is not None or not report["strongly_typed"]:
+        if (report["tf32"] and not experimental) or report["quantization"] is not None or not report["strongly_typed"]:
             raise ValueError("This candidate requires non-quantized, strongly typed, TF32-off engine")
         source_report = Path(report["source_export"]) / "export_report.json"
         if digest(source_report) != report["source_export_report_sha256"]:
             raise ValueError("Source export report fingerprint mismatch")
         export = json.loads(source_report.read_text())
+        self.num_steps = export.get("contract", {}).get("steps", 10)
+        if self.num_steps not in (5, 6, 7, 8, 10):
+            raise ValueError("Unsupported engine denoising steps")
+        if experimental and (
+            export.get("rtc_mode") != "trained"
+            or (candidate_kind == "tf32" and (not report["tf32"] or export.get("compute_dtype") != "float32"))
+            or (candidate_kind == "bf16" and (report["tf32"] or export.get("compute_dtype") != "bfloat16"))
+        ):
+            raise ValueError("Experimental engine precision does not match its trained-RTC export")
         self.input_names = tuple(input_names)
         if ("previous_actions" in self.input_names) != (export.get("rtc_mode") == "trained"):
             raise ValueError("RTC runtime and exported engine route disagree")
         self.text_bucket = export.get("text_bucket", 200)
         if not 1 <= self.text_bucket <= 200:
             raise ValueError("Unsupported text bucket")
-        if self.text_bucket < 200 and export.get("padding_experiment", {}).get("status") != (
-            "offline_experiment_supported_not_accuracy_approved"
+        rtc_bucket_evidence = (
+            export.get("rtc_mode") == "trained"
+            and len(export.get("jax_comparisons", [])) >= 9
+            and all(row.get("numeric_gate_1e-4") for row in export["jax_comparisons"])
+            and all(row.get("optimized_numerical_gate_1e-5") for row in export["wrapper_comparisons"])
+        )
+        if (
+            self.text_bucket < 200
+            and not rtc_bucket_evidence
+            and export.get("padding_experiment", {}).get("status")
+            != "offline_experiment_supported_not_accuracy_approved"
         ):
             raise ValueError("Padding engine lacks its separately recorded diagnostic evidence")
         engine_file = engine_dir / "sampler.engine"

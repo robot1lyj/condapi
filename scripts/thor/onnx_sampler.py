@@ -27,8 +27,8 @@ def check_text_bucket(tokens, mask, bucket):
 
 
 def fixed_time_schedule(num_steps, *, width, device):
-    if num_steps != 10:
-        raise ValueError("This export contract fixes exactly ten denoising steps")
+    if num_steps not in (5, 6, 7, 8, 10):
+        raise ValueError("This export contract supports 5, 6, 7, 8 or 10 denoising steps")
     dt = torch.full((), -1.0 / num_steps, dtype=torch.float32, device=device)
     time = torch.ones((), dtype=torch.float32, device=device)
     times, embeddings = [], []
@@ -55,7 +55,7 @@ def flat_inputs(observation, noise):
 
 
 class Pi05OnnxSampler(nn.Module):
-    def __init__(self, model, *, cache_time_modulation=False, text_bucket=200):
+    def __init__(self, model, *, cache_time_modulation=False, text_bucket=200, num_steps=10):
         super().__init__()
         if not model.pi05 or model.config.action_horizon != 50 or model.config.action_dim != 32:
             raise ValueError("Exporter is scoped to Pi0.5 H50 / 32D")
@@ -63,8 +63,9 @@ class Pi05OnnxSampler(nn.Module):
         if not 1 <= text_bucket <= 200:
             raise ValueError("Invalid text bucket")
         self.text_bucket = text_bucket
+        self.num_steps = num_steps
         dt, times, embeddings = fixed_time_schedule(
-            10, width=model.action_in_proj.out_features, device=next(model.parameters()).device
+            num_steps, width=model.action_in_proj.out_features, device=next(model.parameters()).device
         )
         self.register_buffer("euler_dt", dt)
         self.register_buffer("times", times)
@@ -114,7 +115,7 @@ class Pi05OnnxSampler(nn.Module):
         )
         actions = noise
         try:
-            for step in range(10):
+            for step in range(self.num_steps):
                 for projection in self.cached_modulations:
                     projection.step = step
                 velocity = self.model.denoise_step(

@@ -10,7 +10,7 @@
 - YAM 为 14D `[左6关节, 左夹爪, 右6关节, 右夹爪]`；Pi 路径关节 delta、夹爪 absolute，mask `(6,-1,6,-1)`，内部 32D、horizon 50；这些模型内部规则不套用其他系列。物理单位仍须数据审计，不套用 OpenArm/Piper 合同，见 [数据合同](../04_data_contracts.md)。
 - Pi 当前训练产物为 JAX/Flax；新模型保留原生 LeRobot/PyTorch 格式。既有 Thor Pi 部署按系列隔离容器，新接入层环境采用独立 Conda；3588 采集/控制，两 IPC 网线直连，本项目不操作 3588。转换与量化须独立验收，既有部署事实见 [Thor 部署](../08_thor_edge_deployment.md)，新架构见 [01](../01_system_architecture.md)。
 - 主检出为 `/home/wuyan-lyj/condapi`，改造工作树以实际 cwd 为准，外部 YAM 参考只读；设备、功能分支提交、数据保护和 RTC 回退边界由 `AGENTS.md` 持有。
-- Thor 训练时 RTC 30000 已传输、有限性审计、FP32转换、原始JAX↔Torch↔TensorRT真实回放对照并启动固定 Pi 地址 `ws://192.168.250.1:8000`：9组 d=0/1/10 物理动作相对JAX最大差 `8.55e-6`，WebSocket本机9/9有限50×14且前缀逐位保持；MAXN下服务P50约1033ms、远慢于目标，不代表已完成延迟优化或真机闭环/3588直连验收。曾因Torch模型初始化覆盖FP32 highest为high造成 `5.12e-4` 偏差，加载后重设highest已修复。旧100000 `pi05-infer` 已按用户要求停止，其权重/容器保留；8001无监听，后续Pi系列切checkpoint沿用8000。MAXN由RTC容器监视会话临时维持，停止后恢复120W。20000原件与转换产物仍保留。配置、证据、时序与未知项见 [RTC 冷手册](../reference/thor/13_trained_rtc_inference.md)。
+- Thor 训练时 RTC 30000 已传输、有限性审计、FP32转换、原始JAX↔Torch↔TensorRT 9组真实回放对照，并在固定 `ws://192.168.250.1:8000` 启动FP32 RTC服务：d=0/1/10、有限50×14、前缀逐位保持、JAX最大物理差8.55e-6；MAXN本机服务P50约1033ms。离线未量化候选：FP32权重+TF32/80-token/时间缓存，10/8/7/6/5步稳态Thor总处理P50约224/203/192/187/178ms，同步数原始JAX最大单关节差分别0.00176/0.00102/0.00089/0.00152/0.00148rad；缩短步数还带来采样轨迹差异，不能当成真值误差。若预留外部20ms，只有5步约198ms勉强低于200ms P50，余量极薄。另有BF16/200-token/10步约138ms、最大差0.02236rad，精度风险较高；所有离线候选均未切服务。FP8当前仅调研，正常优先做高精度训练后的真实数据PTQ，而非直接改FP8微调。训练时RTC不等于推理时梯度guidance，其本身不应解释全部延迟差。旧100000 `pi05-infer` 已停止、权重/容器保留；8001不监听；3588直连/真机闭环尚未验收。Torch模型初始化覆盖FP32 highest造成5.12e-4偏差已修复。RTC容器运行时MAXN、停止后恢复120W。详情及证据见 [RTC 冷手册](../reference/thor/13_trained_rtc_inference.md)。
 
 ## 恢复任务
 

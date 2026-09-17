@@ -58,7 +58,7 @@ def main():
     backend.enable_cuda_graph()
     serving = TrainedRtcInference(
         policy, stats, max_delay=manifest["max_delay_steps"],
-        text_bucket=export["text_bucket"], sampler=backend,
+        text_bucket=export["text_bucket"], num_steps=export["contract"]["steps"], sampler=backend,
     )
     warmup = read_observation(args.warmup_sample)
     warmup_rtc = json.loads(args.warmup_rtc.read_text())
@@ -76,6 +76,7 @@ def main():
         "engine_sha256": report["engine_sha256"],
         "compute_dtype": export["compute_dtype"],
         "action_horizon": 50,
+        "denoising_steps": export["contract"]["steps"],
         "action_dt_s": 1 / 30,
         "action_dim": 14,
         "action_mode": "absolute physical target after checkpoint inverse transforms",

@@ -159,6 +159,30 @@ class RtcCandidateTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             validate_trained_prefix(values[-1], mask, max_delay=6)
 
+    def test_official_and_intermediate_denoising_steps_keep_rtc_prefix(self):
+        for num_steps in (5, 6, 7, 8):
+            with self.subTest(num_steps=num_steps):
+                model = FakeModel().eval()
+                sampler = Pi05RtcOnnxSampler(model, num_steps=num_steps).eval()
+                values = (
+                    torch.zeros(1, 9, 224, 224),
+                    torch.ones(1, 3, dtype=torch.bool),
+                    torch.zeros(1, 200, dtype=torch.int64),
+                    torch.ones(1, 200, dtype=torch.bool),
+                    torch.zeros(1, 32),
+                    torch.ones(1, 50, 32),
+                    torch.full((1, 50, 32), 0.25),
+                )
+                mask = (torch.arange(50) < 7)[None]
+                actual = sampler(*values, mask)
+                reference = PI0Pytorch.sample_actions_trained_rtc(
+                    model, "cpu", SimpleNamespace(state=torch.zeros(1, 32)),
+                    previous_actions=values[-1], prefix_mask=mask, noise=values[5], num_steps=num_steps,
+                )
+                self.assertTrue(torch.equal(actual, reference))
+                self.assertTrue(torch.equal(actual[:, :7], values[-1][:, :7]))
+                self.assertEqual(len(model.times_seen), 2 * num_steps)
+
     def test_rtc_cache_selects_clean_or_step_value(self):
         linear = nn.Linear(8, 24).float().eval()
         clean = torch.randn(1, 8)

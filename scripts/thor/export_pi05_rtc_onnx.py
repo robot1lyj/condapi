@@ -36,8 +36,15 @@ def main():
     parser.add_argument("--jax-reference", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--compute-dtype", choices=("float32", "bfloat16"), default="float32")
+    parser.add_argument("--num-steps", type=int, choices=(5, 6, 7, 8, 10), default=10)
+    parser.add_argument("--text-bucket", type=int, choices=(80, 200), default=200)
+    parser.add_argument("--cache-time-modulation", action="store_true")
+    parser.add_argument(
+        "--prepare-only", action="store_true", help="Run real-case numerical checks without exporting ONNX"
+    )
     args = parser.parse_args()
-    if args.output.exists() or not torch.cuda.is_available() or os.environ.get("TORCH_ALLOW_TF32_CUBLAS_OVERRIDE") == "1":
+    if (args.output.exists() or not torch.cuda.is_available()
+            or os.environ.get("TORCH_ALLOW_TF32_CUBLAS_OVERRIDE") == "1"):
         parser.error("Use a new output directory on Thor CUDA with TF32 override disabled")
     manifest_path = args.checkpoint / "rtc_manifest.json"
     manifest = json.loads(manifest_path.read_text())
@@ -59,6 +66,7 @@ def main():
         or reference_manifest.get("source_params_files_sha256") != manifest["source_params_files_sha256"]
         or reference_manifest.get("norm_stats_sha256") != digest(norm_path)
         or reference_manifest.get("cases_sha256") != digest(args.cases)
+        or reference_manifest.get("num_steps", 10) != args.num_steps
     ):
         raise ValueError("JAX RTC reference does not match converted checkpoint and cases")
     if case_set.get("source_kind") != "real_yam_recording" or case_set.get("norm_stats_sha256") != digest(norm_path):
@@ -110,10 +118,15 @@ def main():
         model.paligemma_with_expert.paligemma.language_model.layers[0].self_attn.parameters()
     ).dtype
     eager = RtcEagerAdapter(model, max_delay=max_delay, compare_ordinary=True)
-    wrapper = Pi05RtcOnnxSampler(model, cache_time_modulation=False, text_bucket=200).eval()
+    wrapper = Pi05RtcOnnxSampler(
+        model, cache_time_modulation=args.cache_time_modulation, text_bucket=args.text_bucket,
+        num_steps=args.num_steps,
+    ).eval()
     prepared = RtcFlatSamplerAdapter(wrapper, max_delay=max_delay)
-    eager_policy = TrainedRtcInference(policy, stats, max_delay=max_delay, sampler=eager)
-    prepared_policy = TrainedRtcInference(policy, stats, max_delay=max_delay, sampler=prepared)
+    eager_policy = TrainedRtcInference(policy, stats, max_delay=max_delay, num_steps=args.num_steps, sampler=eager)
+    prepared_policy = TrainedRtcInference(
+        policy, stats, max_delay=max_delay, num_steps=args.num_steps, sampler=prepared
+    )
     noise = np.random.default_rng(0).standard_normal((1, 50, 32)).astype(np.float32)
     args.output.mkdir(parents=True)
     report = {
@@ -129,9 +142,12 @@ def main():
         "cases_sha256": digest(args.cases),
         "jax_reference_manifest_sha256": digest(args.jax_reference / "reference_manifest.json"),
         "compute_dtype": args.compute_dtype,
-        "contract": {"views": 3, "image_resolution": [224, 224], "horizon": 50, "steps": 10, "action_dim": 32},
-        "text_bucket": 200,
-        "cache_time_modulation": False,
+        "contract": {
+            "views": 3, "image_resolution": [224, 224], "horizon": 50,
+            "steps": args.num_steps, "action_dim": 32,
+        },
+        "text_bucket": args.text_bucket,
+        "cache_time_modulation": args.cache_time_modulation,
         "tf32": False,
         "quantization": None,
         "nonfinite_sanitization": False,
@@ -152,14 +168,19 @@ def main():
         prepared_raw = prepared.last_raw.detach().cpu().numpy()
         finite = bool(np.isfinite(raw).all() and np.isfinite(prepared_raw).all() and np.isfinite(actual).all())
         exact = bool(np.array_equal(raw, prepared_raw) and np.array_equal(expected, actual))
+        raw_max_abs = float(np.max(np.abs(raw.astype(np.float64) - prepared_raw.astype(np.float64))))
+        physical_max_abs = float(np.max(np.abs(expected.astype(np.float64) - actual.astype(np.float64))))
+        optimized_numerical_gate_1e_5 = bool(raw_max_abs <= 1e-5 and physical_max_abs <= 1e-5)
         report["wrapper_comparisons"].append({
             "sample": name, "delay_steps": rtc["delay_steps"], "finite": finite, "exact": exact,
-            "raw_max_abs": float(np.max(np.abs(raw.astype(np.float64) - prepared_raw.astype(np.float64)))),
-            "physical_max_abs": float(np.max(np.abs(expected.astype(np.float64) - actual.astype(np.float64)))),
+            "raw_max_abs": raw_max_abs,
+            "physical_max_abs": physical_max_abs,
+            "optimized_numerical_gate_1e-5": optimized_numerical_gate_1e_5,
         })
         ref_row = reference_manifest["cases"][index]
         ref_path = checked_path(args.jax_reference, ref_row["reference"])
-        if ref_row["sample"] != name or ref_row["delay_steps"] != rtc["delay_steps"] or digest(ref_path) != ref_row["sha256"]:
+        if (ref_row["sample"] != name or ref_row["delay_steps"] != rtc["delay_steps"]
+                or digest(ref_path) != ref_row["sha256"]):
             raise ValueError("JAX RTC reference case identity mismatch")
         with np.load(ref_path, allow_pickle=False) as data:
             jax_raw, jax_physical = data["normalized"], data["physical"]
@@ -188,7 +209,10 @@ def main():
         if first is None and rtc["delay_steps"]:
             first = tuple(x.clone() for x in prepared.last_inputs)
         save()
-        if not finite or not exact:
+        allow_optimized_numeric = (
+            (args.cache_time_modulation or args.text_bucket != 200) and optimized_numerical_gate_1e_5
+        )
+        if not finite or not (exact or allow_optimized_numeric):
             raise RuntimeError("Trained RTC wrapper differs from eager; ONNX export blocked")
         if args.compute_dtype == "float32" and not numeric_ok:
             raise RuntimeError("FP32 trained RTC differs from original JAX beyond numerical gate")
@@ -201,6 +225,11 @@ def main():
     })
     report["loaded_param_dtypes"] = dict(Counter(str(p.dtype) for p in model.parameters()))
     save()
+    if args.prepare_only:
+        report["status"] = "precision_probe_only"
+        report["finished_at"] = datetime.datetime.now(datetime.UTC).isoformat()
+        save()
+        return
     onnx_path = args.output / "sampler.onnx"
     with torch.no_grad():
         torch.onnx.export(

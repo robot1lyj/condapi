@@ -62,3 +62,53 @@ JAX CUDA 参考需用独立 `openpi-pi:thor-trained-rtc-jax-ref-20260917-r3` 镜
 TensorRT 构建输出 `/home/wuyan-lyj/thor/pi/artifacts/rtc-30000-trt-fp32-20260917-r1`：`--stronglyTyped --noTF32 --skipInference`，无量化，8输入/1输出，engine SHA256 `24bbf6329e6525d930d441dd85a01678be3d09cb4ffb6733ae20fac8ab304fc8`。`validate_pi05_rtc_trt.py` 用同9组真实观测/固定噪声、CUDA Graph对原始JAX物理动作：最大绝对差 `8.553785528997437e-6`，平均绝对差 `6.454800959446696e-7`，前缀逐位不变且全部有限，报告 `validation-synced.json`。第一版计时在GPU异步提交后立即读时钟，P50 `0.76ms`为**无效延迟**；已在 `TrainedRtcInference` 的采样调用后同步CUDA并重测，真实引擎调用 P50 `1028.23ms`、P95 `1726.60ms`（含首调用）；无权重污染或数值异常。该全FP32强精度路径是准确性基线而非低延迟最终方案。
 
 Thor Docker `pi05-rtc-infer` 使用RTC候选镜像、`--restart no`。初次试运行曾占独立8001并取得 `ws-smoke-local.json`；用户随后明确要求同一个地址切模型，现已停止并保留旧8001容器为 `pi05-rtc-infer-8001-stopped-20260917`，重启新 `pi05-rtc-infer` 到固定 `192.168.250.1:8000`。`ss` 仅见8000监听，无8001。本机 `smoke_pi05_rtc_ws.py` 在固定8000对9例三路RGB/14D state/prompt与 `d=0/1/10` 请求全部成功，输出有限 `(50,14)` 绝对目标、已承诺前缀逐位不变；最终收据 `ws-smoke-fixed-8000.json`，MAXN下服务 P50/P95 `1033.02/1043.24ms`、往返 `1033.85/1044.67ms`。这不是跨IPC网络或闭环任务验收。宿主 `thor-pi-maxn-30000.service` 使用 `maxn_session.py` 包裹 `watch_docker_container.py`，在容器运行时维持MAXN；容器停止并超出短暂重启宽限后恢复日常120W。以后Pi系列切checkpoint只替换同一固定地址服务，不让3588按模型切端口。连接时应核对握手 `rtc_mode=trained`、`backend=tensorrt_cuda_graph`、checkpoint/norm指纹、`action_dt_s=1/30`、`action_0_relative_to_observation_policy_tick=0`；这一个0仅指训练数据行的30Hz policy tick，不是相机曝光到控制执行零延迟。3588 必须在同一目标tick上提交已承诺 `(d,14)` 绝对动作并只从返回 `actions[d]` 接管，`d` 限于0–10；晚到或前缀失配的回包必须丢弃。物理单位握手称关节rad、夹爪连续标称0闭/1开且不裁剪；真实硬件标定和曝光→policy tick偏移仍需现场核对，Thor不修改3588。
+
+## 2026-09-17 · RTC 延迟与精度优化候选
+
+用户要求争取约150ms、允许255ms作为候选，优先保留动作精度。训练时RTC不是推理时的梯度式inpainting；[Physical Intelligence后续论文](https://arxiv.org/html/2512.05964v2)明确说训练时前缀条件消除了推理时RTC的额外计算开销。本项目的 `d` 前缀仍是动态输入，10步Euler、H50、三相机和YAM逆变换均不更改。旧100000约106ms用BF16、文本桶80、时间缓存；首版RTC FP32约1033ms用200、无缓存，不能把差值归因于RTC本身。[NVIDIA精度说明](https://docs.nvidia.com/deeplearning/tensorrt/latest/inference-library/accuracy-considerations.html)指出TF32保留FP32指数范围但尾数缩短，BF16尾数更短；二者不能以模型参数标签替代实际动作误差验证。
+
+离线候选在Thor MAXN、同一30000权重/norm、9组真实YAM观测与原始JAX固定噪声下测试。稳态统计为9组样本再重复3轮，`server_infer`是采样器调用及CUDA同步，`server_total`还含Thor本机输入变换/逆变换，不含网络与控制端。首版验证只跑9例一次，首调用包含CUDA Graph捕获，不用其P95评估稳态。
+
+| 路线 | 稳态采样P50/P95 | 稳态Thor处理P50/P95 | 物理14D对JAX最大绝对差 | 判定 |
+| --- | --- | --- | --- | --- |
+| FP32，TF32关，200 token，无时间缓存 | 约1028ms / 首轮P95含捕获 | 固定8000 WebSocket服务约1033/1043ms | 8.55e-6 | 高精度基线，太慢 |
+| FP32权重＋TensorRT TF32，200 token，无时间缓存 | 247.90/255.12ms | 251.89/259.81ms | 0.0016182rad | 候选，不是已上线或闭环合格 |
+| FP32权重＋TensorRT TF32，80 token＋时间缓存，10步 | 220.32/223.46ms | 224.01/227.37ms | 0.0017599rad | 当前同精度路线最快10步候选，仍高于200ms |
+| BF16混合权重＋TensorRT，200 token，无时间缓存 | 133.72/137.67ms | 138.33/142.86ms | 0.0223596rad | 速度达标，但误差较大，暂不部署 |
+
+TF32引擎 `/home/wuyan-lyj/thor/pi/artifacts/rtc-30000-trt-tf32-20260917-r1`，SHA256 `c71d048b2c577b0070db904de6c9a8f3e43b451af38202980a15ca8f3a4ae974`，9例数值/稳态回执 `validation-steady.json`。BF16引擎 `/home/wuyan-lyj/thor/pi/artifacts/rtc-30000-trt-bf16-200-20260917-r1`，SHA256 `d857ba8b6e44da1bbccca135dd51577bfc831c6e3f9990e22e3b1794025e4414`，回执 `validation.json`；BF16导出前Torch对JAX最大物理差0.03826rad，最终TRT最大0.02236rad，不能把这一路标成数值等价。以上两条均保持9/9有限 `(50,14)`、`d=0/1/10` 前缀逐位不变，只证明离线回放数值性质，不证明任务成功率。
+
+FP32的80-token＋时间调制缓存预检 `/home/wuyan-lyj/thor/pi/artifacts/rtc-30000-fp32-cache80-probe-20260917-r2`：9例eager↔wrapper不逐位相同，但原始JAX物理最大差6.54e-6、wrapper物理最大差1.33e-6，均通过数值门槛；按这个事实将优化版wrapper门槛单列为`1e-5`，不再错误声称bit-exact。正式ONNX `/home/wuyan-lyj/thor/pi/artifacts/rtc-30000-onnx-fp32-cache80-20260917-r1` 和TensorRT引擎 `/home/wuyan-lyj/thor/pi/artifacts/rtc-30000-trt-tf32-cache80-20260917-r1` 已通过9例完整验证，收据为 `validation-detail.json`：物理14D MAE `9.12e-5`、P95 `2.93e-4`、最大 `0.0017599`（关节rad；最坏为case7、动作第49步、dim1），前缀保持且输出有限。`0.0017599`是所有标量中最大的一个，并非每个关节都如此。所有新引擎为**离线实验**，未改固定8000的FP32生产候选；若决定切换，必须单独经过运行时/协议smoke和控制侧协商。
+
+### 5/6/7/8/10 步采样配比实验（同一训练时 RTC checkpoint）
+
+[训练时RTC官方实机实验](https://arxiv.org/html/2512.05964)使用5步去噪、H50、50Hz、训练延迟均匀采样0–10；本YAM训练也是H50与`d∈[0,10]`，但数据控制合同为30Hz，既有推理是10步。改变的是**推理 Euler 积分步数**，不改变训练权重、RTC最大前缀或动作空间；不能把官方50Hz、H100延迟和任务结果搬到Thor。`rtc_jax_reference.py`、RTC ONNX/TensorRT适配器现支持独立5/6/7/8/10步产物，原10步默认与线上路径不变；5/6/7/8步原始JAX、同checkpoint/norm、同9组真实观测、同噪声参考分别为 `/home/wuyan-lyj/thor/pi/artifacts/rtc-30000-jax-reference-{5,6,7,8}step-20260917-r1`。比较程序 `scripts/thor/compare_rtc_step_schedules.py` 核对manifest与每例哈希后测量**采样设置差异**，不是对专家真值的误差：
+
+| JAX原版同权重对比 | 全H50物理14D平均绝对差 | 全H50最大单元素差 | 每例前10个新生成动作最大差 |
+| --- | ---: | ---: | ---: |
+| 5步 vs 10步 | 0.0059225 | 0.0447544 rad | 0.0447544 rad |
+| 6步 vs 10步 | 0.0040525 | 0.0318072 rad | 0.0318072 rad |
+| 7步 vs 10步 | 0.0026847 | 0.0184450 rad | 0.0158643 rad |
+| 8步 vs 10步 | 0.0016968 | 0.0122331 rad | 0.0107353 |
+
+关节以rad计，夹爪为标称0–1连续值；混合14D的平均值不能被称为统一物理单位。5/6/7/8步最大关节差约2.56°/1.82°/1.06°/0.70°，但10步也只是另一种数值积分，不是真值。8步“前10个新生成动作”的最大项是夹爪值，不能标rad。原始回执在Thor `/home/wuyan-lyj/thor/pi/probes/rtc-step-sweep-20260917/jax-{5,8}-vs-10-r2.json`、`jax-7-vs-10-r1.json` 与 `/home/wuyan-lyj/thor/pi/artifacts/rtc-30000-jax-reference-6step-20260917-r1/vs-10.json`。下一闸门是每个步数自身的JAX↔TensorRT数值差、MAXN稳态服务端时延与随后真机任务效果；不能只以这张表选线上精度。所有步数ONNX和引擎保留独立目录，不触碰固定8000服务。
+
+同一 Thor/MAXN、FP32权重＋TensorRT TF32、80-token/时间缓存/CUDA Graph、9个真实三相机观测的离线候选结果（每行均与**同一步数**原始 JAX 对照，非与10步对照）：
+
+| 去噪步数 | 采样器P50/P95 | Thor总处理P50/P95 | JAX→TRT最大单关节差 | 结果 |
+| --- | ---: | ---: | ---: | --- |
+| 10 | 220.32/223.46 ms | 224.01/227.37 ms | 0.0017599 rad | 精度参考，慢 |
+| 8 | 198.99/202.64 ms | 202.53/207.06 ms | 0.0010224 rad | 仅采样器P50低于200ms |
+| 7 | 188.01/189.80 ms | 191.78/193.94 ms | 0.0008881 rad | Thor端低于200ms；加假定20ms余量约212ms |
+| 6 | 182.92/183.44 ms | 186.53/187.26 ms | 0.0015228 rad | 加假定20ms余量约207ms |
+| 5 | 174.54/175.09 ms | 178.23/178.85 ms | 0.0014782 rad | 加假定20ms余量约198ms，但采样设置偏离10步较多 |
+
+5/6/7/8步各9/9输出有限且RTC冻结前缀逐位保持，均未上线、未做3588端到端/真机闭环。引擎和原始回执分别为 Thor `/home/wuyan-lyj/thor/pi/artifacts/rtc-30000-trt-tf32-cache80-{5,6,7,8}step-20260917-r1/validation-detail.json`；5步引擎SHA256 `f99dad5ef9985c93553db2fe09538fe261e80535f976a829d2e4015bbb957c59`，6步 `fe18dde29d6cee3ae1571fec30f4e4015a5f010b2103f021a2fb419d6d4c71db`，7步 `0b5cc53e2c4eaba58021b4018d471c3d8954633507d4d477088731f4a12455ce`，8步 `450f7793009696bc083a6d54b0254d5a995376959d7e4189d16185b348130fdd`。外部20ms仅为用户给的预算，不是已测3588往返。6/7步JAX→TRT物理14D平均差分别`9.06e-5`/`8.66e-5`（混合单位）、P95`2.92e-4`/`2.63e-4`、最坏均为case7/action49/dim1；这些也不是任务误差。若把外部20ms当硬预算，当前只有5步的P50约198ms勉强小于200ms，P95约199ms，余量极薄；6步约207ms，7步约212ms。控制侧真实端到端时延、排队抖动与真机效果未验证，不能宣称200ms闭环已达标。
+
+### FP8 是独立的部署量化研究，不是改用 FP8 微调
+
+2026-09-17 查阅 [Jetson AI Lab Thor 教程](https://www.jetson-ai-lab.com/tutorials/openpi_on_thor/)、[openpi-thor 实现](https://github.com/xuweiwu/openpi-thor)、[NVIDIA TensorRT 精度说明](https://docs.nvidia.com/deeplearning/tensorrt/latest/inference-library/accuracy-considerations.html) 与 [量化方案](https://docs.nvidia.com/deeplearning/tensorrt/latest/inference-library/quantized-types-schemes.html)。主流 Pi0.5 Thor FP8 路线是**训练后量化（PTQ）**：保留高精度训练权重，用真实数据标定激活 scale，在 ONNX 图中插入明确的 Q/DQ，让 TensorRT 对适合的矩阵计算用 FP8；敏感计算保留较高精度。NVIDIA 教程在 LIBERO/H10/7D、MAXN 的不同合同下报告 FP8 TensorRT 约54ms、FP8+NVFP4约49ms；这些数字和余弦相似度不能外推为本项目 YAM/H50/14D/trained-RTC 的时延或物理关节误差。它也没有给出足以判定本任务闭环成功的逐关节/夹爪误差。FP8 的收益是更高矩阵吞吐和较小权重/激活传输，但精度代价包括舍入与范围截断；不是每个算子都改成 FP8，`--fp8` 字样也不代表已正确量化整个网络。
+
+社区 `openpi-thor` 的 FP8 默认校准32个真实样本，保留 FP32 敏感岛与 strongly typed 构建；其 FP8 验证门槛 `min_cosine≥0.97, MAE≤0.08, max_abs≤0.3` 是该实现自己的数值合同，单位/动作空间与本项目不保证相同，**不得直接拿来放行 YAM**。其作者还记录更广泛的 NVFP4 曾在 TensorRT lowering 后把均误放大约30倍，现改为 attention-side NVFP4、Gemma MLP 留 FP8；说明量化范围比一个精度标签更重要。NVIDIA [PTQ/QAT 说明](https://docs.nvidia.com/deeplearning/tensorrt/10.x.x/inference-library/work-quantized-types.html)区分：PTQ 不重训，QAT 才在训练时模拟量化误差；真正的 [FP8 混合精度训练](https://docs.nvidia.com/deeplearning/transformer-engine/features/low_precision_training/introduction/introduction.html)通常仍保存高精度主权重/优化状态，不能理解为只留下8位训练权重。当前没有授权或依据为 YAM 改训练路线。
+
+若后续做 FP8 实机候选，应固定30000 checkpoint/norm、同一去噪步数/文本桶/RTC输入与噪声，使用 YAM 真实数据标定并单独导出；对同一步数原始JAX与未量化引擎比较完整物理 `50×14`、逐关节rad、双夹爪、每个 `d` 的新后缀前段、P95/P99/最坏值与稳态服务时延，最后由真机任务验证。FP8不得把更改步数造成的采样差异算作量化误差。目前只完成社区/官方调研，**本项目尚无 FP8 RTC 引擎、YAM 校准或测试数字**。
