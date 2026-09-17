@@ -1,5 +1,10 @@
 # 07 · 变更历史
 
+## 2026-09-17 · RTC 20000 先转换、暂缓测试
+
+- 用户要求旧100000推理继续约半小时测试，Thor RTC只先做转换。20000完整JAX保存点已校验传至Thor、原始参数非有限0；独立PyTorch FP32产物完成，811张量映射/加载逐位一致。现有RTC ONNX导出先在Thor CUDA上进行JAX/PyTorch动作数值对照，TensorRT构建依赖该闸门，因此未绕过测试要求抢GPU或伪称引擎已建。
+- `thor-rtc-20000`心跳暂停，旧`pi05-infer`不变；等待用户明确恢复RTC测试。路径、哈希及未完成范围归[RTC冷手册](reference/thor/13_trained_rtc_inference.md)。
+
 ## 2026-09-16 · Evo-1基座VLM权重本地下载与服务器交接
 
 - 按当前固定 LeRobot Evo-1 配置从 ModelScope 镜像下载 `OpenGVLab/InternVL3-1B-hf`，revision 为 `014c0583a0d4bedf29fbe2dbff4f865eb998e171`；16 个文件共 `1,892,380,781` bytes，主权重 SHA256 为 `fdf8d51c7db5e31938300642b1bebce7f28592a2adefafc931cb8c21a8395517`。

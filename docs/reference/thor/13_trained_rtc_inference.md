@@ -1,6 +1,6 @@
 # 13 · Pi0.5 training-time RTC：Thor 转换与推理候选
 
-2026-09-17 状态：**代码候选、Pi 系列 RTC 候选镜像与 Thor 隔离容器 CPU 合约测试已完成；服务器 20000 保存点已完整传至 Thor 并核对来源，尚未完成真实 JAX→Torch→TensorRT 精度/延迟验收，也未启动 RTC 服务。** 现行 `pi05-infer` 的 100000 W/80 服务不变。RTC 新服务预留独立 8001 端口，验收前不得以它替换 8000。
+2026-09-17 状态：**代码候选、Pi 系列 RTC 候选镜像与 Thor 隔离容器 CPU 合约测试已完成；服务器 20000 保存点已完整传至 Thor，原始参数审计及 JAX→PyTorch FP32 权重转换已完成。按用户最新要求，RTC 动作精度/延迟测试暂不进行，ONNX/TensorRT 尚未导出或构建，也未启动 RTC 服务。** 现行 `pi05-infer` 的 100000 W/80 服务不变。RTC 新服务预留独立 8001 端口，验收前不得以它替换 8000。
 
 ## 算法合同：没有兼容降级
 
@@ -33,10 +33,12 @@ JAX参考采样 `src/openpi/models/pi0.py::sample_actions_trained_rtc`；Torch e
 
 ## 2026-09-17 · 20000 保存点首次接入
 
-服务器原件：`yam-server:/home/wuyan/lyj/YAM/training-runs/pi05_yam/lego_pi05_rtc_base_10h_20260916/20000`，`_CHECKPOINT_METADATA` 含 `commit_timestamp_nsecs=1789600432477436453`，params 16个文件；本次只取 params/assets/完成元数据与训练合同，不取 train_state。Thor 独立目标：`/home/wuyan-lyj/thor/pi/checkpoints/lego-pi05-rtc-base-10h-20260916/20000`。六个大 OCDBT 文件经本机 SSH agent 转发、Thor 直接从服务器 `rsync --partial --append-verify` 并行续传；传输期间将管理 Wi-Fi 从2.4 GHz切为5 GHz，完成后两端 params/assets 共17个文件、文件字节总和 `12440600720`、逐文件 SHA256 全部一致，`_CHECKPOINT_METADATA` SHA256 均为 `68188c321087001dec95ca5b4cd0ca10fe485407c912e75c130106c4e5d4faad`，训练合同 SHA256 均为 `ef773631bb5dac8d4de055dc1d7161cf57c691b68ae50ec983e3a6297cb5ed5f`。服务器与Thor `du -sb` 目录大小因文件系统目录项开销不同而略有差异，不是权重差异。源端仍在训练，选旧 20000 避开最新保存窗口；后续真权重恢复/审计与转换尚未完成。`thor-rtc-20000` 当前线程心跳继续测试，状态不变静默，全部完成后停用。
+服务器原件：`yam-server:/home/wuyan/lyj/YAM/training-runs/pi05_yam/lego_pi05_rtc_base_10h_20260916/20000`，`_CHECKPOINT_METADATA` 含 `commit_timestamp_nsecs=1789600432477436453`，params 16个文件；本次只取 params/assets/完成元数据与训练合同，不取 train_state。Thor 独立目标：`/home/wuyan-lyj/thor/pi/checkpoints/lego-pi05-rtc-base-10h-20260916/20000`。六个大 OCDBT 文件经本机 SSH agent 转发、Thor 直接从服务器 `rsync --partial --append-verify` 并行续传；传输期间将管理 Wi-Fi 从2.4 GHz切为5 GHz，完成后两端 params/assets 共17个文件、文件字节总和 `12440600720`、逐文件 SHA256 全部一致，`_CHECKPOINT_METADATA` SHA256 均为 `68188c321087001dec95ca5b4cd0ca10fe485407c912e75c130106c4e5d4faad`，训练合同 SHA256 均为 `ef773631bb5dac8d4de055dc1d7161cf57c691b68ae50ec983e3a6297cb5ed5f`。服务器与Thor `du -sb` 目录大小因文件系统目录项开销不同而略有差异，不是权重差异。源端仍在训练，选旧 20000 避开最新保存窗口；原始参数审计及FP32转换结果见本节末。用户暂缓RTC测试，`thor-rtc-20000` 心跳已暂停，不会自行启动参考推理、导出或测速。
 
 发现一个可验证的 norm 序列化差异：训练源 `training_contract.json` 的 norm SHA256 是 `606d5c69e56aadb273ed3882ba9b62e11978a4222d8ff1e827e541bddd112893`；保存点 `assets/yam/norm_stats.json` 是 `b38ac082a729a4825c1a946c965183125382f10ccb5a75da89c2427019d1fefe`。服务器 `cmp` 核实前3416字节逐字节相同，训练源只多一个末尾换行；不是 norm 数值改变。`rtc_norm_identity.py` 仅接受原字节完全一致或**恰好少这一个末尾换行**，分别记录两种哈希；不接受任意 JSON 语义近似。旧 100000 norm 不能用于本次 RTC 回放。
 
 Thor 已用 `prepare_rtc_cases.py` 生成新的真实离线回放 `/home/wuyan-lyj/thor/pi/test-data/pi05-rtc-20000-replay-20260917-r2`：源 Parquet SHA与原回放 provenance 一致，逐行 state 完全相同，9个三相机观测覆盖 episode95/96/97 的早中晚，`d=0/1/10` 各3个；prefix直接取同 episode 同行起的 `action`，不是模型伪造。`cases.json` 显式记录 `observation_policy_tick == target_start_tick`、数据时间戳和 norm 双哈希。它可供精度/延迟离线测试，不是3588物理时序已验收。
 
 原始JAX参数已在Thor候选容器中用 `audit_checkpoint_finite.py`、原dtype完整恢复审计：全部参数非有限元素0，词嵌入 `257152×2048` FP32中NaN/Inf均0。报告 `/home/wuyan-lyj/thor/pi/artifacts/rtc-20000-audit-20260917-r1.json`，SHA256 `879e8a827e8eb0bad35505763040971c19dce785214c8b27e553e6abea08b8b6`。这只是源参数闸门，不代表动作输出精度通过。首次FP32转换入口在容器 `/bench` 挂载下因 `Path.parents[2]` 越界、尚未调用转换器而退出；已修正为存在repo路径时使用repo转换器，否则用同目录已审计转换器。重跑完成，产物 `/home/wuyan-lyj/thor/pi/checkpoints/lego-pi05-rtc-base-10h-20260916/20000-pytorch-fp32-r1`，811个映射张量/3353433872个元素与加载值逐位一致，`model.safetensors` SHA256 `4f4ceb6849b0739cfd68abc92e3d817864c7416ecae9fc3add83653beb9056b7`；输出FP32、无LoRA。`config.json`仅有Pi0.5结构字段，实际RTC训练上限10由同目录 `rtc_manifest.json` 绑定训练合同持有，不能把转换器打印的默认`rtc_training_max_delay=0`当成本保存点的训练语义。此阶段尚无JAX↔PyTorch动作对照/推理延迟或TensorRT验收，不删除原件或首次失败证据。
+
+2026-09-17 用户指定旧推理还需约半小时测试，RTC 先只转换、不测试。现有 `export_pi05_rtc_onnx.py` 在真正写ONNX之前会加载同保存点JAX参考并在CUDA上跑9组 `d=0/1/10` 的eager/wrapper及JAX数值对照；`build_trt_engine.py`又要求这些数值门槛与动态前缀输入通过。因此本轮停在已审计的FP32权重，不绕过精度闸门伪造“已导出/已构建”，也不占用正在测试旧模型的GPU。待用户明确恢复RTC测试后，再生成JAX参考、导出ONNX和构建独立引擎；不自动替换100000服务。
