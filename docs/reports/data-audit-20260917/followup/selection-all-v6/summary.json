@@ -1,0 +1,32 @@
+{
+  "label": "selection_all",
+  "hostname": "gpu001.hlink.local",
+  "python": "3.12.12 | packaged by conda-forge | (main, Oct 13 2025, 14:34:15) [GCC 14.3.0]",
+  "dataset": "/home/wuyan/lyj/YAM/YAM_data/processed/lego_lerobot_v1_20260907/train",
+  "dataset_info_sha256": "ba88887ff84544eb130708cdf8c0ce965b53f099fdad07286a57f41883211851",
+  "conversion_manifest_sha256": "9844c0b86b93fd40adf251275d770899ba413800d2a0cba11d4e9bdae40544dc",
+  "selection": "/home/wuyan/lyj/YAM/training-assets/lego_rtc_10h_20260916/episodes.json",
+  "selection_sha256": "c261841d3617cad25e0caac7ae7cb74a00832d993a6c22be6e4ea01fb7de79db",
+  "norm_dir": "/home/wuyan/lyj/YAM/training-assets/lego_rtc_10h_20260916/norm/yam",
+  "norm_sha256": "606d5c69e56aadb273ed3882ba9b62e11978a4222d8ff1e827e541bddd112893",
+  "total_dataset_episodes": 4458,
+  "total_dataset_frames": 10374181,
+  "probe_episodes": 468,
+  "probe_frames": 1082232,
+  "probe_windows": 1872,
+  "samples_ok": 1872,
+  "samples_failed": 0,
+  "failure_counts": {},
+  "tail_checks": 936,
+  "elapsed_seconds": 67.14259019307792,
+  "pipeline": [
+    "LeRobotDataset(video_backend=pyav, delta_timestamps action H50)",
+    "YamInputs(PI05, 14D, three RGB views)",
+    "DeltaActions(mask=(6,-1,6,-1))",
+    "Normalize(quantile stats)",
+    "InjectDefaultPrompt",
+    "ResizeImages(224,224)",
+    "TokenizePrompt(PaliGemma, discrete PI05 state)",
+    "PadStatesAndActions(32)"
+  ]
+}

@@ -21,9 +21,33 @@
   },
   "source_repairs": {
     "count": 10,
-    "source_episode_ids": [9750, 9873, 15193, 20234, 28675, 30059, 79470, 92573, 113716, 119779],
-    "processed_episode_ids": [323, 324, 536, 737, 1016, 1058, 2734, 3187, 3913, 4131],
-    "rtc_intersection_processed_ids": [3187],
+    "source_episode_ids": [
+      9750,
+      9873,
+      15193,
+      20234,
+      28675,
+      30059,
+      79470,
+      92573,
+      113716,
+      119779
+    ],
+    "processed_episode_ids": [
+      323,
+      324,
+      536,
+      737,
+      1016,
+      1058,
+      2734,
+      3187,
+      3913,
+      4131
+    ],
+    "rtc_intersection_processed_ids": [
+      3187
+    ],
     "repaired_video_probe": {
       "videos": 30,
       "elapsed_seconds": 21.73,
@@ -41,109 +65,180 @@
     "errors": 0,
     "source": "docs/reports/training/pi05-crash-audit-20260909/data-audit.json"
   },
-    "loader_equivalence": {
-        "full_samples": 12,
-        "subset_samples": 12,
-    "sample_positions": ["first", "middle", "length_minus_horizon", "last"],
-    "images_shape": [224, 224, 3],
-        "state_action_equal": true,
-        "source": "server training-assets/*/yam/loader_equivalence.json"
-    },
-    "subset_norm_recompute": {
-        "episodes": 468,
-        "frames": 1082232,
-        "block_size": 1024,
-        "parquet_episode_boundary_frame_timestamp_loader_errors": 0,
-        "matches_training_norm": true,
-        "norm_sha256": "606d5c69e56aadb273ed3882ba9b62e11978a4222d8ff1e827e541bddd112893",
-        "block_size_4096_quantiles_differ": true,
-        "selected_source_episode_ids": 468,
-        "source_episode_mapping_is_one_to_one": true
-    },
-    "published_media_inventory": {
-        "parquet_files": 4458,
-        "video_files": 13374,
-        "camera_streams_per_episode": 3,
-        "all_camera_streams_present": true
-    },
-    "full_selection_loader_probe": {
-        "selection_episodes": 468,
-        "mode": "read_only_real_loader_no_training",
-        "status": "failed_fd_exhaustion",
-        "error": "OSError: [Errno 24] Too many open files",
-        "summary_written": false,
-        "fixed_episode_frame": null,
-        "server_log": "/home/wuyan/lyj/YAM/training-runs/control/yam-loader-probe-20260917/slurm-2146.log",
-        "interpretation": "reader/file-descriptor pressure reproduced; workers=0/2/8 control still missing"
-    },
-    "training_alignment": {
+  "loader_equivalence": {
+    "full_samples": 12,
+    "subset_samples": 12,
+    "sample_positions": [
+      "first",
+      "middle",
+      "length_minus_horizon",
+      "last"
+    ],
+    "images_shape": [
+      224,
+      224,
+      3
+    ],
+    "state_action_equal": true,
+    "source": "server training-assets/*/yam/loader_equivalence.json"
+  },
+  "subset_norm_recompute": {
+    "episodes": 468,
+    "frames": 1082232,
+    "block_size": 1024,
+    "parquet_episode_boundary_frame_timestamp_loader_errors": 0,
+    "matches_training_norm": true,
+    "norm_sha256": "606d5c69e56aadb273ed3882ba9b62e11978a4222d8ff1e827e541bddd112893",
+    "block_size_4096_quantiles_differ": true,
+    "selected_source_episode_ids": 468,
+    "source_episode_mapping_is_one_to_one": true
+  },
+  "published_media_inventory": {
+    "parquet_files": 4458,
+    "video_files": 13374,
+    "camera_streams_per_episode": 3,
+    "all_camera_streams_present": true
+  },
+  "full_selection_loader_probe": {
+    "selection_episodes": 468,
+    "mode": "read_only_real_loader_no_training",
+    "status": "failed_fd_exhaustion",
+    "error": "OSError: [Errno 24] Too many open files",
+    "summary_written": false,
+    "fixed_episode_frame": null,
+    "server_log": "/home/wuyan/lyj/YAM/training-runs/control/yam-loader-probe-20260917/slurm-2146.log",
+    "interpretation": "Initial FD failure alone does not reproduce training FD exhaustion: later job 2149 with ulimit -n 65535 passed 1872 windows. CPU and memory allocations also differed."
+  },
+  "training_alignment": {
     "full_r2_r3": {
       "code_snapshot": "a53bb001e4acb2cce486f2da83d6d8256439a188",
       "batch": 64,
       "workers": 8,
       "rtc_training_max_delay": 0,
       "norm_scope": "4458 train episodes",
-      "peak_lr": 2.5e-5,
+      "peak_lr": 2.5e-05,
       "dtype": "bfloat16",
       "fsdp_devices": 4
     },
-        "rtc_10h": {
+    "rtc_10h": {
       "code_snapshot": "3dd9c82046eef4edfda776771290ba9994da30ae",
       "batch": 32,
       "workers": 2,
       "rtc_training_max_delay": 10,
       "norm_scope": "468 selected episodes",
-      "peak_lr": 1e-5,
-      "decay_lr": 1e-6,
+      "peak_lr": 1e-05,
+      "decay_lr": 1e-06,
       "dtype": "bfloat16",
-            "fsdp_devices": 4
-        },
-        "full_b32_stable_continuation": {
-            "batch": 32,
-            "workers": 2,
-            "peak_lr": 1.25e-05,
-            "observed_finite_step": 100450,
-            "paused_step": 100531,
-            "new_steps_after_source_checkpoint": 450,
-            "source_checkpoint_step": 100000,
-            "status": "user_paused_not_failure",
-            "run": "lego_full_b32_stable_20260916"
-        }
+      "fsdp_devices": 4
     },
-    "historical_faults": {
-        "read_decode": {
-            "fixed_file_decode_errors": 0,
-            "dataloader_fd_exhaustion": {
-                "time": "2026-09-11T20:34:15+08:00",
-                "batch": 32,
-                "workers": 8,
-                "path": "/home/wuyan/lyj/YAM/training-runs/control/lego_full_b32_xid13_recovery_20260911/auto_resume_20260911T204200+0800.json"
-            }
-        },
-        "cuda_xid_nccl": [
-            {"step": 271, "kind": "NCCL/CUDA illegal memory access", "run": "lego_full_b64_r2_20260909"},
-            {"step": 37761, "kind": "GPU1 Xid13/MMU fault", "run": "lego_full_b32_xid13_recovery_20260911"},
-            {"step": 65531, "kind": "NCCL/CUDA illegal memory access", "run": "lego_full_b32_xid13_recovery_20260912_nccl_65531_hl"},
-            {"step": 67670, "kind": "NCCL/CUDA illegal memory access", "run": "lego_full_b32_xid13_recovery_20260912_nccl_67670_hl2"},
-            {"step": 77490, "kind": "NCCL/CUDA illegal memory access", "run": "lego_full_b32_xid13_recovery_20260912_nccl_77490_hl3"}
-        ],
-        "nonfinite": [
-            {"step": 9361, "metric": "grad_norm=inf", "run": "lego_full_b64_r3_20260909"},
-            {"step": 134061, "metric": "grad_norm=inf", "run": "lego_full_b32_xid13_recovery_20260914_nccl_129501_hl10"}
-        ],
-        "finite_extreme_gradients": {
-            "full_step": 69111,
-            "full_grad_norm": 1.7427094373505434e18,
-            "rtc_step": 24351,
-            "rtc_grad_norm": 2169158912.0,
-            "rtc_continued_after": true
-        }
+    "full_b32_stable_continuation": {
+      "batch": 32,
+      "workers": 2,
+      "peak_lr": 1.25e-05,
+      "observed_finite_step": 100450,
+      "paused_step": 100531,
+      "new_steps_after_source_checkpoint": 450,
+      "source_checkpoint_step": 100000,
+      "status": "user_paused_not_failure",
+      "run": "lego_full_b32_stable_20260916"
+    }
+  },
+  "historical_faults": {
+    "read_decode": {
+      "fixed_file_decode_errors": 0,
+      "dataloader_fd_exhaustion": {
+        "time": "2026-09-11T20:34:15+08:00",
+        "batch": 32,
+        "workers": 8,
+        "path": "/home/wuyan/lyj/YAM/training-runs/control/lego_full_b32_xid13_recovery_20260911/auto_resume_20260911T204200+0800.json"
+      }
     },
-    "known_gaps": [
+    "cuda_xid_nccl": [
+      {
+        "step": 271,
+        "kind": "NCCL/CUDA illegal memory access",
+        "run": "lego_full_b64_r2_20260909"
+      },
+      {
+        "step": 37761,
+        "kind": "GPU1 Xid13/MMU fault",
+        "run": "lego_full_b32_xid13_recovery_20260911"
+      },
+      {
+        "step": 65531,
+        "kind": "NCCL/CUDA illegal memory access",
+        "run": "lego_full_b32_xid13_recovery_20260912_nccl_65531_hl"
+      },
+      {
+        "step": 67670,
+        "kind": "NCCL/CUDA illegal memory access",
+        "run": "lego_full_b32_xid13_recovery_20260912_nccl_67670_hl2"
+      },
+      {
+        "step": 77490,
+        "kind": "NCCL/CUDA illegal memory access",
+        "run": "lego_full_b32_xid13_recovery_20260912_nccl_77490_hl3"
+      }
+    ],
+    "nonfinite": [
+      {
+        "step": 9361,
+        "metric": "grad_norm=inf",
+        "run": "lego_full_b64_r3_20260909"
+      },
+      {
+        "step": 134061,
+        "metric": "grad_norm=inf",
+        "run": "lego_full_b32_xid13_recovery_20260914_nccl_129501_hl10"
+      }
+    ],
+    "finite_extreme_gradients": {
+      "full_step": 69111,
+      "full_grad_norm": 1.7427094373505434e+18,
+      "rtc_step": 24351,
+      "rtc_grad_norm": 2169158912.0,
+      "rtc_continued_after": true
+    }
+  },
+  "known_gaps": [
     "independent full video audit full.json is absent; full.json.incomplete is empty",
     "only 24 transformed loader windows have persisted equivalence evidence",
     "step 9361 failing batch episode/frame provenance is absent",
     "per-episode jump/delta and normalized range distribution has not been computed",
     "workers 0/2/8 resource comparison has not been run"
-  ]
+  ],
+  "report_status": "historical_initial_report_superseded_by_followup",
+  "followup": "followup/numeric_distribution.json and FOLLOWUP.md",
+  "followup_result": {
+    "report": "FOLLOWUP.md",
+    "full_parquet_scan": {
+      "episodes": 4458,
+      "frames": 10374181,
+      "finite_frame_episode_timestamp_errors": 0
+    },
+    "retrieved_loader_windows": 2056,
+    "targeted_windows_two_norms": 24,
+    "source_arrays_equal": true,
+    "spikes": [
+      {
+        "episode": 3227,
+        "source_episode": 93591,
+        "frame": 484,
+        "dimension": 5
+      },
+      {
+        "episode": 3306,
+        "source_episode": 96098,
+        "frame": 1172,
+        "dimension": 4
+      },
+      {
+        "episode": 1086,
+        "source_episode": 30941,
+        "frame": 1303,
+        "dimension": 12
+      }
+    ],
+    "causes_training_crash": "not_established"
+  }
 }

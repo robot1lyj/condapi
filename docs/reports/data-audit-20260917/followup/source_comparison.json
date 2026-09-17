@@ -1,0 +1,56 @@
+[
+  {
+    "episode": 3227,
+    "source_episode": 93591,
+    "source_path": "/home/wuyan/lyj/YAM/YAM_data/ABC-130k-two-tasks/lego_sorting/train/data/source-file-576.parquet",
+    "source_sha256": "0ce014b00eab8ae3fb5130e40e061c0f0e673cdfe01a4843f0e968a8f23ef01f",
+    "source_rows": 4154,
+    "published_rows": 4154,
+    "columns": {
+      "observation.state": {
+        "equal": true,
+        "max_abs_difference": 0.0
+      },
+      "action": {
+        "equal": true,
+        "max_abs_difference": 0.0
+      }
+    }
+  },
+  {
+    "episode": 3306,
+    "source_episode": 96098,
+    "source_path": "/home/wuyan/lyj/YAM/YAM_data/ABC-130k-two-tasks/lego_sorting/train/data/source-file-588.parquet",
+    "source_sha256": "0666dfe066acc05d1f8d993aeb31c007fbb71e0fd6227b9d513e30fda274dd63",
+    "source_rows": 2347,
+    "published_rows": 2347,
+    "columns": {
+      "observation.state": {
+        "equal": true,
+        "max_abs_difference": 0.0
+      },
+      "action": {
+        "equal": true,
+        "max_abs_difference": 0.0
+      }
+    }
+  },
+  {
+    "episode": 1086,
+    "source_episode": 30941,
+    "source_path": "/home/wuyan/lyj/YAM/YAM_data/ABC-130k-two-tasks/lego_sorting/train/data/source-file-244.parquet",
+    "source_sha256": "5648060db30380621bc0ca8df118cd5a71bc5982dd6868f29c0f488c5d2db1a2",
+    "source_rows": 2015,
+    "published_rows": 2015,
+    "columns": {
+      "observation.state": {
+        "equal": true,
+        "max_abs_difference": 0.0
+      },
+      "action": {
+        "equal": true,
+        "max_abs_difference": 0.0
+      }
+    }
+  }
+]
