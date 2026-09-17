@@ -732,3 +732,7 @@ text80 实验完成 ONNX、TensorRT 构建和 W 正式回放。完整 policy P50
 ## 2026-09-17：Thor RTC 去噪步数与 FP8 路线
 
 用户要求并行寻找低于200ms且尽量保留精度的配比。保留原30000 RTC/FP32权重、norm、三相机H50与固定8000服务，新增独立5/6/7/8步原始JAX参考、FP32 ONNX与未量化TF32 TensorRT引擎，同9个真实YAM观测、固定噪声、MAXN逐步验收。10/8/7/6/5步稳态Thor总处理P50约224/203/192/187/178ms；外部另留20ms时只有5步约198ms勉强过200ms，且相对10步JAX采样轨迹最大关节差0.04475rad。6/7/8步相对10步差逐步减小，具体转换误差、P95与指纹归[RTC冷手册](reference/thor/13_trained_rtc_inference.md)；这些不是任务真值误差，也没有跨3588/真机验收。社区FP8主要为带真实校准的训练后量化，不把训练改为FP8；本项目尚未构建FP8 RTC候选。旧生产容器、权重与接口均未替换。
+
+## 2026-09-17 18:40 CST：按用户要求上线Thor RTC 7步
+
+在原30000 checkpoint/norm和既有固定WebSocket地址不变下，仅替换为已离线验证的7步FP32权重＋TF32 TensorRT引擎。服务入口新增显式`--allow-validated-tf32-7step`，用9例回放/前缀、同JAX指纹、checkpoint及引擎SHA放行；22项相关代码测试通过。临时8001和正式8000各9/9真实协议smoke通过，固定8000握手7步，服务/本机往返P50约194/195ms，首请求约212ms；未做3588直连或真机。首次临时容器漏写Python入口、退出126；修正入口后正常，旧8000未受影响。切换期间旧MAXN会话随旧容器结束并恢复120W，新容器启动后重新以临时systemd unit维持MAXN、GPU/EMC锁频，实测active；该unit与`--restart no`容器均非持久开机。旧10步容器与权重、引擎保留供回退。详细指纹、命令边界及回执见[RTC冷手册](reference/thor/13_trained_rtc_inference.md)。

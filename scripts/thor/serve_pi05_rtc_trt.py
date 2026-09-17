@@ -4,6 +4,7 @@ import argparse
 import dataclasses
 import json
 import logging
+import math
 from pathlib import Path
 
 from benchmark_pi05 import digest
@@ -18,6 +19,33 @@ from openpi.shared import normalize
 from openpi.training import config
 
 
+def check_validated_tf32_7step(report, export, manifest, validation):
+    """Limit production promotion to the independently replayed RTC candidate."""
+    cases = validation.get("cases", [])
+    if (
+        report.get("status") != "built_experiment_not_accuracy_validated"
+        or report.get("exit_code") != 0
+        or report.get("precision_candidate_kind") != "tf32"
+        or report.get("tf32") is not True
+        or report.get("quantization") is not None
+        or report.get("strongly_typed") is not True
+        or export.get("compute_dtype") != "float32"
+        or export.get("contract", {}).get("steps") != 7
+        or validation.get("status") != "compared_not_robot_task_validated"
+        or validation.get("engine_sha256") != report.get("engine_sha256")
+        or validation.get("engine_tf32") is not True
+        or validation.get("num_steps") != 7
+        or validation.get("checkpoint_weights_sha256") != manifest.get("model_weights_sha256")
+        or validation.get("jax_reference_manifest_sha256") != export.get("jax_reference_manifest_sha256")
+        or len(cases) != 9
+        or {case.get("delay_steps") for case in cases} != {0, 1, 10}
+        or not all(case.get("finite") is True and case.get("prefix_exact") is True for case in cases)
+        or not math.isfinite(validation.get("physical_max_abs", float("nan")))
+        or validation["physical_max_abs"] > 0.002
+    ):
+        raise ValueError("The seven-step TF32 engine lacks matching numerical validation")
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--engine", type=Path, required=True)
@@ -27,6 +55,7 @@ def main():
     parser.add_argument("--warmup-rtc", type=Path, required=True)
     parser.add_argument("--host", default="192.168.250.1")
     parser.add_argument("--port", type=int, default=8001)
+    parser.add_argument("--allow-validated-tf32-7step", action="store_true")
     args = parser.parse_args()
     if not torch.cuda.is_available():
         parser.error("Thor CUDA required")
@@ -35,8 +64,9 @@ def main():
     export = json.loads(export_path.read_text())
     manifest_path = args.checkpoint / "rtc_manifest.json"
     manifest = json.loads(manifest_path.read_text())
+    experimental = args.allow_validated_tf32_7step
     if (
-        report["status"] != "built_not_inference_or_accuracy_validated"
+        (not experimental and report["status"] != "built_not_inference_or_accuracy_validated")
         or report["exit_code"] != 0
         or export["status"] != "onnx_exported_engine_not_validated"
         or export["rtc_mode"] != "trained"
@@ -44,17 +74,22 @@ def main():
         or export["rtc_manifest_sha256"] != digest(manifest_path)
         or manifest["route"] != "pi05_yam_trained_rtc"
         or not all(row["numeric_gate_1e-4"] for row in export["jax_comparisons"])
-        or report["tf32"]
+        or (report["tf32"] and not experimental)
         or report["quantization"] is not None
     ):
         parser.error("RTC engine/checkpoint/norm/JAX gate mismatch")
+    if experimental:
+        validation = json.loads((args.engine / "validation-detail.json").read_text())
+        check_validated_tf32_7step(report, export, manifest, validation)
     train = config.get_config("pi05_yam")
     train = dataclasses.replace(train, model=dataclasses.replace(
         train.model, dtype=export["compute_dtype"], rtc_training_max_delay=manifest["max_delay_steps"],
     ))
     stats = normalize.deserialize_json(args.norm.read_text())
     policy = create_rtc_transform_policy(train, stats)
-    backend = RtcTensorRTAdapter(args.engine, max_delay=manifest["max_delay_steps"])
+    backend = RtcTensorRTAdapter(
+        args.engine, max_delay=manifest["max_delay_steps"], allow_experimental=experimental
+    )
     backend.enable_cuda_graph()
     serving = TrainedRtcInference(
         policy, stats, max_delay=manifest["max_delay_steps"],
@@ -75,6 +110,9 @@ def main():
         "norm_stats_sha256": manifest["norm_stats_sha256"],
         "engine_sha256": report["engine_sha256"],
         "compute_dtype": export["compute_dtype"],
+        "precision_mode": (
+            "fp32_weights_tf32_compute" if experimental else f"{export['compute_dtype']}_no_tf32"
+        ),
         "action_horizon": 50,
         "denoising_steps": export["contract"]["steps"],
         "action_dt_s": 1 / 30,

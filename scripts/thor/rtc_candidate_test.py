@@ -17,6 +17,7 @@ from rtc_onnx_sampler import Pi05RtcOnnxSampler
 from rtc_onnx_sampler import validate_trained_prefix
 from rtc_norm_identity import checkpoint_norm_identity
 from rtc_policy import validate_request
+from serve_pi05_rtc_trt import check_validated_tf32_7step
 
 from openpi.models_pytorch.pi0_pytorch import PI0Pytorch
 from openpi.models_pytorch.pi0_pytorch import create_sinusoidal_pos_embedding
@@ -58,6 +59,35 @@ class FakeModel(nn.Module):
 
 
 class RtcCandidateTest(unittest.TestCase):
+    def test_seven_step_tf32_service_requires_matching_validation(self):
+        report = {
+            "status": "built_experiment_not_accuracy_validated", "exit_code": 0,
+            "precision_candidate_kind": "tf32", "tf32": True, "quantization": None,
+            "strongly_typed": True, "engine_sha256": "engine",
+        }
+        export = {
+            "compute_dtype": "float32", "contract": {"steps": 7},
+            "jax_reference_manifest_sha256": "jax",
+        }
+        manifest = {"model_weights_sha256": "weights"}
+        validation = {
+            "status": "compared_not_robot_task_validated", "engine_sha256": "engine",
+            "engine_tf32": True, "num_steps": 7,
+            "checkpoint_weights_sha256": "weights", "jax_reference_manifest_sha256": "jax",
+            "physical_max_abs": 0.0009,
+            "cases": [
+                {"delay_steps": delay, "finite": True, "prefix_exact": True}
+                for delay in (0, 1, 10) for _ in range(3)
+            ],
+        }
+        check_validated_tf32_7step(report, export, manifest, validation)
+        with self.assertRaises(ValueError):
+            check_validated_tf32_7step(report, export, manifest, {**validation, "engine_sha256": "other"})
+        with self.assertRaises(ValueError):
+            check_validated_tf32_7step(report, export, manifest, {**validation, "physical_max_abs": 0.0021})
+        with self.assertRaises(ValueError):
+            check_validated_tf32_7step(report, {**export, "contract": {"steps": 8}}, manifest, validation)
+
     def test_norm_identity_allows_only_the_missing_final_newline(self):
         source = b'{"action":{"mean":[1]}}\n'
         with tempfile.TemporaryDirectory() as directory:

@@ -2,13 +2,13 @@
 
 逐步安装指导的冷记忆入口：[Thor 安装系列 00](reference/thor/00_start_here.md)。该组按 G0–G5 持有设备预检、ISO/USB 制作、固件/NVMe 安装、宿主/容器检查、Pi 工程闸门及故障交接；本页继续持有版本、精度决策和当前状态。指导 agent 不得把下文安装概览当成跳过目标确认的操作脚本。
 
-训练时 RTC 的完整 Thor 路线（原始 JAX FP32 → PyTorch FP32 → 动态前缀 ONNX/TensorRT → 严格 RTC WebSocket）见 [13 · trained RTC 推理](reference/thor/13_trained_rtc_inference.md)。2026-09-17已完成30000 checkpoint的真实离线数值/延迟对照并启动FP32 RTC服务；TF32/BF16是独立实验候选，未替换固定8000服务。旧100000普通服务已停止，不能再当作当前运行状态。
+训练时 RTC 的完整 Thor 路线（原始 JAX FP32 → PyTorch FP32 → 动态前缀 ONNX/TensorRT → 严格 RTC WebSocket）见 [13 · trained RTC 推理](reference/thor/13_trained_rtc_inference.md)。2026-09-17已完成30000 checkpoint的真实离线数值/延迟对照，并按用户要求将固定8000服务切换为7步FP32权重＋TF32 TensorRT版本；旧10步FP32和100000普通服务均已停止、保留。BF16仍只是离线实验候选。
 
 本页是 NVIDIA Jetson AGX Thor IPC 的端侧系统、Pi0.5 转换/加速和推理验收的唯一 owner。训练仍在服务器 GPU 上进行；3588 IPC 负责相机采集、机械臂驱动、CAN、GUI、home pose、限位和急停，本仓库不读取或修改 3588 的实现。
 
 ## 1. 当前决策
 
-- 2026-09-17 固定 `ws://192.168.250.1:8000` 当前由30000训练时RTC的FP32 TensorRT Docker `pi05-rtc-infer` 提供，9/9本机真实回放通过，MAXN服务P50约1033ms；旧100000 `pi05-infer` 已停止但保留。离线未量化TF32/80-token/时间缓存候选10/8/7/6/5步稳态Thor总处理P50约224/203/192/187/178ms；各自对同一步数JAX最大单关节差0.00176/0.00102/0.00089/0.00152/0.00148rad，缩步另有采样轨迹差异且未做真机验收。若外部预算固定20ms，只有5步约198ms勉强达200ms P50目标，余量很薄。BF16/200-token/10步约138ms，但最大动作差0.02236rad，故没有自动上线。FP8仅完成调研，尚无本项目RTC量化实测；不为此改训练精度。用户规定推理/测试阶段一律MAXN，其他阶段120W。当前服务、候选指纹及验收边界见 [RTC冷手册](reference/thor/13_trained_rtc_inference.md)；历史100000回执见[05](05_inference_and_rollout.md#2026-09-16--100000-服务已启动)。
+- 2026-09-17 18:40 CST，固定 `ws://192.168.250.1:8000` 当前由30000训练时RTC的**7步**FP32权重＋TF32 TensorRT Docker `pi05-rtc-infer` 提供；80-token/时间缓存/CUDA Graph，MAXN本机9/9协议smoke通过，服务/往返P50约194/195ms，首请求往返约212ms。旧10步FP32与100000容器停止保留。离线未量化候选10/8/7/6/5步稳态Thor总处理P50约224/203/192/187/178ms；各自对同一步数JAX最大单关节差0.00176/0.00102/0.00089/0.00152/0.00148rad，缩步另有采样轨迹差异且未做真机验收。若外部预算固定20ms，7步不能宣称满足全链路200ms目标。BF16/200-token/10步约138ms，但最大动作差0.02236rad，未上线。FP8仅完成调研，尚无本项目RTC量化实测。用户规定推理/测试阶段一律MAXN，其他阶段120W。当前服务、候选指纹及验收边界见 [RTC冷手册](reference/thor/13_trained_rtc_inference.md)；协议状态见[05](05_inference_and_rollout.md#2026-09-17--固定8000的-rtc-30000-服务)。
 
 - 2026-09-11 用户确认保留 W 混合精度路线作为新 checkpoint 的优先接入方案；自动接入技能及逐阶段步骤见 [新 checkpoint 交接](reference/thor/12_checkpoint_handoff.md)。它自动协助离线转换、构建与回放，不是后台监听或自动生产切换；现有基础模型宿主脚本的硬编码边界在该手册明确列出。
 
