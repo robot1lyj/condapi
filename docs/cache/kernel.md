@@ -10,7 +10,7 @@
 - YAM 为 14D `[左6关节, 左夹爪, 右6关节, 右夹爪]`；Pi 路径关节 delta、夹爪 absolute，mask `(6,-1,6,-1)`，内部 32D、horizon 50；这些模型内部规则不套用其他系列。物理单位仍须数据审计，不套用 OpenArm/Piper 合同，见 [数据合同](../04_data_contracts.md)。
 - Pi 当前训练产物为 JAX/Flax；新模型保留原生 LeRobot/PyTorch 格式。既有 Thor Pi 部署按系列隔离容器，新接入层环境采用独立 Conda；3588 采集/控制，两 IPC 网线直连，本项目不操作 3588。转换与量化须独立验收，既有部署事实见 [Thor 部署](../08_thor_edge_deployment.md)，新架构见 [01](../01_system_architecture.md)。
 - 主检出为 `/home/wuyan-lyj/condapi`，改造工作树以实际 cwd 为准，外部 YAM 参考只读；设备、功能分支提交、数据保护和 RTC 回退边界由 `AGENTS.md` 持有。
-- Thor 训练时 RTC 推理已有独立候选代码/镜像：干净前缀 `t=0`、动态 mask、JAX→Torch→TensorRT 数值 gate 与30Hz policy tick协议。2026-09-17 服务器20000保存点已完整传至Thor，17个params/assets文件与元数据/训练合同两端SHA一致；9组真实d=0/1/10离线回放已生成。训练源/保存点norm仅差末尾换行、数值字节相同。尚未完成真权重推理/engine/延迟，100000普通服务不变；测试心跳`thor-rtc-20000`。详见 [RTC 冷手册](../reference/thor/13_trained_rtc_inference.md)。
+- Thor 训练时 RTC 推理已有独立候选代码/镜像：干净前缀 `t=0`、动态 mask、JAX→Torch→TensorRT 数值 gate 与30Hz policy tick协议。2026-09-17 服务器20000保存点已完整传至Thor，17个params/assets文件与元数据/训练合同两端SHA一致；原始参数非有限0，FP32转换811张量加载逐位一致；9组真实d=0/1/10离线回放已生成。训练源/保存点norm仅差末尾换行、数值字节相同。尚未完成真权重动作对照/engine/延迟，100000普通服务不变；测试心跳`thor-rtc-20000`。详见 [RTC 冷手册](../reference/thor/13_trained_rtc_inference.md)。
 
 ## 恢复任务
 
