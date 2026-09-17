@@ -1,6 +1,6 @@
 # 13 · Pi0.5 training-time RTC：Thor 转换与推理候选
 
-2026-09-17 状态：**代码候选、Pi 系列 RTC 候选镜像与 Thor 隔离容器 CPU 合约测试已完成；服务器 20000 保存点已完整传至 Thor，原始参数审计及 JAX→PyTorch FP32 权重转换已完成。按用户最新要求，RTC 动作精度/延迟测试暂不进行，ONNX/TensorRT 尚未导出或构建，也未启动 RTC 服务。** 现行 `pi05-infer` 的 100000 W/80 服务不变。RTC 新服务预留独立 8001 端口，验收前不得以它替换 8000。
+2026-09-17 状态：**代码候选、Pi 系列 RTC 候选镜像与 Thor 隔离容器 CPU 合约测试已完成；20000 已传至 Thor、审计并转换为 PyTorch FP32；30000 已完整传至 Thor 并核对文件身份，尚未审计或转换。RTC 动作精度/延迟测试暂不进行，ONNX/TensorRT 尚未导出或构建，也未启动 RTC 服务。** 现行 `pi05-infer` 的 100000 W/80 服务不变。RTC 新服务预留独立 8001 端口，验收前不得以它替换 8000。
 
 ## 算法合同：没有兼容降级
 
@@ -42,3 +42,9 @@ Thor 已用 `prepare_rtc_cases.py` 生成新的真实离线回放 `/home/wuyan-l
 原始JAX参数已在Thor候选容器中用 `audit_checkpoint_finite.py`、原dtype完整恢复审计：全部参数非有限元素0，词嵌入 `257152×2048` FP32中NaN/Inf均0。报告 `/home/wuyan-lyj/thor/pi/artifacts/rtc-20000-audit-20260917-r1.json`，SHA256 `879e8a827e8eb0bad35505763040971c19dce785214c8b27e553e6abea08b8b6`。这只是源参数闸门，不代表动作输出精度通过。首次FP32转换入口在容器 `/bench` 挂载下因 `Path.parents[2]` 越界、尚未调用转换器而退出；已修正为存在repo路径时使用repo转换器，否则用同目录已审计转换器。重跑完成，产物 `/home/wuyan-lyj/thor/pi/checkpoints/lego-pi05-rtc-base-10h-20260916/20000-pytorch-fp32-r1`，811个映射张量/3353433872个元素与加载值逐位一致，`model.safetensors` SHA256 `4f4ceb6849b0739cfd68abc92e3d817864c7416ecae9fc3add83653beb9056b7`；输出FP32、无LoRA。`config.json`仅有Pi0.5结构字段，实际RTC训练上限10由同目录 `rtc_manifest.json` 绑定训练合同持有，不能把转换器打印的默认`rtc_training_max_delay=0`当成本保存点的训练语义。此阶段尚无JAX↔PyTorch动作对照/推理延迟或TensorRT验收，不删除原件或首次失败证据。
 
 2026-09-17 用户指定旧推理还需约半小时测试，RTC 先只转换、不测试。现有 `export_pi05_rtc_onnx.py` 在真正写ONNX之前会加载同保存点JAX参考并在CUDA上跑9组 `d=0/1/10` 的eager/wrapper及JAX数值对照；`build_trt_engine.py`又要求这些数值门槛与动态前缀输入通过。因此本轮停在已审计的FP32权重，不绕过精度闸门伪造“已导出/已构建”，也不占用正在测试旧模型的GPU。待用户明确恢复RTC测试后，再生成JAX参考、导出ONNX和构建独立引擎；不自动替换100000服务。
+
+## 2026-09-17 · 30000 保存点传至 Thor；100000 重载
+
+用户允许从同一 RTC run 拉回 30000，并要求重载旧 100000 服务。服务器源目录为 `yam-server:/home/wuyan/lyj/YAM/training-runs/pi05_yam/lego_pi05_rtc_base_10h_20260916/30000`；`_CHECKPOINT_METADATA` 含 `commit_timestamp_nsecs=1789623621937577783`，无同名未完成临时目录。Thor 目标为 `/home/wuyan-lyj/thor/pi/checkpoints/lego-pi05-rtc-base-10h-20260916/30000`。仅传 `params/assets/_CHECKPOINT_METADATA` 与同 run 的 `control/lego_pi05_rtc_base_10h_20260916/training_contract.json`；不传 `train_state`。六个大 OCDBT 文件经 Thor 5GHz Wi-Fi 从服务器并行续传，均退出0，最后整目录 rsync 补传退出0。`params/assets` 共16文件、`12440614997`字节，源/目标逐文件 SHA-256 清单一致；完成元数据 SHA256 `87477bac56c0bf9025d8891cab670870ad340e4bafee1d59b9c504fd38930e62`，norm SHA256 `b38ac082a729a4825c1a946c965183125382f10ccb5a75da89c2427019d1fefe`，训练合同 SHA256 `ef773631bb5dac8d4de055dc1d7161cf57c691b68ae50ec983e3a6297cb5ed5f`。norm/合同与 20000 相同，但参数文件身份按 30000 独立核对。此保存点**尚未做原始参数有限性审计、FP32转换或动作测试**；旧模型测试期间避免 CPU/内存带宽干扰，完成后从这份原件另建转换目录，不覆盖20000。
+
+Thor `pi05-infer` 于 2026-09-17 14:01:15 +08 原容器重启，`--checkpoint`仍指向 `lego-full-20260913/100000-pytorch-fp32`、W/80 引擎仍为 `pi05-100000-trt-80-20260915-r1`，直连 `192.168.250.1:8000` 未改。重载后 `/healthz` 返回 OK，宿主 `nvpmodel -q` 为 MAXN，现有 `maxn_session.py -- docker wait pi05-infer` 会话仍在；这只证明服务就绪，不代替用户侧真实推理测试或跨 IPC 验收。
