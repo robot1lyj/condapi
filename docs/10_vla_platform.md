@@ -2,6 +2,8 @@
 
 ## 当前状态
 
+2026-09-17新增研究计划：Qwen3-VL-2B替换InternVL，独立RLT观测级记忆接入Evo风格动作头，主数据源为ABC-130k。计划沿用LeRobot research policy和共享训练后端；未注册可运行capability、未接通新模型训练/推理。架构、接口缺口与验收工作包见 [完整方案](reference/qwen3_vl_rlt_abc130k_plan.md)，训练路由见 [03](03_training_and_evaluation.md#2026-09-17--qwen3-vl-2b与独立rlt记忆研究方案)。
+
 观察日期：2026-09-09。本轮按用户授权将多模型工作树与 main 的 Pi 全量训练/续训修复整合，主检出通过快进接收合并结果；不部署服务器或 Thor。实际提交/远端同步以 Git 为准。架构 owner 为 [01](01_system_architecture.md#多模型接入层)，设备信息归 [02](02_installation_and_environment.md)，模型精度与 Thor 验收归 [08](08_thor_edge_deployment.md)，模型无关训练看板归 [11](11_training_dashboard.md)。
 
 | 部分 | 状态 |

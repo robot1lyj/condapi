@@ -2,6 +2,8 @@
 
 本页是新同事的唯一入口，只说明文档路由以及当前、计划、历史的边界，不复制完整命令或实验计划。
 
+Qwen3-VL-2B + 独立RLT记忆 + ABC-130k为2026-09-17新增研究计划，入口见 [03训练与评估](03_training_and_evaluation.md#2026-09-17--qwen3-vl-2b与独立rlt记忆研究方案) 与 [详细方案](reference/qwen3_vl_rlt_abc130k_plan.md)；计划存在不代表实现或训练已完成。
+
 ## 推荐阅读顺序
 
 多模型工作树改造先读 [01 的多模型接入层](01_system_architecture.md#多模型接入层)，再读 [10 的当前状态](10_vla_platform.md#当前状态)。以下既有路径用于 Pi/YAM 后端，不代表 Evo-1 已完成适配。
