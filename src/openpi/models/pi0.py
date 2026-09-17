@@ -319,10 +319,8 @@ class Pi0(_model.BaseModel):
         """
         if not 0 <= delay_steps <= self.rtc_training_max_delay or delay_steps >= self.action_horizon:
             raise ValueError("RTC delay exceeds the checkpoint's trained range")
-        if delay_steps == 0:
-            return self.sample_actions(rng, observation, num_steps=num_steps, noise=noise)
         if previous_actions is None:
-            raise ValueError("RTC previous_actions are required for a nonzero delay")
+            raise ValueError("RTC previous_actions are required, including an ignored placeholder for zero delay")
         observation = _model.preprocess_observation(None, observation, train=False)
         batch_size = observation.state.shape[0]
         if previous_actions.shape != (batch_size, self.action_horizon, self.action_dim):

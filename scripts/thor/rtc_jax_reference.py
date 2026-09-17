@@ -7,7 +7,6 @@ from pathlib import Path
 
 from benchmark_pi05 import digest
 from benchmark_pi05 import read_observation
-from benchmark_suite import checked_path
 import jax
 import jax.numpy as jnp
 import numpy as np
@@ -21,6 +20,13 @@ from openpi.shared import normalize
 from openpi.training import config
 
 
+def checked_path(root: Path, name: str) -> Path:
+    path = (root / name).resolve()
+    if not path.is_relative_to(root.resolve()):
+        raise ValueError("RTC reference path escaped the fixture directory")
+    return path
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--checkpoint", type=Path, required=True)
@@ -30,6 +36,8 @@ def main():
     args = parser.parse_args()
     if args.output.exists() or (args.checkpoint / "model.safetensors").exists():
         parser.error("Use a new output directory and the original JAX checkpoint")
+    # Match the audited FP32 reference route; GPU defaults may use TF32 matmuls.
+    jax.config.update("jax_default_matmul_precision", "highest")
     if any(device.platform != "gpu" for device in jax.devices()):
         parser.error("Original JAX reference requires Thor GPU")
     contract = json.loads(args.training_contract.read_text())
@@ -105,6 +113,7 @@ def main():
         "cases_sha256": digest(args.cases),
         "noise_seed": 0,
         "precision": "FP32 original checkpoint/compute",
+        "jax_default_matmul_precision": "highest",
         "cases": results,
     }, ensure_ascii=False, indent=2) + "\n")
 

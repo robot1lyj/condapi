@@ -22,7 +22,7 @@ Thor 系统、容器、Pi0.5 转换和 TensorRT 方案见 [08 · Thor 端侧部�
 3588 camera/state/prompt
   == direct Ethernet / WebSocket or agreed transport ==>
 Thor Pi 系列容器：YamInputs + norm
-  -> 已完成离线原 JAX 对照的 TensorRT policy（当前 100000）
+  -> 已完成离线原 JAX 对照的 TensorRT policy（当前 RTC 30000）
   -> YamOutputs + absolute action
   == direct Ethernet / action response ==>
 3588 controller: 有限的 (50,14) YAM action chunk
@@ -68,21 +68,28 @@ actions: float array, shape (50, 14), all finite
 - 记录 engine/backend、config、checkpoint、训练 commit、norm 路径、JetPack/L4T、CUDA/TensorRT、warmup、时延和功耗模式；
 - 端侧本地路径通过后，才允许进入低速、限位和人工急停可用的机器人侧测试。
 
-当前 100000 服务使用 [serve_pi05_trt.py](../scripts/thor/serve_pi05_trt.py) 与 [smoke_pi05_ws.py](../scripts/thor/smoke_pi05_ws.py)；独立真实回放和原 JAX 对照见 [100000 报告](reports/thor/100000.html)。不要把旧 OpenArm 16D 工具重新作为默认入口。
+旧 100000 服务使用 [serve_pi05_trt.py](../scripts/thor/serve_pi05_trt.py) 与 [smoke_pi05_ws.py](../scripts/thor/smoke_pi05_ws.py)；其独立真实回放和原 JAX 对照见 [100000 报告](reports/thor/100000.html)。当前RTC30000见[训练时RTC冷手册](reference/thor/13_trained_rtc_inference.md)。不要把旧 OpenArm 16D 工具重新作为默认入口。
 
 ## 5. Thor↔3588 网络推理通道
 
-Thor 服务端在 Pi 系列容器内加载已验收的 TensorRT engine 与训练 norm，3588 通过 Thor 直连网卡上发布的 policy 端口发送 observation 并接收 action。当前 100000 使用 Docker `pi05-infer`、`--restart unless-stopped`，**尚未实施 Compose**。切换模型时更改配置/checkpoint 并重启该系列服务，重新预热和验收，不假定支持热切换。GPU 接入与端口规则见 [08](08_thor_edge_deployment.md)。
+Thor 服务端在 Pi 系列容器内加载已验收的 TensorRT engine 与训练 norm，3588 通过 Thor 直连网卡上发布的 policy 端口发送 observation 并接收 action。Pi 系列固定 `ws://192.168.250.1:8000`，切 checkpoint/普通或RTC模式时更改服务配置并重启、重新预热和验收，**不因模型切换另设客户端 URL**，也不假定支持热切换。旧100000 Docker `pi05-infer` 已停；当前RTC30000为 `pi05-rtc-infer`、`--restart no`，**尚未实施 Compose**。GPU 接入与端口规则见 [08](08_thor_edge_deployment.md)。
 
-### 2026-09-16 · 100000 服务已启动
+### 2026-09-16 · 100000 服务历史验收（2026-09-17 已停）
 
 - Thor 直连 URL：`ws://192.168.250.1:8000`；只绑定该网口，不绑定 Wi-Fi 管理地址。宿主 `curl http://192.168.250.1:8000/healthz` 返回 `OK`；`docker inspect pi05-infer` 为 running、restart=unless-stopped、当次重启0。运行状态在使用前复核。
 - 入口为 `python /service/serve_pi05_trt.py`，Pi v6 镜像，独立服务目录 `/home/wuyan-lyj/thor/pi/services/pi05-100000-20260916`；容器只读挂载对应 100000 FP32 checkpoint、训练 norm、100000 W/80 engine、真实回放，tokenizer 缓存本地挂载。新请求由 Thor 生成 `(50,32)` FP32 噪声，客户端只发标准 observation；服务关闭 RTC。
 - 握手 metadata 声明 `checkpoint_step=100000`、`backend=tensorrt`、`norm_stats_sha256=044aad51…4dcc`、`engine_sha256=70b366c5…9d54`、`precision=BF16 main/FP32 sensitive+time cache, no quantization, TF32 off`、`action_horizon=50`、`robot_action_dim=14`、`denoising_steps=10`。完整字段及哈希在 [Thor 本机 WebSocket smoke 回执](reports/thor/evidence/20260916/100000-service/local-ws-smoke-20260916.json)。未核实第 0 步相对 observation 的物理时间偏移，不在握手中臆造 `action_dt_s`/时间偏移。
 - 返回 `actions` 为训练逆变换后的 50×14 **绝对目标**，顺序 `[左 6 关节, 左夹爪, 右 6 关节, 右夹爪]`。根据当前数据发布合同，关节数值按弧度、夹爪名义 0 闭 1 开；这是数据语义，不宣称硬件标定/限位。模型输出未裁夹爪；机器人侧不能把本服务输出视为已做安全约束。
 - Thor 本机经直连地址发送一条真实记录的三路 224×224 RGB、14D 状态和 prompt，普通 WebSocket 握手及推理成功，返回有限 50×14。初次 `120W` 的服务端推理 `174.71 ms`、请求往返 `177.07 ms`；按用户 2026-09-16 明确要求切入 **MAXN 推理/测试阶段**，同一路 WebSocket 复测服务端 `106.10 ms`、请求往返 `107.16 ms`，GPU 1575 MHz、EMC 4266 MHz 锁到该模式上限。MAXN 原始回执见 [本轮 MAXN smoke](reports/thor/evidence/20260916/100000-service/local-ws-smoke-maxn-20260916.json)；这仍只是单次在线协议 smoke，不等于离线 180 次 P50 `104.34 ms`，也不是 3588↔Thor 跨 IPC、真机闭环或任务效果验收。
-- **电源阶段规则**：以后推理和测试阶段启用 MAXN＋`jetson_clocks`；准备、下载、安装和日常空闲为 120W/动态调频/自动风扇。当前在 MAXN 测试阶段，Thor 宿主运行 `maxn_session.py -- docker wait pi05-infer` 保持模式；该容器停止或 session 被正常终止时恢复旧时钟配置及 120W。若主机断电/SIGKILL，Python 清理无法执行，重启后先检查 `nvpmodel -q`。**Docker 容器有开机自动重启策略，但 MAXN session 不设开机自启动**；重启机器后再次推理/测试须先启动新的 MAXN 会话并核对模式，不能只看容器在运行。
-- 当前 W/80 engine 仅接受有效 token ≤80 的 prompt；更长文本需为**本次 100000**另建 200 桶引擎，当前没有自动路由。检查日志用 `ssh thor 'docker logs --tail 100 pi05-infer'`；结束本轮推理阶段用 `ssh thor 'docker stop pi05-infer'`，随后核对 `nvpmodel -q` 回到 120W。若只是暂停请求但仍保留容器，MAXN session 仍认为该服务处于推理阶段；正式结束测试应明确停止容器或正常终止 session。
+- **电源阶段规则**：以后推理和测试阶段启用 MAXN＋`jetson_clocks`；准备、下载、安装和日常空闲为 120W/动态调频/自动风扇。当时 Thor 宿主用 `maxn_session.py -- docker wait pi05-infer` 保持模式；容器后续重启暴露该等待方式会卡住，已停用并恢复120W。若主机断电/SIGKILL，Python 清理无法执行，重启后先检查 `nvpmodel -q`。旧100000 Docker容器虽有自动重启策略，但目前手动停止；不能只看旧容器配置推断当前服务。
+- 当时 W/80 engine 仅接受有效 token ≤80 的 prompt；更长文本需为**本次 100000**另建 200 桶引擎，当时没有自动路由。历史日志可用 `ssh thor 'docker logs --tail 100 pi05-infer'` 查看；这不是当前RTC服务的日志入口。
+
+### 2026-09-17 · 固定8000的 RTC 30000 服务
+
+- 旧100000容器已停、权重与引擎保留。当前 `pi05-rtc-infer` 只监听 `ws://192.168.250.1:8000`；曾短暂试验的8001已停且无监听。后续Pi系列模型共用此固定URL，通过握手metadata区分实际 checkpoint/backend/模式。
+- 握手 `rtc_mode=trained`、`backend=tensorrt_cuda_graph`、`rtc_max_delay_steps=10`，`checkpoint_weights_sha256=fc60f64cfd05906edda9f446e113c159e1df6ece4ea479e27ba22b01791d5f60`、`norm_stats_sha256=b38ac082a729a4825c1a946c965183125382f10ccb5a75da89c2427019d1fefe`，`action_dt_s=1/30`、第0步相对**observation数据行的30Hz policy tick**为0；相机曝光到物理控制tick的偏移未知。输出为 `(50,14)` 绝对目标，关节rad、夹爪连续值名义0闭1开，未裁剪。
+- Thor本机9组真实三相机/状态/prompt的d=0/1/10协议smoke均返回有限50×14，已承诺前缀逐位不变，MAXN服务/往返P50约1033/1034ms。原始JAX↔TensorRT物理最大绝对差约8.55e-6，但**约1秒延迟远未满足低延迟目标**；3588→Thor跨IPC和真机闭环尚未验收。准确性、计时、引擎、操作细节与收据见[RTC冷手册](reference/thor/13_trained_rtc_inference.md)。
+- 当前MAXN由 `thor-pi-maxn-30000.service` 监视容器；停止 `pi05-rtc-infer` 后会恢复120W。容器 `--restart no`，重启机器后不能仅凭历史状态认为它会自动服务；按固定地址部署流程重新启动并核对模式。
 
 ### 2026-09-14 直连网络基线
 

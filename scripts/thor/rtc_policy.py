@@ -7,6 +7,7 @@ checkpoint's normalized action space and conditions the denoising postfix.
 
 import time
 
+import jax
 import numpy as np
 import torch
 
@@ -52,13 +53,20 @@ def validate_request(observation, rtc, *, max_delay):
 
 
 class RtcEagerAdapter:
-    def __init__(self, model, *, max_delay):
+    def __init__(self, model, *, max_delay, compare_ordinary=False):
         self.model = model
         self.max_delay = max_delay
+        self.compare_ordinary = compare_ordinary
+        self.last_ordinary_raw = None
 
     @torch.no_grad()
     def __call__(self, device, observation, *, noise, previous_actions, prefix_mask, num_steps=10):
         validate_trained_prefix(previous_actions, prefix_mask, max_delay=self.max_delay)
+        self.last_ordinary_raw = None
+        if self.compare_ordinary and not bool(prefix_mask.any().item()):
+            self.last_ordinary_raw = self.model.sample_actions(
+                device, observation, noise=noise, num_steps=num_steps
+            ).detach().clone()
         result = self.model.sample_actions_trained_rtc(
             device, observation, noise=noise, previous_actions=previous_actions,
             prefix_mask=prefix_mask, num_steps=num_steps,
@@ -93,7 +101,9 @@ class TrainedRtcInference:
             absolute, state, self.norm_stats, use_quantiles=self.use_quantiles
         )
         transformed = self.policy._input_transform(dict(obs))  # noqa: SLF001
-        tensors = {key: torch.as_tensor(np.asarray(value), device=self.device)[None] for key, value in transformed.items()}
+        tensors = jax.tree.map(
+            lambda value: torch.as_tensor(np.asarray(value), device=self.device)[None], transformed
+        )
         observation = model_api.Observation.from_dict(tensors)
         if noise is None:
             noise = self.noise_rng.standard_normal((1, 50, 32)).astype(np.float32)
@@ -108,6 +118,8 @@ class TrainedRtcInference:
             result = self.sampler(
                 self.device, observation, noise=noise, previous_actions=previous, prefix_mask=mask, num_steps=10
             )
+        if self.device.type == "cuda":
+            torch.cuda.synchronize(self.device)
         infer_ms = (time.monotonic() - start) * 1000
         outputs = {"state": np.asarray(tensors["state"][0].cpu()), "actions": np.asarray(result[0].cpu())}
         outputs = self.policy._output_transform(outputs)  # noqa: SLF001

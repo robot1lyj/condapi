@@ -91,9 +91,6 @@ def main():
         raise ValueError("RTC export cases must include delays 0, 1 and trained maximum")
     if len(reference_manifest["cases"]) != len(cases):
         raise ValueError("JAX RTC reference case count mismatch")
-    torch.set_float32_matmul_precision("highest")
-    torch.backends.cuda.matmul.allow_tf32 = False
-    torch.backends.cudnn.allow_tf32 = False
     train = config.get_config("pi05_yam")
     train = dataclasses.replace(train, model=dataclasses.replace(train.model, dtype=args.compute_dtype))
     stats = normalize.deserialize_json(norm_path.read_text())
@@ -101,13 +98,18 @@ def main():
         train, args.checkpoint, norm_stats=stats, pytorch_device="cuda",
         pytorch_precision=args.compute_dtype, pytorch_compile=False,
     )
+    # PI0Pytorch.__init__ sets matmul precision to "high"; override it only
+    # after model construction so the FP32/JAX equivalence gate tests true FP32.
+    torch.set_float32_matmul_precision("highest")
+    torch.backends.cuda.matmul.allow_tf32 = False
+    torch.backends.cudnn.allow_tf32 = False
     model = policy._model  # noqa: SLF001
     model.batch_vision = True
     model.attention_implementation = "eager"
     model.attention_mask_dtype = next(
         model.paligemma_with_expert.paligemma.language_model.layers[0].self_attn.parameters()
     ).dtype
-    eager = RtcEagerAdapter(model, max_delay=max_delay)
+    eager = RtcEagerAdapter(model, max_delay=max_delay, compare_ordinary=True)
     wrapper = Pi05RtcOnnxSampler(model, cache_time_modulation=False, text_bucket=200).eval()
     prepared = RtcFlatSamplerAdapter(wrapper, max_delay=max_delay)
     eager_policy = TrainedRtcInference(policy, stats, max_delay=max_delay, sampler=eager)
@@ -161,6 +163,15 @@ def main():
             raise ValueError("JAX RTC reference case identity mismatch")
         with np.load(ref_path, allow_pickle=False) as data:
             jax_raw, jax_physical = data["normalized"], data["physical"]
+        diagnostic = {
+            "jax_normalized": jax_raw,
+            "jax_physical": jax_physical,
+            "torch_rtc_normalized": prepared_raw[0],
+            "torch_rtc_physical": actual,
+        }
+        if eager.last_ordinary_raw is not None:
+            diagnostic["torch_ordinary_normalized"] = eager.last_ordinary_raw[0].cpu().numpy()
+        np.savez_compressed(args.output / f"comparison-{index:03d}.npz", **diagnostic)
         raw_error = np.abs(prepared_raw.astype(np.float64) - jax_raw[None].astype(np.float64))
         physical_error = np.abs(actual.astype(np.float64) - jax_physical.astype(np.float64))
         numeric_ok = bool(

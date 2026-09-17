@@ -1,0 +1,7 @@
+{
+  "delay_steps": 0,
+  "observation_policy_tick": 100,
+  "target_start_tick": 100,
+  "committed_start_tick": 100,
+  "committed_actions": []
+}

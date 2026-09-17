@@ -1,0 +1,11 @@
+# JAX GPU reference only. Uses the existing Thor CUDA-13 JAX image; the
+# PyTorch/TensorRT serving image and deployed 100000 container stay separate.
+FROM openpi-pi:thor-jax-20260907
+
+COPY pi0.py /usr/local/lib/python3.12/dist-packages/openpi/models/pi0.py
+COPY pi0_config.py /usr/local/lib/python3.12/dist-packages/openpi/models/pi0_config.py
+COPY gemma.py /usr/local/lib/python3.12/dist-packages/openpi/models/gemma.py
+COPY rtc_training.py /usr/local/lib/python3.12/dist-packages/openpi/models/rtc_training.py
+COPY training_config.py /usr/local/lib/python3.12/dist-packages/openpi/training/config.py
+
+RUN JAX_PLATFORMS=cpu python -c "from openpi.models.pi0 import Pi0; from openpi.models.pi0_config import Pi0Config; assert hasattr(Pi0, 'sample_actions_trained_rtc') and hasattr(Pi0Config(), 'rtc_training_max_delay')"
