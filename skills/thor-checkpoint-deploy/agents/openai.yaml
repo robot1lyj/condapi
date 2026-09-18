@@ -1,7 +1,6 @@
 interface:
-  display_name: "Thor checkpoint 接入"
-  short_description: "沿用 Pi0.5 混合精度路线，将新全量微调权重转换为 Thor 推理候选"
-  default_prompt: "使用 $thor-checkpoint-deploy 将这个新的 Pi0.5 checkpoint 按既定路线接入 Thor，完成转换、构建与真实回放。"
+  display_name: "Thor 模型转换：普通 / RTC"
+  short_description: "将 Pi0.5 全量微调检查点按普通或 RTC 路线转换、验收并接入 Thor"
+  default_prompt: "使用 $thor-checkpoint-deploy 将这个 Pi0.5 checkpoint 接入 Thor，依据我指定的普通或 RTC 模式及训练合同选择路线，完成转换、构建与真实回放。"
 policy:
   allow_implicit_invocation: true
-

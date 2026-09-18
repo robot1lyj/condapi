@@ -16,6 +16,8 @@ RTC WebSocket 用 `{"type":"infer","obs":{...},"rtc":{"delay_steps":d,"observati
 
 ## 固定模型路径
 
+**当前操作优先级（2026-09-18）**：以下步骤描述完整工具链，其中十步/TF32-off是最初参考配置。新RTC检查点优先复用已验证的**7步、FP32权重＋TF32、80-token/时间缓存/CUDA Graph**配比，并对新权重独立验收；原JAX/FP32诊断仍关闭TF32。JAX参考、导出、构建及服务的步数必须一致。前缀编码必须从训练配置读取`use_quantile_norm`，Pi0.5/YAM为分位数，两端显式传`use_quantiles=True`；数值对照之外还要独立核对训练transform及前后缀交界。服务提供新版`--validation`和`--jax-reference`，保留0.2rad/tick跳变拒绝；具体参数以当前脚本帮助为准。普通非RTC检查点走[12](12_checkpoint_handoff.md)。本轮用户已反馈修正后的真机效果良好，属于定性反馈，不是跨模型/跨检查点成功率验收。
+
 1. 从完整、有限的原始 JAX/Orbax RTC checkpoint 及对应 `training_contract.json`、checkpoint 内 `assets/yam/norm_stats.json` 开始。`scripts/thor/prepare_rtc_checkpoint.py --checkpoint <JAX目录> --training-contract <训练合同> --output <新PyTorch目录>` 核对 `pi05/H50/32D/dmax` 与 norm 身份，复用现有审计转换器保存 FP32，不丢精度、不丢参数。容器运行时把审计转换器与本脚本同目录挂载，或显式传 `--converter`。结构未新增权重，因此无需另写 RTC 权重映射。转换成功只表示权重可加载，不表示 RTC 数值一致。
 2. 制作真实 YAM `cases.json`：`source_kind=real_yam_recording`、`norm_stats_sha256`、`cases` 列表。每行含真实 observation `sample`、其 `provenance`、同 episode 连续执行的 `committed_actions` `.npy`、`committed_actions_sha256`、`source_episode`（provenance `source_files` 中的精确路径）、`delay_steps`、`observation_policy_tick`、`target_start_tick`、`committed_start_tick`。至少覆盖 `d=0/1/dmax`、早/中/晚片段；从 episode 的动作数据提取而不是让模型伪造前缀。所有路径相对 cases 文件目录。`scripts/thor/prepare_rtc_cases.py` 可从真实 Parquet 与已核验 RGB 回放生成，逐行核对 state 和30Hz时间索引；这仍是离线数据 tick，不证明现场物理同步。
 3. 原始 JAX 生成金标准：`scripts/thor/rtc_jax_reference.py --checkpoint <JAX目录> --training-contract <合同> --cases <cases.json> --output <新reference目录>`。固定同一噪声、原始FP32参数/计算、完整YAM逆变换。Thor GPU 上按推理/测试规则启用 MAXN，并在会话结束恢复日常功耗。
