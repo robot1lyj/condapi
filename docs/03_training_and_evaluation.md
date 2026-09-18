@@ -513,3 +513,7 @@ bash scripts/launch_lego_full.sh JOB_ID \
 本轮本地结果：RTC/入口/子集选择/子集norm与既有YAM审计共41项轻量测试通过；完整Pi05仅作抽象shape追踪，参数名称、形状、dtype一致。新增/修改入口、norm、选择工具、helper、测试与Gemma通过Ruff；Pi0/Pi0Config原有4/1项lint与HEAD对照无新增。全仓Ruff/format存在历史差异，未批量修复无关代码；本次文件格式与`git diff --check`通过。遵守本地禁止训练边界，未执行包含训练/设备操作的全仓pytest。
 
 **18:15运行更新。** 用户随后明确要求启动并由其他agent接手监控。已从Gitea取得固定`3dd9c82`快照，随机468条/10.020667h，重算norm与12个真实样本等价验证通过。Slurm2140在gpu001四卡RTX4090上运行，metrics第21次更新loss0.063918、grad_norm0.921431、约2.270秒/步，均有限；首个1000保存点及真实恢复尚未验收。准确命令、路径、合同、日志及resume边界归[运行交接](reports/training/rtc-base-10h-20260916/README.md)。该用户自行安排其他agent监控，本轮未创建自动化或发送任务消息。
+
+## 2026-09-18 · base + 20h RTC 训练准备
+
+用户确定从官方base重新训练，保留原468集并补充473集，共941集20.007528h。batch32、136000步约2.014等效轮，LR1e-5→1e-6、warmup1000、decay136000；首次运行生成独立20h norm。选集与可恢复Slurm入口见[运行交接](reports/training/rtc-base-20h-20260918/README.md)。本次仅准备，不自动停止旧作业或在22点提交；新实验与60k续训不同。
