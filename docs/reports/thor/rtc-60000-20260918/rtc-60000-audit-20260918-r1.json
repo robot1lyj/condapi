@@ -1,0 +1,596 @@
+{
+  "checkpoint": "/checkpoints/60000",
+  "metadata_sha256": "2912d15ba42fe0d742b5ac46e88804dacce69644369b4cf9b7405cf7d8fe7247",
+  "tensors": [
+    {
+      "name": "PaliGemma/img/Transformer/encoder_norm/bias",
+      "shape": [
+        1152
+      ],
+      "dtype": "float32",
+      "elements": 1152,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "name": "PaliGemma/img/Transformer/encoder_norm/scale",
+      "shape": [
+        1152
+      ],
+      "dtype": "float32",
+      "elements": 1152,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "name": "PaliGemma/img/Transformer/encoderblock/LayerNorm_0/bias",
+      "shape": [
+        27,
+        1152
+      ],
+      "dtype": "float32",
+      "elements": 31104,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "name": "PaliGemma/img/Transformer/encoderblock/LayerNorm_0/scale",
+      "shape": [
+        27,
+        1152
+      ],
+      "dtype": "float32",
+      "elements": 31104,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "name": "PaliGemma/img/Transformer/encoderblock/LayerNorm_1/bias",
+      "shape": [
+        27,
+        1152
+      ],
+      "dtype": "float32",
+      "elements": 31104,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "name": "PaliGemma/img/Transformer/encoderblock/LayerNorm_1/scale",
+      "shape": [
+        27,
+        1152
+      ],
+      "dtype": "float32",
+      "elements": 31104,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "name": "PaliGemma/img/Transformer/encoderblock/MlpBlock_0/Dense_0/bias",
+      "shape": [
+        27,
+        4304
+      ],
+      "dtype": "float32",
+      "elements": 116208,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "name": "PaliGemma/img/Transformer/encoderblock/MlpBlock_0/Dense_0/kernel",
+      "shape": [
+        27,
+        1152,
+        4304
+      ],
+      "dtype": "float32",
+      "elements": 133871616,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "name": "PaliGemma/img/Transformer/encoderblock/MlpBlock_0/Dense_1/bias",
+      "shape": [
+        27,
+        1152
+      ],
+      "dtype": "float32",
+      "elements": 31104,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "name": "PaliGemma/img/Transformer/encoderblock/MlpBlock_0/Dense_1/kernel",
+      "shape": [
+        27,
+        4304,
+        1152
+      ],
+      "dtype": "float32",
+      "elements": 133871616,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "name": "PaliGemma/img/Transformer/encoderblock/MultiHeadDotProductAttention_0/key/bias",
+      "shape": [
+        27,
+        16,
+        72
+      ],
+      "dtype": "float32",
+      "elements": 31104,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "name": "PaliGemma/img/Transformer/encoderblock/MultiHeadDotProductAttention_0/key/kernel",
+      "shape": [
+        27,
+        1152,
+        16,
+        72
+      ],
+      "dtype": "float32",
+      "elements": 35831808,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "name": "PaliGemma/img/Transformer/encoderblock/MultiHeadDotProductAttention_0/out/bias",
+      "shape": [
+        27,
+        1152
+      ],
+      "dtype": "float32",
+      "elements": 31104,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "name": "PaliGemma/img/Transformer/encoderblock/MultiHeadDotProductAttention_0/out/kernel",
+      "shape": [
+        27,
+        16,
+        72,
+        1152
+      ],
+      "dtype": "float32",
+      "elements": 35831808,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "name": "PaliGemma/img/Transformer/encoderblock/MultiHeadDotProductAttention_0/query/bias",
+      "shape": [
+        27,
+        16,
+        72
+      ],
+      "dtype": "float32",
+      "elements": 31104,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "name": "PaliGemma/img/Transformer/encoderblock/MultiHeadDotProductAttention_0/query/kernel",
+      "shape": [
+        27,
+        1152,
+        16,
+        72
+      ],
+      "dtype": "float32",
+      "elements": 35831808,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "name": "PaliGemma/img/Transformer/encoderblock/MultiHeadDotProductAttention_0/value/bias",
+      "shape": [
+        27,
+        16,
+        72
+      ],
+      "dtype": "float32",
+      "elements": 31104,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "name": "PaliGemma/img/Transformer/encoderblock/MultiHeadDotProductAttention_0/value/kernel",
+      "shape": [
+        27,
+        1152,
+        16,
+        72
+      ],
+      "dtype": "float32",
+      "elements": 35831808,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "name": "PaliGemma/img/embedding/bias",
+      "shape": [
+        1152
+      ],
+      "dtype": "float32",
+      "elements": 1152,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "name": "PaliGemma/img/embedding/kernel",
+      "shape": [
+        14,
+        14,
+        3,
+        1152
+      ],
+      "dtype": "float32",
+      "elements": 677376,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "name": "PaliGemma/img/head/bias",
+      "shape": [
+        2048
+      ],
+      "dtype": "float32",
+      "elements": 2048,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "name": "PaliGemma/img/head/kernel",
+      "shape": [
+        1152,
+        2048
+      ],
+      "dtype": "float32",
+      "elements": 2359296,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "name": "PaliGemma/img/pos_embedding",
+      "shape": [
+        1,
+        256,
+        1152
+      ],
+      "dtype": "float32",
+      "elements": 294912,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "name": "PaliGemma/llm/embedder/input_embedding",
+      "shape": [
+        257152,
+        2048
+      ],
+      "dtype": "float32",
+      "elements": 526647296,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "name": "PaliGemma/llm/final_norm/scale",
+      "shape": [
+        2048
+      ],
+      "dtype": "float32",
+      "elements": 2048,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "name": "PaliGemma/llm/final_norm_1/Dense_0/bias",
+      "shape": [
+        3072
+      ],
+      "dtype": "float32",
+      "elements": 3072,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "name": "PaliGemma/llm/final_norm_1/Dense_0/kernel",
+      "shape": [
+        1024,
+        3072
+      ],
+      "dtype": "float32",
+      "elements": 3145728,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "name": "PaliGemma/llm/layers/attn/attn_vec_einsum/w",
+      "shape": [
+        18,
+        8,
+        256,
+        2048
+      ],
+      "dtype": "float32",
+      "elements": 75497472,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "name": "PaliGemma/llm/layers/attn/attn_vec_einsum_1/w",
+      "shape": [
+        18,
+        8,
+        256,
+        1024
+      ],
+      "dtype": "float32",
+      "elements": 37748736,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "name": "PaliGemma/llm/layers/attn/kv_einsum/w",
+      "shape": [
+        18,
+        2,
+        1,
+        2048,
+        256
+      ],
+      "dtype": "float32",
+      "elements": 18874368,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "name": "PaliGemma/llm/layers/attn/kv_einsum_1/w",
+      "shape": [
+        18,
+        2,
+        1,
+        1024,
+        256
+      ],
+      "dtype": "float32",
+      "elements": 9437184,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "name": "PaliGemma/llm/layers/attn/q_einsum/w",
+      "shape": [
+        18,
+        8,
+        2048,
+        256
+      ],
+      "dtype": "float32",
+      "elements": 75497472,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "name": "PaliGemma/llm/layers/attn/q_einsum_1/w",
+      "shape": [
+        18,
+        8,
+        1024,
+        256
+      ],
+      "dtype": "float32",
+      "elements": 37748736,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "name": "PaliGemma/llm/layers/mlp/gating_einsum",
+      "shape": [
+        18,
+        2,
+        2048,
+        16384
+      ],
+      "dtype": "float32",
+      "elements": 1207959552,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "name": "PaliGemma/llm/layers/mlp/linear",
+      "shape": [
+        18,
+        16384,
+        2048
+      ],
+      "dtype": "float32",
+      "elements": 603979776,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "name": "PaliGemma/llm/layers/mlp_1/gating_einsum",
+      "shape": [
+        18,
+        2,
+        1024,
+        4096
+      ],
+      "dtype": "float32",
+      "elements": 150994944,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "name": "PaliGemma/llm/layers/mlp_1/linear",
+      "shape": [
+        18,
+        4096,
+        1024
+      ],
+      "dtype": "float32",
+      "elements": 75497472,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "name": "PaliGemma/llm/layers/pre_attention_norm/scale",
+      "shape": [
+        18,
+        2048
+      ],
+      "dtype": "float32",
+      "elements": 36864,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "name": "PaliGemma/llm/layers/pre_attention_norm_1/Dense_0/bias",
+      "shape": [
+        18,
+        3072
+      ],
+      "dtype": "float32",
+      "elements": 55296,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "name": "PaliGemma/llm/layers/pre_attention_norm_1/Dense_0/kernel",
+      "shape": [
+        18,
+        1024,
+        3072
+      ],
+      "dtype": "float32",
+      "elements": 56623104,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "name": "PaliGemma/llm/layers/pre_ffw_norm/scale",
+      "shape": [
+        18,
+        2048
+      ],
+      "dtype": "float32",
+      "elements": 36864,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "name": "PaliGemma/llm/layers/pre_ffw_norm_1/Dense_0/bias",
+      "shape": [
+        18,
+        3072
+      ],
+      "dtype": "float32",
+      "elements": 55296,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "name": "PaliGemma/llm/layers/pre_ffw_norm_1/Dense_0/kernel",
+      "shape": [
+        18,
+        1024,
+        3072
+      ],
+      "dtype": "float32",
+      "elements": 56623104,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "name": "action_in_proj/bias",
+      "shape": [
+        1024
+      ],
+      "dtype": "float32",
+      "elements": 1024,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "name": "action_in_proj/kernel",
+      "shape": [
+        32,
+        1024
+      ],
+      "dtype": "float32",
+      "elements": 32768,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "name": "action_out_proj/bias",
+      "shape": [
+        32
+      ],
+      "dtype": "float32",
+      "elements": 32,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "name": "action_out_proj/kernel",
+      "shape": [
+        1024,
+        32
+      ],
+      "dtype": "float32",
+      "elements": 32768,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "name": "time_mlp_in/bias",
+      "shape": [
+        1024
+      ],
+      "dtype": "float32",
+      "elements": 1024,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "name": "time_mlp_in/kernel",
+      "shape": [
+        1024,
+        1024
+      ],
+      "dtype": "float32",
+      "elements": 1048576,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "name": "time_mlp_out/bias",
+      "shape": [
+        1024
+      ],
+      "dtype": "float32",
+      "elements": 1024,
+      "nan": 0,
+      "inf": 0
+    },
+    {
+      "name": "time_mlp_out/kernel",
+      "shape": [
+        1024,
+        1024
+      ],
+      "dtype": "float32",
+      "elements": 1048576,
+      "nan": 0,
+      "inf": 0
+    }
+  ],
+  "nonfinite_elements": 0
+}
