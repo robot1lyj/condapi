@@ -2,13 +2,13 @@
 
 逐步安装指导的冷记忆入口：[Thor 安装系列 00](reference/thor/00_start_here.md)。该组按 G0–G5 持有设备预检、ISO/USB 制作、固件/NVMe 安装、宿主/容器检查、Pi 工程闸门及故障交接；本页继续持有版本、精度决策和当前状态。指导 agent 不得把下文安装概览当成跳过目标确认的操作脚本。
 
-训练时 RTC 的完整 Thor 路线（原始 JAX FP32 → PyTorch FP32 → 动态前缀 ONNX/TensorRT → 严格 RTC WebSocket）见 [13 · trained RTC 推理](reference/thor/13_trained_rtc_inference.md)。2026-09-17晚间发现前缀归一化错误并停止固定8000 RTC服务；旧7步/10步历史对照不能验收前缀条件。正确分位数下的离线复测与停服闸门见[事故报告](reports/thor/rtc-prefix-quantile-incident-20260917.md)。BF16仍只是离线实验候选。
+训练时 RTC 的完整 Thor 路线（原始 JAX FP32 → PyTorch FP32 → 动态前缀 ONNX/TensorRT → 严格 RTC WebSocket）见 [13 · trained RTC 推理](reference/thor/13_trained_rtc_inference.md)。2026-09-17晚间发现前缀归一化错误并停服；旧7步/10步历史对照不能验收前缀条件。2026-09-18按用户要求重启修正分位数前缀的七步服务，本机协议smoke通过，3588端到端/真机仍待验；详见[事故报告更新](reports/thor/rtc-prefix-quantile-incident-20260917.md#2026-09-18-更新新版服务与-thor-本机协议测试)。BF16仍只是离线实验候选。
 
 本页是 NVIDIA Jetson AGX Thor IPC 的端侧系统、Pi0.5 转换/加速和推理验收的唯一 owner。训练仍在服务器 GPU 上进行；3588 IPC 负责相机采集、机械臂驱动、CAN、GUI、home pose、限位和急停，本仓库不读取或修改 3588 的实现。
 
 ## 1. 当前决策
 
-- 2026-09-17 晚间，固定 `ws://192.168.250.1:8000` **无监听**，`pi05-rtc-infer` 已停，Thor为120W。18:40上线的7步FP32权重＋TF32 TensorRT及其MAXN本机9/9协议smoke、约194/195ms服务/往返P50是事故前历史：当时模型前缀误用均值/标准差，旧JAX参考也如此；旧数值差与前缀逐位保持不能证明RTC正确。原10/8/7/6/5步及BF16候选同样不得按旧RTC精度表直接放行，10步旧容器不是安全回退。修正后的7步离线9例JAX↔TRT最大单关节差0.00452rad、P99约0.000507，仍未做新版协议/真机；详见[事故报告](reports/thor/rtc-prefix-quantile-incident-20260917.md)。用户规定推理/测试阶段MAXN、其他阶段120W；重启服务前需新版回执和受控验收。
+- 2026-09-18 09:33 CST，固定 `ws://192.168.250.1:8000` 由**修正分位数前缀**的30000 RTC七步FP32权重＋TF32 TensorRT Docker `pi05-rtc-infer` 提供，MAXN临时会话运行。已核验新版回执绑定、原9例两轮与事故4例本机WebSocket输出有限50×14、前缀不变、事故集最大新后缀关节步进0.0924rad/tick。首轮9例本机往返P50约193.9ms，事故4例约202.6ms；第二轮9例偶发约390ms往返，服务推理仍约193–194ms，成因未知。旧错误前缀的7/10步验证和BF16候选不得作上线精度依据；旧10步不是安全回退。**3588端到端/真机效果未验收**，详见[事故报告更新](reports/thor/rtc-prefix-quantile-incident-20260917.md#2026-09-18-更新新版服务与-thor-本机协议测试)。推理/测试阶段MAXN、容器停止后回120W；不设开机持久化。
 
 - 2026-09-11 用户确认保留 W 混合精度路线作为新 checkpoint 的优先接入方案；自动接入技能及逐阶段步骤见 [新 checkpoint 交接](reference/thor/12_checkpoint_handoff.md)。它自动协助离线转换、构建与回放，不是后台监听或自动生产切换；现有基础模型宿主脚本的硬编码边界在该手册明确列出。
 
