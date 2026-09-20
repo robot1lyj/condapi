@@ -1,0 +1,101 @@
+{
+  "scope": "Thor offline real-episode replay; no robot commands",
+  "cases_sha256": "6156933dee0dc7e68414ecb2596c7acafb055d652d57cd953b62ee9fdb99a881",
+  "jax_reference_manifest_sha256": "da5ad9566ac58e17fe08d9e9252dbe56e88f0f80ec53ae93eb07f03056fdb1a9",
+  "engine_sha256": "bc07331e11faad0e9580d12755f43926780ef4b6c763eecb3a5b3cff7724cf4e",
+  "noise_seed": 0,
+  "limitations": [
+    "Original request prefix reconstructed from reply.actions[:d].",
+    "Original online noise absent; recorded-vs-replay is not an exact reproduction."
+  ],
+  "cases": [
+    {
+      "request_id": 1,
+      "reply_row": 9,
+      "observation_row": 1,
+      "delay_steps": 9,
+      "recorded_seam": {
+        "max_rad": 0.10965592414140701,
+        "joint_14d_index": 1
+      },
+      "jax_seam": {
+        "max_rad": 0.006197565235197544,
+        "joint_14d_index": 1
+      },
+      "trt_seam": {
+        "max_rad": 0.006135878153145313,
+        "joint_14d_index": 1
+      },
+      "jax_trt_max_abs_joint_rad": 0.0006385445594787598,
+      "jax_trt_p99_abs_joint_rad": 0.0005210152268409729,
+      "recorded_vs_same_seed_jax_max_abs_joint_rad": 0.4724492132663727,
+      "recorded_original_noise_known": false
+    },
+    {
+      "request_id": 2,
+      "reply_row": 18,
+      "observation_row": 11,
+      "delay_steps": 9,
+      "recorded_seam": {
+        "max_rad": 0.2936888635158539,
+        "joint_14d_index": 1
+      },
+      "jax_seam": {
+        "max_rad": 0.007962744683027267,
+        "joint_14d_index": 8
+      },
+      "trt_seam": {
+        "max_rad": 0.007983911782503128,
+        "joint_14d_index": 8
+      },
+      "jax_trt_max_abs_joint_rad": 0.0007646381855010986,
+      "jax_trt_p99_abs_joint_rad": 0.0006983733177185055,
+      "recorded_vs_same_seed_jax_max_abs_joint_rad": 0.42766812443733215,
+      "recorded_original_noise_known": false
+    },
+    {
+      "request_id": 3,
+      "reply_row": 30,
+      "observation_row": 22,
+      "delay_steps": 9,
+      "recorded_seam": {
+        "max_rad": 0.931786060333252,
+        "joint_14d_index": 12
+      },
+      "jax_seam": {
+        "max_rad": 0.09700952470302582,
+        "joint_14d_index": 1
+      },
+      "trt_seam": {
+        "max_rad": 0.09711591899394989,
+        "joint_14d_index": 1
+      },
+      "jax_trt_max_abs_joint_rad": 0.0009071826934814453,
+      "jax_trt_p99_abs_joint_rad": 0.0006893557310104368,
+      "recorded_vs_same_seed_jax_max_abs_joint_rad": 0.912165641784668,
+      "recorded_original_noise_known": false
+    },
+    {
+      "request_id": 4,
+      "reply_row": 40,
+      "observation_row": 32,
+      "delay_steps": 9,
+      "recorded_seam": {
+        "max_rad": 2.505012035369873,
+        "joint_14d_index": 2
+      },
+      "jax_seam": {
+        "max_rad": 0.0905110239982605,
+        "joint_14d_index": 12
+      },
+      "trt_seam": {
+        "max_rad": 0.09093022346496582,
+        "joint_14d_index": 12
+      },
+      "jax_trt_max_abs_joint_rad": 0.001703023910522461,
+      "jax_trt_p99_abs_joint_rad": 0.0015372407436370845,
+      "recorded_vs_same_seed_jax_max_abs_joint_rad": 2.5869572162628174,
+      "recorded_original_noise_known": false
+    }
+  ]
+}
