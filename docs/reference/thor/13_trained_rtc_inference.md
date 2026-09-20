@@ -1,5 +1,13 @@
 # 13 · Pi0.5 training-time RTC：Thor 转换与推理候选
 
+## 2026-09-20 · 80000接入与旧推理模型清理（进行中）
+
+用户要求拉取同run的80000替换60000，并删除30000推理模型；追加确认100000非RTC也可删。现场60000容器仍停止、Thor为120W，保持暂停状态，不将“替换”解释为重新开放推理。80000源为`yam-server:/home/wuyan/lyj/YAM/training-runs/pi05_yam/lego_pi05_rtc_base_10h_20260916/80000`，已确认完整commit元数据；完成元数据SHA为`10c89477271a1e8a30208a94857592c8efecf5be852aa05b7a2dd38640e97fd0`。Thor直接六路rsync下载params/assets和合同，不取train_state，目标为同RTC检查点父目录的`80000`。
+
+已永久删除停止容器`pi05-rtc-30000-preserved-20260918`、`30000-pytorch-fp32-r1/model.safetensors`、`rtc-30000-onnx-fp32-cache80-7step-20260917-r1/sampler.onnx.data`和`rtc-30000-trt-tf32-cache80-7step-20260917-r1/sampler.engine`；约释放37GiB。原始30000 JAX及小报告保留，需要回退时必须重建。100000原始params/转换权重/引擎和容器已在9月18日删除，本次复核无大模型文件，仅约71MB图结构/配置/报告，继续保留追溯证据。60000权重和产物未删。
+
+一次性作业`thor-rtc-80000-test-20260920.service`等待下载合同标记及`probes/rtc-80000-20260920-r1/source.sha256`，然后校验源端17个文件SHA、CPU有限性审计/FP32转换、MAXN下七步JAX→ONNX→TF32 TRT九例及事故四例回放，结束恢复120W；不会自动启服务。脚本暂存同目录`rtc80000-test-20260920.sh`。**此记录只证明下载/流水线已启动，不代表80000已转换、通过测试或已替换60000**。下一步检查作业日志和新回执，验收后配置同地址服务并本机smoke，结束继续暂停。
+
 **最新在线状态（2026-09-18 11:14 CST）**：用户授权上线60000；`pi05-rtc-infer`已切换60000七步FP32权重＋TF32，固定`ws://192.168.250.1:8000`，quantile前缀与0.2rad/tick保护不变，MAXN会话`thor-pi-maxn-60000.service` active。真实协议九例通过，权重指纹匹配60000、输出有限50×14、前缀保持。本机往返P50/P95=197.85/208.18ms；未做3588端到端或真机任务验收。30000容器停止保留为`pi05-rtc-30000-preserved-20260918`，不是并行在线服务。回执见[online-smoke](../../reports/thor/rtc-60000-20260918/online-smoke.json)。下文“恢复30000/60000未上线”为先前离线阶段记录。
 
 ## 2026-09-18 · 60000 RTC离线验收完成
