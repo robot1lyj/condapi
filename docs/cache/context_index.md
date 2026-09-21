@@ -10,6 +10,8 @@
 
 ## Canonical Docs
 
+- 乐高DAgger、人工接管纠正、首轮混采实验与论文依据 → [训练owner](../03_training_and_evaluation.md#2026-09-21--乐高-dagger-首轮方案) → [操作手册](../reference/lego_dagger_playbook.md)；字段归04，均须区分方案与实现。
+
 - 任意模型训练看板、JSONL/CSV/Trainer-state、LeRobot 指标采集 → `docs/11_training_dashboard.md`
 - 多模型薄接入层、Conda、工作树、Evo-1 接入状态 → `docs/10_vla_platform.md`
 - Evo-1 独立环境安装与复现 → `docs/02_installation_and_environment.md#Evo-1 / LeRobot 独立环境`；实测安装证据 → `docs/reports/environments/evo1-20260908/README.md`

@@ -4,6 +4,8 @@
 
 ## 推荐阅读顺序
 
+当前乐高DAgger采集与首轮A/B混采实验见 [方案手册](reference/lego_dagger_playbook.md)（03下属；方案阶段，未开训）。
+
 多模型工作树改造先读 [01 的多模型接入层](01_system_architecture.md#多模型接入层)，再读 [10 的当前状态](10_vla_platform.md#当前状态)。以下既有路径用于 Pi/YAM 后端，不代表 Evo-1 已完成适配。
 
 `README.md` → `01_system_architecture.md` → `02_installation_and_environment.md` → `08_thor_edge_deployment.md` → `03_training_and_evaluation.md` → `04_data_contracts.md` → `05_inference_and_rollout.md`。
