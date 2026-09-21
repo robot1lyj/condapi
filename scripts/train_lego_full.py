@@ -162,8 +162,8 @@ def main():
     args = parser.parse_args()
     if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_-]{0,95}", args.run_name):
         parser.error("invalid run name")
-    if not 0 < args.steps <= 324_194:
-        parser.error("steps must be within 1..324194")
+    if args.steps <= 0:
+        parser.error("steps must be positive")
     if jax.device_count() != 4 or any(device.platform != "gpu" for device in jax.devices()):
         raise RuntimeError("This entrypoint requires four allocated GPUs")
     episodes = read_episode_ids(args.train_episodes_file) if args.train_episodes_file else None

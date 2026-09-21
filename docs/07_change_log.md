@@ -791,3 +791,7 @@ text80 实验完成 ONNX、TensorRT 构建和 W 正式回放。完整 policy P50
 ## 2026-09-18：准备20h Pi0.5 RTC base重训
 
 按用户最终选择保留10h全部episode，从同一train随机补足至941集20.007528h，生成136000步/batch32配置与resume入口。复用已验证训练代码快照，独立计算norm，未启动新作业。详见[交接](reports/training/rtc-base-20h-20260918/README.md)。
+
+## 2026-09-21 · 50h RTC训练准备
+
+准备50h RTC base全量微调配置，解除旧324194步入口上限，分段适配Slurm时间限制；未提交新训练或干预当前作业。详见[交接](reports/training/rtc-base-50h-20260921/README.md)。

@@ -523,3 +523,7 @@ bash scripts/launch_lego_full.sh JOB_ID \
 ## 2026-09-18 · base + 20h RTC 训练准备
 
 用户确定从官方base重新训练，保留原468集并补充473集，共941集20.007528h。batch32、136000步约2.014等效轮，LR1e-5→1e-6、warmup1000、decay136000；首次运行生成独立20h norm。选集与可恢复Slurm入口见[运行交接](reports/training/rtc-base-20h-20260918/README.md)。本次仅准备，不自动停止旧作业或在22点提交；新实验与60k续训不同。
+
+## 2026-09-21 · 50h RTC训练准备
+
+50h训练配置：保留原20h的941集，新增1396集，共5400685帧；官方base、RTC全量、batch32、338000步约两轮。分170k与338k两个累计停止段，固定LR计划，支持resume。详见[交接](reports/training/rtc-base-50h-20260921/README.md)。
