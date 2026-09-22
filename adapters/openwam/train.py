@@ -129,6 +129,17 @@ def worker(config):
     native.main.__wrapped__(OmegaConf.load(config))
 
 
+def validate_runtime_assets(cfg):
+    """Reject unresolved external video-backbone paths before torchrun."""
+    backbone = cfg.model.get("video_backbone")
+    model_path = backbone.get("model_path") if backbone else None
+    if not isinstance(model_path, str) or not model_path.strip():
+        raise ValueError("model.video_backbone.model_path must point to a prepared local backbone")
+    path = Path(model_path).expanduser()
+    if not path.is_absolute() or not path.is_dir():
+        raise ValueError(f"model.video_backbone.model_path is not a local directory: {model_path}")
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", type=Path, required=True)
@@ -153,6 +164,7 @@ def main(argv=None):
     if args.check_only:
         print(OmegaConf.to_yaml(cfg, resolve=True))
         return
+    validate_runtime_assets(cfg)
     import numpy as np  # noqa: PLC0415
 
     from adapters.openwam.data import YamDataset  # noqa: PLC0415
