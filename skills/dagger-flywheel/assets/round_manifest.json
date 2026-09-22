@@ -106,5 +106,15 @@
     "decision": "pending",
     "evidence": [],
     "next_round_failure_targets": []
+  },
+  "recipe_confirmation": {
+    "status": "awaiting_user_confirmation",
+    "recipe_version": null,
+    "recipe_summary_path": null,
+    "candidate_names": [],
+    "confirmed_recipe_version": null,
+    "confirmed_candidates": [],
+    "user_confirmation_reference": null,
+    "confirmed_at": null
   }
 }
