@@ -1,5 +1,10 @@
 # 07 · 变更历史
 
+## 2026-09-22 · 启动20h124000替换90000
+
+- 按用户授权直拉完整124000推理权重，建立一次性下载后校验、FP32转换、MAXN七步RTC验收与同地址上线流程；下载期间90000保持运行。
+- 仅在124000在线协议smoke通过后清理Thor90000/30000大权重，保留服务器原件与报告。此记录为启动状态，不代表转换、上线或删除已完成；恢复入口见[RTC手册](reference/thor/13_trained_rtc_inference.md)。
+
 ## 2026-09-22 · 关闭 GitHub pre-commit 自动触发
 
 用户不希望继续收到该工作流的GitHub通知邮件。将 `.github/workflows/pre-commit.yml` 从main push/PR触发改为仅 `workflow_dispatch` 手动触发；本地 `.pre-commit-config.yaml` 保留。仅调整本工作流，未修改账户全局邮件设置或其他CI。

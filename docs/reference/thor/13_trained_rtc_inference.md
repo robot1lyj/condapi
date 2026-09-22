@@ -1,5 +1,13 @@
 # 13 · Pi0.5 training-time RTC：Thor 转换与推理候选
 
+## 2026-09-22 · 20h124000下载及替换流水线（进行中）
+
+用户授权取最新124000替换90000，并删除Thor的90000/30000大权重。已确认完整源目录 `yam-server:/home/wuyan/lyj/YAM/training-runs/pi05_yam/lego_pi05_rtc_base_20h_20260918/124000`，完成元数据SHA `84c80a466efe32f2bf042b4c1efb4dfed34abb04ec2ae4ce5f04717f06118fc5`，norm SHA `d5493ce7b71790526312779d8fbccc374b9569f14d88722682b0e7c8bfcf1d52`。六路直接下载到Thor同run的124000目录，只取params/assets/元数据/训练合同，不取train_state。
+
+一次性作业 `thor-rtc-20h124000-deploy.service` 已启动，脚本及17项源SHA在 `/home/wuyan-lyj/thor/pi/probes/rtc-20h-124000-20260922-r1/`。流程：等待完整下载→SHA/有限性审计→FP32转换→按新norm生成真实回放→暂停90000并等待其MAXN会话退出→MAXN七步JAX对照、ONNX/TF32构建与九例验证→同8000候选smoke→替换同名Pi服务→新MAXN会话→再次在线smoke。GPU验收失败尝试恢复旧服务，不放宽精度门槛。当前下载期间90000仍在线/MAXN，**尚未证明124000转换完成、验收通过或上线**。
+
+新服务在线smoke通过后才永久删除：20h90000原始params、FP32 model.safetensors、七步ONNX外部权重和TRT引擎，以及10h30000剩余原始params。小体积配置/norm/报告、服务器原件、其他检查点不动；删除后旧模型需重新下载/构建才能回退。不要把该计划写成已清理。恢复任务先检查该unit的journal、`20h124000-online-smoke.json`及实际容器挂载，最后标记 `DEPLOYED_124000_AND_CLEANED_90000_30000` 才代表流水线完成；不重复启动下载或转换。服务地址仍为 `ws://192.168.250.1:8000`，未操作3588。
+
 **2026-09-21最新取消指令**：用户取消20h70000及此前未完成的20h80000下载，已停止70000 rsync及`thor-rtc-20h70000-prepare.service`（inactive），永久删除Thor `checkpoints/lego-pi05-rtc-base-20h-20260918/70000`和`80000`两个未完成目录，约释放5.3GiB。20h目录现仅保留90000原始与FP32转换件；源服务器检查点、10h版本、脚本及历史报告未动。90000在线服务健康检查OK。**下文70000等待下载/自动转换的计划已取消，不再恢复执行**；需要时重新下载，已删片段不在回收站。
 
 ## 2026-09-21 · 20h90000在线，70000仅下载/CPU转换
