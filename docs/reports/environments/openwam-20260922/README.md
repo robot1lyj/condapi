@@ -18,6 +18,7 @@
 - 微调基础模型按官方 OpenWAM-α 文档选择 `OpenWAM/OpenWAM-Alpha-Pretrain-Foundation-Model`，不是 Thor 部署用的 RoboTwin-Full 策略。官方元数据在 2026-09-22 16:27 CST 解析到 revision `52df4e66c82c5c8b480adcc8d01f4db7415dfb56`，8 个文件合计 `24835230480` bytes；其中 `checkpoint_step_154000.safetensors` 为 `24813767464` bytes，LFS SHA256 为 `180a02653118b0f96da28a9cae9ec7b4c1c1e6cd0e4608b56c7b4884f8001d3d`。
 - 目标目录为 `/home/wuyan/lyj/openwam-models/OpenWAM-Alpha-Pretrain-Foundation-Model`，通过 `download_openwam_foundation.py` 在 tmux `openwam-foundation-download` 中断点下载，固定 revision 后逐文件大小/SHA256 写入 `foundation-download-receipt.json`。下载期间设 `HF_HUB_DISABLE_XET=1`，模型完成前不得把目录交给训练。
 - Foundation 配置仍引用外部视频骨干 `Wan2.2-TI2V-5B`，因此同步下载官方 `Wan-AI/Wan2.2-TI2V-5B` 到 `/home/wuyan/lyj/openwam-models/Wan2.2-TI2V-5B`；2026-09-22 16:52 CST 固定 revision `921dbaf3f1674a56f47e83fb80a34bac8a8f203e`，23 个文件合计 `34203123497` bytes。该任务使用 tmux `openwam-video-download`，回执为 `video-backbone-download-receipt.json`，未完成前也不能开始训练。
+- 镜像核验：ModelScope 的同名视频骨干地址 `Wan-AI/Wan2.2-TI2V-5B` 可通过服务器代理访问；`Wan2.2_VAE.pth`、3 个 diffusion shard 和 `models_t5_umt5-xxl-enc-bf16.pth` 的 `X-Linked-Etag` 分别与 Hugging Face 固定 revision 的 LFS SHA256 一致。当前 Hugging Face 断点任务已经在目标目录写入，继续保留该任务，不让第二个下载器并发覆盖同一目录；完成后用固定哈希复核。未发现 `OpenWAM-Alpha-Pretrain-Foundation-Model` 的 ModelScope 同名记录，基础模型仍以官方 Hugging Face 仓库为唯一已验证来源；`hf-mirror.com` 对这两个仓库重定向回 `huggingface.co`，未作为独立镜像使用。
 - 官方配置确认 `action_dim=state_dim=80`，YAM 原始数据为 14D 关节合同；当前适配器只接受明确的 14D 原生 checkpoint，或调用者提供经过物理语义审核的 14 槽 80D 投影。不会把关节角静默放入 EEF xyz/rot6d 槽位。
 
 ## 已有验证
