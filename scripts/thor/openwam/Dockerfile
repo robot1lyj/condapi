@@ -12,5 +12,9 @@ RUN python -m pip freeze | grep -Ei '^(torch|torchvision|torchaudio|triton|numpy
       'opencv-python-headless>=4.7,<5' 'timm>=1.0.20,<1.1' 'modelscope>=1.13,<2' && \
     python -m pip install --no-deps -e . && \
     python -m pip freeze > /opt/openwam/thor-environment.txt
+RUN python -m pip install --constraint /tmp/nvidia-constraints.txt \
+      'h5py>=3.8,<4' 'pyarrow>=14,<26' 'pandas>=2,<4' 'scipy>=1.10,<2' 'av>=12,<18' && \
+    python -c "from openwam.dataloader.transforms.normalize import Normalizer" && \
+    python -m pip freeze > /opt/openwam/thor-environment.txt
 ENV PYTHONPATH=/opt/openwam
 CMD ["python", "-m", "openwam.deploy.server", "--help"]

@@ -1,5 +1,10 @@
 # 07 · 变更历史
 
+## 2026-09-22 · OpenWAM完成Thor首轮GPU推理
+
+- 用户授权暂停Pi后，在独占MAXN完成官方BF16/10步四组对照，有限32×20 EEF输出；基线1254ms、提示词缓存1253ms、DiT缓存520ms、compile964ms。合成输入小样本，不作任务精度验收；缓存与编译均有数值差异。
+- 补齐官方normalizer隐式h5py依赖并修正测试预处理调用，使用独立r2镜像。测试结束恢复原Pi服务与MAXN，healthz=OK；未改3588、未量化或开训。原始数据和限制见[GPU报告](reports/thor/openwam-20260922/gpu-r4.md)。
+
 ## 2026-09-22 · OpenWAM独立推理准备
 
 - 固定官方源码，新增Thor独立镜像与带revision/SHA验证的官方检查点下载入口。用户明确暂不暂停Pi，GPU测试留待授权；没有修改其他任务的OpenWAM训练适配代码。
