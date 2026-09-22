@@ -18,6 +18,8 @@ Thor直连HF及hf-mirror超时，本机HF可通。临时SSH远程动态转发只
 
 HF检查点已固定revision `04b96af53eeeb111c64631f822efcbb82f4b186e`；主权重文件24,813,767,464字节，Wan2.2 TI2V5B骨干。转发下载曾在约100MB断开，已加入断点重试；当前仍下载中，未生成完成回执。
 
+2026-09-22续查：主文件已到11,010,048,000字节，尚未完成。只读文件头显示2089个张量全部为BF16（不是依据训练配置猜测）；未扫描权重有限性、未完成SHA校验。检查入口 `scripts/thor/openwam/inspect_safetensors.py <文件>`，支持未完成文件但明确标记 `size_complete=false`，不能替代下载回执。官方config确认 `joint_self_attn`/`mutual`、三相机、384×320、`action_mode=eef`、80维动作/状态、min-max。Pi健康检查仍为OK。
+
 Alpha官方合同为80维统一槽位、32个action（33源帧，video_stride4），包含双臂EEF位置/rot6d及夹爪，min-max归一化。不是Pi的14维关节/50步/分位数归一化。官方RoboTwin模型仅用于原生推理运行验证；不下发YAM，也不声称测得乐高任务成功率。后续输入形状和dtype以下载的config核实。
 
 ## GPU获准后实验顺序
