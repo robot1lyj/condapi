@@ -343,3 +343,72 @@ def test_training_entry_rejects_unallocated_local_execution(tmp_path, monkeypatc
     with pytest.raises(SystemExit, match="2"):
         main(["--config", str(tmp_path / "missing.json"), "--worker", "--check-only"])
     assert not (tmp_path / "out").exists()
+
+
+def test_v3_shared_shards_and_nonzero_video_offsets(dataset, data_modules, tmp_path, monkeypatch):
+    np, data = data_modules
+    from PIL import Image  # noqa: PLC0415
+    import pyarrow as pa  # noqa: PLC0415
+    import pyarrow.parquet as pq  # noqa: PLC0415
+
+    old_root, config = dataset
+    root = tmp_path / "v3"
+    (root / "meta/episodes/chunk-000").mkdir(parents=True)
+    (root / "data/chunk-007").mkdir(parents=True)
+    info = json.loads((old_root / "meta/info.json").read_text())
+    info.update(
+        codebase_version="v3.0",
+        data_path="data/chunk-{chunk_index:03d}/file-{file_index:03d}.parquet",
+        video_path="videos/{video_key}/chunk-{chunk_index:03d}/file-{file_index:03d}.mp4",
+    )
+    (root / "meta/info.json").write_text(json.dumps(info))
+    rows = []
+    for episode in (0, 1):
+        row = {
+            "episode_index": episode,
+            "length": 9,
+            "dataset_from_index": episode * 9,
+            "dataset_to_index": (episode + 1) * 9,
+            "data/chunk_index": 7,
+            "data/file_index": 2,
+        }
+        for camera in CAMERAS:
+            row.update(
+                {
+                    f"videos/{camera}/chunk_index": 1,
+                    f"videos/{camera}/file_index": 3,
+                    f"videos/{camera}/from_timestamp": episode * 0.3,
+                    f"videos/{camera}/to_timestamp": (episode + 1) * 0.3,
+                }
+            )
+        rows.append(row)
+    pq.write_table(pa.Table.from_pylist(rows), root / "meta/episodes/chunk-000/file-000.parquet")
+    pq.write_table(pa.Table.from_pylist([{"task_index": 0, "task": "sort lego"}]), root / "meta/tasks.parquet")
+    tables = [pq.read_table(old_root / f"data/episode_{i:06d}.parquet") for i in (0, 1)]
+    pq.write_table(pa.concat_tables(tables), root / "data/chunk-007/file-002.parquet")
+    stats = tmp_path / "v3-stats.json"
+    payload = data.prepare_stats(root, [1], stats)
+    assert len(payload["parquet_sha256"]) == 1
+    assert min(payload["stats"]["joint"]["min"]) == 10000
+    config.update(dataset_dir=str(root), episodes=[1], normalization_json=str(stats))
+    ds = data.YamDataset(config)
+    seen = []
+
+    def decode(path, indices, h, w):
+        seen.append((path, indices, h, w))
+        return [Image.new("RGB", (w, h), (i, i, i)) for i in indices]
+
+    monkeypatch.setattr(data, "decode_video_frames", decode)
+    sample = ds[0]
+    assert seen[0][1] == [9, 11, 13, 15, 17]
+    assert "chunk-001/file-003.mp4" in seen[0][0]
+    assert seen[0][2:] == (64, 64)
+    assert seen[1][2:] == (32, 32)
+    assert sample["video"][0].getpixel((0, 0)) == (9, 9, 9)
+    raw = data.read_episode(root, info, 1)
+    np.testing.assert_allclose(ds.action_norm.unnormalize(sample["action"].numpy()), raw["action"][:8], atol=1e-3)
+    ds[7]
+    assert seen[-1][1] == [16, 17, 17, 17, 17]
+    (root / "meta/excluded_episodes.json").write_text(json.dumps({"episode_indices": [1]}))
+    with pytest.raises(ValueError, match="excluded"):
+        data.YamDataset(config)

@@ -4,4 +4,4 @@ backend = "openwam"
 status = "implemented"
 operations = ["train", "infer"]
 contracts = ["yam-bimanual-v1"]
-note = "YAM LeRobot v2 adapter and native finetune/resume/offline inference interfaces implemented; no GPU training or Thor deployment acceptance yet."
+note = "YAM LeRobot v2/v3 adapter and native finetune/resume/offline inference interfaces implemented; no GPU training or Thor deployment acceptance yet."

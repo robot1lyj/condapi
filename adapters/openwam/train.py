@@ -100,7 +100,7 @@ def compose_config(recipe_path, output):
         "condapi",
         {
             "nproc_per_node": workers,
-            "adapter": "yam_lerobot_v2_v1",
+            "adapter": "yam_lerobot_v1",
             "upstream_revision": json.loads((VENDOR / "UPSTREAM.json").read_text())["revision"],
         },
         force_add=True,
@@ -120,7 +120,7 @@ def worker(config):
     from adapters.openwam.data import YamDataset  # noqa: PLC0415
     from adapters.openwam.metrics import metrics_hook  # noqa: PLC0415
 
-    register_dataset("yam_lerobot_v2")(YamDataset)
+    register_dataset("yam_lerobot")(YamDataset)
     OpenWAMTrainer.log_step = metrics_hook(OpenWAMTrainer.log_step)
     spec = importlib.util.spec_from_file_location("condapi_openwam_native_train", VENDOR / "scripts/train.py")
     native = importlib.util.module_from_spec(spec)

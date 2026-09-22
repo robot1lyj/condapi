@@ -49,8 +49,8 @@ def validate_data_config(dl, architecture):
     }
     if set(dl) - allowed:
         raise ValueError(f"Unsupported YAM data options: {sorted(set(dl) - allowed)}")
-    if dl.get("type") != "yam_lerobot_v2" or dl.get("action_mode") != "joint":
-        raise ValueError("Expected yam_lerobot_v2 with joint actions")
+    if dl.get("type") != "yam_lerobot" or dl.get("action_mode") != "joint":
+        raise ValueError("Expected yam_lerobot with joint actions")
     if dl.get("action_semantics") != "absolute":
         raise ValueError("Only audited absolute YAM action targets are supported")
     if list(dl.get("camera_layout", [])) != CAMERAS or not dl.get("multiview"):
@@ -90,8 +90,8 @@ def validate_data_config(dl, architecture):
 def read_info(root):
     root = Path(root).resolve()
     info = json.loads((root / "meta/info.json").read_text())
-    if info.get("codebase_version") not in ("v2.0", "v2.1"):
-        raise ValueError("This adapter supports LeRobot v2.0/v2.1 only; never converts source data in place")
+    if info.get("codebase_version") not in ("v2.0", "v2.1", "v3.0"):
+        raise ValueError("Supported LeRobot versions: v2.0/v2.1/v3.0; never converts source data in place")
     fps = info.get("fps")
     if not isinstance(fps, (float, int)) or not math.isfinite(fps) or fps <= 0:
         raise ValueError("Dataset metadata must provide positive finite fps")
@@ -104,11 +104,15 @@ def read_info(root):
     return info
 
 
-def dataset_path(root, info, kind, episode, camera=None):
+def dataset_path(root, info, kind, episode, camera=None, row=None):
     root = Path(root).resolve()
-    path = root / info[f"{kind}_path"].format(
-        episode_index=episode, episode_chunk=episode // info["chunks_size"], video_key=camera
-    )
+    values = {"episode_index": episode, "episode_chunk": episode // info["chunks_size"], "video_key": camera}
+    if info["codebase_version"] == "v3.0":
+        if row is None:
+            raise ValueError("LeRobot v3 paths require the episode shard metadata")
+        prefix = "data" if kind == "data" else f"videos/{camera}"
+        values.update(chunk_index=int(row[f"{prefix}/chunk_index"]), file_index=int(row[f"{prefix}/file_index"]))
+    path = root / info[f"{kind}_path"].format(**values)
     if not path.resolve().is_relative_to(root):
         raise ValueError("Dataset path escapes source root")
     return path

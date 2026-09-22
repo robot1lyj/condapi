@@ -1,4 +1,4 @@
-"""Read-only YAM LeRobot v2 windows using native OpenWAM transforms and video IO."""
+"""Read-only YAM LeRobot v2/v3 windows using native OpenWAM transforms and video IO."""
 
 from bisect import bisect_right
 import functools
@@ -11,6 +11,8 @@ from openwam.dataloader.bases import BaseDataset
 from openwam.dataloader.transforms.multiview import assemble_multiview_layout
 from openwam.dataloader.transforms.normalize import YAML_TO_NORM_MODE
 from openwam.dataloader.transforms.normalize import Normalizer
+from openwam.dataloader.utils.lerobotv3 import load_episodes_parquet
+from openwam.dataloader.utils.lerobotv3 import load_excluded_episodes_snapshot
 from openwam.dataloader.utils.unify_action import map_to_unify
 from openwam.dataloader.utils.video_io import decode_video_frames
 import pyarrow.parquet as pq
@@ -21,9 +23,67 @@ from adapters.openwam.common import dataset_path
 from adapters.openwam.common import read_info
 
 
-def read_episode(root, info, episode):
-    path = dataset_path(root, info, "data", episode)
-    table = pq.read_table(path)
+class YamLayout:
+    """Resolve v2 episode files or v3 shared shards without rewriting either layout."""
+
+    def __init__(self, root, info):
+        self.root, self.info = Path(root).resolve(), info
+        self.metadata = [self.root / "meta/info.json"]
+        if info["codebase_version"] == "v3.0":
+            self.metadata += sorted((self.root / "meta/episodes").rglob("*.parquet"))
+            self.metadata.append(self.root / "meta/tasks.parquet")
+            rows = load_episodes_parquet(self.root).to_dict("records")
+            tasks = pq.read_table(self.root / "meta/tasks.parquet").to_pylist()
+        else:
+            self.metadata += [self.root / "meta/episodes.jsonl", self.root / "meta/tasks.jsonl"]
+            rows = [json.loads(line) for line in self.metadata[1].read_text().splitlines() if line]
+            tasks = [json.loads(line) for line in self.metadata[2].read_text().splitlines() if line]
+        self.rows = {int(row["episode_index"]): row for row in rows}
+        if len(self.rows) != len(rows):
+            raise ValueError("Duplicate episode metadata")
+        self.tasks = {int(row["task_index"]): row["task"] for row in tasks}
+        if len(self.tasks) != len(tasks):
+            raise ValueError("Duplicate task indices")
+        self.excluded = set(load_excluded_episodes_snapshot(self.root).episode_indices)
+        excluded_path = self.root / "meta/excluded_episodes.json"
+        if excluded_path.exists():
+            self.metadata.append(excluded_path)
+
+    def select(self, episodes):
+        if set(episodes) - self.rows.keys() or set(episodes) & self.excluded:
+            raise ValueError("Requested episode is missing or explicitly excluded")
+        for episode in episodes:
+            row = self.rows[episode]
+            if row.get("_valid_start", 0) != 0 or row.get("_valid_end", row["length"]) != row["length"]:
+                raise ValueError("Trimmed episodes require a separately published dataset")
+
+    def path(self, kind, episode, camera=None):
+        return dataset_path(self.root, self.info, kind, episode, camera, self.rows[episode])
+
+    def video_offset(self, episode, camera):
+        if self.info["codebase_version"] != "v3.0":
+            return 0
+        row = self.rows[episode]
+        first = float(row[f"videos/{camera}/from_timestamp"]) * self.info["fps"]
+        last = float(row[f"videos/{camera}/to_timestamp"]) * self.info["fps"]
+        if not np.isfinite([first, last]).all() or first < 0 or abs(first - round(first)) > 1e-3:
+            raise ValueError("Invalid v3 video frame offset")
+        if abs(last - first - row["length"]) > 1e-3:
+            raise ValueError("Video time span disagrees with episode length/fps")
+        return round(first)
+
+    def metadata_hashes(self):
+        return {str(path.relative_to(self.root)): digest(path) for path in self.metadata}
+
+
+def read_episode(root, info, episode, layout=None):
+    layout = layout or YamLayout(root, info)
+    layout.select([episode])
+    path = layout.path("data", episode)
+    columns = ["episode_index", "frame_index", "timestamp", "task_index", "action", "observation.state"]
+    table = pq.read_table(path, columns=columns, filters=[("episode_index", "=", episode)])
+    if len(table) != layout.rows[episode]["length"]:
+        raise ValueError(f"Episode metadata length mismatch: {path}")
     values = table.to_pydict()
     if not values["episode_index"] or set(values["episode_index"]) != {episode}:
         raise ValueError(f"Episode identity mismatch: {path}")
@@ -53,14 +113,19 @@ def prepare_stats(root, episodes, output):
     if not episodes or len(set(episodes)) != len(episodes) or any(type(e) is not int or e < 0 for e in episodes):
         raise ValueError("Select unique nonnegative training episode ids")
     info = read_info(root)
+    layout = YamLayout(root, info)
+    layout.select(episodes)
     accum = {
         key: [0, np.zeros(14), np.zeros(14), np.full(14, np.inf), np.full(14, -np.inf)]
         for key in ("action", "observation.state")
     }
     hashes = {}
     for episode in episodes:
-        values = read_episode(root, info, episode)
-        hashes[str(episode)] = digest(dataset_path(root, info, "data", episode))
+        values = read_episode(root, info, episode, layout)
+        path = layout.path("data", episode)
+        name = str(path.relative_to(root))
+        if name not in hashes:
+            hashes[name] = digest(path)
         for key, (count, mean, m2, lo, hi) in accum.items():
             x = values[key].astype(np.float64)
             n, batch_mean = len(x), x.mean(axis=0)
@@ -82,13 +147,11 @@ def prepare_stats(root, episodes, output):
             "max": hi.tolist(),
         }
     payload = {
-        "schema_version": 1,
+        "schema_version": 2,
         "episodes": list(episodes),
         "fps": info["fps"],
         "info_sha256": digest(root / "meta/info.json"),
-        "metadata_sha256": {
-            name: digest(root / "meta" / name) for name in ("info.json", "episodes.jsonl", "tasks.jsonl")
-        },
+        "metadata_sha256": layout.metadata_hashes(),
         "parquet_sha256": hashes,
         "stats": stats,
     }
@@ -101,7 +164,7 @@ def prepare_stats(root, episodes, output):
 
 def load_stats(path):
     payload = json.loads(Path(path).read_text())
-    if payload.get("schema_version") != 1:
+    if payload.get("schema_version") != 2:
         raise ValueError("Unsupported YAM statistics schema")
     for name in ("joint", "joint_state"):
         for key in ("mean", "std", "min", "max"):
@@ -123,27 +186,24 @@ class YamDataset(BaseDataset):
         payload = load_stats(config["normalization_json"])
         if payload["episodes"] != self.episodes or payload["info_sha256"] != digest(self.root / "meta/info.json"):
             raise ValueError("Statistics do not match selected training data")
-        for name, expected in payload["metadata_sha256"].items():
-            if (
-                name not in ("info.json", "episodes.jsonl", "tasks.jsonl")
-                or digest(self.root / "meta" / name) != expected
-            ):
-                raise ValueError(f"Dataset metadata changed after statistics audit: {name}")
-        if set(payload["metadata_sha256"]) != {"info.json", "episodes.jsonl", "tasks.jsonl"}:
-            raise ValueError("Incomplete metadata provenance")
+        self.layout = YamLayout(self.root, self.info)
+        self.layout.select(self.episodes)
+        if payload["metadata_sha256"] != self.layout.metadata_hashes():
+            raise ValueError("Dataset metadata changed after statistics audit")
         self.ends = [0]
-        metadata = [json.loads(line) for line in (self.root / "meta/episodes.jsonl").read_text().splitlines() if line]
-        lengths = {row["episode_index"]: row["length"] for row in metadata}
+        paths = {self.layout.path("data", episode) for episode in self.episodes}
+        expected_paths = {str(path.relative_to(self.root)) for path in paths}
+        if set(payload["parquet_sha256"]) != expected_paths:
+            raise ValueError("Statistics shard population mismatch")
+        for path in paths:
+            if payload["parquet_sha256"][str(path.relative_to(self.root))] != digest(path):
+                raise ValueError(f"Dataset changed after statistics audit: {path}")
         for episode in self.episodes:
-            if payload["parquet_sha256"][str(episode)] != digest(dataset_path(self.root, self.info, "data", episode)):
-                raise ValueError(f"Dataset changed after statistics audit: episode {episode}")
-            if lengths[episode] < 2:
+            length = self.layout.rows[episode]["length"]
+            if length < 2:
                 raise ValueError("Training episodes must have at least two frames")
-            self.ends.append(self.ends[-1] + lengths[episode] - 1)
-        self.tasks = {
-            row["task_index"]: row["task"]
-            for row in (json.loads(line) for line in (self.root / "meta/tasks.jsonl").read_text().splitlines() if line)
-        }
+            self.ends.append(self.ends[-1] + length - 1)
+        self.tasks = self.layout.tasks
         self.action_norm = Normalizer(YAML_TO_NORM_MODE[config["normalize_mode"]], payload["stats"]["joint"])
         self.state_norm = Normalizer(YAML_TO_NORM_MODE[config["normalize_mode"]], payload["stats"]["joint_state"])
         self.normalization_stats_path = config["normalization_stats_path"]
@@ -161,7 +221,7 @@ class YamDataset(BaseDataset):
 
     @functools.lru_cache(maxsize=2)  # noqa: B019 - bounded cache in the lifetime of a worker process
     def _episode(self, episode):
-        values = read_episode(self.root, self.info, episode)
+        values = read_episode(self.root, self.info, episode, self.layout)
         local = self.episodes.index(episode)
         if len(values["frame_index"]) != self.ends[local + 1] - self.ends[local] + 1:
             raise ValueError("Episode metadata length mismatch")
@@ -192,12 +252,18 @@ class YamDataset(BaseDataset):
         indices = np.arange(0, cfg["num_frames"], cfg["video_stride"]) + offset
         video_mask = indices < length
         indices = np.minimum(indices, length - 1).tolist()
-        views = {
-            camera: decode_video_frames(
-                str(dataset_path(self.root, self.info, "video", episode, camera)), indices, cfg["height"], cfg["width"]
+        top_h = round(cfg["height"] * 2 / 3)
+        sizes = [
+            (top_h, cfg["width"]),
+            (cfg["height"] - top_h, cfg["width"] // 2),
+            (cfg["height"] - top_h, cfg["width"] - cfg["width"] // 2),
+        ]
+        views = {}
+        for camera, (height, width) in zip(CAMERAS, sizes, strict=True):
+            base = self.layout.video_offset(episode, camera)
+            views[camera] = decode_video_frames(
+                str(self.layout.path("video", episode, camera)), [i + base for i in indices], height, width
             )
-            for camera in CAMERAS
-        }
         video = [compose_image({camera: views[camera][i] for camera in CAMERAS}, cfg) for i in range(len(indices))]
         prompt = self.tasks[values["task_index"][offset]]
         if not isinstance(prompt, str) or not prompt.strip():

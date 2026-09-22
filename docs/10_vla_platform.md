@@ -134,7 +134,7 @@ python3 scripts/vla.py bundle check /path/to/package/manifest.json
 
 ### 数据接口
 
-当前 reader 读取 **LeRobot v2.0/v2.1、每 episode parquet/MP4**，适配本项目 YAM；不原位升级数据。v3/跨文件视频偏移尚不支持，会明确拒绝。相机、14D 次序和语义归 [04](04_data_contracts.md#openwam-yam-数据投影)。缺失/损坏相机、非有限值、fps/时间戳不一致会报错，不自动换 episode 或填黑腕部图像。
+当前 reader 读取 **LeRobot v2.0/v2.1 每 episode 文件与 v3.0 共享分片**；正式服务器发布目录实测为 v3.0、14D、30fps。复用原生 episode metadata 读取器，按 episode_index 选择共享 Parquet 内的记录，并按每相机 from_timestamp/fps 定位共享视频；不原位升级数据。相机、14D 次序和语义归 [04](04_data_contracts.md#openwam-yam-数据投影)。缺失/损坏相机、非有限值、fps/时间戳不一致会报错，不自动换 episode 或填黑腕部图像。
 
 先准备明确的训练 episode ID JSON 列表，统计工具只读取这些 episode，输出路径必须位于源数据目录外且尚不存在：
 

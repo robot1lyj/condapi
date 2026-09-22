@@ -9,8 +9,8 @@
     }
   },
   "dataloader": {
-    "type": "yam_lerobot_v2",
-    "dataset_dir": "/path/to/yam-lerobot-v2",
+    "type": "yam_lerobot",
+    "dataset_dir": "/path/to/yam-lerobot",
     "episodes": [0, 1],
     "normalization_json": "/path/to/new-output/yam-train-stats.json",
     "action_mode": "joint",
