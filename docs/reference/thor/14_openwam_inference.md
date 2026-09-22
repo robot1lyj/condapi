@@ -24,6 +24,8 @@ Alpha官方合同为80维统一槽位、32个action（33源帧，video_stride4�
 
 ## GPU获准后实验顺序
 
+续查下载达到约18GiB后，已启动一次性CPU校验容器 `openwam-download-audit`：等待下载完成回执（最多4小时），然后扫描BF16指数位检查NaN/Inf，输出 `logs/finite-audit.json`。入口 `scripts/thor/openwam/audit_download.py`，限制1CPU/512MiB、无网络、无GPU、checkpoint只读；不是定时推理或自动上线。检查有限性不代表模型任务精度。下载超时或校验失败需读取容器日志，不得当作通过。
+
 1. 独占MAXN，固定官方checkpoint/config、输入/噪声/种子，记录原生dtype与10步基线，关闭compile和近似DiT缓存。真实观测与人工构造smoke分开标注。
 2. 同输入测试提示词缓存、`decode_video=false`、torch.compile/SDPA。跳过视频**解码**不等于删除内部video DiT；动作仍可能依赖它。
 3. 单独启用官方DiT velocity cache：属于近似跨去噪步复用，报告动作逐维差异、连续性及实际跳步率，不当成无损。
