@@ -1,5 +1,7 @@
 # 08 · Thor 端侧部署
 
+OpenWAM独立镜像、官方权重、LoRA合并与压缩候选见 [14 · OpenWAM推理实验](reference/thor/14_openwam_inference.md)。2026-09-22用户限定先准备、不暂停Pi；尚未开展GPU测试。
+
 逐步安装指导的冷记忆入口：[Thor 安装系列 00](reference/thor/00_start_here.md)。该组按 G0–G5 持有设备预检、ISO/USB 制作、固件/NVMe 安装、宿主/容器检查、Pi 工程闸门及故障交接；本页继续持有版本、精度决策和当前状态。指导 agent 不得把下文安装概览当成跳过目标确认的操作脚本。
 
 训练时 RTC 的完整 Thor 路线（原始 JAX FP32 → PyTorch FP32 → 动态前缀 ONNX/TensorRT → 严格 RTC WebSocket）见 [13 · trained RTC 推理](reference/thor/13_trained_rtc_inference.md)。2026-09-17晚间发现前缀归一化错误并停服；旧7步/10步历史对照不能验收前缀条件。2026-09-18按用户要求重启修正分位数前缀的七步服务，本机协议smoke通过，3588端到端/真机仍待验；详见[事故报告更新](reports/thor/rtc-prefix-quantile-incident-20260917.md#2026-09-18-更新新版服务与-thor-本机协议测试)。BF16仍只是离线实验候选。
