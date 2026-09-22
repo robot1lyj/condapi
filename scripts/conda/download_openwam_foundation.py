@@ -30,7 +30,8 @@ def download(root: Path, requested_revision: str = "main", retries: int = 20) ->
     checkpoint directory.
     """
 
-    from huggingface_hub import HfApi, snapshot_download
+    from huggingface_hub import HfApi  # noqa: PLC0415
+    from huggingface_hub import snapshot_download  # noqa: PLC0415
 
     root = root.resolve()
     root.mkdir(parents=True, exist_ok=True)
