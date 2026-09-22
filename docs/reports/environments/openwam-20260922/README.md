@@ -17,6 +17,7 @@
 
 - 微调基础模型按官方 OpenWAM-α 文档选择 `OpenWAM/OpenWAM-Alpha-Pretrain-Foundation-Model`，不是 Thor 部署用的 RoboTwin-Full 策略。官方元数据在 2026-09-22 16:27 CST 解析到 revision `52df4e66c82c5c8b480adcc8d01f4db7415dfb56`，8 个文件合计 `24835230480` bytes；其中 `checkpoint_step_154000.safetensors` 为 `24813767464` bytes，LFS SHA256 为 `180a02653118b0f96da28a9cae9ec7b4c1c1e6cd0e4608b56c7b4884f8001d3d`。
 - 目标目录为 `/home/wuyan/lyj/openwam-models/OpenWAM-Alpha-Pretrain-Foundation-Model`，通过 `download_openwam_foundation.py` 在 tmux `openwam-foundation-download` 中断点下载，固定 revision 后逐文件大小/SHA256 写入 `foundation-download-receipt.json`。下载期间设 `HF_HUB_DISABLE_XET=1`，模型完成前不得把目录交给训练。
+- Foundation 配置仍引用外部视频骨干 `Wan2.2-TI2V-5B`，因此同步下载官方 `Wan-AI/Wan2.2-TI2V-5B` 到 `/home/wuyan/lyj/openwam-models/Wan2.2-TI2V-5B`；2026-09-22 16:52 CST 固定 revision `921dbaf3f1674a56f47e83fb80a34bac8a8f203e`，23 个文件合计 `34203123497` bytes。该任务使用 tmux `openwam-video-download`，回执为 `video-backbone-download-receipt.json`，未完成前也不能开始训练。
 - 官方配置确认 `action_dim=state_dim=80`，YAM 原始数据为 14D 关节合同；当前适配器只接受明确的 14D 原生 checkpoint，或调用者提供经过物理语义审核的 14 槽 80D 投影。不会把关节角静默放入 EEF xyz/rot6d 槽位。
 
 ## 已有验证
