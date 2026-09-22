@@ -1,0 +1,6 @@
+schema_version = 1
+model = "openwam"
+manager = "conda"
+target = "workstation"
+prefix = "/home/wuyan-lyj/.conda/envs/vla-openwam"
+spec = "environments/openwam.yml"

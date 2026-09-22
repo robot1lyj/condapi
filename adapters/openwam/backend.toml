@@ -1,0 +1,18 @@
+schema_version = 1
+id = "openwam"
+status = "implemented"
+note = "Native OpenWAM trainer and offline YAM inference; GPU and Thor acceptance pending."
+upstream_revision = "7c5861e45cfe1339a0323f0e0b03a3316c37971c"
+sources = ["adapters/openwam/common.py", "adapters/openwam/data.py", "adapters/openwam/train.py", "adapters/openwam/infer.py", "adapters/openwam/prepare.py", "adapters/openwam/metrics.py", "third_party/openwam/UPSTREAM.json"]
+
+[operations.train]
+targets = ["server"]
+required = ["native_config"]
+file_parameters = ["native_config"]
+command = ["python", "{root}/adapters/openwam/train.py", "--config", "{native_config}", "--output", "{output}"]
+
+[operations.infer]
+targets = ["server", "workstation"]
+required = ["checkpoint", "request", "model_version"]
+file_parameters = ["request"]
+command = ["python", "{root}/adapters/openwam/infer.py", "--checkpoint", "{checkpoint}", "--request", "{request}", "--contract", "{contract}", "--model-version", "{model_version}", "--output", "{output}"]

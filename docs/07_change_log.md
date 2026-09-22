@@ -829,3 +829,9 @@ text80 实验完成 ONNX、TensorRT 构建和 W 正式回放。完整 policy P50
 ## 2026-09-22 · Archify 架构总览
 
 按用户要求使用已安装的 Archify 2.17，基于控制层、后端声明、模型状态及架构 owner 绘制 [交互架构图](diagrams/architecture.html)。保留图源、确定性交付回执和浏览器截图证据；9/9 showcase 与四种桌面尺寸检查通过。区分 Pi 已实现主线、LeRobot 待验收模型、Thor 模型侧与仓库外 3588；不以图示宣称远端在线。同步修正 01 中过时的默认 LoRA 描述为正式 Pi0.5 全量微调。未修改训练配置或执行训练。
+
+## 2026-09-22 · OpenWAM 原生微调接口
+
+用户要求把本地 OpenWAM 纳入训练/推理模型选择，本任务负责微调接口。迁入固定 revision `7c5861e45cfe1339a0323f0e0b03a3316c37971c` 的运行时源码和许可，新增独立后端、Conda bootstrap、YAM LeRobot v2 只读 reader、训练子集统计、14D/显式80D映射、原生 fine-tune/resume 与离线 infer。复用原生 trainer/normalizer/checkpoint，未开训、未同步服务器/Thor、未操作3588。所有示例预算为接口模板，不作为 DAgger 某轮配方确认。
+
+验证包括轻量配置/数据/视频/归一化/平台回归，不运行本地训练 smoke。完整模型依赖、GPU 首训与真实恢复、Thor 容器/精度/性能仍未验收；操作和局限归 [10](10_vla_platform.md#2026-09-22--openwam-微调接入)，语义归 [04](04_data_contracts.md#openwam-yam-数据投影)。保留既有未提交的看板与其他任务改动，本功能分支不自动合并 main。

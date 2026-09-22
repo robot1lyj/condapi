@@ -277,7 +277,7 @@ def test_incomplete_bundle_not_published(recipe):
 def test_cli_models(capsys):
     assert main(["--root", str(ROOT), "models"]) == 0
     result = json.loads(capsys.readouterr().out)
-    assert {x["id"] for x in result} == {"pi", "evo1", "vla-jepa", "fastwam", "molmoact2"}
+    assert {x["id"] for x in result} == {"pi", "evo1", "vla-jepa", "fastwam", "molmoact2", "openwam"}
 
 
 def test_env_plan_no_install(project):

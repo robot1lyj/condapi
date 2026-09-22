@@ -29,6 +29,8 @@ Evo-1、FastWAM、VLA-JEPA 的模型声明共用 LeRobot 后端，不再为每�
 
 2026-09-08 目录清理：删除非 YAM 的 `examples/` 示例以及未初始化的 ALOHA/LIBERO `third_party/` 子模块和配置，移除空 `plugins/` 目录。唯一仍用于部署的 JAX→PyTorch 转换器迁至 `adapters/openpi/convert_jax_model_to_pytorch.py`，Docker 和回归入口随之更新。`src/` 是实际 Pi 后端，`packages/` 是控制层/客户端，`artifacts/` 和 `docs/reports/` 是历史证据，`skills/` 是记忆工具源码，均不因目录数量多而删除。旧示例可由 Git 历史或原上游获取；历史文档提及的示例路径不代表当前可运行入口。
 
+2026-09-22 新增 `adapters/openwam/` 独立后端，模型选择为 `openwam`。固定上游运行时快照在 `third_party/openwam/`（逐文件哈希归 `UPSTREAM.json`）；复用 OpenWAM 原生模型、Hydra/DeepSpeed trainer、归一化与 checkpoint，不经 LeRobot trainer，也不复制训练循环。YAM reader 只负责 LeRobot v2 数据投影，微调/恢复入口和离线推理由独立 Conda 子进程承载。控制层仍无模型依赖；接口实现不表示 GPU 或 Thor 已验收，操作边界见 [10](10_vla_platform.md#2026-09-22--openwam-微调接入)。
+
 以下数据流和 32D/H50、delta 配置描述的是 **Pi 后端**，不是对所有模型的统一要求。
 
 ## 当前训练数据流

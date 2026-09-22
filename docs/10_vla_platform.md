@@ -121,3 +121,53 @@ python3 scripts/vla.py bundle check /path/to/package/manifest.json
 训练入口 API 依据固定源码：[原生训练入口](https://github.com/huggingface/lerobot/blob/2774d9bddcbbda50e697e162e89e7eaada8d7105/src/lerobot/scripts/lerobot_train.py)、[训练配置](https://github.com/huggingface/lerobot/blob/2774d9bddcbbda50e697e162e89e7eaada8d7105/src/lerobot/configs/train.py)。
 
 源码来源：[Evo config](https://github.com/huggingface/lerobot/blob/2774d9bddcbbda50e697e162e89e7eaada8d7105/src/lerobot/policies/evo1/configuration_evo1.py)、[模型](https://github.com/huggingface/lerobot/blob/2774d9bddcbbda50e697e162e89e7eaada8d7105/src/lerobot/policies/evo1/modeling_evo1.py)、[处理器](https://github.com/huggingface/lerobot/blob/2774d9bddcbbda50e697e162e89e7eaada8d7105/src/lerobot/policies/evo1/processor_evo1.py)。
+
+## 2026-09-22 · OpenWAM 微调接入
+
+**已实现接口，未验收 GPU 训练或 Thor 推理。** `configs/models/openwam.toml` 选择独立 `openwam` 后端，支持 `train` 和离线 `infer`。本次仅接入模型侧，不启动训练、不更换 Thor 服务。初次训练前仍需数据单位/绝对目标语义审核、模型依赖锁定、计算节点容量与真实保存/恢复验收。
+
+### 固定源码与环境
+
+本地 OpenWAM 的 Git revision `7c5861e45cfe1339a0323f0e0b03a3316c37971c` 原样快照到 `third_party/openwam/`。`UPSTREAM.json` 保存源仓库、revision 与逐文件 SHA256；入口校验快照。只迁入模型/数据处理/原生 trainer、配置、训练入口及许可，不带权重、原仓库 Git 历史或未跟踪资料。快照中的 README 是上游说明，部分完整上游文档链接不随运行时快照迁入。本项目的变更在 `adapters/openwam/`，不另写训练循环。
+
+`environments/openwam.yml` 仅创建 Python 3.12/pip。审计过的 GPU 计算节点上，在独立 `vla-openwam` Conda prefix 安装 `python -m pip install ./third_party/openwam`；它不与 Pi/Evo 的依赖混装。上游 `pyproject.toml` 使用版本范围，**不是已验证的 CUDA 锁文件**；`docker/constraints-cu128.txt` 仅为上游参考，不能据此声称服务器或 Thor 可用。安装后应保存完整包锁、CUDA/DeepSpeed 审计和对应骨干依赖。此轮只在临时测试目录增加 Hydra/OmegaConf/h5py 等轻量依赖，没有安装模型环境。
+
+### 数据接口
+
+当前 reader 读取 **LeRobot v2.0/v2.1、每 episode parquet/MP4**，适配本项目 YAM；不原位升级数据。v3/跨文件视频偏移尚不支持，会明确拒绝。相机、14D 次序和语义归 [04](04_data_contracts.md#openwam-yam-数据投影)。缺失/损坏相机、非有限值、fps/时间戳不一致会报错，不自动换 episode 或填黑腕部图像。
+
+先准备明确的训练 episode ID JSON 列表，统计工具只读取这些 episode，输出路径必须位于源数据目录外且尚不存在：
+
+```bash
+python adapters/openwam/prepare.py --dataset /absolute/yam-v2 \
+  --episodes /absolute/train-episodes.json --output /absolute/new-run/yam-stats.json
+```
+
+该命令只做数据审计/统计，不运行训练。产物包含 `joint` 和 `joint_state` 各自的 min/max/mean/std、episode 清单、fps、metadata/parquet 哈希。训练启动复查哈希，生成原生 `normalization_stats.npy`，交由上游 checkpoint 保存器复制。不要拿 Pi 的 delta/分位数 norm 来替代。当前只支持 min-max/z-score；统计不读取验证集。
+
+### 微调与恢复
+
+`configs/native/openwam-yam.example.json` 是**接口示例，不是已批准实验配方**；路径、episode 清单和预算均须替换。DAgger 各轮仍按 AGENTS 的逐轮配方确认要求执行。`configs/experiments/openwam-yam.toml` 将本轮 JSON 交给后端：
+
+```bash
+python scripts/vla.py models
+python scripts/vla.py plan configs/experiments/openwam-yam.toml train --run-id openwam-yam-r1
+python adapters/openwam/train.py --config /absolute/recipe.json --output /absolute/new-artifacts --check-only
+# 仅在获准的 Slurm GPU allocation、独立 OpenWAM 环境中执行：
+python scripts/vla.py run configs/experiments/openwam-yam.toml train --run-id openwam-yam-r1
+```
+
+`--check-only` 只组合配置/检查 metadata，不导入 trainer、不构建模型。正式入口要求 Slurm allocation，按 `nproc_per_node` 调用原生 torchrun + Hydra/Accelerate/DeepSpeed 训练。平台仅标记 target 不会自动 SSH，因此必须在计算节点执行；本地禁止训练。入口关闭 W&B 发送与 Hugging Face 在线下载；模型资产须预先准备。
+
+- `training.finetune_ckpt_path`：完整原生 checkpoint **run 目录**，新输出、step 从零开始。继承 checkpoint 模型配置，再应用显式 `model` 修改，禁止静默改变动作头维度/framework/variant。不使用父目录替代实际含 `config.yaml` 的 run 目录。
+- 常见 80D 预训练 checkpoint：模型保持 `action_dim=state_dim=80`；显式开启 `unify_action` 并提供 **14 个不同的整数槽位**，state/action 使用同一映射。槽位需结合该 checkpoint 的原训练语义确定，不能把关节角冒充 EEF xyz/rot6d。没有自动猜测或默认映射。
+- 示例的 14D 模式要求已有兼容 14D checkpoint。若从预训练视频骨干建立新 14D 动作专家，将 `finetune_ckpt_path` 设为 null，配置骨干的本地 `model_path`；这属于新动作专家训练，不是完整 80D policy 权重微调。
+- `training.resume_ckpt_path`：与 finetune 互斥；恢复原生 `accel_state_step_*`，复用原 run 的权重/优化器/scheduler/RNG。入口要求保存的 model、dataset、project、training 以及进程数一致；变更配方应另开 finetune。上游会进一步检查全状态完整性和 norm 一致性。**上游正常结束会移除续训全状态**，只有权重时应 warm-start，不能假称严格续训。
+
+`training.max_steps`、`save_steps`、`global_step` 是上游 **micro-batch step**；`opt_step` 才是优化器更新次数。不要把梯度累积后的有效 batch 或更新预算算错。原生日志 hook 同时写 `metrics.jsonl`：事件 step 为 microstep，`optimizer_step` 独立保存；只有主进程写，非有限指标计数保留。它可供现有看板消费，不改变 loss/optimizer。模型产物位于平台 `artifacts/checkpoints/<上游时间目录>/`；平台层另存 resolved config、来源与数据审计。checkpoint 应完整交接 `config.yaml`、safetensors、normalization_stats.npy、tokenizer/component assets，不能只拷权重文件。
+
+### 离线推理与验收
+
+`configs/experiments/openwam-reference.toml` 复用平台请求合同；替换 checkpoint、请求和模型版本后使用 `vla plan/run infer`。图像为本地 RGB 文件，入口复用训练时三相机拼图及原生 checkpoint normalizer，返回 `(num_frames - 1) × 14` 绝对动作，动作周期从保存的 dataset fps 计算。每次请求独立进程；不是常驻 IPC 协议。默认不启用 compile/DiT cache，性能优化须单独验收。
+
+本次轻量测试覆盖配置规划、源快照、训练集统计隔离、14D/80D 掩码、时间窗口/末尾填充、实际 MP4 解码、三相机顺序、原生 checkpoint norm 正逆变换、微调动作头拒绝和恢复合同。测试不运行模型前后向或训练循环。真实 checkpoint 加载、GPU loss/梯度、容量/吞吐、实际中断恢复、任务成功率与 Thor 精度/延迟仍待独立验收；现阶段不开放平台 Thor target，避免绕过容器和部署 gate。

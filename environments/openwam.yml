@@ -1,0 +1,7 @@
+# Bootstrap only; install the vendored native package separately on an audited GPU node.
+name: vla-openwam
+channels:
+  - defaults
+dependencies:
+  - python=3.12
+  - pip

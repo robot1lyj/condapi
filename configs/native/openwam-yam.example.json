@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "nproc_per_node": 1,
+  "model": {
+    "architecture": {
+      "action_dim": 14,
+      "state_dim": 14,
+      "use_proprioception": true
+    }
+  },
+  "dataloader": {
+    "type": "yam_lerobot_v2",
+    "dataset_dir": "/path/to/yam-lerobot-v2",
+    "episodes": [0, 1],
+    "normalization_json": "/path/to/new-output/yam-train-stats.json",
+    "action_mode": "joint",
+    "action_semantics": "absolute",
+    "unify_action": false,
+    "unify_action_map": null,
+    "unify_state_map": null,
+    "normalize_mode": "min-max",
+    "num_frames": 33,
+    "video_stride": 4,
+    "height": 384,
+    "width": 320,
+    "multiview": true,
+    "camera_layout": ["observation.images.top_rgb", "observation.images.left_rgb", "observation.images.right_rgb"]
+  },
+  "training": {
+    "finetune_ckpt_path": "/path/to/compatible-14d-openwam-checkpoint",
+    "resume_ckpt_path": null,
+    "learning_rate": 0.00001,
+    "batch_size": 1,
+    "gradient_accumulation_steps": 1,
+    "num_epochs": null,
+    "max_steps": 1000,
+    "save_steps": 100,
+    "save_full_states_for_resume": true,
+    "keep_last_k_ckpts": 2,
+    "dataset_num_workers": 4
+  },
+  "project": {"seed": 42}
+}

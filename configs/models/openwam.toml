@@ -1,0 +1,7 @@
+schema_version = 1
+id = "openwam"
+backend = "openwam"
+status = "implemented"
+operations = ["train", "infer"]
+contracts = ["yam-bimanual-v1"]
+note = "YAM LeRobot v2 adapter and native finetune/resume/offline inference interfaces implemented; no GPU training or Thor deployment acceptance yet."

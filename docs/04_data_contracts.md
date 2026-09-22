@@ -303,3 +303,13 @@ ssh yam-server 'bash /home/wuyan/lyj/YAM/env-transfer/lego-resume-v2-20260907/sc
 
 验证：本地 32 项相关测试、服务器 11 项转换/续跑测试通过，覆盖中途异常、派生视频损坏、配置变化、
 未知目录、并发锁、完成版本复核和批处理二次运行。实际服务器已输出 REUSED_COMPLETED_SPLIT=val 并继续训练集转换。
+
+## OpenWAM YAM 数据投影
+
+2026-09-22 接入 `adapters/openwam/data.py`；当前输入限 LeRobot v2.0/v2.1，每 episode 独立 parquet/MP4。原始数据只读，不自动转换版本、不写回统计。14D 次序仍为 `[左6关节, 左夹爪, 右6关节, 右夹爪]`，状态读 `observation.state`，监督读同一行的单数 `action`；要求调用者确认数据为绝对目标，本次不推断物理单位、不做 Pi delta 或 EEF/FK 转换。两个夹爪保留连续值，不翻转、二值化或重标单位。
+
+三相机按 `top_rgb / left_rgb / right_rgb`（完整键前缀 `observation.images.`）排列为上部全宽、左下/右下各半宽的原生 OpenWAM L 形 RGB 拼图，训练和离线推理复用同一函数。禁止缺失腕部相机时静默填黑。动作窗长为 `num_frames - 1`，视频每 `video_stride` 抽帧；例如 33/4 得 H32 与 9 帧视频，与 Pi H50 不同。窗口不跨 episode；末尾动作零填充并屏蔽 loss，视频复制最后一帧并用 `video_mask` 标明填充；proprio 仅为窗口起点状态。
+
+动作/状态分别使用所选训练 episode 的 min-max 或 z-score 统计。统计 JSON 带源 metadata/parquet 哈希和清单，原生 checkpoint 保存 `normalization_stats.npy` 的 `joint`（动作）与 `joint_state`（状态）两个区块。推理使用原生定向 normalizer：状态归一化使用 state 统计，动作反归一化使用 action 统计，保留 fps 为返回动作周期的来源。
+
+14D 模型不 padding；80D 预训练模型要求配方明确指定 14 个唯一槽位。先在原始 14D 空间归一化，再 scatter 到 80D 并构造维度 mask，推理先 gather 再反归一化。此映射不宣称与上游 EEF 槽位有相同物理语义；没有已核对的槽位合同不得声称 pretrained policy 可直接控制 YAM。动作头维度不一致的微调会拒绝，不能悄悄随机重建头。配置与验收状态归 [10](10_vla_platform.md#2026-09-22--openwam-微调接入)。
