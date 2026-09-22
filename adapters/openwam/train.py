@@ -71,6 +71,11 @@ def compose_config(recipe_path, output):
             if old["model"]["architecture"].get(key) != plain["model"]["architecture"].get(key):
                 raise ValueError(f"Checkpoint {key} mismatch; implicit action-head resizing is forbidden")
         if resume:
+            if (
+                old.get("condapi", {}).get("upstream_revision")
+                != json.loads((VENDOR / "UPSTREAM.json").read_text())["revision"]
+            ):
+                raise ValueError("Resume requires the original OpenWAM source revision")
             if old.get("condapi", {}).get("nproc_per_node") != workers:
                 raise ValueError("Resume changed world size or lacks the original launcher contract")
             # Resume retains the exact model, data and optimizer/scheduler contract.
@@ -90,7 +95,16 @@ def compose_config(recipe_path, output):
                     raise ValueError(f"Resume changed {section}; use a new finetune run")
             if not any(source.glob("accel_state_step_*")):
                 raise ValueError("Resume requires native Accelerate full-state checkpoint")
-    OmegaConf.update(cfg, "condapi", {"nproc_per_node": workers, "adapter": "yam_lerobot_v2_v1"}, force_add=True)
+    OmegaConf.update(
+        cfg,
+        "condapi",
+        {
+            "nproc_per_node": workers,
+            "adapter": "yam_lerobot_v2_v1",
+            "upstream_revision": json.loads((VENDOR / "UPSTREAM.json").read_text())["revision"],
+        },
+        force_add=True,
+    )
     cfg.training.output_path = str(Path(output).resolve() / "checkpoints")
     cfg.training.save_full_states_for_resume = True
     cfg.dataloader.normalization_stats_path = str(Path(output).resolve() / "normalization_stats.npy")

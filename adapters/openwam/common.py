@@ -25,6 +25,30 @@ def verify_source():
 
 
 def validate_data_config(dl, architecture):
+    allowed = {
+        "type",
+        "dataset_dir",
+        "episodes",
+        "normalization_json",
+        "normalization_stats_path",
+        "fps",
+        "seed",
+        "action_mode",
+        "action_semantics",
+        "unify_action",
+        "unify_action_map",
+        "unify_state_map",
+        "normalize_mode",
+        "num_frames",
+        "video_stride",
+        "height",
+        "width",
+        "multiview",
+        "camera_layout",
+        "binary_action_dims",
+    }
+    if set(dl) - allowed:
+        raise ValueError(f"Unsupported YAM data options: {sorted(set(dl) - allowed)}")
     if dl.get("type") != "yam_lerobot_v2" or dl.get("action_mode") != "joint":
         raise ValueError("Expected yam_lerobot_v2 with joint actions")
     if dl.get("action_semantics") != "absolute":

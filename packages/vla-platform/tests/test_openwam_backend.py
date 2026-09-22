@@ -332,3 +332,14 @@ def test_native_checkpoint_normalizer_roundtrip(dataset, data_modules, tmp_path,
     raw = data.read_episode(ds.root, ds.info, 0)
     np.testing.assert_allclose(normalizer.unnormalize(sample["action"].numpy()), raw["action"][:8], atol=1e-5)
     np.testing.assert_allclose(normalizer.normalize(raw["observation.state"][:1]), sample["proprio"].numpy(), atol=1e-5)
+
+
+def test_training_entry_rejects_unallocated_local_execution(tmp_path, monkeypatch):
+    from adapters.openwam.train import main  # noqa: PLC0415
+
+    monkeypatch.delenv("SLURM_JOB_ID", raising=False)
+    with pytest.raises(SystemExit, match="2"):
+        main(["--config", str(tmp_path / "missing.json"), "--output", str(tmp_path / "out")])
+    with pytest.raises(SystemExit, match="2"):
+        main(["--config", str(tmp_path / "missing.json"), "--worker", "--check-only"])
+    assert not (tmp_path / "out").exists()
