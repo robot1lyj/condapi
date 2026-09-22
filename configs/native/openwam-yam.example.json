@@ -2,6 +2,9 @@
   "schema_version": 1,
   "nproc_per_node": 1,
   "model": {
+    "video_backbone": {
+      "model_path": "/path/to/Wan2.2-TI2V-5B"
+    },
     "architecture": {
       "action_dim": 14,
       "state_dim": 14,
