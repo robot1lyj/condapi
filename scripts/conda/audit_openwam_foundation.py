@@ -10,7 +10,15 @@ import struct
 import numpy as np
 
 
-def scan_safetensors(path: Path) -> dict:
+_DTYPE_INFO = {
+    "BF16": ("<u2", 0x7F80),
+    "F16": ("<u2", 0x7C00),
+    "F32": ("<u4", 0x7F800000),
+    "F64": ("<u8", 0x7FF0000000000000),
+}
+
+
+def scan_safetensors(path: Path, require_bf16: bool = True) -> dict:
     with path.open("rb") as stream:
         header_size_bytes = stream.read(8)
         if len(header_size_bytes) != 8:
@@ -23,10 +31,16 @@ def scan_safetensors(path: Path) -> dict:
         for name, tensor in header.items():
             if name == "__metadata__":
                 continue
-            if tensor["dtype"] != "BF16":
+            dtype = tensor["dtype"]
+            if require_bf16 and dtype != "BF16":
                 raise ValueError(f"Expected BF16 foundation weights, got {tensor['dtype']} in {name}")
+            try:
+                numpy_dtype, exponent_mask = _DTYPE_INFO[dtype]
+            except KeyError as exc:
+                raise ValueError(f"Unsupported safetensors dtype {dtype} in {name}") from exc
             start, end = tensor["data_offsets"]
-            if start < 0 or end < start or (end - start) % 2:
+            itemsize = np.dtype(numpy_dtype).itemsize
+            if start < 0 or end < start or (end - start) % itemsize:
                 raise ValueError(f"Invalid tensor offsets in {name}")
             stream.seek(8 + header_size + start)
             remaining = end - start
@@ -35,15 +49,20 @@ def scan_safetensors(path: Path) -> dict:
                 block = stream.read(min(remaining, 8 * 1024 * 1024))
                 if not block:
                     raise ValueError(f"Truncated tensor data in {name}")
-                bits = np.frombuffer(block, dtype="<u2")
-                count += int(np.count_nonzero((bits & 0x7F80) == 0x7F80))
+                bits = np.frombuffer(block, dtype=numpy_dtype)
+                count += int(np.count_nonzero((bits & exponent_mask) == exponent_mask))
                 remaining -= len(block)
             if count:
                 nonfinite[name] = count
     return {"tensor_count": len(header) - int("__metadata__" in header), "nonfinite_by_tensor": nonfinite}
 
 
-def audit(root: Path, output: Path, receipt_name: str = "foundation-download-receipt.json") -> dict:
+def audit(
+    root: Path,
+    output: Path,
+    receipt_name: str = "foundation-download-receipt.json",
+    allow_mixed_dtypes: bool = False,
+) -> dict:
     root, output = root.resolve(), output.resolve()
     receipt_path = root / receipt_name
     if not receipt_path.is_file():
@@ -57,7 +76,9 @@ def audit(root: Path, output: Path, receipt_name: str = "foundation-download-rec
             path = root / entry["file"]
             if path.stat().st_size != entry["size"]:
                 raise ValueError(f"File size changed after download receipt: {path}")
-            reports[entry["file"]] = scan_safetensors(path)
+            reports[entry["file"]] = scan_safetensors(
+                path, require_bf16=not allow_mixed_dtypes
+            )
     if not reports:
         raise ValueError("The receipt contains no safetensors weights")
     result = {
@@ -78,8 +99,9 @@ def main(argv=None):
     parser.add_argument("--root", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--receipt", default="foundation-download-receipt.json")
+    parser.add_argument("--allow-mixed-dtypes", action="store_true")
     args = parser.parse_args(argv)
-    result = audit(args.root, args.output, args.receipt)
+    result = audit(args.root, args.output, args.receipt, args.allow_mixed_dtypes)
     print("FOUNDATION_FINITE_PASS" if result["finite"] else "FOUNDATION_FINITE_FAIL", flush=True)
     if not result["finite"]:
         raise SystemExit(1)
