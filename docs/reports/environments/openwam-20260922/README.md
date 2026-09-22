@@ -8,7 +8,7 @@
 - 服务器：`yam-server`（`rocky-login.hlink.local`）。安装目录 `/home/wuyan/lyj/openwam-install-7c5861e`，独立 detached 工作树 `code/`，来源仅为 Gitea 分支。
 - 新 Conda prefix：`/home/wuyan/.conda/envs/vla-openwam`。未修改 Pi/Evo/Molmo 环境。
 - 安装脚本/日志/退出回执：安装目录下 `install.sh`、`install.log`、`install.exit`；当前续装使用 `resume_openwam_install.sh`、`install-recover.log`、`install-recover.exit` 和 tmux 会话 `openwam-install-recover`。恢复时先查退出回执和日志，不重复创建 prefix/启动第二份安装。
-- 复用已存在 Python3.12/FFmpeg bootstrap archive，解包后运行 conda-unpack。共享 NFS 解包较慢，不能误记为数据损坏；目前尚无环境可训练结论。
+- 复用已存在 Python3.12/FFmpeg bootstrap archive，解包后运行 conda-unpack。共享 NFS 解包较慢，不能误记为数据损坏；`install-recover.exit=0` 已生成，CPU 依赖审计通过，GPU 审计仍需独立 Slurm allocation。
 - 目标依赖以固定上游 CUDA12.8 constraints 为候选；实际版本与验证结论以随后安装/审计产物为准。安装禁用 GPU、DeepSpeed 可选预编译，使用低优先级及单线程。原生 trainer 使用 PyTorch AdamW，ZeRO-2，不依赖 CPU optimizer offload；额外 offload/FlashAttention 编译不属于已通过项。
 - 2026-09-22 15:00 CST 资源观察：Pi 作业2165在gpu001使用4GPU/64CPU/480G，gpu002也已分配，无空闲GPU。不会附着现有训练作业执行测试。GPU audit 要等独立 Slurm allocation。
 - 服务器直连 Gitea 超时；通过工作站临时 `-R 127.0.0.1:12225:192.168.110.142:2222` 隧道获取源码，以本机已知 Gitea ed25519公钥固定校验（安装目录 `gitea_known_hosts`），不关闭主机公钥校验、不访问GitHub。未更新服务器原训练 checkout。
@@ -21,12 +21,13 @@
 - 镜像核验：ModelScope 的同名视频骨干地址 `Wan-AI/Wan2.2-TI2V-5B` 可通过服务器代理访问；`Wan2.2_VAE.pth`、3 个 diffusion shard 和 `models_t5_umt5-xxl-enc-bf16.pth` 的 `X-Linked-Etag` 分别与 Hugging Face 固定 revision 的 LFS SHA256 一致。未发现 `OpenWAM-Alpha-Pretrain-Foundation-Model` 的 ModelScope 同名记录，基础模型仍以官方 Hugging Face 仓库为唯一已验证来源。
 - 2026-09-22 17:32 CST 对 `hf-mirror.com` 做了隔离测速：按镜像站推荐设置 `HF_ENDPOINT=https://hf-mirror.com` 后，同一基础模型权重的 8 MiB Range 请求返回 `206`，镜像吞吐约 `1.22 MB/s`；同一服务器代理直连 Hugging Face 约 `1.03 MB/s`，本次样本镜像快约 19%。直接用 curl HEAD 得到的 308 不是有效结论，镜像应通过 `HF_ENDPOINT`/huggingface_hub 使用。当前两个 Hugging Face 断点任务已在目标目录写入，继续保留，不让第二个下载器并发覆盖同一目录；若现有任务失败，恢复脚本可在新目录用 `HF_ENDPOINT` 切换镜像并复核固定哈希。
 - 2026-09-22 17:36 CST 评估“本地下载后压缩上传”：工作站直连 hf-mirror 的 8 MiB 样本约 `0.75 MB/s`，工作站到服务器的 16 MiB SCP 上传约 `3.6 MB/s`；服务器直接经代理访问 hf-mirror 约 `1.22 MB/s`，因此瓶颈仍是工作站下载，搬运整包不会更快。对已完成的 `Wan2.2_VAE.pth` 取 64 MiB 做 `gzip -1` 只压到 `62,629,714` bytes（约减少 6.7%），权重压缩收益不足以抵消本地下载、打包、校验和再解包成本。保持服务器端断点下载。
+- 2026-09-22 19:48 CST 基础模型下载回执生成；2026-09-22 19:58 CST 视频骨干下载回执生成。两份回执均包含固定 revision、逐文件大小和 SHA256。CPU 权重审计产物为 `audits/foundation-finite-20260922T2005.json` 与 `audits/video-finite-mixed-20260922T2010.json`，均报告 `FOUNDATION_FINITE_PASS`；视频骨干首次按纯 BF16 规则审计时发现官方权重含 F32 bias，已改为支持 BF16/F16/F32/F64 混合浮点并重新通过，不改变权重。
 - 官方配置确认 `action_dim=state_dim=80`，YAM 原始数据为 14D 关节合同；当前适配器只接受明确的 14D 原生 checkpoint，或调用者提供经过物理语义审核的 14 槽 80D 投影。不会把关节角静默放入 EEF xyz/rot6d 槽位。
 
 ## 已有验证
 
 本地临时测试依赖位于 `/tmp/condapi-openwam-test-deps`，调用既有 condapi-yam Python但不修改其安装包。控制层全套轻量测试73项通过；其中OpenWAM17项覆盖真实微型MP4/Parquet、训练集统计隔离、原生normalizer回读、mask/相机布局、native config微调/恢复与本地训练拒绝。没有模型前后向或训练循环。
 
-相关改动 Ruff 与格式检查通过，`git diff --check` 通过。全仓 Ruff 检出141项既有问题，格式检查另有24个既有文件待格式化；主要在Pi/Thor旧脚本与历史报告，本次不扩散修改。GPU模型加载、实际更新/恢复、完整依赖安装验收仍待完成。
+相关改动 Ruff 与格式检查通过，`git diff --check` 通过。全仓 Ruff 检出141项既有问题，格式检查另有24个既有文件待格式化；主要在Pi/Thor旧脚本与历史报告，本次不扩散修改。服务器 CPU 环境审计 `audits/environment-cpu-20260922T2120.json` 已通过，记录 `torch 2.7.1+cu128`、CUDA build `12.8`、OpenWAM/Transformers/Diffusers/DeepSpeed/Accelerate 等依赖导入和 ZeRO-2 配置；该审计没有加载模型权重，也没有执行训练。GPU 数值审计、模型前向和实际更新/恢复仍待独立 GPU allocation。
 
 并行Thor实验使用另一上游revision（见 [Thor owner](../../../reference/thor/14_openwam_inference.md)），未来传递checkpoint必须核对来源与保存配置，不能把两个版本的导入成功合并成训练部署验收。
