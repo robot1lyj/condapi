@@ -1,11 +1,7 @@
 name: pre-commit
+# Run manually only; routine pushes and PRs must not trigger notification emails.
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - "*"
+  workflow_dispatch:
 jobs:
   pre-commit:
     runs-on: ubuntu-latest

@@ -1,5 +1,9 @@
 # 07 · 变更历史
 
+## 2026-09-22 · 关闭 GitHub pre-commit 自动触发
+
+用户不希望继续收到该工作流的GitHub通知邮件。将 `.github/workflows/pre-commit.yml` 从main push/PR触发改为仅 `workflow_dispatch` 手动触发；本地 `.pre-commit-config.yaml` 保留。仅调整本工作流，未修改账户全局邮件设置或其他CI。
+
 ## 2026-09-22 · DAgger 每轮配置前确认训练配方
 
 用户追加要求每轮写训练配置前确认具体配方。规则写入AGENTS和dagger-flywheel，工作流与模板同步增加配方版本、候选范围和用户确认来源；允许先审核数据/计算预算，未确认不生成本轮训练配置、命令或作业。配方变更重新确认，同合同恢复不重复询问。仅更新规则与模板，未生成实验训练配置或启动训练。
