@@ -1,0 +1,4 @@
+interface:
+  display_name: "DAgger 训练飞轮"
+  short_description: "从首次任务微调模型开始，规划纠正采集、混采训练与三至五轮评估迭代"
+  default_prompt: "使用 $dagger-flywheel，从首次任务微调后的固定基线模型设计或推进本轮 DAgger 数据处理、训练和评估。"

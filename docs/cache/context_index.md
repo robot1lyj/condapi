@@ -31,6 +31,8 @@
 
 ## Quick Route
 
+- 从首次任务SFT模型开始DAgger/HIL纠正训练、3～5轮飞轮 → `dagger-flywheel`（源码 `skills/dagger-flywheel/SKILL.md`）；项目执行参数见03及其下属DAgger手册，数据字段归04。
+
 - 新 Pi0.5 checkpoint / 权重就绪 / 转为 Thor 可推理 → 优先使用 `thor-checkpoint-deploy`（源码 `skills/thor-checkpoint-deploy/SKILL.md`）；操作 owner 为 `docs/reference/thor/12_checkpoint_handoff.md`。
 
 - 多模型架构改造 → `02_code_change.md`，再读 `docs/01_system_architecture.md#多模型接入层`；执行命令和模型状态按需读 `docs/10_vla_platform.md` 的相关章节，不加载所有模型文档。

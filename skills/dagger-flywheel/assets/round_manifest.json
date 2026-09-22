@@ -1,0 +1,110 @@
+{
+  "schema": "dagger-round-plan/v1",
+  "record_kind": "planning_template_not_trainer_config",
+  "campaign_id": null,
+  "round_index": null,
+  "status": "planned",
+  "campaign": {
+    "planned_rounds": 3,
+    "max_rounds": 5,
+    "stop_review": {
+      "consecutive_no_gain_rounds": 2,
+      "task_acceptance_criteria": null
+    },
+    "initialization_strategy": "fixed_task_sft_baseline"
+  },
+  "baseline": {
+    "model_family": null,
+    "native_checkpoint": null,
+    "weights_fingerprint": null,
+    "source_sft_dataset_manifest": null,
+    "source_sft_dataset_sha256": null,
+    "processor_norm_assets": null,
+    "assets_sha256": null,
+    "model_training_contract": null
+  },
+  "collection": {
+    "accepted_policy_checkpoint": null,
+    "policy_fingerprint": null,
+    "controller_inference_version": null,
+    "collection_protocol_version": null,
+    "raw_manifest": null,
+    "raw_manifest_sha256": null,
+    "target_correction_events": 50,
+    "rollout_count": null,
+    "accepted_correction_events": null,
+    "expert_seconds": null
+  },
+  "release": {
+    "status": "unverified",
+    "dataset_version": null,
+    "export_code_revision": null,
+    "split_group_key": [
+      "source_rollout_id",
+      "layout_session_id"
+    ],
+    "train_groups_manifest": null,
+    "validation_groups_manifest": null,
+    "all_rounds_holdout_registry": null,
+    "audit_report": null,
+    "frame_rate_hz": null,
+    "action_horizon": null,
+    "action_semantics": null,
+    "gap_and_boundary_policy": "continuous_valid_expert_windows_only"
+  },
+  "pools": [
+    {
+      "id": "D_base",
+      "role": "base_demonstrations",
+      "dataset_manifest": null,
+      "manifest_sha256": null,
+      "valid_start_count": null,
+      "sampling_probability": null,
+      "target_exposures": null
+    },
+    {
+      "id": "C1_train",
+      "role": "correction",
+      "dataset_manifest": null,
+      "manifest_sha256": null,
+      "valid_start_count": null,
+      "sampling_probability": null,
+      "target_exposures": 2
+    }
+  ],
+  "experiment": {
+    "name": null,
+    "seed": 42,
+    "global_batch": null,
+    "total_optimizer_updates": null,
+    "lr_schedule": null,
+    "rtc_or_model_objective_contract": null,
+    "normalization_strategy": "inherit_fixed_baseline_then_audit_ranges",
+    "expected_exposure_by_pool": null,
+    "budget_limit": null,
+    "actual_sampling_counts": null
+  },
+  "execution": {
+    "status": "not_started",
+    "capability_check_report": null,
+    "native_config_path": null,
+    "config_sha256": null,
+    "code_revision": null,
+    "environment_manifest": null,
+    "scheduler_job_id": null,
+    "output_directory": null,
+    "resume_checkpoint": null,
+    "log_paths": []
+  },
+  "evaluation": {
+    "per_pool_validation_reports": [],
+    "selected_checkpoint": null,
+    "inference_validation_report": null,
+    "robot_selection_trials": null,
+    "robot_confirmation_trials": null,
+    "promotion_criteria_frozen_before_trials": null,
+    "decision": "pending",
+    "evidence": [],
+    "next_round_failure_targets": []
+  }
+}
