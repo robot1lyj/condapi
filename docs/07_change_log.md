@@ -809,3 +809,8 @@ text80 实验完成 ONNX、TensorRT 构建和 W 正式回放。完整 policy P50
 ## 2026-09-21 · 50h RTC训练准备
 
 准备50h RTC base全量微调配置，解除旧324194步入口上限，分段适配Slurm时间限制；未提交新训练或干预当前作业。详见[交接](reports/training/rtc-base-50h-20260921/README.md)。
+
+
+## 2026-09-22 · Archify 架构总览
+
+按用户要求使用已安装的 Archify 2.17，基于控制层、后端声明、模型状态及架构 owner 绘制 [交互架构图](diagrams/architecture.html)。保留图源、确定性交付回执和浏览器截图证据；9/9 showcase 与四种桌面尺寸检查通过。区分 Pi 已实现主线、LeRobot 待验收模型、Thor 模型侧与仓库外 3588；不以图示宣称远端在线。同步修正 01 中过时的默认 LoRA 描述为正式 Pi0.5 全量微调。未修改训练配置或执行训练。

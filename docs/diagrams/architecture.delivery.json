@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "deliver",
+  "type": "architecture",
+  "input": "/home/wuyan-lyj/condapi/docs/diagrams/architecture.json",
+  "output": "/home/wuyan-lyj/condapi/docs/diagrams/architecture.html",
+  "specification": {
+    "sha256": "6ce84dee27b0da73ebde45c41fb8775057247490297d9ff6d5790662f34d90d6",
+    "bytes": 6824
+  },
+  "artifact": {
+    "sha256": "e60c71b6f4b21999e00bb168003cd16c878d77aaf37db42cea1e5f223dfc0eda",
+    "bytes": 812028
+  },
+  "validation": {
+    "checksPassed": 9,
+    "checkCount": 9,
+    "compositionProfile": "showcase",
+    "compositionStatus": "pass",
+    "errors": 0,
+    "warnings": 0
+  },
+  "evidence": {
+    "verified": true,
+    "repository": "ssh://git@192.168.110.142:2222/wuyan_lyj/conda_pi.git",
+    "revision": "30a270d4bb0517ca17f554d95a366444219a1136",
+    "references": 19,
+    "linkMode": "local-only"
+  }
+}

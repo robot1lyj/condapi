@@ -1,5 +1,7 @@
 # 01 · 系统架构
 
+交互架构图：[Archify 总览](diagrams/architecture.html) · [可编辑图源](diagrams/architecture.json) · [生成与验收记录](diagrams/README.md)。图示区分已实现入口、待验收模型和仓库外控制侧；不代表远端实时运行状态。
+
 ## 多模型接入层
 
 模型无关遥测使用标准库 `vla_platform.metrics.write_metrics`，训练器只需输出标量事件。LeRobot 共享入口采集原生结构化 tracker；Pi 保持原生日志；独立只读看板统一消费 JSONL/CSV/Trainer-state，不导入模型环境。指标合同、配置与局限归 [11](11_training_dashboard.md)。
@@ -67,7 +69,7 @@ YAM 配置集中在 `src/openpi/training/config.py`：
 - `LeRobotYamDataConfig`：默认双臂、14D、`assets/yam`，动作序列键为单数 `action`。
 - `YamInputs`：接收 `observation.images.top_rgb`、`left_rgb`、`right_rgb`、`observation.state`、`action` 和 prompt。
 - `YamOutputs`：把模型至少 32D 的 action chunk 裁回 14D；不足 14D 直接报错。
-- `pi05_yam_lora`：当前首选低显存配置；对应 `gemma_2b_lora` 和 `gemma_300m_lora`，关闭 EMA。
+- `pi05_yam`：当前默认全量微调配置，正式入口为 `scripts/train_lego_full.py`；`pi05_yam_lora` 仅保留为显式可选配置，不是默认路线。
 
 YAM policy 不复用 OpenArm 或 Piper 的 transform。单臂 7D 只作为配置类的显式兼容选项，当前项目默认始终是双臂 14D。
 

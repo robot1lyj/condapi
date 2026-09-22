@@ -1,0 +1,348 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Condapi · 多模型训练与端侧推理架构",
+    "locale": "zh-CN",
+    "quality_profile": "showcase",
+    "viewBox": [
+      1300,
+      760
+    ],
+    "repository": {
+      "url": "ssh://git@192.168.110.142:2222/wuyan_lyj/conda_pi.git",
+      "revision": "30a270d4bb0517ca17f554d95a366444219a1136",
+      "link_mode": "local-only"
+    }
+  },
+  "components": [
+    {
+      "id": "config",
+      "type": "frontend",
+      "label": "配置与命令入口",
+      "sublabel": "scripts/vla.py · configs/",
+      "pos": [
+        40,
+        70
+      ],
+      "size": [
+        250,
+        86
+      ],
+      "sources": [
+        {
+          "path": "scripts/vla.py"
+        },
+        {
+          "path": "configs/models/pi.toml"
+        }
+      ]
+    },
+    {
+      "id": "platform",
+      "type": "backend",
+      "label": "标准库控制层",
+      "sublabel": "计划 · Conda 子进程 · 运行记录",
+      "pos": [
+        360,
+        70
+      ],
+      "size": [
+        250,
+        86
+      ],
+      "sources": [
+        {
+          "path": "packages/vla-platform/src/vla_platform/runtime.py"
+        }
+      ]
+    },
+    {
+      "id": "pi",
+      "type": "backend",
+      "label": "OpenPI / Pi0.5",
+      "sublabel": "全量微调 · 独立 Conda",
+      "pos": [
+        680,
+        70
+      ],
+      "size": [
+        250,
+        86
+      ],
+      "sources": [
+        {
+          "path": "adapters/openpi/backend.toml"
+        },
+        {
+          "path": "scripts/train_lego_full.py"
+        }
+      ]
+    },
+    {
+      "id": "bundle",
+      "type": "database",
+      "label": "checkpoint 与合同",
+      "sublabel": "权重 · norm · processors · 样例",
+      "pos": [
+        1000,
+        70
+      ],
+      "size": [
+        250,
+        86
+      ],
+      "sources": [
+        {
+          "path": "packages/vla-platform/src/vla_platform/artifacts.py"
+        },
+        {
+          "path": "docs/10_vla_platform.md"
+        }
+      ]
+    },
+    {
+      "id": "native",
+      "type": "backend",
+      "label": "LeRobot 共享入口",
+      "sublabel": "原生 trainer / processor",
+      "pos": [
+        360,
+        330
+      ],
+      "size": [
+        250,
+        86
+      ],
+      "sources": [
+        {
+          "path": "adapters/lerobot/train.py"
+        },
+        {
+          "path": "configs/models/evo1.toml"
+        }
+      ]
+    },
+    {
+      "id": "data",
+      "type": "database",
+      "label": "YAM 数据与变换",
+      "sublabel": "三路 RGB · 14D state / action",
+      "pos": [
+        680,
+        330
+      ],
+      "size": [
+        250,
+        86
+      ],
+      "sources": [
+        {
+          "path": "src/openpi/policies/yam_policy.py"
+        },
+        {
+          "path": "docs/04_data_contracts.md"
+        }
+      ]
+    },
+    {
+      "id": "thor",
+      "type": "backend",
+      "label": "Thor 模型推理",
+      "sublabel": "Docker · 转换与精度验收",
+      "pos": [
+        1000,
+        330
+      ],
+      "size": [
+        250,
+        86
+      ],
+      "sources": [
+        {
+          "path": "docs/08_thor_edge_deployment.md"
+        },
+        {
+          "path": "scripts/thor/prepare_rtc_checkpoint.py"
+        }
+      ]
+    },
+    {
+      "id": "planned",
+      "type": "external",
+      "label": "待验收模型",
+      "sublabel": "Evo-1 · MolmoAct2 · FastWAM · VLA-JEPA",
+      "pos": [
+        360,
+        590
+      ],
+      "size": [
+        250,
+        86
+      ],
+      "sources": [
+        {
+          "path": "configs/models/molmoact2.toml"
+        },
+        {
+          "path": "configs/models/fastwam.toml"
+        },
+        {
+          "path": "configs/models/vla-jepa.toml"
+        }
+      ]
+    },
+    {
+      "id": "metrics",
+      "type": "frontend",
+      "label": "只读训练看板",
+      "sublabel": "读取训练日志 · 模型无关",
+      "pos": [
+        680,
+        590
+      ],
+      "size": [
+        250,
+        86
+      ],
+      "sources": [
+        {
+          "path": "scripts/training_dashboard.py"
+        },
+        {
+          "path": "docs/11_training_dashboard.md"
+        }
+      ]
+    },
+    {
+      "id": "ipc",
+      "type": "external",
+      "label": "3588 控制侧",
+      "sublabel": "相机采集 · 机械臂控制 · 仓库外",
+      "pos": [
+        1000,
+        590
+      ],
+      "size": [
+        250,
+        86
+      ],
+      "sources": [
+        {
+          "path": "docs/05_inference_and_rollout.md"
+        }
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "select",
+      "from": "config",
+      "to": "platform",
+      "label": "解析",
+      "variant": "emphasis"
+    },
+    {
+      "id": "launch",
+      "from": "platform",
+      "to": "pi",
+      "label": "Conda",
+      "variant": "emphasis"
+    },
+    {
+      "id": "save",
+      "from": "pi",
+      "to": "bundle",
+      "label": "保存",
+      "variant": "emphasis"
+    },
+    {
+      "id": "native-launch",
+      "from": "platform",
+      "to": "native",
+      "label": "原生配置",
+      "variant": "default",
+      "labelAt": [
+        485,
+        245
+      ]
+    },
+    {
+      "id": "pending",
+      "from": "native",
+      "to": "planned",
+      "label": "接入待验收",
+      "variant": "dashed",
+      "labelAt": [
+        485,
+        505
+      ]
+    },
+    {
+      "id": "dataset",
+      "from": "data",
+      "to": "pi",
+      "label": "加载与变换",
+      "variant": "default"
+    },
+    {
+      "id": "handoff",
+      "from": "bundle",
+      "to": "thor",
+      "label": "转换 / 数值 gate",
+      "variant": "emphasis",
+      "labelAt": [
+        1125,
+        245
+      ]
+    },
+    {
+      "id": "actions",
+      "from": "thor",
+      "to": "ipc",
+      "label": "WebSocket 动作",
+      "variant": "emphasis",
+      "labelAt": [
+        1060,
+        475
+      ]
+    },
+    {
+      "id": "observation",
+      "from": "ipc",
+      "to": "thor",
+      "label": "直连以太网观测",
+      "variant": "default",
+      "labelAt": [
+        1200,
+        535
+      ]
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Pi 当前主线",
+      "items": [
+        "正式训练：train_lego_full.py → pi05_yam",
+        "Pi 专用：关节 delta、夹爪 absolute、32D / H50"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "共享入口 ≠ 模型验收",
+      "items": [
+        "LeRobot 四个模型声明仍为 planned",
+        "各系列独立环境与原生处理器，不套用 Pi norm"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "交接与运行边界",
+      "items": [
+        "模型包哈希通过不代表部署精度通过",
+        "图示为代码架构；未核验远端实时运行状态"
+      ]
+    }
+  ]
+}
