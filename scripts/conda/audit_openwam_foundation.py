@@ -43,9 +43,9 @@ def scan_safetensors(path: Path) -> dict:
     return {"tensor_count": len(header) - int("__metadata__" in header), "nonfinite_by_tensor": nonfinite}
 
 
-def audit(root: Path, output: Path) -> dict:
+def audit(root: Path, output: Path, receipt_name: str = "foundation-download-receipt.json") -> dict:
     root, output = root.resolve(), output.resolve()
-    receipt_path = root / "foundation-download-receipt.json"
+    receipt_path = root / receipt_name
     if not receipt_path.is_file():
         raise FileNotFoundError(receipt_path)
     if output.exists():
@@ -77,8 +77,9 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--receipt", default="foundation-download-receipt.json")
     args = parser.parse_args(argv)
-    result = audit(args.root, args.output)
+    result = audit(args.root, args.output, args.receipt)
     print("FOUNDATION_FINITE_PASS" if result["finite"] else "FOUNDATION_FINITE_FAIL", flush=True)
     if not result["finite"]:
         raise SystemExit(1)

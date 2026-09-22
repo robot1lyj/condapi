@@ -22,3 +22,19 @@ def test_audit_requires_verified_receipt(tmp_path):
         assert "no safetensors" in str(exc)
     else:
         raise AssertionError("expected missing weight failure")
+
+
+def test_audit_accepts_custom_receipt_name(tmp_path):
+    (tmp_path / "video-backbone-download-receipt.json").write_text(
+        json.dumps({"repo": "Wan-AI/test", "revision": "r", "files": []})
+    )
+    try:
+        audit(
+            tmp_path,
+            tmp_path / "audit.json",
+            "video-backbone-download-receipt.json",
+        )
+    except ValueError as exc:
+        assert "no safetensors" in str(exc)
+    else:
+        raise AssertionError("expected missing weight failure")
