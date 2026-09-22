@@ -1,0 +1,10 @@
+{
+  "revision": "04b96af53eeeb111c64631f822efcbb82f4b186e",
+  "finite": true,
+  "files": {
+    "checkpoint_step_118655.safetensors": {
+      "tensor_count": 2089,
+      "nonfinite_by_tensor": {}
+    }
+  }
+}

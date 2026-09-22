@@ -1,0 +1,51 @@
+{
+  "repo": "OpenWAM/OpenWAM-Alpha-Sim-RoboTwin-Full",
+  "revision": "04b96af53eeeb111c64631f822efcbb82f4b186e",
+  "files": [
+    {
+      "file": ".gitattributes",
+      "size": 1596,
+      "sha256": "6c9b746263df936b5ec492d926ff8660b8dfa24b56c2a337ce16d22e42f81c22"
+    },
+    {
+      "file": "README.md",
+      "size": 1313,
+      "sha256": "ff3346c9e2f4a3c0d13a565dd364a00653aa0f97ca221ebaba0cd5339904da6c"
+    },
+    {
+      "file": "checkpoint_step_118655.safetensors",
+      "size": 24813767464,
+      "sha256": "d07ff6f8cfb627ebf47313e65af38773fabcb3861d52fdc7c3bc5e7bee33f6fe"
+    },
+    {
+      "file": "config.yaml",
+      "size": 3398,
+      "sha256": "d69c342a2d7e67dbb44058b20bfd0b0e986e8885b9462f7c7e85f8658fb822b0"
+    },
+    {
+      "file": "normalization_stats.npy",
+      "size": 1581,
+      "sha256": "3eb52f759ebd004feda2772925d587054f9c2f05e1b979c3ff8c94fdd40e5db5"
+    },
+    {
+      "file": "tokenizer/google/umt5-xxl/special_tokens_map.json",
+      "size": 6623,
+      "sha256": "7b8a9f5040adb67b5805abdfd42c1f8d0f3d0e711f10726580eb3789cd0ad61d"
+    },
+    {
+      "file": "tokenizer/google/umt5-xxl/spiece.model",
+      "size": 4548313,
+      "sha256": "e3909a67b780650b35cf529ac782ad2b6b26e6d1f849d3fbb6a872905f452458"
+    },
+    {
+      "file": "tokenizer/google/umt5-xxl/tokenizer.json",
+      "size": 16837417,
+      "sha256": "6e197b4d3dbd71da14b4eb255f4fa91c9c1f2068b20a2de2472967ca3d22602b"
+    },
+    {
+      "file": "tokenizer/google/umt5-xxl/tokenizer_config.json",
+      "size": 61728,
+      "sha256": "ed9a3a8b0faa71a70a32847e0435fe036e6e112d4df4edb7bb48a921e344dc05"
+    }
+  ]
+}
