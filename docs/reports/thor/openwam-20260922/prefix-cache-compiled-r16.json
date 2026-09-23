@@ -1,0 +1,53 @@
+{
+  "scope": "one_synthetic_observation_bf16_not_robot_accuracy",
+  "compiled": true,
+  "compile_mode": "default",
+  "cases": [
+    {
+      "dit_cache": true,
+      "case": "prefix_only",
+      "full_forwards": 4,
+      "cache_hit_layers": 90,
+      "skipped_attention_queries": 0,
+      "cold_ms": 217519.6171499556,
+      "p50_ms": 393.8427989487536,
+      "p95_ms": 395.97020640503615,
+      "times_ms": [
+        396.2186020798981,
+        394.56263091415167,
+        393.1229669833556,
+        384.2861719895154
+      ],
+      "vs_baseline": {
+        "max_abs": 0.0,
+        "mae": 0.0,
+        "position_max_abs": 0.0,
+        "rotation6d_max_abs": 0.0,
+        "gripper_max_abs": 0.0,
+        "per_dimension_max": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "compiled_loop_alive": true
+    }
+  ]
+}

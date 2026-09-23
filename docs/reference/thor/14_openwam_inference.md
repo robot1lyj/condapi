@@ -26,7 +26,7 @@ Alpha官方合同为80维统一槽位、32个action（33源帧，video_stride4�
 
 **2026-09-22首轮GPU结果已完成**：r4四组均有限32×20输出；MAXN下baseline1254ms、提示词缓存1253ms、DiT缓存520ms、compile964ms（各3次稳态P50）。后两者有输出差异，未验收任务精度或YAM部署。Pi已恢复原8000服务与MAXN、healthz=OK。当前可运行镜像为 `openwam:thor-20260922-r2`，r1镜像缺h5py，不再推荐；具体数值、合成输入局限和失败记录见[GPU报告](../../reports/thor/openwam-20260922/gpu-r4.md)。
 
-**后续r6–r12**：用户要求Pi停止；BF16官方组合在Thor MAXN下约404–408ms，`reduce-overhead`确认CUDA Graph重放、`max-autotune`没有加速。7步单独编译能比10步快，但加官方DiT缓存后均只跑4次完整前向，7步没有增益且动作差增大。GPU profile显示矩阵乘法约249ms、联合masked SDPA约60ms。USB恢复管理后，同形状掩码探针r10表明自动已走有效CUTLASS内核，cuDNN无明显收益，Flash不支持此掩码；r11/r12表明一个合成输入的全部10次去噪中首帧逐层状态不变，为精确缓存候选提供证据，**缓存尚未实现、更未测得提速或任务精度**。细节和原始回执见[BF16优化报告](../../reports/thor/openwam-20260922/bf16-optimization.md)。
+**后续r6–r17**：用户要求Pi停止；BF16官方编译＋DiT缓存在Thor MAXN下约404–408ms，`reduce-overhead`确认CUDA Graph重放、`max-autotune`没有加速。7步单独编译能比10步快，但加官方DiT缓存后均只跑4次完整前向，7步没有增益且动作差增大。GPU profile显示矩阵乘法约249ms、联合masked SDPA约60ms。r10的同形状掩码探针表明自动已走CUTLASS，cuDNN无明显收益，Flash不支持此掩码；r11/r12发现单个合成观测的首帧逐层不变。r13实测分段无掩码attention单算子提速但带来数值差异；r14已实现**实验进程内**首帧逐层Q/K/V和残差缓存，eager＋官方DiT缓存从522.9ms降到484.7ms，单个合成输入动作零差。r15直接叠加CUDA Graph因图内缓存张量被覆盖失败；r16/r17普通编译（无图）对照393.8ms vs 406.5ms，但动作最大差0.0078125、MAE 0.000461，且只有一个合成输入，未晋级部署。现有可靠路线仍是官方BF16 10步＋DiT缓存＋编译/CUDA Graph约405ms。细节和原始回执见[BF16优化报告](../../reports/thor/openwam-20260922/bf16-optimization.md)。
 
 历史r5选择性FP8实验已单独归档为[量化报告](../../reports/thor/openwam-20260922/quant-r5.md)，当前按用户指示优先BF16路线。
 

@@ -1,0 +1,27 @@
+{
+  "scope": "single synthetic observation, BF16, 10 denoise steps, MAXN, official DiT cache, torch.compile default, no CUDA Graph; not task accuracy",
+  "source_actions": {
+    "prefix_r16": {
+      "thor_path": "/home/wuyan-lyj/thor/openwam/logs/benchmark-r16/dit-prefix_only-actions.npy",
+      "sha256": "0b776bf381e4c33c1ae45fa4b69d92a3e64b33384bfded856caea84ee056c977"
+    },
+    "baseline_r17": {
+      "thor_path": "/home/wuyan-lyj/thor/openwam/logs/benchmark-r17/dit-baseline-actions.npy",
+      "sha256": "b4ea99fe69aa020750436051b9f5aa63262200a090ebe787b00050808238e2d0"
+    }
+  },
+  "actions_shape": [32, 20],
+  "both_finite": true,
+  "prefix_r16_p50_ms": 393.8427989487536,
+  "baseline_r17_p50_ms": 406.5412735217251,
+  "p50_gain_ms": 12.698474572971463,
+  "p50_gain_percent": 3.123540061579829,
+  "absolute_difference": {
+    "max": 0.0078125,
+    "mae": 0.00046117237,
+    "position_max": 0.0038015842,
+    "rotation6d_max": 0.0078125,
+    "gripper_max": 0.00390625
+  },
+  "interpretation": "The compiled prefix cache is not bitwise action-equivalent to the separately compiled baseline. Output units are native EEF/rot6d components, not YAM joint radians. This single synthetic comparison does not establish task accuracy."
+}

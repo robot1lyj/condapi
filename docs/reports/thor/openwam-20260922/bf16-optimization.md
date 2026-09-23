@@ -1,4 +1,4 @@
-# OpenWAM-α Thor BF16 加速跟进（r6–r9）
+# OpenWAM-α Thor BF16 加速跟进（r6–r17）
 
 ## 范围
 
@@ -25,4 +25,31 @@ BF16 同形状布尔掩码探针 r10：自动模式已走 `efficient`/CUTLASS，
 
 r12 用同一模型和合成观测扩展到全部10次去噪前向，以第一次为参考比较其余9次的首帧输入及30层输出，共279项，最大差均为**0**；[原始回执](prefix-invariance-r12.json)。这排除了仅前两次恰好相同的解释，但仍未覆盖其他输入/编译路线，也不等于缓存已实现。
 
-原始回执：[r6](benchmark-r6.json)、[r7](benchmark-r7.json)、[r8](benchmark-r8.json)、[r9](benchmark-r9.json)、[r10](attention-probe-r10.json)、[r11](prefix-invariance-r11.json)、[r12](prefix-invariance-r12.json)。Thor宿主各有 `logs/benchmark-rN-host.log` 和原始 profile；当前未下载整份 trace。所有容器实验后退出并恢复宿主120W，Pi按用户最新指示保持停止。2026-09-23 USB恢复管理后，将Thor连接至工作站当前5 GHz AP，Wi-Fi DHCP `10.18.10.89`；见[网络状态](../../../08_thor_edge_deployment.md#7-当前状态)。
+## 首帧逐层缓存与分段注意力（r13–r14）
+
+r13 从实际Alpha首层截取 Q/K/V 和布尔掩码：视频360 token，其中首帧120 token，动作32 token，24头×128维；首帧查询仅可看首帧键，其余查询可看全部键。用两次无掩码 SDPA 代替一次带掩码 SDPA，单算子P50由0.235ms降至0.145–0.155ms；但注意力输出最大差0.03125、MAE 0.000111，属于**算子数值差异**，不是完整动作误差或精度验收。[入口](../../../../scripts/thor/openwam/probe_segmented_attention.py)、[回执](segmented-attention-r13.json)。
+
+r14 在固定单个合成观测上对照完整 `engine.generate`（BF16、10步、每组1次预热＋6次计时）；实验猴补丁只在测试进程生效，未改检查点、镜像或生产服务。逐层缓存首帧 Q/K/V 和块输出残差，后续全量前向仅计算视频后缀；为保持原带掩码 attention 内核/求和顺序，`prefix_only` **仍然计算首帧的 attention 查询**，只是跳过首帧QKV投影和块后半段，不能声称完全跳过首帧全部计算。`prefix_split` 才略过首帧查询，但改用两个无掩码attention内核。
+
+| 10步路线 | eager BF16 P50/P95 | 与同组 baseline 动作最大绝对差 / MAE |
+|---|---:|---:|
+| 无官方DiT缓存，baseline | 1260.9/1268.0 ms | 0 / 0 |
+| 无官方DiT缓存，逐层首帧缓存 | 1146.2/1147.0 ms | **0 / 0** |
+| 官方DiT缓存，baseline | 522.9/523.2 ms | 0 / 0 |
+| 官方DiT缓存，分段attention | 513.6/513.9 ms | 0.0078125 / 0.0005301 |
+| 官方DiT缓存，逐层首帧缓存 | 484.7/485.4 ms | **0 / 0** |
+| 官方DiT缓存，首帧缓存＋分段attention | 475.0/476.9 ms | 0.0078125 / 0.0005301 |
+
+官方DiT缓存下10次去噪中仅4次完整联合前向，因此首帧缓存命中90层（后续3次×30层），分段查询可跳过10800次token查询（120×90），而非10步都重跑。`prefix_only` 的零差只在**这一个合成输入、同eager配置**得到，不能当作跨观测或任务精度证明。分段attention的0.0078125最大差发生在rot6d分量；位置最大差0.003802、夹爪最大差0.003906，输出是原始EEF表示，物理单位/控制容差未验明，不可当作关节rad误差。
+
+上述eager最快475ms，仍慢于既有官方 **编译＋CUDA Graph＋DiT缓存约405ms**；不可跨运行把eager收益直接加到编译路径，更不能宣称达到300ms。编译耦合测试仍需验证，分段attention在真实任务数据完成数值/成功率对照前不晋级。入口[实验脚本](../../../../scripts/thor/openwam/benchmark_exact_prefix.py)、[原始回执](prefix-cache-benchmark-r14.json)。
+
+### 与编译路线耦合（r15–r17）
+
+r15 直接在缓存实验上叠加 `torch.compile(mode="reduce-overhead")`／CUDA Graph：首个去噪步冷编译约81秒，第二个去噪步试图从图内保存的首帧Q/K/V读取时抛 `accessing tensor output of CUDAGraphs that has been overwritten by a subsequent run`；上游捕捉编译失败后回退eager，也读到已失效的图输出，进程失败。它不是权重损坏或训练异常。不能通过忽略异常来称CUDA Graph加速成功；要用图模式需将缓存显式移到图外、分离首遍/后续图并管理缓冲区生命周期。宿主原始日志：`/home/wuyan-lyj/thor/openwam/logs/benchmark-r15-host.log`。
+
+r16 关闭CUDA Graph、保留 `torch.compile(mode="default")` 与官方DiT缓存，逐层缓存稳态P50/P95 **393.8/396.0ms**，4次完整联合前向、90层缓存命中；首次调用217.5秒（两条分支冷编译，不是推理稳态）。r17 同脚本/配置不缓存基线 P50/P95 **406.5/407.2ms**，缓存快12.7ms、约3.1%。两组各1次冷调用＋4次稳态测量，样本少，P95不代表生产尾延迟。[r16](prefix-cache-compiled-r16.json)、[r17](prefix-cache-compiled-baseline-r17.json)。
+
+两组最终 `(32,20)` 动作均有限，但**不逐位相同**：最大绝对差0.0078125、MAE 0.000461；位置分量最大0.003802、rot6d分量最大0.0078125、夹爪分量最大0.003906。[逐维对照与原始数组哈希](prefix-cache-compiled-comparison-r16-r17.json)。r14的eager零差不能外推到编译版本；这次还未区分是编译后的不同融合/归约顺序还是缓存逻辑。且未覆盖真实任务观测/成功率，**不晋级部署**。分段attention本身在eager全链路仅节省约9ms且引入数值偏差，本轮不再叠加为生产候选。当前可靠基线仍是官方BF16 10步＋DiT缓存＋编译/CUDA Graph约405ms；约394ms仅为离线候选，不是已上线性能。
+
+原始回执：[r6](benchmark-r6.json)、[r7](benchmark-r7.json)、[r8](benchmark-r8.json)、[r9](benchmark-r9.json)、[r10](attention-probe-r10.json)、[r11](prefix-invariance-r11.json)、[r12](prefix-invariance-r12.json)、[r13](segmented-attention-r13.json)、[r14](prefix-cache-benchmark-r14.json)、[r16](prefix-cache-compiled-r16.json)、[r17](prefix-cache-compiled-baseline-r17.json)。Thor宿主各有 `logs/benchmark-rN-host.log` 和原始动作数组；r15失败日志亦保留。所有容器实验后退出并恢复宿主120W，Pi按用户最新指示保持停止。2026-09-23 USB恢复管理后，将Thor连接至工作站当前5 GHz AP，Wi-Fi DHCP `10.18.10.89`；见[网络状态](../../../08_thor_edge_deployment.md#7-当前状态)。

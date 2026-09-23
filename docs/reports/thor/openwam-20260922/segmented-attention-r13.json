@@ -1,0 +1,65 @@
+{
+  "scope": "actual_first_joint_layer_qkv_synthetic_observation_operator_only",
+  "shape": {
+    "prefix_tokens": 120,
+    "video_tokens": 360,
+    "time_mod_shape": [
+      1,
+      360,
+      6,
+      3072
+    ],
+    "rope_freqs_shape": [
+      360,
+      1,
+      64
+    ],
+    "grid": [
+      3,
+      12,
+      10
+    ],
+    "vace_hints": 0
+  },
+  "mask": {
+    "shape": [
+      392,
+      392
+    ],
+    "prefix_allows_only_prefix": true,
+    "suffix_allows_all_keys": true,
+    "counts": [
+      120,
+      392
+    ]
+  },
+  "qkv_shape": [
+    1,
+    24,
+    392,
+    128
+  ],
+  "operators": [
+    {
+      "name": "masked_auto",
+      "p50_ms": 0.23518399894237518,
+      "p95_ms": 0.23844320476055145,
+      "max_abs_vs_masked": 0.0,
+      "mae_vs_masked": 0.0
+    },
+    {
+      "name": "split_flash",
+      "p50_ms": 0.15520000457763672,
+      "p95_ms": 0.16520480439066887,
+      "max_abs_vs_masked": 0.03125,
+      "mae_vs_masked": 0.00011128739424748346
+    },
+    {
+      "name": "split_auto",
+      "p50_ms": 0.14457599818706512,
+      "p95_ms": 0.14690879955887792,
+      "max_abs_vs_masked": 0.03125,
+      "mae_vs_masked": 0.00011128739424748346
+    }
+  ]
+}
