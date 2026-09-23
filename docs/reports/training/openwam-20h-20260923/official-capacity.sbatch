@@ -16,6 +16,7 @@ output=/home/wuyan/lyj/openwam-runs/yam-20h-official-capacity-20260923-${SLURM_J
 cd "$code"
 export PATH="/home/wuyan/.conda/envs/vla-openwam/bin:$PATH"
 export CUDA_HOME=/home/wuyan/.conda/envs/vla-openwam
+export LD_LIBRARY_PATH="$CUDA_HOME/lib/python3.12/site-packages/nvidia/curand/lib:$CUDA_HOME/lib/python3.12/site-packages/torch/lib:$CUDA_HOME/lib:${LD_LIBRARY_PATH:-}"
 export OMP_NUM_THREADS=4 OPENBLAS_NUM_THREADS=1 WANDB_MODE=disabled
 export HF_HUB_OFFLINE=1 HF_DATASETS_OFFLINE=1 PYTHONUNBUFFERED=1
 printf 'job=%s host=%s time=%s commit=%s\n' "$SLURM_JOB_ID" "$(hostname)" "$(date -Is)" "$(git rev-parse HEAD)"
