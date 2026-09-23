@@ -1,6 +1,6 @@
 # 08 · Thor 端侧部署
 
-OpenWAM独立镜像、官方权重、LoRA合并与压缩候选见 [14 · OpenWAM推理实验](reference/thor/14_openwam_inference.md)。2026-09-23 已在 Thor 做 BF16 GPU 优化探针，Pi 依用户新指示保持停止；结果与局限见[优化报告](reports/thor/openwam-20260922/bf16-optimization.md)。
+OpenWAM独立镜像、官方权重、LoRA合并与压缩候选见 [14 · OpenWAM推理实验](reference/thor/14_openwam_inference.md)。2026-09-23 用户暂停 OpenWAM，Thor 的已停止试验容器已清理；原始权重、环境镜像和日志保留。Pi 已恢复并切换到 20h136000，证据见[136000报告](reports/thor/rtc-20h-136000-20260923/README.md)。
 
 逐步安装指导的冷记忆入口：[Thor 安装系列 00](reference/thor/00_start_here.md)。该组按 G0–G5 持有设备预检、ISO/USB 制作、固件/NVMe 安装、宿主/容器检查、Pi 工程闸门及故障交接；本页继续持有版本、精度决策和当前状态。指导 agent 不得把下文安装概览当成跳过目标确认的操作脚本。
 
@@ -10,13 +10,15 @@ OpenWAM独立镜像、官方权重、LoRA合并与压缩候选见 [14 · OpenWAM
 
 ## 1. 当前决策
 
+- **2026-09-23 15:22 CST 现场**：固定 `ws://192.168.250.1:8000` 为 20h136000 训练型 RTC Pi0.5，Pi 共用容器 `pi05-rtc-infer` 运行、MAXN 会话 active；七步 FP32 权重＋TF32 TensorRT、quantile 前缀、80-token 时间缓存/CUDA Graph。九例 JAX/TRT 同输入及上线后 WebSocket 验收通过，输出有限 `(50,14)` 绝对动作、前缀保持；最大关节差 0.000747rad，服务推理 P50/P95 约 197.87/207.56ms。本机协议往返约 198.73/208.77ms，非3588端到端。旧124000大权重/引擎已清理，不能就地回退；完整证据与合同来源见[136000报告](reports/thor/rtc-20h-136000-20260923/README.md)。下条30000状态仅为历史快照。
+
 - 2026-09-18 09:33 CST，固定 `ws://192.168.250.1:8000` 由**修正分位数前缀**的30000 RTC七步FP32权重＋TF32 TensorRT Docker `pi05-rtc-infer` 提供，MAXN临时会话运行。已核验新版回执绑定、原9例两轮与事故4例本机WebSocket输出有限50×14、前缀不变、事故集最大新后缀关节步进0.0924rad/tick。首轮9例本机往返P50约193.9ms，事故4例约202.6ms；第二轮9例偶发约390ms往返，服务推理仍约193–194ms，成因未知。旧错误前缀的7/10步验证和BF16候选不得作上线精度依据；旧10步不是安全回退。**3588端到端/真机效果未验收**，详见[事故报告更新](reports/thor/rtc-prefix-quantile-incident-20260917.md#2026-09-18-更新新版服务与-thor-本机协议测试)。推理/测试阶段MAXN、容器停止后回120W；不设开机持久化。
 
 - 2026-09-11 用户确认保留 W 混合精度路线作为新 checkpoint 的优先接入方案；自动接入技能及逐阶段步骤见 [新 checkpoint 交接](reference/thor/12_checkpoint_handoff.md)。它自动协助离线转换、构建与回放，不是后台监听或自动生产切换；现有基础模型宿主脚本的硬编码边界在该手册明确列出。
 
 - 默认推理目标是 Jetson AGX Thor Developer Kit（T5000 口径）；设备到手后仍需用 `jetson_release`/`cat /etc/nv_tegra_release` 核对实际 SKU。若实际是 T4000 或定制载板，不能直接套用开发套件 ISO。
 - 官方系统基线选 JetPack 7.2.1 / Jetson Linux r39.2.1。系统盘制作介质是 Jetson ISO USB 安装盘，实际 BSP 安装到 Thor 的 NVMe，不把 ISO 当作 Live USB。
-- 部署形式确定为 Docker + NVIDIA Container Toolkit，按模型系列管理容器：Pi 系列共用一个服务，通过配置/checkpoint 选择模型，默认一次加载一个。当前 Pi 服务使用 Docker restart policy；Compose 仍是后续生命周期规划，不宣称已实施。模型 Python 依赖、转换工具和开发环境均封装在系列镜像中。
+- 部署形式确定为 Docker + NVIDIA Container Toolkit，按模型系列管理容器：Pi 系列共用一个服务，通过配置/checkpoint 选择模型，默认一次加载一个。当前 Pi 容器为 `--restart no`，由 MAXN 会话手动拉起，**不是开机自启**；Compose 仍是后续生命周期规划，不宣称已实施。模型 Python 依赖、转换工具和开发环境均封装在系列镜像中。
 - 用户确认 Pi 训练产物为 JAX/Flax（Orbax）checkpoint；当前为 `pi05_yam` 全量微调，不默认执行 LoRA 合并。原始 checkpoint、配置、norm 和原 JAX policy 行为是部署验收依据，必须完整保留；历史 LoRA 输入另行处理。
 - 精度优先：先建立原 JAX golden，并验证 Thor 容器内原生 JAX 的可行性；需要转换时，按实际全量/LoRA 权重审计映射，使用 FP32 中间产物，再验证未量化混合精度运行与参考误差。100000 W 已完成数值回放和协议 smoke，但任务效果/跨 IPC 尚待用户测试；不预设 PyTorch BF16 → TensorRT FP8 为必经路线。
 - TensorRT BF16/FP32 混合精度是未量化候选，须另行验证 exporter 支持；FP8、NVFP4、定制 FP16 均为可选实验。只有逐层、逐去噪步、完整 action 与任务验收通过后才能晋级；cosine、有限输出或时延不能单独证明精度保持。
