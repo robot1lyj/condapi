@@ -11,7 +11,7 @@
 ## 数据与模型边界
 
 - 官方 OpenWAM-Alpha foundation 是 80D 统一动作空间。用户决定保留官方完整 80D 动作/状态头：YAM 14D 按固定槽位 scatter，其他槽位填 0 并在动作损失中屏蔽；推理按同一映射 gather 为 14D。固定映射为 `[0,1,2,3,4,5,9,34,35,36,37,38,39,43]`，使左右臂落在原双臂区域、两夹爪沿用原 gripper 槽 9/43；其余 12 关节值占据原 EEF 槽，需要视为重新约定 YAM 语义，不能沿用 EEF 位置/旋转单位解释。无须派生 14D 权重，既有 80D foundation checkpoint 原件保持不变。服务器 Conda 环境已验证此映射的 14D→80D→14D 精确往返；真实首个 YAM 样本经完整视频读取后，动作 `(32,80)`、状态 `(1,80)`、动作有效 mask `(32,80)`，其余 66 槽全 0 且 loss mask 全假。用真实 train action/state 分别的 min-max 统计测试原生 deploy normalizer：状态输入与训练变换逐值差 0，模型归一化动作经 80D gather 后还原 raw14 最大差 `1.19e-7`；完整模型推理仍待 GPU 验证。
-- 官方 README 推荐 8×80 GB GPU。基础权重文件 24,813,767,464 bytes，约 23.11 GiB；本服务器 4090 每卡 24,564 MiB。原生 ZeRO-2 复制权重到每卡，几乎无空间容纳激活/优化器，不能把“有 4 张卡”视为可训练。全量微调候选需要 ZeRO-3 参数分片、CPU optimizer offload、CPU 初始化、BF16、梯度检查点和每卡 microbatch 1；该组合尚未在本项目做 GPU 前反向、首个 Adam 状态分配及保存恢复验收。这里的“全量”指训练视频 DiT、ActionDiT、14D 头；上游默认冻结文本编码器、VAE 等预训练组件。
+- 官方 README 推荐 8×80 GB GPU。基础权重文件 24,813,767,464 bytes，约 23.11 GiB；本服务器 4090 每卡 24,564 MiB。原生 ZeRO-2 复制权重到每卡，几乎无空间容纳激活/优化器。现在已通过 ZeRO-3 参数预分片、CPU optimizer offload、CPU 初始化、BF16、梯度检查点和每卡 microbatch 1，完成首个 GPU 前反向与 Adam 更新；保存恢复仍待验收。这里的“全量”指训练视频 DiT、ActionDiT、80D 动作/状态投影；上游默认冻结文本编码器、VAE 等预训练组件。
 - Pi0.5 training-time RTC 使用动作位置级扩散时间，已执行前缀保持无噪且只对后缀计损失。OpenWAM 的 ActionDiT 当前只接受每样本一个时间条件，不能直接复用 Pi 的时间条件实现。本分支已在 OpenWAM 原生 loss 中加入动作前缀无噪条件和后缀损失掩码，并在采样器每次动作更新后重钳已提交前缀；`rtc_mode=off` 保留旧路径。用户已将延迟范围改为 **1–20 步**，对应 30 fps 下约 33–667 ms；尾端短 episode 会把延迟截到 `有效动作数-1`，至少保留一个学习目标。训练仍使用整条动作共用的时间调制，须通过容量/数值及前缀条件验收，不能声称与 Pi 数学实现相同。现有推理 DiT 缓存不是 RTC；LoRA 训练代码仍未接入。
 - 2026-09-23 13:23 CST：用户 Pi 50h 作业 2167 占满 gpu001 四卡；gpu002 四卡由其他用户作业 2161 占用。不得附着现有作业做 OpenWAM GPU 测试。GPU 容量与吞吐仍未知。
 - 源数据中的 `action` 按既有导出合同是绝对关节目标，夹爪 0=闭、1=开；raw-to-LeRobot 的单位逐值对照与实际机器人标定尚未完成。训练数据保持原始 14D 数值，部署前必须完成方向、单位、动作限位和反馈时序审核。
@@ -29,6 +29,9 @@
 - Gitea SSH 从本机在握手前断开、服务器侧报告无路由；为使用已腾出的 GPU，将本地提交通过可验证 Git bundle 临时传到服务器，服务器检出提交 `9a82836`。Gitea 恢复后须把相同分支提交补推，服务器正式代码来源仍回到 Gitea。
 - `2169` 修正 ninja 路径后，再次在优化器 JIT 初始化处失败：DeepSpeed 检测系统 CUDA 13.2 与 PyTorch CUDA 12.8 跨主版本，不允许编译 `cpu_adam`。尚未触及显存测试。不能通过 `DS_SKIP_CUDA_CHECK=1` 将不匹配当作成功。
 - 用户随后明确要求暂缓 RTC，先跑通官方微调。新候选 `configs/native/openwam-yam-20h-official-capacity.json` 与 `official-capacity.sbatch` 保留官方 H32、视频 stride4、普通联合损失，RTC 两参数设 0。之前 RTC 候选/补丁不用于该作业；它不是论文等价 RTC，尤其缺逐动作位置扩散时间条件，且 H32 无法满足最大延迟20、执行窗口至少20时的 RTC 时域约束。需单独重设计，不随官方微调作业启动。
+- `2170` 在 DeepSpeed CPUAdam JIT 链接时缺少 `libcurand.so` 开发名。将 PyTorch 环境自带的 `libcurand.so.10` 链到 Conda `lib/libcurand.so`，并在作业中设置 `LD_LIBRARY_PATH` 后可加载 `cpu_adam.so`；此修复只针对当前服务器环境。
+- `2171` 在 DeepSpeed 将未分片的整个 12.4B 模型搬上单卡时 OOM（23.52 GiB 总显存仅余 9.62 MiB），尚未进入前向。`2172` 将已加载 CPU 权重先用 ZeRO-3 分片后越过该 OOM，但因新初始化的投影参数与 checkpoint 参数精度混合，在优化器分片时断言失败。可训练参数统一为 BF16 后再分片。
+- **`2173` 通过官方微调容量测试**：4×4090、8 microstep、梯度累积 8、完成 1 次优化器更新，Slurm `COMPLETED 0:0`，总运行 `00:02:29`；训练进度到 8/8，末次日志 loss `0.2825`（video `0.2163`、action `0.0662`）。运行中 `nvidia-smi` 一次观测四卡各 `9430 MiB / 24564 MiB`，不是全过程峰值。此容量配方 `save_steps=0`，因此尚未验证权重/优化器保存恢复。另备 `official-checkpoint-smoke.sbatch` 与 `openwam-yam-20h-official-checkpoint-smoke.json` 做 8 microstep 保存短测。
 
 ## 表示与 RTC 研究核对
 

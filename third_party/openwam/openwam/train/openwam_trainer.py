@@ -688,7 +688,7 @@ class OpenWAMTrainer:
         removes every ``accel_state_step_*`` and retains the configured number of recent
         weight checkpoints (rank-0, post-barrier).
         """
-        if save_steps:
+        if save_steps and global_step % save_steps != 0:
             save_weights(self.accelerator, self.architecture, output_path, global_step, final=True)
         self.accelerator.wait_for_everyone()
         if is_main:

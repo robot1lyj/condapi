@@ -81,6 +81,7 @@ def _build_accelerator(cfg: DictConfig):
         # back the norm under DeepSpeed); single source = training.max_grad_norm, 0.0 = off.
         gradient_clipping=float(max_grad_norm) if max_grad_norm else 0.0,
         offload_optimizer_device=str(t.offload_optimizer_device),
+        zero3_save_16bit_model=int(t.zero_stage) == 3,
     )
 
     return accelerate.Accelerator(

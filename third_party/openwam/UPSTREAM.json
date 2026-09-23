@@ -236,14 +236,14 @@
     "openwam/model/vlm_backbone/qwen3_vl_backbone.py": "7bca136c3940cfcde441c957454d6daee7fd9b7886404f8ec9c7163898eb54f5",
     "openwam/model/vlm_backbone/registry.py": "917b43d6597b754179223719c41de4747ca83f9c528f8a7591507a9cd1a18f6a",
     "openwam/train/__init__.py": "726b67ac9d85e98734f5ea8759a1e62de693008b06eae2a3b1dfe70376cb405a",
-    "openwam/train/openwam_trainer.py": "af50e833851f4226c006700481b2663d60eaf9832c6e503a269a67563f681468",
+    "openwam/train/openwam_trainer.py": "53f445fb530eea2c1c15bf9a5fdc33ddfd6ddad8f779cbd6585ad37378b4eb09",
     "openwam/train/utils/__init__.py": "921f21e666a7697ec19f7e43d9f804e85e605280e68ce25c36a1d3f63e7b544e",
-    "openwam/train/utils/checkpointing.py": "0cf757973a3eedd1377da9c7a17c786de6468755cdef8b4afba3606288fd8ca8",
+    "openwam/train/utils/checkpointing.py": "a4ab7a22b457e94ccbb8dc0478e05f94b4e9e6890632140e1f092e203483dc7a",
     "openwam/train/utils/ckpt_model_loader.py": "7332c896bd9591b6de00ee534109062bb4e287d0206b675047674794b9b105a5",
     "openwam/train/utils/optimizer_groups.py": "5ed9008b6a33757069aa7715707722da9af7e38424f73fc6378a6ee0c60ea682",
     "openwam/train/utils/seeding.py": "251ecbcef57c01ad28ca3a32f616c75871e09b9d72575827a3b72aee8afd76cc",
     "openwam/train/utils/training_utils.py": "3faec01a7cde3c6d4ec05c4367cc852960d1c07d75bd6ef4289ef8b9893d68b6",
     "pyproject.toml": "aebb7bbfc9e7cbda51d00c22bb36011d81f00953396d86a0a2f9dd5eee206bce",
-    "scripts/train.py": "e4a8a0f213581c039ed1dce746f33183e602849453b73d35cfabc5beeb4efb0a"
+    "scripts/train.py": "d58713034af089bc21a54d02e7955e0b180b04e3c5f9488dc9e33d009d211e59"
   }
 }

@@ -195,22 +195,22 @@ def verify_resume_normalization_stats(output_dir: str, dataset) -> None:
 def save_weights(accelerator, architecture, output_path: str, global_step: int, *, final: bool) -> None:
     """Write the weights safetensors (the deploy artifact).
 
-    Only rank-0 writes. ZeRO-1/2 (this repo's only stages, see
-    ``training.zero_stage``) replicates the bf16 params on every rank, so
-    ``get_state_dict`` is rank-local: non-writers return immediately —
-    otherwise every rank can clone the full state dict to host memory at once
-    and exhaust the node during checkpointing. Pruning is the caller's job, run
-    after the full state is also written so the two lines stay in lockstep.
+    Only rank-0 writes. ZeRO-3 consolidation is collective, so every rank
+    must enter ``get_state_dict``; ZeRO-1/2 keep the rank-0-only fast path.
+    Pruning is the caller's job, after the full state is also written.
     """
     from tqdm import tqdm
 
+    zero3 = accelerator.deepspeed_config["zero_optimization"]["stage"] == 3
+    if not zero3 and not accelerator.is_main_process:
+        return
+    state_dict = accelerator.get_state_dict(architecture)
     if not accelerator.is_main_process:
         return
     ckpt_path = os.path.join(output_path, f"checkpoint_step_{global_step}.safetensors")
     msg = f"[checkpoint] Saving {'final ' if final else ''}step {global_step} -> {ckpt_path}"
     logger.info(msg)
     tqdm.write(msg)
-    state_dict = accelerator.get_state_dict(architecture)
     accelerator.unwrap_model(architecture).save_checkpoint(ckpt_path, state_dict=state_dict)
     msg = f"[checkpoint] Saved{' final' if final else ''}: {ckpt_path}"
     logger.info(msg)
