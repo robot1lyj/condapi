@@ -7,7 +7,7 @@ compile_mode=${3:-default}
 step_sweep=${4:-0}
 case "$step_sweep" in 0|1) ;; *) echo "Expected step sweep 0 or 1"; exit 2;; esac
 case "$compile_mode" in default|reduce-overhead|max-autotune) ;; *) echo "Unknown compile mode"; exit 2;; esac
-case "$bench_file" in benchmark.py|benchmark-r9.py|quant_benchmark.py|probe_attention.py) ;; *) echo "Unknown benchmark script"; exit 2;; esac
+case "$bench_file" in benchmark.py|benchmark-r9.py|quant_benchmark.py|probe_attention.py|probe_prefix_invariance.py) ;; *) echo "Unknown benchmark script"; exit 2;; esac
 [[ "$run_id" =~ ^r[0-9]+$ ]] || { echo "Expected a new run ID such as r5"; exit 2; }
 if docker inspect "openwam-benchmark-$run_id" >/dev/null 2>&1 || test -e "$root/logs/benchmark-$run_id"; then
   echo "Run ID already exists; use a new ID without overwriting evidence"
