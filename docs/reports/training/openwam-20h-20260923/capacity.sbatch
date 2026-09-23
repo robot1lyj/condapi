@@ -12,8 +12,9 @@
 set -euo pipefail
 code=/home/wuyan/lyj/openwam-install-7c5861e/code
 python=/home/wuyan/.conda/envs/vla-openwam/bin/python
-output=/home/wuyan/lyj/openwam-runs/yam-20h-rtc-capacity-20260923
+output=/home/wuyan/lyj/openwam-runs/yam-20h-rtc-capacity-20260923-${SLURM_JOB_ID}
 cd "$code"
+export PATH="/home/wuyan/.conda/envs/vla-openwam/bin:$PATH"
 export OMP_NUM_THREADS=4 OPENBLAS_NUM_THREADS=1 WANDB_MODE=disabled
 export HF_HUB_OFFLINE=1 HF_DATASETS_OFFLINE=1 PYTHONUNBUFFERED=1
 printf 'job=%s host=%s time=%s commit=%s\n' "$SLURM_JOB_ID" "$(hostname)" "$(date -Is)" "$(git rev-parse HEAD)"

@@ -21,3 +21,9 @@
 已生成 `configs/native/openwam-yam-20h-rtc-capacity.json` 与本目录 `capacity.sbatch`，仅用于**8 microstep / 1 个优化器更新**的首轮跑通测试，不保存模型；4×4090、BF16、ZeRO-3、CPU optimizer offload、CPU 初始化、梯度检查点；每卡 microbatch 1、累积 8、有效全局 batch 32。官方 80D OpenWAM-Alpha foundation 权重 + 上述固定 14 槽映射；训练视频 DiT、ActionDiT 与 80D 动作/状态投影，冻结文本编码器、VAE；33 个原始时间点、视频 stride 4、32 步 action horizon、384×320 三相机拼图；训练集 min-max norm、seed 42；RTC 延迟 1–20 步。成功后再用独立输出目录做 100–200 microstep 稳态、完整权重保存/恢复、峰值显存和吞吐验收。若全量 OOM，改为单独的 LoRA + 80D 动作/状态投影可训练配方；该 LoRA 实现和保存/恢复仍需开发与测试，不应把架构内部 AdaLN-LoRA 当作现成 PEFT。
 
 初始候选学习率为全量 `1e-5`，LoRA `5e-5`，其余优化器继承原生 AdamW `[0.9,0.95]` / weight decay `0.01`；正式训练总更新预算、保存周期尚未确定。注意 OpenWAM 的 `max_steps` / `save_steps` 计数是每进程 microstep，累积 8 时不能误报成优化器更新数。用户已授权先做服务器短跑通测试；正式长训练尚未启动。现有 `configs/native/openwam-yam.example.json` 只是接口示例。
+
+## 服务器容量测试现场
+
+- 2026-09-23 13:50 CST，`gpu001` 四卡空闲后提交 Slurm `2168`。模型初始化打印总参数 `12406.8M`，其中可训练 `6021.2M`（视频 DiT `4999.8M`、ActionDiT `1021.0M`、proprio encoder `0.3M`）。尚未执行第一个 GPU 前向。
+- `2168` 在 DeepSpeed ZeRO-3/CPU optimizer 初始化时失败：`Unable to JIT load the cpu_adam op due to ninja not being installed`。服务器环境实际有 `ninja 1.13.2` 及 `/home/wuyan/.conda/envs/vla-openwam/bin/ninja`，但 Slurm 作业 `PATH` 未包含该 Conda `bin`。已修改作业脚本显式加入该目录，并改为每个 job 独立输出目录；需重新运行。此错误与显存容量无关。
+- Gitea SSH 从本机在握手前断开、服务器侧报告无路由；为使用已腾出的 GPU，将本地提交通过可验证 Git bundle 临时传到服务器，服务器检出提交 `9a82836`。Gitea 恢复后须把相同分支提交补推，服务器正式代码来源仍回到 Gitea。
