@@ -1,6 +1,6 @@
 # 08 · Thor 端侧部署
 
-OpenWAM独立镜像、官方权重、LoRA合并与压缩候选见 [14 · OpenWAM推理实验](reference/thor/14_openwam_inference.md)。2026-09-22用户限定先准备、不暂停Pi；尚未开展GPU测试。
+OpenWAM独立镜像、官方权重、LoRA合并与压缩候选见 [14 · OpenWAM推理实验](reference/thor/14_openwam_inference.md)。2026-09-23 已在 Thor 做 BF16 GPU 优化探针，Pi 依用户新指示保持停止；结果与局限见[优化报告](reports/thor/openwam-20260922/bf16-optimization.md)。
 
 逐步安装指导的冷记忆入口：[Thor 安装系列 00](reference/thor/00_start_here.md)。该组按 G0–G5 持有设备预检、ISO/USB 制作、固件/NVMe 安装、宿主/容器检查、Pi 工程闸门及故障交接；本页继续持有版本、精度决策和当前状态。指导 agent 不得把下文安装概览当成跳过目标确认的操作脚本。
 
@@ -233,6 +233,12 @@ PR #960 作者给出的局部 checkpoint 对照如下；样本范围、硬件及
 - 端口监听或容器启动不算通过；必须有真实 Thor 本地推理结果和 Thor↔3588 直连以太网 smoke。
 
 ## 7. 当前状态
+
+### 2026-09-23 · Thor 管理 Wi-Fi 跟随工作站当前 AP
+
+工作站当前 `琶洲模方` 连接 BSSID `C8:A2:3B:8A:87:AB`、5280 MHz，DHCP `10.18.10.43/23`；Thor 原 `thor-5g` 虽同名，但连 BSSID `C8:A2:3B:92:87:A7`、5745 MHz，DHCP 已从历史 `.250` 变为 `192.168.110.57/23`，两台机器不在同一管理网段。Thor 扫描可见工作站 AP 后，通过 USB `192.168.55.1` 从现有凭据连接克隆 `thor-workstation-ap`，绑定该 BSSID，autoconnect=yes、priority=210、省电禁用；旧 `thor-5g` autoconnect=yes、priority=200 保留回退，未记录或输出密码。Thor 连接后 DHCP 为 **`10.18.10.89/23`**、网关 `10.18.10.1`，工作站→Thor SSH 和 TCP 4000、Thor→工作站 ping 已通过；本机 `thor` SSH 别名更新至 `.89`，NoMachine 无线目标可用 `10.18.10.89:4000`（仅验证端口，未验证图形会话）。NetworkManager enabled。该地址仍是 DHCP 临时值，开机重连和 AP 不可用时的自动回退尚未重启验收；固定 BSSID 只适用于这个 AP。生产 Thor↔3588 直连口 `192.168.250.1/24` 未改；2026-09-23 13:33 CST 从 Thor 的 `enP2p1s0` 邻居表识别 3588 为 **`192.168.250.2`**，两次 ICMP 往返0.141–0.180ms，仅复核连通性，未登录或修改3588。USB 管理口仍为 `192.168.55.1`。后续管理连接异常先用 USB 查 `nmcli` 当前连接/IP，再更新别名，不应把历史 `.250` 当固定地址。
+
+2026-09-23 13:36 CST，用户提供3588登录方式后，经Thor直连 SSH **只读查询**其 `ip -4 -brief address` / 默认路由：3588 `wlan0` 当前 DHCP **`192.168.110.55/23`**、网关 `192.168.111.254`，`lan1` 仍为 `192.168.250.2/24`；未修改3588。历史 2026-09-14 的 Wi-Fi `.140` 已失效，当前 `.55` 也不是静态地址。Thor Wi-Fi 当前 `10.18.10.89/23` 与3588 Wi-Fi不在同一网段；两者的生产通信继续走独立直连网口，不依赖Wi-Fi互通。
 
 ### 2026-09-17 · Thor 管理 Wi-Fi 切换为 5 GHz
 

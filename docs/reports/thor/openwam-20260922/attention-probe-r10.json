@@ -1,0 +1,53 @@
+{
+  "scope": "synthetic_mask_operator_probe_not_model_accuracy",
+  "shape": [
+    1,
+    24,
+    513,
+    128
+  ],
+  "results": [
+    {
+      "backend": "auto",
+      "p50_ms": 0.3537279963493347,
+      "p95_ms": 0.36064958572387695,
+      "max_abs_vs_auto": 0.0,
+      "mae_vs_auto": 0.0,
+      "attention_ops": [
+        "aten::_efficient_attention_forward",
+        "aten::_scaled_dot_product_efficient_attention",
+        "aten::scaled_dot_product_attention",
+        "fmha_cutlassF_bf16_aligned_64x128_rf_sm80(PyTorchMemEffAttention::AttentionKernel<cutlass::bfloat16_t, cutlass::arch::Sm80, true, 64, 128, 128, true, true>::Params)"
+      ]
+    },
+    {
+      "backend": "efficient",
+      "p50_ms": 0.3848479986190796,
+      "p95_ms": 0.3929392099380493,
+      "max_abs_vs_auto": 0.0,
+      "mae_vs_auto": 0.0,
+      "attention_ops": [
+        "aten::_efficient_attention_forward",
+        "aten::_scaled_dot_product_efficient_attention",
+        "aten::scaled_dot_product_attention",
+        "fmha_cutlassF_bf16_aligned_64x128_rf_sm80(PyTorchMemEffAttention::AttentionKernel<cutlass::bfloat16_t, cutlass::arch::Sm80, true, 64, 128, 128, true, true>::Params)"
+      ]
+    },
+    {
+      "backend": "cudnn",
+      "p50_ms": 0.3767840266227722,
+      "p95_ms": 0.39415520429611206,
+      "max_abs_vs_auto": 0.001953125,
+      "mae_vs_auto": 1.560283635626547e-07,
+      "attention_ops": [
+        "aten::_cudnn_attention_forward",
+        "aten::_scaled_dot_product_cudnn_attention",
+        "aten::scaled_dot_product_attention"
+      ]
+    },
+    {
+      "backend": "flash",
+      "error": "No available kernel. Aborting execution."
+    }
+  ]
+}

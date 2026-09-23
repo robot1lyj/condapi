@@ -36,23 +36,22 @@ def main() -> None:
         nonlocal pass_index
         if layer_id == 0:
             pass_index += 1
-        if pass_index <= 2:
-            prefix_tokens = driver._video_tokens_per_frame(vstate)  # noqa: SLF001
-            if layer_id == 0:
-                compare(-1, vstate.hidden_states[:, :prefix_tokens])
+        prefix_tokens = driver._video_tokens_per_frame(vstate)  # noqa: SLF001
+        if layer_id == 0:
+            compare(-1, vstate.hidden_states[:, :prefix_tokens])
         vstate, astate = original_step(layer_id, vstate, astate, **kwargs)
-        if pass_index <= 2:
-            compare(layer_id, vstate.hidden_states[:, :prefix_tokens])
+        compare(layer_id, vstate.hidden_states[:, :prefix_tokens])
         return vstate, astate
 
     def compare(stage, value):
         current = value.detach().float().cpu()
         if pass_index == 1:
             snapshots[stage] = current
-        elif pass_index == 2:
+        elif pass_index > 1:
             difference = (current - snapshots[stage]).abs()
             results.append(
                 {
+                    "pass": pass_index,
                     "stage": stage,
                     "shape": list(current.shape),
                     "max_abs": float(difference.max()),
@@ -88,10 +87,10 @@ def main() -> None:
         actions = actions.detach().float().cpu().numpy()
     if np.asarray(actions).shape != (32, 20) or not np.isfinite(actions).all():
         raise ValueError("Unexpected or nonfinite actions")
-    if pass_index < 2 or len(results) != driver.num_layers + 1:
+    if pass_index < 2 or len(results) != (pass_index - 1) * (driver.num_layers + 1):
         raise RuntimeError(f"Incomplete capture: passes={pass_index}, stages={len(results)}")
     report = {
-        "scope": "one_synthetic_observation_first_two_eager_forwards_only",
+        "scope": "one_synthetic_observation_all_eager_forwards",
         "passes_seen": pass_index,
         "prefix_tokens": results[0]["shape"][1],
         "layers": driver.num_layers,

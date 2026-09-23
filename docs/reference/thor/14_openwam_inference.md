@@ -26,7 +26,7 @@ Alpha官方合同为80维统一槽位、32个action（33源帧，video_stride4�
 
 **2026-09-22首轮GPU结果已完成**：r4四组均有限32×20输出；MAXN下baseline1254ms、提示词缓存1253ms、DiT缓存520ms、compile964ms（各3次稳态P50）。后两者有输出差异，未验收任务精度或YAM部署。Pi已恢复原8000服务与MAXN、healthz=OK。当前可运行镜像为 `openwam:thor-20260922-r2`，r1镜像缺h5py，不再推荐；具体数值、合成输入局限和失败记录见[GPU报告](../../reports/thor/openwam-20260922/gpu-r4.md)。
 
-**后续r6–r9**：用户要求Pi停止；BF16官方组合在Thor MAXN下约404–408ms，`reduce-overhead`确认CUDA Graph重放、`max-autotune`没有加速。7步单独编译能比10步快，但加官方DiT缓存后均只跑4次完整前向，7步没有增益且动作差增大。GPU profile显示矩阵乘法约249ms、联合masked SDPA约60ms，是后续热点。细节、原始回执和2026-09-23 Thor管理网断连情况见[BF16优化报告](../../reports/thor/openwam-20260922/bf16-optimization.md)。下次先恢复Thor连接，运行已准备的同形状注意力后端探针和首帧逐层不变性探针；它们都不是完整模型验收。
+**后续r6–r12**：用户要求Pi停止；BF16官方组合在Thor MAXN下约404–408ms，`reduce-overhead`确认CUDA Graph重放、`max-autotune`没有加速。7步单独编译能比10步快，但加官方DiT缓存后均只跑4次完整前向，7步没有增益且动作差增大。GPU profile显示矩阵乘法约249ms、联合masked SDPA约60ms。USB恢复管理后，同形状掩码探针r10表明自动已走有效CUTLASS内核，cuDNN无明显收益，Flash不支持此掩码；r11/r12表明一个合成输入的全部10次去噪中首帧逐层状态不变，为精确缓存候选提供证据，**缓存尚未实现、更未测得提速或任务精度**。细节和原始回执见[BF16优化报告](../../reports/thor/openwam-20260922/bf16-optimization.md)。
 
 历史r5选择性FP8实验已单独归档为[量化报告](../../reports/thor/openwam-20260922/quant-r5.md)，当前按用户指示优先BF16路线。
 
