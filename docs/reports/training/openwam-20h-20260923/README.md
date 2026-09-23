@@ -32,6 +32,7 @@
 - `2170` 在 DeepSpeed CPUAdam JIT 链接时缺少 `libcurand.so` 开发名。将 PyTorch 环境自带的 `libcurand.so.10` 链到 Conda `lib/libcurand.so`，并在作业中设置 `LD_LIBRARY_PATH` 后可加载 `cpu_adam.so`；此修复只针对当前服务器环境。
 - `2171` 在 DeepSpeed 将未分片的整个 12.4B 模型搬上单卡时 OOM（23.52 GiB 总显存仅余 9.62 MiB），尚未进入前向。`2172` 将已加载 CPU 权重先用 ZeRO-3 分片后越过该 OOM，但因新初始化的投影参数与 checkpoint 参数精度混合，在优化器分片时断言失败。可训练参数统一为 BF16 后再分片。
 - **`2173` 通过官方微调容量测试**：4×4090、8 microstep、梯度累积 8、完成 1 次优化器更新，Slurm `COMPLETED 0:0`，总运行 `00:02:29`；训练进度到 8/8，末次日志 loss `0.2825`（video `0.2163`、action `0.0662`）。运行中 `nvidia-smi` 一次观测四卡各 `9430 MiB / 24564 MiB`，不是全过程峰值。此容量配方 `save_steps=0`，因此尚未验证权重/优化器保存恢复。另备 `official-checkpoint-smoke.sbatch` 与 `openwam-yam-20h-official-checkpoint-smoke.json` 做 8 microstep 保存短测。
+- **`2174` 通过完整权重保存短测**：同样完成 8 microstep / 1 次优化器更新，Slurm `COMPLETED 0:0`，总运行 `00:08:15`。ZeRO-3 全 rank 汇集后写出 `/home/wuyan/lyj/openwam-runs/yam-20h-official-checkpoint-smoke-20260923-2174/checkpoints/2026-09-23_14-28-22/checkpoint_step_8.safetensors`，大小 24,813,767,464 bytes；`config.yaml`、`normalization_stats.npy` 同目录。与基础 checkpoint 比较，安全张量头有相同的 2089 个键，抽样读取的 ActionDiT decoder bias/weight 和视频 DiT cross-attention bias 均发生更新。作业也完成约 76 GiB 断点状态写入，然后按上游 `finish_training` 规则清除中间优化器状态，仅保留完整权重；这验证了状态**保存**和正常退出，尚未做中断后的状态**恢复**。本轮检查点只是一次更新的功能验收产物，不能当成已训练好的 20h policy。
 
 ## 表示与 RTC 研究核对
 
