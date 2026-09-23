@@ -181,6 +181,13 @@ class OpenWAMTrainer:
         ):
             import deepspeed
 
+            # Checkpoint tensors and newly initialized projections may arrive in
+            # different dtypes; ZeRO-3 requires one low-precision dtype per
+            # optimizer partition. Keep the conversion on CPU before sharding.
+            with torch.no_grad():
+                for param in self.architecture.parameters():
+                    if param.requires_grad and param.is_floating_point():
+                        param.data = param.data.to(dtype=torch.bfloat16)
             with deepspeed.zero.Init(module=self.architecture, remote_device="cpu", dtype=torch.bfloat16):
                 pass
             logger.info("Partitioned loaded architecture with ZeRO-3 before accelerator.prepare")
