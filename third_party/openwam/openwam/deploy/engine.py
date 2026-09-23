@@ -324,6 +324,17 @@ class JointInferenceEngine(BaseInferenceEngine):
         if proprio is not None:
             proprio = self.architecture.normalize_deploy_proprio(proprio)
 
+        rtc_mode = conditions.get("rtc_mode", "off")
+        raw_rtc_prefix = conditions.get("rtc_prefix_actions")
+        rtc_prefix = None
+        if rtc_mode == "trained":
+            if raw_rtc_prefix is None:
+                raise ValueError("trained RTC requires rtc_prefix_actions")
+            normalizer = getattr(self.architecture, "normalizer", None)
+            if normalizer is None or not hasattr(normalizer, "normalize_action"):
+                raise ValueError("trained RTC requires action-space normalization")
+            rtc_prefix = normalizer.normalize_action(raw_rtc_prefix)
+
         action_num_frames = int(conditions.get("num_frames", getattr(inf_cfg, "num_frames", 49)))
         video_num_frames = int(
             conditions.get(
@@ -353,11 +364,20 @@ class JointInferenceEngine(BaseInferenceEngine):
                 "vace_cache": self._vace_cache,
                 "prompt_embed_cache": self._prompt_embed_cache,
                 "proprio": proprio,
+                "rtc_mode": rtc_mode,
+                "rtc_prefix_actions": rtc_prefix,
                 "cfg_scale": self._cfg_scale,
                 "cfg_merge": self._cfg_merge,
             }
         )
         result = self.architecture.generate(**generate_kwargs)
+        if rtc_mode == "trained":
+            import numpy as np
+
+            raw = np.asarray(raw_rtc_prefix, dtype=np.float32)
+            if raw.ndim == 3 and raw.shape[0] == 1:
+                raw = raw[0]
+            result["actions"][: len(raw)] = raw
 
         # Attach optimization stats if profiling
         if self._profile and self._dit_cache is not None:

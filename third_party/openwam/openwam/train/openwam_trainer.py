@@ -565,6 +565,8 @@ class OpenWAMTrainer:
             **inputs,
             lambda_video=self.lambda_video,
             lambda_action=self.lambda_action,
+            rtc_min_delay=int(getattr(self.cfg.training, "rtc_min_delay", 0)),
+            rtc_max_delay=int(getattr(self.cfg.training, "rtc_max_delay", 0)),
         )
 
         return {

@@ -27,6 +27,8 @@ def main(argv=None):
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--model-version", required=True)
     parser.add_argument("--device", default="cuda")
+    parser.add_argument("--rtc-mode", choices=("off", "trained"), default="off")
+    parser.add_argument("--rtc-prefix", type=Path, help="JSON array of 1–20 committed raw 14D actions")
     args = parser.parse_args(argv)
     activate_source()
     verify_source()
@@ -70,6 +72,17 @@ def main(argv=None):
         }
     )
     engine = JointInferenceEngine(merge_deploy_cfg(cfg, deploy), architecture=architecture)
+    rtc_prefix = None
+    if args.rtc_mode == "trained":
+        if args.rtc_prefix is None:
+            parser.error("--rtc-mode trained requires --rtc-prefix")
+        rtc_prefix = np.asarray(json.loads(args.rtc_prefix.read_text()), dtype=np.float32)
+        if rtc_prefix.ndim != 2 or rtc_prefix.shape[1] != 14 or not 1 <= len(rtc_prefix) <= 20:
+            raise ValueError("RTC prefix must be 1–20 raw 14D actions")
+        if not np.isfinite(rtc_prefix).all():
+            raise ValueError("RTC prefix contains non-finite values")
+    elif args.rtc_prefix is not None:
+        parser.error("--rtc-prefix requires --rtc-mode trained")
     started = time.perf_counter()
     actions = np.asarray(
         engine.generate(
@@ -77,6 +90,8 @@ def main(argv=None):
                 "first_frame_image": [canvas],
                 "prompt": request["prompt"],
                 "proprio": np.asarray(request["state"], dtype=np.float32)[None],
+                "rtc_mode": args.rtc_mode,
+                "rtc_prefix_actions": rtc_prefix,
             }
         )["actions"]
     )

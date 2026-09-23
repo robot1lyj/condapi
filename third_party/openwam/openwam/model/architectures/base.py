@@ -1047,6 +1047,8 @@ class BaseWAMArchitecture(ABC, nn.Module):
         actions: Optional[torch.Tensor] = None,
         lambda_video: float = 1.0,
         lambda_action: float = 1.0,
+        rtc_min_delay: int = 0,
+        rtc_max_delay: int = 0,
         **inputs,
     ) -> dict:
         """Compute joint video-action flow matching loss.
@@ -1126,6 +1128,23 @@ class BaseWAMArchitecture(ABC, nn.Module):
                 a_sigma_bc = action_sigmas.unsqueeze(-1)
             noisy_actions = action_scheduler.add_noise(actions, action_noise, a_sigma_bc)
             action_target = action_scheduler.training_target(actions, action_noise)
+            if rtc_max_delay:
+                if not 1 <= rtc_min_delay <= rtc_max_delay < actions.shape[1]:
+                    raise ValueError("RTC delay range must be within the action horizon")
+                pad = inputs.get("action_is_pad")
+                if pad is None:
+                    pad = torch.zeros(actions.shape[:2], dtype=torch.bool, device=_device)
+                else:
+                    pad = pad.to(device=_device, dtype=torch.bool)
+                valid_steps = (~pad).any(dim=-1) if pad.ndim == 3 else ~pad
+                valid_counts = valid_steps.sum(dim=1)
+                if torch.any(valid_counts < 2):
+                    raise ValueError("RTC needs at least two valid action steps per sample")
+                delays = torch.randint(rtc_min_delay, rtc_max_delay + 1, (B,), device=_device)
+                delays = torch.minimum(delays, valid_counts - 1)
+                prefix = torch.arange(actions.shape[1], device=_device)[None, :] < delays[:, None]
+                noisy_actions = torch.where(prefix[..., None], actions, noisy_actions)
+                inputs["action_is_pad"] = pad | prefix[..., None] if pad.ndim == 3 else pad | prefix
 
         # --- Joint forward pass ---
         forward_inputs = dict(inputs)
@@ -1385,6 +1404,8 @@ class BaseWAMArchitecture(ABC, nn.Module):
         cfg_scale: float = 1.0,
         cfg_merge: bool = False,
         active_action_mask: Optional[Tensor] = None,
+        rtc_mode: str = "off",
+        rtc_prefix_actions: Optional[Tensor] = None,
         **extra_pipeline_inputs: Any,
     ) -> dict:
         """Execute joint video-action denoising driven by a schedule.
@@ -1493,6 +1514,21 @@ class BaseWAMArchitecture(ABC, nn.Module):
             dtype=dtype,
             generator=torch.Generator(device=device).manual_seed(seed),
         )
+        if rtc_mode not in ("off", "trained"):
+            raise ValueError(f"Unknown RTC mode: {rtc_mode}")
+        prefix_length = 0
+        if rtc_mode == "trained":
+            if rtc_prefix_actions is None:
+                raise ValueError("trained RTC requires committed prefix actions")
+            rtc_prefix_actions = torch.as_tensor(rtc_prefix_actions, device=device, dtype=dtype)
+            if rtc_prefix_actions.ndim == 3 and rtc_prefix_actions.shape[0] == 1:
+                rtc_prefix_actions = rtc_prefix_actions[0]
+            if rtc_prefix_actions.ndim != 2 or rtc_prefix_actions.shape[1] != self.action_dim:
+                raise ValueError("RTC prefix must have shape (delay, action_dim)")
+            prefix_length = rtc_prefix_actions.shape[0]
+            if not 1 <= prefix_length < action_latents.shape[1]:
+                raise ValueError("RTC prefix length must be within the action horizon")
+            action_latents[:, :prefix_length] = rtc_prefix_actions
 
         # Unified-action checkpoints scatter raw actions into a larger zero-padded
         # space.  The inactive dimensions may be excluded from the training loss,
@@ -1581,6 +1617,8 @@ class BaseWAMArchitecture(ABC, nn.Module):
                 )
                 if inactive_action_dims is not None:
                     action_latents[..., inactive_action_dims] = inactive_action_noise * float(sigma_a_next)
+                if prefix_length:
+                    action_latents[:, :prefix_length] = rtc_prefix_actions
 
         if profile:
             if torch.cuda.is_available():

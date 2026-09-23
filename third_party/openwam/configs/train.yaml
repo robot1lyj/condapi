@@ -42,6 +42,8 @@ training:
   # --- Loss weights ---
   lambda_video: 1.0               # Video flow-matching loss weight
   lambda_action: 1.0              # Action flow-matching loss weight
+  rtc_min_delay: 0                # 0/0 keeps original action sampling; YAM trained RTC uses 1..20
+  rtc_max_delay: 0
 
   # --- Flow matching timestep range ---
   max_timestep_boundary: 1.0      # Upper bound (fraction of total timesteps)

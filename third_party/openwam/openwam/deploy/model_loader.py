@@ -487,6 +487,23 @@ class _UnifyAwareNormalizer:
         unified, _mask = self._map_to_unify(arr, self._state_dst_index, self._unify_dim)
         return unified
 
+    def normalize_action(self, x):
+        """Normalize a committed raw action with action stats, then scatter it.
+
+        Proprio ``normalize`` may use a distinct ``joint_state`` block, so it
+        cannot be reused for RTC action prefixes.
+        """
+        from openwam.dataloader.transforms.normalize import Normalizer
+
+        arr = np.asarray(x)
+        if self._inner is not None:
+            if not isinstance(self._inner, Normalizer):
+                raise ValueError("RTC action normalization requires a plain action normalizer")
+            action_only = Normalizer(mode=self._inner.mode.value, stats=self._inner.stats)
+            arr = action_only.normalize(arr)
+        unified, _mask = self._map_to_unify(arr, self._action_dst_index, self._unify_dim)
+        return unified
+
     # Expose inner stats for callers that introspect (best-effort).
     @property
     def stats(self):
