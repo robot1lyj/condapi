@@ -236,7 +236,7 @@
     "openwam/model/vlm_backbone/qwen3_vl_backbone.py": "7bca136c3940cfcde441c957454d6daee7fd9b7886404f8ec9c7163898eb54f5",
     "openwam/model/vlm_backbone/registry.py": "917b43d6597b754179223719c41de4747ca83f9c528f8a7591507a9cd1a18f6a",
     "openwam/train/__init__.py": "726b67ac9d85e98734f5ea8759a1e62de693008b06eae2a3b1dfe70376cb405a",
-    "openwam/train/openwam_trainer.py": "126936e2984f52b8c75865c2eb3dc22edc149ab3001c93e3696af8319844863d",
+    "openwam/train/openwam_trainer.py": "e8c8902dcdbb23f0fc7e201c85d4e6e573cb436d496089ac80707e9e591b4e3f",
     "openwam/train/utils/__init__.py": "921f21e666a7697ec19f7e43d9f804e85e605280e68ce25c36a1d3f63e7b544e",
     "openwam/train/utils/checkpointing.py": "0cf757973a3eedd1377da9c7a17c786de6468755cdef8b4afba3606288fd8ca8",
     "openwam/train/utils/ckpt_model_loader.py": "7332c896bd9591b6de00ee534109062bb4e287d0206b675047674794b9b105a5",

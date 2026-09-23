@@ -171,6 +171,20 @@ class OpenWAMTrainer:
         is_main = self.accelerator is None or self.accelerator.is_main_process
         log_parameter_counts(self.architecture, is_main=is_main)
 
+        # A full OpenWAM checkpoint exceeds a 24 GiB card before the first
+        # forward pass.  Partition the already-loaded CPU weights before
+        # Accelerator/DeepSpeed tries to move the module to each GPU.
+        if (
+            _init_on_cpu
+            and self.accelerator is not None
+            and int(t.get("zero_stage", 0)) == 3
+        ):
+            import deepspeed
+
+            with deepspeed.zero.Init(module=self.architecture, remote_device="cpu", dtype=torch.bfloat16):
+                pass
+            logger.info("Partitioned loaded architecture with ZeRO-3 before accelerator.prepare")
+
     # (2) Driver — build optimizer/dataloader/scheduler -> setup dir -> accelerate prepare
     #     -> (resume) -> epoch/step loop{compute_loss -> log_step -> save} -> finish_training.
     def train(self, num_epochs: int = None, max_steps: int = None):
