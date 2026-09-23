@@ -27,3 +27,10 @@
 - 2026-09-23 13:50 CST，`gpu001` 四卡空闲后提交 Slurm `2168`。模型初始化打印总参数 `12406.8M`，其中可训练 `6021.2M`（视频 DiT `4999.8M`、ActionDiT `1021.0M`、proprio encoder `0.3M`）。尚未执行第一个 GPU 前向。
 - `2168` 在 DeepSpeed ZeRO-3/CPU optimizer 初始化时失败：`Unable to JIT load the cpu_adam op due to ninja not being installed`。服务器环境实际有 `ninja 1.13.2` 及 `/home/wuyan/.conda/envs/vla-openwam/bin/ninja`，但 Slurm 作业 `PATH` 未包含该 Conda `bin`。已修改作业脚本显式加入该目录，并改为每个 job 独立输出目录；需重新运行。此错误与显存容量无关。
 - Gitea SSH 从本机在握手前断开、服务器侧报告无路由；为使用已腾出的 GPU，将本地提交通过可验证 Git bundle 临时传到服务器，服务器检出提交 `9a82836`。Gitea 恢复后须把相同分支提交补推，服务器正式代码来源仍回到 Gitea。
+- `2169` 修正 ninja 路径后，再次在优化器 JIT 初始化处失败：DeepSpeed 检测系统 CUDA 13.2 与 PyTorch CUDA 12.8 跨主版本，不允许编译 `cpu_adam`。尚未触及显存测试。不能通过 `DS_SKIP_CUDA_CHECK=1` 将不匹配当作成功。
+- 用户随后明确要求暂缓 RTC，先跑通官方微调。新候选 `configs/native/openwam-yam-20h-official-capacity.json` 与 `official-capacity.sbatch` 保留官方 H32、视频 stride4、普通联合损失，RTC 两参数设 0。之前 RTC 候选/补丁不用于该作业；它不是论文等价 RTC，尤其缺逐动作位置扩散时间条件，且 H32 无法满足最大延迟20、执行窗口至少20时的 RTC 时域约束。需单独重设计，不随官方微调作业启动。
+
+## 表示与 RTC 研究核对
+
+- [OpenWAM 官方论文页](https://openwam-official.github.io/)将 80D 描述为跨 embodiment 的固定槽位语义，且动作流以专用 ActionDiT 与视频流联合去噪。把 YAM 12 个关节角装入左右臂原 EEF 槽属于新语义微调；复用模型权重和双臂区域，不能据此认为原 EEF 先验对关节角有效。20h 单任务是否足够、全量更新是否遗忘预训练能力均未见该映射的直接实验数据，需留出独立 val 并与冻结/LoRA 对照。
+- [训练时 RTC 原论文](https://arxiv.org/html/2512.05964)明确要求：前缀动作无噪、对应的逐 token flow 时间为干净端、损失只在后缀；当前 OpenWAM 补丁缺第二项，不可作为论文复现。论文的有效重叠条件是 `d ≤ H-s`，且实时执行通常还要求 `s ≥ d`；H32、d20 无法同时满足。若未来恢复 1–20 步 RTC，需将 H 至少扩至 40（例如 H48）并改 ActionDiT 的逐 token 时间调制，再验收训练、推理和异步队列。
