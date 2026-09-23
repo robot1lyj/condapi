@@ -59,7 +59,7 @@ def compose_config(recipe_path, output):
     if source and Path(output).resolve().is_relative_to(Path(source).resolve()):
         raise ValueError("New launcher artifacts must be outside the source checkpoint")
     info = read_info(cfg.dataloader.dataset_dir)
-    cfg.dataloader.fps = info["fps"]
+    OmegaConf.update(cfg, "dataloader.fps", info["fps"], force_add=True)
     plain = OmegaConf.to_container(cfg, resolve=True)
     validate_data_config(plain["dataloader"], plain["model"]["architecture"])
     for key in ("dataset_dir", "normalization_json"):
@@ -107,7 +107,12 @@ def compose_config(recipe_path, output):
     )
     cfg.training.output_path = str(Path(output).resolve() / "checkpoints")
     cfg.training.save_full_states_for_resume = True
-    cfg.dataloader.normalization_stats_path = str(Path(output).resolve() / "normalization_stats.npy")
+    OmegaConf.update(
+        cfg,
+        "dataloader.normalization_stats_path",
+        str(Path(output).resolve() / "normalization_stats.npy"),
+        force_add=True,
+    )
     return OmegaConf.create(OmegaConf.to_container(cfg, resolve=True)), workers
 
 
