@@ -1,0 +1,7 @@
+schema_version = 1
+id = "xr1-5b"
+backend = "xr1"
+status = "implemented"
+operations = ["train"]
+contracts = ["yam-bimanual-v1"]
+note = "Native 5B EE-action post-training registered; YAM training requires audited FK labels and a separate deployment IK gate."

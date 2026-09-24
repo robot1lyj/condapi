@@ -1,0 +1,6 @@
+# Bootstrap only; install the fixed vendored XR-1 runtime and audited GPU wheels separately.
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12
+  - pip

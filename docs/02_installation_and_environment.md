@@ -242,6 +242,7 @@ DeepSpeed 0.18.9；`pip check` 通过。服务器模型文件为
 `/home/wuyan/lyj/xiaomi-robotics-1/checkpoints/Xiaomi-Robotics-1-5B-ee21d524/model_states.pt`，
 远端 SHA-256 与 Hugging Face LFS 摘要一致。安装完成不代表 GPU、训练或 YAM 数据适配已验收。
 XR-1 state 是 60D 关节/夹爪输入，action 虽为 60D 张量，语义为末端相对位姿/夹爪及腰部/底盘槽位；YAM 的 14D joint action 不能按形状直接套入。启动训练前必须先确定并验收具体投影，见环境报告。
+本地 `configs/environments/xr1-server.toml` 指向上述已安装 prefix，`environments/xr1.yml` 仅用于新环境 bootstrap，不代表已安装完整 XR-1 依赖。固定源码及原生训练入口现在位于本仓库 `third_party/xr1/`、`adapters/xr1/`；服务器此前安装的是相同上游 revision 的独立快照，尚未同步本仓库新代码或运行本入口。数据和启动 gate 见 [10](10_vla_platform.md#2026-09-24--xr-1-原生训练入口)。
 
 ## 3. Slurm 和 GPU 预检
 

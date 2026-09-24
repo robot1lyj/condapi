@@ -1,5 +1,10 @@
 # 07 · 变更历史
 
+## 2026-09-24 · 将 XR-1 原生训练接入本地多模型平台
+
+用户授权整合本地 condapi 训练部分并接入 XR-1，同时规划模型、数据、算法模块化配置。固定 Xiaomi 上游 `0dd7aef8dc87296246aae812a1f59ccb708e5546` 的运行时源码及逐文件哈希，新增 `xr1-5b` 声明、独立后端、服务器 Conda profile、原生训练配方示例和 Slurm 训练 wrapper。wrapper 在启动前要求逐文件绑定的原生末端 JSON、train-only 统计、FK/单位/时序审计及官方 5B 权重 SHA；训练调用上游 Hydra/Lightning/DeepSpeed 入口，W&B 设为 offline。当前没有经审核的 YAM FK 派生标签、IK 或真实 GPU 训练，因此仅训练接线已实现，YAM 可训练性和 Thor 推理未验收。模块化改革先写入 10 作为草案，不迁移现有实验。
+
+
 ## 2026-09-24 · 安装 Xiaomi-Robotics-1 XR-1 环境并缓存官方 checkpoint
 
 选择官方通用后训练权重 `XiaomiRobotics/Xiaomi-Robotics-1-5B`，固定 revision `ee21d524b5c52ac961d941e1bc7d6d92836c3d5e`；服务器文件 `model_states.pt` 大小 10,226,684,862 bytes，SHA-256 `94d55a79122050a654b379664b644e874ff90d64ccd30a6a633f816555bcecf7` 已核对。仅将 XR-1 源码快照、许可、Qwen processor/config 文件和 checkpoint 放入 `/home/wuyan/lyj/xiaomi-robotics-1`；不下载 XR-1 demo 数据。

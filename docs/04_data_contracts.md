@@ -306,6 +306,8 @@ ssh yam-server 'bash /home/wuyan/lyj/YAM/env-transfer/lego-resume-v2-20260907/sc
 
 ## OpenWAM YAM 数据投影
 
+XR-1 使用单独的末端动作合同，不继承本节 OpenWAM 的 joint-action 投影；其字段、split 与 FK 审计门槛见 [10 的 XR-1 原生训练入口](10_vla_platform.md#2026-09-24--xr-1-原生训练入口)。原始 YAM 14D `action` 保持关节/夹爪语义，派生末端 JSON 只能写新目录，并记录来源 episode、帧对齐、坐标系和单位。
+
 2026-09-22 接入 `adapters/openwam/data.py`；输入支持 LeRobot v2.0/v2.1 独立 episode 文件与 v3.0 共享 Parquet/MP4 分片。服务器正式数据实测为 v3.0、14D、30fps；共享 Parquet 按 episode_index 筛选，视频根据每相机 metadata 的 from_timestamp×fps 计算文件内起点，并核对片段时长。原始数据只读，不自动转换版本、不写回统计。14D 次序仍为 `[左6关节, 左夹爪, 右6关节, 右夹爪]`，状态读 `observation.state`，监督读同一行的单数 `action`；要求调用者确认数据为绝对目标，本次不推断物理单位、不做 Pi delta 或 EEF/FK 转换。两个夹爪保留连续值，不翻转、二值化或重标单位。
 
 三相机按 `top_rgb / left_rgb / right_rgb`（完整键前缀 `observation.images.`）排列为上部全宽、左下/右下各半宽的原生 OpenWAM L 形 RGB 拼图，训练和离线推理复用同一函数。禁止缺失腕部相机时静默填黑。动作窗长为 `num_frames - 1`，视频每 `video_stride` 抽帧；例如 33/4 得 H32 与 9 帧视频，与 Pi H50 不同。窗口不跨 episode；末尾动作零填充并屏蔽 loss，视频复制最后一帧并用 `video_mask` 标明填充；proprio 仅为窗口起点状态。

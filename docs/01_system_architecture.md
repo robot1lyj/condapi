@@ -31,6 +31,8 @@ Evo-1、FastWAM、VLA-JEPA 的模型声明共用 LeRobot 后端，不再为每�
 
 2026-09-22 新增 `adapters/openwam/` 独立后端，模型选择为 `openwam`。固定上游运行时快照在 `third_party/openwam/`（逐文件哈希归 `UPSTREAM.json`）；复用 OpenWAM 原生模型、Hydra/DeepSpeed trainer、归一化与 checkpoint，不经 LeRobot trainer，也不复制训练循环。YAM reader 只负责 LeRobot v2/v3 数据投影，微调/恢复入口和离线推理由独立 Conda 子进程承载。控制层仍无模型依赖；接口实现不表示 GPU 或 Thor 已验收，操作边界见 [10](10_vla_platform.md#2026-09-22--openwam-微调接入)。
 
+2026-09-24 新增 `adapters/xr1/` 独立后端和 `third_party/xr1/` 固定上游运行时快照。控制层仅计划并调用独立 Conda 子进程；XR-1 保留其 Hydra/Lightning/DeepSpeed trainer 与 60D 原生动作。`configs/models/xr1-5b.toml` 当前只声明训练能力；YAM 的 14D joint 动作须先由可信 FK 产生末端目标标签、按 train split 重算统计，推理还需独立 IK/控制时序验收。兼容门槛及模块化配置改革草案见 [10](10_vla_platform.md#2026-09-24--xr-1-原生训练入口)。
+
 以下数据流和 32D/H50、delta 配置描述的是 **Pi 后端**，不是对所有模型的统一要求。
 
 ## 当前训练数据流

@@ -1,0 +1,12 @@
+schema_version = 1
+id = "xr1"
+status = "implemented"
+note = "Native XR-1 training launcher for audited EE-pose JSON; YAM joint-only conversion and deployment remain gated."
+upstream_revision = "0dd7aef8dc87296246aae812a1f59ccb708e5546"
+sources = ["adapters/xr1/common.py", "adapters/xr1/train.py", "third_party/xr1/UPSTREAM.json"]
+
+[operations.train]
+targets = ["server"]
+required = ["recipe"]
+file_parameters = ["recipe"]
+command = ["python", "{root}/adapters/xr1/train.py", "--recipe", "{recipe}", "--output", "{output}"]

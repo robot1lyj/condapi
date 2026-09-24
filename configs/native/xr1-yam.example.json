@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "source_contract": "yam-bimanual-v1",
+  "train_jsons": ["/path/to/derived/xr1/train/episode_000001.json"],
+  "stats": "/path/to/derived/xr1/train/normalize.json",
+  "kinematics_audit": "/path/to/derived/xr1/fk_audit.json",
+  "pretrained": "/home/wuyan/lyj/xiaomi-robotics-1/checkpoints/Xiaomi-Robotics-1-5B-ee21d524/model_states.pt",
+  "checkpoint_sha256": "94d55a79122050a654b379664b644e874ff90d64ccd30a6a633f816555bcecf7",
+  "nproc_per_node": 1,
+  "project": "yam-xr1",
+  "experiment": "ee-posttrain",
+  "max_steps": 10000,
+  "batch_size": 48
+}

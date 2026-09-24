@@ -2,7 +2,7 @@
 
 ## 当前状态
 
-观察日期：2026-09-09。本轮按用户授权将多模型工作树与 main 的 Pi 全量训练/续训修复整合，主检出通过快进接收合并结果；不部署服务器或 Thor。实际提交/远端同步以 Git 为准。架构 owner 为 [01](01_system_architecture.md#多模型接入层)，设备信息归 [02](02_installation_and_environment.md)，模型精度与 Thor 验收归 [08](08_thor_edge_deployment.md)，模型无关训练看板归 [11](11_training_dashboard.md)。
+状态汇总更新至 2026-09-24。2026-09-09 曾按用户授权将多模型工作树与当时 main 的 Pi 全量训练/续训修复整合；当前功能分支与 main 的关系以 Git 为准。本次 XR-1 仅接入本地源码和配置，未部署服务器或 Thor。架构 owner 为 [01](01_system_architecture.md#多模型接入层)，设备信息归 [02](02_installation_and_environment.md)，模型精度与 Thor 验收归 [08](08_thor_edge_deployment.md)，模型无关训练看板归 [11](11_training_dashboard.md)。
 
 | 部分 | 状态 |
 |---|---|
@@ -11,16 +11,45 @@
 | LeRobot 后端 | 共用原生训练 launcher 已实现并用替身测试；无自建 trainer/processor；尚无通用离线推理入口 |
 | Evo-1 | 本地/服务器专用环境已安装并通过CPU检查；YAM真实训练/推理仍待接入 |
 | MolmoAct2 | 原生LeRobot共享后端已注册；两端独立环境CPU检查通过、108包版本一致；仅普通版，不含Think，真实YAM/GPU仍待验收 |
-| Xiaomi-Robotics-1 / XR-1 | 2026-09-24 已安装独立服务器环境并下载官方 5B checkpoint；`pip check` 通过；原生输入为关节/夹爪 state、输出 action 为末端相对位姿/夹爪，未做 GPU 推理/训练或 YAM 适配 |
+| Xiaomi-Robotics-1 / XR-1 | 官方 5B checkpoint 和独立服务器环境已准备；本地 `xr1` 后端、固定上游源码、训练配置预检与原生训练入口已接入。YAM 的 FK 末端标签、训练统计、真实 GPU 训练及部署 IK 尚未验收 |
 | FastWAM、VLA-JEPA | 注册 planned；不得运行或报告已支持 |
 | Conda | Evo-1已有独立环境规格和104个wheel的锁；Pi等bootstrap仍不代表模型环境已安装 |
 | Thor | 原 Pi 容器、TensorRT 引擎、报告保持原状；没有部署此次改造 |
 
 当前 CPU 回归：平台测试52项；与 `scripts/thor`、`skills/mlops-memory/tests` 和下载完整性测试合跑170项通过。测试命令为 `python -m pytest -q packages/vla-platform/tests scripts/thor skills/mlops-memory/tests scripts/conda/fetch_locked_wheels_test.py`。框架测试替身不冒充模型运行；独立Evo环境实际导入/processor检查见 [环境证据](reports/environments/evo1-20260908/README.md)，MolmoAct2的原生精度/数据差异见 [接入说明](reference/molmoact2_integration.md)。
 
-XR-1 当前只是服务器资产与依赖准备，不代表已接入本仓库训练入口。所选 checkpoint、版本锁、`decord` wheel 元数据修复和原生 state/action 语义见 [XR-1 环境报告](reports/environments/xr1-20260924/README.md)；不能把 YAM 14D joint action 直接当作 XR-1 action。
+XR-1 的本地原生训练入口已接入，尚不能把现有 YAM 14D joint action 数据直接拿来开训。所选 checkpoint、版本锁、`decord` wheel 元数据修复和原生 state/action 语义见 [XR-1 环境报告](reports/environments/xr1-20260924/README.md)；操作与待完成项见下文。
 
 不复制 LeRobot 的 registry、trainer、processor 或 dataset 实现；`configs/models/*.toml` 只选后端、policy_type 和已接通能力，入口集中在 `adapters/<backend>/backend.toml`。具体模型在子进程中调用上游；Pi 调用既有 OpenPI。原作者代码用于对照，不强制每个模型维护双实现。RLinf 的 DAgger/RL 接入不是当前范围。
+
+## 2026-09-24 · XR-1 原生训练入口
+
+`configs/models/xr1-5b.toml` 选择独立 `xr1` 后端，`third_party/xr1/` 固定 Xiaomi 上游 `0dd7aef8dc87296246aae812a1f59ccb708e5546` 源码、许可和逐文件 SHA256。`adapters/xr1/` 只做配置合成、数据门槛和 Slurm 启动；调用上游 `tools/train.py`，不复制训练循环。服务器已安装的独立 prefix 和官方 5B 权重仍按 [02](02_installation_and_environment.md#xr-1-服务器环境-2026-09-24) 与 [环境报告](reports/environments/xr1-20260924/README.md) 核对。本地快照与服务器早先安装的源码 revision 一致，服务器尚未同步本仓库的新接入代码。
+
+先由已标定的离线运动学在**新目录**生成 XR-1 原生 JSON 和三路同步视频绝对路径；每条训练 episode 需有当前/目标末端位置与旋转矩阵、6关节与夹爪状态/目标、显式固定底盘和腰部字段。关节状态能映射到 60D 的左/右各6关节和夹爪槽，缺少的第7关节槽为0；14D 关节目标不能填进末端 action。按 train episode 运行上游 `tools/compute_normalize.py` 得到 30×60 action mean/std 和 1×60 state q01/q99，在 `normalize.json` 加入 `train_json_sha256`，每个训练 JSON 的绝对路径映射到 SHA256。另存 `fk_audit.json`，记录 `source_contract`、`source_dataset`、`source_revision`、逐条 `train_episode_ids`、`fk_model` 绝对路径及 `fk_model_sha256`、相同的 `train_json_sha256`，并且只在逐值核实坐标系/物理单位和目标时序后把 `frames_and_units_verified`、`target_alignment_verified` 置为 true。split 按源 rollout 隔离；val 不进入训练统计。现阶段**没有**已审核的 FK、派生 JSON、统计和部署 IK，示例路径不可运行。
+
+准备好这些资产后，将 [示例 recipe](../configs/native/xr1-yam.example.json) 另存为实验专用文件，填入真实绝对路径和批量/步数，然后只读生成平台计划：
+
+```bash
+python3 scripts/vla.py plan configs/experiments/xr1-yam.toml train --run-id xr1-yam-plan
+```
+
+平台计划仅核对声明和文件哈希，不表示配方已通过数据门槛。用服务器 XR-1 prefix 执行 `python adapters/xr1/train.py --recipe <绝对路径> --output <新目录> --check-only` 才执行原生 JSON、视频、统计、FK 审计和 checkpoint SHA 检查；此步骤不构造模型或进入训练循环。真正启动必须在获准的 Slurm GPU allocation 中执行 `scripts/vla.py run ...`；wrapper 会把解析后的上游配置与审计哈希留在新运行目录，W&B 仅本地离线记录。启动前仍需核对当前作业资源、CUDA/import、视频解码与首条数据。已实现训练接口不等于真实 YAM 训练或推理通过。XR-1 原生输出是末端目标；推理前还需独立验证 YAM 的 IK、限位、坐标变换及 Thor 服务时序，当前模型声明没有 `infer` 能力。
+
+## 模型、数据、算法模块化配置改革草案
+
+目标是在现有 stdlib 控制层上组合**声明**，保持 LeRobot、OpenPI、XR-1 和 OpenWAM 的原生训练器与 checkpoint。建议分四层，逐层固定版本并在生成命令前解析成不可变的 `resolved` 产物：
+
+| 层 | 组件声明 | 关键字段与验收 |
+|---|---|---|
+| 模型 | `configs/models/` + `adapters/<backend>/backend.toml` | 后端、基础 checkpoint 哈希、支持操作、state/action 语义、horizon、相机需求；能力未接通不可声明 |
+| 数据 | 待增 `configs/datasets/` + `configs/splits/` | 源 repo/revision、episode/场景分组、时间轴与单位、三相机映射、不可变 train/val manifest；split 先于统计，原始数据只读 |
+| 算法 | 待增 `configs/algorithms/` | full/LoRA、原生 trainer 参数、loss/normalizer、精度、资源预算、续训语义；按后端做允许字段校验，不创造通用 optimizer 实现 |
+| 运行与交接 | 现有 `configs/environments/` + `configs/experiments/`，后续部署 profile | Conda/镜像、设备、输出合同、checkpoint/processor/stats 的哈希、推理服务和精度/时延 gate |
+
+实验文件只引用各层组件 ID、版本及少量有类型的覆盖值。解析器先核查**模型动作空间 × 机器人状态/动作合同 × 数据标签 × 算法**是否相容，再冻结源 episode 列表、split、统计 ID、权重 hash、上游 revision 和全部覆盖值。`plan` 展示最终训练/推理命令、数据读写路径与尚缺 gate；`run` 在正确环境调用原生入口。推理 profile 必须随 checkpoint 读取同一相机顺序、动作语义、归一化与控制周期；不能从训练名猜测。
+
+第一阶段把现有 Pi、Evo/MolmoAct2、OpenWAM、XR-1 配置映射为这些组件的**只读清单**，保留旧实验入口和结果。第二阶段新增按 rollout/场景分组的确定性 split 生成器及泄漏审计，派生文件只写新目录；各后端用自己的 processor/统计。第三阶段生成冻结的训练和部署包，进行真实 GPU/Thor 验收后再替换旧入口。XR-1 先作为反例驱动兼容性检查：YAM 14D joint 标签与 XR-1 EE action 不相容时，`plan` 必须显式阻断训练，除非已选经审计的 FK 派生数据；部署另需 IK gate。DAgger 每轮训练配方仍按本仓库约束逐轮展示和确认，模块化不能绕过该边界。
 
 ## 工作树与 Git
 
