@@ -6,7 +6,7 @@
 
 新增独立服务器 prefix `/home/wuyan/.conda/envs/xr1-posttrain`，Python 3.12.14、Torch 2.8.0+cu128、Transformers 4.57.1、FlashAttention 2.8.3、DeepSpeed 0.18.9；包锁、安装日志和来源凭据见 [环境报告](reports/environments/xr1-20260924/README.md)。`pip check` 最初因 decord 0.6.0 的官方 wheel 外部文件名与内部 WHEEL tag 不一致而失败；依据上游 issue 将内部 tag 修正为其发布文件名声明的 `py3-none-manylinux2010_x86_64`，备份原元数据、更新 RECORD 后检查通过，并将修复加入安装脚本。环境 activation hook 自动设置 `HF_HOME`。
 
-安装期间只读确认 Slurm 作业 2176 保持运行，没有中断作业或运行训练。XR-1 源码硬编码 state 60D/action 30×60，YAM 是 14D，尚未设计数据投影；因此没有提交训练。GPU import/前向、真实视频数据加载与训练仍未验收。
+安装期间只读确认 Slurm 作业 2176 保持运行，没有中断作业或运行训练。后续核对源码明确 XR-1 原生 state 为关节/夹爪、action 为末端局部相对位姿/夹爪及腰部/底盘槽；YAM 是 joint-space 14D，不能直接按形状映射。数据/部署投影尚未设计，因此没有提交训练。GPU import/前向、真实视频数据加载与训练仍未验收。
 
 ## 2026-09-23 · Thor Pi RTC 20h136000 上线并清理旧产物
 

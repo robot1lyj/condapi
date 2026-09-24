@@ -11,14 +11,14 @@
 | LeRobot 后端 | 共用原生训练 launcher 已实现并用替身测试；无自建 trainer/processor；尚无通用离线推理入口 |
 | Evo-1 | 本地/服务器专用环境已安装并通过CPU检查；YAM真实训练/推理仍待接入 |
 | MolmoAct2 | 原生LeRobot共享后端已注册；两端独立环境CPU检查通过、108包版本一致；仅普通版，不含Think，真实YAM/GPU仍待验收 |
-| Xiaomi-Robotics-1 / XR-1 | 2026-09-24 已安装独立服务器环境并下载官方 5B checkpoint；`pip check` 通过；未做 GPU 推理/训练，YAM 14D 与模型 60D 合同尚未适配 |
+| Xiaomi-Robotics-1 / XR-1 | 2026-09-24 已安装独立服务器环境并下载官方 5B checkpoint；`pip check` 通过；原生输入为关节/夹爪 state、输出 action 为末端相对位姿/夹爪，未做 GPU 推理/训练或 YAM 适配 |
 | FastWAM、VLA-JEPA | 注册 planned；不得运行或报告已支持 |
 | Conda | Evo-1已有独立环境规格和104个wheel的锁；Pi等bootstrap仍不代表模型环境已安装 |
 | Thor | 原 Pi 容器、TensorRT 引擎、报告保持原状；没有部署此次改造 |
 
 当前 CPU 回归：平台测试52项；与 `scripts/thor`、`skills/mlops-memory/tests` 和下载完整性测试合跑170项通过。测试命令为 `python -m pytest -q packages/vla-platform/tests scripts/thor skills/mlops-memory/tests scripts/conda/fetch_locked_wheels_test.py`。框架测试替身不冒充模型运行；独立Evo环境实际导入/processor检查见 [环境证据](reports/environments/evo1-20260908/README.md)，MolmoAct2的原生精度/数据差异见 [接入说明](reference/molmoact2_integration.md)。
 
-XR-1 当前只是服务器资产与依赖准备，不代表已接入本仓库训练入口。所选 checkpoint、版本锁和 `decord` wheel 元数据修复记录见 [XR-1 环境报告](reports/environments/xr1-20260924/README.md)；模型源码固定 60D state / 60D action horizon 30，不能直接套用 YAM 14D 合同。
+XR-1 当前只是服务器资产与依赖准备，不代表已接入本仓库训练入口。所选 checkpoint、版本锁、`decord` wheel 元数据修复和原生 state/action 语义见 [XR-1 环境报告](reports/environments/xr1-20260924/README.md)；不能把 YAM 14D joint action 直接当作 XR-1 action。
 
 不复制 LeRobot 的 registry、trainer、processor 或 dataset 实现；`configs/models/*.toml` 只选后端、policy_type 和已接通能力，入口集中在 `adapters/<backend>/backend.toml`。具体模型在子进程中调用上游；Pi 调用既有 OpenPI。原作者代码用于对照，不强制每个模型维护双实现。RLinf 的 DAgger/RL 接入不是当前范围。
 

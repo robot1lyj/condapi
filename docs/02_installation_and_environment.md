@@ -241,7 +241,7 @@ echo "$HF_HOME"
 DeepSpeed 0.18.9；`pip check` 通过。服务器模型文件为
 `/home/wuyan/lyj/xiaomi-robotics-1/checkpoints/Xiaomi-Robotics-1-5B-ee21d524/model_states.pt`，
 远端 SHA-256 与 Hugging Face LFS 摘要一致。安装完成不代表 GPU、训练或 YAM 数据适配已验收。
-XR-1 源码将 state 固定为 60D、action 固定为 30×60；YAM 原始合同是 14D，启动训练前必须先设计并验收数据投影。
+XR-1 state 是 60D 关节/夹爪输入，action 虽为 60D 张量，语义为末端相对位姿/夹爪及腰部/底盘槽位；YAM 的 14D joint action 不能按形状直接套入。启动训练前必须先确定并验收具体投影，见环境报告。
 
 ## 3. Slurm 和 GPU 预检
 
