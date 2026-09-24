@@ -224,6 +224,25 @@ pip check → CPU 导入检查。目标为 `/home/wuyan/.conda/envs/condapi-yam`
 安装日志 `/tmp/condapi-yam-smoke.CzQI6oAj/install.log` 已出现 INSTALL_COMPLETE。
 不能据此宣布 `/home/wuyan/.conda/envs/condapi-yam` 已完成，后者仍以自身安装日志为准。
 
+### XR-1 服务器环境（2026-09-24）
+
+在服务器安装上游 XR-1 代码快照并创建独立 Conda prefix；没有复用或修改 `condapi-yam`。运行前：
+
+```bash
+module load miniconda3/26.1.1
+conda activate /home/wuyan/.conda/envs/xr1-posttrain
+python -m pip check
+echo "$HF_HOME"
+```
+
+`HF_HOME` 由该环境的 Conda activation hook 指向 `/home/wuyan/lyj/xiaomi-robotics-1/hf-home`。
+安装记录、包锁、来源 revision、哈希与兼容限制见 [XR-1 环境报告](reports/environments/xr1-20260924/README.md)。
+已安装 Python 3.12.14、PyTorch 2.8.0+cu128（CUDA build 12.8）、Transformers 4.57.1、FlashAttention 2.8.3、
+DeepSpeed 0.18.9；`pip check` 通过。服务器模型文件为
+`/home/wuyan/lyj/xiaomi-robotics-1/checkpoints/Xiaomi-Robotics-1-5B-ee21d524/model_states.pt`，
+远端 SHA-256 与 Hugging Face LFS 摘要一致。安装完成不代表 GPU、训练或 YAM 数据适配已验收。
+XR-1 源码将 state 固定为 60D、action 固定为 30×60；YAM 原始合同是 14D，启动训练前必须先设计并验收数据投影。
+
 ## 3. Slurm 和 GPU 预检
 
 最新复核（2026-09-07）：调度接口已恢复，按用户要求撤销仍在排队的作业 2063，

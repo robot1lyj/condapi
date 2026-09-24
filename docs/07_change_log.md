@@ -1,5 +1,13 @@
 # 07 · 变更历史
 
+## 2026-09-24 · 安装 Xiaomi-Robotics-1 XR-1 环境并缓存官方 checkpoint
+
+选择官方通用后训练权重 `XiaomiRobotics/Xiaomi-Robotics-1-5B`，固定 revision `ee21d524b5c52ac961d941e1bc7d6d92836c3d5e`；服务器文件 `model_states.pt` 大小 10,226,684,862 bytes，SHA-256 `94d55a79122050a654b379664b644e874ff90d64ccd30a6a633f816555bcecf7` 已核对。仅将 XR-1 源码快照、许可、Qwen processor/config 文件和 checkpoint 放入 `/home/wuyan/lyj/xiaomi-robotics-1`；不下载 XR-1 demo 数据。
+
+新增独立服务器 prefix `/home/wuyan/.conda/envs/xr1-posttrain`，Python 3.12.14、Torch 2.8.0+cu128、Transformers 4.57.1、FlashAttention 2.8.3、DeepSpeed 0.18.9；包锁、安装日志和来源凭据见 [环境报告](reports/environments/xr1-20260924/README.md)。`pip check` 最初因 decord 0.6.0 的官方 wheel 外部文件名与内部 WHEEL tag 不一致而失败；依据上游 issue 将内部 tag 修正为其发布文件名声明的 `py3-none-manylinux2010_x86_64`，备份原元数据、更新 RECORD 后检查通过，并将修复加入安装脚本。环境 activation hook 自动设置 `HF_HOME`。
+
+安装期间只读确认 Slurm 作业 2176 保持运行，没有中断作业或运行训练。XR-1 源码硬编码 state 60D/action 30×60，YAM 是 14D，尚未设计数据投影；因此没有提交训练。GPU import/前向、真实视频数据加载与训练仍未验收。
+
 ## 2026-09-23 · Thor Pi RTC 20h136000 上线并清理旧产物
 
 - 从服务器同 20h run 的136000取完整推理参数，Thor18项源SHA全部通过、无NaN/Inf；复用同run且norm一致的124000训练合同，保留其来源限制。完成811张量FP32转换、MAXN下七步JAX/TRT九例对照和候选/上线后各九例WebSocket smoke。

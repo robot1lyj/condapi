@@ -16,6 +16,7 @@
 - 多模型薄接入层、Conda、工作树、Evo-1 接入状态 → `docs/10_vla_platform.md`
 - Evo-1 独立环境安装与复现 → `docs/02_installation_and_environment.md#Evo-1 / LeRobot 独立环境`；实测安装证据 → `docs/reports/environments/evo1-20260908/README.md`
 - MolmoAct2原生LeRobot/LoRA/双夹爪接入 → `docs/reference/molmoact2_integration.md`；环境状态 → `docs/reports/environments/molmoact2-20260908/README.md`
+- Xiaomi-Robotics-1 / XR-1 checkpoint、服务器环境与 60D/14D 适配 gate → `docs/02_installation_and_environment.md#XR-1 服务器环境（2026-09-24）`、`docs/10_vla_platform.md`；完整哈希/版本/安装证据 → `docs/reports/environments/xr1-20260924/README.md`
 
 - 交接入口 → `docs/00_handoff_index.md`
 - 架构 → `docs/01_system_architecture.md`

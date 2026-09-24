@@ -5,6 +5,7 @@
 ## 当前默认
 
 - 2026-09-08 功能分支收敛为模型配置 + 共享后端：`configs/models/` 选择模型，`adapters/lerobot/` 共用原生入口、`adapters/openpi/` 保留 Pi；撤销按模型的 plugins 目录。系列环境仍独立 Conda，LeRobot 模型不重写 trainer/processor。控制层和合同测试已有，Evo-1/FastWAM/VLA-JEPA 尚未接通 GPU 训练或推理；共享入口不等于模型已支持。架构见 [01](../01_system_architecture.md#多模型接入层)，当前状态和 Evo 接入步骤见 [10](../10_vla_platform.md)。
+- 2026-09-24 XR-1 官方 5B 后训练 checkpoint 与独立 Conda 环境已放在服务器；`pip check` 通过。源码固定 60D state/action，YAM 14D 投影未完成，未运行训练或 GPU 验收。资产摘要和实测边界见 [环境报告](../reports/environments/xr1-20260924/README.md)，操作入口见 [02](../02_installation_and_environment.md#xr-1-服务器环境-2026-09-24) 与 [10](../10_vla_platform.md)。
 
 - YAM 已实现路线为 Pi0.5 全量微调 / `pi05_yam`。2026-09-16用户暂停训练，完整基线100000；后确认现场16 mm小颗粒与ABC不同。14:51夹爪已能闭合；只读控制重放发现夹爪旧预测/关节融合与滤波响应需验收。现场计划先验控制，再采50条train+10条val，以100000权重另开SFT；用户随后提出采集窗口训练Evo，建议D1小预算两阶段与采集并行，四卡训练按时段串行。后续最新决定改为从官方Pi0.5 base随机10h训练RTC+全量微调，已接代码与子集norm；18:15获用户授权后Slurm2140/gpu001四卡已运行，随机468条10.020667h、记录至21次更新有限，首个保存/真实恢复待验收。接管见[运行报告](../reports/training/rtc-base-10h-20260916/README.md)；训练设计见[RTC方案](../03_training_and_evaluation.md#2026-09-16--pi05-training-time-rtc基础权重与随机10小时)。状态、预算和证据归 [训练](../03_training_and_evaluation.md#2026-09-16--训练重设计先复现乐高分拣再比较模型)，Evo版本/计数陷阱归 [10](../10_vla_platform.md#四卡训练落地前的固定版本检查)；不自动回退LoRA。
 - YAM 为 14D `[左6关节, 左夹爪, 右6关节, 右夹爪]`；Pi 路径关节 delta、夹爪 absolute，mask `(6,-1,6,-1)`，内部 32D、horizon 50；这些模型内部规则不套用其他系列。物理单位仍须数据审计，不套用 OpenArm/Piper 合同，见 [数据合同](../04_data_contracts.md)。
