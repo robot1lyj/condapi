@@ -1,0 +1,7 @@
+schema_version = 1
+model = "xr1-5b"
+environment = "configs/environments/xr1-server.toml"
+contract = "configs/robots/yam.toml"
+
+[parameters]
+recipe = "configs/native/xr1-yam-lego-50h.json"

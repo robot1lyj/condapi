@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "source_contract": "yam-bimanual-v1",
+  "train_manifest": "/home/wuyan/lyj/YAM/YAM_data/derived/xr1_lego_50h_eef_v1_20260924/train/manifest.json",
+  "selection_sha256": "05bebc664d627a7ca4279314df1f61de67397c8943dc6b45223a2bb6893bcd8f",
+  "source_manifest_sha256": "9844c0b86b93fd40adf251275d770899ba413800d2a0cba11d4e9bdae40544dc",
+  "expected_episodes": 2337,
+  "expected_frames": 5400685,
+  "stats": "/home/wuyan/lyj/YAM/YAM_data/derived/xr1_lego_50h_eef_v1_20260924/normalize.json",
+  "kinematics_audit": "/home/wuyan/lyj/YAM/YAM_data/derived/xr1_lego_50h_eef_v1_20260924/fk_audit.json",
+  "pretrained": "/home/wuyan/lyj/xiaomi-robotics-1/checkpoints/Xiaomi-Robotics-1-5B-ee21d524/model_states.pt",
+  "checkpoint_sha256": "94d55a79122050a654b379664b644e874ff90d64ccd30a6a633f816555bcecf7",
+  "nproc_per_node": 4,
+  "project": "yam-xr1",
+  "experiment": "lego-50h-eef-v1",
+  "max_steps": 337543,
+  "batch_size": 4,
+  "save_interval": 25000
+}

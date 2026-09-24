@@ -8,6 +8,23 @@
 
 本地已接上游 XR-1 原生训练入口，但当前 YAM 数据只有14D关节/夹爪目标，缺少经审核的末端位姿标签。正式训练先由离线 FK 在新目录生成原生 JSON，固定 train/val split 并只用 train 重算 30×60 action 与 1×60 state 统计；再核查坐标系、物理单位、时序与 5B 基础权重 SHA。平台 `plan` 只生成命令，不替代数据预检；只有通过 [10 的 XR-1 操作门槛](10_vla_platform.md#2026-09-24--xr-1-原生训练入口) 且获准的 Slurm GPU 节点才能启动。训练完成还需独立做模型 forward、验证集和部署 IK/Thor 推理验收；现均未发生。
 
+### 乐高 50h 的候选微调配方
+
+配置 owner 为 [`configs/native/xr1-yam-lego-50h.json`](../configs/native/xr1-yam-lego-50h.json)，平台入口为 [`configs/experiments/xr1-lego-50h.toml`](../configs/experiments/xr1-lego-50h.toml)。这是**候选配方，尚未开训**。固定官方通用 5B `ee21d524` 权重及 SHA256；训练集为 50h 派生版的完整 `train/manifest.json`，预期 2,337 集、5,400,685 帧；原始 `val` 69 集独立保留，不参加训练统计或训练采样。训练入口从 manifest 展开精确 JSON 列表，并核对选集、源转换 manifest、逐集 JSON 哈希、统计 manifest 哈希、FK audit 的源仓/模型/成员，以及官方权重 SHA。完整转换、`normalize.json` 和真实 FK/单位/时序审核完成前，`--check-only` 应拒绝通过。
+
+首版计划为 4 GPU × 每卡 batch 4、梯度累积 1，即 global batch 16；`max_steps=337543`，按上游 `JsonDataset` 的逐帧采样逻辑覆盖 `ceil(5,400,685/16)` 个 optimizer step，约一轮。30 步 action horizon、BF16 mixed precision、DeepSpeed、AdamW/FusedAdam、原生 cosine 日程（warmup 500、最高学习率 2e-5、最低 5e-6）、梯度裁剪 1.0 和随机种子 42 继承固定上游配置。每 25,000 optimizer step 保存，原生 `save_last` 保留；因上游 `save_top_k=-1` 会积累所有定期 checkpoint，训练前须估算磁盘占用并确定保留策略。每卡 batch 4 只是容量起点，需在空闲的 Slurm GPU 节点验证 CUDA/模型初始化、数据解码与显存；若改 batch、卡数或步数，须同步重新计算覆盖轮数并产生新配方版本，不能静默沿用本配方的轮数声明。
+
+先在服务器仓库同步该代码和配置；派生 `train/manifest.json`、`val/manifest.json`、`normalize.json` 与 `fk_audit.json` 真实齐备并完成逐值审核后，执行只读预检：
+
+```bash
+conda run -p /home/wuyan/.conda/envs/xr1-posttrain python adapters/xr1/train.py \
+  --recipe configs/native/xr1-yam-lego-50h.json \
+  --output /home/wuyan/lyj/xiaomi-robotics-1/runs/lego-50h-eef-v1 \
+  --check-only
+```
+
+预检通过后再编排 Slurm 作业；当前没有提交作业文件或启动 XR-1 训练。上游 loader 当前无 val dataloader，69 集 val 用于训练后离线评估，需要另行明确评估指标和执行入口，不能把训练 loss 当成验证结果。
+
 ## 2026-09-22 · 通用 DAgger 工作流技能
 
 已创建 [dagger-flywheel](../skills/dagger-flywheel/SKILL.md) 源码与轮次模板，支持任意首次任务SFT基线的3轮主计划及最多2轮条件扩展，不绑定20h。训练初始化固定基线、采集使用当前验收模型；训练仍为普通全量SFT/原RTC目标，介入字段仅用于离线筛选与追溯。项目操作细节归 [手册](reference/lego_dagger_playbook.md)，数据语义归04。技能安装不代表HIL转换/双池采样/有效窗口已实现，不授权自动提交训练或切换服务。

@@ -32,6 +32,8 @@ YAM 新增的 `hil.xr1_dataset` 是 FK 与连续人工专家段的 sidecar owner
 
 用户随后指定服务器的 50h 乐高 LeRobot 选集。该资产不是 HIL episode，本仓库因此另提供 `adapters/xr1/prepare_lego.py`：按既有 2,337 条选集和 LeRobot v3 episode 边界使用同一 YAM 末端坐标合同派生 JSON；服务器 XR-1 的 decord 无法读取源 AV1，故按逐集 `start` 偏移将选中视频重编码到新的 H.264 目录。不生成虚构的 HIL tick 或专家标记。50h 派生资产的来源、状态和单位限制归 [04](04_data_contracts.md#50h-乐高-lerobot-数据的-xr-1-末端派生版)。
 
+该选集的候选训练配置为 [`xr1-yam-lego-50h.json`](../configs/native/xr1-yam-lego-50h.json) 和 [`xr1-lego-50h.toml`](../configs/experiments/xr1-lego-50h.toml)，具体 batch、步数、checkpoint 频率和未完成 gate 见 [03](03_training_and_evaluation.md#乐高-50h-的候选微调配方)。50h recipe 直接引用完成的 train manifest，由适配器展开并核对成员；旧 `train_jsons` recipe 仍可用。
+
 准备好这些资产后，将 [示例 recipe](../configs/native/xr1-yam.example.json) 另存为实验专用文件，填入真实绝对路径和批量/步数，然后只读生成平台计划：
 
 ```bash

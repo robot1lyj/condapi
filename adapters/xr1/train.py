@@ -9,10 +9,10 @@ import subprocess
 import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from adapters.xr1.common import VENDOR  # noqa: E402
-from adapters.xr1.common import validate_episode  # noqa: E402
-from adapters.xr1.common import validate_stats  # noqa: E402
-from adapters.xr1.common import verify_source  # noqa: E402
+from adapters.xr1.common import VENDOR
+from adapters.xr1.common import validate_episode
+from adapters.xr1.common import validate_stats
+from adapters.xr1.common import verify_source
 
 
 def file_hash(path):
@@ -24,9 +24,24 @@ def inspect_recipe(recipe_path, output):
     """Inspect model/data/kinematics identity without importing or constructing the model."""
     recipe = json.loads(Path(recipe_path).read_text())
     keys = {
-        "schema_version", "source_contract", "train_jsons", "stats", "kinematics_audit",
-        "pretrained", "checkpoint_sha256", "nproc_per_node", "project", "experiment",
-        "max_steps", "batch_size",
+        "schema_version",
+        "source_contract",
+        "train_jsons",
+        "train_manifest",
+        "stats",
+        "kinematics_audit",
+        "pretrained",
+        "checkpoint_sha256",
+        "nproc_per_node",
+        "project",
+        "experiment",
+        "max_steps",
+        "batch_size",
+        "save_interval",
+        "selection_sha256",
+        "source_manifest_sha256",
+        "expected_episodes",
+        "expected_frames",
     }
     if recipe.get("schema_version") != 1 or set(recipe) - keys:
         raise ValueError("Invalid XR-1 recipe schema")
@@ -35,34 +50,83 @@ def inspect_recipe(recipe_path, output):
     for field in ("nproc_per_node", "max_steps", "batch_size"):
         if type(recipe.get(field)) is not int or recipe[field] < 1:
             raise ValueError(f"{field} must be a positive integer")
+    if "save_interval" in recipe and (type(recipe["save_interval"]) is not int or recipe["save_interval"] < 1):
+        raise ValueError("save_interval must be a positive integer")
     for field in ("project", "experiment"):
         value = recipe.get(field)
         alphabet = "abcdefghijklmnopqrstuvwxyz0123456789-_"
         if not isinstance(value, str) or not value or any(ch not in alphabet for ch in value):
             raise ValueError(f"Invalid {field}")
-    paths = recipe.get("train_jsons")
+    if ("train_jsons" in recipe) == ("train_manifest" in recipe):
+        raise ValueError("Provide exactly one of train_jsons or train_manifest")
+    manifest = None
+    if "train_manifest" in recipe:
+        manifest_path = Path(recipe["train_manifest"])
+        if not manifest_path.is_absolute() or not manifest_path.is_file():
+            raise ValueError("Missing absolute XR-1 train manifest")
+        manifest = json.loads(manifest_path.read_text())
+        entries = manifest.get("episodes")
+        ids = manifest.get("episode_ids")
+        if (
+            manifest.get("schema") != "yam_xr1_lego_eef_v1"
+            or manifest.get("split") != "train"
+            or not isinstance(entries, list)
+            or not entries
+            or not isinstance(ids, list)
+            or len(entries) != len(ids)
+            or len(set(ids)) != len(ids)
+        ):
+            raise ValueError("Incomplete or invalid 50h train manifest")
+        for key in ("selection_sha256", "source_manifest_sha256"):
+            if manifest.get(key) != recipe.get(key):
+                raise ValueError(f"50h train manifest {key} differs from recipe")
+        if (
+            len(entries) != recipe.get("expected_episodes")
+            or sum(entry["frames"] for entry in entries) != recipe.get("expected_frames")
+            or [entry["episode_index"] for entry in entries] != ids
+        ):
+            raise ValueError("50h train episode identity or frame total differs from recipe")
+        paths = [entry["json"] for entry in entries]
+    else:
+        paths = recipe["train_jsons"]
     if not isinstance(paths, list) or not paths or len(set(paths)) != len(paths):
         raise ValueError("Provide a nonempty, unique train JSON list")
     output = Path(output).resolve()
-    for field in (*paths, recipe["stats"], recipe["kinematics_audit"], recipe["pretrained"]):
+    input_fields = [*paths, recipe["stats"], recipe["kinematics_audit"], recipe["pretrained"]]
+    if manifest is not None:
+        input_fields.append(recipe["train_manifest"])
+    for field in input_fields:
         if not isinstance(field, str) or not Path(field).is_absolute():
             raise ValueError("XR-1 input paths must be absolute")
     inputs = [Path(p).resolve() for p in paths]
     stats_path = Path(recipe["stats"]).resolve()
     audit_path = Path(recipe["kinematics_audit"]).resolve()
-    checkpoint = Path(recipe["pretrained"]).resolve()
-    for path in (*inputs, stats_path, audit_path, checkpoint):
+    for path in (Path(p).resolve() for p in input_fields):
         if not path.is_file():
             raise ValueError(f"Missing absolute XR-1 input: {path}")
         if output.is_relative_to(path.parent):
             raise ValueError("New training output must be outside the input tree")
     episodes = [validate_episode(path) for path in inputs]
+    if manifest is not None:
+        for entry, episode in zip(manifest["episodes"], episodes, strict=True):
+            if (
+                entry["json"] != episode["path"]
+                or entry["json_sha256"] != episode["sha256"]
+                or entry["frames"] != episode["frames"]
+            ):
+                raise ValueError("50h train manifest does not bind the derived episode")
     stats = json.loads(stats_path.read_text())
     validate_stats(stats)
     audit = json.loads(audit_path.read_text())
     required = (
-        "source_contract", "source_dataset", "source_revision", "train_episode_ids", "fk_model",
-        "fk_model_sha256", "frames_and_units_verified", "target_alignment_verified",
+        "source_contract",
+        "source_dataset",
+        "source_revision",
+        "train_episode_ids",
+        "fk_model",
+        "fk_model_sha256",
+        "frames_and_units_verified",
+        "target_alignment_verified",
     )
     if any(key not in audit for key in required):
         raise ValueError("Incomplete YAM FK audit")
@@ -74,17 +138,39 @@ def inspect_recipe(recipe_path, output):
     fk_model = Path(audit["fk_model"])
     if not fk_model.is_absolute() or not fk_model.is_file() or file_hash(fk_model) != audit["fk_model_sha256"]:
         raise ValueError("YAM FK model path/hash mismatch")
-    if (not isinstance(audit["train_episode_ids"], list) or len(audit["train_episode_ids"]) != len(inputs)
-            or len(set(audit["train_episode_ids"])) != len(inputs)):
+    if (
+        not isinstance(audit["train_episode_ids"], list)
+        or len(audit["train_episode_ids"]) != len(inputs)
+        or len(set(audit["train_episode_ids"])) != len(inputs)
+    ):
         raise ValueError("FK audit must identify every training episode")
     if audit.get("train_json_sha256") != {item["path"]: item["sha256"] for item in episodes}:
         raise ValueError("FK audit does not bind the exact derived JSON files")
+    if manifest is not None and (
+        audit["train_episode_ids"] != manifest["episode_ids"]
+        or audit["source_dataset"] != manifest["source_repo"]
+        or audit["source_revision"] != manifest["source_manifest_sha256"]
+        or audit["fk_model"] != manifest["fk_model"]
+        or audit["fk_model_sha256"] != manifest["fk_model_sha256"]
+        or stats.get("train_manifest_sha256") != file_hash(recipe["train_manifest"])
+    ):
+        raise ValueError("50h FK audit or statistics differ from the train manifest")
     if stats.get("train_json_sha256") != audit["train_json_sha256"]:
         raise ValueError("Normalization statistics do not bind the training split")
     if recipe.get("checkpoint_sha256") != "94d55a79122050a654b379664b644e874ff90d64ccd30a6a633f816555bcecf7":
         raise ValueError("XR-1 checkpoint identity differs from the selected official 5B revision")
-    return recipe, stats, {"episodes": episodes, "audit_sha256": file_hash(audit_path),
-                           "stats_sha256": file_hash(stats_path), "upstream_revision": verify_source()}
+    resolved = {**recipe, "train_jsons": paths}
+    return (
+        resolved,
+        stats,
+        {
+            "episodes": episodes,
+            "audit_sha256": file_hash(audit_path),
+            "stats_sha256": file_hash(stats_path),
+            "upstream_revision": verify_source(),
+            "train_manifest_sha256": file_hash(recipe["train_manifest"]) if manifest else None,
+        },
+    )
 
 
 def compose_config(recipe, stats, output):
@@ -102,6 +188,8 @@ def compose_config(recipe, stats, output):
         data[key] = stats[key]
     config.model.params.pretrained = recipe["pretrained"]
     config.trainer.max_steps = recipe["max_steps"]
+    if "save_interval" in recipe:
+        config.trainer.save_interval = recipe["save_interval"]
     config.trainer.project = recipe["project"]
     config.trainer.exp_name = recipe["experiment"]
     config.trainer.default_root_dir = str(output / "native")
@@ -138,10 +226,21 @@ def main(argv=None):
     env["MLP_WORKER_NUM"] = "1"
     env["MLP_WORKER_GPU"] = str(recipe["nproc_per_node"])
     subprocess.run(
-        [sys.executable, "-m", "torch.distributed.run", "--standalone",
-         f"--nproc_per_node={recipe['nproc_per_node']}", str(VENDOR / "tools/train.py"),
-         "--config-path", str(args.output.resolve()), "--config-name", "resolved"],
-        cwd=args.output, env=env, check=True,
+        [
+            sys.executable,
+            "-m",
+            "torch.distributed.run",
+            "--standalone",
+            f"--nproc_per_node={recipe['nproc_per_node']}",
+            str(VENDOR / "tools/train.py"),
+            "--config-path",
+            str(args.output.resolve()),
+            "--config-name",
+            "resolved",
+        ],
+        cwd=args.output,
+        env=env,
+        check=True,
     )
 
 
