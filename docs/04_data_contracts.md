@@ -328,9 +328,9 @@ XR-1 使用单独的末端动作合同，不继承本节 OpenWAM 的 joint-actio
 
 `adapters/xr1/prepare_lego.py` 对每个选中 episode 的同一行 `observation.state` 和绝对 `action` 各执行官方 YAM + `linear_4310/grasp_site` 的 MuJoCo FK，产出米制末端位置与 3×3 旋转矩阵、原 6 关节与夹爪 proprio/目标。模型束在 `third_party/yam-fk-model/`，来源 revision、XML/mesh 哈希和 MIT 许可同目录。服务器 XR-1 的 `decord==0.6.0` 实测不能打开源 AV1 视频，因此每集将源视频按 v3 `start` 帧偏移提取、以 H.264 `yuv420p/crf18` 重编码到新目录，并逐集核对输出帧数；这是有损图像派生，不是逐像素无损副本。原 `timestamp`、episode/frame 索引和源 `start` 仍在溯源文件。源数据和 Pi 50h 资产只读，派生输出写新目录；中断后仅允许相同 source/selection/FK 身份执行 `--resume`。源集没有逐集成功标注，派生 `trajectory_type` 设为 `ongoing`，不得在审核前宣称全为成功示范。
 
-发布前核对总集数/帧数、逐集三视频偏移和原生字段。原转换 manifest 对 joint 单位为 rad、夹爪 0 闭 1 开的结论基于发布者合同及数值一致性，仍未完成独立 raw→port/真机标定；因此 FK 单位与同帧目标时序审计不能自动写为训练 gate 的 true。后续 `normalize.json` 只用 50h train 选集计算，不读取原 val；验证集也保留独立资产身份。
+发布前核对总集数/帧数、逐集三视频偏移和原生字段。原转换 manifest 对 joint 单位为 rad、夹爪 0 闭 1 开的结论基于发布者合同及数值一致性，仍未完成独立 raw→port/真机标定；因此 FK 单位与同帧目标时序审计不能自动写为训练 gate 的 true。`adapters/xr1/compute_stats.py` 在 train/val 完整产物写成后，按上游相同的完整 30 步窗口与旋转向量编码流式累积 30×60 均值/标准差、14 个有效状态槽的精确分位数，并将每个训练 JSON 的 SHA256 写入 `normalize.json`；不读取原 val。验证集保留独立资产身份。
 
-服务器已于 2026-09-24 17:44+08 在低优先级 tmux `xr1-lego-50h-data` 启动转换，派生根目录为 `/home/wuyan/lyj/YAM/YAM_data/derived/xr1_lego_50h_eef_v1_20260924/`，日志为 `/home/wuyan/lyj/xiaomi-robotics-1/install/prepare_lego_50h.log`。首条 train episode 0 的三路 H.264 各 3,428 帧，XR-1 原生 `decord` 能读取各自首末帧；此时全量转换仍在进行，不能把目录存在当作已发布完成。只有 train/val 的 `manifest.json` 均写成且总集数、帧数、来源哈希核对后，才能标记此数据版本完成。
+服务器已于 2026-09-24 17:44+08 在低优先级 tmux `xr1-lego-50h-data` 启动转换，派生根目录为 `/home/wuyan/lyj/YAM/YAM_data/derived/xr1_lego_50h_eef_v1_20260924/`，日志为 `/home/wuyan/lyj/xiaomi-robotics-1/install/prepare_lego_50h.log`。首条 train episode 0 的三路 H.264 各 3,428 帧，XR-1 原生 `decord` 能读取各自首末帧。另有 tmux `xr1-lego-50h-stats` 等待 train/val 转换进程结束，两个 manifest 均存在时才启动仅 train 的流式统计，日志为同一 `install/prepare_lego_50h_stats.log`。此时全量转换仍在进行，不能把目录存在当作已发布完成。只有 train/val 的 `manifest.json`、`normalize.json` 均写成且总集数、帧数、来源哈希核对后，才能标记此数据版本完成。
 
 2026-09-22 接入 `adapters/openwam/data.py`；输入支持 LeRobot v2.0/v2.1 独立 episode 文件与 v3.0 共享 Parquet/MP4 分片。服务器正式数据实测为 v3.0、14D、30fps；共享 Parquet 按 episode_index 筛选，视频根据每相机 metadata 的 from_timestamp×fps 计算文件内起点，并核对片段时长。原始数据只读，不自动转换版本、不写回统计。14D 次序仍为 `[左6关节, 左夹爪, 右6关节, 右夹爪]`，状态读 `observation.state`，监督读同一行的单数 `action`；要求调用者确认数据为绝对目标，本次不推断物理单位、不做 Pi delta 或 EEF/FK 转换。两个夹爪保留连续值，不翻转、二值化或重标单位。
 
