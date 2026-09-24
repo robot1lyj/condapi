@@ -13,7 +13,8 @@
   "nproc_per_node": 4,
   "project": "yam-xr1",
   "experiment": "lego-50h-eef-v1",
-  "max_steps": 337543,
+  "max_steps": 168772,
   "batch_size": 4,
+  "gradient_accumulation": 2,
   "save_interval": 25000
 }

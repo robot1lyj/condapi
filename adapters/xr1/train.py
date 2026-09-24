@@ -37,6 +37,7 @@ def inspect_recipe(recipe_path, output):
         "experiment",
         "max_steps",
         "batch_size",
+        "gradient_accumulation",
         "save_interval",
         "selection_sha256",
         "source_manifest_sha256",
@@ -50,6 +51,8 @@ def inspect_recipe(recipe_path, output):
     for field in ("nproc_per_node", "max_steps", "batch_size"):
         if type(recipe.get(field)) is not int or recipe[field] < 1:
             raise ValueError(f"{field} must be a positive integer")
+    if type(recipe.get("gradient_accumulation", 1)) is not int or recipe.get("gradient_accumulation", 1) < 1:
+        raise ValueError("gradient_accumulation must be a positive integer")
     if "save_interval" in recipe and (type(recipe["save_interval"]) is not int or recipe["save_interval"] < 1):
         raise ValueError("save_interval must be a positive integer")
     for field in ("project", "experiment"):
@@ -188,6 +191,11 @@ def compose_config(recipe, stats, output):
         data[key] = stats[key]
     config.model.params.pretrained = recipe["pretrained"]
     config.trainer.max_steps = recipe["max_steps"]
+    accumulation = recipe.get("gradient_accumulation", 1)
+    config.trainer.accumulate_grad_batches = accumulation
+    # The native dataset sizes itself in micro-batches, while Trainer counts
+    # optimizer steps. Without this adjustment, accumulation truncates the data.
+    config.data.params.max_steps = recipe["max_steps"] * accumulation
     if "save_interval" in recipe:
         config.trainer.save_interval = recipe["save_interval"]
     config.trainer.project = recipe["project"]
