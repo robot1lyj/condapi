@@ -290,11 +290,12 @@ df -h "$DATA_ROOT"
 
 当前本地仓库是 `condapi`；服务器 `YAM_code` 只接收本仓库的代码。不得同步 `/home/wuyan-lyj/YAM/yam-abc-reproduce` 到该目录，也不得把它的控制/GUI 依赖作为训练依赖。
 
-本地工作站提交后使用两个远端：Gitea 是服务器唯一代码来源，GitHub 只由本地工作站维护备份。服务器无法连接 GitHub，不在服务器配置或执行 GitHub push/pull：
+本地工作站提交后使用两个远端：Gitea 是服务器唯一代码来源，GitHub 只由本地工作站维护备份。功能分支先推送当前分支；只有完成已授权的 main 合并后才推送 main。服务器无法连接 GitHub，不在服务器配置或执行 GitHub push/pull：
 
 ```bash
-git push -u origin main    # 本地 → Gitea
-git push github main       # 本地 → GitHub
+git push -u origin HEAD    # 当前分支 → Gitea
+git push github HEAD       # 同一分支 → GitHub
+# 仅在已授权并完成 main 合并后：git push origin main && git push github main
 ```
 
 服务器端如需通过 Git 同步，只使用 Gitea `origin` 的 clone/fetch/pull；先确认服务器公钥已登记到 Gitea，再使用非交互认证。Gitea Git 身份为 `wuyan_lyj <linyongjia@wuyanai.cn>`；未登记前不要把密码拼进 URL。服务器代码同步、环境安装和数据审计必须分开记录。

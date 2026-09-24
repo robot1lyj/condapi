@@ -2,15 +2,15 @@
 
 ## 项目定位
 
-2026-09-08 起在独立工作树分支推进多模型接入层改造：复用 LeRobot 的模型、数据处理器和训练器，本仓库只增加配置、Conda 运行、模型交接与 Thor 部署适配；不重写第二套 LeRobot。模型放 `configs/models/`，代码入口按 `adapters/openpi`、`adapters/lerobot` 后端组织，不再为每个模型复制插件/训练循环。下文 OpenPI 规则仍适用于 Pi 后端，不能套用到所有模型。当前阶段与操作见 `docs/10_vla_platform.md`，架构 owner 为 `docs/01_system_architecture.md`。
+本仓库是 YAM 双臂（与 YAM-ABC 同硬件配置）VLA 多模型训练与 Thor 推理平台。控制层复用各模型原生训练器、处理器和权重格式；Pi 使用 OpenPI，LeRobot 系列复用 LeRobot，不复制第二套训练循环。按模型系列隔离 Conda 环境，当前 Pi 默认路线为 `pi05_yam` 全量微调，训练在服务器 GPU 上执行。架构与模型状态分别归 `docs/01_system_architecture.md`、`docs/10_vla_platform.md`；Pi 特有规则不能套用其他模型。
 
-本仓库是 OpenPI 的 YAM 双臂训练适配分支，当前默认任务是使用 LeRobot 数据对 YAM（与 YAM-ABC 同硬件配置）进行 VLA 后训练，并把训练后 policy 部署到 NVIDIA Jetson AGX Thor 端侧推理。系统由两台 IPC 组成：Thor 只负责模型推理，3588 负责相机采集、机械臂控制和控制侧逻辑，两者通过网线直连交换数据。当前训练路线已切换为 Pi0.5 全量微调，不再默认采用 LoRA；训练仍在服务器 GPU 上，模型不再放在远程推理服务器。OpenArm、Piper 和独立 YAM-ABC-Reproduce 代码只作为 legacy/reference，不是本项目默认实现。
+Thor 只负责推理，3588 负责相机、机械臂和控制，两台 IPC 用网线直连。OpenArm、Piper、独立 YAM-ABC-Reproduce 仅作历史参考；不得把其控制代码移入本仓库。
 
-`/home/wuyan-lyj/YAM` 是外部 YAM 参考目录，只读查看训练数据合同和模型适配信息；主检出目录是 `/home/wuyan-lyj/condapi`，工作树以实际 cwd / `git rev-parse --show-toplevel` 为准，不得硬编码主目录来写文件。不得把 YAM-ABC 的机械臂控制代码同步进来替代本项目。
+`/home/wuyan-lyj/YAM` 是外部只读参考目录；以实际 cwd / `git rev-parse --show-toplevel` 为工作树根目录，不硬编码主检出路径写文件。
 
 ## Context OS 记忆规则
 
-- 唯一项目记忆是本文件、`docs/cache/` 和编号化 `docs/` 的既有 owner；不要另建 `.agents`、`.codex` 或平行缓存。规则归本文件，路由归 `docs/cache/context_index.md`，详细事实归相关编号文档，历史原因归 `docs/07_change_log.md`。
+- 本文件 `AGENTS.md` 是唯一项目规则入口；`docs/cache/` 和编号化 `docs/` 是按需记忆与事实 owner。不要另建 `CLAUDE.md`、`.agents`、`.codex` 或平行缓存。路由归 `docs/cache/context_index.md`，详细事实归相关编号文档，历史原因归 `docs/07_change_log.md`。
 - 启动只用宿主已注入的本文件；**不默认读取** kernel、index、mode、交接页或历史。先确定当前决策与缺失事实；已知 owner 时直接读相关章节，未知 owner 时查 index；跨主题恢复时才读 kernel，需要具体操作边界时才读一个 mode。已有上下文不重复读取。
 - 完整证据和未完成事项留在现有 owner；更新当前状态时替换旧摘要，不把进度逐条追加到热记忆，不为普通进度新建记忆文件。候选经验、失败尝试、单位/版本、适用条件、反例与来源按需记录在 owner；历史通过不能当成当前运行就绪，临时状态使用前复核。
 - 无默认累计读取额度。`memory_gate.py` 是可选检索/证据工具，其字节包和 `docs/cache/runtime/` 账本都不是模型上下文 token 计量；旧账本保留历史并按 [09](docs/09_memory_system.md) 原位迁移。搜索与日志先过滤；必要完整条件不截断，原始证据不因节省上下文而删除。
@@ -20,41 +20,9 @@
 
 架构归 `docs/01_system_architecture.md`，环境归 `02_installation_and_environment.md`，训练归 `03_training_and_evaluation.md`，数据合同归 `04_data_contracts.md`，推理协议归 `05_inference_and_rollout.md`，Thor 部署归 `08_thor_edge_deployment.md`，多模型操作归 `10_vla_platform.md`，看板归 `11_training_dashboard.md`，记忆规则归 `09_memory_system.md`。交接导航归 `00_handoff_index.md`；`06_openarm_research_plan.md`、`07_change_log.md`、`docs/reference/` 为按需读取的历史或参考。详细路由只在 index 维护。
 
-## 代码与目录
+## 环境与代码边界
 
-- `configs/`：模型选择、原生配置引用、系列环境、实验与机器人合同投影。
-- `adapters/`：共享 LeRobot/OpenPI 入口；`packages/vla-platform/` 只做无模型依赖的调度和交接。
-- `src/openpi/`：模型、策略、训练、数据 transform 和公共工具。
-- `packages/openpi-client/`：通用机器人侧 WebSocket/IO 客户端；YAM 机械臂控制不在本次训练适配范围。
-- `scripts/`：训练、数据准备、服务和审计入口。
-- 非 YAM 的上游 `examples/` 和 ALOHA/LIBERO 子模块已清理；需要原作者示例时查固定上游版本或 Git 历史，不再作为默认目录。Pi 转换器在 `adapters/openpi/convert_jax_model_to_pytorch.py`。
-
-## 环境与常用命令
-
-新多模型接入层按模型系列使用独立 Conda prefix，不使用一个包含所有模型依赖的环境。控制层 `packages/vla-platform` 仅依赖 Python 标准库，不能导入 Torch/JAX/LeRobot。`environments/bootstrap.yml` 只创建 Python/pip，不代表已安装模型依赖或通过 GPU 审计。既有服务器环境和 Thor Pi 容器不在本地架构改造中自动更新。
-
-服务器 module 入口为：
-
-```bash
-module load miniconda3/26.1.1
-```
-
-本项目使用独立的 `/home/wuyan/.conda/envs/condapi-yam`。使用 conda/pip 镜像和项目依赖，不使用 uv。Python 版本与完整依赖必须在 GPU 计算节点审计后才能宣称可训练；不要在登录节点执行长训练。
-
-```bash
-module load miniconda3/26.1.1
-conda activate /home/wuyan/.conda/envs/condapi-yam
-conda run -p /home/wuyan/.conda/envs/condapi-yam python -m pip install --no-build-isolation --no-deps -e .
-conda run -p /home/wuyan/.conda/envs/condapi-yam python -m pip install --no-build-isolation --no-deps -e packages/openpi-client
-```
-
-验证和格式化：
-
-```bash
-ruff check .
-ruff format .
-conda run -p /home/wuyan/.conda/envs/condapi-yam python -m pytest --strict-markers -m "not manual"
-```
+`packages/vla-platform/` 控制层仅依赖 Python 标准库，不导入 Torch/JAX/LeRobot；各模型在独立 Conda prefix 调用原生入口，不使用 uv 或一个混装环境。`environments/bootstrap.yml` 不代表模型依赖/GPU 已就绪。环境、安装命令、模型目录及审计步骤按需查 `docs/01_system_architecture.md`、`docs/02_installation_and_environment.md` 和 `docs/10_vla_platform.md`；登录节点不运行长训练。本地架构改动不自动更新服务器环境或 Thor 容器。
 
 ## 当前 YAM 数据边界
 
@@ -73,7 +41,7 @@ conda run -p /home/wuyan/.conda/envs/condapi-yam python -m pytest --strict-marke
 - 2026-09-23 用户反馈当前 Thor Pi 136000 policy 左臂行为异常；在未复核现场输入与结果前不得继续驱动真机。来源与待核条件见 `docs/reports/thor/rtc-20h-136000-20260923/README.md`；当前服务/设备状态每次操作前重新观测。
 - 不提交凭据、token、私钥、服务器密码；不删除远端数据/权重/缓存，除非用户明确授权。
 - 长训练使用 Slurm 作业或 tmux；端侧推理默认在 Thor 本地容器/进程执行，Thor↔3588 的直连以太网协议是生产数据通道。端口监听不等于推理可用，必须做真实本地推理和跨 IPC 直连 smoke。
-- 本任务只改 Thor 侧；不得读取、修改、同步或替代 3588 的机械臂控制、相机采集和系统部署。
+- 涉及端侧推理与部署时只操作 Thor 侧；不得读取、修改、同步或替代 3588 的机械臂控制、相机采集和系统部署。
 - Thor 推理默认使用 Docker + NVIDIA Container Toolkit，按模型系列隔离容器，Pi 系列共用一个服务，通过配置/checkpoint 选择模型；模型依赖安装在系列镜像内，容器规划与精度验收由 `docs/08_thor_edge_deployment.md` 持有。
 - 数据转换只写新目录；原始 YAM 数据和现有下载任务不可覆盖、停止或删除。
 - 2026-09-07 用户追加授权：确实损坏的 Lego episode 可修复或整条隔离排除；优先从固定上游 revision 恢复并逐帧验证，保留坏原件、哈希和修复记录，使用双写锁更新仅被修复文件的断点签名。不可把网络/权限/容量问题视为数据损坏；不随意裁帧，不改变其他数据和下载任务。非必要不永久删除。
@@ -81,14 +49,6 @@ conda run -p /home/wuyan/.conda/envs/condapi-yam python -m pytest --strict-marke
 
 ## Git 自动化
 
-独立工作树改造期间默认只提交/备份功能分支；用户明确授权合并后，先吸收最新 main 并验收，再将主检出快进到合并提交，使用下面的 main 双远端同步流程。2026-09-09 已授权本轮合并，但不自动同步 Thor/服务器代码，服务器故障期间不启动训练。用户允许不兼容的架构改造，不等于授权删除原始权重、实验证据或正在使用的远端环境。
+默认只提交/备份当前功能分支；合并前按当前授权吸收最新 main、核对并快进，不自动同步 Thor/服务器代码或删除远端环境、权重和实验原件。历史合并授权与原因见 `docs/07_change_log.md`，具体双远端命令见 `docs/02_installation_and_environment.md`。
 
-完成请求后执行 `git diff --check`，代码改动再执行 Ruff/pytest，然后 `git add -A` 和中文 commit，例如 `git commit -m "接入YAM双臂训练配置"`。本地工作站提交后把同一 `main` 提交同步到 Gitea 和 GitHub；服务器无法连接 GitHub，只从 Gitea 同步代码：
-
-```bash
-git push -u origin main    # 本地 → Gitea，服务器的唯一代码来源
-git push github main       # 本地 → GitHub，仅作本地侧备份
-# 服务器：git fetch/pull origin main；不访问 github remote
-```
-
-Git 身份固定为 `wuyan_lyj <linyongjia@wuyanai.cn>`。本地推送后核对两个远端的 `main`；服务器只核对 Gitea。永远不要 force push，不要把凭据写进 remote URL 或提交历史，也不要推送到未明确配置的其他远端。
+完成请求后执行 `git diff --check`；代码检查按任务与适用指令执行。只暂存本任务文件，中文提交；本地把同一分支提交推送到已配置的 Gitea `origin` 和 GitHub `github`，核对两端提交。服务器只从 Gitea 获取代码，不访问 GitHub。Git 身份为 `wuyan_lyj <linyongjia@wuyanai.cn>`；不 force push、不在 URL/历史中写凭据、不推送未知远端。
