@@ -1,0 +1,22 @@
+{
+  "source": "i2rt official YAM + linear_4310 combined MJCF",
+  "source_repo": "i2rt (MIT), third_party/i2rt in YAM",
+  "source_revision": "4b3d6b5e43782cd8c55e3bdb832f8b3c40c6cd8d",
+  "coordinate_frame": "each_arm_base/linear_4310/grasp_site",
+  "xml_sha256": "a7362a0d3e7bffd822b2ba9992c1fb4b00862eb86277a4f11326018680d9dcc3",
+  "meshes_sha256": {
+    "arm/yam/assets/base.stl": "d95a5aa0c06a5ef6da02788b0df5a14e4202c1ae8eb2771a7f6f8947e3a490c7",
+    "arm/yam/assets/link1.stl": "41f7dfbd0471a0f96884c73782e82927f2bbc6aced9b55c0111da1b52d6e0c50",
+    "arm/yam/assets/link2.stl": "067b51567a95a631d50fc02515bd045a2eb7f2f34489d5aec31d9f3f6ce58b30",
+    "arm/yam/assets/link3.stl": "9650a114393881b54a68822ba3fb48fcd3318023ebecaf251e4f7804e91f801c",
+    "arm/yam/assets/link4.stl": "42740ce2bb8693760a35dc6e9e8fe0981999c02d6bf167a465c9936acf41c557",
+    "arm/yam/assets/link5.stl": "f70eb1191d6a1ccbb748a46fe8ba541f38094c9829fd1859300e70360c5a07c7",
+    "gripper/linear_4310/assets/gripper.stl": "d949c401186197d842ca8f9b23bfcbf24bed8461b421df06093c65e4ead21f5d",
+    "gripper/linear_4310/assets/tip_left.stl": "03d94f53d7b5e9e1871ea6f3925c68d7a2f894b08e0c575fa0b9ed4024684ff7",
+    "gripper/linear_4310/assets/tip_right.stl": "8f620aae9c15e00e2ea4e5bf5e9a49e7edb2d23128b8955cfacc0da8da45c72f"
+  },
+  "source_xml_sha256": {
+    "arm/yam/yam.xml": "3aa4eb74d1f4ce14ae669f57d0fcc6752f0c0424e2779bafac9bccd4dd7e8eae",
+    "gripper/linear_4310/linear_4310.xml": "1ae64edff48e7a1d1de727d90c2a77a98aa519796b72233a26f2c1ab1bf66652"
+  }
+}

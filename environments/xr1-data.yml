@@ -1,0 +1,13 @@
+name: yam-xr1-data
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12
+  - pip
+  - pip:
+      - numpy==2.2.6
+      - scipy==1.18.0
+      - av==15.1.0
+        - h5py==3.16.0
+        - pyarrow==25.0.0
+        - mujoco==3.10.0

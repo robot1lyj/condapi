@@ -2,7 +2,7 @@
 
 ## 当前状态
 
-状态汇总更新至 2026-09-24。2026-09-09 曾按用户授权将多模型工作树与当时 main 的 Pi 全量训练/续训修复整合；当前功能分支与 main 的关系以 Git 为准。本次 XR-1 仅接入本地源码和配置，未部署服务器或 Thor。架构 owner 为 [01](01_system_architecture.md#多模型接入层)，设备信息归 [02](02_installation_and_environment.md)，模型精度与 Thor 验收归 [08](08_thor_edge_deployment.md)，模型无关训练看板归 [11](11_training_dashboard.md)。
+状态汇总更新至 2026-09-24。2026-09-09 曾按用户授权将多模型工作树与当时 main 的 Pi 全量训练/续训修复整合；当前功能分支与 main 的关系以 Git 为准。XR-1 原生训练入口和 YAM HIL sidecar 转换入口已写入本地分支；真实 HIL 训练集尚未定位，未启动训练或部署 Thor。架构 owner 为 [01](01_system_architecture.md#多模型接入层)，设备信息归 [02](02_installation_and_environment.md)，模型精度与 Thor 验收归 [08](08_thor_edge_deployment.md)，模型无关训练看板归 [11](11_training_dashboard.md)。
 
 | 部分 | 状态 |
 |---|---|
@@ -11,7 +11,7 @@
 | LeRobot 后端 | 共用原生训练 launcher 已实现并用替身测试；无自建 trainer/processor；尚无通用离线推理入口 |
 | Evo-1 | 本地/服务器专用环境已安装并通过CPU检查；YAM真实训练/推理仍待接入 |
 | MolmoAct2 | 原生LeRobot共享后端已注册；两端独立环境CPU检查通过、108包版本一致；仅普通版，不含Think，真实YAM/GPU仍待验收 |
-| Xiaomi-Robotics-1 / XR-1 | 官方 5B checkpoint 和独立服务器环境已准备；本地 `xr1` 后端、固定上游源码、训练配置预检与原生训练入口已接入。YAM 的 FK 末端标签、训练统计、真实 GPU 训练及部署 IK 尚未验收 |
+| Xiaomi-Robotics-1 / XR-1 | 官方 5B checkpoint 和独立服务器模型/清洗环境已准备；本地 `xr1` 后端、固定上游源码、训练配置预检、原生训练入口及 HIL sidecar→末端原生 JSON/视频转换入口已接入。50h 乐高 LeRobot→末端派生版正在服务器生成；FK 审计、训练统计、GPU 训练及部署 IK 尚未验收 |
 | FastWAM、VLA-JEPA | 注册 planned；不得运行或报告已支持 |
 | Conda | Evo-1已有独立环境规格和104个wheel的锁；Pi等bootstrap仍不代表模型环境已安装 |
 | Thor | 原 Pi 容器、TensorRT 引擎、报告保持原状；没有部署此次改造 |
@@ -27,6 +27,10 @@ XR-1 的本地原生训练入口已接入，尚不能把现有 YAM 14D joint act
 `configs/models/xr1-5b.toml` 选择独立 `xr1` 后端，`third_party/xr1/` 固定 Xiaomi 上游 `0dd7aef8dc87296246aae812a1f59ccb708e5546` 源码、许可和逐文件 SHA256。`adapters/xr1/` 只做配置合成、数据门槛和 Slurm 启动；调用上游 `tools/train.py`，不复制训练循环。服务器已安装的独立 prefix 和官方 5B 权重仍按 [02](02_installation_and_environment.md#xr-1-服务器环境-2026-09-24) 与 [环境报告](reports/environments/xr1-20260924/README.md) 核对。本地快照与服务器早先安装的源码 revision 一致，服务器尚未同步本仓库的新接入代码。
 
 先由已标定的离线运动学在**新目录**生成 XR-1 原生 JSON 和三路同步视频绝对路径；每条训练 episode 需有当前/目标末端位置与旋转矩阵、6关节与夹爪状态/目标、显式固定底盘和腰部字段。关节状态能映射到 60D 的左/右各6关节和夹爪槽，缺少的第7关节槽为0；14D 关节目标不能填进末端 action。按 train episode 运行上游 `tools/compute_normalize.py` 得到 30×60 action mean/std 和 1×60 state q01/q99，在 `normalize.json` 加入 `train_json_sha256`，每个训练 JSON 的绝对路径映射到 SHA256。另存 `fk_audit.json`，记录 `source_contract`、`source_dataset`、`source_revision`、逐条 `train_episode_ids`、`fk_model` 绝对路径及 `fk_model_sha256`、相同的 `train_json_sha256`，并且只在逐值核实坐标系/物理单位和目标时序后把 `frames_and_units_verified`、`target_alignment_verified` 置为 true。split 按源 rollout 隔离；val 不进入训练统计。现阶段**没有**已审核的 FK、派生 JSON、统计和部署 IK，示例路径不可运行。
+
+YAM 新增的 `hil.xr1_dataset` 是 FK 与连续人工专家段的 sidecar owner。本仓库 `adapters/xr1/prepare_hil.py` 将每个不少于 30 帧的 sidecar 段转成单独的原生 JSON 与重编码视频，并保存源时间/tick/相机索引和摘要；命令与数据门槛见 [04](04_data_contracts.md#yam-hil-人工专家帧到-xr-1-原生训练数据)。现阶段本地仅发现 mock 录制，服务器尚未定位真实 HIL 原始 episode，因此该入口没有生成可训练的真实版本；上段所述训练统计与 FK audit gate 仍有效。
+
+用户随后指定服务器的 50h 乐高 LeRobot 选集。该资产不是 HIL episode，本仓库因此另提供 `adapters/xr1/prepare_lego.py`：按既有 2,337 条选集和 LeRobot v3 episode 边界使用同一 YAM 末端坐标合同派生 JSON；服务器 XR-1 的 decord 无法读取源 AV1，故按逐集 `start` 偏移将选中视频重编码到新的 H.264 目录。不生成虚构的 HIL tick 或专家标记。50h 派生资产的来源、状态和单位限制归 [04](04_data_contracts.md#50h-乐高-lerobot-数据的-xr-1-末端派生版)。
 
 准备好这些资产后，将 [示例 recipe](../configs/native/xr1-yam.example.json) 另存为实验专用文件，填入真实绝对路径和批量/步数，然后只读生成平台计划：
 

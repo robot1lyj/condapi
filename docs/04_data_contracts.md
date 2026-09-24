@@ -314,6 +314,24 @@ ssh yam-server 'bash /home/wuyan/lyj/YAM/env-transfer/lego-resume-v2-20260907/sc
 
 XR-1 使用单独的末端动作合同，不继承本节 OpenWAM 的 joint-action 投影；其字段、split 与 FK 审计门槛见 [10 的 XR-1 原生训练入口](10_vla_platform.md#2026-09-24--xr-1-原生训练入口)。原始 YAM 14D `action` 保持关节/夹爪语义，派生末端 JSON 只能写新目录，并记录来源 episode、帧对齐、坐标系和单位。
 
+### YAM HIL 人工专家帧到 XR-1 原生训练数据
+
+数据侧接口 owner 是只读参考 `/home/wuyan-lyj/YAM/yam-abc-reproduce/yam_abc_reproduce/hil/xr1_dataset.py`。先在具备该版本 YAM 数据环境的主机用 `python -m yam_abc_reproduce.hil.xr1_dataset <源episode> --output <新sidecar目录>` 导出 sidecar。它按 `expert_valid`、`source=human`、观测有效性、等待边界、连续 tick/epoch 和源存储片段切段，并使用官方 YAM `linear_4310/grasp_site` FK 分别计算同帧观测与**实际下发**目标。每个 sidecar 保留原时间、tick 和三相机帧号；不能把过滤后的行再次无条件拼接。
+
+`adapters/xr1/prepare_hil.py` 接收该 sidecar 和对应原始 HIL episode，只允许 `mock=false`、无错误、已完成的 30 Hz 录制，拒绝 aborted/discarded；源结果非 success 时原生标签为 `ongoing`，不冒充成功。调用者显式选择 `train` 或 `val`，并提供与源 manifest 的 `task` 完全相同的 instruction。程序将每个不少于 30 帧的连续专家段转换成独立 XR-1 JSON 和从原始三路视频重编码的连续专家帧视频；摄像头源帧重复时仍保留重复帧。产物位于新目录，不写回源 HDF5、视频或 sidecar。末端位置以米、旋转以旋转矩阵表示，均位于各臂底座坐标系；动作来自 `submitted_action` 的 FK，关节和夹爪仅用于 proprio 与夹爪目标，腰部/底盘填固定零。原始帧号、时间、tick 和源文件摘要保存在产物 `provenance.json`/`manifest.json`。
+
+每个源 rollout/session 的 train/val 划分须先经数据审核并在外部清单中固定；不得将同一源 rollout 的不同专家段分入两侧。少于 30 帧的段只计入 `skipped_short_segments`，不生成 XR-1 样本。`normalize.json` 只对 train JSON 使用固定上游 `third_party/xr1/tools/compute_normalize.py` 计算，并把每个训练 JSON 的 SHA256 记录到 `train_json_sha256`。`fk_audit.json` 的单位、坐标和目标时序真值仍需针对真实数据核验，转换脚本不会自行把它标成通过；训练入口继续执行该 gate。真实 HIL 数据位置与 split 尚待提供，当前本机 YAM 目录仅发现 mock 录制，不是可发布的真实训练版本。
+
+### 50h 乐高 LeRobot 数据的 XR-1 末端派生版
+
+2026-09-24 用户指定将服务器既有 50h 乐高分拣选集用于 XR-1。它是已发布 LeRobot v3 数据，不含 HIL 的 `expert_valid`、`source_tick` 或 `source_video_index`，因此不能调用上述 HIL sidecar 筛选并把所有帧宣称为新采集的纠正专家帧。源 train repo 为 `/home/wuyan/lyj/YAM/YAM_data/processed/lego_lerobot_v1_20260907/train`；50h 选集固定在 `/home/wuyan/lyj/YAM/training-assets/lego_rtc_50h_20260921/episodes.json`，共 2,337 集、5,400,685 帧。原始 train/val 已分仓；验证集使用同一发布版本的 `val` 仓，不从 50h train 选集中再抽帧。
+
+`adapters/xr1/prepare_lego.py` 对每个选中 episode 的同一行 `observation.state` 和绝对 `action` 各执行官方 YAM + `linear_4310/grasp_site` 的 MuJoCo FK，产出米制末端位置与 3×3 旋转矩阵、原 6 关节与夹爪 proprio/目标。模型束在 `third_party/yam-fk-model/`，来源 revision、XML/mesh 哈希和 MIT 许可同目录。服务器 XR-1 的 `decord==0.6.0` 实测不能打开源 AV1 视频，因此每集将源视频按 v3 `start` 帧偏移提取、以 H.264 `yuv420p/crf18` 重编码到新目录，并逐集核对输出帧数；这是有损图像派生，不是逐像素无损副本。原 `timestamp`、episode/frame 索引和源 `start` 仍在溯源文件。源数据和 Pi 50h 资产只读，派生输出写新目录；中断后仅允许相同 source/selection/FK 身份执行 `--resume`。源集没有逐集成功标注，派生 `trajectory_type` 设为 `ongoing`，不得在审核前宣称全为成功示范。
+
+发布前核对总集数/帧数、逐集三视频偏移和原生字段。原转换 manifest 对 joint 单位为 rad、夹爪 0 闭 1 开的结论基于发布者合同及数值一致性，仍未完成独立 raw→port/真机标定；因此 FK 单位与同帧目标时序审计不能自动写为训练 gate 的 true。后续 `normalize.json` 只用 50h train 选集计算，不读取原 val；验证集也保留独立资产身份。
+
+服务器已于 2026-09-24 17:44+08 在低优先级 tmux `xr1-lego-50h-data` 启动转换，派生根目录为 `/home/wuyan/lyj/YAM/YAM_data/derived/xr1_lego_50h_eef_v1_20260924/`，日志为 `/home/wuyan/lyj/xiaomi-robotics-1/install/prepare_lego_50h.log`。首条 train episode 0 的三路 H.264 各 3,428 帧，XR-1 原生 `decord` 能读取各自首末帧；此时全量转换仍在进行，不能把目录存在当作已发布完成。只有 train/val 的 `manifest.json` 均写成且总集数、帧数、来源哈希核对后，才能标记此数据版本完成。
+
 2026-09-22 接入 `adapters/openwam/data.py`；输入支持 LeRobot v2.0/v2.1 独立 episode 文件与 v3.0 共享 Parquet/MP4 分片。服务器正式数据实测为 v3.0、14D、30fps；共享 Parquet 按 episode_index 筛选，视频根据每相机 metadata 的 from_timestamp×fps 计算文件内起点，并核对片段时长。原始数据只读，不自动转换版本、不写回统计。14D 次序仍为 `[左6关节, 左夹爪, 右6关节, 右夹爪]`，状态读 `observation.state`，监督读同一行的单数 `action`；要求调用者确认数据为绝对目标，本次不推断物理单位、不做 Pi delta 或 EEF/FK 转换。两个夹爪保留连续值，不翻转、二值化或重标单位。
 
 三相机按 `top_rgb / left_rgb / right_rgb`（完整键前缀 `observation.images.`）排列为上部全宽、左下/右下各半宽的原生 OpenWAM L 形 RGB 拼图，训练和离线推理复用同一函数。禁止缺失腕部相机时静默填黑。动作窗长为 `num_frames - 1`，视频每 `video_stride` 抽帧；例如 33/4 得 H32 与 9 帧视频，与 Pi H50 不同。窗口不跨 episode；末尾动作零填充并屏蔽 loss，视频复制最后一帧并用 `video_mask` 标明填充；proprio 仅为窗口起点状态。
