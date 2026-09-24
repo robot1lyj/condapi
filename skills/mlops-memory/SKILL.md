@@ -9,15 +9,15 @@ Identify the decision, missing facts and constraints before retrieval. Improve m
 
 ## Task-focused retrieval
 
-- Follow project `AGENTS.md` and existing owners. The skill stores methods, not project facts. Use the task index to choose **one relevant owner section**; read a kernel, checkpoint, mode or history only when the task needs it. Do not reread material already in context.
+- Follow the user's instructions and project `AGENTS.md`; treat this skill as a method to improve, not a fixed memory design. The skill stores methods, not project facts. If the owner is known, read its relevant section directly; consult the task index only when routing is needed. Read a kernel, checkpoint, mode or history only when the task needs it. Do not reread material already injected or in context.
 - Filter search hits, logs and tool output before presenting them to the model. Stop when the next action is supported; splitting a full dump into small calls is not a saving. For unfamiliar failures, inspect a few scoped matches and retry conditions before reading full records.
 - A working summary retains objective, user constraints, applicable facts, unknowns, next action and source links. Preserve units, versions, validity conditions and contrary evidence; a summary does not certify the underlying claim or compact host history.
 
 ## Layering and file discipline
 
 - Keep durable rules/routes hot, active work in a bounded checkpoint, detailed contracts task-selected, and logs/old attempts cold. Recency alone does not qualify a fact for hot memory. Store complete evidence at its owner; demotion changes loading frequency, not truth or authorization.
-- Update the canonical owner first, then **replace** its hot projection. Routine progress does not need a new record, archive copy or dated memory file. Create one only for unique, reusable evidence/contract not held by an existing owner; check references before removing duplicate metadata. Never delete unique evidence or split files to evade a budget.
-- Apply the project's complete-file and combined-default-path UTF-8 budgets, including injected rules; if none exist, start with 3 KiB each for kernel/checkpoint and explicitly budget rules/routing. These are file budgets, not token counts. Read [layers.md](references/layers.md) when changing budgets/routes; verify that a real next task can recover necessary safety conditions.
+- Update the canonical owner first, then **replace** its hot projection. Routine progress does not need a new record, archive copy or dated memory file. Search existing owners before creating a file; create one only for unique, reusable evidence/contract not held by an existing owner. Check references before demoting duplicate metadata. Never delete unique evidence or split files to evade a budget.
+- Inventory what the host injects and what the workflow actually reads by default before setting budgets. Do not force a kernel/index/mode startup chain merely because those files exist. Apply the project's complete-file and combined-default-path UTF-8 budgets, including injected rules; if none exist, start with 3 KiB each for kernel/checkpoint and explicitly budget rules/routing. These are file budgets, not token counts. Read [layers.md](references/layers.md) when changing budgets/routes; verify that a real next task can recover necessary safety conditions.
 
 ## Measurement boundaries
 

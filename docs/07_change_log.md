@@ -1,5 +1,9 @@
 # 07 · 变更历史
 
+## 2026-09-24 · 精简项目热记忆与修正技能入口
+
+用户指出历史文档和重复热记忆消耗上下文。审计发现 AGENTS 强制预载 kernel/index，CLAUDE 重复此链且误写 LoRA 默认，mode 03/04 固化旧地址和 LoRA 优先路线。现改为仅宿主注入的 AGENTS 为默认项目入口，index/kernel/mode 按任务取；旧事实仍留原 owner/报告，kernel 只存少量恢复导航。09 设完整文件与默认路径字节预算，技能补充按实际注入路径计量、已知 owner 直读及新增文件门槛。旧固定三文件链 30,820 字节，新默认 AGENTS 10,706 字节；这是文件检索字节差异，不是宿主 token 测量。保留原始证据与可选账本，未删除历史报告。
+
 ## 2026-09-24 · 建立模块化训练后端 v0.2
 
 按用户要求先实现可复用核心与 CLI，后续再加多人服务 API。保留 v1 实验入口，新增 v2 模型/数据/算法组合校验、源文件哈希 inventory、按原始采集组的不可覆盖 train/val/test split，以及运行前源资产和模型包复核。Pi 增加只绑定 frozen split 与 train-only norm 的薄启动器，仍调用原 OpenPI 训练循环；OpenWAM/XR-1 保留原生 trainer 并核对 train 成员。Pi/OpenWAM v2 离线推理要求 sealed 模型包；XR-1 仍无 YAM 推理 capability。当前只完成本地代码和操作/记忆更新，示例路径为模板，未运行本地或服务器训练、未做 GPU/Thor/多人 API 验收。

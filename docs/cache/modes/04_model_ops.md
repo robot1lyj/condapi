@@ -1,26 +1,9 @@
 # 04 · Mode — Model Operations
 
-用于 YAM LeRobot 数据、Pi0.5 LoRA、乐高分拣和后续 DAgger。
+仅在 YAM 数据、Pi 训练、评估或 DAgger 操作需要额外边界时读取；不得代替 `AGENTS.md` 或当前实验 owner。
 
-## 入口
-
-- 数据格式、14D 动作和 norm stats → `docs/04_data_contracts.md`
-- 训练、评估和 checkpoint gate → `docs/03_training_and_evaluation.md`
-- 服务与安全 rollout → `docs/05_inference_and_rollout.md`
-- Thor 端侧转换与本地验收 → `docs/08_thor_edge_deployment.md`
-- 环境与服务器 → `docs/02_installation_and_environment.md`
-
-## 操作边界
-
-- 先审计数据集版本、任务 prompt、三路图像、14D state/action 和 norm stats，再启动训练。
-- 当前第一阶段是乐高分拣监督微调；第二阶段收集并清洗人工纠正数据后再做 DAgger，不能混用数据集和 checkpoint。
-- 使用 `pi05_yam_lora` 或其任务配置；模型内部可为 32D，YAM 输出必须回到真实 14D。
-- 长任务使用 tmux；记录节点、GPU、实际命令、checkpoint 和失败原因。
-- 真机 rollout 先做 Thor 本地策略 transform/golden comparison，再做 Thor↔3588 网络 smoke，随后才进入低速、限位和人工急停可用的测试。
-
-## 结果写回
-
-稳定默认写入 `kernel.md`；当前训练/数据事实写入 `docs/03` 或 `docs/04`；历史原因写入 `docs/07_change_log.md`。不要恢复 OpenArm/KAI0 研究计划作为当前入口。
-> 2026-09-08当前路线覆盖：用户已明确切换并启动Pi0.5全量微调。以AGENTS.md与
-> docs/03_training_and_evaluation.md的正式运行章节为准；下文如有LoRA优先建议，仅属旧路线，
-> 不作为当前默认，不允许未经用户同意回退LoRA。历史产物与实现代码不删除。
+- 当前 Pi 默认路线是 `pi05_yam` **全量微调**；LoRA 属历史或另行批准的实验，不自动回退。训练配方、checkpoint 与续训条件从 [03](../../03_training_and_evaluation.md) 当前适用章节取，数据与单位从 [04](../../04_data_contracts.md) 取。
+- 先核对数据版本、任务 prompt、三路图像、14D 原始 state/action、单位、split 和对应模型的 norm/processor。Pi 内部 32D/H50、关节 delta/夹爪 absolute 不套到 XR-1 或其他模型。
+- 训练只能在获准服务器计算资源上运行；每个 DAgger 轮次配置/命令/作业文件先获本轮具体配方确认，规则见 `AGENTS.md`。Slurm、下载和 GPU 状态使用前重新观测。
+- checkpoint 通过完整性检查后仍需模型精度、Thor 本机推理和 Thor↔3588 直连 smoke；真机测试还需现场安全条件与用户反馈复核。见 [05](../../05_inference_and_rollout.md)、[08](../../08_thor_edge_deployment.md)。
+- 当前事实写入唯一 owner；kernel 仅在跨主题恢复确有必要时替换摘要，失败与原因按需写入 [07](../../07_change_log.md)。

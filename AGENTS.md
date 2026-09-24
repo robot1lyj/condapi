@@ -10,31 +10,15 @@
 
 ## Context OS 记忆规则
 
-- 唯一记忆系统是 `AGENTS.md` + `docs/cache/`；不要新增 `.agents`、`.codex` 或其他平行缓存。
-- 启动时依次读取本文件、`docs/cache/kernel.md`、`docs/cache/context_index.md`，然后按路由最多读取一个 mode；已由宿主注入的内容不重复读取。
-- 稳定事实只保留一个 owner：规则归本文件，路由归 index，操作边界归 mode，详细事实归编号化 `docs/`，历史原因归 `docs/07_change_log.md`。kernel 只保留带来源的摘要，不独立维护第二份事实。
-- 长期资料不设文档行数硬限制，完整证据和未完成事项继续保存在既有 owner。读取前明确当前决策与缺失事实，先取摘要和相关章节，必要时再展开原文；不预加载全部历史，不重复读取仍在上下文中的内容。摘要保留目标、用户约束、适用条件、单位/版本、反例、未知项、下一步和证据来源。
-- 本项目取消默认累计读取额度及旧固定上限，不因读取计数达到阈值而停止任务、要求压缩或新开对话。可选 `memory_gate.py` 用于章节选择、证据检查与去重；单包默认 12,288 UTF-8 字节是可调检索设置，先缩小无关选择，必要完整证据可用 `--max-bytes` 扩大，不截掉条件。普通工具也可做有界读取；搜索/日志先过滤再返回相关片段，原始产物保留。
-- `docs/cache/runtime/` 的可选账本仅记录已声明预加载和成功输出包，不代表当前上下文占用。按 2026-09-11 用户授权，对旧账本原位执行 `resize --no-total-limit`，保留计量、去重历史和带时间/理由的调整记录；不靠清空或换 ID 迁移。实际压缩后需要恢复时，只对缺失章节用 `--reload`。完整请求 token 限制只能由宿主按实际 tokenizer、完整消息/工具封装和输出预留执行，字节计量不能代替它。观察到上下文压力时在既有 cache 保存可恢复摘要；写摘要本身不会移除旧消息。细节归 `docs/09_memory_system.md`。
-- 工程经验按需补充到既有 owner：可复用工具记录入口、环境/配置、输入输出、适用条件、验证方法、验收标准与局限；重复实现前先检索已有工具。失败尝试保留症状、原因假设、实际干预/结果、结论、混杂因素及重试条件，不把失败修复推荐为可用方案。
-- 配置预期与现场实测分开记录，未知值/时间标为未知，保留单位、证据和复核触发条件；历史通过不等于当前运行就绪。问题索引按需关联检查、历史尝试、修复工具及前置条件，不递归加载全部关联。可选字段不要求补齐全部旧记录，验证失效不能仅刷新哈希来恢复可信状态。
-- 临时状态带观察时间并在使用前复核；经验先候选、再证据验证、再合并 owner；原始产物不因压缩而删除。通用 skill 源码在 `skills/mlops-memory/`，不承载项目记忆副本。设计与验收归 `docs/09_memory_system.md`。
+- 唯一项目记忆是本文件、`docs/cache/` 和编号化 `docs/` 的既有 owner；不要另建 `.agents`、`.codex` 或平行缓存。规则归本文件，路由归 `docs/cache/context_index.md`，详细事实归相关编号文档，历史原因归 `docs/07_change_log.md`。
+- 启动只用宿主已注入的本文件；**不默认读取** kernel、index、mode、交接页或历史。先确定当前决策与缺失事实；已知 owner 时直接读相关章节，未知 owner 时查 index；跨主题恢复时才读 kernel，需要具体操作边界时才读一个 mode。已有上下文不重复读取。
+- 完整证据和未完成事项留在现有 owner；更新当前状态时替换旧摘要，不把进度逐条追加到热记忆，不为普通进度新建记忆文件。候选经验、失败尝试、单位/版本、适用条件、反例与来源按需记录在 owner；历史通过不能当成当前运行就绪，临时状态使用前复核。
+- 无默认累计读取额度。`memory_gate.py` 是可选检索/证据工具，其字节包和 `docs/cache/runtime/` 账本都不是模型上下文 token 计量；旧账本保留历史并按 [09](docs/09_memory_system.md) 原位迁移。搜索与日志先过滤；必要完整条件不截断，原始证据不因节省上下文而删除。
+- 热文件预算、写回与复核流程归 [09](docs/09_memory_system.md)；通用方法归 `skills/mlops-memory/`，不在 skill 复制项目事实。
 
 ## 编号化文档所有权
 
-- `docs/00_handoff_index.md`：交接导航和当前/计划/历史边界。
-- `docs/01_system_architecture.md`：代码与训练数据流架构。
-- `docs/02_installation_and_environment.md`：服务器、Thor 环境、数据预检、路径和远端资源。
-- `docs/03_training_and_evaluation.md`：训练、评估和 checkpoint gate。
-- `docs/04_data_contracts.md`：YAM 数据格式、动作维度、单位待核项和 norm stats。
-- `docs/05_inference_and_rollout.md`：训练后 policy 的 Thor 本地协议、Thor↔3588 网络通道和最小 smoke；不承载机械臂驱动说明。
-- `docs/08_thor_edge_deployment.md`：Thor 官方系统、容器环境、Pi0.5 转换/加速和端侧验收；下属 `docs/reference/thor/` 为按阶段读取的安装操作冷手册，不承载机械臂驱动说明。
-- `docs/09_memory_system.md`：按需检索、计量边界、证据生命周期、skill 接入与迭代验收。
-- `docs/10_vla_platform.md`：新接入层的操作、模型/后端状态、Conda 工作流和模型接入验收；不是模型训练实现的第二份文档。
-- `docs/11_training_dashboard.md`：模型无关的指标协议、多运行看板、原生训练器接入与显示语义。
-- `docs/06_openarm_research_plan.md`：历史 OpenArm/KAI0/Evo-RL 研究归档，不是当前 YAM 路线。
-- `docs/07_change_log.md`：按日期记录原因和结果。
-- `docs/reference/`：长篇技术参考或 legacy；默认入口不依赖其中的旧结论。
+架构归 `docs/01_system_architecture.md`，环境归 `02_installation_and_environment.md`，训练归 `03_training_and_evaluation.md`，数据合同归 `04_data_contracts.md`，推理协议归 `05_inference_and_rollout.md`，Thor 部署归 `08_thor_edge_deployment.md`，多模型操作归 `10_vla_platform.md`，看板归 `11_training_dashboard.md`，记忆规则归 `09_memory_system.md`。交接导航归 `00_handoff_index.md`；`06_openarm_research_plan.md`、`07_change_log.md`、`docs/reference/` 为按需读取的历史或参考。详细路由只在 index 维护。
 
 ## 代码与目录
 
@@ -86,6 +70,7 @@ conda run -p /home/wuyan/.conda/envs/condapi-yam python -m pytest --strict-marke
 - 2026-09-22 用户明确要求：DAgger每轮生成或修改训练配置、训练命令、作业文件之前，先展示该轮具体训练配方并取得明确确认；A/B可整组确认，配方变更重新确认。数据审核、统计与预算草案可先完成；上轮/总体授权不替代本轮配方确认，同一已确认合同恢复不重复询问。确认记录与操作归 `dagger-flywheel` 技能和本轮实验产物。
 
 - 2026-09-09 用户明确要求：本地工作站禁止运行训练循环或训练 smoke（包括 CPU/debug 小模型），会造成卡顿；仅做静态检查、轻量配置/协议测试和看板验证。训练执行验证留待服务器恢复后在获准的计算资源上进行。
+- 2026-09-23 用户反馈当前 Thor Pi 136000 policy 左臂行为异常；在未复核现场输入与结果前不得继续驱动真机。来源与待核条件见 `docs/reports/thor/rtc-20h-136000-20260923/README.md`；当前服务/设备状态每次操作前重新观测。
 - 不提交凭据、token、私钥、服务器密码；不删除远端数据/权重/缓存，除非用户明确授权。
 - 长训练使用 Slurm 作业或 tmux；端侧推理默认在 Thor 本地容器/进程执行，Thor↔3588 的直连以太网协议是生产数据通道。端口监听不等于推理可用，必须做真实本地推理和跨 IPC 直连 smoke。
 - 本任务只改 Thor 侧；不得读取、修改、同步或替代 3588 的机械臂控制、相机采集和系统部署。
