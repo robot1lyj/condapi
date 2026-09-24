@@ -1,0 +1,11 @@
+schema_version = 1
+id = "openwam-joint-full"
+backend = "openwam"
+operation = "train"
+method = "full"
+state_space = "yam_joint_absolute_14"
+action_space = "yam_joint_absolute_14"
+overridable = ["native_config"]
+
+[parameters]
+native_config = "configs/native/openwam-yam.example.json"

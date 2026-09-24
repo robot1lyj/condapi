@@ -7,9 +7,13 @@ import subprocess
 
 from vla_platform.artifacts import seal_bundle
 from vla_platform.artifacts import validate_bundle
+from vla_platform.inventory import create_inventory
 from vla_platform.project import Project
+from vla_platform.project import tree_digest
 from vla_platform.runtime import audit_environment
 from vla_platform.runtime import execute
+from vla_platform.splits import create_split
+from vla_platform.splits import inspect_split
 
 
 def main(argv=None):
@@ -18,6 +22,23 @@ def main(argv=None):
     sub = parser.add_subparsers(dest="action", required=True)
     sub.add_parser("models")
     sub.add_parser("backends")
+    hash_tree = sub.add_parser("hash-tree")
+    hash_tree.add_argument("directory", type=Path)
+    for name in ("datasets", "algorithms"):
+        sub.add_parser(name)
+    inventory = sub.add_parser("inventory")
+    inventory_sub = inventory.add_subparsers(dest="operation", required=True)
+    inventory_create = inventory_sub.add_parser("create")
+    inventory_create.add_argument("--source-root", type=Path, required=True)
+    inventory_create.add_argument("--listing", type=Path, required=True)
+    inventory_create.add_argument("--output", type=Path, required=True)
+    split = sub.add_parser("split")
+    split_sub = split.add_subparsers(dest="operation", required=True)
+    split_create = split_sub.add_parser("create")
+    split_create.add_argument("recipe", type=Path)
+    split_create.add_argument("--output", type=Path, required=True)
+    split_inspect = split_sub.add_parser("inspect")
+    split_inspect.add_argument("manifest", type=Path)
     for name in ("plan", "run"):
         p = sub.add_parser(name)
         p.add_argument("experiment", type=Path)
@@ -53,6 +74,31 @@ def main(argv=None):
                     }
                     for key, value in registry.items()
                 ]
+            elif args.action == "hash-tree":
+                result = {"directory": str(args.directory.resolve()), "sha256": tree_digest(args.directory)}
+            elif args.action in ("datasets", "algorithms"):
+                from vla_platform.project import read_toml  # noqa: PLC0415
+
+                directory = project.root / "configs" / args.action
+                result = [
+                    {"id": read_toml(path).get("id"), "path": str(path.relative_to(project.root))}
+                    for path in sorted(directory.glob("*.toml"))
+                ]
+            elif args.action == "split":
+                if args.operation == "create":
+                    output = args.output if args.output.is_absolute() else project.root / args.output
+                    result = create_split(project.root, args.recipe, output)
+                else:
+                    path = args.manifest if args.manifest.is_absolute() else project.root / args.manifest
+                    manifest, _, _ = inspect_split(project.root, path)
+                    result = {
+                        "status": "source_and_membership_verified",
+                        "dataset_id": manifest["dataset_id"],
+                        "split_id": manifest["split_id"],
+                        "counts": {name: len(ids) for name, ids in manifest["partitions"].items()},
+                    }
+            elif args.action == "inventory":
+                result = create_inventory(args.source_root, args.listing, args.output)
             elif args.action in ("plan", "run"):
                 experiment = args.experiment if args.experiment.is_absolute() else project.root / args.experiment
                 plan = project.plan(experiment, args.operation, args.run_id)

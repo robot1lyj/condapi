@@ -1,0 +1,11 @@
+schema_version = 1
+id = "xr1-ee-full"
+backend = "xr1"
+operation = "train"
+method = "full"
+state_space = "yam_joint_absolute_14"
+action_space = "yam_ee_pose_target_v1"
+overridable = ["recipe"]
+
+[parameters]
+recipe = "configs/native/xr1-yam.example.json"

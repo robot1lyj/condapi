@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "yam-vla-platform"
-version = "0.1.0"
+version = "0.2.0"
 description = "Dependency-isolated VLA experiment and inference control plane"
 requires-python = ">=3.11"
 dependencies = []

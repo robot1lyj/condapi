@@ -1,0 +1,9 @@
+schema_version = 1
+id = "xr1-grouped-v1"
+dataset = "configs/datasets/yam-xr1-ee.toml"
+seed = 20260924
+
+[ratios]
+train = 0.8
+val = 0.1
+test = 0.1

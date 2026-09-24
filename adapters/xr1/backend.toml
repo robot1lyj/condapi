@@ -10,3 +10,8 @@ targets = ["server"]
 required = ["recipe"]
 file_parameters = ["recipe"]
 command = ["python", "{root}/adapters/xr1/train.py", "--recipe", "{recipe}", "--output", "{output}"]
+
+[operations.train.split_binding]
+parameter = "recipe"
+json_path = ["train_jsons"]
+episode_field = "asset_uri"

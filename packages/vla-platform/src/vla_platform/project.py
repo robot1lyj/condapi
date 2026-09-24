@@ -2,8 +2,10 @@
 
 from dataclasses import asdict
 from dataclasses import dataclass
+from dataclasses import field
 import hashlib
 import json
+import os
 from pathlib import Path
 import re
 import string
@@ -19,8 +21,31 @@ def read_toml(path):
 
 
 def digest(path):
-    with Path(path).open("rb") as stream:
-        return hashlib.file_digest(stream, "sha256").hexdigest()
+    path = Path(path)
+    before = path.stat()
+    with path.open("rb") as stream:
+        value = hashlib.file_digest(stream, "sha256").hexdigest()
+    after = path.stat()
+    require((before.st_dev, before.st_ino, before.st_size, before.st_mtime_ns)
+            == (after.st_dev, after.st_ino, after.st_size, after.st_mtime_ns),
+            f"File changed while hashing: {path}")
+    return value
+
+
+def tree_digest(root):
+    """Content identity for a local checkpoint directory, independent of mtimes."""
+    root = Path(root).resolve()
+    require(root.is_dir(), "Expected a checkpoint directory")
+    entries = sorted(root.rglob("*"))
+    require(all(not path.is_symlink() for path in entries), "Checkpoint symlink is not allowed")
+    files = [path for path in entries if path.is_file()]
+    require(bool(files), "Checkpoint directory is empty")
+    hashes = {}
+    for path in files:
+        require(path.resolve().is_relative_to(root), "Checkpoint file escapes its root")
+        hashes[str(path.relative_to(root))] = digest(path)
+    canonical = json.dumps(hashes, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(canonical.encode()).hexdigest()
 
 
 def identifier(value):
@@ -58,6 +83,7 @@ class Plan:
     target: str
     implementation: str
     acceptance: str = "planned_not_executed"
+    components: dict = field(default_factory=dict)
 
     def to_dict(self):
         return asdict(self)
@@ -99,6 +125,12 @@ class Project:
         identifier(run_id)
         experiment_path = Path(experiment_path).resolve()
         experiment = read_toml(experiment_path)
+        extra_sources = []
+        components = {}
+        if experiment.get("schema_version") == 2:
+            from vla_platform.composition import resolve  # noqa: PLC0415
+
+            experiment, extra_sources, components = resolve(self, experiment, operation)
         require(experiment.get("schema_version") == 1, "Unsupported experiment version")
         name = identifier(experiment["model"])
         require(name in self.models(), f"Unknown model: {name}")
@@ -125,16 +157,22 @@ class Project:
         values = experiment.get("parameters", {})
         require(isinstance(values, dict), "parameters must be a table")
         require(all(type(v) in (str, int, float, bool) for v in values.values()), "Parameters must be scalar")
-        reserved = {"root", "output", "run_id", "contract", "policy_type"}
+        reserved = {"root", "output", "run_id", "contract", "policy_type", "split_manifest"}
         require(not reserved.intersection(values), "Parameters overwrite platform fields")
-        required = set(op.get("required", []))
+        modular = bool(components)
+        required = set(op.get("modular_required", op.get("required", [])) if modular else op.get("required", []))
         require(required.issubset(values), f"Missing parameters: {sorted(required - values.keys())}")
         for key, allowed in op.get("choices", {}).items():
-            require(values.get(key) in allowed, f"Unsupported {key}: {values.get(key)}")
+            if key in values:
+                require(values[key] in allowed, f"Unsupported {key}: {values[key]}")
         # Native configuration remains upstream JSON; record its hash, not a lossy translation.
         file_sources = []
         values = dict(values)
-        for key in op.get("file_parameters", []):
+        files = (
+            op.get("modular_file_parameters", op.get("file_parameters", []))
+            if modular else op.get("file_parameters", [])
+        )
+        for key in files:
             path = Path(values[key]).expanduser()
             path = path.resolve() if path.is_absolute() else (self.root / path).resolve()
             require(path.is_file(), f"Missing native configuration: {path}")
@@ -148,12 +186,15 @@ class Project:
             "run_id": run_id,
             "contract": str(contract_path),
             "policy_type": model.get("policy_type", ""),
+            "split_manifest": components.get("split_manifest", ""),
         }
-        args = [render(token, values) for token in op["command"]]
+        template = op.get("modular_command", op["command"]) if modular else op["command"]
+        args = [render(token, values) for token in template]
         require(bool(args) and args[0] == "python", "Model entrypoint must run Python inside Conda")
         command = ["conda", "run", "--no-capture-output", "--prefix", str(prefix), *args]
         sources = [self.settings_path, experiment_path, model_path, backend_path, profile_path, contract_path]
         sources.extend(file_sources)
+        sources.extend(extra_sources)
         sources.extend(inside(self.root, path) for path in backend.get("sources", []))
         sources.append(inside(self.root, profile["spec"]))
         if profile.get("lock"):
@@ -173,6 +214,7 @@ class Project:
             {str(p): digest(p) for p in sources},
             profile["target"],
             model["backend"],
+            components=components,
         )
 
     def environment_plan(self, profile_path):
@@ -200,3 +242,5 @@ def write_json(path, value):
     with Path(path).open("x", encoding="utf-8") as stream:
         json.dump(value, stream, ensure_ascii=False, indent=2, allow_nan=False)
         stream.write("\n")
+        stream.flush()
+        os.fsync(stream.fileno())

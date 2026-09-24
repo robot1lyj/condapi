@@ -11,6 +11,7 @@ import subprocess
 
 from vla_platform.contracts import require
 from vla_platform.project import digest
+from vla_platform.project import tree_digest
 from vla_platform.project import write_json
 
 
@@ -42,6 +43,17 @@ def execute(plan):
     require((Path(plan.prefix) / "conda-meta").is_dir(), "Conda environment has not been created")
     for path, expected in plan.source_hashes.items():
         require(digest(path) == expected, f"Configuration/source changed since planning: {path}")
+    if plan.components.get("init_params_tree_sha256"):
+        require(tree_digest(plan.components["init_params"]) == plan.components["init_params_tree_sha256"],
+                "Pi base checkpoint changed since planning")
+    if plan.components.get("split_manifest"):
+        from vla_platform.splits import inspect_split  # noqa: PLC0415
+
+        inspect_split(plan.cwd, plan.components["split_manifest"])
+    if plan.components.get("bundle_manifest"):
+        from vla_platform.artifacts import validate_bundle  # noqa: PLC0415
+
+        validate_bundle(plan.components["bundle_manifest"])
     command = list(plan.command)
     if plan.target == "thor":
         device = Path("/proc/device-tree/model")

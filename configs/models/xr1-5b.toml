@@ -5,3 +5,10 @@ status = "implemented"
 operations = ["train"]
 contracts = ["yam-bimanual-v1"]
 note = "Native 5B EE-action post-training registered; YAM training requires audited FK labels and a separate deployment IK gate."
+
+[io.train]
+contract_id = "yam-bimanual-v1"
+state_space = "yam_joint_absolute_14"
+action_space = "yam_ee_pose_target_v1"
+cameras = ["observation.images.top_rgb", "observation.images.left_rgb", "observation.images.right_rgb"]
+methods = ["full"]

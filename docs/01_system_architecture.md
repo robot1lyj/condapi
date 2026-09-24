@@ -23,7 +23,23 @@ scripts/vla.py / 安装后的 vla
 
 Evo-1、FastWAM、VLA-JEPA 的模型声明共用 LeRobot 后端，不再为每个系列建一个 Python 插件目录。模型声明只选择 backend、policy_type、已接通的操作和机器人合同，不允许自行定义训练循环。LeRobot 原生 JSON 配置直接传给上游；本地不重写 trainer、processor 或 checkpoint 格式。共享入口存在与具体模型可用是两件事，三个新模型仍为 planned；具体状态、缺口和操作归 [10](10_vla_platform.md)。
 
-目录职责：`configs/models/` 选择模型及后端，`configs/experiments/` 组合实验，`configs/environments/` 选择系列 Conda prefix，`configs/robots/` 持有机器人合同投影。`adapters/` 按后端组织代码，`packages/vla-platform/` 只做跨进程编排；已有 `src/openpi/` 和 `scripts/train.py` 是 Pi 原生实现，`scripts/thor/` 继续承载现有部署/评测，`docs/reports/thor/` 保存证据。不为凑目录树新建空的 deployment/evaluation 层，也不移动现有实机脚本导致远端路径失效。
+目录职责：`configs/models/` 选择模型及后端，`configs/datasets/` 声明数据语义与来源，`configs/splits/` 保存分组分割配方，`configs/algorithms/` 声明原生算法和允许覆盖的参数，`configs/experiments/` 组合实验，`configs/environments/` 选择系列 Conda prefix，`configs/robots/` 持有机器人合同投影。`adapters/` 按后端组织代码，`packages/vla-platform/` 只做跨进程编排；已有 `src/openpi/` 和 `scripts/train.py` 是 Pi 原生实现，`scripts/thor/` 继续承载现有部署/评测，`docs/reports/thor/` 保存证据。
+
+2026-09-24 控制层 0.2 增加可组合配置核心：`inventory.py` 从审核后的 episode/采集组/源文件清单生成源哈希，`splits.py` 以固定 seed 按组划分并发布只读成员清单，`composition.py` 交叉核对模型 IO、数据动作空间、相机顺序、算法后端、机器人合同及训练 split/推理模型包。`project.py` 将实验 schema 2 编译为既有 `Plan`，运行前再核对组件/源文件 SHA 和 split 或模型包；schema 1 旧实验继续可用。所有组件是 TOML/JSON 文件，解析器只用 Python 标准库；模型、数据读取和优化仍留在 OpenPI、LeRobot、OpenWAM、XR-1 各自环境。新 split 只记录 episode 成员，不移动或修改数据。实现和命令归 [10](10_vla_platform.md#模块化配置后端-v02)。
+
+```text
+源数据（只读） → episode inventory（文件哈希） → 分组 split（不可覆盖）
+                                            ↓
+模型声明 + 数据声明 + 算法声明 + 环境 + 机器人合同
+                    ↓ 类型/能力/语义检查
+             Plan（命令、源哈希、组件身份）
+                    ↓ 运行前复核
+        独立 Conda 子进程中的原生训练器 / 推理器
+                    ↓
+           原生 checkpoint + 模型包完整性/验收
+```
+
+首版是本地可复用核心和 CLI，不提供多用户服务 API。后续 API 应调用同一组合、分割和执行边界，另加身份、租户隔离、作业队列与持久状态；不能把 HTTP handler 直接放进模型进程，也不能绕过 `Plan`、数据 split 或模型包校验。服务设计不是当前已实现能力。
 
 原型 `plugins/<family>/` 已撤销，项目配置升级为 schema 2；实验、环境和模型包用 `model` 字段替代 `plugin`，不提供旧控制层格式兼容。原始模型权重、历史报告、运行记录不迁移或改写。机器资源继续由 [02](02_installation_and_environment.md) 统一记录，当前执行器不自动 SSH 或复制服务器配置到各模型代码中。
 
@@ -31,7 +47,7 @@ Evo-1、FastWAM、VLA-JEPA 的模型声明共用 LeRobot 后端，不再为每�
 
 2026-09-22 新增 `adapters/openwam/` 独立后端，模型选择为 `openwam`。固定上游运行时快照在 `third_party/openwam/`（逐文件哈希归 `UPSTREAM.json`）；复用 OpenWAM 原生模型、Hydra/DeepSpeed trainer、归一化与 checkpoint，不经 LeRobot trainer，也不复制训练循环。YAM reader 只负责 LeRobot v2/v3 数据投影，微调/恢复入口和离线推理由独立 Conda 子进程承载。控制层仍无模型依赖；接口实现不表示 GPU 或 Thor 已验收，操作边界见 [10](10_vla_platform.md#2026-09-22--openwam-微调接入)。
 
-2026-09-24 新增 `adapters/xr1/` 独立后端和 `third_party/xr1/` 固定上游运行时快照。控制层仅计划并调用独立 Conda 子进程；XR-1 保留其 Hydra/Lightning/DeepSpeed trainer 与 60D 原生动作。`configs/models/xr1-5b.toml` 当前只声明训练能力；YAM 的 14D joint 动作须先由可信 FK 产生末端目标标签、按 train split 重算统计，推理还需独立 IK/控制时序验收。兼容门槛及模块化配置改革草案见 [10](10_vla_platform.md#2026-09-24--xr-1-原生训练入口)。
+2026-09-24 新增 `adapters/xr1/` 独立后端和 `third_party/xr1/` 固定上游运行时快照。控制层仅计划并调用独立 Conda 子进程；XR-1 保留其 Hydra/Lightning/DeepSpeed trainer 与 60D 原生动作。`configs/models/xr1-5b.toml` 当前只声明训练能力；YAM 的 14D joint 动作须先由可信 FK 产生末端目标标签、按 train split 重算统计，推理还需独立 IK/控制时序验收。兼容门槛见 [10 的 XR-1 入口](10_vla_platform.md#2026-09-24--xr-1-原生训练入口)，模块化组合见 [同页 v0.2](10_vla_platform.md#模块化配置后端-v02)。
 
 以下数据流和 32D/H50、delta 配置描述的是 **Pi 后端**，不是对所有模型的统一要求。
 

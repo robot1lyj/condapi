@@ -1,0 +1,17 @@
+schema_version = 1
+id = "pi-native-infer"
+backend = "openpi"
+operation = "infer"
+method = "native"
+state_space = "yam_joint_absolute_14"
+action_space = "yam_joint_absolute_14"
+overridable = ["checkpoint", "request", "model_version", "action_dt_s", "backend", "compute"]
+
+[parameters]
+checkpoint = "/path/to/audited-pi-checkpoint"
+config = "pi05_yam"
+backend = "jax"
+compute = "float32"
+request = "configs/requests/pi-example.json"
+model_version = "pi-example"
+action_dt_s = 0.1

@@ -1,0 +1,11 @@
+schema_version = 2
+operation = "infer"
+model = "pi"
+bundle_manifest = "/path/to/sealed-pi-package/manifest.json"
+algorithm = "configs/algorithms/pi-native-infer.toml"
+environment = "configs/environments/pi-server.toml"
+contract = "configs/robots/yam.toml"
+
+[overrides]
+checkpoint = "/path/to/audited-pi-checkpoint"
+model_version = "pi-example"

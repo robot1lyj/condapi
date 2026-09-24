@@ -11,6 +11,11 @@ required = ["native_config"]
 file_parameters = ["native_config"]
 command = ["python", "{root}/adapters/openwam/train.py", "--config", "{native_config}", "--output", "{output}"]
 
+[operations.train.split_binding]
+parameter = "native_config"
+json_path = ["dataloader", "episodes"]
+episode_field = "episode_id"
+
 [operations.infer]
 targets = ["server", "workstation"]
 required = ["checkpoint", "request", "model_version"]

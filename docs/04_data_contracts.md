@@ -1,5 +1,11 @@
 # 04 · 数据合同
 
+## 模块化数据 inventory 与 split（2026-09-24）
+
+控制层 v0.2 只处理数据**身份与成员清单**，不替代 LeRobot/XR-1 loader 或逐帧有效性审计。`configs/datasets/*.toml` 声明源版本、机器人合同、三相机顺序及动作空间；审核后的 JSONL 输入逐条标明 `episode_id`、原始 rollout/场景 `group_id`、`task_id`、`frames` 和所有会影响解码/标签的源文件，包括元数据。`vla inventory create` 在新路径计算每个源文件 SHA256，再把相对路径→哈希的规范 JSON 映射取 SHA256 作为该 episode 的 `source_sha256`；因此它不是单个 Parquet 或视频的直接哈希。XR-1 派生数据另有 `asset_uri` 指向原生 JSON，必须包含在该 episode 源文件列表；其引用视频也必须列入。工具不自动发现清单遗漏。生成的清单不修改原始数据。
+
+`vla split create` 固定 seed、数据声明和源清单哈希，将同一 `group_id` 的所有 episode 放在一个 train/val/test 分区，拒绝重复 ID、缺失文件、源文件变化与输出覆盖。它不自动判断片段有效、任务成败或既有官方 val 是否可回流训练；原有 val 与各轮 DAgger val 的隔离规则仍有效。训练计划还核对后端原生 episode 选择与冻结 train 清单一致，统计须由对应训练集单独产生。操作与限制见 [10](10_vla_platform.md#模块化配置后端-v02)。
+
 ## DAgger 纠正数据发布合同（2026-09-21方案）
 
 状态：拟实施，尚未验收现场新数据或导出器。采集/训练操作见 [DAgger手册](reference/lego_dagger_playbook.md)。已有14D、三路RGB、absolute动作原值和Pi训练时delta规则继续适用。

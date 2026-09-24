@@ -1,5 +1,10 @@
 # 07 · 变更历史
 
+## 2026-09-24 · 建立模块化训练后端 v0.2
+
+按用户要求先实现可复用核心与 CLI，后续再加多人服务 API。保留 v1 实验入口，新增 v2 模型/数据/算法组合校验、源文件哈希 inventory、按原始采集组的不可覆盖 train/val/test split，以及运行前源资产和模型包复核。Pi 增加只绑定 frozen split 与 train-only norm 的薄启动器，仍调用原 OpenPI 训练循环；OpenWAM/XR-1 保留原生 trainer 并核对 train 成员。Pi/OpenWAM v2 离线推理要求 sealed 模型包；XR-1 仍无 YAM 推理 capability。当前只完成本地代码和操作/记忆更新，示例路径为模板，未运行本地或服务器训练、未做 GPU/Thor/多人 API 验收。
+
+
 ## 2026-09-24 · 将 XR-1 原生训练接入本地多模型平台
 
 用户授权整合本地 condapi 训练部分并接入 XR-1，同时规划模型、数据、算法模块化配置。固定 Xiaomi 上游 `0dd7aef8dc87296246aae812a1f59ccb708e5546` 的运行时源码及逐文件哈希，新增 `xr1-5b` 声明、独立后端、服务器 Conda profile、原生训练配方示例和 Slurm 训练 wrapper。wrapper 在启动前要求逐文件绑定的原生末端 JSON、train-only 统计、FK/单位/时序审计及官方 5B 权重 SHA；训练调用上游 Hydra/Lightning/DeepSpeed 入口，W&B 设为 offline。当前没有经审核的 YAM FK 派生标签、IK 或真实 GPU 训练，因此仅训练接线已实现，YAM 可训练性和 Thor 推理未验收。模块化改革先写入 10 作为草案，不迁移现有实验。

@@ -1,0 +1,11 @@
+schema_version = 2
+operation = "train"
+model = "pi"
+dataset = "configs/datasets/yam-lerobot-joints.toml"
+split_manifest = "/path/to/new-yam-split/manifest.json"
+algorithm = "configs/algorithms/pi-joint-full.toml"
+environment = "configs/environments/pi-server.toml"
+contract = "configs/robots/yam.toml"
+
+[overrides]
+recipe = "/path/to/audited-pi-recipe.json"

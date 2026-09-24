@@ -1,0 +1,11 @@
+schema_version = 2
+operation = "infer"
+model = "openwam"
+bundle_manifest = "/path/to/sealed-openwam-package/manifest.json"
+algorithm = "configs/algorithms/openwam-native-infer.toml"
+environment = "configs/environments/openwam-server.toml"
+contract = "configs/robots/yam.toml"
+
+[overrides]
+checkpoint = "/path/to/sealed-openwam-package/checkpoint"
+model_version = "openwam-example"

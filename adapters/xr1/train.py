@@ -123,9 +123,9 @@ def main(argv=None):
         return
     if not os.environ.get("SLURM_JOB_ID"):
         parser.error("XR-1 training requires an authorized Slurm GPU allocation")
-    if args.output.exists():
-        parser.error("Output already exists")
-    args.output.mkdir(parents=True)
+    if args.output.exists() and any(args.output.iterdir()):
+        parser.error("Training artifact directory is not empty")
+    args.output.mkdir(parents=True, exist_ok=True)
     (args.output / "assets").mkdir()
     from omegaconf import OmegaConf  # noqa: PLC0415
 

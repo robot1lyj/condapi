@@ -178,7 +178,9 @@ def main(argv=None):
     # Metadata/hash preflight, no training and no source writes.
     YamDataset(OmegaConf.to_container(cfg.dataloader, resolve=True))
     payload = load_stats(cfg.dataloader.normalization_json)
-    args.output.mkdir(parents=True, exist_ok=False)
+    if args.output.exists() and any(args.output.iterdir()):
+        parser.error("Training artifact directory is not empty")
+    args.output.mkdir(parents=True, exist_ok=True)
     np.save(args.output / "normalization_stats.npy", payload["stats"])
     resolved = args.output.resolve() / "resolved.yaml"
     OmegaConf.save(cfg, resolved)

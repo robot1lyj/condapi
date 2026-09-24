@@ -7,6 +7,7 @@
 当前乐高DAgger采集与首轮A/B混采实验见 [方案手册](reference/lego_dagger_playbook.md)（03下属；方案阶段，未开训）。
 
 多模型工作树改造先读 [01 的多模型接入层](01_system_architecture.md#多模型接入层)，再读 [10 的当前状态](10_vla_platform.md#当前状态)。以下既有路径用于 Pi/YAM 后端，不代表 Evo-1 已完成适配。
+模型、数据、算法的第二版组合配置及 inventory/split CLI 见 [10 的模块化后端](10_vla_platform.md#模块化配置后端-v02)；能力边界和架构分层归 [01](01_system_architecture.md#多模型接入层)。首版只有核心与 CLI，尚无多用户服务 API。
 
 XR-1 服务器环境与 checkpoint 已准备，本地原生训练入口已接入，但 YAM 的末端标签/FK 及部署 IK 尚未验收；按 [10 接入与改革草案](10_vla_platform.md#2026-09-24--xr-1-原生训练入口)、[02 环境记录](02_installation_and_environment.md#xr-1-服务器环境-2026-09-24) 和 [安装报告](reports/environments/xr1-20260924/README.md) 查看边界。
 

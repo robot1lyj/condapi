@@ -1,0 +1,11 @@
+schema_version = 2
+operation = "train"
+model = "xr1-5b"
+dataset = "configs/datasets/yam-xr1-ee.toml"
+split_manifest = "/path/to/new-xr1-split/manifest.json"
+algorithm = "configs/algorithms/xr1-ee-full.toml"
+environment = "configs/environments/xr1-server.toml"
+contract = "configs/robots/yam.toml"
+
+[overrides]
+recipe = "/path/to/audited-xr1-recipe.json"

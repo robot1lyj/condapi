@@ -1,0 +1,11 @@
+schema_version = 1
+id = "pi-joint-full"
+backend = "openpi"
+operation = "train"
+method = "full"
+state_space = "yam_joint_absolute_14"
+action_space = "yam_joint_absolute_14"
+overridable = ["recipe"]
+
+[parameters]
+recipe = "configs/native/pi-yam-modular.example.json"

@@ -6,7 +6,7 @@
 
 | 部分 | 状态 |
 |---|---|
-| 控制层 | 标准库实现；模型与后端分离、计划、Conda 子进程、运行记录、模型包哈希与离线 IO 检查 |
+| 控制层 | 标准库核心 v0.2；模型/数据/算法组合、源文件 inventory、分组 split、计划与运行哈希、独立 Conda 子进程和模型包完整性 |
 | Pi | 现有 OpenPI 训练/参考推理/回放/ONNX 导出入口已接线；新环境 GPU 执行未验证 |
 | LeRobot 后端 | 共用原生训练 launcher 已实现并用替身测试；无自建 trainer/processor；尚无通用离线推理入口 |
 | Evo-1 | 本地/服务器专用环境已安装并通过CPU检查；YAM真实训练/推理仍待接入 |
@@ -16,7 +16,7 @@
 | Conda | Evo-1已有独立环境规格和104个wheel的锁；Pi等bootstrap仍不代表模型环境已安装 |
 | Thor | 原 Pi 容器、TensorRT 引擎、报告保持原状；没有部署此次改造 |
 
-当前 CPU 回归：平台测试52项；与 `scripts/thor`、`skills/mlops-memory/tests` 和下载完整性测试合跑170项通过。测试命令为 `python -m pytest -q packages/vla-platform/tests scripts/thor skills/mlops-memory/tests scripts/conda/fetch_locked_wheels_test.py`。框架测试替身不冒充模型运行；独立Evo环境实际导入/processor检查见 [环境证据](reports/environments/evo1-20260908/README.md)，MolmoAct2的原生精度/数据差异见 [接入说明](reference/molmoact2_integration.md)。
+历史 2026-09-09 CPU 回归曾有平台测试52项、与 `scripts/thor`、`skills/mlops-memory/tests` 和下载完整性测试合跑170项通过；这些数值不代表 v0.2 新模块已验收。框架测试替身不冒充模型运行；独立Evo环境实际导入/processor检查见 [环境证据](reports/environments/evo1-20260908/README.md)，MolmoAct2的原生精度/数据差异见 [接入说明](reference/molmoact2_integration.md)。
 
 XR-1 的本地原生训练入口已接入，尚不能把现有 YAM 14D joint action 数据直接拿来开训。所选 checkpoint、版本锁、`decord` wheel 元数据修复和原生 state/action 语义见 [XR-1 环境报告](reports/environments/xr1-20260924/README.md)；操作与待完成项见下文。
 
@@ -36,20 +36,52 @@ python3 scripts/vla.py plan configs/experiments/xr1-yam.toml train --run-id xr1-
 
 平台计划仅核对声明和文件哈希，不表示配方已通过数据门槛。用服务器 XR-1 prefix 执行 `python adapters/xr1/train.py --recipe <绝对路径> --output <新目录> --check-only` 才执行原生 JSON、视频、统计、FK 审计和 checkpoint SHA 检查；此步骤不构造模型或进入训练循环。真正启动必须在获准的 Slurm GPU allocation 中执行 `scripts/vla.py run ...`；wrapper 会把解析后的上游配置与审计哈希留在新运行目录，W&B 仅本地离线记录。启动前仍需核对当前作业资源、CUDA/import、视频解码与首条数据。已实现训练接口不等于真实 YAM 训练或推理通过。XR-1 原生输出是末端目标；推理前还需独立验证 YAM 的 IK、限位、坐标变换及 Thor 服务时序，当前模型声明没有 `infer` 能力。
 
-## 模型、数据、算法模块化配置改革草案
+## 模块化配置后端 v0.2
 
-目标是在现有 stdlib 控制层上组合**声明**，保持 LeRobot、OpenPI、XR-1 和 OpenWAM 的原生训练器与 checkpoint。建议分四层，逐层固定版本并在生成命令前解析成不可变的 `resolved` 产物：
+首版按用户确定的范围提供**可复用标准库核心与 CLI**，暂不提供多用户 REST API。旧 `schema_version = 1` 实验继续按原有入口执行；新的 `schema_version = 2` 实验按组件组合，模型权重和数据仍在仓库外，各系列继续调用原生训练器。后端由 `packages/vla-platform/src/vla_platform/` 的 inventory、splits、composition、project、runtime 和 artifacts 模块组成；文件清单与命令均不执行 shell 插值。模型/算法/数据的名称不是兼容性的证据，必须通过具体 IO 与来源检查。
 
-| 层 | 组件声明 | 关键字段与验收 |
+| 组件 | 配置/产物 | 编译时核对 |
 |---|---|---|
-| 模型 | `configs/models/` + `adapters/<backend>/backend.toml` | 后端、基础 checkpoint 哈希、支持操作、state/action 语义、horizon、相机需求；能力未接通不可声明 |
-| 数据 | 待增 `configs/datasets/` + `configs/splits/` | 源 repo/revision、episode/场景分组、时间轴与单位、三相机映射、不可变 train/val manifest；split 先于统计，原始数据只读 |
-| 算法 | 待增 `configs/algorithms/` | full/LoRA、原生 trainer 参数、loss/normalizer、精度、资源预算、续训语义；按后端做允许字段校验，不创造通用 optimizer 实现 |
-| 运行与交接 | 现有 `configs/environments/` + `configs/experiments/`，后续部署 profile | Conda/镜像、设备、输出合同、checkpoint/processor/stats 的哈希、推理服务和精度/时延 gate |
+| 模型 | `configs/models/*.toml` 的 `io.<operation>` | 后端、方法、状态/动作空间、相机顺序、合同及已开放操作 |
+| 数据 | `configs/datasets/*.toml` + episode inventory JSONL | 源格式、版本、14D joint 或经 FK 派生 EE 标签、源文件哈希 |
+| 分割 | `configs/splits/*.toml` → 新目录 `manifest.json` + `READY` | 固定 seed，按 `group_id` 整组分配，train/val/test 互斥，源清单或文件变化拒绝复用 |
+| 算法 | `configs/algorithms/*.toml` | 后端/方法/输入语义；只允许类型相同的显式覆盖；底层 loss/processor/optimizer 仍由原生训练器实现 |
+| 运行 | `configs/experiments/*.toml`、环境、机器人合同 | 生成完整 Conda 命令、输入哈希、run ID 和组件收据；运行前重查 split/模型包 |
 
-实验文件只引用各层组件 ID、版本及少量有类型的覆盖值。解析器先核查**模型动作空间 × 机器人状态/动作合同 × 数据标签 × 算法**是否相容，再冻结源 episode 列表、split、统计 ID、权重 hash、上游 revision 和全部覆盖值。`plan` 展示最终训练/推理命令、数据读写路径与尚缺 gate；`run` 在正确环境调用原生入口。推理 profile 必须随 checkpoint 读取同一相机顺序、动作语义、归一化与控制周期；不能从训练名猜测。
+### 生成 inventory 与 split
 
-第一阶段把现有 Pi、Evo/MolmoAct2、OpenWAM、XR-1 配置映射为这些组件的**只读清单**，保留旧实验入口和结果。第二阶段新增按 rollout/场景分组的确定性 split 生成器及泄漏审计，派生文件只写新目录；各后端用自己的 processor/统计。第三阶段生成冻结的训练和部署包，进行真实 GPU/Thor 验收后再替换旧入口。XR-1 先作为反例驱动兼容性检查：YAM 14D joint 标签与 XR-1 EE action 不相容时，`plan` 必须显式阻断训练，除非已选经审计的 FK 派生数据；部署另需 IK gate。DAgger 每轮训练配方仍按本仓库约束逐轮展示和确认，模块化不能绕过该边界。
+先准备审核后的 JSONL 文件列表，每行至少有 `episode_id`、`group_id`（原始 rollout 或同场景采集组）、`task_id`、`frames`、`source_files`。`source_files` 是相对数据根目录或绝对文件路径，必须完整列出会影响该 episode 解码/标签的 Parquet、三路视频和元数据文件；XR-1 还要用 `asset_uri` 标明原生 JSON 文件，并把该 JSON 引用的视频列入清单。平台仅核对清单中声明的文件，不会自动发现漏列资产。示例的一行格式：
+
+```json
+{"episode_id":"17","group_id":"session-2026-09-24-a","task_id":"sort lego","frames":780,"source_files":["meta/info.json","data/episode_000017.parquet","videos/top/episode_000017.mp4","videos/left/episode_000017.mp4","videos/right/episode_000017.mp4"]}
+```
+
+已有 YAM 原始 val 不应重新混入 train 池；只对允许重新划分的源 train 池建立一个数据组件。`inventory create` 在数据根目录之外的新路径写入源文件哈希与 episode 清单，不复制或修改视频/Parquet。它检查路径不逃出数据根目录、文件存在且无重复；来源、分组和帧数仍须先完成采集审计。
+
+```bash
+python3 scripts/vla.py inventory create --source-root /path/to/source-train --listing /path/to/reviewed-episodes.jsonl --output /path/to/new-audit/episode-inventory.jsonl
+python3 scripts/vla.py split create configs/splits/yam-grouped.toml --output /path/to/new-split
+python3 scripts/vla.py split inspect /path/to/new-split/manifest.json
+```
+
+将数据组件中的 `source_root`、`episode_manifest`、`source_revision` 填成真实值后再创建 split。分割结果只含成员 ID 和源/配方哈希；每个非零比例至少需要一个独立 group，组过少直接失败。输出目录必须不存在且位于原始数据目录之外；半途失败不自动覆盖重试目录。`split inspect` 和训练运行前重新计算源文件哈希并重放分配。比例按 group 完整性尽量逼近，不能承诺每个任务或每个比例精确分层；需要任务分层时先扩展且版本化分割策略，不能手工改 manifest。
+
+### 组合训练与推理
+
+第二版示例在 `configs/experiments/*-modular.example.toml`。将占位路径换成实际资产后运行 `vla plan`；它核对模型、数据、算法、机器人合同、split 和原生训练配置的 train 成员必须完全一致。Pi 使用薄启动器把选中 episode 交给现有 OpenPI `train.main`，还要求同一 train 集的 H50/delta norm provenance、显式基础 `/params` 及 `vla hash-tree /path/to/params` 得出的完整目录 SHA256；计划锁定 norm 文件哈希，运行前复核基础权重目录哈希。OpenWAM 核对其原生 JSON `dataloader.dataset_dir`、`episodes`、动作/相机语义和训练统计的成员清单，并锁定统计文件哈希；XR-1 核对原生 JSON 列表，并继续要求 FK/单位/时序审计。三者都不产生第二套训练循环。Pi 模块化首版只支持 `pi05_yam` 全量新 run，未提供 LoRA 或自动 resume；旧正式 Lego 路线不受影响。
+
+```bash
+python3 scripts/vla.py datasets
+python3 scripts/vla.py algorithms
+python3 scripts/vla.py plan configs/experiments/pi-train-modular.example.toml train --run-id pi-new-001
+python3 scripts/vla.py plan configs/experiments/xr1-modular.example.toml train --run-id xr1-new-001
+```
+
+推理/导出组合要求已封装的模型包 `bundle_manifest`：逐文件哈希必须通过，模型、合同、model_version 与 checkpoint 路径必须一致。当前 v2 推理声明覆盖 Pi 和 OpenWAM 的原生离线接口；XR-1 没有 YAM IK/末端到关节转换验收，仍无 `infer` capability。训练后 policy 的 Thor 服务、数值精度和跨 IPC smoke 仍按 [05](05_inference_and_rollout.md) 与 [08](08_thor_edge_deployment.md) 单独验收。
+
+`plan` 只读，`run` 在本机系列 Conda prefix 启动；不自动 SSH、提交 Slurm 或更新 Thor。训练 wrapper 另要求获准的 Slurm GPU allocation，本地工作站禁止训练。运行目录只创建一次，记录 `plan.json`、源 SHA、开始/结束状态和原生日志；命令退出成功不等于模型验收。当前示例是模板，路径未填、数据未审核、GPU 未验证时不可运行。DAgger 每轮训练配方仍须按本仓库既有规则逐轮展示与确认。
+
+此核心为以后服务 API 留下清晰边界：HTTP 层只提交已授权的配置与操作，复用相同的 plan/run/split 逻辑；身份、租户隔离、任务队列、配额、持久事件和审计仍需独立实现，现阶段不能宣称已提供多人在线服务。
 
 ## 工作树与 Git
 

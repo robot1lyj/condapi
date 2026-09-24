@@ -1,0 +1,13 @@
+schema_version = 1
+id = "openwam-native-infer"
+backend = "openwam"
+operation = "infer"
+method = "native"
+state_space = "yam_joint_absolute_14"
+action_space = "yam_joint_absolute_14"
+overridable = ["checkpoint", "request", "model_version"]
+
+[parameters]
+checkpoint = "/path/to/sealed-openwam-package/checkpoint"
+request = "configs/requests/pi-example.json"
+model_version = "openwam-example"

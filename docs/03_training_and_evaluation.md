@@ -1,5 +1,9 @@
 # 03 · 训练与评估
 
+## 模块化训练入口 v0.2 的验收边界
+
+`schema_version = 2` 实验先固定审核过的 episode inventory 和分组 split，再核对算法动作空间与模型输入、原生训练配置中的 train episode 集。Pi 薄入口把 train ID 注入现有 OpenPI YAM loader，要求 `norm_assets/yam/provenance.json` 的 `selected_episode_ids`、H50、`(6,-1,6,-1)` delta mask 与数据集一致；当前仅新 run 全量 `pi05_yam`，不支持该入口自动 LoRA/续训。OpenWAM 和 XR-1 保留原生 trainer，分别核对其原生 episode 列表；XR-1 仍须 FK 派生末端目标。所有示例均不代表 GPU 训练已验收，任何 DAgger 轮次配方仍先逐轮展示并获明确确认。具体命令与状态见 [10](10_vla_platform.md#模块化配置后端-v02)。
+
 ## XR-1 后训练 gate（2026-09-24）
 
 本地已接上游 XR-1 原生训练入口，但当前 YAM 数据只有14D关节/夹爪目标，缺少经审核的末端位姿标签。正式训练先由离线 FK 在新目录生成原生 JSON，固定 train/val split 并只用 train 重算 30×60 action 与 1×60 state 统计；再核查坐标系、物理单位、时序与 5B 基础权重 SHA。平台 `plan` 只生成命令，不替代数据预检；只有通过 [10 的 XR-1 操作门槛](10_vla_platform.md#2026-09-24--xr-1-原生训练入口) 且获准的 Slurm GPU 节点才能启动。训练完成还需独立做模型 forward、验证集和部署 IK/Thor 推理验收；现均未发生。
