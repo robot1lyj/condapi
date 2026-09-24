@@ -14,7 +14,7 @@
 
 首版计划为 4 GPU × 每卡 micro-batch 4 × 梯度累积 2，即**有效 global batch 32**；`max_steps=168772`，按上游 `JsonDataset` 的逐帧采样逻辑覆盖 `ceil(5,400,685/32)` 个 optimizer step，约一轮（末尾补取 19 帧）。适配器同时把原生数据集 `max_steps` 设为 optimizer steps × 梯度累积；否则上游 loader 会提前耗尽，仅读约半轮数据。30 步 action horizon、BF16 mixed precision、DeepSpeed、FusedAdam、原生 cosine 日程（warmup 500、最高学习率 2e-5、最低 5e-6）、梯度裁剪 1.0 和随机种子 42 继承固定上游配置。每 25,000 optimizer step 保存，原生 `save_last` 保留；因上游 `save_top_k=-1` 会积累所有定期 checkpoint，训练前须估算磁盘占用并确定保留策略。每卡 micro-batch 4 只是容量起点，需在空闲的 Slurm GPU 节点验证 CUDA/模型初始化、数据解码与显存；若改 micro-batch、累积次数、卡数或步数，须同步重新计算覆盖轮数并产生新配方版本，不能静默沿用本配方的轮数声明。
 
-先在服务器仓库同步该代码和配置；派生 `train/manifest.json`、`val/manifest.json`、`normalize.json` 与 `fk_audit.json` 真实齐备并完成逐值审核后，执行只读预检：
+2026-09-24 已将本配方、XR-1 训练入口和固定上游代码同步到服务器独立目录 `/home/wuyan/lyj/xiaomi-robotics-1/source/condapi-xr1-train/`，入口与配方的 SHA256 已与本地提交逐文件核对；此目录不承载平台 CLI。派生 `train/manifest.json`、`val/manifest.json`、`normalize.json` 与 `fk_audit.json` 真实齐备并完成逐值审核后，从该目录执行只读预检：
 
 ```bash
 conda run -p /home/wuyan/.conda/envs/xr1-posttrain python adapters/xr1/train.py \
