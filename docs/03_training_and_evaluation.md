@@ -556,3 +556,5 @@ bash scripts/launch_lego_full.sh JOB_ID \
 ## 2026-09-21 · 50h RTC训练准备
 
 50h训练配置：保留原20h的941集，新增1396集，共5400685帧；官方base、RTC全量、batch32、338000步约两轮。分170k与338k两个累计停止段，固定LR计划，支持resume。详见[交接](reports/training/rtc-base-50h-20260921/README.md)。
+
+2026-09-28 当前执行状态：作业2183已从最新完整69,000检查点按原 `run.sbatch --resume 338000` 恢复，在gpu001运行；10:24:57 +08 新metrics已推进至69,021且数值有限。动态状态、验证证据、2175–2177故障记录及用户提出的“假期空调可能导致过热”未证实假设，见[运行交接](reports/training/rtc-base-50h-20260921/README.md)。SSH 已验证入口为 `yam-server` (`wuyan@10.18.31.234:22`)；使用前仍动态检查 Slurm、metrics、保存状态及锁。

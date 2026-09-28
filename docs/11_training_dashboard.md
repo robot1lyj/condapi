@@ -13,7 +13,9 @@ python3 scripts/training_dashboard.py --metrics /absolute/run/metrics.jsonl --mo
 
 打开 `http://127.0.0.1:8765`。顶部切换运行；自动显示已有数值指标，默认至多添加八个辅助图，其余通过“添加指标”选择，× 可移除。训练损失图固定保留；没有 loss 的模型可通过自定义指标图观察。未知 batch、目标步数、精度、GPU 数留空，绝不套用 Pi 配置。
 
-当前 Pi 服务模板 `scripts/training_dashboard.service` 跟踪 batch32 训练，并通过 `--history-remote-metrics` 继承历史指标（需要续训时启用）。恢复运行时，父 run 的记录会保留到当前 run 的第一条 step 之前；重叠 step 由当前 run 覆盖，避免同一训练步重复绘制。当前服务显式指定 RTC 子集本轮目标 30k、每 1k 保存；余弦学习率周期按运行配置保留。
+当前 Pi 服务模板 `scripts/training_dashboard.service` 跟踪 50h RTC run `lego_pi05_rtc_base_50h_20260921`，从 `yam-server` 镜像远端 metrics 至 `artifacts/training_dashboard/pi05_rtc_50h_20260921/metrics.jsonl`，每10秒同步。服务参数为 batch32、首段累计目标170k、总累计目标338k、每1k保存；run恢复时由远端 `metrics.jsonl` 作为当前数据源。`--history-remote-metrics` 仍可用于跨 run 拼接父指标，但本次同 run resume 不应重复合并父run。2026-09-28本机用户服务已处于 active。
+
+重启初始化期间远端 metrics 可能暂时保留上次运行的尾部 step；看板同步成功只证明 SSH 文件镜像成功，不证明当前作业已写新指标。展示当前进度前同时复核远端 `squeue`、metrics 源文件 mtime 与最后step；如源mtime落后于当前作业启动时刻，应标为恢复初始化/旧尾值。2026-09-28 10:24 +08 的 2183 已在gpu001恢复至新step69021；本机看板API当次同步到69011，约落后一个10秒轮询间隔。
 
 单次运行也可以用 `--history-metrics /path/to/parent.jsonl` 指定本地父日志；远端父日志使用同一 SSH 主机上的重复 `--history-remote-metrics /absolute/parent.jsonl`。当前 run 尚无记录时，看板先显示父 run；当前 run 写入后自动拼接为连续曲线。父日志只读，镜像失败时保留上次缓存。
 
@@ -26,7 +28,7 @@ python3 scripts/training_dashboard.py --metrics /absolute/run/metrics.jsonl --mo
 
 | 配置/预期 | 需要的实际证据 | 当前记忆边界与复核触发 |
 |---|---|---|
-| service 参数 batch32、30k总体目标、每1k保存 | 对应 run 的启动配置、实际日志、已提交 checkpoint | 是展示/计划值，今天训练实际状态未知；切换 run、续训或参数变化时重核 |
+| service 参数 batch32、338k累计目标、每1k保存 | 对应 run 的启动配置、实际日志、已提交 checkpoint | 配置来自 50h run；job启动、续训及参数变化后动态核实，不可仅凭静态metadata认定实际进度 |
 | `--interval 10`、页面持续刷新 | 指标源时间、镜像错误、源端最新 step | HTTP刷新不等于新训练更新；缓存可在同步失败后保留，使用前查新鲜度 |
 | 原始 loss / 页面平滑线 | 训练器日志聚合代码与该 run 的 log_interval | Pi日志均值与显示平滑分开，不能恢复未保存的逐步loss；换后端/版本须重新确认统计口径 |
 
