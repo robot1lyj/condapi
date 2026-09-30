@@ -4,7 +4,7 @@
 
 ## 多模型接入层
 
-2026-09-30 PARTS左右抓取残差服务端首版已在本地实现；用户澄清瓶颈为下降高度不足并确认YAM端有FK。YAM客户端拥有下降高度门控、关爪/力矩奖励与动作时间轴；Thor冻结Pi并生成活动臂下降抓取残差候选；独立GPU服务器训练actor/critics。动作合同候选为六关节增量，若选单维高度还须独立IK映射；旧夹爪残差方案已撤销。网络留在模型环境，控制层仅标准库编排，不复制Pi训练循环或YAM控制。标准库协议/文件审核位于vla_platform，独立PyTorch learner位于packages/parts-rl，由adapters/parts调用；Pi训练循环不复制。TRT目前仅shadow，eager特征/actor路径尚待GPU验收，未采集/训练/远端部署。责任、RTC交还与联调顺序归 [05](05_inference_and_rollout.md#parts-左右抓取的服务端与客户端合同2026-09-30方案)，学习/数据归03/04。
+2026-09-30 PARTS左右抓取残差服务端已实现，另按用户要求增加固定RLinf源码的RLT实验接口。用户确认瓶颈为下降高度不足、YAM端有FK、动作采用活动臂六关节有界增量。YAM客户端拥有高度/持物门控、关爪力矩结果、奖励及执行时间轴；Thor冻结Pi生成候选；GPU服务器训练左右actor/critics。RLT先在缓存最终image prefix上训练原生token模块，再冻结token训练actor/critics，不更新Pi、不训练阶段分类器。模型留在packages/parts-rl，控制包仅标准库，adapters/rlt复用PARTS Actor/Critic编排，未复制Pi训练循环或YAM控制。旧PARTS路径保留；TRT仅off/shadow，RLT为独立eager实验路径，GPU训练/数值/延迟与远端部署均未验收。协议归 [05](05_inference_and_rollout.md#rlt-eager-实验服务2026-09-30)，操作和版本差异归 [03](03_training_and_evaluation.md#rlt-服务端实验接口2026-09-30)，数据归04。
 
 模型无关遥测使用标准库 `vla_platform.metrics.write_metrics`，训练器只需输出标量事件。LeRobot 共享入口采集原生结构化 tracker；Pi 保持原生日志；独立只读看板统一消费 JSONL/CSV/Trainer-state，不导入模型环境。指标合同、配置与局限归 [11](11_training_dashboard.md)。
 2026-09-08 工作树改造：采用 **LeRobot 原生能力 + 薄接入层**，不是自研训练框架。LeRobot 负责其支持模型的网络、loss、数据集、处理器、优化器和 checkpoint；原版 OpenPI 是 Pi 的独立实现后端。RLinf 仅作为未来有具体 DAgger/RL 需求时的可选后端，不作为所有模型的强制依赖。

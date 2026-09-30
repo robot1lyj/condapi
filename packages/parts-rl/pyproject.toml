@@ -9,5 +9,15 @@ description = "Isolated residual RL learner for audited YAM subtask replay"
 requires-python = ">=3.11"
 dependencies = ["numpy>=2,<2.3", "torch==2.7.1", "h5py>=3.12,<4"]
 
+[project.optional-dependencies]
+video = ["av>=14,<16"]
+
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+"parts_rl.vendor.rlinf" = ["SOURCE.json", "LICENSE"]
+
+[tool.ruff]
+extend = "../../pyproject.toml"
+extend-exclude = ["src/parts_rl/vendor"]

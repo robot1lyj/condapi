@@ -24,11 +24,11 @@ from openpi.shared import normalize
 from openpi.training import config
 
 
-def main():
+def main(*, manifest_option="--parts-manifest", backend="eager_parts_candidate", expected_feature_extractor=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--checkpoint", type=Path, required=True)
     parser.add_argument("--norm", type=Path, required=True)
-    parser.add_argument("--parts-manifest", type=Path, required=True)
+    parser.add_argument(manifest_option, dest="extension_manifest", type=Path, required=True)
     parser.add_argument("--warmup-sample", type=Path, required=True)
     parser.add_argument("--warmup-rtc", type=Path)
     parser.add_argument("--rtc-mode", choices=("off", "trained"), required=True)
@@ -37,6 +37,11 @@ def main():
     parser.add_argument("--host", default="192.168.250.1")
     parser.add_argument("--port", type=int, default=8001)
     args = parser.parse_args()
+    if (
+        expected_feature_extractor is not None
+        and json.loads(args.extension_manifest.read_text()).get("feature_extractor") != expected_feature_extractor
+    ):
+        parser.error("This experimental entry requires its own feature manifest")
     if not torch.cuda.is_available():
         parser.error("Thor CUDA required")
     weights = args.checkpoint / "model.safetensors"
@@ -70,7 +75,7 @@ def main():
     metadata = {
         **policy.metadata,
         "config": "pi05_yam",
-        "backend": "eager_parts_candidate",
+        "backend": backend,
         "status": "not_robot_or_latency_validated",
         "rtc_mode": args.rtc_mode,
         "checkpoint_weights_sha256": weights_sha,
@@ -81,7 +86,7 @@ def main():
         "rtc_max_delay_steps": max_delay,
         "compute_dtype": "float32",
     }
-    extension = load_eager_extension(args.parts_manifest, policy, metadata)
+    extension = load_eager_extension(args.extension_manifest, policy, metadata)
     serving = policy
     if trained:
         use_quantiles = train.data.create(train.assets_dirs, train.model).use_quantile_norm

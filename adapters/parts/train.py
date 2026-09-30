@@ -16,7 +16,7 @@ from adapters.parts.common import load_recipe
 from adapters.parts.common import require_server
 
 
-def main(argv=None):
+def main(argv=None, *, backend="parts"):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--recipe", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
@@ -33,7 +33,14 @@ def main(argv=None):
         if hashlib.sha256((snapshot / "training.json").read_bytes()).hexdigest() != latest["training_sha256"]:
             parser.error("resume training manifest hash mismatch")
         args.resume = snapshot
-    recipe = load_recipe(args.recipe)
+    recipe_loader = load_recipe
+    if backend == "rlt":
+        from adapters.rlt.common import load_recipe as recipe_loader
+    elif backend != "parts":
+        parser.error("Unknown learner backend")
+    recipe = recipe_loader(args.recipe)
+    if backend == "rlt" and args.fresh_retrain:
+        parser.error("RLT uses the audited replay as supplied; PARTS fresh-retrain is not an RLT recipe")
     if args.check_only:
         print(json.dumps({"status": "recipe_checked_not_training_validated", "algorithm": recipe["algorithm"]}))
         return
@@ -50,14 +57,34 @@ def main(argv=None):
     from parts_rl.learner import Learner
     import torch
 
+    token_binding = None
+    if backend == "rlt":
+        from parts_rl.rlt import Learner
+        from parts_rl.rlt_contract import load_token_manifest
+
+        from adapters.rlt.common import bind_token
+
+        token_manifest, _ = load_token_manifest(recipe["token_manifest"])
+        token_binding = {
+            "path": str(Path(recipe["token_manifest"]).resolve()),
+            "sha256": digest(recipe["token_manifest"]),
+            "feature_schema_id": token_manifest["feature_schema_id"],
+        }
+
     if not torch.cuda.is_available():
         parser.error("server CUDA unavailable")
+    if backend == "rlt":
+        torch.backends.cuda.matmul.allow_tf32 = False
+        torch.backends.cudnn.allow_tf32 = False
     torch.manual_seed(recipe["seed"])
     torch.cuda.manual_seed_all(recipe["seed"])
     rng = np.random.default_rng(recipe["seed"])
     replays, learners, curated = {}, {}, {}
     prior = json.loads((args.resume / "training.json").read_text()) if args.resume else None
     if prior:
+        expected_schema = "yam_rlt_training_v1" if backend == "rlt" else "yam_parts_training_v1"
+        if prior.get("schema") != expected_schema or prior.get("token_manifest") != token_binding:
+            parser.error("resume backend/token provenance mismatch")
         curated = prior.get("curated_attempts", {}).copy()
     for arm in ("left", "right"):
         ready = Path(recipe["replay"][arm]).resolve()
@@ -71,6 +98,8 @@ def main(argv=None):
             chosen = curate_attempts(metadata["attempts"], recipe["failure_fraction"], recipe["seed"])
             curated[arm] = chosen
         replay = Replay(ready, arm, selected_attempts=chosen)
+        if backend == "rlt":
+            bind_token(recipe, replay)
         if replays and any(
             replay.metadata[key] != replays["left"].metadata[key]
             for key in ("contract_sha", "feature_dim", "feature_schema_id", "reward_recipe", "holdout_groups")
@@ -114,10 +143,24 @@ def main(argv=None):
                 metrics.write(json.dumps({"step": learner.step, "arm": arm, **result}, allow_nan=False) + "\n")
             if update % recipe["save_every"] == 0 or update == recipe["updates"]:
                 metrics.flush()
-                save_checkpoint(args.output, recipe, core, learners, replays, curated, rng, code_sha, digest)
+                save_checkpoint(
+                    args.output,
+                    recipe,
+                    core,
+                    learners,
+                    replays,
+                    curated,
+                    rng,
+                    code_sha,
+                    digest,
+                    backend=backend,
+                    token_binding=token_binding,
+                )
 
 
-def save_checkpoint(output, recipe, core, learners, replays, curated, rng, code_sha, digest):
+def save_checkpoint(
+    output, recipe, core, learners, replays, curated, rng, code_sha, digest, *, backend="parts", token_binding=None
+):
     import torch
 
     # Save portable FP32 actor bundles; original Pi weights are never loaded or changed.
@@ -131,7 +174,7 @@ def save_checkpoint(output, recipe, core, learners, replays, curated, rng, code_
         checkpoint_tmp.replace(output / f"{arm}_learner.pt")
         learner_members[arm] = {"path": f"{arm}_learner.pt", "sha256": digest(output / f"{arm}_learner.pt")}
         actor = {
-            "schema": "yam_parts_actor_v1",
+            "schema": "yam_rlt_actor_v1" if backend == "rlt" else "yam_parts_actor_v1",
             "arm": arm,
             "contract_sha": replays[arm].metadata["contract_sha"],
             "state_schema": replays[arm].metadata["state_schema"],
@@ -143,6 +186,8 @@ def save_checkpoint(output, recipe, core, learners, replays, curated, rng, code_
             "mean": learner.mean.detach().cpu(),
             "std": learner.std.detach().cpu(),
         }
+        if backend == "rlt":
+            actor.update(algorithm=recipe["algorithm"], fixed_std=recipe["fixed_std"], token_manifest=token_binding)
         actor_tmp = output / f".{arm}_actor.pt.tmp"
         torch.save(actor, actor_tmp)
         actor_tmp.replace(output / f"{arm}_actor.pt")
@@ -152,7 +197,7 @@ def save_checkpoint(output, recipe, core, learners, replays, curated, rng, code_
             "step": learner.step,
         }
     record = {
-        "schema": "yam_parts_training_v1",
+        "schema": "yam_rlt_training_v1" if backend == "rlt" else "yam_parts_training_v1",
         "status": "trained_not_task_evaluated",
         "contract_sha": replays["left"].metadata["contract_sha"],
         "recipe_core": core,
@@ -175,6 +220,8 @@ def save_checkpoint(output, recipe, core, learners, replays, curated, rng, code_
             for arm, replay in replays.items()
         },
     }
+    if backend == "rlt":
+        record["token_manifest"] = token_binding
     temp = output / ".training.json.tmp"
     temp.write_text(json.dumps(record, ensure_ascii=False, indent=2, allow_nan=False) + "\n")
     temp.replace(output / "training.json")

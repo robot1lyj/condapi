@@ -131,7 +131,9 @@ class PartsPolicyExtension:
             spec = self.manifest.get("actors", {}).get(arm, {})
             if sent["mode"] != "shadow":
                 state = encode_state(z, obs["observation.state"], actions, sent, arm, feature_dim=self.feature_dim)
-                if arm in self.actors:
+                if arm in self.actors and not (
+                    sent["mode"] == "collect" and self.manifest.get("exploration_space") == "pre_tanh_gaussian"
+                ):
                     u = np.asarray(self.actors[arm](state), dtype=np.float32)
                 if sent["mode"] == "collect":
                     seed = int(
@@ -145,7 +147,15 @@ class PartsPolicyExtension:
                         16,
                     )
                     rng = np.random.default_rng(seed)
-                    u = np.clip(u + rng.normal(0, self.exploration_std, (50, 6)), -1, 1).astype(np.float32)
+                    if self.manifest.get("exploration_space") == "pre_tanh_gaussian":
+                        actor = self.actors.get(arm)
+                        u = (
+                            actor.sample(state, rng)
+                            if actor is not None
+                            else np.tanh(rng.normal(0, self.exploration_std, (50, 6))).astype(np.float32)
+                        )
+                    else:
+                        u = np.clip(u + rng.normal(0, self.exploration_std, (50, 6)), -1, 1).astype(np.float32)
             u[:delay] = 0
             candidates[arm] = {
                 "u": u,
@@ -194,6 +204,10 @@ def load_eager_extension(path, policy, base_metadata):
     """Load pinned FP32 actors against the same eager Pi feature schema."""
     manifest_path = Path(path).resolve()
     manifest = json.loads(manifest_path.read_text())
+    if manifest.get("feature_extractor") == "pi_eager_rlt_final_prefix_v1":
+        from rlt_policy import load_rlt_extension
+
+        return load_rlt_extension(manifest_path, policy, base_metadata)
     if manifest.get("feature_extractor") != "pi_eager_image_prefix_mean_three_views_v1":
         raise ValueError("Unknown eager feature extraction contract")
     identity = manifest.get("base_identity", {})

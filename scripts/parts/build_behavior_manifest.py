@@ -14,7 +14,17 @@ sys.path.insert(0, str(ROOT / "packages/vla-platform/src"))
 from vla_platform import parts as wire
 
 
-def build(output, declaration, identity, *, snapshot=None, feature_dim=None, exploration_std=None, seed=None):
+def build(
+    output,
+    declaration,
+    identity,
+    *,
+    snapshot=None,
+    feature_dim=None,
+    exploration_std=None,
+    seed=None,
+    token_manifest=None,
+):
     output = Path(output).resolve()
     if output.exists():
         raise ValueError("Behavior output must be a new directory")
@@ -24,6 +34,16 @@ def build(output, declaration, identity, *, snapshot=None, feature_dim=None, exp
         if len(value) != 64 or any(c not in "0123456789abcdef" for c in value):
             raise ValueError("Actual base asset SHA256 required")
     trained = None
+    token, token_asset = None, None
+    if token_manifest is not None:
+        sys.path.insert(0, str(ROOT / "packages/parts-rl/src"))
+        from parts_rl.rlt_contract import load_token_manifest  # noqa: PLC0415
+
+        token_manifest = Path(token_manifest).resolve()
+        token, token_asset = load_token_manifest(token_manifest)
+        if token["base_identity"] != identity or token["feature_schema_id"] != declaration["feature_schema_id"]:
+            raise ValueError("RLT token/base/declaration identity mismatch")
+        feature_dim = token["architecture"]["embed_dim"]
     if snapshot:
         snapshot = Path(snapshot).resolve()
         if (snapshot / "LATEST.json").is_file():
@@ -34,12 +54,24 @@ def build(output, declaration, identity, *, snapshot=None, feature_dim=None, exp
             snapshot = path
         trained = json.loads((snapshot / "training.json").read_text())
         if (
-            trained.get("schema") != "yam_parts_training_v1"
+            trained.get("schema") != ("yam_rlt_training_v1" if token else "yam_parts_training_v1")
             or trained.get("contract_sha") != declaration["contract_sha"]
             or trained.get("feature_schema_id") != declaration["feature_schema_id"]
             or trained.get("state_schema") != wire.STATE_SCHEMA
         ):
             raise ValueError("Training snapshot contract/feature mismatch")
+        if token and (
+            trained.get("token_manifest", {}).get("sha256") != wire.sha256(token_manifest)
+            or trained["feature_dim"] != feature_dim
+            or trained.get("recipe_core", {}).get("algorithm") != "yam_rlt_gaussian_reference_v1"
+        ):
+            raise ValueError("RLT actor/token snapshot mismatch")
+        if (
+            token
+            and "collect" in declaration["supported_modes"]
+            and exploration_std != trained["recipe_core"]["fixed_std"]
+        ):
+            raise ValueError("RLT collect std must equal the learner's pre-tanh fixed_std")
         feature_dim = trained["feature_dim"]
     if "eval" in declaration["supported_modes"] and trained is None:
         raise ValueError("eval requires learned actors")
@@ -74,9 +106,18 @@ def build(output, declaration, identity, *, snapshot=None, feature_dim=None, exp
         "training_manifest_sha256": None if trained is None else wire.sha256(snapshot / "training.json"),
         "status": "candidate_not_robot_or_latency_validated",
     }
+    if token:
+        manifest.update(
+            feature_extractor=token["feature_extractor"],
+            exploration_space="pre_tanh_gaussian",
+            algorithm="yam_rlt_gaussian_reference_v1",
+            token_manifest={"path": "token/token.json", "sha256": wire.sha256(token_manifest)},
+        )
+        assets.extend(((token_manifest, "token/token.json"), (token_asset, "token/" + token["weights"]["path"])))
     manifest["behavior_snapshot_id"] = wire.canonical_sha(manifest)
     output.mkdir(parents=True, exist_ok=False)
     for source, relative in assets:
+        (output / relative).parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(source, output / relative)
     path = output / "behavior.json"
     path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2, allow_nan=False) + "\n")

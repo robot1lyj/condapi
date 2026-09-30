@@ -1,5 +1,64 @@
 # 03 · 训练与评估
 
+## RLT 服务端实验接口（2026-09-30）
+
+**状态：代码与离线合同检查已完成；未运行 GPU 网络、训练更新、远端部署或真机实验。** 用户要求参考当前核对的 RLinf 实现，先构建服务端实验接口。源固定为 [RLinf `d34d4c320d08cb982de034aa9a011f08dc0fa217`](https://github.com/RLinf/RLinf/tree/d34d4c320d08cb982de034aa9a011f08dc0fa217)，不随上游 main 自动变化。原生 `rlt_token_transformer.py` 原样保存在 `packages/parts-rl/src/parts_rl/vendor/rlinf/`，附 SOURCE.json、文件哈希及 Apache-2.0 LICENSE；其编码器追加一个 learned RL token，解码器采用移位、stop-gradient teacher 输入和 causal mask，以有效 image prefix 的重建 MSE 训练。另核对了该提交的 RLTMLPPolicy 与 Actor/Critic 更新；后者在本项目按下述动作合同适配，未将完整 RLinf 分布式运行时作为依赖。
+
+### 架构和与上游的区别
+
+| 模块 | 服务端实现 |
+|---|---|
+| 冻结基础策略 | 原 `pi05_yam`，同 checkpoint/norm；PyTorch eager FP32，三路图像、14D反馈、原始 H50×14 动作 |
+| token 预训练 | 同次 Pi prefill 的**最终 image prefix** → RLinf 原生 encoder/decoder → 重建损失；不使用此前输入 embedding 的均值池化，不更新 Pi |
+| RL 状态 | 冻结 token D维 + 现有1527维关节/基础H50/高度/力矩/资格/调度队列状态；默认 D=2048，总3575维 |
+| 左右 Actor | 各自三层256 Tanh MLP；固定标准差、tanh 前高斯采样；输出 H50×6 的归一化关节残差 u，物理增量仍为 B_rad×u |
+| 左右 Critic | 各自双Q及target网络；完整状态 + 带mask的300维残差 + 300维mask；使用真实 elapsed_steps 折扣 |
+| Actor 目标 | `-q_weight*Q1(s,u) + reference_weight*masked_mean(u²)`；残差坐标的基础策略 reference 为零。reference dropout 只屏蔽 Actor 的基础动作输入，Critic 保留完整 reference |
+| 发布/推理 | 固定 token + 左右actor + hash绑定行为目录；collect一次采样，eval使用tanh(mean)，RTC承诺前缀不可编辑 |
+
+**这是 YAM 残差空间适配，不能称为 RLinf 原任务的逐项复现。** 上游学习完整动作 chunk，本接口遵循用户确认的六关节增量并保留夹爪/另一臂基础动作；上游固定chunk折扣改为当前RTC决策间隔，critic保留决定残差动力学的基础动作及队列；actor最后一层零初始化。未实现 RLinf 的人工介入BC分支，也未增加抓后掉落恢复任务或阶段判断网络。下降高度/力矩决定客户端资格与奖励，不将阶段分类器加入训练。
+
+Actor/Critic 入口 `adapters/rlt/train.py` 复用 `adapters/parts/train.py` 的服务器限制、replay读取、双臂编排、恢复及不可变snapshot；新增算法在 `parts_rl/rlt.py`。token 入口 `adapters/rlt/train_token.py` **只加载缓存prefix和原生token模块**，没有VLA模型、VLA优化器或第二套Pi训练循环。所有权重保持FP32；训练位于批准的GPU服务器，长作业使用Slurm/tmux。
+
+### 实验顺序与用法
+
+1. **原始包 → 观测。** `scripts/rlt/prepare_observations.py` 先审核 publication、观测状态及三路video_refs，按原视频frame_index解码RGB，在新目录写NPZ和observations.json。需要 `packages/parts-rl[video]` 的 PyAV 数据依赖，`--prompt`必须填写采集时实际策略提示词。只选择train布局，明确保留holdout；完整或局部任务都可供token重建，不能把mock/eval加入训练。
+2. **观测 → 冻结prefix。** 在具有既有OpenPI/Pi模型依赖的GPU服务器环境，`scripts/rlt/extract_prefixes.py`加载原FP32模型资产、执行离线推理，hook读取最终image prefix；不修改动作或权重。在新目录发布 PREFIX_READY.json 与有限FP32 prefix/mask NPZ；逐成员哈希、基础策略身份与split均固定。此入口同样要求显式hostname名单和执行标志。
+3. **训练token并固定一版。** 填写 `configs/rlt/token_recipe.example.json` 的prefix路径、批准的hostname和预算，服务器运行token入口；选定 `snapshots/step_XXXXXXXX/token.json` 后冻结encoder。`--resume`指向同配方/同cache的具体token snapshot，新输出目录保存恢复后的训练。更新token会产生新的feature_schema_id，需要新实验数据与actor。
+4. **准备RLT采集行为。** 取token.json的feature_schema_id填写新的已审核contract，并绑定同checkpoint/norm资产身份、已审核B_rad、目标高度及奖励配方。`scripts/rlt/build_behavior_manifest.py --zero-residual`发布**已训练token + 初始零均值actor**，collect显式给fixed_std/seed。客户端仍按现有协议自动裁决，不需要新增人工阶段标签；本轮没有向客户端发送任务。
+5. **训练左右Actor/Critic。** 采集RLT token版本的真实下降/闭合attempt；复用 `scripts/parts/audit_publication.py` 与 `prepare_replay.py`，得到左右READY。填 `configs/rlt/train_recipe.example.json`，服务器运行RLT入口。已有池化特征READY不可直接换标签冒充token；现有原始包可先用于token预训练，本接口未实现旧PARTS replay的自动重编码迁移。RLT不使用PARTS的`--fresh-retrain`成功重加权选项。
+6. **固定候选对照。** builder的 `--snapshot`可指向RLT训练run（读取LATEST并验hash）或具体snapshot；发布时核对actor/token/feature/base绑定。`scripts/thor/serve_pi05_rlt_eager.py`为独立实验入口，复用Pi/RTC服务、warmup和原WebSocket协议。服务器新训练不自动替换Thor运行快照。GPU数值、token重载、显存、延迟、两臂局部成功率和整任务效果通过后，才可宣称实验可部署或有提升。
+
+下面为**未执行的命令模板**。数据转换可离线完成；模型推理和两阶段训练仅在显式批准的GPU服务器执行，`GPU_SERVER_HOSTNAME`需替换成实际白名单主机名：
+
+```bash
+python scripts/rlt/prepare_observations.py --run /data/rlt/raw_A \
+  --output /data/rlt/observations_v1 --split /data/rlt/split.json \
+  --prompt '采集时的原始任务提示词'
+python scripts/rlt/extract_prefixes.py --observations /data/rlt/observations_v1/observations.json \
+  --checkpoint /models/pi05_fp32 --norm /models/norm_stats.json \
+  --output /data/rlt/prefixes_v1 --server-host GPU_SERVER_HOSTNAME --execute-on-server
+python adapters/rlt/train_token.py --recipe /data/rlt/token_recipe.json \
+  --output /data/rlt/token_train_v1 --execute-on-server
+python scripts/rlt/build_behavior_manifest.py --contract /data/rlt/contract.json \
+  --base-identity /data/rlt/base_identity.json \
+  --token-manifest /data/rlt/token_train_v1/snapshots/step_00010000/token.json \
+  --zero-residual --exploration-std 0.1 --seed 0 --output /data/rlt/behavior_collect_v1
+# 完成真实RLT采集并按现有prepare_replay入口构建左右READY后：
+python adapters/rlt/train.py --recipe /data/rlt/actor_recipe.json \
+  --output /data/rlt/actor_train_v1 --check-only
+python adapters/rlt/train.py --recipe /data/rlt/actor_recipe.json \
+  --output /data/rlt/actor_train_v1 --execute-on-server
+python scripts/rlt/build_behavior_manifest.py --contract /data/rlt/eval_contract.json \
+  --base-identity /data/rlt/base_identity.json \
+  --token-manifest /data/rlt/token_train_v1/snapshots/step_00010000/token.json \
+  --snapshot /data/rlt/actor_train_v1 --output /data/rlt/behavior_eval_v1
+```
+
+两个example都为空hostname名单、null数据路径，不能直接开训。token默认2048D/2层/8头/768 prefix沿用原生模块；token学习率1e-4、batch8、10000更新，RL每臂batch128/10000更新、gamma=.999、tau=.005、std=.1、Q/reference权重1/1等均为**待实验的工程模板**，不称论文已验证的YAM配方。`--check-only`只检配方、不验证cache或GPU。token/actor的resume都恢复optimizer、target（actor阶段）、训练统计和随机状态，并要求原数据哈希一致。
+
+本轮验证：`PYTHONPATH=/tmp/condapi-parts-data-test python -m pytest packages/parts-rl/tests -q`为 **53 passed（0.62 s）**，含25项原PARTS回归；21个相关Python文件AST通过，限定文件Ruff及`git diff --check`通过。检查覆盖原生源码哈希/causal mask、final-prefix hook与异常恢复、token/基础策略/actor快照绑定、prefix/holdout隔离、无Torch导入的check-only/hostname拒绝、pre-tanh单次采样、RTC前缀与真实编码视频的frame_index解码。未运行网络前向、backward、optimizer或训练循环。真实客户端数据目录尚未交付本任务审核；fixture不代表真实数据已READY。GPU更新、保存/恢复的数值一致性、token运行显存与Thor延迟仍未验收。
+
 ## PARTS 左右抓取残差学习方案（2026-09-30）
 
 **状态：服务端首版代码已实现，离线协议/数据检查通过；未启动真实采集、GPU训练或远端部署。** 用户要求先完成服务端，客户端新增指令须先交用户审核。2026-09-29 用户明确确认此前夹爪、动作相位和左臂异常均已解决；下面的历史诊断保留来源，不再作为本方案的当前阻断。当前可用基线的 checkpoint、norm、推理模式和控制版本尚未在本次现场核验，不从历史报告选定它们。

@@ -4,13 +4,28 @@
 
 Thor 系统、容器、Pi0.5 转换和 TensorRT 方案见 [08 · Thor 端侧部署](08_thor_edge_deployment.md)。
 
+## RLT eager 实验服务（2026-09-30）
+
+新增 `scripts/thor/serve_pi05_rlt_eager.py --rlt-manifest ...`，复用eager Pi服务与RTC适配器；训练及快照选择见 [03](03_training_and_evaluation.md#rlt-服务端实验接口2026-09-30)。这是尚未GPU/延迟/真机验收的实验入口，未改生产TRT。清单指定`feature_extractor=pi_eager_rlt_final_prefix_v1`时，读取同次冻结Pi prefill最终image prefix，经固定token encoder输出z后调用左右actor；不重复调用基础Pi，不部署token decoder。加载时核对behavior/token/actor/基础checkpoint/norm/feature ID与有限FP32成员。
+
+外部协议仍为 **yam-parts-v1**，同H50×14基础动作、左右H50×6的u、B_rad、editable_mask、features.z、context和behavior snapshot字段。客户端按原自动规则决定当前arm是否应用 `B_rad×u`；服务端不决定抓取阶段、不控制夹爪、不生成奖励，不增加VLM或阶段网络。50 mm为客户端可配置介入高度，目标高度独立；关爪后新鲜、连续的`abs(effort_nm)>0.65`用于结果确认，达到高度不自动判成功。持物/放置禁止重入仍由客户端裁决。
+
+- **off：** 原基础推理，不提取token或运行actor。
+- **shadow：** 验证token出口，候选为零，客户端执行基础策略。
+- **collect：** `u=tanh(mu+fixed_std*epsilon)`，只采样一次；初始零均值actor同样使用tanh前高斯噪声，不叠加旧PARTS的tanh后噪声。固定seed/context/behavior/arm可重现候选，std与训练快照一致。
+- **eval：** `u=tanh(mu)`，无探索；必须有learned actor。
+
+RTC前d行u为零且不可编辑，原已承诺物理动作及RTC回退边界保持。旧PARTS `--parts-manifest`及均值池化/TD3路径保留；actions-only TRT仍仅off/shadow，不能据此宣称RLT collect可用。
+
+启动参数复用原服务：`--checkpoint`、`--norm`、`--warmup-sample`、`--rtc-mode off|trained`、`--num-steps`、`--max-joint-step-rad`及host/port；trained另需匹配的rtc_manifest.json与`--warmup-rtc`。新contract的feature ID取自选定token，客户端按审核后的manifest声明配置新run，无需协议新增字段。发布快照不会热替换运行模型。本轮未同步Thor/客户端或自动发送任务；真实样例的token/动作数值、延迟、RTC与跨IPC验收待完成。
+
 ## PARTS 左右抓取的服务端与客户端合同（2026-09-30方案）
 
 **状态：服务端首版已实现，离线协议/数据验收通过，未远端部署。** 用户已确认旧夹爪、动作相位和左臂问题解决，并澄清当前失败是下降高度不足；用户确认客户端已有末端位姿/FK。用户确认将介入高度、目标高度和关爪后的抓取判据分开，并指定 **`h_entry` 可配置，初始值为50 mm（0.05 m）**；目标高度和高度测量坐标/参考点待核对。采用高度误差辅助奖励与抓取结果奖励的设计，具体公式/权重待定。抓取结果用用户确定的 `abs(effort_nm)>0.65`，到达高度不自动发抓取成功奖励。学习目标归 [03](03_training_and_evaluation.md#parts-左右抓取残差学习方案2026-09-30)，数据与字段归 [04](04_data_contracts.md#parts-抓取-rl-回放数据合同2026-09-30方案)。
 
 客户端开发的执行入口为 [YAM客户端实施计划](reference/parts_client_handoff.md)，含构建范围、采集阶段、双方依赖、验收交付和可直接执行的指令。此前按用户授权交给客户端任务；2026-09-30用户追加要求：后续客户端任务指令须先展示具体内容并经用户审核，禁止自动发送新任务/补充指令。condapi当前优先完成服务端。
 
-**自动资格方案：** 用户随后要求每次抓取不人工标记、不调用额外VLM，采用本地规则自动切换。已核对客户端 `98e8dee` 首版仍使用显式标记；[自动规则改造计划](reference/parts_client_handoff.md#本轮客户端改造自动规则选择器待审核的实施方案)拟用实际张开反馈、关爪/持续力矩历史、桌面系抓取区及回撤判定自动生成eligible/empty_hand。成功后的持物/放置和释放后未回撤区间禁止重入；力矩回落不自动变空手。计划已形成，尚未修改客户端、发送追加任务或验收自动规则。
+**自动资格现状：** 用户要求不人工标记、不调用额外VLM，采用本地规则自动切换，并反馈客户端已实现。此前只读核对的提交为 `714e9c409cab9fc29655f2900fff2e2cf7f978e1`（`fix(parts): allow preclosing grasps without spatial or opening gates`），不再沿用`98e8dee`显式标记首版作为当前结论。客户端生成资格并跟踪持物/释放及回撤，服务端消费协议字段、不训练阶段判断器。本轮未修改客户端、发送新任务或验收现场规则。[原改造计划](reference/parts_client_handoff.md#本轮客户端改造自动规则选择器待审核的实施方案)保留设计来源，实际参数以采集run及现场验收为准。
 
 ### 本地接口证据与责任分配
 

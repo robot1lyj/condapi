@@ -1,5 +1,24 @@
 # 04 · 数据合同
 
+## RLT 派生特征与训练数据（2026-09-30）
+
+RLT沿用下面的原始发布包、14D物理动作、活动臂六关节残差、真实决策间隔、RTC队列与结果奖励合同；新增特征版本不能覆盖原始包或旧READY。入口与训练顺序归 [03](03_training_and_evaluation.md#rlt-服务端实验接口2026-09-30)，推理归 [05](05_inference_and_rollout.md#rlt-eager-实验服务2026-09-30)。
+
+| 阶段 | 不可变产物与检查 |
+|---|---|
+| 原始包 | publication.json完整、mock=false；布局在train组、split_role=train且非eval；request的state、tick及video_refs与原HDF5/episode匹配 |
+| 观测导出 | `yam_rlt_observations_v1` observations.json；每观测一个NPZ，含三路`observation.images.*_rgb`（HWC uint8 RGB）、`observation.state`（有限14D）、`prompt`（原始提示词）；成员有path/SHA、observation_key、group_id、context、video_refs，清单记录publication哈希与split |
+| 冻结prefix | `yam_rlt_prefixes_v1` PREFIX_READY.json；NPZ仅含prefix=`(S,2048)` FP32、mask=`(S,)` bool，有限且至少一个有效token；S不超过显式架构上限，三视图预期768，实际形状由hook/cache核对 |
+| token快照 | `yam_rlt_token_v1` token.json + `yam_rlt_token_weights_v1` token.pt；固定上游commit、架构、prefix schema、checkpoint/norm SHA、cache SHA、train/holdout组及权重SHA；原生encoder/decoder均有限FP32，部署只加载encoder |
+| RL回放 | 仍为`yam_parts_replay_v1`，状态前D维为选定token的z，后1527维不变；左右READY的feature ID/D匹配token，且同reward/contract/holdout；保持accepted_candidate_plan_v1行为残差 |
+| Actor快照 | `yam_rlt_training_v1` training.json、每臂`yam_rlt_actor_v1`；绑定token清单SHA、feature/state schema、物理合同、fixed_std、train统计、replay/成员哈希；不兼容旧PARTS actorbundle |
+
+`feature_schema_id = rlt-<canonical SHA256>`由上游commit、token架构、checkpoint/norm身份、prefix schema及权重成员身份确定。换token/checkpoint/norm另开版本；行为目录复制原清单和相对权重路径后保持同一ID。token预训练和RL必须保留同一holdout布局组，不把评测图像用于token训练。成员路径受目录边界和哈希检查，不读取pickle；不完整输出没有READY。
+
+现有原始数据可用于token重建，不要求完整颜色分拣任务；RL仍要求完整的局部下降→闭合→终止/实际交还attempt。取消、失效力矩和不连续来源等排除规则保持。旧池化feature的READY不能直接训练RLT actor，本轮未实现旧replay自动重编码迁移；新RLT collect包的同次token由服务端回传，再复用replay assembler。不能根据FK或后续测量倒推动作。
+
+`prepare_observations.py`只读原数据，按MP4引用解码，不宣称恢复压缩前逐字节像素。PyAV为可选数据依赖，模型/GPU依赖留在Pi服务器环境。本轮用fixture验证字段与来源连接，未审核实际采集包。
+
 ## PARTS 抓取 RL 回放数据合同（2026-09-30方案）
 
 **状态：服务端原始包审核和replay构建已实现，未接收/发布真实RL训练集。** 用户澄清当前失败为下降高度不足；需采集下降接近→关爪的完整尝试，下降进入信号待核对。`abs(effort_nm)>0.65`仍为关爪后的结果判据；状态机和权责归 [05](05_inference_and_rollout.md#parts-左右抓取的服务端与客户端合同2026-09-30方案)，学习算法归 [03](03_training_and_evaluation.md#parts-左右抓取残差学习方案2026-09-30)。本合同不是LeRobot专家SFT/HIL导出规则。
