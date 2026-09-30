@@ -4,6 +4,8 @@
 
 ## 推荐阅读顺序
 
+PARTS下降抓取的客户端构建与采集交接先读 [客户端实施计划](reference/parts_client_handoff.md)（05下属；含可执行指令与阶段条件），具体消息/数据分别归05/04。h_entry初始50 mm且可配置；当前仍是构建计划，尚无已部署PARTS服务。
+
 当前乐高DAgger采集与首轮A/B混采实验见 [方案手册](reference/lego_dagger_playbook.md)（03下属；方案阶段，未开训）。
 
 多模型工作树改造先读 [01 的多模型接入层](01_system_architecture.md#多模型接入层)，再读 [10 的当前状态](10_vla_platform.md#当前状态)。以下既有路径用于 Pi/YAM 后端，不代表 Evo-1 已完成适配。

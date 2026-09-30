@@ -22,7 +22,7 @@
 | request表 | `(run_id, session_id, epoch, request_id, obs_id)`；三相机源帧/时间和state；观测tick、RTC committed prefix、其逐tick原来源、队列状态；完整基础H50、左右候选U、feature或可校验feature_ref；探索实现后的behavior、snapshot与噪声来源 |
 | 每tick记录 | 原生policy_selection.request/model_index/target_tick、attempt_id/arm/phase、是否启用残差、基础目标与残差候选引用、应用的physical residual、selected/bounded/submitted/measured各自值与时间、当前高度/目标高度/误差及有效性、height_reward/grasp_reward/total_reward、力矩原值与反馈有效性、客户端约束/裁剪标记 |
 | attempt表 | arm、下降进入及首次实际残差tick、闭合开始tick、reward proposal/确认tick、handback effective tick、成功/失败/取消原因、reset边界、grasp_reward=0/1或null、高度辅助与总奖励分量、terminated/truncated、trainable与排除原因、来源request/视频区间 |
-| 发布清单 | 完整attempt成员、源文件哈希、来源组/train-val分区、数组维数/有限性、下降进入/关节残差/reward合同、逐tick执行掩码、时序审计、READY；只写新目录 |
+| 发布清单 | 完整attempt成员、源文件哈希、来源组/train-val分区、数组维数/有限性、下降进入/关节残差/reward合同、逐tick执行掩码与客户端完整标志；服务器审计后生成READY，只写新目录 |
 
 数据传输和大文件落盘由已有后台录制/传输路径承担，不在30Hz提交路径等待网络/磁盘。客户端生成所有控制tick、epoch、attempt与奖励事件；Thor原样回显关联token并将自身特征/残差记录与之绑定。跨机monotonic保持原时钟域，不伪造对齐。
 
@@ -48,6 +48,60 @@ transition只组装控制来源和记录连续的区间，状态包括冻结视�
 行为标签来自记录的残差候选和客户端实际应用链，不用measured_state代替动作、不把submitted_action当U直接输入网络、不从动作差中猜未知B。约束改变了行为时保留原候选、最终应用差和标记；学习器采用的动作表示固定在本run合同，并核对超出归一化[-1,1]的样本。首次发布先对逐值来源和实际调度回放验收。
 
 成功/失败attempt都需保留。重训练的成功重加权只是派生采样清单，不删除失败原件。同一原始rollout/重置布局组放同一split，左右arm来自同组不能分开跨train/val；holdout组不进入online buffer或后续success-reweighted retraining。旧HIL数据只有满足完整来源、力矩、特征和动作合同才可能派生，不默认给整集U=0或局部成功标签。
+
+### PARTS 原始发布格式
+
+这是本轮客户端构建的拟实施物理格式，新增层schema为 `yam_parts_raw_v1`；已有episode继续保留 `yam_hil_v2`，运行配置/发布规范以本节为准。客户端实施步骤见 [交接计划](reference/parts_client_handoff.md)。尚未实现录制扩展或发布器。
+
+```text
+<新采集根目录>/<run_id>/
+  run.json
+  requests.jsonl
+  requests.h5
+  events.jsonl
+  attempts.jsonl
+  publication.json
+  episodes/<episode_id>/
+    manifest.json                  # 原yam_hil_v2结构，补充parts来源引用
+    <原有segment目录>/
+      samples.h5                   # 原14D列和UTF-8 details，新增details.parts
+      top.mp4
+      left.mp4
+      right.mp4
+```
+
+JSON为UTF-8；JSONL每行一个完整对象，未设置/无效值用null并保存valid标志，不写NaN/Inf。HDF5沿用客户端已有依赖，数值保留源精度，不将物理动作重新归一化；三路像素仍只保存在MP4。大数组通过HDF5路径引用，跨文件引用使用run根目录下的相对路径。原始tick/epoch/IPC单调时间及相机时钟域保留，视频frame_index不替代控制tick。
+
+| 文件 | 必须保存的内容 |
+|---|---|
+| run.json | schema、run_id/session_id、task、mode、mock、control_hz/action_dt、layout_group_id与split_role、两侧配置、h_entry_m/h_goal_m、FK模型/末端参考点/table frame/转换与标定身份、reward schema和数值是否已固定、contract SHA、behavior/feature manifest引用 |
+| requests.jsonl | context（run/session/epoch/request/observation）、观测tick与本机发送/接收时间、三图的episode/segment/frame引用、state与FK/高度快照、请求时调度队列来源、parts能力/合同/mode、HDF5数组路径、接收错误/迟到/discard、behavior与feature引用 |
+| requests.h5 | 每个request独立group，保存actions_native、左右u/B_rad/editable_mask、RTC committed_prefix与原来源引用；实际数组shape/dtype写在请求索引。没有收到的数组不创建，记录缺失原因 |
+| events.jsonl | 唯一event_id、单调event_seq、context/attempt/arm、event类型、控制tick与IPC时间、原因、原始SDK快照引用、奖励分量及valid；记录进入、首个残差、关爪、目标到达、成功确认、交还、失败、取消与重置 |
+| attempts.jsonl | 每个已终止attempt一条结果：attempt_id/arm、run配置引用、episode/来源区间、进入/首个残差/关爪/终止/实际交还tick、成功/失败/取消及原因、grasp_reward、height_reward/total_reward汇总与有效性、terminated/truncated和已采用请求区间 |
+| publication.json | publication_id、run_id/schema、client_complete、文件相对路径/bytes/SHA256、完整episode/attempt成员、记录缺口、producer代码SHA及传输状态。只在队列消费完、文件关闭并校验后标client_complete=true |
+
+requests.h5的group拟命名为 `/requests/e<epoch>_r<request_id>`，JSONL必须显式给出group路径，不能依赖命名猜测关联。`actions_native`为50×14；`left/u`、`right/u`为50×6，`B_rad`为6，`editable_mask`为50，RTC前缀为d×14。对RTC前d行标记原前缀来源，它们不是该request未修正的base；缺少parts的基线请求仍存actions_native，并记录候选/特征缺失，不能填伪造零候选。
+
+视觉feature由Thor生成并按本request/observation绑定，可返回数组或feature_ref。Thor返回数组时，客户端按原dtype存request group并注明feature_schema；仅返回引用时存引用和可核验身份，由condapi合并对应feature文件。无feature出口时如实标missing，不用关节state冒充图像特征；基线/早期shadow包用于标定和接口审计，是否可派生训练由模型侧另行审核。
+
+每行 `details.parts` 至少包含下表逻辑字段。无活动attempt可以为null；两臂反馈独立保存，active_arm只选一个。
+
+| 字段 | 定义 |
+|---|---|
+| schema/run_id/mode/contract_sha | 新增层身份、实际模式和锁定合同 |
+| active_arm/attempt_id/phase/eligible | 当前活动臂/尝试/阶段/接近资格及其来源；持物和非接近下降不自动启用 |
+| arms.left/right | 每侧FK position/orientation及frame/参考点/采样时间/valid、height_m/h_entry_m/h_goal_m/error_m、原力矩快照引用与新鲜度 |
+| selection | 生成最终采用目标的epoch/request_id/observation_id/model_index/target_tick，是否继承RTC前缀，request数组/feature引用；继承行继续指向旧request |
+| residual_applied/physical_residual_rad | 是否实际启用及最终物理14D差值；只有该活动臂六关节可非零，shadow实际值全0 |
+| constraints | 候选/组合/最终提交来源、裁剪/连续性/高度边界结果及拒绝原因；原动作与反馈保留在原14D列 |
+| reward/event_refs | height_reward/grasp_reward/total_reward、valid、reward_schema引用、对应event_id；未固定公式/目标或取消时不伪造总奖励 |
+
+本节 `error_m`统一定义为 `height_m - h_goal_m`；未设置h_goal时为null。每个event和attempt需能定位原始反馈与上一条已提交命令，before_command语义不变。request和逐tickselection分别记录“生成候选”与“实际采用”，未执行/丢弃的候选不能计入行为动作。
+
+客户端在episode manifest增加 `parts` 引用，包含run_id、contract_sha、mode、run相对路径及本episode的attempt成员；不覆盖既有action_semantics、时钟、视频同步和等待切点说明。发生恢复/写入中断时将未完成attempt记canceled，文件收尾不完整则client_complete=false。服务/采集mock必须mock=true，split_role记录mock/eval/holdout/train或未分配，不能自动把所有包放入train。
+
+发布走后台持久outbox和独立传输路径，按publication_id幂等；源包收尾后保持不可变，重传核对相同哈希。接收侧ack只代表文件接收，客户端client_complete只代表生产完整。condapi另在新派生目录做时序/残差/奖励审计、分组split并生成READY与transition清单；训练只消费READY中的有效自主区间，不能把H50整块默认当成已执行50步。
 
 ## 模块化数据 inventory 与 split（2026-09-24）
 

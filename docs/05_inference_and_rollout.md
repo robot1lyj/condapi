@@ -8,6 +8,8 @@ Thor 系统、容器、Pi0.5 转换和 TensorRT 方案见 [08 · Thor 端侧部�
 
 **状态：设计合同，未实现、未远端部署。** 用户已确认旧夹爪、动作相位和左臂问题解决，并澄清当前失败是下降高度不足；用户确认客户端已有末端位姿/FK。用户确认将介入高度、目标高度和关爪后的抓取判据分开，并指定 **`h_entry` 可配置，初始值为50 mm（0.05 m）**；目标高度和高度测量坐标/参考点待核对。采用高度误差辅助奖励与抓取结果奖励的设计，具体公式/权重待定。抓取结果用用户确定的 `abs(effort_nm)>0.65`，到达高度不自动发抓取成功奖励。学习目标归 [03](03_training_and_evaluation.md#parts-左右抓取残差学习方案2026-09-30)，数据与字段归 [04](04_data_contracts.md#parts-抓取-rl-回放数据合同2026-09-30方案)。
 
+客户端开发的执行入口为 [YAM客户端实施计划](reference/parts_client_handoff.md)，含构建范围、采集阶段、双方依赖、验收交付和可直接执行的指令。用户本轮要求将计划交给客户端开发任务，由其完成YAM侧实现；condapi仍只修改模型/文档侧。
+
 ### 本地接口证据与责任分配
 
 本次仅检查condapi本地源码，以及只读参考 `/home/wuyan-lyj/YAM/yam-abc-reproduce` 的客户端协议/录制文档和对应 `hil/policy.py`、`hil/policy_process.py`、`hil/rtc_protocol.py`、`hil/grasp_diagnostics.py`。没有读取或操作3588运行系统/机械臂控制/相机实现；没有将YAM控制代码复制进condapi。
@@ -52,9 +54,9 @@ RTC已有 `(d,14)` 前缀在两侧均不可重写：Thor候选前d行不参与�
 
 | 消息 | PARTS字段 |
 |---|---|
-| handshake | `parts_protocol=yam-parts-v1`、supported_modes、contract SHA、per_arm_residual_indices={left:[0,1,2,3,4,5],right:[7,8,9,10,11,12]}、候选shape/rad语义、feature schema与snapshot引用；不得以旧夹爪contract启动新collect/eval |
-| infer请求 | run/session、epoch/request_id/obs_id、mode、arm阶段/attempt ID/活动arm、event_seq、末端位姿/高度/目标高度及frame/时间/FK身份、力矩原值/有效性/tick、未完成回执摘要、RTC队列调度上下文；obs/rtc原结构保持 |
-| infer回复 | 原actions、token原样回显、左右候选U/B、behavior snapshot/探索标记、feature_ref、contract SHA、候选适用tick/可编辑mask |
+| handshake | 新增metadata.parts声明协议/模式、contract SHA、per_arm索引/边界、shape/rad语义、feature schema与snapshot引用；确切字段见下节，不得以旧夹爪contract启动新collect/eval |
+| infer请求 | 新增parts.context/arms/scheduler关联run/session、epoch/request/observation、arm阶段/attempt/高度/FK/力矩及RTC队列；obs/rtc原结构保持 |
+| infer回复 | 原actions，parts.context原样回显、左右候选u/B_rad、behavior snapshot/探索标记、feature_ref、contract SHA及可编辑mask |
 | attempt反馈 | 异步可靠回执：event ID、进入/实际残差开始/终止/交还tick、结果、reward/null、已采用request与model_index区间；丢包重发，event ID幂等 |
 
 当前 `src/openpi/serving/websocket_policy_server.py::_split_payload` 仅提取obs/rtc，会丢弃parts扩展；需要在保持旧请求兼容的同时显式校验和传递parts。`scripts/thor/rtc_onnx_sampler.py`及TRT adapter现在只导出/接受actions，新增feature出口必须使用新的、经数值与延迟验证的导出版本，不能假设加字段即可取到视觉特征。
@@ -62,6 +64,27 @@ RTC已有 `(d,14)` 前缀在两侧均不可重写：Thor候选前d行不参与�
 YAM `ProcessPolicyClient`已经转发原始response，但 `PolicyWorker`构造Reply时只取actions、timing和plan，会丢掉parts。客户端实现需贯穿 `infer_rtc` envelope、Reply、录制details和每tick动作来源引用。不能只在WebSocket收包处保存候选，实际提交时却没有可验证的来源。
 
 反馈/大数组记录不另占Pi单在途socket做阻塞往返。首版使用本地持久outbox和已完成episode/请求表的异步发布，在独立的后端传输路径作ack/重试；即时进入/退出由本地完成。若后续增加独立反馈API，其服务不持有SDK，ack和learner更新都不在提交路径等待。模型身份可以保存在condapi交接manifest与sidecar，保持既有YAM产品不强制记录每帧模型名称/指纹的边界。
+
+### PARTS 消息字段规范
+
+本节是客户端可以先按mock实现的v1字段，当前服务尚不支持。传输沿用msgpack-numpy；原metadata/obs/rtc/actions和时钟语义不变。`parts`均为新增可选对象，off保留旧调用；shadow在旧服务缺少能力时仅记录unsupported并按原基线执行。collect/eval切换前必须完整握手。
+
+| 位置 | 字段和约束 |
+|---|---|
+| metadata.parts | protocol=`yam-parts-v1`、contract_sha、supported_modes、residual_space=`joint_delta_rad`、horizon=50、state_dim=14、action_dt=1/30、per_arm.left/right.indices、per_arm.left/right.B_rad、feature_schema_id、behavior_manifest_ref |
+| infer.parts | protocol/contract_sha/mode、context、active_arm（null/left/right）、arms.left/right、scheduler |
+| reply.parts | protocol/contract_sha/mode、原样context、behavior_snapshot_id、candidates.left/right、features |
+| 发布event | schema/event_id/event_seq、context/attempt_id/arm/tick/time、kind/reason、奖励/原反馈引用；经原始包与独立outbox发布，不新增必须实时应答的Pi反馈请求 |
+
+`context`包括 `run_id, session_id, epoch, request_id, observation_id, observation_policy_tick`，客户端生成、服务端完整回显；不改变已有客户端token。observation_policy_tick与RTC原字段相同，非RTC也记录其观测控制tick。错epoch/request/observation/contract回复不应用；迟到仍按原时间轴处理，不强行从第0行执行。
+
+请求 `arms.left/right` 包括attempt_id、phase、eligible及其来源、height_m/h_goal_m/error_m、pose_frame/pose_ref/pose_sampled_at/pose_valid、force_feedback_ref或原始effort_nm与更新时间/年龄/valid。所有数值沿用本机时钟域和本合同m/rad/Nm；误差为height_m-h_goal_m。null表示未设置/无效，不转为0。`scheduler`保存本观测时未完成/已承诺目标及其来源，RTC前缀的数值仍在原rtc对象；还记录是否已无活动attempt与旧残差承诺，供snapshot边界判断。
+
+每侧 `candidates`包括 `u`（50×6，有限且在[-1,1]）、`B_rad`（6个非负有限边界，与握手/manifest一致）、`editable_mask`（50个bool）、actor_snapshot_id和exploration_applied。索引只使用握手per_arm，左为0–5、右为7–12；本版本两夹爪和另一臂不在活动mask内。editable_mask前d行必须false，候选始终在所回显context和该次actions时间轴下解释；实际执行仍需客户端eligible/phase/承诺检查。collect探索由Thor在生成u时完成，客户端不再加噪声。
+
+`features`包含feature_schema_id、feature_ref及校验身份；可选z数组有确切shape/dtype。特征绑定本次observation_id和冻结Pi资产。当前导出缺少feature时shadow记录missing；collect发布的可训练区间需能由condapi校验完整特征。behavior_snapshot_id引用含左右actor、基础Pi/norm/engine、B、feature/reward合同的不可变manifest，客户端在run.json留引用，无需逐帧输入模型名称。
+
+parts字段错形状/非有限/合同或snapshot不匹配时按模式处理：shadow拒绝候选并记录原因，保持零实际残差；collect/eval取消受影响attempt并沿用既有协议故障HOLD流程。实际提交链及记录故障仍归YAM。握手未提供parts能力时不得启动collect/eval；不能将RTC悄悄降为普通模式。
 
 ### 部署和联调交付
 
