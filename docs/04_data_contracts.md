@@ -1,5 +1,50 @@
 # 04 · 数据合同
 
+## PARTS 抓取 RL 回放数据合同（2026-09-30方案）
+
+**状态：拟实现，未发布RL数据集。** 用户确定关爪开始进入、`abs(effort_nm)>0.65`作为抓取成功判据；状态机和权责归 [05](05_inference_and_rollout.md#parts-左右抓取的服务端与客户端合同2026-09-30方案)，学习算法归 [03](03_training_and_evaluation.md#parts-左右抓取残差学习方案2026-09-30)。本合同不是LeRobot专家SFT/HIL导出规则。
+
+### 已有原始记录与缺口
+
+2026-09-30只读检查本地YAM `docs/hil_dataset_fields.md`、`hil/policy.py`、`hil/rtc_protocol.py`、`hil/grasp_diagnostics.py`。原始记录是 `yam_hil_v2`：每集manifest、每段HDF5和top/left/right MP4。现有字段包括三图帧号/同步质量、观测与测量state、策略/选中/实际提交action、request/reply、epoch/tick、RTC `policy_selection`来源、可选夹爪力矩快照。仅据源码列能力，不声称现场已经启用新版本。
+
+夹爪快照 `grasp_diagnostics.followers[left,right]` 包含 `position/velocity/effort_nm/sdk_updated_at/sampled_at/feedback_age_s/valid`，采样阶段为before_command。该行反馈发生在该行新命令之前，应关联前一已提交命令及其来源。`effort_nm`为有符号Nm，判据按用户要求取绝对值。重复SDK快照不得累计为多次有效确认；SDK的Unix更新时间不能直接与IPC monotonic相减。
+
+现有记录没有逐次抓取reward、terminated/truncated、残差候选/应用值、对应behavior/feature身份。现有离线Detector还带速度与空夹位置条件，只输出候选；不能直接把contact_candidate升为0.65规则的成功标签，也不能把expert_valid或episode_success当局部reward。
+
+### 原始库、请求表、attempt表
+
+拟复用原始HDF5/MP4，新增字段使用details/sidecar；不覆盖原件、不从客户端模型进程重复录制图像。数组按request只存一份，逐帧使用引用。
+
+| 记录层 | 必须保存的内容 |
+|---|---|
+| run manifest | schema/contract SHA、task、实际基础checkpoint/norm/engine身份、Pi和YAM版本、mode、feature schema、左右actor snapshot、action_dt=1/30、B与确认/超时规则、数据传输完成标志；模型身份可存交接sidecar，不强制改旧YAM产品字段 |
+| request表 | `(run_id, session_id, epoch, request_id, obs_id)`；三相机源帧/时间和state；观测tick、RTC committed prefix、其逐tick原来源、队列状态；完整基础H50、左右候选U、feature或可校验feature_ref；探索实现后的behavior、snapshot与噪声来源 |
+| 每tick记录 | 原生policy_selection.request/model_index/target_tick、attempt_id/arm/phase、是否启用残差、基础目标与残差候选引用、应用的physical residual、selected/bounded/submitted/measured各自值与时间、力矩原值与反馈有效性、客户端约束/裁剪标记 |
+| attempt表 | arm、进入及首次实际残差tick、reward proposal/确认tick、handback effective tick、成功/失败/取消原因、reset边界、reward=0/1或null、terminated/truncated、trainable与排除原因、来源request/视频区间 |
+| 发布清单 | 完整attempt成员、源文件哈希、来源组/train-val分区、数组维数/有限性、闭合与reward合同、逐tick执行掩码、时序审计、READY；只写新目录 |
+
+数据传输和大文件落盘由已有后台录制/传输路径承担，不在30Hz提交路径等待网络/磁盘。客户端生成所有控制tick、epoch、attempt与奖励事件；Thor原样回显关联token并将自身特征/残差记录与之绑定。跨机monotonic保持原时钟域，不伪造对齐。
+
+RTC回复的前d行是既有实际承诺动作，可能已带旧request残差，不能当本request的未修正基础动作。request表标记这些行的基础引用不可用；通过原policy_selection来源找到生成该target的旧基础/残差。请求返回但迟到/被discard的候选及另一只未选中arm的候选不进入已执行动作样本。
+
+### reward、边界和transition组装
+
+| attempt结果 | reward | 回放处理 |
+|---|---|---|
+| 按05确认、在实际交还边界仍满足力矩成功判据 | 局部终止处1，其余0 | 有效成功attempt；终止不bootstrap |
+| 有效反馈下重新张开且未成功，或到显式抓取任务时间预算 | 0 | 有效失败attempt；任务结束，终止不bootstrap |
+| 断联/人接管/反馈缺失或过旧/epoch切换/保存中断 | null | canceled/invalid；原件保留，默认不入自主RL回放，不冒充失败 |
+| 训练重置/人工摆放 | null | 与前后attempt分隔；不作为抓取动作或next state |
+
+同一attempt的局部reward总和为0或1；一个持续力矩高的片段不能按每帧产生多个+1。同一SDK快照只判定一次。交还后、明确释放之前的力矩下降可另记 `post_grasp_loss`，与局部抓取reward和整任务正确放置指标分别存储。
+
+transition只组装控制来源和记录连续的区间，状态包括冻结视觉特征、反馈state、基础参考与RTC调度队列；按真实决策tick差保存 `h_i`、reward发生位置、bootstrap和执行掩码。H50预测长度不代表本request执行50步。重叠队列/承诺动作来源缺失、next state不完整或feature版本不匹配时 `trainable=false`；不能仅靠mask补齐不存在的轨迹。
+
+行为标签来自记录的残差候选和客户端实际应用链，不用measured_state代替动作、不把submitted_action当U直接输入网络、不从动作差中猜未知B。约束改变了行为时保留原候选、最终应用差和标记；学习器采用的动作表示固定在本run合同，并核对超出归一化[-1,1]的样本。首次发布先对逐值来源和实际调度回放验收。
+
+成功/失败attempt都需保留。重训练的成功重加权只是派生采样清单，不删除失败原件。同一原始rollout/重置布局组放同一split，左右arm来自同组不能分开跨train/val；holdout组不进入online buffer或后续success-reweighted retraining。旧HIL数据只有满足完整来源、力矩、特征和动作合同才可能派生，不默认给整集U=0或局部成功标签。
+
 ## 模块化数据 inventory 与 split（2026-09-24）
 
 控制层 v0.2 只处理数据**身份与成员清单**，不替代 LeRobot/XR-1 loader 或逐帧有效性审计。`configs/datasets/*.toml` 声明源版本、机器人合同、三相机顺序及动作空间；审核后的 JSONL 输入逐条标明 `episode_id`、原始 rollout/场景 `group_id`、`task_id`、`frames` 和所有会影响解码/标签的源文件，包括元数据。`vla inventory create` 在新路径计算每个源文件 SHA256，再把相对路径→哈希的规范 JSON 映射取 SHA256 作为该 episode 的 `source_sha256`；因此它不是单个 Parquet 或视频的直接哈希。XR-1 派生数据另有 `asset_uri` 指向原生 JSON，必须包含在该 episode 源文件列表；其引用视频也必须列入。工具不自动发现清单遗漏。生成的清单不修改原始数据。

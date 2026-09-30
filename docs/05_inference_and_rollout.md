@@ -4,6 +4,70 @@
 
 Thor 系统、容器、Pi0.5 转换和 TensorRT 方案见 [08 · Thor 端侧部署](08_thor_edge_deployment.md)。
 
+## PARTS 左右抓取的服务端与客户端合同（2026-09-30方案）
+
+**状态：设计合同，未实现、未远端部署。** 用户已确认旧夹爪、动作相位和左臂问题解决；本方案使用当前已可用基线，不从下方历史服务快照指定checkpoint。用户本轮明确：RL在对应夹爪开始闭合时进入，抓取成功采用 `abs(effort_nm)>0.65`。学习目标归 [03](03_training_and_evaluation.md#parts-左右抓取残差学习方案2026-09-30)，数据与字段归 [04](04_data_contracts.md#parts-抓取-rl-回放数据合同2026-09-30方案)。
+
+### 本地接口证据与责任分配
+
+本次仅检查condapi本地源码，以及只读参考 `/home/wuyan-lyj/YAM/yam-abc-reproduce` 的客户端协议/录制文档和对应 `hil/policy.py`、`hil/policy_process.py`、`hil/rtc_protocol.py`、`hil/grasp_diagnostics.py`。没有读取或操作3588运行系统/机械臂控制/相机实现；没有将YAM控制代码复制进condapi。
+
+| 所属侧 | 责任及拟新增能力 | 可以复用的接口 |
+|---|---|---|
+| YAM/3588客户端 | 唯一的进入/退出/奖励裁决；在实际目标tick启用单臂残差；提交动作、RTC承诺、源索引、力矩与三图原始录制；重置执行与操作员事件 | 单写入者、30Hz提交、PolicyWorker/ProcessPolicyClient、RtcPolicyClient、原始HDF5/MP4、grasp_diagnostics快照 |
+| Thor服务端 | 冻结Pi基础推理和同checkpoint视觉特征；左右actor候选残差、collect探索、token回显及请求资产记录；服务端不生成SDK/复位控制指令 | Pi系列容器、物理H50/14D逆变换、RTC sampler、现有WebSocket端口 |
+| GPU训练服务器 | 发布后数据审计、独立残差TD3+BC/twin critics、成功重加权、snapshot导出 | 独立Conda prefix、Slurm/tmux、现有模型资产/清单管理；训练不在工作站或Thor执行 |
+
+本项目采用**Thor预计算候选，客户端按tick决定是否应用**。这是针对本地力矩与RTC时间轴的工程设计，不称PARTS原作者已公开的服务端/客户端分工。不能把力矩成功判定放在约一次Pi推理周期之后才响应；也不能等客户端已经提交首次关爪再开始请求全部候选。
+
+### 进入、退出与单臂状态机
+
+每臂独立跟踪 `READY → ACTIVE → EXIT_PENDING → WAIT_REARM → READY`。首版同一tick最多选中一只arm的actor，保持论文单一active bottleneck语义；同时出现的闭合事件用明确、可记录的轮换优先级处理，未选中arm按基础策略执行，不伪造其RLattempt。
+
+- **进入：** READY状态中，尚未提交的基础目标首次从打开/静止转为闭合趋势。YAM名义0闭1开，方向为开度降低；检测使用最终采用计划的基础目标与前一目标，不使用未来H50中任意远期小值直接提前触发。用户已定“开始闭合”，具体抗抖容差 `closing_epsilon` 待定。客户端在首次实际采用目标tick生成/锁定attempt ID，记录 `entry_tick` 和 `first_residual_tick`；候选迟到时二者可以不同，不把首次尚未应用残差的动作记成RL行为。
+- **成功确认：** 只在ACTIVE闭合阶段判断有效、新鲜、SDK更新时间严格推进的样本是否 `abs(effort_nm)>0.65`。建议以连续时间 `confirm_s=0.1` 过滤单次尖峰，以 `max_feedback_age_s=0.1` 过滤旧反馈；这是当前离线诊断已有默认值的工程候选，未获本轮数值确认。按实际时间累计，不能把三个30Hz采样点误称跨度恰好0.1秒；缺帧/重复快照不继续累计。
+- **成功退出：** 条件确认后进入EXIT_PENDING，从下一个尚未承诺的target tick起取消新残差。若已有RTC残差前缀，必须执行到其真实承诺边界；在 `handback_effective_tick` 用新鲜力矩再次检查仍 `>0.65`，才结束attempt并给一次reward=1。条件已丢失则在预算内返回ACTIVE，不提前重复发+1。随后基础策略负责抬升/搬运/放置。
+- **失败退出：** 有效反馈下未成功就重新张开，或达到显式抓取时间预算，结束本次attempt，reward=0。预算属于子任务终止条件，训练不bootstrap；具体timeout不按论文的一般3–15秒直接拍定。事件终止tick和RTC旧残差实际结束tick分别记录。客户端故障/断联/人接管/反馈失效属于取消，reward=null，不能当抓取失败训练。
+- **重新进入：** 成功/失败后进入WAIT_REARM，需发生明确释放/重新张开且原attempt已交还或重置完成，再回READY。持物后的持续关爪命令不能重复触发新attempt。成功交还后、明确释放前的力矩下降另记post_grasp_loss供整任务评测，不重复改写已终止的局部reward。
+
+0.65阈值不会自动增加速度/空夹位置条件。现有离线Detector还含这些判定且只输出contact_candidate，不能直接用其结果替代用户规则；复用的是原始反馈字段、时间检查方法和可选确认参数。
+
+### 动作和RTC配合
+
+Thor返回的 `actions` 仍是有限 `(50,14)` **基础物理目标**；额外 `parts` 返回同观测的左/右候选 `U_left/U_right`，各为 `(50,1)` 的归一化有界修正，以及 `B_left/B_right`、适用tick和contract SHA。基础Pi使用原norm/delta/32D逆变换；残差只在物理夹爪开度空间加一次。左右B是必填的已审查参数，当前没有数值，不给默认猜值。
+
+客户端对选中的arm计算 `a_final = constraints(a_base + B_arm*U_arm)`，只允许索引6或13变化；12关节和另一只夹爪按原基础路径。记录原U、添加位置、实际差值与最终提交；raw反馈不能当动作。服务off时返回原服务语义，shadow算候选但实际残差为0，collect有探索，eval无探索。基础与残差对照采用同一最终动作映射；若当前普通基线使用夹爪实验变换，需显式冻结并记录该规则，不能单方面关闭后仍称同基线对照。RTC继续不叠加TDA/普通夹爪变换，任何后续动作编辑必须在执行链中有来源。
+
+RTC已有 `(d,14)` 前缀在两侧均不可重写：Thor候选前d行不参与本次叠加，客户端只修改未承诺后缀，然后把**约束之后的最终目标**承诺进RtcTimeline；下一请求送回该实际修正后的前缀。前缀继承原request来源，不能把旧残差归到新request。关闭/退出残差只影响未承诺目标；HOLD/介入/故障按现有客户端合同取消时间轴，并把受影响attempt标为取消。
+
+候选提前随基础H50一起返回，客户端收到后在对应开度开始降低的目标tick启用，力矩确认成功后在未承诺区域关掉。已提交动作或已承诺前缀上发生的闭合不能通过重写旧tick“提前介入”；这种情况保留真实first_residual_tick，用于评估候选是否及时。网络时延及实际控制周期保持现有协议，不靠放慢30Hz或强制执行整H50补数据。
+
+### WebSocket扩展和客户端透传
+
+拟沿用直连Pi地址及msgpack-numpy，在原 `type=infer/obs/rtc` envelope增加可选 `parts`。不建立左右臂各一个Pi服务，不让训练服务器成为机器人请求链路的必需节点。以下是**拟定字段**，不是已实现API。
+
+| 消息 | PARTS字段 |
+|---|---|
+| handshake | `parts_protocol=yam-parts-v1`、supported_modes、contract SHA、residual_indices=[6,13]、候选H50形状/语义、feature schema与snapshot引用；未提供该能力不得启动collect/eval |
+| infer请求 | run/session、epoch/request_id/obs_id、mode、客户端arm阶段/attempt ID/活动arm、event_seq、反馈原值/有效性/tick、未完成回执摘要、与RTC对应的队列调度上下文；obs/rtc原结构保持 |
+| infer回复 | 原actions、token原样回显、左右候选U/B、behavior snapshot/探索标记、feature_ref、contract SHA、候选适用tick/可编辑mask |
+| attempt反馈 | 异步可靠回执：event ID、进入/实际残差开始/终止/交还tick、结果、reward/null、已采用request与model_index区间；丢包重发，event ID幂等 |
+
+当前 `src/openpi/serving/websocket_policy_server.py::_split_payload` 仅提取obs/rtc，会丢弃parts扩展；需要在保持旧请求兼容的同时显式校验和传递parts。`scripts/thor/rtc_onnx_sampler.py`及TRT adapter现在只导出/接受actions，新增feature出口必须使用新的、经数值与延迟验证的导出版本，不能假设加字段即可取到视觉特征。
+
+YAM `ProcessPolicyClient`已经转发原始response，但 `PolicyWorker`构造Reply时只取actions、timing和plan，会丢掉parts。客户端实现需贯穿 `infer_rtc` envelope、Reply、录制details和每tick动作来源引用。不能只在WebSocket收包处保存候选，实际提交时却没有可验证的来源。
+
+反馈/大数组记录不另占Pi单在途socket做阻塞往返。首版使用本地持久outbox和已完成episode/请求表的异步发布，在独立的后端传输路径作ack/重试；即时进入/退出由本地完成。若后续增加独立反馈API，其服务不持有SDK，ack和learner更新都不在提交路径等待。模型身份可以保存在condapi交接manifest与sidecar，保持既有YAM产品不强制记录每帧模型名称/指纹的边界。
+
+### 部署和联调交付
+
+1. **condapi本地实现：** 标准库协议/数据检查放控制层；独立残差网络/learner放模型环境，薄adapter调用；Thor候选wrapper接冻结Pi并增加feature出口。计划中的新增模块为 `adapters/parts/`、独立 `parts_rl` 包及 `scripts/thor/parts_policy.py`，当前均未创建。普通/RTC旧入口及parts=off保持可用。
+2. **YAM客户端交接：** 提供本节消息/状态机及04字段合同，由YAM项目实现本地selector/verifier、候选按tick叠加、RTC来源和recording扩展。condapi本次不修改外部只读YAM或3588。
+3. **静态/回放：** 本地只验协议、状态机和纯数组时序。必须覆盖双臂闭合竞争、过旧/重复力矩、epoch/attempt错配、迟到候选、前缀不变、退出时旧承诺残差及取消不标失败；不运行训练smoke。
+4. **Thor shadow：** 现场状态观测后按08部署候选，先做本地真实输入及跨IPC直连smoke、记录基础动作逐值不变和附加feature/actor时延。尚无actor权重时只允许零残差/shadow。
+5. **采集与训练：** 完整批次/READY审核后，在服务器训练两个独立残差策略；B/确认/timeout/训练配方固定后方可collect。原始记录异步复制到新目录；训练server返回snapshot，Thor只在attempt和旧残差承诺均结束时加载。
+6. **eval：** 固定snapshot关闭探索，完成03的局部与完整任务对照。自动物理重置的实现/验收归YAM；不以Thor服务代码替代机械臂控制。
+
 ## 1. 部署前 gate
 
 必须同时满足：

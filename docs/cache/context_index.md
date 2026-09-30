@@ -9,6 +9,7 @@
 | 交接/架构 | 交接选 [00](../00_handoff_index.md)；架构选 [01](../01_system_architecture.md#多模型接入层) | 缺当前能力状态才读 [10](../10_vla_platform.md#当前状态) |
 | 环境、服务器、checkpoint 下载 | [02](../02_installation_and_environment.md) | 对应 `docs/reports/environments/` 证据 |
 | 训练、评估、恢复 | [03](../03_training_and_evaluation.md) | 对应 `docs/reports/training/` 运行报告 |
+| PARTS左右抓取残差RL | 学习选 [03](../03_training_and_evaluation.md#parts-左右抓取残差学习方案2026-09-30)；接口/退出选 [05](../05_inference_and_rollout.md#parts-左右抓取的服务端与客户端合同2026-09-30方案) | 回放选 [04](../04_data_contracts.md#parts-抓取-rl-回放数据合同2026-09-30方案) |
 | YAM 数据、单位、分割、norm | [04](../04_data_contracts.md) | [10 模块化配置](../10_vla_platform.md#模块化配置后端-v02) |
 | Thor 推理协议/部署 | 协议选 [05](../05_inference_and_rollout.md)；系统/转换选 [08](../08_thor_edge_deployment.md) | 当前 checkpoint 报告、`docs/reference/thor/` 阶段手册 |
 | 多模型、XR-1、Conda 接入 | [10](../10_vla_platform.md) | [XR-1 环境证据](../reports/environments/xr1-20260924/README.md)、[MolmoAct2 参考](../reference/molmoact2_integration.md) |
@@ -29,7 +30,7 @@
 
 | 症状 | 当前检查与历史证据 |
 |---|---|
-| 乐高接近但不抓、16 mm 小颗粒、控制时序 | [03 训练重设计](../03_training_and_evaluation.md#2026-09-16--训练重设计先复现乐高分拣再比较模型)、[原始控制重放](../reports/training/redesign-20260916/README.md)；先区分预测年龄、滤波和反馈，再谈适配。 |
+| 乐高接近但不抓、16 mm 小颗粒、控制时序 | 历史证据见 [03 训练重设计](../03_training_and_evaluation.md#2026-09-16--训练重设计先复现乐高分拣再比较模型)、[原始控制重放](../reports/training/redesign-20260916/README.md)；用户已确认旧机械臂/夹爪问题解决，当前抓取RL需求见本页PARTS路由，不复用旧问题作默认阻断。 |
 | training-time RTC、10h 子集 | [03 RTC 合同](../03_training_and_evaluation.md#2026-09-16--pi05-training-time-rtc基础权重与随机10小时)、[运行交接](../reports/training/rtc-base-10h-20260916/README.md)；复核子集 norm、保存/恢复状态。 |
 | Evo-1 四卡预算/梯度累积 | [03 四卡试验](../03_training_and_evaluation.md#采集期间的evo-1四卡试验)、[10 固定版本](../10_vla_platform.md#四卡训练落地前的固定版本检查)；更新数与 microstep 分开。 |
 | 训练崩溃、Xid、illegal memory access | [03 故障诊断](../03_training_and_evaluation.md#故障诊断复用与重试条件)；匹配故障窗口、范围及重试前提。 |

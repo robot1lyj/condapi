@@ -1,5 +1,49 @@
 # 03 · 训练与评估
 
+## PARTS 左右抓取残差学习方案（2026-09-30）
+
+**状态：接口与训练方案，未实现残差网络/学习器，未启动采集、训练或部署。** 用户要求先给出与当前 YAM 项目对齐的方案。2026-09-29 用户明确确认此前夹爪、动作相位和左臂异常均已解决；下面的历史诊断保留来源，不再作为本方案的当前阻断。当前可用基线的 checkpoint、norm、推理模式和控制版本尚未在本次现场核验，不从历史报告选定它们。
+
+2026-09-30 用户指定两个瓶颈：左臂抓取、右臂抓取；RL 进入时刻为对应夹爪开始闭合，成功判据为 **`abs(effort_nm) > 0.65`**。本地 YAM 字段定义 `effort_nm` 为 SDK 夹爪电机反馈 Nm；0.65 是用户指定阈值，尚未由本任务独立测量。进入/退出/奖励协议归 [05 的 PARTS 合同](05_inference_and_rollout.md#parts-左右抓取的服务端与客户端合同2026-09-30方案)，回放数据归 [04 的 PARTS 数据合同](04_data_contracts.md#parts-抓取-rl-回放数据合同2026-09-30方案)。
+
+### 论文方法与本项目选择
+
+来源：[PARTS 论文](https://arxiv.org/abs/2609.21788)，本次已读的原件为 `/home/wuyan-lyj/下载/rsi+rl.pdf`；[作者项目页](https://destiny000621.github.io/PARTS/)检索时仍为 Code Coming Soon。
+
+| 内容 | 论文明确的做法 | 本项目拟实施的选择 |
+|---|---|---|
+| 基础策略 | Pi0.5 先 SFT，再冻结；持续供给参考动作和视觉特征 | 固定当前已可用 Pi 的原 checkpoint、norm、RTC/普通模式；只训练残差，不更新 Pi |
+| LEGO 残差 | 左、右抓取各一个策略，修正夹爪闭合，其他阶段使用基础策略 | 左 actor 只改索引6，右 actor 只改索引13；每个输出 `(50,1)`，两侧各有 twin critics/回放池 |
+| 选择与奖励 | 可执行 selector/verifier；LEGO 用自动局部奖励 | YAM 客户端根据闭合事件和新鲜力矩作唯一状态裁决；成功阈值采用用户给定的绝对值0.65 |
+| 视觉状态 | 使用基础策略提取的特征；未公开确切层/池化方案 | 从同一 Pi 图像 embedding 出口按 top/left/right 各自池化后连接，层、池化、维数及数值验收写进 feature manifest；这是工程选择，不称原作者实现 |
+| 算法 | 按块 TD3+BC，高斯探索，成功残差BC；失败归零锚定可选；reference dropout | 复用该目标；RTC时增加已承诺/待采用队列状态和实际决策时长，不能机械使用50步折扣 |
+| 重训练 | 全部成功episode＋随机比例ρ失败，重新初始化actor/critics，选checkpoint后继续online | 同样按完整抓取attempt筛选；保留原失败库与抽样清单，snapshot只在attempt边界切换 |
+| 重置 | LEGO 可自动放下并释放积木 | 重置执行归YAM客户端；首个版本可人工恢复场景，reset/human帧保留但不进自主残差transition |
+
+### 网络学习与时间合同
+
+每臂 actor 读取同一观测的冻结视觉特征 `z`、14D反馈状态 `p`、Pi物理参考动作块 `A_base`，输出 `U ∈ [-1,1]^(50×1)`。首版还将 selector状态、反馈有效性和时间轴队列编码为调度上下文，供 actor/critic 使用；这是使异步RTC决策可追溯的项目扩展。网络宽度/层数是待制定的训练配方，不冒称论文已经提供。
+
+客户端把残差 `B_arm * U` 加到对应夹爪目标；`B_arm` 使用本地连续开度单位，不能套用Pi关节delta或论文未公开的幅度。实际应用只涉及未承诺目标，按05裁剪；未选中arm的候选不能作为执行过的行为。采集探索噪声由Thor一次生成并记录，不在每次重选同一target tick时重新抽样；eval时关闭探索。
+
+两只critic估计状态/残差决策的回报。数据组装按真实决策观测 `k_i → k_(i+1)` 建立transition；`h_i = k_(i+1)-k_i`，局部reward对齐真实发生的tick。RTC状态必须包括观测时已承诺动作、剩余待采用计划及来源；仅加入execute_mask不足以把重叠H50当成真实执行过的固定块。critic输入本次实际选择的规划残差及其应用掩码，环境反馈包含最终提交和下一队列状态。不能从后续测量位置倒推出行为残差。
+
+拟采用的target为 `y_i = sum_(j=0..h_i-1) gamma^j*r_(k_i+j) + bootstrap_i*gamma^h_i*min(Q1_target,Q2_target)(s_next,U_next)`。显式任务超时结束一次抓取，reward=0且bootstrap=0；成功结束reward=1且bootstrap=0；断联、介入、反馈失效等取消attempt单独保留，不伪造失败reward。未完整记录下一状态/队列的样本不进入训练。固定C的论文target只有在执行合同确实固定C时才等价。
+
+actor损失按论文包含 `-lambda_Q*Q1(s,U_pred)`、成功尝试执行位置上的 `lambda_+*||U_pred-U_behavior||²`，以及可选失败尝试的 `lambda_-*||U_pred||²`。BC只用确实应用过的行为位置，不能模仿未执行的H50尾部或同tick已被替换的候选。reference dropout随机屏蔽基础动作输入。gamma、各lambda、噪声、TD3目标更新、网络和更新频率均需单独确定，论文未公开完整数值配方。
+
+重新训练时对train池保留全部成功attempt与均匀抽取的ρ比例失败attempt，使用新actor/critics；候选与对应的curated replay一起初始化下一online阶段。holdout组及独立整任务评测始终不进入回放训练。基线、残差、reward合同和feature版本变化均另开run，不跨版本静默续池。
+
+### 实施顺序与验收产物
+
+1. **合同/影子记录：** YAM侧闭合状态机、力矩verifier、attempt ID与来源索引先做离线回放；Thor生成零残差，客户端shadow只执行基础动作。审计成功/失败/取消、反馈新鲜度及跨RTC前缀的handback tick。确认基础动作没有被shadow改写。
+2. **特征与推理：** Pi导出增加经验证的视觉feature出口，左右actor从零残差初始化；服务器学习器用独立PyTorch Conda prefix，Thor在Pi系列容器内加载actor；本地工作站仅静态/协议/纯数组检查。
+3. **有界collect：** 冻结基础策略、控制版本和本次behavior snapshot，以闭合→判定→交还/重置为一条attempt。左右各积累成功与真实失败，所有取消记录留在原件。先审计一个完整数据批次与实际execute mask，再进入服务器训练。
+4. **在线学习/重训练：** 服务器在Slurm/tmux中运行独立残差learner；数据经异步传输发布，训练暂停/故障不影响YAM控制与Thor当前snapshot。新snapshot在无活动attempt、无旧残差承诺的边界加载，eval关闭探索。
+5. **完整任务评测：** 与同基础策略、同控制版本比较，分别报告两臂抓取attempt成功率、抓后掉落/正确投放、10块平均正确分拣比例、10块全完成率、时间与重置成本。先20个完整回合作筛查，明确x/20与不确定性；论文82%是进度分数，不能当本站目标或十块全完成率。
+
+待固定的实施参数只有明确缺口：当前基线资产身份、左右闭合方向抖动容差、残差幅度 `B_left/B_right`、抓取时间预算、反馈判定时间参数和learner数值配方。05给出的0.1秒确认/反馈年龄仅是复用现有诊断默认值的候选；不能将这些参数写成用户已确认。
+
 ## 模块化训练入口 v0.2 的验收边界
 
 `schema_version = 2` 实验先固定审核过的 episode inventory 和分组 split，再核对算法动作空间与模型输入、原生训练配置中的 train episode 集。Pi 薄入口把 train ID 注入现有 OpenPI YAM loader，要求 `norm_assets/yam/provenance.json` 的 `selected_episode_ids`、H50、`(6,-1,6,-1)` delta mask 与数据集一致；当前仅新 run 全量 `pi05_yam`，不支持该入口自动 LoRA/续训。OpenWAM 和 XR-1 保留原生 trainer，分别核对其原生 episode 列表；XR-1 仍须 FK 派生末端目标。所有示例均不代表 GPU 训练已验收，任何 DAgger 轮次配方仍先逐轮展示并获明确确认。具体命令与状态见 [10](10_vla_platform.md#模块化配置后端-v02)。
