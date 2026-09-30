@@ -2,7 +2,7 @@
 
 ## PARTS 抓取 RL 回放数据合同（2026-09-30方案）
 
-**状态：拟实现，未发布RL数据集。** 用户确定关爪开始进入、`abs(effort_nm)>0.65`作为抓取成功判据；状态机和权责归 [05](05_inference_and_rollout.md#parts-左右抓取的服务端与客户端合同2026-09-30方案)，学习算法归 [03](03_training_and_evaluation.md#parts-左右抓取残差学习方案2026-09-30)。本合同不是LeRobot专家SFT/HIL导出规则。
+**状态：拟实现，未发布RL数据集。** 用户澄清当前失败为下降高度不足；需采集下降接近→关爪的完整尝试，下降进入信号待核对。`abs(effort_nm)>0.65`仍为关爪后的结果判据；状态机和权责归 [05](05_inference_and_rollout.md#parts-左右抓取的服务端与客户端合同2026-09-30方案)，学习算法归 [03](03_training_and_evaluation.md#parts-左右抓取残差学习方案2026-09-30)。本合同不是LeRobot专家SFT/HIL导出规则。
 
 ### 已有原始记录与缺口
 
@@ -18,11 +18,11 @@
 
 | 记录层 | 必须保存的内容 |
 |---|---|
-| run manifest | schema/contract SHA、task、实际基础checkpoint/norm/engine身份、Pi和YAM版本、mode、feature schema、左右actor snapshot、action_dt=1/30、B与确认/超时规则、数据传输完成标志；模型身份可存交接sidecar，不强制改旧YAM产品字段 |
+| run manifest | schema/contract SHA、task、实际基础checkpoint/norm/engine身份、Pi和YAM版本、mode、feature schema、左右actor snapshot、action_dt=1/30、活动臂关节mask/六维rad边界B、下降进入与确认/超时规则、数据传输完成标志；模型身份可存交接sidecar，不强制改旧YAM产品字段 |
 | request表 | `(run_id, session_id, epoch, request_id, obs_id)`；三相机源帧/时间和state；观测tick、RTC committed prefix、其逐tick原来源、队列状态；完整基础H50、左右候选U、feature或可校验feature_ref；探索实现后的behavior、snapshot与噪声来源 |
 | 每tick记录 | 原生policy_selection.request/model_index/target_tick、attempt_id/arm/phase、是否启用残差、基础目标与残差候选引用、应用的physical residual、selected/bounded/submitted/measured各自值与时间、力矩原值与反馈有效性、客户端约束/裁剪标记 |
-| attempt表 | arm、进入及首次实际残差tick、reward proposal/确认tick、handback effective tick、成功/失败/取消原因、reset边界、reward=0/1或null、terminated/truncated、trainable与排除原因、来源request/视频区间 |
-| 发布清单 | 完整attempt成员、源文件哈希、来源组/train-val分区、数组维数/有限性、闭合与reward合同、逐tick执行掩码、时序审计、READY；只写新目录 |
+| attempt表 | arm、下降进入及首次实际残差tick、闭合开始tick、reward proposal/确认tick、handback effective tick、成功/失败/取消原因、reset边界、reward=0/1或null、terminated/truncated、trainable与排除原因、来源request/视频区间 |
+| 发布清单 | 完整attempt成员、源文件哈希、来源组/train-val分区、数组维数/有限性、下降进入/关节残差/reward合同、逐tick执行掩码、时序审计、READY；只写新目录 |
 
 数据传输和大文件落盘由已有后台录制/传输路径承担，不在30Hz提交路径等待网络/磁盘。客户端生成所有控制tick、epoch、attempt与奖励事件；Thor原样回显关联token并将自身特征/残差记录与之绑定。跨机monotonic保持原时钟域，不伪造对齐。
 
@@ -37,7 +37,11 @@ RTC回复的前d行是既有实际承诺动作，可能已带旧request残差，
 | 断联/人接管/反馈缺失或过旧/epoch切换/保存中断 | null | canceled/invalid；原件保留，默认不入自主RL回放，不冒充失败 |
 | 训练重置/人工摆放 | null | 与前后attempt分隔；不作为抓取动作或next state |
 
-同一attempt的局部reward总和为0或1；一个持续力矩高的片段不能按每帧产生多个+1。同一SDK快照只判定一次。交还后、明确释放之前的力矩下降可另记 `post_grasp_loss`，与局部抓取reward和整任务正确放置指标分别存储。
+同一attempt的局部reward总和为0或1；只在已开始关爪后用力矩给下降抓取尝试的结果，下降段本身不凭高度变化给额外reward。一个持续力矩高的片段不能按每帧产生多个+1。同一SDK快照只判定一次。交还后、明确释放之前的力矩下降可另记 `post_grasp_loss`，与局部抓取reward和整任务正确放置指标分别存储。
+
+用户提出接触前深度目标后，拟补充 `h_entry/h_goal`、实际高度及目标误差的记录，绑定同一参考点/坐标/单位和标定版本。上述reward表仍为稀疏抓取方案；若增加高度误差辅助reward，须另存高度奖励与抓取奖励分量、公式/权重/版本，并修订总reward合同，不能继续宣称总和仅0或1。达到高度与抓取成功分别记录。
+
+初始录制从下降接近进入前保留观测，到关爪后的结果和实际交还结束，不能在夹爪开始闭合才开录。若记录派生末端高度，另存FK模型身份、frame、单位及桌面法向标定；仅有base系FK不等于已有桌面相对高度，不把未标定Z写成真实下降毫米数。
 
 transition只组装控制来源和记录连续的区间，状态包括冻结视觉特征、反馈state、基础参考与RTC调度队列；按真实决策tick差保存 `h_i`、reward发生位置、bootstrap和执行掩码。H50预测长度不代表本request执行50步。重叠队列/承诺动作来源缺失、next state不完整或feature版本不匹配时 `trainable=false`；不能仅靠mask补齐不存在的轨迹。
 
