@@ -18,10 +18,10 @@
 
 | 记录层 | 必须保存的内容 |
 |---|---|
-| run manifest | schema/contract SHA、task、实际基础checkpoint/norm/engine身份、Pi和YAM版本、mode、feature schema、左右actor snapshot、action_dt=1/30、活动臂关节mask/六维rad边界B、下降进入与确认/超时规则、数据传输完成标志；模型身份可存交接sidecar，不强制改旧YAM产品字段 |
+| run manifest | schema/contract SHA、task、实际基础checkpoint/norm/engine身份、Pi和YAM版本、mode、feature schema、左右actor snapshot、action_dt=1/30、活动臂关节mask/六维rad边界B、各臂实际h_entry_m（用户初始值0.05）/h_goal及高度参考/标定身份、奖励公式/权重/版本、下降进入与确认/超时规则、数据传输完成标志；模型身份可存交接sidecar，不强制改旧YAM产品字段 |
 | request表 | `(run_id, session_id, epoch, request_id, obs_id)`；三相机源帧/时间和state；观测tick、RTC committed prefix、其逐tick原来源、队列状态；完整基础H50、左右候选U、feature或可校验feature_ref；探索实现后的behavior、snapshot与噪声来源 |
-| 每tick记录 | 原生policy_selection.request/model_index/target_tick、attempt_id/arm/phase、是否启用残差、基础目标与残差候选引用、应用的physical residual、selected/bounded/submitted/measured各自值与时间、力矩原值与反馈有效性、客户端约束/裁剪标记 |
-| attempt表 | arm、下降进入及首次实际残差tick、闭合开始tick、reward proposal/确认tick、handback effective tick、成功/失败/取消原因、reset边界、reward=0/1或null、terminated/truncated、trainable与排除原因、来源request/视频区间 |
+| 每tick记录 | 原生policy_selection.request/model_index/target_tick、attempt_id/arm/phase、是否启用残差、基础目标与残差候选引用、应用的physical residual、selected/bounded/submitted/measured各自值与时间、当前高度/目标高度/误差及有效性、height_reward/grasp_reward/total_reward、力矩原值与反馈有效性、客户端约束/裁剪标记 |
+| attempt表 | arm、下降进入及首次实际残差tick、闭合开始tick、reward proposal/确认tick、handback effective tick、成功/失败/取消原因、reset边界、grasp_reward=0/1或null、高度辅助与总奖励分量、terminated/truncated、trainable与排除原因、来源request/视频区间 |
 | 发布清单 | 完整attempt成员、源文件哈希、来源组/train-val分区、数组维数/有限性、下降进入/关节残差/reward合同、逐tick执行掩码、时序审计、READY；只写新目录 |
 
 数据传输和大文件落盘由已有后台录制/传输路径承担，不在30Hz提交路径等待网络/磁盘。客户端生成所有控制tick、epoch、attempt与奖励事件；Thor原样回显关联token并将自身特征/残差记录与之绑定。跨机monotonic保持原时钟域，不伪造对齐。
@@ -30,16 +30,16 @@ RTC回复的前d行是既有实际承诺动作，可能已带旧request残差，
 
 ### reward、边界和transition组装
 
-| attempt结果 | reward | 回放处理 |
+| attempt结果 | 抓取结果分量grasp_reward | 回放处理 |
 |---|---|---|
 | 按05确认、在实际交还边界仍满足力矩成功判据 | 局部终止处1，其余0 | 有效成功attempt；终止不bootstrap |
 | 有效反馈下重新张开且未成功，或到显式抓取任务时间预算 | 0 | 有效失败attempt；任务结束，终止不bootstrap |
 | 断联/人接管/反馈缺失或过旧/epoch切换/保存中断 | null | canceled/invalid；原件保留，默认不入自主RL回放，不冒充失败 |
 | 训练重置/人工摆放 | null | 与前后attempt分隔；不作为抓取动作或next state |
 
-同一attempt的局部reward总和为0或1；只在已开始关爪后用力矩给下降抓取尝试的结果，下降段本身不凭高度变化给额外reward。一个持续力矩高的片段不能按每帧产生多个+1。同一SDK快照只判定一次。交还后、明确释放之前的力矩下降可另记 `post_grasp_loss`，与局部抓取reward和整任务正确放置指标分别存储。
+同一attempt的抓取结果分量总和为0或1；只在已开始关爪后用力矩给下降抓取尝试的结果。下降阶段提供独立的高度误差辅助分量，具体公式/权重待定，总reward不限定为0或1。一个持续力矩高的片段不能按每帧产生多个抓取+1。同一SDK快照只判定一次。交还后、明确释放之前的力矩下降可另记 `post_grasp_loss`，与局部抓取reward和整任务正确放置指标分别存储。
 
-用户提出接触前深度目标后，拟补充 `h_entry/h_goal`、实际高度及目标误差的记录，绑定同一参考点/坐标/单位和标定版本。上述reward表仍为稀疏抓取方案；若增加高度误差辅助reward，须另存高度奖励与抓取奖励分量、公式/权重/版本，并修订总reward合同，不能继续宣称总和仅0或1。达到高度与抓取成功分别记录。
+用户确认 `h_entry`可配置、初始50 mm（内部0.05 m），以及高度辅助奖励与抓取结果奖励的组合设计。录制必须保存各臂实际生效 `h_entry/h_goal`、当前高度及目标误差，绑定同一参考点/坐标/单位和标定版本；高度奖励、抓取奖励、合成总奖励分别保存，并绑定公式/权重/版本。奖励数值配方尚未确定，不能从当前文档推导默认高度权重。达到高度与抓取成功分别记录。
 
 初始录制从下降接近进入前保留观测，到关爪后的结果和实际交还结束，不能在夹爪开始闭合才开录。若记录派生末端高度，另存FK模型身份、frame、单位及桌面法向标定；仅有base系FK不等于已有桌面相对高度，不把未标定Z写成真实下降毫米数。
 
