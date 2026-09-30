@@ -2,7 +2,7 @@
 
 ## PARTS 抓取 RL 回放数据合同（2026-09-30方案）
 
-**状态：拟实现，未发布RL数据集。** 用户澄清当前失败为下降高度不足；需采集下降接近→关爪的完整尝试，下降进入信号待核对。`abs(effort_nm)>0.65`仍为关爪后的结果判据；状态机和权责归 [05](05_inference_and_rollout.md#parts-左右抓取的服务端与客户端合同2026-09-30方案)，学习算法归 [03](03_training_and_evaluation.md#parts-左右抓取残差学习方案2026-09-30)。本合同不是LeRobot专家SFT/HIL导出规则。
+**状态：服务端原始包审核和replay构建已实现，未接收/发布真实RL训练集。** 用户澄清当前失败为下降高度不足；需采集下降接近→关爪的完整尝试，下降进入信号待核对。`abs(effort_nm)>0.65`仍为关爪后的结果判据；状态机和权责归 [05](05_inference_and_rollout.md#parts-左右抓取的服务端与客户端合同2026-09-30方案)，学习算法归 [03](03_training_and_evaluation.md#parts-左右抓取残差学习方案2026-09-30)。本合同不是LeRobot专家SFT/HIL导出规则。
 
 ### 已有原始记录与缺口
 
@@ -51,7 +51,7 @@ transition只组装控制来源和记录连续的区间，状态包括冻结视�
 
 ### PARTS 原始发布格式
 
-这是本轮客户端构建的拟实施物理格式，新增层schema为 `yam_parts_raw_v1`；已有episode继续保留 `yam_hil_v2`，运行配置/发布规范以本节为准。客户端实施步骤见 [交接计划](reference/parts_client_handoff.md)。尚未实现录制扩展或发布器。
+这是本轮客户端构建的拟实施物理格式，新增层schema为 `yam_parts_raw_v1`；已有episode继续保留 `yam_hil_v2`，运行配置/发布规范以本节为准。客户端实施步骤见 [交接计划](reference/parts_client_handoff.md)。服务端已有审核器与派生replay构建；YAM客户端录制实现及现场完整性由客户端交付验收，不能从本地代码推定真实包齐备。
 
 ```text
 <新采集根目录>/<run_id>/
@@ -81,7 +81,7 @@ JSON为UTF-8；JSONL每行一个完整对象，未设置/无效值用null并保�
 | attempts.jsonl | 每个已终止attempt一条结果：attempt_id/arm、run配置引用、episode/来源区间、进入/首个残差/关爪/终止/实际交还tick、成功/失败/取消及原因、grasp_reward、height_reward/total_reward汇总与有效性、terminated/truncated和已采用请求区间 |
 | publication.json | publication_id、run_id/schema、client_complete、文件相对路径/bytes/SHA256、完整episode/attempt成员、记录缺口、producer代码SHA及传输状态。只在队列消费完、文件关闭并校验后标client_complete=true |
 
-requests.h5的group拟命名为 `/requests/e<epoch>_r<request_id>`，JSONL必须显式给出group路径，不能依赖命名猜测关联。`actions_native`为50×14；`left/u`、`right/u`为50×6，`B_rad`为6，`editable_mask`为50，RTC前缀为d×14。对RTC前d行标记原前缀来源，它们不是该request未修正的base；缺少parts的基线请求仍存actions_native，并记录候选/特征缺失，不能填伪造零候选。
+requests.h5的group拟命名为 `/requests/e<epoch>_r<request_id>`，JSONL必须显式给出group路径，不能依赖命名猜测关联。`actions_native`为50×14；`left/u`、`right/u`为50×6，`B_rad`为6，`editable_mask`为50，RTC前缀为d×14；`scheduler/targets`为50×14、`scheduler/valid_mask`及`committed_mask`为50。请求JSON中移出的大数组由assembler按HDF5路径还原。对RTC前d行标记原前缀来源，它们不是该request未修正的base；缺少parts的基线请求仍存actions_native，并记录候选/特征缺失，不能填伪造零候选。
 
 视觉feature由Thor生成并按本request/observation绑定，可返回数组或feature_ref。Thor返回数组时，客户端按原dtype存request group并注明feature_schema；仅返回引用时存引用和可核验身份，由condapi合并对应feature文件。无feature出口时如实标missing，不用关节state冒充图像特征；基线/早期shadow包用于标定和接口审计，是否可派生训练由模型侧另行审核。
 
@@ -93,6 +93,7 @@ requests.h5的group拟命名为 `/requests/e<epoch>_r<request_id>`，JSONL必须
 | active_arm/attempt_id/phase/eligible | 当前活动臂/尝试/阶段/接近资格及其来源；持物和非接近下降不自动启用 |
 | arms.left/right | 每侧FK position/orientation及frame/参考点/采样时间/valid、height_m/h_entry_m/h_goal_m/error_m、原力矩快照引用与新鲜度 |
 | selection | 生成最终采用目标的epoch/request_id/observation_id/model_index/target_tick，是否继承RTC前缀，request数组/feature引用；继承行继续指向旧request |
+| base_target/candidate_ref | 残差叠加前经客户端原映射后的14D基础目标；候选的request_epoch/request_id/model_index/arm/actor_snapshot_id/behavior_snapshot_id，必须独立记录，不能从submitted或未知夹爪映射倒推 |
 | residual_applied/physical_residual_rad | 是否实际启用及最终物理14D差值；只有该活动臂六关节可非零，shadow实际值全0 |
 | constraints | 候选/组合/最终提交来源、裁剪/连续性/高度边界结果及拒绝原因；原动作与反馈保留在原14D列 |
 | reward/event_refs | height_reward/grasp_reward/total_reward、valid、reward_schema引用、对应event_id；未固定公式/目标或取消时不伪造总奖励 |
@@ -102,6 +103,28 @@ requests.h5的group拟命名为 `/requests/e<epoch>_r<request_id>`，JSONL必须
 客户端在episode manifest增加 `parts` 引用，包含run_id、contract_sha、mode、run相对路径及本episode的attempt成员；不覆盖既有action_semantics、时钟、视频同步和等待切点说明。发生恢复/写入中断时将未完成attempt记canceled，文件收尾不完整则client_complete=false。服务/采集mock必须mock=true，split_role记录mock/eval/holdout/train或未分配，不能自动把所有包放入train。
 
 发布走后台持久outbox和独立传输路径，按publication_id幂等；源包收尾后保持不可变，重传核对相同哈希。接收侧ack只代表文件接收，客户端client_complete只代表生产完整。condapi另在新派生目录做时序/残差/奖励审计、分组split并生成READY与transition清单；训练只消费READY中的有效自主区间，不能把H50整块默认当成已执行50步。
+
+### 服务端派生replay v1
+
+入口 `scripts/parts/audit_publication.py`为标准库文件审核，只返回files_verified_not_training_ready。`scripts/parts/prepare_replay.py`使用独立数据/模型环境中的NumPy/HDF5，在新输出目录保存audit.json及左右独立 `READY.json + transitions.npz`。builder目前只消费请求HDF5中已解析的features/z，不自动解析外部feature_ref。成功、取消、缺失字段和mock检查均有离线fixtures；没有读取真实现场包。
+
+`READY.json` schema=`yam_parts_replay_v1`，含arm、state_schema=`yam-parts-state-v1`、D与state_dim=D+1527、feature_schema_id、contract_sha、reward_recipe（含显式height_scope）、每控制tick gamma、原始publication哈希、holdout组、attempt结果及NPZ哈希。action_semantics=`accepted_candidate_plan_v1`：行为动作为实际被采用请求的归一化H50×6规划候选，环境含真实裁剪/提交/队列；不是把整个H50标记执行完。终止next_state只是不用的零占位，bootstrap=false。
+
+| NPZ字段 | shape/语义 |
+|---|---|
+| state/next_state | N×(D+1527)，同一个编码器；下一有效自主决策或终止占位 |
+| action/action_mask | N×300，原候选u/该计划可编辑且B非零的维度；critic以带mask动作估计回报 |
+| executed_mask | N×300，命令tick区间[k,next_k)实际采用的位置，仅这些位置参加成功BC/可选失败锚定 |
+| next_action_mask | N×300，下一计划的可编辑维度；终止全false |
+| reward/elapsed_steps/bootstrap | N，反馈区间(k,next_k]的逐tick折扣和、真实tick差、是否bootstrap |
+| success | N bool，对整个已审核attempt标记成功，途中行可bootstrap；不是每行成功奖励 |
+| attempt_id/group_id | N文本，run_id:attempt_id及原始布局组；组不跨train/holdout |
+
+入口前READY候选只有后来被某attempt实际采用、来源与整个决策区间连续时才可组装；进入前基础反馈reward为0，执行mask仅标实际活动命令，未采用候选仍不进入replay。active_descent高度分量使用前一提交命令的phase，终止结果与前一命令反馈对齐。
+
+builder验证source SDK有效性、单调/不重复确认、新鲜终止反馈和有效handback；obs_id/state与原始row、三路视频引用/索引/文件、分段committed_rows、队列数组、候选身份与实际提交差值须可追溯。视频这里只检查索引与文件身份，不解码像素或独立证明现场同步/标定。缺少独立base_target、next队列/特征、原始连续tick或reward配置的attempt写排除报告；不补造数据。重复run/attempt或发布损坏拒绝，重传不能重复计入。
+
+正式奖励作用阶段与数值尚待固定。服务器逐反馈tick复算注册配方，客户端汇总只保留来源；双方需明确height_scope及时间对齐后才交真实READY。当前YAM只读源码中base_target在编辑记录存在但record转发未包含该字段，这一客户端对齐项已放待用户审核清单，未发送追加任务。
 
 ## 模块化数据 inventory 与 split（2026-09-24）
 

@@ -9,6 +9,7 @@ from pathlib import Path
 
 from benchmark_pi05 import digest
 from benchmark_pi05 import read_observation
+from parts_policy import load_shadow_extension
 from rtc_policy import TrainedRtcInference
 from rtc_trt_policy import RtcTensorRTAdapter
 from rtc_trt_policy import create_rtc_transform_policy
@@ -63,6 +64,7 @@ def main():
     parser.add_argument("--allow-validated-tf32-7step", action="store_true")
     parser.add_argument("--validation", type=Path, help="new quantile-prefix validation receipt")
     parser.add_argument("--jax-reference", type=Path, help="corrected original-JAX reference directory")
+    parser.add_argument("--parts-manifest", type=Path, help="optional PARTS shadow/off manifest; TRT remains actions-only")
     args = parser.parse_args()
     if not torch.cuda.is_available():
         parser.error("Thor CUDA required")
@@ -150,7 +152,9 @@ def main():
         "camera_exposure_to_policy_tick_offset_s": None,
     }
     logging.info("READY ws://%s:%d trained-RTC", args.host, args.port)
-    WebsocketPolicyServer(serving, host=args.host, port=args.port, rtc_mode="trained", metadata=metadata).serve_forever()
+    extension = load_shadow_extension(args.parts_manifest, metadata) if args.parts_manifest else None
+    WebsocketPolicyServer(serving, host=args.host, port=args.port, rtc_mode="trained",
+                          metadata=metadata, parts_extension=extension).serve_forever()
 
 
 if __name__ == "__main__":

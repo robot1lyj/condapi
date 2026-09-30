@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "algorithm": "parts_td3_bc_v1",
+  "allowed_training_hosts": [],
+  "replay": {"left": null, "right": null},
+  "hidden_dims": [256, 256],
+  "actor_lr": 0.0003,
+  "critic_lr": 0.0003,
+  "gamma": 0.999,
+  "tau": 0.005,
+  "target_noise": 0.2,
+  "target_noise_clip": 0.5,
+  "policy_frequency": 2,
+  "q_weight": 1.0,
+  "success_bc_weight": 1.0,
+  "failure_anchor_weight": 0.0,
+  "reference_dropout": 0.1,
+  "batch_size": 128,
+  "updates": 10000,
+  "save_every": 1000,
+  "seed": 0,
+  "failure_fraction": 0.5
+}

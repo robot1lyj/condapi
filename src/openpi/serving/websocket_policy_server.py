@@ -6,7 +6,6 @@ import traceback
 from typing import Any
 
 import numpy as np
-
 from openpi_client import base_policy as _base_policy
 from openpi_client import msgpack_numpy
 import websockets.asyncio.server as _server
@@ -32,6 +31,7 @@ class WebsocketPolicyServer:
         port: int | None = None,
         rtc_mode: str = "off",
         metadata: dict | None = None,
+        parts_extension: Any | None = None,
     ) -> None:
         self._policy = policy
         self._host = host
@@ -39,6 +39,9 @@ class WebsocketPolicyServer:
         self._rtc_mode = rtc_mode
         self._metadata = dict(metadata or {})
         self._metadata.setdefault("rtc_mode", self._rtc_mode)
+        self._parts_extension = parts_extension
+        if parts_extension is not None:
+            self._metadata["parts"] = parts_extension.metadata
         logging.getLogger("websockets.server").setLevel(logging.INFO)
 
     def serve_forever(self) -> None:
@@ -66,7 +69,7 @@ class WebsocketPolicyServer:
             try:
                 start_time = time.monotonic()
                 payload = msgpack_numpy.unpackb(await websocket.recv())
-                obs, rtc_payload = _split_payload(payload)
+                obs, rtc_payload, parts_payload = _split_request(payload)
                 if self._rtc_mode == "only" and rtc_payload is None:
                     raise RequestError("RTC payload required when rtc_mode=only.")
                 if self._rtc_mode == "off" and rtc_payload is not None:
@@ -74,7 +77,7 @@ class WebsocketPolicyServer:
                     rtc_payload = None
 
                 infer_time = time.monotonic()
-                action, rtc_used, rtc_warnings, rtc_error = self._infer(obs, rtc_payload)
+                action, rtc_used, rtc_warnings, rtc_error = self._infer_with_parts(obs, rtc_payload, parts_payload)
                 infer_time = time.monotonic() - infer_time
 
                 action["server_timing"] = {
@@ -133,15 +136,27 @@ class WebsocketPolicyServer:
                     return action, rtc_used, rtc_warnings, rtc_error
                 except NotImplementedError as exc:
                     if self._rtc_mode == "only":
-                        raise RequestError(str(exc))
+                        raise RequestError(str(exc)) from exc
                     rtc_error = str(exc)
                     logger.warning("RTC inference not supported, falling back to normal inference: %s", exc)
                 except Exception as exc:
                     if self._rtc_mode == "only":
-                        raise RequestError(f"RTC inference failed: {exc}")
+                        raise RequestError(f"RTC inference failed: {exc}") from exc
                     rtc_error = f"RTC inference failed: {exc}"
                     logger.warning("RTC inference failed, falling back to normal inference: %s", exc)
         return self._policy.infer(obs), rtc_used, rtc_warnings, rtc_error
+
+    def _infer_with_parts(self, obs: dict, rtc_payload: dict | None, parts_payload: dict | None):
+        if parts_payload is None or parts_payload.get("mode") == "off":
+            return self._infer(obs, rtc_payload)
+        if self._parts_extension is None:
+            if parts_payload.get("mode") == "shadow":
+                return self._infer(obs, rtc_payload)
+            raise RequestError("PARTS collect/eval unsupported by this service")
+        try:
+            return self._parts_extension.infer(obs, rtc_payload, parts_payload, lambda: self._infer(obs, rtc_payload))
+        except (ValueError, TypeError, KeyError) as exc:
+            raise RequestError(f"PARTS request rejected: {exc}") from exc
 
 
 def _health_check(connection: _server.ServerConnection, request: _server.Request) -> _server.Response | None:
@@ -152,7 +167,12 @@ def _health_check(connection: _server.ServerConnection, request: _server.Request
 
 
 def _split_payload(payload: object) -> tuple[dict, dict | None]:
-    if isinstance(payload, dict) and ("obs" in payload or "rtc" in payload or "type" in payload):
+    obs, rtc, _ = _split_request(payload)
+    return obs, rtc
+
+
+def _split_request(payload: object) -> tuple[dict, dict | None, dict | None]:
+    if isinstance(payload, dict) and any(key in payload for key in ("obs", "rtc", "type", "parts")):
         msg_type = payload.get("type", "infer")
         if msg_type != "infer":
             raise RequestError(f"Unsupported message type: {msg_type}")
@@ -164,10 +184,13 @@ def _split_payload(payload: object) -> tuple[dict, dict | None]:
             raise RequestError("RTC payload must be an object.")
         if not isinstance(obs, dict):
             raise RequestError("Observation must be an object.")
-        return obs, rtc_payload
+        parts_payload = payload.get("parts")
+        if parts_payload is not None and not isinstance(parts_payload, dict):
+            raise RequestError("PARTS payload must be an object.")
+        return obs, rtc_payload, parts_payload
     if not isinstance(payload, dict):
         raise RequestError("Observation must be an object.")
-    return payload, None
+    return payload, None, None
 
 
 def _parse_rtc_payload(payload: dict[str, Any], metadata: dict | None) -> tuple[dict[str, Any], list[str]]:
@@ -186,11 +209,14 @@ def _parse_rtc_payload(payload: dict[str, Any], metadata: dict | None) -> tuple[
         action_horizon_meta = _coerce_optional_int(metadata.get("action_horizon"), "action_horizon", warnings)
         action_dim_meta = _coerce_optional_int(metadata.get("action_dim"), "action_dim", warnings)
 
-    if action_horizon_meta is not None and action_horizon_payload is not None:
-        if action_horizon_meta != action_horizon_payload:
-            raise RequestError(
-                f"RTC action_horizon mismatch: payload={action_horizon_payload} metadata={action_horizon_meta}"
-            )
+    if (
+        action_horizon_meta is not None
+        and action_horizon_payload is not None
+        and action_horizon_meta != action_horizon_payload
+    ):
+        raise RequestError(
+            f"RTC action_horizon mismatch: payload={action_horizon_payload} metadata={action_horizon_meta}"
+        )
     action_horizon = action_horizon_meta if action_horizon_meta is not None else action_horizon_payload
     if action_horizon is None:
         raise RequestError("RTC requires action_horizon from payload or server metadata.")

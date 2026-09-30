@@ -4,6 +4,12 @@
 
 服务器信息于 2026-09-04 按用户提供的《琶洲模方智算平台用户操作手册》（本地参考文件：`/home/wuyan-lyj/下载/琶洲模方智算平台用户操作手册_带目录.pdf`）以及 SSH/Slurm 只读核验建立；Thor 官方版本和端侧方案于 2026-09-05 更新。一次性状态每次操作前都要重新检查。
 
+## PARTS 独立环境（2026-09-30，本地代码准备）
+
+`environments/parts.yml`仅声明Python3.12/pip bootstrap；`packages/parts-rl/pyproject.toml`候选依赖NumPy2.x、Torch2.7.1、HDF5。正式安装在独立服务器prefix并验证CUDA，不将learner依赖安装到标准库控制层或现有Pi训练环境。本轮未创建服务器环境或启动GPU训练，依赖可导入不等于learner更新通过。
+
+本地仅用现有condapi-yam解释器的NumPy/pytest运行纯协议/数组检查；HDF5 3.14.0安装到临时 `/tmp/condapi-parts-data-test`（no-deps），通过PYTHONPATH用于合成数据审计测试，没有修改Pi prefix。Torch版本仅通过包metadata读取，未执行网络前向/优化器。Thor eager候选继续使用Pi系列容器已验收的Torch，不对端侧盲目安装服务器x86 wheel；FP32转换、CUDA和数值/延迟按08验收。操作见03/05。
+
 ## Thor 端侧系统与从零安装
 
 本节是环境概览，不是安全烧录操作清单。实际指导用户从 [Thor 安装系列入口](reference/thor/00_start_here.md) 开始，按阶段核验设备、USB、NVMe 与固件；不可跳过其中的目标确认和停止条件。

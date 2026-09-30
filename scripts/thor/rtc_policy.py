@@ -13,6 +13,8 @@ from rtc_action_space import encode_committed_actions
 from rtc_onnx_sampler import Pi05RtcOnnxSampler
 from rtc_onnx_sampler import RtcFlatSamplerAdapter
 from rtc_onnx_sampler import validate_trained_prefix
+from rtc_prefix import physical_prefix_array
+from rtc_prefix import restore_physical_prefix
 import torch
 
 from openpi.models import model as model_api
@@ -65,11 +67,7 @@ def validate_request(observation, rtc, *, max_delay):
         raise ValueError("RTC action[0] must target the observation's policy tick")
     if committed_tick != target_tick:
         raise ValueError("RTC committed_start_tick must equal target_start_tick")
-    absolute_prefix = np.asarray(rtc.get("committed_actions"), dtype=np.float32)
-    if delay == 0 and absolute_prefix.size == 0:
-        absolute_prefix = absolute_prefix.reshape(0, 14)
-    if absolute_prefix.shape != (delay, 14) or not np.isfinite(absolute_prefix).all():
-        raise ValueError("RTC committed_actions must be finite [delay_steps,14] absolute targets")
+    absolute_prefix = physical_prefix_array(rtc.get("committed_actions"), delay)
     return state, absolute_prefix, delay
 
 
@@ -160,7 +158,7 @@ class TrainedRtcInference:
             raise RuntimeError("RTC returned invalid physical H50/14D actions")
         # The controller's already committed commands are authoritative, not a
         # floating-point normalize/inverse-normalize round trip.
-        actions[:delay] = physical_prefix
+        actions = restore_physical_prefix(actions, physical_prefix)
         if self.max_joint_step_rad is not None:
             reject_large_joint_step(actions, state, delay, max_step_rad=self.max_joint_step_rad)
         outputs["actions"] = actions

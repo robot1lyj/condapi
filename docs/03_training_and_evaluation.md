@@ -2,7 +2,7 @@
 
 ## PARTS 左右抓取残差学习方案（2026-09-30）
 
-**状态：接口与训练方案，未实现残差网络/学习器，未启动采集、训练或部署。** 用户要求先给出与当前 YAM 项目对齐的方案。2026-09-29 用户明确确认此前夹爪、动作相位和左臂异常均已解决；下面的历史诊断保留来源，不再作为本方案的当前阻断。当前可用基线的 checkpoint、norm、推理模式和控制版本尚未在本次现场核验，不从历史报告选定它们。
+**状态：服务端首版代码已实现，离线协议/数据检查通过；未启动真实采集、GPU训练或远端部署。** 用户要求先完成服务端，客户端新增指令须先交用户审核。2026-09-29 用户明确确认此前夹爪、动作相位和左臂异常均已解决；下面的历史诊断保留来源，不再作为本方案的当前阻断。当前可用基线的 checkpoint、norm、推理模式和控制版本尚未在本次现场核验，不从历史报告选定它们。
 
 2026-09-30 用户指定左、右抓取为瓶颈，随后澄清：**当前失败是下降高度不够，问题不在抓住后保持。** 用户确认YAM端已有末端位姿/FK，确认介入高度 `h_entry`、下降目标 `h_goal`、力矩成功判据分别定义，并指定 **`h_entry` 可配置、初始50 mm（0.05 m）**。取消先前的“只修夹爪、关爪开始介入”实施选择；拟修正下降接近动作。用户确认网络读取当前高度/目标高度/误差，客户端提供高度辅助奖励与关爪后的抓取结果奖励；具体奖励公式/权重、目标高度与测量参考待定。成功判据 **`abs(effort_nm) > 0.65`** 用于关爪后给下降抓取attempt的结果奖励；到达某个高度本身不算抓取成功。YAM字段 `effort_nm` 为 SDK 夹爪电机反馈Nm；0.65是用户指定阈值，尚未由本任务独立测量。进入/退出/奖励协议归 [05 的 PARTS 合同](05_inference_and_rollout.md#parts-左右抓取的服务端与客户端合同2026-09-30方案)，回放数据归 [04 的 PARTS 数据合同](04_data_contracts.md#parts-抓取-rl-回放数据合同2026-09-30方案)。
 
@@ -22,7 +22,7 @@
 
 ### 网络学习与时间合同
 
-每臂 actor 读取同一观测的冻结视觉特征 `z`、14D反馈状态 `p`、Pi物理参考动作块 `A_base`，以及用户确认的当前高度/目标高度/误差，拟输出 `U ∈ [-1,1]^(50×6)` 的活动臂关节修正。首版还将 selector状态、反馈有效性和时间轴队列编码为调度上下文，供 actor/critic 使用；这是使异步RTC决策可追溯的项目扩展。网络宽度/层数是待制定的训练配方，不冒称论文已经提供。
+每臂 actor 读取同一观测的冻结视觉特征 `z`、14D反馈状态 `p`、Pi物理参考动作块 `A_base`，以及用户确认的当前高度/目标高度/误差，拟输出 `U ∈ [-1,1]^(50×6)` 的活动臂关节修正。首版还将 selector状态、反馈有效性和时间轴队列编码为调度上下文，供 actor/critic 使用；这是使异步RTC决策可追溯的项目扩展。示例网络为两层256宽MLP，数值由项目候选配方持有，不冒称论文已经提供。
 
 客户端把残差 `B_arm ⊙ U` 加到活动臂六个绝对关节目标，B为六维rad边界；它是物理目标上的增量，与Pi训练时相对state的delta/归一化处理分开。另一臂及两只夹爪保持基础动作路径。实际应用只涉及未承诺目标，按05核查最终关节连续性；未选中arm的候选不能作为执行过的行为。采集探索噪声由Thor一次生成并记录，不在每次重选同一target tick时重新抽样；eval时关闭探索。
 
@@ -32,11 +32,49 @@
 
 两只critic估计状态/残差决策的回报。数据组装按真实决策观测 `k_i → k_(i+1)` 建立transition；`h_i = k_(i+1)-k_i`，局部reward对齐真实发生的tick。RTC状态必须包括观测时已承诺动作、剩余待采用计划及来源；仅加入execute_mask不足以把重叠H50当成真实执行过的固定块。critic输入本次实际选择的规划残差及其应用掩码，环境反馈包含最终提交和下一队列状态。不能从后续测量位置倒推出行为残差。
 
-拟采用的target为 `y_i = sum_(j=0..h_i-1) gamma^j*r_(k_i+j) + bootstrap_i*gamma^h_i*min(Q1_target,Q2_target)(s_next,U_next)`，其中r为按待定配方合成的高度辅助与抓取结果奖励。显式任务超时结束一次抓取，grasp_reward=0且bootstrap=0；成功结束grasp_reward=1且bootstrap=0；总reward还包含实际高度分量，不能把失败尝试总和直接写成0。断联、介入、反馈失效等取消attempt单独保留，不伪造失败reward。未完整记录下一状态/队列的样本不进入训练。固定C的论文target只有在执行合同确实固定C时才等价。
+实现target为 `y_i = sum_(j=1..h_i) gamma^(j-1)*r_(k_i+j) + bootstrap_i*gamma^h_i*min(Q1_target,Q2_target)(s_next,U_next)`（before_command反馈归前一命令），其中r为按待定配方合成的高度辅助与抓取结果奖励。显式任务超时结束一次抓取，grasp_reward=0且bootstrap=0；成功结束grasp_reward=1且bootstrap=0；总reward还包含实际高度分量，不能把失败尝试总和直接写成0。断联、介入、反馈失效等取消attempt单独保留，不伪造失败reward。未完整记录下一状态/队列的样本不进入训练。固定C的论文target只有在执行合同确实固定C时才等价。
 
 actor损失按论文包含 `-lambda_Q*Q1(s,U_pred)`、成功尝试执行位置上的 `lambda_+*||U_pred-U_behavior||²`，以及可选失败尝试的 `lambda_-*||U_pred||²`。BC只用确实应用过的行为位置，不能模仿未执行的H50尾部或同tick已被替换的候选。reference dropout随机屏蔽基础动作输入。gamma、各lambda、噪声、TD3目标更新、网络和更新频率均需单独确定，论文未公开完整数值配方。
 
 重新训练时对train池保留全部成功attempt与均匀抽取的ρ比例失败attempt，使用新actor/critics；候选与对应的curated replay一起初始化下一online阶段。holdout组及独立整任务评测始终不进入回放训练。基线、残差、reward合同和feature版本变化均另开run，不跨版本静默续池。
+
+### 已实现代码与实际训练步骤
+
+服务端独立包为 `packages/parts-rl/`：`state.py`统一推理/训练编码；`prepare.py`审核原始来源并构建replay；`data.py`读取不可变NPZ；`learner.py`实现左右各自actor、双critic、target网络和优化器。入口为 `adapters/parts/train.py`。Pi训练循环与权重均不改动，平台控制包仍仅标准库。当前是离线批次更新接口，尚无自动接收新包、自动刷新buffer或自动替换运行snapshot的后台常驻learner。
+
+每臂输入维数为 **D+1527**：D维同观测视觉特征、14D反馈、700D基础H50、8D高度/时间/力矩有效性/资格、5D阶段、700D待采用目标、50D有效mask、50D承诺mask。actor输出300D后reshape50×6，最后一层零初始化；双critic各输入state+300D带mask动作+300D mask。推理固定使用train样本的均值/标准差；不同feature/基础策略版本另开合同。
+
+1. **准备可采集服务。** 固定基线资产、feature schema、h_goal/坐标、各维B、确认/超时和奖励配方。先完成Thor特征、数值、延迟与跨IPC验收。第一次collect使用显式零初始化actor加一次生成的有界高斯噪声，收真实下降纠正与结果；零残差baseline/shadow只做接口/标定检查，当前builder不将它们伪装成collect replay。
+2. **采集、审核、构建。** 完整记录左右下降→闭合→结果→实际交还，原始包后台发布。`audit_publication.py`只验文件完整；`prepare_replay.py`在新目录审核观测/视频引用、队列、来源、前缀、最终动作、力矩确认和奖励，输出两侧READY/NPZ与排除报告。无特征、基础目标或连续来源时排除attempt。holdout布局组、mock/eval和取消均不入train。具体格式见04。
+3. **填正式配方。** `configs/parts/train_recipe.example.json`是工程候选，含hidden=[256,256]、actor/critic LR=3e-4、每30Hz tick gamma=.999、tau=.005、目标噪声=.2/clip=.5、actor每2次critic更新、Q/成功BC权重1/1、失败锚定0、reference dropout=.1、batch128、每臂10000次更新/每1000次保存、seed0、ρ=.5。论文没有公开这些完整数值，当前不称已验证最优；示例的服务器host白名单为空、READY路径为null，不能直接执行。更新预算按有效数据另定，不按H50虚增采样量。
+4. **服务器训练。** 在获准GPU计算节点单独创建 `environments/parts.yml` prefix，安装本仓库 `packages/parts-rl`；控制包通过源码路径使用。启动须同时有正式READY、显式服务器hostname白名单及 `--execute-on-server`。长作业放Slurm/tmux，本地工作站不能执行下面的训练命令。`--check-only`只做标准库配方检查，不加载网络或验证GPU。
+5. **保存与选择。** 输出新run的metrics.jsonl、recipe.json及不可变 `snapshots/step_XXXXXXXX/`（两actor FP32权重与train统计、两个完整learner状态、training.json和哈希），LATEST原子指向最后完整snapshot。`--resume`须同配方核心、同replay哈希，恢复优化器/target/统计/随机状态与筛选成员；新数据或合同换新run。`--fresh-retrain`从train池保留全部成功并随机取floor(ρ×失败数)个失败attempt，新建actor/critics；筛选IDs写入snapshot。
+6. **固定snapshot评测。** `build_behavior_manifest.py`在新目录发布零初始化或learned候选，核对actor/训练清单哈希；Thor按05加载，eval不加探索噪声。原JAX权重不改写，训练loss不能替代两臂局部和完整任务评测。首次GPU训练更新和snapshot重载仍须在服务器验证。
+
+下面都是命令模板，路径代表正式填写后的新产物；本轮没有执行训练或设备部署：
+
+```bash
+# 数据处理：只读原始包，写新replay目录。
+python scripts/parts/audit_publication.py /data/parts/run_A
+python scripts/parts/prepare_replay.py --run /data/parts/run_A --run /data/parts/run_B \
+  --output /data/parts/replay_v1 --contract /data/parts/contract.json \
+  --reward /data/parts/reward.json --split /data/parts/split.json --gamma 0.999
+# 配方的replay.left/right分别指向上述两侧READY.json。
+python adapters/parts/train.py --recipe /data/parts/recipe_v1.json \
+  --output /data/parts/train_v1 --check-only
+# 仅获准GPU服务器、Slurm/tmux内执行。
+python adapters/parts/train.py --recipe /data/parts/recipe_v1.json \
+  --output /data/parts/train_v1 --execute-on-server
+# 成功重加权重训：新输出、新网络，原始数据保留。
+python adapters/parts/train.py --recipe /data/parts/recipe_v2.json \
+  --output /data/parts/retrain_v2 --fresh-retrain --execute-on-server
+```
+
+奖励注册的候选公式是 `height=-abs(height_m-h_goal_m)`、`total=w_h*height+w_g*grasp`，w_h≥0、w_g>0均须显式指定；`height_scope`须显式选 `active_descent`（只下降阶段）或 `whole_attempt`（完整局部尝试）。这是项目实现选项，用户尚未确认数值与作用阶段。builder逐反馈tick复算，命令区间 `[k,next_k)`对应反馈 `(k,next_k]`；active_descent按前一已提交命令的phase计高度分量，避免关爪当行反馈误归新命令。入口前READY请求若后来确实被该attempt采用，也保留原观测决策，进入前基础动作反馈奖励为0；成功终止只加一次grasp=1，失败grasp=0，终止不bootstrap。
+
+本地检查使用纯标准库/NumPy/HDF5合成fixtures，未调用actor/critic前向、backward、optimizer或训练循环。HDF5验证依赖仅装入临时测试目录，没有混装Pi环境。GPU验收、真实采集字段/奖励作用阶段对齐和任务效果仍待完成。
+
+2026-09-30验证：PARTS专属 `pytest packages/parts-rl/tests -q`为25 passed（0.27 s）；新/修改入口21个Python文件AST语法检查通过，限定文件ruff与git diff --check通过。此前扩大到既有vla-platform套件合并检查时为86 passed、2 skipped、8 failed：其中2项缺OmegaConf，5项使用不存在的/path/to/request.json，1项模型列表fixture漏xr1-5b。相关配置/实现与旧tests均未由本次修改；独立重跑旧fixture复现路径缺失与模型列表断言。此次不修其他模型测试，不能将平台总套件称为全通过。没有执行真实训练smoke。
 
 ### 实施顺序与验收产物
 
