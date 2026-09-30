@@ -10,6 +10,8 @@ Thor 系统、容器、Pi0.5 转换和 TensorRT 方案见 [08 · Thor 端侧部�
 
 客户端开发的执行入口为 [YAM客户端实施计划](reference/parts_client_handoff.md)，含构建范围、采集阶段、双方依赖、验收交付和可直接执行的指令。此前按用户授权交给客户端任务；2026-09-30用户追加要求：后续客户端任务指令须先展示具体内容并经用户审核，禁止自动发送新任务/补充指令。condapi当前优先完成服务端。
 
+**自动资格方案：** 用户随后要求每次抓取不人工标记、不调用额外VLM，采用本地规则自动切换。已核对客户端 `98e8dee` 首版仍使用显式标记；[自动规则改造计划](reference/parts_client_handoff.md#本轮客户端改造自动规则选择器待审核的实施方案)拟用实际张开反馈、关爪/持续力矩历史、桌面系抓取区及回撤判定自动生成eligible/empty_hand。成功后的持物/放置和释放后未回撤区间禁止重入；力矩回落不自动变空手。计划已形成，尚未修改客户端、发送追加任务或验收自动规则。
+
 ### 本地接口证据与责任分配
 
 本次仅检查condapi本地源码，以及只读参考 `/home/wuyan-lyj/YAM/yam-abc-reproduce` 的客户端协议/录制文档和对应 `hil/policy.py`、`hil/policy_process.py`、`hil/rtc_protocol.py`、`hil/grasp_diagnostics.py`。没有读取或操作3588运行系统/机械臂控制/相机实现；没有将YAM控制代码复制进condapi。
@@ -26,7 +28,7 @@ Thor 系统、容器、Pi0.5 转换和 TensorRT 方案见 [08 · Thor 端侧部�
 
 高度统一约定为末端参考点沿桌面法向、相对桌面的距离。`h_entry`在基础策略仍能到达的下降段，用来启动修正；`h_goal`是待核对的可抓取深度，用来指导下降，两者不共用一个值或事件。目标需核对夹爪参考点/指尖偏移、积木高度和抓取姿态；统一的接触前平面只有在各目标适用同一抓取高度时才能共用。若目标还在抓取位置上方，应作为接近阶段的中间目标；是否在该高度交还须单独验证。
 
-拟新增运行参数 `h_entry_m`，左右臂分别配置，初始均为 `0.05`；界面/交接可显示50 mm，协议及网络输入统一使用m。该字段尚未接入运行代码。每个run记录实际生效值及高度参考点/标定版本，活动attempt内锁定参数；后续调整通过配置生效，不写死在状态机或网络中。50 mm是用户指定初值，不代表现场已验证可到达性或坐标标定；不能直接把未转换的机器人base系Z与0.05比较。`h_goal`独立配置，目前没有指定数值。
+运行参数 `h_entry_m` 在客户端 `98e8dee` 配置及状态机中已实现，左右初始均为 `0.05`；界面/交接显示50 mm，协议及网络输入统一使用m。每个run记录实际生效值及高度参考点/标定版本，活动attempt内锁定参数；后续调整通过配置生效，不写死在状态机或网络中。50 mm是用户指定初值，不代表现场已验证可到达性或坐标标定；不能直接把未转换的机器人base系Z与0.05比较。`h_goal`独立配置，目前没有指定数值。
 
 每臂独立跟踪 `READY → ACTIVE_DESCENT → ACTIVE_CLOSURE → EXIT_PENDING → WAIT_REARM → READY`。首版同一tick最多选中一只arm的actor，保持论文单一active bottleneck语义；同时满足下降进入条件时用明确、可记录的轮换优先级处理，未选中arm按基础策略执行，不伪造其RLattempt。
 
@@ -34,7 +36,7 @@ Thor 系统、容器、Pi0.5 转换和 TensorRT 方案见 [08 · Thor 端侧部�
 - **成功确认：** 只在ACTIVE_CLOSURE阶段判断有效、新鲜、SDK更新时间严格推进的样本是否 `abs(effort_nm)>0.65`，不在尚未关爪的下降段直接判成功。建议以连续时间 `confirm_s=0.1` 过滤单次尖峰，以 `max_feedback_age_s=0.1` 过滤旧反馈；这是当前离线诊断已有默认值的工程候选，未获本轮数值确认。按实际时间累计，不能把三个30Hz采样点误称跨度恰好0.1秒；缺帧/重复快照不继续累计。
 - **成功退出：** 条件确认后进入EXIT_PENDING，停止新的探索残差并请求基础策略依据实际修正后的状态/RTC前缀生成交还计划。不能在未承诺区域把关节offset生硬清零；只有新计划的最终关节连续性检查通过，才能在承诺边界交还。`handback_effective_tick`用新鲜力矩再次检查仍 `>0.65`，才给一次抓取结果分量 `grasp_reward=1`；总奖励另含按合同计算的高度辅助分量。条件已丢失则在预算内返回ACTIVE_CLOSURE。普通模式若需要残差逐渐退场，整段实际退场动作与来源同样记录，不能隐藏成纯基础动作。随后基础策略负责抬升/搬运/放置。
 - **失败退出：** 有效反馈下未成功就重新张开，或达到显式下降抓取预算/已审查的最低高度边界，结束attempt，`grasp_reward=0`，保留实际高度辅助分量。预算/边界属于子任务终止条件，训练不bootstrap；具体timeout/最低高度不按论文的一般3–15秒或任意毫米数拍定。事件终止tick和RTC旧残差实际结束tick分别记录。客户端故障/断联/人接管/反馈失效属于取消，reward=null，不能当抓取失败训练。
-- **重新进入：** 成功/失败后进入WAIT_REARM，需发生明确释放/重新张开且原attempt已交还或重置完成，再回READY。持物后的持续关爪命令不能重复触发新attempt。成功交还后、明确释放前的力矩下降另记post_grasp_loss供整任务评测，不重复改写已终止的局部reward。
+- **重新进入：** 成功/失败后进入WAIT_REARM。自动规则方案要求发生新的实际张开/释放确认、末端回撤到入口上方，且原attempt及旧残差承诺结束，再回READY；当前首版仍以提交的张开目标和高位反馈判断，实测张开确认待客户端改造。持物后的持续关爪命令不能重复触发新attempt。成功交还后、明确释放前的力矩下降另记post_grasp_loss供整任务评测，不重复改写已终止的局部reward。
 
 0.65阈值不会自动增加速度/空夹位置条件。现有离线Detector还含这些判定且只输出contact_candidate，不能直接用其结果替代用户规则；复用的是原始反馈字段、时间检查方法和可选确认参数。
 
@@ -79,6 +81,8 @@ YAM `ProcessPolicyClient`已经转发原始response，但 `PolicyWorker`构造Re
 `context`包括 `run_id, session_id, epoch, request_id, observation_id, observation_policy_tick`，客户端生成、服务端完整回显；不改变已有客户端token。observation_policy_tick与RTC原字段相同，非RTC也记录其观测控制tick。错epoch/request/observation/contract回复不应用；迟到仍按原时间轴处理，不强行从第0行执行。
 
 请求 `arms.left/right` 包括attempt_id、phase、eligible及其来源、height_m/h_goal_m/error_m、pose_frame/pose_ref/pose_sampled_at/pose_valid、force_feedback_ref或原始effort_nm与更新时间/年龄/valid，以及显式elapsed_s、confirmation_s、force_valid/effort_nm。所有数值沿用本机时钟域和本合同m/rad/Nm；误差为height_m-h_goal_m。null表示未设置/无效，不转为0。`scheduler`保存targets（50×14）、valid_mask/committed_mask（50 bool）及本观测时未完成/已承诺目标来源，RTC前缀的数值仍在原rtc对象；还记录是否已无活动attempt与旧残差承诺，供snapshot边界判断。
+
+自动规则改造拟增加独立的selector_state、selector_schema/config_sha、reason_codes与entry_armed诊断；原phase枚举和网络状态维度保持。选择器规则/参数纳入新行为合同与contract_sha，待双方实施和联调；不能用当前握手通过推定自动选择器已验证。
 
 每侧 `candidates`包括 `u`（50×6，有限且在[-1,1]）、`B_rad`（6个非负有限边界，与握手/manifest一致）、`editable_mask`（50个bool）、actor_snapshot_id和exploration_applied。索引只使用握手per_arm，左为0–5、右为7–12；本版本两夹爪和另一臂不在活动mask内。editable_mask前d行必须false，候选始终在所回显context和该次actions时间轴下解释；实际执行仍需客户端eligible/phase/承诺检查。collect探索由Thor在生成u时完成，客户端不再加噪声。
 

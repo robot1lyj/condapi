@@ -92,6 +92,7 @@ requests.h5的group拟命名为 `/requests/e<epoch>_r<request_id>`，JSONL必须
 | schema/run_id/mode/contract_sha | 新增层身份、实际模式和锁定合同 |
 | active_arm/attempt_id/phase/eligible | 当前活动臂/尝试/阶段/接近资格及其来源；持物和非接近下降不自动启用 |
 | arms.left/right | 每侧FK position/orientation及frame/参考点/采样时间/valid、height_m/h_entry_m/h_goal_m/error_m、原力矩快照引用与新鲜度 |
+| 自动选择器诊断（拟新增） | 每侧selector_state、selector_schema/config_sha、eligible/empty_hand/source、reason_codes、entry_armed及table_position_m/frame；run绑定规则配置、抓取区与标定哈希，events记录状态切换/关爪/释放/回撤证据；无活动attempt也保存，详细拟实施规则归05/客户端交接计划 |
 | selection | 生成最终采用目标的epoch/request_id/observation_id/model_index/target_tick，是否继承RTC前缀，request数组/feature引用；继承行继续指向旧request |
 | base_target/candidate_ref | 残差叠加前经客户端原映射后的14D基础目标；候选的request_epoch/request_id/model_index/arm/actor_snapshot_id/behavior_snapshot_id，必须独立记录，不能从submitted或未知夹爪映射倒推 |
 | residual_applied/physical_residual_rad | 是否实际启用及最终物理14D差值；只有该活动臂六关节可非零，shadow实际值全0 |
