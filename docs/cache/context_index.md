@@ -16,6 +16,7 @@
 | 看板 | [11](../11_training_dashboard.md) | 指标源报告 |
 | 记忆维护 | [09](../09_memory_system.md) | `skills/mlops-memory/SKILL.md` 对应参考 |
 | 历史原因/旧研究 | [07](../07_change_log.md)、[06](../06_openarm_research_plan.md) | 按关键词定位，不整篇预载 |
+| BEHAVIOR 1K 与 π0.5 源码学习 | [固定版本与代码对照](../reference/behavior1k_pi05_code_study.md) | 本地 `downloads/behavior-1k-study/` 源码、SHA256 与差异；不作为 YAM 运行合同 |
 
 ## 操作入口
 
