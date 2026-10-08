@@ -68,6 +68,8 @@ def test_resume_history_is_spliced_before_current_run(tmp_path):
         ["--remote", "-oProxyCommand=evil", "--remote-metrics", "/a"],
         ["--remote", "yam-server", "--remote-metrics", "/a;touch /b"],
         ["--remote", "yam-server"],
+        ["--remote-status-job-name", "pi05-rtc-50h"],
+        ["--remote", "yam-server", "--remote-status-job-name", "bad;name", "--remote-status-node", "gpu001"],
         ["--history-remote-metrics", "/a"],
         ["--remote", "yam-server", "--remote-metrics", "/a", "--history-remote-metrics", "/a;touch /b"],
     ],
@@ -145,6 +147,70 @@ def test_successful_mirror_is_atomic(tmp_path, monkeypatch):
     assert app.snapshot()["rows"][0]["step"] == 2
     assert app.sync["source_modified_at"] == 1788842923
     assert not Path(str(path.with_suffix(".pending"))).exists()
+
+
+def test_slurm_status_parses_job_and_node_fields():
+    status = dashboard.parse_slurm_status(
+        b"__JOBS__\n2266|pi05-rtc-50h|RUNNING|00:06:30|gpu001|None\n"
+        b"__NODE__\nState=MIXED|Gres=gpu:rtx:4|CPULoad=17.21|FreeMem=466181\n",
+        "gpu001",
+    )
+    assert status["active_job"]["job_id"] == "2266"
+    assert status["active_job"]["state"] == "RUNNING"
+    assert status["node"] == {
+        "name": "gpu001",
+        "state": "MIXED",
+        "gres": "gpu:rtx:4",
+        "cpu_load": "17.21",
+        "free_mem_mib": "466181",
+    }
+    idle = dashboard.parse_slurm_status(
+        b"__JOBS__\n__NODE__\nState=IDLE|Gres=gpu:rtx:4|CPULoad=0.00|FreeMem=500000\n",
+        "gpu001",
+    )
+    assert idle["jobs"] == []
+    assert idle["active_job"] is None
+
+
+def test_slurm_status_poll_is_cached_in_metrics_api(tmp_path, monkeypatch):
+    path = tmp_path / "metrics.jsonl"
+    path.write_text('{"step":169301,"loss":0.1}\n')
+    app = dashboard.Dashboard(
+        dashboard.parse_args(
+            [
+                "--metrics",
+                str(path),
+                "--remote",
+                "yam-server",
+                "--remote-metrics",
+                "/remote/metrics.jsonl",
+                "--remote-status-job-name",
+                "pi05-rtc-50h",
+                "--remote-status-node",
+                "gpu001",
+            ]
+        )
+    )
+    stop = threading.Event()
+
+    def success(*_args, **_kwargs):
+        stop.set()
+        return subprocess.CompletedProcess(
+            [],
+            0,
+            stdout=(
+                b"__JOBS__\n2266|pi05-rtc-50h|RUNNING|00:06:30|gpu001|None\n"
+                b"__NODE__\nState=MIXED|Gres=gpu:rtx:4|CPULoad=17.21|FreeMem=466181\n"
+            ),
+        )
+
+    monkeypatch.setattr(subprocess, "run", success)
+    app.poll_remote_status(stop)
+    snapshot = app.snapshot()
+    assert snapshot["rows"][-1]["step"] == 169301
+    assert snapshot["slurm"]["active_job"]["job_id"] == "2266"
+    assert snapshot["slurm"]["node"]["state"] == "MIXED"
+    assert snapshot["slurm"]["error"] is None
 
 
 def test_formats_and_custom_metrics(tmp_path):

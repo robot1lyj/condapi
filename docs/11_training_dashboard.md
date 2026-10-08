@@ -13,7 +13,7 @@ python3 scripts/training_dashboard.py --metrics /absolute/run/metrics.jsonl --mo
 
 打开 `http://127.0.0.1:8765`。顶部切换运行；自动显示已有数值指标，默认至多添加八个辅助图，其余通过“添加指标”选择，× 可移除。训练损失图固定保留；没有 loss 的模型可通过自定义指标图观察。未知 batch、目标步数、精度、GPU 数留空，绝不套用 Pi 配置。
 
-当前 Pi 服务模板 `scripts/training_dashboard.service` 跟踪 50h RTC run `lego_pi05_rtc_base_50h_20260921`，从 `yam-server` 镜像远端 metrics 至 `artifacts/training_dashboard/pi05_rtc_50h_20260921/metrics.jsonl`，每10秒同步。服务参数为 batch32、首段累计目标170k、总累计目标338k、每1k保存；run恢复时由远端 `metrics.jsonl` 作为当前数据源。`--history-remote-metrics` 仍可用于跨 run 拼接父指标，但本次同 run resume 不应重复合并父run。2026-09-28本机用户服务已处于 active。
+当前 Pi 服务模板 `scripts/training_dashboard.service` 跟踪 50h RTC run `lego_pi05_rtc_base_50h_20260921`，从 `yam-server` 镜像远端 metrics 至 `artifacts/training_dashboard/pi05_rtc_50h_20260921/metrics.jsonl`，每10秒同步。另每30秒只读查询该 run 的 Slurm 作业和 `gpu001` 节点状态；`/api/metrics` 同时返回分开的 `sync` 与 `slurm` 字段。页面每10秒刷新并同时显示 job 状态和 metrics 源更新时间。服务参数为 batch32、首段累计目标170k、总累计目标338k、每1k保存；run恢复时由远端 `metrics.jsonl` 作为当前数据源。`--history-remote-metrics` 仍可用于跨 run 拼接父指标，但本次同 run resume 不应重复合并父run。服务只查询状态，不提交或控制训练。
 
 重启初始化期间远端 metrics 可能暂时保留上次运行的尾部 step；看板同步成功只证明 SSH 文件镜像成功，不证明当前作业已写新指标。展示当前进度前同时复核远端 `squeue`、metrics 源文件 mtime 与最后step；如源mtime落后于当前作业启动时刻，应标为恢复初始化/旧尾值。2026-09-28 10:24 +08 的 2183 已在gpu001恢复至新step69021；本机看板API当次同步到69011，约落后一个10秒轮询间隔。
 
@@ -98,6 +98,6 @@ write_metrics("/absolute/run/metrics.jsonl", 10, {"loss": 0.123456789})
 
 同一步训练/评估事件合并；步号回退视为续训回滚，丢弃旧分支的未来记录。因此异步延迟事件应先按训练步序整理，不要把多次运行混写一文件。单文件最多 32 MiB、显示最近 20,000 行；超限应归档或分段，不能悄悄认定读取成功。
 
-看板会按指标源的最后更新时间做新鲜度检查。源文件超过 600 秒（10 分钟）没有更新时，顶部状态变为“训练异常：指标超过10分钟未同步”，并显示检查训练进程、远端日志和 SSH 镜像的告警；同步请求本身失败时仍显示“远端同步异常”。尚未产生第一条指标时保持“等待日志”，不把启动空窗误报为训练异常。
+看板会按指标源的最后更新时间做新鲜度检查，并独立显示只读 Slurm 状态。源文件超过 600 秒（10 分钟）没有更新时，页面显示 metrics 滞后；若 Slurm 作业仍为 RUNNING，提示检查当前作业日志，避免把上一轮尾部 step 当成新进度，也不单凭旧 metrics 宣判作业异常。无活动作业时也明确显示；节点不可用或查询失败会单独告警。metrics 同步请求失败时显示“远端指标同步异常”。尚未产生第一条指标时保持“等待日志”，不把启动空窗误报为训练异常。
 
 HTTP 只提供固定页面、`/api/runs` 和已配置 ID 的 `/api/metrics?run=ID`，不能请求任意路径。默认仅监听 localhost。单源保留 SSH 原子镜像、失败保留缓存；多源使用独立本地缓存，不自动向多个服务器发起连接。

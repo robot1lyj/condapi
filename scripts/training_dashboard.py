@@ -15,6 +15,7 @@ import json
 import math
 from pathlib import Path
 import re
+import shlex
 import subprocess
 import threading
 import time
@@ -164,11 +165,62 @@ def combine_history(current, history):
     }
 
 
+def parse_slurm_status(payload, node_name):
+    """Parse the bounded, delimiter-based output from the read-only Slurm poll."""
+    text = payload.decode("utf-8", errors="strict")
+    if "__JOBS__\n" not in text or "\n__NODE__\n" not in text:
+        raise ValueError("Slurm status response is incomplete")
+    jobs_text, node_text = text.split("__JOBS__\n", 1)[1].split("\n__NODE__\n", 1)
+    jobs = []
+    for line in jobs_text.splitlines():
+        fields = line.split("|", 5)
+        if len(fields) != 6:
+            raise ValueError("Slurm job row is malformed")
+        job_id, name, state, elapsed, nodes, reason = fields
+        jobs.append(
+            {
+                "job_id": job_id,
+                "name": name,
+                "state": state,
+                "elapsed": elapsed,
+                "nodes": nodes,
+                "reason": reason,
+            }
+        )
+    node_fields = node_text.strip().split("|")
+    if len(node_fields) != 4 or not node_fields[0]:
+        raise ValueError("Slurm node row is malformed")
+    state, gres, cpu_load, free_mem = node_fields
+    active_states = {"RUNNING", "PENDING", "CONFIGURING", "COMPLETING", "SUSPENDED"}
+    active_job = next((job for job in jobs if job["state"] == "RUNNING"), None)
+    if active_job is None:
+        active_job = next((job for job in jobs if job["state"] in active_states), None)
+    return {
+        "jobs": jobs,
+        "active_job": active_job,
+        "node": {
+            "name": node_name,
+            "state": state.removeprefix("State="),
+            "gres": gres.removeprefix("Gres="),
+            "cpu_load": cpu_load.removeprefix("CPULoad="),
+            "free_mem_mib": free_mem.removeprefix("FreeMem="),
+        },
+    }
+
+
 class Dashboard:
     def __init__(self, args):
         self.args = args
         self.lock = threading.Lock()
         self.sync = {"enabled": bool(args.remote), "last_success": None, "error": None}
+        self.slurm_status = {
+            "enabled": bool(args.remote_status_job_name),
+            "last_success": None,
+            "error": None,
+            "jobs": [],
+            "active_job": None,
+            "node": None,
+        }
         self.history_remote_metrics = []
         if args.runs_config:
             value = json.loads(args.runs_config.read_text())
@@ -257,6 +309,7 @@ class Dashboard:
         run = self.runs[run_id or next(iter(self.runs))]
         with self.lock:
             sync = dict(self.sync)
+            slurm = dict(self.slurm_status)
         current = read_metrics(
             run["metrics"],
             run.get("batch_size"),
@@ -276,6 +329,7 @@ class Dashboard:
             **combine_history(current, history),
             "server_time": time.time(),
             "sync": sync,
+            "slurm": slurm,
             "run": {
                 **{
                     key: value
@@ -289,6 +343,49 @@ class Dashboard:
                 "metric_labels": run.get("metric_labels", {}),
             },
         }
+
+    def poll_remote_status(self, stop):
+        """Cache read-only Slurm job/node state independently from the metrics mirror."""
+        node = self.args.remote_status_node
+        job_name = shlex.quote(self.args.remote_status_job_name)
+        node_arg = shlex.quote(node)
+        command = (
+            "set -e; printf '__JOBS__\\n'; "
+            "squeue --noheader --user \"$(id -un)\" --name "
+            + job_name
+            + " --format '%i|%j|%T|%M|%N|%R'; "
+            "printf '__NODE__\\n'; "
+            "scontrol show node "
+            + node_arg
+            + " -o | awk '{for(i=1;i<=NF;i++){if($i~/^State=/)state=$i; "
+            "if($i~/^Gres=/)gres=$i; if($i~/^CPULoad=/)load=$i; "
+            "if($i~/^FreeMem=/)mem=$i} print state \"|\" gres \"|\" load \"|\" mem}'"
+        )
+        while not stop.is_set():
+            try:
+                result = subprocess.run(
+                    [
+                        "ssh",
+                        "-oBatchMode=yes",
+                        "-oConnectTimeout=8",
+                        self.args.remote,
+                        command,
+                    ],
+                    capture_output=True,
+                    timeout=20,
+                    check=True,
+                )
+                parsed = parse_slurm_status(result.stdout, node)
+                with self.lock:
+                    self.slurm_status.update(
+                        parsed,
+                        last_success=time.time(),
+                        error=None,
+                    )
+            except (OSError, subprocess.SubprocessError, UnicodeDecodeError, ValueError) as exc:
+                with self.lock:
+                    self.slurm_status["error"] = f"{type(exc).__name__}: Slurm 状态查询失败"
+            stop.wait(self.args.status_interval)
 
     def mirror(self, stop):
         """Atomic local replacement. SSH failure retains the last successful snapshot."""
@@ -402,6 +499,9 @@ def parse_args(argv=None):
         help="Parent-run JSONL files on the same SSH host; repeated options are prepended to the current run",
     )
     parser.add_argument("--interval", type=int, default=10)
+    parser.add_argument("--remote-status-job-name", help="Read-only Slurm job name to monitor over the configured SSH alias")
+    parser.add_argument("--remote-status-node", help="Read-only Slurm node name for the configured job")
+    parser.add_argument("--status-interval", type=int, default=30)
     args = parser.parse_args(argv)
     if bool(args.metrics) == bool(args.runs_config):
         parser.error("choose exactly one of --metrics and --runs-config")
@@ -411,11 +511,20 @@ def parse_args(argv=None):
         or args.metadata
         or args.history_metrics
         or args.history_remote_metrics
+        or args.remote_status_job_name
+        or args.remote_status_node
     ):
         parser.error("multi-run sources are local; mirror each remote source separately")
     if any(
         value is not None and value <= 0
-        for value in (args.batch_size, args.stage_steps, args.total_steps, args.save_interval, args.interval)
+        for value in (
+            args.batch_size,
+            args.stage_steps,
+            args.total_steps,
+            args.save_interval,
+            args.interval,
+            args.status_interval,
+        )
     ):
         parser.error("counts and interval must be positive")
     if args.stage_steps and args.total_steps and args.stage_steps > args.total_steps:
@@ -427,6 +536,16 @@ def parse_args(argv=None):
             parser.error("remote-metrics must be an absolute path without shell metacharacters")
         if any(not re.fullmatch(r"/[A-Za-z0-9_./-]+", path) for path in args.history_remote_metrics or []):
             parser.error("history remote metrics must be absolute paths without shell metacharacters")
+    status_requested = args.remote_status_job_name is not None or args.remote_status_node is not None
+    if status_requested:
+        if not args.remote or not args.remote_status_job_name or not args.remote_status_node:
+            parser.error("Slurm status requires --remote, --remote-status-job-name, and --remote-status-node")
+        if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]{0,63}", args.remote_status_job_name):
+            parser.error("invalid Slurm status job name")
+        if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]{0,63}", args.remote_status_node):
+            parser.error("invalid Slurm status node")
+    elif args.status_interval != 30:
+        parser.error("--status-interval requires Slurm status monitoring")
     if (args.history_metrics or args.history_remote_metrics) and not args.metrics:
         parser.error("history metrics require a single --metrics source")
     return args
@@ -438,6 +557,8 @@ def main():
     stop = threading.Event()
     if args.remote:
         threading.Thread(target=dashboard.mirror, args=(stop,), daemon=True).start()
+    if args.remote_status_job_name:
+        threading.Thread(target=dashboard.poll_remote_status, args=(stop,), daemon=True).start()
     server = make_server(dashboard, args.port)
     print(f"Training dashboard: http://127.0.0.1:{server.server_port}", flush=True)
     try:
