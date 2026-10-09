@@ -14,9 +14,9 @@ Add `capability` to `kind: procedure` when a tool or workflow can be reused:
 - `acceptance`: the criterion selected before validation; preserve the scope of the actual result.
 - `limitations`: nonempty list of untested cases or known constraints; state the tested scope even if no other limits are known.
 
-Put measured validation reports in the envelope's `evidence`; fingerprint the entrypoint and every config path in `depends_on` before marking the capability verified. Include additional behavior-changing files, validator code and fixtures as dependencies where relevant. Keep source code and configurations at their existing owner. A path or successful process exit alone does not prove the capability works.
+Put measured validation reports in the envelope's `evidence`; verify the entrypoint and relevant configuration against the actual test before recording its scoped result. Hashes and `depends_on` are optional in basic mode. For strict exact-version reuse, fingerprint the entrypoint and config paths, plus other behavior-changing dependencies needed by that decision. Keep source code and configurations at their existing owner. A path or successful process exit alone does not prove the capability works.
 
-Promote only the exact tested version/scope. If an artifact changes, revalidate that capability; do not silently refresh the hash to regain admission. First search for an existing applicable tool before implementing a duplicate. Retrieval exposes an invocation recipe but never authorizes a remote run, training job or deployment.
+Record the tested version/scope. A known relevant behavior change calls for a targeted check; unrelated edits do not require full revalidation. In strict mode, do not silently refresh a hash to regain admission. First search for an existing applicable tool before implementing a duplicate. Retrieval exposes an invocation recipe but never authorizes a remote run, training job or deployment.
 
 ## Failed or inconclusive attempts
 
@@ -55,8 +55,8 @@ Optionally add `retrieval` with:
 - `terms`: nonempty list of short problem names, aliases and action keywords, such as `推理延迟`, `latency`, `频率检查`.
 - `related`: optional list of `{relation, source}`. Relations are `check`, `repair`, `attempt` or `prerequisite`; `source` is an existing project-relative memory path with an optional exact Markdown heading.
 
-The helper verifies related files exist, but a link does not validate its target claim or heading. Inspect the target through normal source/evidence checks when needed. Do not recursively expand every relation. Keep primary project navigation in the existing context index; these fields are routing metadata on the record, not a duplicate catalog of facts.
+Basic mode reports missing related files as source warnings; strict mode requires them to exist. A link does not validate its target claim or heading. Inspect the target through normal source/evidence checks when needed. Do not recursively expand every relation. Keep primary project navigation in the existing context index; these fields are routing metadata on the record, not a duplicate catalog of facts.
 
-Use `search` with short keywords and the known project/platform/contract scope. It ranks lexical overlap, returns a bounded set of claim/source summaries and exclusion counts, and then `pack` loads selected records. Search does not emit commands, raw evidence, or full relation trees. See [usage.md](usage.md) for CLI examples and review mode.
+Use `search` with short keywords and the known project/platform/contract scope. It ranks lexical overlap and returns bounded claim/source summaries and exclusion counts; load useful candidates with `pack` or a normal source read. Let the model compare meaning, contradictions and missing conditions; the score is not confidence. If keywords miss relevant records, try a concrete alias or the existing Markdown owner before building a new search system. Search does not emit commands, raw evidence, or full relation trees. See [usage.md](usage.md) for CLI examples and review mode.
 
-After a repair, add only the useful artifact/attempt references to the existing problem route. When the change affects reusable behavior, retain a replay case following [evaluation.md](evaluation.md). A routing improvement is useful only if it helps recover the right action without losing required conditions.
+After a repair, add only the useful artifact/attempt references to the existing problem route. For a material change to reusable decisions, retain a replay case following [evaluation.md](evaluation.md). A routing improvement is useful only if it helps recover the right action without losing required conditions.

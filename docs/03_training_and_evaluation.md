@@ -605,7 +605,7 @@ batch 4 × 30000 steps 约采样 120000 个训练窗口；manifest 声明数据�
 
 每个实验至少记录 git commit、config、repo id、数据版本、split、norm 路径、base checkpoint、LoRA 设置、batch、workers、step 和 seed。普通 SFT、不同 LoRA 设置和后续评估必须使用独立实验名，避免结果无法归因。
 
-面向跨会话记忆的产物身份、指纹和本地 run manifest 合同见 [09 · 记忆系统](09_memory_system.md)。该合同用于记录与验收；训练入口尚未自动生成其全部字段，不得把文档规范写成已经实现的采集器。
+面向跨会话记忆的来源记录与可选 run manifest 方法见 [09 · 记忆系统](09_memory_system.md)。普通记忆可用路径、run ID 和版本；精确产物指纹与训练验收仍遵循本页实际合同。训练入口尚未自动采集全部来源字段，不得把文档方法写成已经实现的采集器。
 
 ## Checkpoint gate
 

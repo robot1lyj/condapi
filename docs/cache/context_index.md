@@ -9,7 +9,7 @@
 | 交接/架构 | 交接选 [00](../00_handoff_index.md)；架构选 [01](../01_system_architecture.md#多模型接入层) | 缺当前能力状态才读 [10](../10_vla_platform.md#当前状态) |
 | 环境、服务器、checkpoint 下载 | [02](../02_installation_and_environment.md) | 对应 `docs/reports/environments/` 证据 |
 | 训练、评估、恢复 | [03](../03_training_and_evaluation.md) | 对应 `docs/reports/training/` 运行报告 |
-| PARTS左右抓取残差RL | 客户端先读 [实施计划](../reference/parts_client_handoff.md)；学习选 [03](../03_training_and_evaluation.md#parts-左右抓取残差学习方案2026-09-30)；协议选 [05](../05_inference_and_rollout.md#parts-左右抓取的服务端与客户端合同2026-09-30方案) | 回放选 [04](../04_data_contracts.md#parts-抓取-rl-回放数据合同2026-09-30方案) |
+| PARTS/RLT 抓取残差学习 | 学习选 [PARTS](../03_training_and_evaluation.md#parts-左右抓取残差学习方案2026-09-30) / [RLT](../03_training_and_evaluation.md#rlt-服务端实验接口2026-09-30)；协议选 [05](../05_inference_and_rollout.md#parts-左右抓取的服务端与客户端合同2026-09-30方案) | [回放](../04_data_contracts.md#parts-抓取-rl-回放数据合同2026-09-30方案)、[客户端计划](../reference/parts_client_handoff.md)；发送指令前用户审核 |
 | YAM 数据、单位、分割、norm | [04](../04_data_contracts.md) | [10 模块化配置](../10_vla_platform.md#模块化配置后端-v02) |
 | Thor 推理协议/部署 | 协议选 [05](../05_inference_and_rollout.md)；系统/转换选 [08](../08_thor_edge_deployment.md) | 当前 checkpoint 报告、`docs/reference/thor/` 阶段手册 |
 | 多模型、XR-1、Conda 接入 | [10](../10_vla_platform.md) | [XR-1 环境证据](../reports/environments/xr1-20260924/README.md)、[MolmoAct2 参考](../reference/molmoact2_integration.md) |

@@ -7,7 +7,7 @@ Use when setting entrypoint budgets, consolidating memory or moving navigation. 
 | Layer | Content | Load condition |
 |---|---|---|
 | Always-loaded rules / kernel | Enduring user constraints, high-frequency product boundaries and short owner routes | Applicable project/task startup; avoid rereading injected content |
-| Working checkpoint | Current objective, latest scoped result, active blockers, next action and source links | Resuming that work; replace completed progress instead of stacking updates |
+| Working checkpoint | Current objective, latest user constraints, completed work, scoped result, unknowns, next action and source links | Resuming that work; replace completed progress instead of stacking updates |
 | Task references | Current architecture, device/environment facts, contracts, operation and recovery procedures | A selected task or a specific missing fact |
 | Cold evidence / history | Measured identities, full logs, performance tables, failed attempts, previous designs | Keyword/problem search, a changed assumption or a verification need |
 
@@ -17,7 +17,7 @@ Canonical truth and retrieval temperature are independent: a rarely used hardwar
 
 Store one budget policy at the project memory owner; kernel links to it. Count UTF-8 bytes of complete files, not lines, estimated tokens or only prose. Inventory files the host always injects as well as files the workflow reads by default; a large AGENTS/index can defeat a small kernel. Distinguish an injected default path from optional routes, and remove duplicate startup instructions in secondary agent files when they contradict the project owner.
 
-Use explicit project limits first. Starting defaults for a project without limits are 3 KiB for kernel and 3 KiB for its current checkpoint. Choose a bounded rules/index allowance appropriate to the project, record the combined default path ceiling, and keep optional references outside it. Do not apply a hot-file cap to full evidence, retrieved technical sections, total disk storage or cumulative reads. Limit changes are visible decisions at the owner with a reason; never raise them just because another append failed to fit.
+Use explicit project limits first. Suggested starting targets for a project without limits are 3 KiB for kernel and 3 KiB for its current checkpoint; these are tuning targets, not a reason to block work or truncate necessary conditions. Choose a bounded rules/index allowance appropriate to the project, record the combined default path ceiling, and keep optional references outside it. Do not apply a hot-file cap to full evidence, retrieved technical sections, total disk storage or cumulative reads. Record changes to an explicit project limit at the owner with a reason; tune advisory targets when actual recovery needs justify it.
 
 ## Write-back and demotion
 
