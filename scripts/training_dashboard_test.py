@@ -79,13 +79,14 @@ def test_bad_arguments_rejected(extra):
         dashboard.parse_args(["--metrics", "/tmp/test-dashboard.jsonl", *extra])
 
 
-def test_size_and_history_limits(tmp_path, monkeypatch):
+def test_all_history_rows_are_kept_but_byte_guard_remains(tmp_path, monkeypatch):
     path = tmp_path / "metrics.jsonl"
-    path.write_text('{"step":0}\n{"step":1}\n{"step":2}\n')
-    monkeypatch.setattr(dashboard, "MAX_ROWS", 2)
+    path.write_text("".join(json.dumps({"step": step, "loss": 1.0}) + "\n" for step in range(20_005)))
     result = dashboard.read_metrics(path, 64)
-    assert result["trimmed"]
-    assert len(result["rows"]) == 2
+    assert not result["trimmed"]
+    assert len(result["rows"]) == 20_005
+    assert result["rows"][0]["step"] == 0
+    assert result["rows"][-1]["step"] == 20_004
     monkeypatch.setattr(dashboard, "MAX_BYTES", 4)
     with pytest.raises(ValueError, match="32 MiB"):
         dashboard.read_metrics(path, 64)

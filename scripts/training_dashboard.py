@@ -5,7 +5,6 @@ Never starts training, edits checkpoints, or exposes the repository as a file se
 """
 
 import argparse
-from collections import deque
 import contextlib
 import csv
 from http.server import BaseHTTPRequestHandler
@@ -24,7 +23,6 @@ from urllib.parse import urlsplit
 
 HTML = Path(__file__).with_name("training_dashboard.html")
 MAX_BYTES = 32 * 1024 * 1024
-MAX_ROWS = 20_000
 
 
 def number(value):
@@ -112,8 +110,7 @@ def read_metrics(path, batch_size=None, *, source_format="auto", field_map=None)
                 sources.append(json.loads(line))
             except (ValueError, UnicodeDecodeError):
                 invalid += 1
-    rows = deque(maxlen=MAX_ROWS)
-    count = 0
+    rows = []
     for source in sources:
         if not isinstance(source, dict):
             invalid += 1
@@ -136,12 +133,12 @@ def read_metrics(path, batch_size=None, *, source_format="auto", field_map=None)
             while rows and rows[-1]["step"] >= step:
                 rows.pop()
             rows.append(row)
-        count += 1
     return {
-        "rows": list(rows),
+        "rows": rows,
         "modified_at": path.stat().st_mtime,
         "invalid_lines": invalid,
-        "trimmed": count > MAX_ROWS,
+        # Kept for API compatibility; all valid rows are now retained.
+        "trimmed": False,
     }
 
 
@@ -159,9 +156,9 @@ def combine_history(current, history):
     rows = [by_step[step] for step in sorted(by_step)]
     return {
         **current,
-        "rows": rows[-MAX_ROWS:],
+        "rows": rows,
         "invalid_lines": current["invalid_lines"] + sum(source["invalid_lines"] for source in history),
-        "trimmed": current["trimmed"] or any(source["trimmed"] for source in history) or len(rows) > MAX_ROWS,
+        "trimmed": False,
     }
 
 
