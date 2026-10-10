@@ -248,7 +248,15 @@ python adapters/parts/train.py --recipe /data/parts/recipe_v2.json \
 
 **服务器与启动：** Pi50h实际配方是global32、保存1000/保留5000、warmup1000、LR1e-5→1e-6、累计338000约两轮；XR-1只借鉴保存规则。Pi旧Slurm2287的trainer已为zombie且日志停止、GPU0利用率，释放的只是失效分配，保留所有Pi实验产物。XR-1正式入口为 `scripts/train_xr1_lego_50h.sbatch`，独立Gitea固定提交检出 `/home/wuyan/lyj/xiaomi-robotics-1/source/xr1-50h-formal-20261010`；不使用旧9/24快照启动。CUDA SDK和独立Conda设置见[02](02_installation_and_environment.md#xr-1-服务器环境2026-09-24)。控制日志根目录 `/home/wuyan/lyj/xiaomi-robotics-1/runs/control/lego-50h-20261010`。
 
-正式Slurm2307已提交，固定代码 `038a4bcfccc44b753daeaa70ae5ab0884cb6d1cb`，run为 `/home/wuyan/lyj/xiaomi-robotics-1/runs/lego-50h-eef-v1-20261010`；依赖试跑2304完成保存/恢复/旧点清理与CPU完整数值审计2305成功，之后入口再次核对正式数据与配方。当前尚未观测正式optimizer step；Slurm分配状态不能替代训练进度。日志为控制目录 `train-2307.log`。
+正式Slurm2307已提交，固定代码 `038a4bcfccc44b753daeaa70ae5ab0884cb6d1cb`，run为 `/home/wuyan/lyj/xiaomi-robotics-1/runs/lego-50h-eef-v1-20261010`；试跑2304保存/恢复/旧点清理成功，CPU完整审计2305对保存后的模型及四rank优化器状态均记录0个非有限值；2026-10-10 19:20+08正式训练已完成step1和2，实际global32/local8，loss分别6.1442/7.3097，四rank初始梯度检查均有限；step2间隔8.55秒（早期值，不作完整工期承诺），峰值reserved约18.45GiB。首个正式恢复点要到step1000才产生，试跑检查点不作为正式恢复点。日志为控制目录 `train-2307.log`。
+
+监控读取 `squeue -j 2307` 和控制日志中的 `XR1_OPTIMIZER_STEP`；持续指标在run下 `native/project_yam-xr1/lego-50h-eef-v1/metrics.jsonl`，checkpoint和 `last.ckpt` 在同目录。试跑67.7GB的单次保存曾耗时数分钟；不能只因保存期间GPU空闲就判作业失效，应结合日志、分片大小增长和完整回执判断。Slurm时间上限6天，届时由监控方核对原作业已结束、last回执完整、剩余盘空间和可用GPU后续训；不得并行重开同run。续训命令保持代码和配方不变：
+
+```bash
+export XR1_CODE_DIR=/home/wuyan/lyj/xiaomi-robotics-1/source/xr1-50h-formal-20261010
+export XR1_CODE_REVISION=038a4bcfccc44b753daeaa70ae5ab0884cb6d1cb
+sbatch "$XR1_CODE_DIR/scripts/train_xr1_lego_50h.sbatch" resume
+```
 
 ## 2026-09-22 · 通用 DAgger 工作流技能
 
