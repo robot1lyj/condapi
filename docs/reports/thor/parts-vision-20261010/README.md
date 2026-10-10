@@ -76,3 +76,11 @@ R3 构建包 `/home/wuyan-lyj/condapi-data/rl/parts-vision-env-20261010/install-
 当前 `reward_generation_ready=false`。真实视觉评估需包含桌面、夹爪内持物、空手、容器内积木、遮挡及掉落；还需验证时序/运动学条件。输出候选数据供用户审核后才可进入学习，不能把 SAM3 可加载或几张叠图当成整套奖励已验证。客户端改造需求先展示用户审核，不自动发任务；当前无生产接入、无训练。
 
 后续14集完整批次已完成3846张图的Thor推理及273个候选审核视频：建议成功2、失败0、不确定271，**自动奖励尚未通过**。初版仅腕部单条夹爪提示，用户反馈后新增外观词、裁剪/顶视、SAM3框/点提示小批比较；环境完成不代表检测语义或奖励完成。当前数据、媒体、运行摘要和限制归[逐抓取报告](../../rl/parts-grasp-review14-20261010/README.md)，不以本页早期5帧定性观察代替后续批次结果。
+
+## DINOv3冻结特征诊断：复用环境，无跟踪
+
+按用户授权测试DINOv3区分指间积木与背景。官方HF ViT-S/16权重访问返回403，随后使用[timm维护者公开移植版](https://huggingface.co/timm/vit_small_patch16_dinov3.lvd1689m)，保留DINOv3许可证。revision为 `3bf4720a82ec2066db88137180ff1f83a675cef0`，safetensors为86,362,376 bytes，SHA256 `2a1ec16ae28ffa07bc0ead0241ee7df9fc26451fe6f9f839b7b3afa0a906b040`。本地新目录 `parts-vision-env-20261010/models/timm-dinov3-vits16-3bf4720/` 下载、实算校验，再传Thor `/home/wuyan-lyj/thor/parts-vision/models/timm-dinov3-vits16-3bf4720/`；Meta官方转换权重与timm权重SHA不同，未声称逐位等价。timm模型卡说明移除了全零QKV bias、RoPE周期生成方式存在数值差异；这是诊断模型选择，不改Pi精度路线。
+
+现有镜像已含timm1.0.27/safetensors0.7.0，直接复用，无新安装。`parts-dinov3-sam3-eval20-20261010`完成新20图夹指分割；`parts-dinov3-features40-20261010`完成旧参考20+新例20的冻结特征前向，均退出0、网络关闭、无控制设备映射。DINO参数FP32、BF16 autocast，严格加载safetensors，无backward/optimizer。权重读取后40图处理约1.58秒，CUDA峰值allocated127,606,272 bytes；首批8图前向0.227秒，其余每批约0.011秒。这里只是离线批处理观察，不是单图在线延迟、进程总显存或与Pi并发验收。
+
+实际运行脚本SHA及版本归[dinov3-feature-run.json](../../rl/parts-grasp-review14-20261010/dinov3-feature-run.json)，本地/Thor外部数据目录的 `run-scripts/probe_dinov3-executed.py` 保留执行原件。Git入口仅补充相同调用处的lint注释，不据此覆盖原执行身份。权重来源归[dinov3-weight-source.json](../../rl/parts-grasp-review14-20261010/dinov3-weight-source.json)。新20例的对照结果、分割异常和模糊样本详见逐抓取报告；所有奖励仍null，不启用跟踪或RL。

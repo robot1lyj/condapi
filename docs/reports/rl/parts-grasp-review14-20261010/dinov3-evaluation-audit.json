@@ -1,0 +1,150 @@
+{
+  "schema": "parts_dinov3_snapshot_evaluation_audit_v1",
+  "reviewer": "assistant_visual_inspection",
+  "recorded_before_dinov3_inference": true,
+  "recorded_at_utc": "2026-10-10T13:23:10.870936+00:00",
+  "scope": "Selected current frame, not attempt outcome; original wrist and approximately +/-0.2s static video frames.",
+  "records": [
+    {
+      "candidate_id": "E05-L001",
+      "row": 264,
+      "label": "held_at_snapshot",
+      "reason": "积木在两指之间清晰可见，邻近回放支持当前持物。",
+      "approved_reward": null
+    },
+    {
+      "candidate_id": "E05-L003",
+      "row": 692,
+      "label": "empty_at_snapshot",
+      "reason": "当前两指之间无被夹住的物体，背景积木或蓝框不算持物。",
+      "approved_reward": null
+    },
+    {
+      "candidate_id": "E05-R001",
+      "row": 109,
+      "label": "empty_at_snapshot",
+      "reason": "当前两指之间无被夹住的物体，背景积木或蓝框不算持物。",
+      "approved_reward": null
+    },
+    {
+      "candidate_id": "E05-R002",
+      "row": 196,
+      "label": "held_at_snapshot",
+      "reason": "积木在两指之间清晰可见，邻近回放支持当前持物。",
+      "approved_reward": null
+    },
+    {
+      "candidate_id": "E06-L002",
+      "row": 595,
+      "label": "empty_at_snapshot",
+      "reason": "当前两指之间无被夹住的物体，背景积木或蓝框不算持物。",
+      "approved_reward": null
+    },
+    {
+      "candidate_id": "E06-L003",
+      "row": 800,
+      "label": "held_at_snapshot",
+      "reason": "积木在两指之间清晰可见，邻近回放支持当前持物。",
+      "approved_reward": null
+    },
+    {
+      "candidate_id": "E06-R002",
+      "row": 512,
+      "label": "empty_at_snapshot",
+      "reason": "当前两指之间无被夹住的物体，背景积木或蓝框不算持物。",
+      "approved_reward": null
+    },
+    {
+      "candidate_id": "E06-R003",
+      "row": 697,
+      "label": "held_at_snapshot",
+      "reason": "积木在两指之间清晰可见，邻近回放支持当前持物。",
+      "approved_reward": null
+    },
+    {
+      "candidate_id": "E08-L001",
+      "row": 883,
+      "label": "held_at_snapshot",
+      "reason": "积木在两指之间清晰可见，邻近回放支持当前持物。",
+      "approved_reward": null
+    },
+    {
+      "candidate_id": "E08-L002",
+      "row": 1074,
+      "label": "held_at_snapshot",
+      "reason": "积木在两指之间清晰可见，邻近回放支持当前持物。",
+      "approved_reward": null
+    },
+    {
+      "candidate_id": "E08-R002",
+      "row": 518,
+      "label": "empty_at_snapshot",
+      "reason": "当前两指之间无被夹住的物体，背景积木或蓝框不算持物。",
+      "approved_reward": null
+    },
+    {
+      "candidate_id": "E08-R003",
+      "row": 733,
+      "label": "empty_at_snapshot",
+      "reason": "当前两指之间无被夹住的物体，背景积木或蓝框不算持物。",
+      "approved_reward": null
+    },
+    {
+      "candidate_id": "E09-L001",
+      "row": 227,
+      "label": "held_at_snapshot",
+      "reason": "积木在两指之间清晰可见，邻近回放支持当前持物。",
+      "approved_reward": null
+    },
+    {
+      "candidate_id": "E09-L003",
+      "row": 870,
+      "label": "held_at_snapshot",
+      "reason": "积木在两指之间清晰可见，邻近回放支持当前持物。",
+      "approved_reward": null
+    },
+    {
+      "candidate_id": "E09-R001",
+      "row": 128,
+      "label": "empty_at_snapshot",
+      "reason": "当前两指之间无被夹住的物体，背景积木或蓝框不算持物。",
+      "approved_reward": null
+    },
+    {
+      "candidate_id": "E09-R002",
+      "row": 302,
+      "label": "empty_at_snapshot",
+      "reason": "当前两指之间无被夹住的物体，背景积木或蓝框不算持物。",
+      "approved_reward": null
+    },
+    {
+      "candidate_id": "E11-L002",
+      "row": 634,
+      "label": "held_at_snapshot",
+      "reason": "积木在两指之间清晰可见，邻近回放支持当前持物。",
+      "approved_reward": null
+    },
+    {
+      "candidate_id": "E11-L003",
+      "row": 795,
+      "label": "held_at_snapshot",
+      "reason": "积木在两指之间清晰可见，邻近回放支持当前持物。",
+      "approved_reward": null
+    },
+    {
+      "candidate_id": "E11-R001",
+      "row": 141,
+      "label": "empty_at_snapshot",
+      "reason": "当前两指之间无被夹住的物体，背景积木或蓝框不算持物。",
+      "approved_reward": null
+    },
+    {
+      "candidate_id": "E11-R002",
+      "row": 226,
+      "label": "uncertain",
+      "reason": "红色积木投影接近右指，模糊及遮挡使单帧/邻近回放难以排除背景重叠，保留不确定。",
+      "approved_reward": null
+    }
+  ],
+  "automatic_reward_ready": false
+}

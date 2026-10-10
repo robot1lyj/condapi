@@ -1,0 +1,107 @@
+{
+  "schema": "parts_dinov3_exemplar_audit_v1",
+  "reference_images": 20,
+  "evaluation_images": 20,
+  "reference_episode_numbers": [
+    1,
+    2,
+    3,
+    4,
+    7,
+    10,
+    12
+  ],
+  "evaluation_episode_numbers": [
+    5,
+    6,
+    8,
+    9,
+    11
+  ],
+  "metrics": {
+    "roi": {
+      "tp": 9,
+      "tn": 9,
+      "fp": 0,
+      "fn": 0,
+      "unknown_held": 1,
+      "unknown_empty": 0,
+      "audit_uncertain": 1
+    },
+    "cls": {
+      "tp": 8,
+      "tn": 9,
+      "fp": 0,
+      "fn": 1,
+      "unknown_held": 1,
+      "unknown_empty": 0,
+      "audit_uncertain": 1
+    },
+    "agreement_review_exploratory": {
+      "tp": 8,
+      "tn": 9,
+      "fp": 0,
+      "fn": 0,
+      "unknown_held": 2,
+      "unknown_empty": 0,
+      "audit_uncertain": 1
+    },
+    "threshold_met": {
+      "tp": 6,
+      "tn": 5,
+      "fp": 4,
+      "fn": 3,
+      "unknown_held": 1,
+      "unknown_empty": 0,
+      "audit_uncertain": 1
+    },
+    "shadow_tolerant_threshold_met": {
+      "tp": 8,
+      "tn": 5,
+      "fp": 4,
+      "fn": 1,
+      "unknown_held": 1,
+      "unknown_empty": 0,
+      "audit_uncertain": 1
+    }
+  },
+  "run": {
+    "schema": "parts_frozen_dinov3_probe_v1",
+    "images": 40,
+    "model": "timm/vit_small_patch16_dinov3.lvd1689m",
+    "revision": "3bf4720a82ec2066db88137180ff1f83a675cef0",
+    "weights_sha256": "2a1ec16ae28ffa07bc0ead0241ee7df9fc26451fe6f9f839b7b3afa0a906b040",
+    "model_params_dtype": "torch.float32",
+    "autocast": "bfloat16",
+    "versions": {
+      "torch": "2.12.0a0+5aff3928d8.nv26.5.50603568",
+      "timm": "1.0.27",
+      "safetensors": "0.7.0"
+    },
+    "elapsed_s": 1.581946942023933,
+    "batch_inference_s": [
+      0.22672152193263173,
+      0.01113999099470675,
+      0.011099109891802073,
+      0.011112629203125834,
+      0.011212128913030028
+    ],
+    "peak_cuda_allocated_bytes": 127606272,
+    "jobs_sha256": "254321c7788a738f6f552146a1535093c8f1bbc43acad7ab0a84a9d2a5e5bbf4",
+    "pipeline_sha256": "277953b339dd0ad123008534a8ce853b50a2a09dbb9c12222e090df7cccfd912",
+    "automatic_tracking": false,
+    "gradient_updates": 0,
+    "training_executed": false,
+    "automatic_reward_ready": false
+  },
+  "margin_threshold": 0.02,
+  "reviewer": "assistant_visual_inspection",
+  "audit_uncertain_excluded_from_confusion": true,
+  "agreement_review_gate_exploratory": true,
+  "evaluation_audit_sha256": "ede844bcb0a7bbe8cbf0722b1bba93bd33607870523f193d225794d08d728aa7",
+  "pipeline_sha256": "147100c563edcdc9edc0473477dffe06c949dd04ea60200d8f02f3a14376d83b",
+  "automatic_tracking": false,
+  "gradient_updates": 0,
+  "training_executed": false,
+  "automatic_reward_ready": false
+}

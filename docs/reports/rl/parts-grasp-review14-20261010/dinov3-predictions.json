@@ -1,0 +1,646 @@
+{
+  "roi": [
+    {
+      "id": "E05-L001",
+      "label": "held_at_snapshot",
+      "margin": 0.2540476322174072,
+      "nearest": {
+        "held_at_snapshot": {
+          "id": "E01-L001",
+          "similarity": 0.9359121322631836
+        },
+        "empty_at_snapshot": {
+          "id": "E04-R006",
+          "similarity": 0.6818645000457764
+        }
+      },
+      "approved_reward": null
+    },
+    {
+      "id": "E05-L003",
+      "label": "empty_at_snapshot",
+      "margin": -0.21443915367126465,
+      "nearest": {
+        "held_at_snapshot": {
+          "id": "E07-L002",
+          "similarity": 0.6197967529296875
+        },
+        "empty_at_snapshot": {
+          "id": "E04-R003",
+          "similarity": 0.8342359066009521
+        }
+      },
+      "approved_reward": null
+    },
+    {
+      "id": "E05-R001",
+      "label": "empty_at_snapshot",
+      "margin": -0.22076284885406494,
+      "nearest": {
+        "held_at_snapshot": {
+          "id": "E07-L002",
+          "similarity": 0.6802965998649597
+        },
+        "empty_at_snapshot": {
+          "id": "E04-R003",
+          "similarity": 0.9010594487190247
+        }
+      },
+      "approved_reward": null
+    },
+    {
+      "id": "E05-R002",
+      "label": "held_at_snapshot",
+      "margin": 0.08502143621444702,
+      "nearest": {
+        "held_at_snapshot": {
+          "id": "E03-L002",
+          "similarity": 0.8340717554092407
+        },
+        "empty_at_snapshot": {
+          "id": "E04-R001",
+          "similarity": 0.7490503191947937
+        }
+      },
+      "approved_reward": null
+    },
+    {
+      "id": "E06-L002",
+      "label": "empty_at_snapshot",
+      "margin": -0.11057502031326294,
+      "nearest": {
+        "held_at_snapshot": {
+          "id": "E07-L002",
+          "similarity": 0.7424798011779785
+        },
+        "empty_at_snapshot": {
+          "id": "E04-R001",
+          "similarity": 0.8530548214912415
+        }
+      },
+      "approved_reward": null
+    },
+    {
+      "id": "E06-L003",
+      "label": "held_at_snapshot",
+      "margin": 0.10566544532775879,
+      "nearest": {
+        "held_at_snapshot": {
+          "id": "E03-L002",
+          "similarity": 0.8168115615844727
+        },
+        "empty_at_snapshot": {
+          "id": "E04-L004",
+          "similarity": 0.7111461162567139
+        }
+      },
+      "approved_reward": null
+    },
+    {
+      "id": "E06-R002",
+      "label": "empty_at_snapshot",
+      "margin": -0.06319576501846313,
+      "nearest": {
+        "held_at_snapshot": {
+          "id": "E03-L002",
+          "similarity": 0.7549978494644165
+        },
+        "empty_at_snapshot": {
+          "id": "E04-R001",
+          "similarity": 0.8181936144828796
+        }
+      },
+      "approved_reward": null
+    },
+    {
+      "id": "E06-R003",
+      "label": "held_at_snapshot",
+      "margin": 0.061559200286865234,
+      "nearest": {
+        "held_at_snapshot": {
+          "id": "E03-L002",
+          "similarity": 0.8115941286087036
+        },
+        "empty_at_snapshot": {
+          "id": "E04-R006",
+          "similarity": 0.7500349283218384
+        }
+      },
+      "approved_reward": null
+    },
+    {
+      "id": "E08-L001",
+      "label": "held_at_snapshot",
+      "margin": 0.32349687814712524,
+      "nearest": {
+        "held_at_snapshot": {
+          "id": "E12-L005",
+          "similarity": 0.9311773180961609
+        },
+        "empty_at_snapshot": {
+          "id": "E04-R006",
+          "similarity": 0.6076804399490356
+        }
+      },
+      "approved_reward": null
+    },
+    {
+      "id": "E08-L002",
+      "label": "held_at_snapshot",
+      "margin": 0.09937429428100586,
+      "nearest": {
+        "held_at_snapshot": {
+          "id": "E03-L002",
+          "similarity": 0.8362337350845337
+        },
+        "empty_at_snapshot": {
+          "id": "E04-R006",
+          "similarity": 0.7368594408035278
+        }
+      },
+      "approved_reward": null
+    },
+    {
+      "id": "E08-R002",
+      "label": "empty_at_snapshot",
+      "margin": -0.09345120191574097,
+      "nearest": {
+        "held_at_snapshot": {
+          "id": "E07-L002",
+          "similarity": 0.7376569509506226
+        },
+        "empty_at_snapshot": {
+          "id": "E01-R001",
+          "similarity": 0.8311081528663635
+        }
+      },
+      "approved_reward": null
+    },
+    {
+      "id": "E08-R003",
+      "label": "empty_at_snapshot",
+      "margin": -0.17169469594955444,
+      "nearest": {
+        "held_at_snapshot": {
+          "id": "E10-R001",
+          "similarity": 0.6521895527839661
+        },
+        "empty_at_snapshot": {
+          "id": "E01-R001",
+          "similarity": 0.8238842487335205
+        }
+      },
+      "approved_reward": null
+    },
+    {
+      "id": "E09-L001",
+      "label": "held_at_snapshot",
+      "margin": 0.14175021648406982,
+      "nearest": {
+        "held_at_snapshot": {
+          "id": "E04-L001",
+          "similarity": 0.842155933380127
+        },
+        "empty_at_snapshot": {
+          "id": "E04-R006",
+          "similarity": 0.7004057168960571
+        }
+      },
+      "approved_reward": null
+    },
+    {
+      "id": "E09-L003",
+      "label": "held_at_snapshot",
+      "margin": 0.21432387828826904,
+      "nearest": {
+        "held_at_snapshot": {
+          "id": "E04-L005",
+          "similarity": 0.9060443639755249
+        },
+        "empty_at_snapshot": {
+          "id": "E04-R006",
+          "similarity": 0.6917204856872559
+        }
+      },
+      "approved_reward": null
+    },
+    {
+      "id": "E09-R001",
+      "label": "empty_at_snapshot",
+      "margin": -0.1704840064048767,
+      "nearest": {
+        "held_at_snapshot": {
+          "id": "E03-L002",
+          "similarity": 0.6723382472991943
+        },
+        "empty_at_snapshot": {
+          "id": "E04-R003",
+          "similarity": 0.842822253704071
+        }
+      },
+      "approved_reward": null
+    },
+    {
+      "id": "E09-R002",
+      "label": "empty_at_snapshot",
+      "margin": -0.20735013484954834,
+      "nearest": {
+        "held_at_snapshot": {
+          "id": "E07-L002",
+          "similarity": 0.6847267150878906
+        },
+        "empty_at_snapshot": {
+          "id": "E04-R003",
+          "similarity": 0.892076849937439
+        }
+      },
+      "approved_reward": null
+    },
+    {
+      "id": "E11-L002",
+      "label": "uncertain",
+      "margin": 0.07928216457366943,
+      "nearest": {
+        "held_at_snapshot": {
+          "id": "E07-L002",
+          "similarity": 0.8190590143203735
+        },
+        "empty_at_snapshot": {
+          "id": "E04-R007",
+          "similarity": 0.7397768497467041
+        }
+      },
+      "approved_reward": null
+    },
+    {
+      "id": "E11-L003",
+      "label": "held_at_snapshot",
+      "margin": 0.13563400506973267,
+      "nearest": {
+        "held_at_snapshot": {
+          "id": "E04-L001",
+          "similarity": 0.901709794998169
+        },
+        "empty_at_snapshot": {
+          "id": "E04-R006",
+          "similarity": 0.7660757899284363
+        }
+      },
+      "approved_reward": null
+    },
+    {
+      "id": "E11-R001",
+      "label": "empty_at_snapshot",
+      "margin": -0.10416895151138306,
+      "nearest": {
+        "held_at_snapshot": {
+          "id": "E03-L002",
+          "similarity": 0.7629638910293579
+        },
+        "empty_at_snapshot": {
+          "id": "E04-R001",
+          "similarity": 0.867132842540741
+        }
+      },
+      "approved_reward": null
+    },
+    {
+      "id": "E11-R002",
+      "label": "held_at_snapshot",
+      "margin": 0.042704641819000244,
+      "nearest": {
+        "held_at_snapshot": {
+          "id": "E07-R001",
+          "similarity": 0.8096489310264587
+        },
+        "empty_at_snapshot": {
+          "id": "E04-R007",
+          "similarity": 0.7669442892074585
+        }
+      },
+      "approved_reward": null
+    }
+  ],
+  "cls": [
+    {
+      "id": "E05-L001",
+      "label": "held_at_snapshot",
+      "margin": 0.28924059867858887,
+      "nearest": {
+        "held_at_snapshot": {
+          "id": "E01-L001",
+          "similarity": 0.8943966627120972
+        },
+        "empty_at_snapshot": {
+          "id": "E04-R006",
+          "similarity": 0.6051560640335083
+        }
+      },
+      "approved_reward": null
+    },
+    {
+      "id": "E05-L003",
+      "label": "empty_at_snapshot",
+      "margin": -0.23382961750030518,
+      "nearest": {
+        "held_at_snapshot": {
+          "id": "E07-L002",
+          "similarity": 0.5003136396408081
+        },
+        "empty_at_snapshot": {
+          "id": "E04-R003",
+          "similarity": 0.7341432571411133
+        }
+      },
+      "approved_reward": null
+    },
+    {
+      "id": "E05-R001",
+      "label": "empty_at_snapshot",
+      "margin": -0.2733652591705322,
+      "nearest": {
+        "held_at_snapshot": {
+          "id": "E07-L002",
+          "similarity": 0.6447325944900513
+        },
+        "empty_at_snapshot": {
+          "id": "E04-R003",
+          "similarity": 0.9180978536605835
+        }
+      },
+      "approved_reward": null
+    },
+    {
+      "id": "E05-R002",
+      "label": "held_at_snapshot",
+      "margin": 0.053668856620788574,
+      "nearest": {
+        "held_at_snapshot": {
+          "id": "E07-L002",
+          "similarity": 0.7806152701377869
+        },
+        "empty_at_snapshot": {
+          "id": "E04-R001",
+          "similarity": 0.7269464135169983
+        }
+      },
+      "approved_reward": null
+    },
+    {
+      "id": "E06-L002",
+      "label": "empty_at_snapshot",
+      "margin": -0.19373250007629395,
+      "nearest": {
+        "held_at_snapshot": {
+          "id": "E07-L002",
+          "similarity": 0.6930806636810303
+        },
+        "empty_at_snapshot": {
+          "id": "E04-L004",
+          "similarity": 0.8868131637573242
+        }
+      },
+      "approved_reward": null
+    },
+    {
+      "id": "E06-L003",
+      "label": "held_at_snapshot",
+      "margin": 0.056748151779174805,
+      "nearest": {
+        "held_at_snapshot": {
+          "id": "E07-R001",
+          "similarity": 0.7499786615371704
+        },
+        "empty_at_snapshot": {
+          "id": "E04-L004",
+          "similarity": 0.6932305097579956
+        }
+      },
+      "approved_reward": null
+    },
+    {
+      "id": "E06-R002",
+      "label": "empty_at_snapshot",
+      "margin": -0.1312030553817749,
+      "nearest": {
+        "held_at_snapshot": {
+          "id": "E07-L002",
+          "similarity": 0.7042721509933472
+        },
+        "empty_at_snapshot": {
+          "id": "E04-R004",
+          "similarity": 0.8354752063751221
+        }
+      },
+      "approved_reward": null
+    },
+    {
+      "id": "E06-R003",
+      "label": "empty_at_snapshot",
+      "margin": -0.07181757688522339,
+      "nearest": {
+        "held_at_snapshot": {
+          "id": "E03-L002",
+          "similarity": 0.7238225340843201
+        },
+        "empty_at_snapshot": {
+          "id": "E04-R007",
+          "similarity": 0.7956401109695435
+        }
+      },
+      "approved_reward": null
+    },
+    {
+      "id": "E08-L001",
+      "label": "held_at_snapshot",
+      "margin": 0.4614865183830261,
+      "nearest": {
+        "held_at_snapshot": {
+          "id": "E12-L005",
+          "similarity": 0.9111443758010864
+        },
+        "empty_at_snapshot": {
+          "id": "E04-R006",
+          "similarity": 0.4496578574180603
+        }
+      },
+      "approved_reward": null
+    },
+    {
+      "id": "E08-L002",
+      "label": "held_at_snapshot",
+      "margin": 0.07956165075302124,
+      "nearest": {
+        "held_at_snapshot": {
+          "id": "E07-L002",
+          "similarity": 0.7931535840034485
+        },
+        "empty_at_snapshot": {
+          "id": "E04-L004",
+          "similarity": 0.7135919332504272
+        }
+      },
+      "approved_reward": null
+    },
+    {
+      "id": "E08-R002",
+      "label": "empty_at_snapshot",
+      "margin": -0.10199320316314697,
+      "nearest": {
+        "held_at_snapshot": {
+          "id": "E10-R001",
+          "similarity": 0.6644045114517212
+        },
+        "empty_at_snapshot": {
+          "id": "E04-R001",
+          "similarity": 0.7663977146148682
+        }
+      },
+      "approved_reward": null
+    },
+    {
+      "id": "E08-R003",
+      "label": "empty_at_snapshot",
+      "margin": -0.10572052001953125,
+      "nearest": {
+        "held_at_snapshot": {
+          "id": "E10-R001",
+          "similarity": 0.5722910165786743
+        },
+        "empty_at_snapshot": {
+          "id": "E01-R001",
+          "similarity": 0.6780115365982056
+        }
+      },
+      "approved_reward": null
+    },
+    {
+      "id": "E09-L001",
+      "label": "held_at_snapshot",
+      "margin": 0.11904317140579224,
+      "nearest": {
+        "held_at_snapshot": {
+          "id": "E03-R001",
+          "similarity": 0.7320533990859985
+        },
+        "empty_at_snapshot": {
+          "id": "E04-R006",
+          "similarity": 0.6130102276802063
+        }
+      },
+      "approved_reward": null
+    },
+    {
+      "id": "E09-L003",
+      "label": "held_at_snapshot",
+      "margin": 0.35198551416397095,
+      "nearest": {
+        "held_at_snapshot": {
+          "id": "E04-L005",
+          "similarity": 0.8613934516906738
+        },
+        "empty_at_snapshot": {
+          "id": "E04-R006",
+          "similarity": 0.5094079375267029
+        }
+      },
+      "approved_reward": null
+    },
+    {
+      "id": "E09-R001",
+      "label": "empty_at_snapshot",
+      "margin": -0.31870460510253906,
+      "nearest": {
+        "held_at_snapshot": {
+          "id": "E03-L002",
+          "similarity": 0.5754129886627197
+        },
+        "empty_at_snapshot": {
+          "id": "E04-R007",
+          "similarity": 0.8941175937652588
+        }
+      },
+      "approved_reward": null
+    },
+    {
+      "id": "E09-R002",
+      "label": "empty_at_snapshot",
+      "margin": -0.24619120359420776,
+      "nearest": {
+        "held_at_snapshot": {
+          "id": "E07-L002",
+          "similarity": 0.6613346934318542
+        },
+        "empty_at_snapshot": {
+          "id": "E04-R003",
+          "similarity": 0.907525897026062
+        }
+      },
+      "approved_reward": null
+    },
+    {
+      "id": "E11-L002",
+      "label": "uncertain",
+      "margin": 0.1208999752998352,
+      "nearest": {
+        "held_at_snapshot": {
+          "id": "E07-L002",
+          "similarity": 0.7360842227935791
+        },
+        "empty_at_snapshot": {
+          "id": "E01-R001",
+          "similarity": 0.6151842474937439
+        }
+      },
+      "approved_reward": null
+    },
+    {
+      "id": "E11-L003",
+      "label": "held_at_snapshot",
+      "margin": 0.16917657852172852,
+      "nearest": {
+        "held_at_snapshot": {
+          "id": "E04-L001",
+          "similarity": 0.8032034635543823
+        },
+        "empty_at_snapshot": {
+          "id": "E04-R006",
+          "similarity": 0.6340268850326538
+        }
+      },
+      "approved_reward": null
+    },
+    {
+      "id": "E11-R001",
+      "label": "empty_at_snapshot",
+      "margin": -0.17934489250183105,
+      "nearest": {
+        "held_at_snapshot": {
+          "id": "E07-L002",
+          "similarity": 0.6899353265762329
+        },
+        "empty_at_snapshot": {
+          "id": "E04-R001",
+          "similarity": 0.869280219078064
+        }
+      },
+      "approved_reward": null
+    },
+    {
+      "id": "E11-R002",
+      "label": "empty_at_snapshot",
+      "margin": -0.24972182512283325,
+      "nearest": {
+        "held_at_snapshot": {
+          "id": "E03-L002",
+          "similarity": 0.6472458839416504
+        },
+        "empty_at_snapshot": {
+          "id": "E04-R004",
+          "similarity": 0.8969677090644836
+        }
+      },
+      "approved_reward": null
+    }
+  ]
+}

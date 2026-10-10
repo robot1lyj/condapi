@@ -1,0 +1,48 @@
+{
+  "schema": "parts_dinov3_probe_selection_v1",
+  "reference": "Previous 20 qualitative snapshot labels; no fine tuning, gradient updates or RL.",
+  "evaluation_rule": "First two eligible candidates per arm in E05/E06/E08/E09/E11, not present in reference. Choose maximal entry-relative lift among post-close samples with openness<.6 and lift>=.05m.",
+  "evaluation_ids": [
+    "E05-L001",
+    "E05-L003",
+    "E05-R001",
+    "E05-R002",
+    "E06-L002",
+    "E06-L003",
+    "E06-R002",
+    "E06-R003",
+    "E08-L001",
+    "E08-L002",
+    "E08-R002",
+    "E08-R003",
+    "E09-L001",
+    "E09-L003",
+    "E09-R001",
+    "E09-R002",
+    "E11-L002",
+    "E11-L003",
+    "E11-R001",
+    "E11-R002"
+  ],
+  "reference_episode_numbers": [
+    1,
+    2,
+    3,
+    4,
+    7,
+    10,
+    12
+  ],
+  "evaluation_episode_numbers": [
+    5,
+    6,
+    8,
+    9,
+    11
+  ],
+  "roi_crop": "256x256 pixels, center x midpoint tips; y midpoint tips minus24px; resize256x256, ImageNet normalization.",
+  "classifier": "Cosine nearest class exemplar: max similarity to held references minus max similarity to empty references. held if margin>=0.02, empty if <=-0.02, otherwise unknown. Fixed before evaluation labels or predictions.",
+  "automatic_tracking": false,
+  "training_executed": false,
+  "main_feature": "Area-weighted mean of DINOv3 patch tokens overlapping the fingertip bridge; L2-normalized. CLS nearest-reference is a predeclared secondary diagnostic."
+}

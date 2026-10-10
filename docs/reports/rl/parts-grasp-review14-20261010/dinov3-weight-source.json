@@ -1,0 +1,109 @@
+{
+  "repo": "timm/vit_small_patch16_dinov3.lvd1689m",
+  "revision": "3bf4720a82ec2066db88137180ff1f83a675cef0",
+  "model_info": {
+    "_id": "68cae462f0bba99bea3c2c6c",
+    "id": "timm/vit_small_patch16_dinov3.lvd1689m",
+    "private": false,
+    "pipeline_tag": "image-feature-extraction",
+    "library_name": "timm",
+    "tags": [
+      "timm",
+      "pytorch",
+      "safetensors",
+      "image-feature-extraction",
+      "transformers",
+      "dataset:lvd-1689m",
+      "arxiv:2508.10104",
+      "arxiv:2010.11929",
+      "license:other",
+      "region:us"
+    ],
+    "downloads": 210632,
+    "likes": 7,
+    "modelId": "timm/vit_small_patch16_dinov3.lvd1689m",
+    "author": "timm",
+    "sha": "3bf4720a82ec2066db88137180ff1f83a675cef0",
+    "lastModified": "2025-09-24T22:44:54.000Z",
+    "gated": false,
+    "disabled": false,
+    "model-index": null,
+    "config": {},
+    "cardData": {
+      "tags": [
+        "image-feature-extraction",
+        "timm",
+        "transformers"
+      ],
+      "pipeline_tag": "image-feature-extraction",
+      "library_name": "timm",
+      "license": "other",
+      "license_name": "dinov3-license",
+      "license_link": "https://ai.meta.com/resources/models-and-libraries/dinov3-license",
+      "datasets": [
+        "lvd-1689m"
+      ]
+    },
+    "transformersInfo": {
+      "auto_model": "AutoModel"
+    },
+    "siblings": [
+      {
+        "rfilename": ".gitattributes",
+        "blobId": "a6344aac8c09253b3b630fb776ae94478aa0275b",
+        "size": 1519
+      },
+      {
+        "rfilename": "LICENSE.md",
+        "blobId": "f531b1e6b5ab2318957bbf8ad1bda9f800a23e17",
+        "size": 7503
+      },
+      {
+        "rfilename": "README.md",
+        "blobId": "037f5f4992703dcc267718f6d6ee127140cd9847",
+        "size": 7892
+      },
+      {
+        "rfilename": "config.json",
+        "blobId": "3ffe9c85d38c30e7920af2d98ca629b03143c905",
+        "size": 670
+      },
+      {
+        "rfilename": "model.safetensors",
+        "blobId": "851512e7d2f0799cb09b93c0eb360614cfc6d6bd",
+        "size": 86362376,
+        "lfs": {
+          "sha256": "2a1ec16ae28ffa07bc0ead0241ee7df9fc26451fe6f9f839b7b3afa0a906b040",
+          "size": 86362376,
+          "pointerSize": 133
+        }
+      },
+      {
+        "rfilename": "pytorch_model.bin",
+        "blobId": "fee410af742340727c31da03d5f704ce6c681732",
+        "size": 86407250,
+        "lfs": {
+          "sha256": "b7e7b7d1518a4dad2d92304ff47967c3dfee806f863552a06870de1e7498e7a2",
+          "size": 86407250,
+          "pointerSize": 133
+        }
+      }
+    ],
+    "spaces": [
+      "tardellirs/model-pulse",
+      "bluman1/animap-inference",
+      "bluman1/animap-gpu",
+      "nnt3001/vnfood-ai-studio"
+    ],
+    "createdAt": "2025-09-17T16:40:02.000Z",
+    "safetensors": {
+      "parameters": {
+        "F32": 21586944
+      },
+      "total": 21586944
+    },
+    "usedStorage": 172769626
+  },
+  "official_hf_access_status": 403,
+  "implementation": "timm port; not byte-identical to Meta checkpoint"
+}
