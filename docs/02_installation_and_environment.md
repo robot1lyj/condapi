@@ -250,9 +250,11 @@ DeepSpeed 0.18.9；`pip check` 通过。服务器模型文件为
 `/home/wuyan/lyj/xiaomi-robotics-1/checkpoints/Xiaomi-Robotics-1-5B-ee21d524/model_states.pt`，
 远端 SHA-256 与 Hugging Face LFS 摘要一致。安装完成不代表 GPU、训练或 YAM 数据适配已验收。
 XR-1 state 是 60D 关节/夹爪输入，action 虽为 60D 张量，语义为末端相对位姿/夹爪及腰部/底盘槽位；YAM 的 14D joint action 不能按形状直接套入。启动训练前必须先确定并验收具体投影，见环境报告。
-本地 `configs/environments/xr1-server.toml` 指向上述已安装 prefix，`environments/xr1.yml` 仅用于新环境 bootstrap，不代表已安装完整 XR-1 依赖。固定源码及原生训练入口现在位于本仓库 `third_party/xr1/`、`adapters/xr1/`；服务器此前安装的是相同上游 revision 的独立快照，尚未同步本仓库新代码或运行本入口。数据和启动 gate 见 [10](10_vla_platform.md#2026-09-24--xr-1-原生训练入口)。
+本地 `configs/environments/xr1-server.toml` 指向上述已安装 prefix，`environments/xr1.yml` 仅用于新环境 bootstrap，不代表已安装完整 XR-1 依赖。固定源码及原生训练入口现在位于本仓库 `third_party/xr1/`、`adapters/xr1/`；2026-10-10服务器已从Gitea取得本仓库训练入口，正式候选检出目录为 `/home/wuyan/lyj/xiaomi-robotics-1/source/xr1-50h-20261010`，各试跑使用固定提交。数据和启动 gate 见 [10](10_vla_platform.md#2026-09-24--xr-1-原生训练入口)。
 
 XR-1 末端数据清洗使用另一独立 prefix `/home/wuyan/.conda/envs/yam-xr1-data`，规格在 `environments/xr1-data.yml`，不安装模型训练依赖。2026-09-24 首次 Conda 创建遭遇旧共享包缓存缺文件；改用 `/home/wuyan/lyj/xiaomi-robotics-1/install/xr1-data-pkgs` 独立缓存后创建成功。此环境只用于数据转换：NumPy 2.2.6、SciPy 1.18.0、HDF5/h5py 3.16.0、PyAV 15.1.0、PyArrow 25.0.0 和 MuJoCo 3.10.0；`pip check` 输出 `No broken requirements found.`，不修改 `xr1-posttrain`、`condapi-yam` 或原始数据。服务器转换代码与官方 YAM FK 模型束单独放在 `/home/wuyan/lyj/xiaomi-robotics-1/source/condapi-xr1-data/`；固定选集和派生数据身份见 [04](04_data_contracts.md#50h-乐高-lerobot-数据的-xr-1-末端派生版)。环境安装记录在服务器 `install/xr1-data-create.log` 与 `install/xr1-data-extra.log`。源 AV1 可由清洗环境 PyAV 读取；XR-1 原生环境 decord 不能读取同一源文件，首条派生 H.264 的三视角各 3,428 帧已由 decord 成功读取首末帧。
+
+2026-10-10 CPUAdam扩展已在gpu001成功编译。系统CUDA13.2与Torch cu128不兼容；当前 `CUDA_HOME=/home/wuyan/.conda/envs/vla-openwam` 只读复用其CUDA12.8.93编译SDK，Python、Torch、DeepSpeed始终来自 `xr1-posttrain`，不导入OpenWAM环境包。不使用未完成的独立SDK复制目录。安装尝试日志在服务器 `install/logs/cuda-toolkit-*20261010.log` 和 `toolchain-fallback-20261010.txt`；CUDA编译成功不等于优化器数值正确。训练Slurm入口为 `scripts/train_xr1_lego_50h.sbatch`；实际数值验收和run状态见03。
 
 ## 3. Slurm 和 GPU 预检
 

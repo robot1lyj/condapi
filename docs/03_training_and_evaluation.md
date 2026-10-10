@@ -232,34 +232,23 @@ python adapters/parts/train.py --recipe /data/parts/recipe_v2.json \
 
 本地已接上游 XR-1 原生训练入口，但当前 YAM 数据只有14D关节/夹爪目标，缺少经审核的末端位姿标签。正式训练先由离线 FK 在新目录生成原生 JSON，固定 train/val split 并只用 train 重算 30×60 action 与 1×60 state 统计；再核查坐标系、物理单位、时序与 5B 基础权重 SHA。平台 `plan` 只生成命令，不替代数据预检；只有通过 [10 的 XR-1 操作门槛](10_vla_platform.md#2026-09-24--xr-1-原生训练入口) 且获准的 Slurm GPU 节点才能启动。训练完成还需独立做模型 forward、验证集和部署 IK/Thor 推理验收；现均未发生。
 
-### 乐高 50h 的候选微调配方
+### 乐高 50h 的 XR-1 微调配方
 
-2026-10-10 用户指定原生异步前缀扩大为 **1–10 步**。50h recipe 显式设置 `rtc_mode=native_async`、`async_prefix_min=1`、`async_prefix_max=10`；保持原生 50% 概率使用均匀采样的前缀、50% 不使用前缀。模型仍输出 30×60 动作张量（30Hz 下约1秒），其中前 N 步为给定前缀、新生成后缀有 30−N 步；N=10 时后缀20步约0.667秒。前缀范围覆盖约33–333ms，但真实推理延迟与执行对齐仍须测量。训练末尾不足30步的样本仍按原生 mask 处理，不能把20步当作所有样本的有效监督长度。`rtc_mode=disabled` 关闭前缀条件训练；未提供新字段的旧 recipe 保持1–6步默认。实现是固定上游的配置化小补丁，`third_party/xr1/UPSTREAM.json` 保留原文件摘要与本地补丁来源；不改变权重形状。尚未同步本次补丁到服务器、未执行50h GPU训练或YAM实机Thor异步验收。
+2026-10-10 用户授权补全并启动正式训练。配置 owner 为 [`configs/native/xr1-yam-lego-50h.json`](../configs/native/xr1-yam-lego-50h.json)，平台入口为 [`configs/experiments/xr1-lego-50h.toml`](../configs/experiments/xr1-lego-50h.toml)。固定官方通用5B `ee21d524` 权重与SHA256；train为2,337集/5,400,685帧，val69集/165,142帧独立保留，不参加统计或采样。全量转换、统计、名义FK审核和只读预检已完成，证据范围见[04](04_data_contracts.md#50h-乐高-lerobot-数据的-xr-1-末端派生版)。配方显式选择 `documented_nominal_training`，不声称完成独立raw单位、真机标定或捕获时序验收。
+
+**配方：** 4×RTX4090 24GB，每卡micro8、累积1，global batch32；一轮 `ceil(5,400,685/32)=168772` optimizer step，末尾补取19个帧起点。使用全部帧起点与原生尾窗mask；5,332,912个完整30步窗口不是step分母。原生数据集max_steps为optimizer steps×累积次数，确保改变累积后仍覆盖一轮。BF16 mixed、ZeRO2＋FP32 CPUAdam、通信bucket20M、梯度裁剪1.0、seed42；原生cosine日程warmup500、LR5e-7起步/最高2e-5/最低5e-6。保持全部原生可训练参数，不额外冻结或量化。CPU卸载使用 `offload_pin_memory=false`、`overlap_comm=false`：安装的DeepSpeed0.18.9在异步pinned卸载＋FFN重计算组合下出现更新前梯度异常，失败试跑只留证据，不作为初始化。同步卸载micro8首步loss4.7243，全部模型参数有限，单卡峰值reserved约18.45GiB；短程验证不是正式训练或模型质量评估。
+
+**RTC：** `rtc_mode=native_async`，原生50%无前缀、50%均匀1～10步前缀；H30/30Hz约1秒，N=10时新后缀20步约0.667秒。前缀范围覆盖约33～333ms，不保证硬实时。`rtc_mode=disabled`保留同步路径；旧配方默认1～6步。补丁不改变模型权重形状，来源归 `third_party/xr1/UPSTREAM.json`。
 
 同日已独立测官方5B基础权重的原生异步Thor延迟：保持BF16/H30/5步去噪，N=10的DiT Graph推理P50约130ms（224px）或174ms（384px）；36组图加速对照逐位一致。较大图像的完整本地路径补测P95约183ms，但主测曾有345ms峰值，不能据此缩小1～10训练范围或保证硬实时。该性能基线不验证50h训练质量、norm、末端参考系或IK，不改变候选配方；完整输入边界、尾延迟与20ms链路＋1 tick预算见[08](08_thor_edge_deployment.md#xr-1-原生异步-rtc-性能基线2026-10-10)和[报告](reports/thor/xr1-rtc-20261010/README.md)。
 
-配置 owner 为 [`configs/native/xr1-yam-lego-50h.json`](../configs/native/xr1-yam-lego-50h.json)，平台入口为 [`configs/experiments/xr1-lego-50h.toml`](../configs/experiments/xr1-lego-50h.toml)。这是**候选配方，尚未开训**。固定官方通用 5B `ee21d524` 权重及 SHA256；训练集为 50h 派生版的完整 `train/manifest.json`，预期 2,337 集、5,400,685 帧；原始 `val` 69 集独立保留，不参加训练统计或训练采样。训练入口从 manifest 展开精确 JSON 列表，并核对选集、源转换 manifest、逐集 JSON 哈希、统计 manifest 哈希、FK audit 的源仓/模型/成员，以及官方权重 SHA。完整转换、`normalize.json` 和真实 FK/单位/时序审核完成前，`--check-only` 应拒绝通过。
+**保存与恢复：** 每1,000 optimizer step保存完整原生模型/优化器/调度/训练进度，保留每5,000及最新恢复点；最后另存168,772，共33个5k里程碑＋最终1份。`PeriodicModelCheckpoint`在各rank保存结束后核对分片与文件大小、写入回执，原子更新 `last.ckpt`，然后只清理本run中有回执的旧非里程碑恢复点。当前实测每份67,696,071,745字节，34份约2.3TB，另留保存峰值与共享盘余量。回执不是内容checksum或断电持久性保证；额外回调在发布前检查全部模型参数有限，初始3步检查CPU分片梯度，逐optimizer step记录有限loss/global batch/实际局部batch/显存到 `metrics.jsonl`。Lightning2.5.3恢复时显式还原保存计数，禁止重写已存在的检查点目标。
 
-首版计划为 4 GPU × 每卡 micro-batch 4 × 梯度累积 2，即**有效 global batch 32**；`max_steps=168772`，按上游 `JsonDataset` 的逐帧采样逻辑覆盖 `ceil(5,400,685/32)` 个 optimizer step，约一轮（末尾补取 19 帧）。适配器同时把原生数据集 `max_steps` 设为 optimizer steps × 梯度累积；否则上游 loader 会提前耗尽，仅读约半轮数据。30 步 action horizon、BF16 mixed precision、DeepSpeed、FusedAdam、原生 cosine 日程（warmup 500、最高学习率 2e-5、最低 5e-6）、梯度裁剪 1.0 和随机种子 42 继承固定上游配置。2026-10-10 用户确认改为每 **1,000 optimizer step 保存，长期保留每 5,000 step 和最新恢复点**（替代此前25,000建议）。配置显式使用 `save_interval=1000`、`keep_period=5000`；保留的是可续训的原生完整状态，包含模型、优化器、调度与训练进度。每卡 micro-batch 4 只是容量起点，需在空闲的 Slurm GPU 节点验证 CUDA/模型初始化、数据解码与显存；若改 micro-batch、累积次数、卡数或步数，须同步重新计算覆盖轮数并产生新配方版本，不能静默沿用本配方的轮数声明。
+同一run使用 `adapters/xr1/train.py --resume` 与原recipe/output，核对resolved config、数据/norm/audit/source身份和last回执，原生Trainer恢复完整状态；无完整检查点拒绝，不从base重开。run专属文件锁防止重复启动。原生DistributedSampler保留seed42与epoch顺序，新增可选按已提交global step×micro×累积跳过已读起点；不宣称图像增强随机序列逐位一致。native loader不提供val dataloader，69集val用于后续离线评估，训练loss不是验证结果。
 
-**保存与恢复实现（2026-10-10）：** `PeriodicModelCheckpoint` 复用 Lightning/DeepSpeed 原生保存和删除；新检查点各 rank 保存结束后核对非空模型/优化器分片，原子写入文件清单回执，再原子更新 `last.ckpt` 链接，最后才清理上一个非5k恢复点。只清理本 run 中有回执的旧恢复点，不清理其他实验；无 `keep_period` 的旧 recipe 沿用上游回调。正常结束另存最终168,772步，即5,000～165,000共33个里程碑＋最终1个；`last.ckpt` 指向最新完整目录，不复制一份权重。回执检查文件名/大小及分片数量，不替代权重数值有限性检查，也不保证断电持久性。保存回调对照服务器 Lightning 2.5.3 API 实现，目前只完成静态检查，真实多卡保存/恢复仍待验收。
+**服务器与启动：** Pi50h实际配方是global32、保存1000/保留5000、warmup1000、LR1e-5→1e-6、累计338000约两轮；XR-1只借鉴保存规则。Pi旧Slurm2287的trainer已为zombie且日志停止、GPU0利用率，释放的只是失效分配，保留所有Pi实验产物。XR-1正式入口为 `scripts/train_xr1_lego_50h.sbatch`，独立Gitea固定提交检出 `/home/wuyan/lyj/xiaomi-robotics-1/source/xr1-50h-formal-20261010`；不使用旧9/24快照启动。CUDA SDK和独立Conda设置见[02](02_installation_and_environment.md#xr-1-服务器环境2026-09-24)。控制日志根目录 `/home/wuyan/lyj/xiaomi-robotics-1/runs/control/lego-50h-20261010`。
 
-同一 run 续训使用 `adapters/xr1/train.py --resume`，传入原 recipe/output：入口核对原始 resolved config、数据/norm/FK/source 身份及 `last.ckpt` 回执，交给原生 `Trainer.fit(ckpt_path=...)` 恢复完整状态；无完整检查点直接拒绝，不从base重开。启动器持有 run 专属文件锁，拒绝重复启动；已有产物的新训练须换输出目录。
-
-**服务器就绪复核（2026-10-10）：** 实际 Pi 50h 控制文件 `/home/wuyan/lyj/YAM/training-runs/control/lego_pi05_rtc_base_50h_20260921/run.sbatch` 使用 `LEGO_SAVE_INTERVAL=1000`、`LEGO_KEEP_PERIOD=5000`、global batch32、warmup1000、LR1e-5→1e-6、累计338000步约两轮；XR-1只借鉴其保存/恢复规则，学习率与一轮步数仍由XR-1原生合同决定。Slurm2287显示RUNNING只代表分配状态，本次没有以此声称训练进度或数值已验收，也未修改Pi作业。共享/home余量约5.4TiB，必须计入Pi及其他任务持续写入。
-
-XR-1派生train/val manifest及train-only norm已存在，但 `fk_audit.json` 仍缺，不能宣称训练预检通过。训练节点4×24GB RTX4090，现候选micro4/累积2/原生ZeRO2＋GPU Adam尚未容量验收；官方checkpoint元数据按张量条目粗估每卡模型/优化器/梯度状态约31.5GB（共享参数尚未去重，且不含激活与通信缓冲），不能只降低microbatch就保证适配。下一步候选是CPU optimizer offload或ZeRO3，维持global32；具体策略与microbatch须先给用户确认并在获准计算节点验证。元数据读取使用FakeTensorMode，不分配模型或执行训练。checkpoint保留34份的磁盘预算同样待原生首存实测；暂按每份约70～90GB预留约2.4～3.1TB，并另留写入峰值与共享盘余量。参见[DeepSpeed模型状态估算](https://deepspeed.readthedocs.io/en/stable/memory.html)。
-
-2026-09-24 已将本配方、XR-1 训练入口和固定上游代码同步到服务器独立目录 `/home/wuyan/lyj/xiaomi-robotics-1/source/condapi-xr1-train/`，入口与配方的 SHA256 已与本地提交逐文件核对；此目录不承载平台 CLI。派生 `train/manifest.json`、`val/manifest.json`、`normalize.json` 与 `fk_audit.json` 真实齐备并完成逐值审核后，从该目录执行只读预检：
-
-```bash
-conda run -p /home/wuyan/.conda/envs/xr1-posttrain python adapters/xr1/train.py \
-  --recipe configs/native/xr1-yam-lego-50h.json \
-  --output /home/wuyan/lyj/xiaomi-robotics-1/runs/lego-50h-eef-v1 \
-  --check-only
-```
-
-预检通过后再编排 Slurm 作业；当前没有提交作业文件或启动 XR-1 训练。上游 loader 当前无 val dataloader，69 集 val 用于训练后离线评估，需要另行明确评估指标和执行入口，不能把训练 loss 当成验证结果。
+正式Slurm2307已提交，固定代码 `038a4bcfccc44b753daeaa70ae5ab0884cb6d1cb`，run为 `/home/wuyan/lyj/xiaomi-robotics-1/runs/lego-50h-eef-v1-20261010`；依赖试跑2304完成保存/恢复/旧点清理与CPU完整数值审计2305成功，之后入口再次核对正式数据与配方。当前尚未观测正式optimizer step；Slurm分配状态不能替代训练进度。日志为控制目录 `train-2307.log`。
 
 ## 2026-09-22 · 通用 DAgger 工作流技能
 
