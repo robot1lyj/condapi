@@ -42,11 +42,12 @@
     "scripts/train.sh": "e589ccfcb14c90fc6064cfeb6937003d69eb81a7fffdefa439b2b03198468e76",
     "setup.py": "e9766b3149e32cdc5db03177515b0641baece84eb8f372e10e84fb2cfa5aa65d",
     "tools/compute_normalize.py": "026010360da213565648ccc13c3a06206015c032dad424f2ab750173359818d8",
-    "tools/train.py": "c7e74c8e6ded004e383acfa77dc97687493dfcc46ff8779c734b02d44db16d40",
+    "tools/train.py": "57781220e131e53b90aa3b0d38d622d40ff9191ed4f1b7b8d5245a6a4925b862",
     "tools/weight_convert.py": "e98ee838201530a9016cc28b64334cee034e16002f0c006ee4852f2f7fc6ab0e",
     "mibot/utils/async_prefix.py": "2db37d84e10605aa02702b8afd5d7d31293107e46166ae56e779e3bf6a8cf4b2",
     "mibot/utils/checkpoint_contract.py": "2f7dda570ccbe9417ba67466a492fe3c627fe2749351104cc9c61a51f011623d",
-    "mibot/utils/periodic_checkpoint.py": "cbd5bc277ac7a1fb87cbcfb7b98b02c04e3d0fde31e5a737c4e0e02f1d8719c0"
+    "mibot/utils/periodic_checkpoint.py": "cbd5bc277ac7a1fb87cbcfb7b98b02c04e3d0fde31e5a737c4e0e02f1d8719c0",
+    "mibot/utils/training_metrics.py": "5f683347749b92115fa9490c81782fa0c5429b443530f58495999b3c65b03942"
   },
   "local_patches": [
     {
@@ -63,13 +64,14 @@
     {
       "id": "periodic-full-state-checkpoint-v1",
       "date": "2026-10-10",
-      "description": "Optional native Lightning/DeepSpeed full-state retention, committed recovery link, final-step save and keep_period pruning. Recipes without keep_period retain the upstream callback. Targets installed Lightning 2.5.3; GPU save/restore not yet validated. Optional local CSV metrics backend; legacy recipes retain WandB.",
+      "description": "Optional native Lightning/DeepSpeed full-state retention, committed recovery link, final-step save and keep_period pruning. Recipes without keep_period retain the upstream callback. Targets installed Lightning 2.5.3; GPU save/restore not yet validated. Optional local CSV metrics backend; legacy recipes retain WandB. Emit finite optimizer-step JSONL metrics and verify native DeepSpeed global steps/batch.",
       "upstream_sha256": {
         "tools/train.py": "54fe28d7cdccf7235192af95f656f32144ddbace1c8a32e092c86cb6c70432cd"
       },
       "added_files": [
         "mibot/utils/checkpoint_contract.py",
-        "mibot/utils/periodic_checkpoint.py"
+        "mibot/utils/periodic_checkpoint.py",
+        "mibot/utils/training_metrics.py"
       ]
     }
   ]
