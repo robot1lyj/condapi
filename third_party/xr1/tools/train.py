@@ -13,6 +13,7 @@ from omegaconf import DictConfig
 from mibot.models import MIMODEL
 
 from mibot.utils.cfg_utils import helper
+from mibot.utils.periodic_checkpoint import PeriodicModelCheckpoint
 
 import mibot.data
 
@@ -23,15 +24,18 @@ def prepare(cfg: Dict[str, Any]) -> Tuple[Config, LightningDataModule, Lightning
     cfg: Config = helper(cfg)
     datamodule: LightningDataModule = DATASETS.build(cfg.data)
     model: LightningModule = MIMODEL.build(cfg.model)
+    save_interval = cfg.trainer.pop("save_interval", 10000)
+    keep_period = cfg.trainer.pop("keep_period", None)
+    checkpoint = (
+        PeriodicModelCheckpoint(cfg.trainer.default_root_dir, save_interval, keep_period)
+        if keep_period is not None else ModelCheckpoint(
+            save_top_k=-1, save_last=True, every_n_train_steps=save_interval,
+            dirpath=cfg.trainer.default_root_dir, enable_version_counter=False,
+        )
+    )
     cfg.trainer["callbacks"] = [
         ModelSummary(max_depth=2),
-        ModelCheckpoint(
-            save_top_k=-1,
-            save_last=True,
-            every_n_train_steps=cfg.trainer.pop("save_interval", 10000),
-            dirpath=cfg.trainer.default_root_dir,
-            enable_version_counter=False,
-        ),
+        checkpoint,
     ]
 
     logger: List[Any] = [

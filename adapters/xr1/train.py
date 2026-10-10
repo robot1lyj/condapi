@@ -1,6 +1,7 @@
-"""Preflight and launch the unchanged XR-1 native trainer on a Slurm GPU node."""
+"""Preflight and launch XR-1's native trainer on a Slurm GPU node."""
 
 import argparse
+import fcntl
 import hashlib
 import json
 import os
@@ -39,6 +40,7 @@ def inspect_recipe(recipe_path, output):
         "batch_size",
         "gradient_accumulation",
         "save_interval",
+        "keep_period",
         "selection_sha256",
         "source_manifest_sha256",
         "expected_episodes",
@@ -63,6 +65,12 @@ def inspect_recipe(recipe_path, output):
         raise ValueError("gradient_accumulation must be a positive integer")
     if "save_interval" in recipe and (type(recipe["save_interval"]) is not int or recipe["save_interval"] < 1):
         raise ValueError("save_interval must be a positive integer")
+    if "keep_period" in recipe and (
+        type(recipe["keep_period"]) is not int
+        or recipe["keep_period"] < 1
+        or recipe["keep_period"] % recipe.get("save_interval", 10000)
+    ):
+        raise ValueError("keep_period must be a positive multiple of save_interval")
     for field in ("project", "experiment"):
         value = recipe.get(field)
         alphabet = "abcdefghijklmnopqrstuvwxyz0123456789-_"
@@ -212,6 +220,9 @@ def compose_config(recipe, stats, output):
     config.data.params.max_steps = recipe["max_steps"] * accumulation
     if "save_interval" in recipe:
         config.trainer.save_interval = recipe["save_interval"]
+    if "keep_period" in recipe:
+        with open_dict(config.trainer):
+            config.trainer.keep_period = recipe["keep_period"]
     config.trainer.project = recipe["project"]
     config.trainer.exp_name = recipe["experiment"]
     config.trainer.default_root_dir = str(output / "native")
@@ -223,24 +234,58 @@ def main(argv=None):
     parser.add_argument("--recipe", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--check-only", action="store_true")
+    parser.add_argument("--resume", action="store_true", help="Restore the same run's committed last.ckpt full state")
     args = parser.parse_args(argv)
     recipe, stats, provenance = inspect_recipe(args.recipe, args.output)
     if file_hash(recipe["pretrained"]) != recipe["checkpoint_sha256"]:
         raise ValueError("XR-1 pretrained checkpoint SHA256 mismatch")
     config = compose_config(recipe, stats, args.output.resolve())
+    output = args.output.resolve()
+    if args.resume:
+        sys.path.insert(0, str(VENDOR))
+        from mibot.utils.checkpoint_contract import validate_checkpoint  # noqa: PLC0415
+        from omegaconf import OmegaConf  # noqa: PLC0415
+
+        if "keep_period" not in recipe:
+            parser.error("Resume requires committed periodic checkpoints")
+        saved_config = OmegaConf.to_container(OmegaConf.load(output / "resolved.yaml"), resolve=True)
+        if saved_config != config or json.loads((output / "provenance.json").read_text()) != provenance:
+            parser.error("Resume requires the original recipe, dataset, statistics, audit and source")
+        native = output / "native" / f"project_{recipe['project']}" / recipe["experiment"]
+        last = native / "last.ckpt"
+        if not last.is_symlink() or last.resolve().parent != native:
+            parser.error("Missing or foreign last.ckpt recovery link")
+        receipt = validate_checkpoint(last, recipe["nproc_per_node"])
+        if receipt["global_step"] >= recipe["max_steps"]:
+            parser.error("Run already reached its target step")
+        config["trainer"]["ckpt_path"] = str(last.resolve())
     if args.check_only:
         print(json.dumps({"status": "config_ready_not_gpu_validated", "provenance": provenance}, indent=2))
         return
     if not os.environ.get("SLURM_JOB_ID"):
         parser.error("XR-1 training requires an authorized Slurm GPU allocation")
-    if args.output.exists() and any(args.output.iterdir()):
-        parser.error("Training artifact directory is not empty")
-    args.output.mkdir(parents=True, exist_ok=True)
-    (args.output / "assets").mkdir()
+    output.parent.mkdir(parents=True, exist_ok=True)
+    # Keep the lock outside the run: a second launcher must never resume or
+    # initialize the same native checkpoint tree while this process is alive.
+    lock = (output.parent / f".{output.name}.train.lock").open("a")
+    try:
+        fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except BlockingIOError:
+        parser.error("Another launcher owns this run")
+    if args.resume:
+        if str(last.resolve()) != config["trainer"]["ckpt_path"]:
+            parser.error("Recovery point changed during preflight; rerun --resume")
+        validate_checkpoint(last, recipe["nproc_per_node"])
+    if not args.resume and output.exists() and any(output.iterdir()):
+        parser.error("Training artifact directory is not empty; use --resume for the same run")
+    output.mkdir(parents=True, exist_ok=True)
+    (output / "assets").mkdir(exist_ok=args.resume)
     from omegaconf import OmegaConf  # noqa: PLC0415
 
-    OmegaConf.save(OmegaConf.create(config), args.output / "resolved.yaml")
-    (args.output / "provenance.json").write_text(json.dumps(provenance, indent=2) + "\n")
+    config_name = "resolved-resume" if args.resume else "resolved"
+    OmegaConf.save(OmegaConf.create(config), output / f"{config_name}.yaml")
+    if not args.resume:
+        (output / "provenance.json").write_text(json.dumps(provenance, indent=2) + "\n")
     env = dict(os.environ)
     env["PYTHONPATH"] = str(VENDOR) + os.pathsep + env.get("PYTHONPATH", "")
     env["WANDB_MODE"] = "offline"
@@ -258,7 +303,7 @@ def main(argv=None):
             "--config-path",
             str(args.output.resolve()),
             "--config-name",
-            "resolved",
+            config_name,
         ],
         cwd=args.output,
         env=env,
