@@ -1,0 +1,544 @@
+{
+  "candidates": 273,
+  "uncertain": 165,
+  "reason_counts": {
+    "insufficient_or_conflicting_evidence": 59,
+    "mixed_held_and_empty": 43,
+    "no_eligible_snapshot": 63
+  },
+  "no_eligible_details": {
+    "closed_but_no_entry_relative_5cm": 60,
+    "never_closed_below_0.6": 3
+  },
+  "no_eligible_dense_eligible_but_missed_sampling": [],
+  "no_eligible_if_close_reference_diagnostic_only": [
+    "E02-R013",
+    "E04-R021",
+    "E07-L011",
+    "E08-R001",
+    "E08-R004",
+    "E10-L002",
+    "E10-L005",
+    "E11-L001",
+    "E14-R001",
+    "E14-R005"
+  ],
+  "no_eligible_if_g_below_0.7_diagnostic_only": [
+    "E08-R011"
+  ],
+  "no_eligible_with_5cm_lift_any_opening": [
+    "E08-R011"
+  ],
+  "no_eligible_trace_gap": 55,
+  "no_eligible_later_lift_if_attempt_survives_missing_image": [
+    "E01-R007",
+    "E02-R002",
+    "E02-R003",
+    "E02-R013",
+    "E02-R014",
+    "E02-R015",
+    "E03-L001",
+    "E03-L007",
+    "E03-R007",
+    "E04-L007",
+    "E04-L010",
+    "E04-R005",
+    "E04-R009",
+    "E04-R012",
+    "E05-L002",
+    "E05-L005",
+    "E05-R005",
+    "E05-R008",
+    "E06-L001",
+    "E06-R001",
+    "E06-R004",
+    "E07-L001",
+    "E07-L010",
+    "E07-L011",
+    "E07-R002",
+    "E07-R007",
+    "E07-R009",
+    "E08-L005",
+    "E08-L007",
+    "E08-R008",
+    "E08-R012",
+    "E09-L002",
+    "E09-L006",
+    "E09-R003",
+    "E10-L008",
+    "E10-L010",
+    "E11-L001",
+    "E11-L007",
+    "E11-L008",
+    "E12-L004",
+    "E13-L002",
+    "E13-L003",
+    "E13-R003",
+    "E13-R006",
+    "E13-R008",
+    "E13-R009",
+    "E14-L007",
+    "E14-R002"
+  ],
+  "all_candidate_end_reasons": {
+    "reopened": 147,
+    "trace_gap": 126
+  },
+  "mixed_stable_held": 21,
+  "mixed_stable_empty": 20,
+  "mixed_both_stable": 12,
+  "mixed_held_stable_then_empty_stable": 9,
+  "mixed_no_stable_pair": 14,
+  "insufficient_details": {
+    "no_contiguous_same_label_pair": 23,
+    "stable_empty_blocked_by_uncertain_frame": 18,
+    "single_eligible_frame": 8,
+    "all_frames_visual_uncertain": 10
+  },
+  "visual_unknown_branch_pairs": {
+    "held_at_snapshot/empty_at_snapshot": 48,
+    "held_at_snapshot/uncertain": 33,
+    "uncertain/held_at_snapshot": 22,
+    "uncertain/empty_at_snapshot": 30,
+    "empty_at_snapshot/held_at_snapshot": 20,
+    "uncertain/uncertain": 14,
+    "empty_at_snapshot/uncertain": 20
+  },
+  "frame_reason_counts": {
+    "feature_agreement": 812,
+    "feature_ambiguous_or_disagree": 187,
+    "invalid fingertip geometry": 11,
+    "invalid or tiny fingertip gap": 8,
+    "fixed crop outside source; no padding": 1
+  },
+  "reference_by_episode": {
+    "1": {
+      "held_at_snapshot": 1,
+      "empty_at_snapshot": 1
+    },
+    "2": {
+      "held_at_snapshot": 1
+    },
+    "12": {
+      "held_at_snapshot": 1
+    },
+    "4": {
+      "held_at_snapshot": 4,
+      "empty_at_snapshot": 6
+    },
+    "3": {
+      "held_at_snapshot": 2
+    },
+    "7": {
+      "held_at_snapshot": 2
+    },
+    "10": {
+      "held_at_snapshot": 2
+    }
+  },
+  "per_episode": {
+    "1": {
+      "short_multiframe_held_evidence": 3,
+      "insufficient_or_conflicting_evidence": 2,
+      "mixed_held_and_empty": 2,
+      "no_eligible_snapshot": 2,
+      "all_lifted_snapshots_empty": 1
+    },
+    "2": {
+      "short_multiframe_held_evidence": 6,
+      "insufficient_or_conflicting_evidence": 4,
+      "no_eligible_snapshot": 5,
+      "all_lifted_snapshots_empty": 5,
+      "mixed_held_and_empty": 1
+    },
+    "3": {
+      "no_eligible_snapshot": 3,
+      "short_multiframe_held_evidence": 3,
+      "all_lifted_snapshots_empty": 4,
+      "mixed_held_and_empty": 4,
+      "insufficient_or_conflicting_evidence": 4
+    },
+    "4": {
+      "short_multiframe_held_evidence": 7,
+      "insufficient_or_conflicting_evidence": 12,
+      "no_eligible_snapshot": 8,
+      "mixed_held_and_empty": 13
+    },
+    "5": {
+      "short_multiframe_held_evidence": 3,
+      "no_eligible_snapshot": 4,
+      "all_lifted_snapshots_empty": 3,
+      "insufficient_or_conflicting_evidence": 3,
+      "mixed_held_and_empty": 2
+    },
+    "6": {
+      "no_eligible_snapshot": 3,
+      "all_lifted_snapshots_empty": 2,
+      "short_multiframe_held_evidence": 4,
+      "insufficient_or_conflicting_evidence": 1
+    },
+    "7": {
+      "no_eligible_snapshot": 7,
+      "mixed_held_and_empty": 2,
+      "insufficient_or_conflicting_evidence": 7,
+      "short_multiframe_held_evidence": 2,
+      "all_lifted_snapshots_empty": 5
+    },
+    "8": {
+      "short_multiframe_held_evidence": 5,
+      "all_lifted_snapshots_empty": 6,
+      "no_eligible_snapshot": 7,
+      "insufficient_or_conflicting_evidence": 2,
+      "mixed_held_and_empty": 2
+    },
+    "9": {
+      "short_multiframe_held_evidence": 2,
+      "no_eligible_snapshot": 3,
+      "mixed_held_and_empty": 2,
+      "all_lifted_snapshots_empty": 1,
+      "insufficient_or_conflicting_evidence": 2
+    },
+    "10": {
+      "mixed_held_and_empty": 6,
+      "no_eligible_snapshot": 4,
+      "insufficient_or_conflicting_evidence": 5,
+      "all_lifted_snapshots_empty": 6,
+      "short_multiframe_held_evidence": 3
+    },
+    "11": {
+      "no_eligible_snapshot": 3,
+      "mixed_held_and_empty": 2,
+      "short_multiframe_held_evidence": 5,
+      "all_lifted_snapshots_empty": 12,
+      "insufficient_or_conflicting_evidence": 5
+    },
+    "12": {
+      "insufficient_or_conflicting_evidence": 5,
+      "short_multiframe_held_evidence": 3,
+      "all_lifted_snapshots_empty": 5,
+      "no_eligible_snapshot": 4,
+      "mixed_held_and_empty": 2
+    },
+    "13": {
+      "insufficient_or_conflicting_evidence": 3,
+      "no_eligible_snapshot": 6,
+      "all_lifted_snapshots_empty": 4
+    },
+    "14": {
+      "mixed_held_and_empty": 5,
+      "short_multiframe_held_evidence": 3,
+      "all_lifted_snapshots_empty": 5,
+      "no_eligible_snapshot": 4,
+      "insufficient_or_conflicting_evidence": 4
+    }
+  },
+  "sensitivity_not_accuracy": {
+    "roi_only": {
+      "counts": {
+        "held_observed": 52,
+        "uncertain": 159,
+        "empty_observed": 62
+      },
+      "changed": [
+        {
+          "candidate_id": "E01-L002",
+          "before": "uncertain",
+          "after": "held_observed"
+        },
+        {
+          "candidate_id": "E02-R016",
+          "before": "uncertain",
+          "after": "held_observed"
+        },
+        {
+          "candidate_id": "E03-R006",
+          "before": "uncertain",
+          "after": "held_observed"
+        },
+        {
+          "candidate_id": "E04-R008",
+          "before": "held_observed",
+          "after": "uncertain"
+        },
+        {
+          "candidate_id": "E05-R007",
+          "before": "uncertain",
+          "after": "held_observed"
+        },
+        {
+          "candidate_id": "E06-L003",
+          "before": "held_observed",
+          "after": "uncertain"
+        },
+        {
+          "candidate_id": "E06-L004",
+          "before": "held_observed",
+          "after": "uncertain"
+        },
+        {
+          "candidate_id": "E06-R003",
+          "before": "uncertain",
+          "after": "held_observed"
+        },
+        {
+          "candidate_id": "E07-R004",
+          "before": "uncertain",
+          "after": "empty_observed"
+        },
+        {
+          "candidate_id": "E10-L003",
+          "before": "uncertain",
+          "after": "held_observed"
+        },
+        {
+          "candidate_id": "E11-R011",
+          "before": "uncertain",
+          "after": "empty_observed"
+        },
+        {
+          "candidate_id": "E14-R010",
+          "before": "uncertain",
+          "after": "empty_observed"
+        }
+      ],
+      "accuracy_measured": false,
+      "applied": false
+    },
+    "stable_empty_allows_unknown": {
+      "counts": {
+        "held_observed": 49,
+        "uncertain": 147,
+        "empty_observed": 77
+      },
+      "changed": [
+        {
+          "candidate_id": "E02-R001",
+          "before": "uncertain",
+          "after": "empty_observed"
+        },
+        {
+          "candidate_id": "E02-R012",
+          "before": "uncertain",
+          "after": "empty_observed"
+        },
+        {
+          "candidate_id": "E03-R004",
+          "before": "uncertain",
+          "after": "empty_observed"
+        },
+        {
+          "candidate_id": "E03-R008",
+          "before": "uncertain",
+          "after": "empty_observed"
+        },
+        {
+          "candidate_id": "E07-R003",
+          "before": "uncertain",
+          "after": "empty_observed"
+        },
+        {
+          "candidate_id": "E07-R004",
+          "before": "uncertain",
+          "after": "empty_observed"
+        },
+        {
+          "candidate_id": "E07-R005",
+          "before": "uncertain",
+          "after": "empty_observed"
+        },
+        {
+          "candidate_id": "E07-R006",
+          "before": "uncertain",
+          "after": "empty_observed"
+        },
+        {
+          "candidate_id": "E07-R008",
+          "before": "uncertain",
+          "after": "empty_observed"
+        },
+        {
+          "candidate_id": "E09-R002",
+          "before": "uncertain",
+          "after": "empty_observed"
+        },
+        {
+          "candidate_id": "E09-R004",
+          "before": "uncertain",
+          "after": "empty_observed"
+        },
+        {
+          "candidate_id": "E10-L006",
+          "before": "uncertain",
+          "after": "empty_observed"
+        },
+        {
+          "candidate_id": "E10-R005",
+          "before": "uncertain",
+          "after": "empty_observed"
+        },
+        {
+          "candidate_id": "E11-R006",
+          "before": "uncertain",
+          "after": "empty_observed"
+        },
+        {
+          "candidate_id": "E11-R011",
+          "before": "uncertain",
+          "after": "empty_observed"
+        },
+        {
+          "candidate_id": "E11-R013",
+          "before": "uncertain",
+          "after": "empty_observed"
+        },
+        {
+          "candidate_id": "E14-R008",
+          "before": "uncertain",
+          "after": "empty_observed"
+        },
+        {
+          "candidate_id": "E14-R010",
+          "before": "uncertain",
+          "after": "empty_observed"
+        }
+      ],
+      "accuracy_measured": false,
+      "applied": false
+    },
+    "held_stable_ignores_mixed": {
+      "counts": {
+        "held_observed": 70,
+        "uncertain": 144,
+        "empty_observed": 59
+      },
+      "changed": [
+        {
+          "candidate_id": "E01-L003",
+          "before": "uncertain",
+          "after": "held_observed"
+        },
+        {
+          "candidate_id": "E02-R005",
+          "before": "uncertain",
+          "after": "held_observed"
+        },
+        {
+          "candidate_id": "E03-R001",
+          "before": "uncertain",
+          "after": "held_observed"
+        },
+        {
+          "candidate_id": "E03-R002",
+          "before": "uncertain",
+          "after": "held_observed"
+        },
+        {
+          "candidate_id": "E04-R019",
+          "before": "uncertain",
+          "after": "held_observed"
+        },
+        {
+          "candidate_id": "E04-R022",
+          "before": "uncertain",
+          "after": "held_observed"
+        },
+        {
+          "candidate_id": "E04-R024",
+          "before": "uncertain",
+          "after": "held_observed"
+        },
+        {
+          "candidate_id": "E05-R002",
+          "before": "uncertain",
+          "after": "held_observed"
+        },
+        {
+          "candidate_id": "E05-R004",
+          "before": "uncertain",
+          "after": "held_observed"
+        },
+        {
+          "candidate_id": "E07-L002",
+          "before": "uncertain",
+          "after": "held_observed"
+        },
+        {
+          "candidate_id": "E07-R001",
+          "before": "uncertain",
+          "after": "held_observed"
+        },
+        {
+          "candidate_id": "E08-R007",
+          "before": "uncertain",
+          "after": "held_observed"
+        },
+        {
+          "candidate_id": "E09-L005",
+          "before": "uncertain",
+          "after": "held_observed"
+        },
+        {
+          "candidate_id": "E10-L001",
+          "before": "uncertain",
+          "after": "held_observed"
+        },
+        {
+          "candidate_id": "E11-R003",
+          "before": "uncertain",
+          "after": "held_observed"
+        },
+        {
+          "candidate_id": "E12-R002",
+          "before": "uncertain",
+          "after": "held_observed"
+        },
+        {
+          "candidate_id": "E14-L001",
+          "before": "uncertain",
+          "after": "held_observed"
+        },
+        {
+          "candidate_id": "E14-L003",
+          "before": "uncertain",
+          "after": "held_observed"
+        },
+        {
+          "candidate_id": "E14-L004",
+          "before": "uncertain",
+          "after": "held_observed"
+        },
+        {
+          "candidate_id": "E14-R009",
+          "before": "uncertain",
+          "after": "held_observed"
+        },
+        {
+          "candidate_id": "E14-R012",
+          "before": "uncertain",
+          "after": "held_observed"
+        }
+      ],
+      "accuracy_measured": false,
+      "applied": false
+    }
+  },
+  "automatic_tracking": false,
+  "training_executed": false,
+  "rewards_published": false,
+  "dataset_modified": false,
+  "raw_boundary_audit": {
+    "boundaries": 126,
+    "measured_and_pose_valid": 126,
+    "observation_invalid": 126,
+    "tick_and_epoch_continuous": 126,
+    "all_camera_received_zero": 126,
+    "no_eligible_boundaries": 55,
+    "no_eligible_missing_row_counts": {
+      "1": 51,
+      "3": 1,
+      "2": 2,
+      "4": 1
+    },
+    "no_eligible_max_recovery_s": 0.1714733480475843
+  }
+}
