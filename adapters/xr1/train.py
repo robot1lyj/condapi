@@ -51,6 +51,7 @@ def inspect_recipe(recipe_path, output):
         "optimizer_offload",
         "communication_bucket_size",
         "logger_backend",
+        "fk_verification_scope",
     }
     if recipe.get("schema_version") != 1 or set(recipe) - keys:
         raise ValueError("Invalid XR-1 recipe schema")
@@ -78,6 +79,8 @@ def inspect_recipe(recipe_path, output):
         raise ValueError("optimizer_offload must be boolean")
     if recipe.get("logger_backend", "wandb") not in ("csv", "wandb"):
         raise ValueError("logger_backend must be csv or wandb")
+    if recipe.get("fk_verification_scope", "independent") not in ("independent", "documented_nominal_training"):
+        raise ValueError("Unrecognized FK verification scope")
     if type(recipe.get("communication_bucket_size", 500000000)) is not int or recipe.get("communication_bucket_size", 500000000) < 1:
         raise ValueError("communication_bucket_size must be a positive integer")
     for field in ("project", "experiment"):
@@ -158,8 +161,22 @@ def inspect_recipe(recipe_path, output):
     )
     if any(key not in audit for key in required):
         raise ValueError("Incomplete YAM FK audit")
-    if audit["source_contract"] != "yam-bimanual-v1" or any(audit[key] is not True for key in required[-2:]):
-        raise ValueError("YAM FK, units and target timing must be verified")
+    if audit["source_contract"] != "yam-bimanual-v1":
+        raise ValueError("Wrong FK source contract")
+    if recipe.get("fk_verification_scope", "independent") == "independent":
+        if any(audit[key] is not True for key in required[-2:]):
+            raise ValueError("Independent YAM units and target timing must be verified")
+    else:
+        # A documented nominal experiment is explicit in the recipe. It must
+        # never turn missing raw-unit/capture-time evidence into verified facts.
+        if (audit.get("verification_scope") != "documented_nominal_training"
+                or any(audit.get(key) is not True for key in (
+                    "nominal_fk_verified", "source_row_alignment_verified", "documented_unit_contract_verified"))
+                or audit["frames_and_units_verified"] is not False
+                or audit["target_alignment_verified"] is not False
+                or audit.get("robot_calibration_verified") is not False
+                or audit.get("raw_command_capture_timing_verified") is not False):
+            raise ValueError("Incomplete nominal FK audit or falsely promoted independent verification")
     identity_fields = ("source_dataset", "source_revision", "fk_model_sha256")
     if any(not isinstance(audit[key], str) or not audit[key] for key in identity_fields):
         raise ValueError("YAM source and FK identity must be recorded")

@@ -23,6 +23,29 @@ from adapters.xr1.prepare_lego import digest
 from adapters.xr1.prepare_lego import verify_fk_bundle
 
 
+def nominal_scope(report):
+    return {**report,
+            "verification_scope": "documented_nominal_training",
+            "frames_and_units_verified": False, "target_alignment_verified": False,
+            "nominal_fk_verified": True, "source_row_alignment_verified": True,
+            "documented_unit_contract_verified": True,
+            "robot_calibration_verified": False, "raw_command_capture_timing_verified": False}
+
+
+def publish(report, output):
+    output.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.NamedTemporaryFile(mode="w", dir=output.parent, delete=False) as stream:
+        temporary = Path(stream.name)
+        json.dump(report, stream, indent=2)
+        stream.write("\n")
+        stream.flush()
+        os.fsync(stream.fileno())
+    try:
+        os.link(temporary, output)
+    finally:
+        temporary.unlink()
+
+
 def audit(manifest_path, stats_path, output, shard=0, shards=1):
     manifest = json.loads(manifest_path.read_text())
     root = Path(manifest["source_repo"])
@@ -120,17 +143,8 @@ def audit(manifest_path, stats_path, output, shard=0, shards=1):
         "video_scope": "all derived hashes/frame counts and source-offset metadata; full source pixel equivalence not claimed",
         "auditor_sha256": digest(Path(__file__)), "stats_sha256": digest(stats_path),
     }
-    output.parent.mkdir(parents=True, exist_ok=True)
-    with tempfile.NamedTemporaryFile(mode="w", dir=output.parent, delete=False) as stream:
-        temporary = Path(stream.name)
-        json.dump(report, stream, indent=2)
-        stream.write("\n")
-        stream.flush()
-        os.fsync(stream.fileno())
-    try:
-        os.link(temporary, output)  # exclusive publication; never overwrite an audit
-    finally:
-        temporary.unlink()
+    report = nominal_scope(report)
+    publish(report, output)
     print(json.dumps({"status": "nominal_training_audit_complete", "output": str(output), "frames": total}), flush=True)
     return report
 
@@ -153,10 +167,36 @@ def parallel_audit(manifest, stats, output, workers):
             or combined["frames"] != sum(e["frames"] for e in identity["episodes"])
             or sorted(e for r in reports for e in r["train_episode_ids"]) != sorted(identity["episode_ids"])):
         raise ValueError("Audit shard membership does not cover the exact training split")
-    with output.open("x") as stream:
-        json.dump(combined, stream, indent=2)
-        stream.write("\n")
+    publish(combined, output)
     print(json.dumps({"status": "full_nominal_training_audit_complete", "frames": combined["frames"], "output": str(output)}), flush=True)
+
+
+def review_nominal_report(report_path, manifest_path, stats_path, output):
+    """Clarify legacy nominal-only booleans without claiming new measurements."""
+    report = json.loads(report_path.read_text())
+    manifest = json.loads(manifest_path.read_text())
+    stats = json.loads(stats_path.read_text())
+    expected = {e["json"]: e["json_sha256"] for e in manifest["episodes"]}
+    if (not report["verification_scope"].startswith("nominal_training_contract:")
+            or report["train_json_sha256"] != expected or stats["train_json_sha256"] != expected
+            or report["train_episode_ids"] != manifest["episode_ids"]
+            or report["source_revision"] != manifest["source_manifest_sha256"]
+            or report["source_dataset"] != manifest["source_repo"]
+            or report["fk_model_sha256"] != manifest["fk_model_sha256"]
+            or report["frames"] != sum(e["frames"] for e in manifest["episodes"])
+            or report["episodes"] != len(expected) or stats["train_manifest_sha256"] != digest(manifest_path)
+            or report["stats_sha256"] != digest(stats_path)
+            or any(not np.isfinite(v) or v < 0 or v > 1e-9 for v in report["max_errors"].values())
+            or report["unit_contract"]["joint_unit"] != "radian"
+            or report["robot_calibration_verified"] is not False
+            or report["raw_command_capture_timing_verified"] is not False):
+        raise ValueError("Legacy report does not prove the full nominal training contract")
+    reviewed = nominal_scope(report)
+    reviewed["review_source_sha256"] = digest(report_path)
+    reviewed["scope_reviewer_sha256"] = digest(Path(__file__))
+    reviewed["scope_review_note"] = "Original measurements retained; independent raw units/timing stay unverified. Legacy booleans only described nominal source-row/FK checks."
+    publish(reviewed, output)
+    print(json.dumps({"status": "documented_nominal_training", "frames": reviewed["frames"], "max_errors": reviewed["max_errors"]}), flush=True)
 
 
 def main():
@@ -165,10 +205,13 @@ def main():
     parser.add_argument("--stats", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--workers", type=int, default=1)
+    parser.add_argument("--review-report", type=Path)
     args = parser.parse_args()
     if not 1 <= args.workers <= 8:
         parser.error("workers must be 1..8")
-    if args.workers == 1:
+    if args.review_report:
+        review_nominal_report(args.review_report, args.manifest, args.stats, args.output)
+    elif args.workers == 1:
         audit(args.manifest, args.stats, args.output)
     else:
         parallel_audit(args.manifest, args.stats, args.output, args.workers)
