@@ -12,6 +12,7 @@ OpenWAM独立镜像、官方权重、LoRA合并与压缩候选见 [14 · OpenWAM
 
 - **2026-10-10 PARTS 视觉环境独立安装**：新增 `parts-vision:thor-sam3-0570b3a-20261010-r3`，模型和报告在 `/home/wuyan-lyj/thor/parts-vision/`，不改 Pi 容器或生产接口。已验证 NVIDIA 原生 CUDA、torchvision NMS、依赖一致性与 SAM3 随机权重前向；随机预测不用于标签。用户提供公开权重仓库，官方与镜像 `sam3.pt` metadata SHA256/大小一致，本地下载、校验后转运 Thor，真实权重和视觉验收状态归[本轮报告](reports/thor/parts-vision-20261010/README.md)。计算沿用上游 BF16 autocast、FP32 参数；这不是 Pi 精度路线变更。未启用 RL/控制设备，未修改 3588。
 - **DINOv3无跟踪诊断**：复用上述镜像内timm1.0.27，无依赖安装或Pi变更。公开timm ViT-S/16权重固定revision `3bf4720a82ec2066db88137180ff1f83a675cef0`、SHA `2a1ec16ae28ffa07bc0ead0241ee7df9fc26451fe6f9f839b7b3afa0a906b040`，本地下载后传Thor并实算复核；这是timm移植版，不冒称与Meta原checkpoint逐位一致。40图冻结特征前向退出0、无训练。环境/产物继续归[视觉报告](reports/thor/parts-vision-20261010/README.md)与[逐抓取报告](reports/rl/parts-grasp-review14-20261010/README.md)。
+- **全量273候选分类**：同镜像独立`parts-full-sam3-1019-20261010`与`parts-full-dinov3-999-20261010`均退出0，无网络/控制设备映射；SAM3处理1019图约254.92秒，DINO池化特征999图约4.69秒、CUDA峰值allocated127,606,272字节（非进程总显存/在线并发）。当前容器均已结束，无RL训练或Pi/3588改动。结果持物49、空手59、待复核165，尚无用户奖励批准；详细身份与备份归逐抓取报告。
 
   后续完整离线批次 `parts-grasp-labels-20261010` 已退出0、无OOM，3846图推理约21.49分钟；273段审核视频已完整解码。自动建议成功2/失败0/不确定271，**环境通过不等于自动奖励通过**。扩展外观提示词、框/点提示在独立小批容器验证，不覆盖初版结果；仅Thor离线GPU，不映射机器人设备、不开生产端口。数据与限制归[逐抓取报告](reports/rl/parts-grasp-review14-20261010/README.md)。
 

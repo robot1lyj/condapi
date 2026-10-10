@@ -16,6 +16,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--dataset", type=Path, required=True)
     parser.add_argument("--weights", type=Path, required=True)
+    parser.add_argument("--skip-dense", action="store_true", help="Save only pooled ROI and CLS features")
     args = parser.parse_args()
     if platform.machine() != "aarch64":
         parser.error("neural inference executes on Thor only")
@@ -72,18 +73,20 @@ def main():
             pooled = (patches * w[:, :, None]).sum(1) / w.sum(1)[:, None]
             cls_features.append(tokens[:, 0].float().cpu().numpy())
             roi_features.append(pooled.cpu().numpy())
-            dense_features.append(patches.cpu().numpy())
+            if not args.skip_dense:
+                dense_features.append(patches.cpu().numpy())
             print(json.dumps({"completed": start + len(group), "total": len(jobs)}), flush=True)
     np.savez_compressed(
         output / "features.npz",
         ids=np.array([j["id"] for j in jobs]),
         cls=np.concatenate(cls_features),
         roi=np.concatenate(roi_features),
-        patches=np.concatenate(dense_features),
+        **({"patches": np.concatenate(dense_features)} if dense_features else {}),
     )
     report = {
         "schema": "parts_frozen_dinov3_probe_v1",
         "images": len(jobs),
+        "dense_features_saved": not args.skip_dense,
         "model": "timm/vit_small_patch16_dinov3.lvd1689m",
         "revision": "3bf4720a82ec2066db88137180ff1f83a675cef0",
         "weights_sha256": weight_sha,

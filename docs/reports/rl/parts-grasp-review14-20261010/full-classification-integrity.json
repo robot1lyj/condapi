@@ -1,0 +1,18 @@
+{
+  "candidates": 273,
+  "frame_classifications": 1019,
+  "all_candidate_ids_retained": true,
+  "reference_exclusion_checked": true,
+  "reference_features_match_source": true,
+  "source_and_clip_sha_verified": true,
+  "execution_script_sha_verified": true,
+  "all_rewards_unapproved": true,
+  "http_resources": 2943,
+  "http_errors": 0,
+  "proposed_reward_counts": {
+    "1": 49,
+    "0": 59,
+    "null": 165
+  },
+  "training_executed": false
+}

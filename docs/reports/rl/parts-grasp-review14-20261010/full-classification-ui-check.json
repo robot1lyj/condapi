@@ -1,0 +1,10 @@
+{
+  "qa_dataset_id": "lego-grasp-classified14-20261010-v2-uiqa",
+  "qa_only": true,
+  "label_and_notes_persist_after_reload": true,
+  "export_import_restores": true,
+  "production_reviewed": 0,
+  "production_spot_filter_count": 24,
+  "production_video_error": null,
+  "actual_reward_approval": false
+}

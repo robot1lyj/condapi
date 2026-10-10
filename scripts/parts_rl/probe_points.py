@@ -33,6 +33,8 @@ def main():
     parser.add_argument("--dataset", type=Path, required=True)
     parser.add_argument("--checkpoint", type=Path, required=True)
     parser.add_argument("--adaptive-anchors", action="store_true")
+    parser.add_argument("--retain-missing-anchors", action="store_true",
+                        help="Keep missing provisional anchors as unknown instead of aborting the batch")
     args = parser.parse_args()
     if platform.machine() != "aarch64":
         parser.error("model inference executes on Thor only")
@@ -64,11 +66,20 @@ def main():
             image = Image.open(path).convert("RGB")
             if image.size != (640, 480):
                 raise ValueError("anchor probe requires recorded 640x480 wrist configuration")
-            state = processor.set_image(image)
             results = []
             rgb = np.asarray(image)
-            left = bottom_dark_anchor(rgb, "left") if args.adaptive_anchors else [90, 450]
-            right = bottom_dark_anchor(rgb, "right") if args.adaptive_anchors else [550, 450]
+            try:
+                left = bottom_dark_anchor(rgb, "left") if args.adaptive_anchors else [90, 450]
+                right = bottom_dark_anchor(rgb, "right") if args.adaptive_anchors else [550, 450]
+            except ValueError as exc:
+                if not args.retain_missing_anchors:
+                    raise
+                record = {"job": job, "results": [], "unknown_reason": str(exc), "approved_reward": None}
+                (output / (job["id"] + ".json")).write_text(json.dumps(record, allow_nan=False) + "\n")
+                records.append(record)
+                print(json.dumps({"completed": len(records), "total": len(jobs), "unknown": str(exc)}), flush=True)
+                continue
+            state = processor.set_image(image)
             for name, points in (("left_finger", [left, right, [320, 200]]),
                                  ("right_finger", [right, left, [320, 200]])):
                 masks, scores, logits = model.predict_inst(
@@ -94,6 +105,8 @@ def main():
               "elapsed_s": time.monotonic() - started, "checkpoint_sha256": checkpoint_sha,
               "pipeline_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
               "anchor_method": "longest_bottom_dark_run" if args.adaptive_anchors else "fixed_camera_points",
+              "missing_anchor_images": sum(not r["results"] for r in records),
+              "retain_missing_anchors": args.retain_missing_anchors,
               "anchors_provisional": True, "accuracy_measured": False, "automatic_reward_ready": False,
               "training_executed": False}
     (args.dataset / (prefix + "-summary.json")).write_text(json.dumps(report, indent=2) + "\n")

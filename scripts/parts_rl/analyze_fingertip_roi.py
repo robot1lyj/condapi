@@ -113,6 +113,8 @@ def main():
             raise ValueError("prediction identity mismatch")
         overlay = rgb.copy()
         try:
+            if len(pred["results"]) != 2:
+                raise ValueError(pred.get("unknown_reason", "two finger segmentations required"))
             result, roi, colored, masks = measure(rgb, pred["results"], root)
             for mask in masks:
                 overlay[mask] = (overlay[mask] * 0.65 + np.array([30, 170, 90]) * 0.35).astype(np.uint8)

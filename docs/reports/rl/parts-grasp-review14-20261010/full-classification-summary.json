@@ -1,0 +1,124 @@
+{
+  "schema": "parts_full_grasp_review_v2",
+  "dataset_id": "lego-grasp-classified14-20261010-v2",
+  "episodes": 14,
+  "candidates": 273,
+  "images": 1019,
+  "dinov3_images": 999,
+  "suggested_counts": {
+    "held_observed": 49,
+    "uncertain": 165,
+    "empty_observed": 59
+  },
+  "frame_label_counts": {
+    "held_at_snapshot": 327,
+    "uncertain": 207,
+    "empty_at_snapshot": 485
+  },
+  "reason_counts": {
+    "short_multiframe_held_evidence": 49,
+    "insufficient_or_conflicting_evidence": 59,
+    "mixed_held_and_empty": 43,
+    "no_eligible_snapshot": 63,
+    "all_lifted_snapshots_empty": 59
+  },
+  "per_episode": {
+    "1": {
+      "held_observed": 3,
+      "uncertain": 6,
+      "empty_observed": 1
+    },
+    "2": {
+      "held_observed": 6,
+      "uncertain": 10,
+      "empty_observed": 5
+    },
+    "3": {
+      "uncertain": 11,
+      "held_observed": 3,
+      "empty_observed": 4
+    },
+    "4": {
+      "held_observed": 7,
+      "uncertain": 33
+    },
+    "5": {
+      "held_observed": 3,
+      "uncertain": 9,
+      "empty_observed": 3
+    },
+    "6": {
+      "uncertain": 4,
+      "empty_observed": 2,
+      "held_observed": 4
+    },
+    "7": {
+      "uncertain": 16,
+      "held_observed": 2,
+      "empty_observed": 5
+    },
+    "8": {
+      "held_observed": 5,
+      "empty_observed": 6,
+      "uncertain": 11
+    },
+    "9": {
+      "held_observed": 2,
+      "uncertain": 7,
+      "empty_observed": 1
+    },
+    "10": {
+      "uncertain": 15,
+      "empty_observed": 6,
+      "held_observed": 3
+    },
+    "11": {
+      "uncertain": 10,
+      "held_observed": 5,
+      "empty_observed": 12
+    },
+    "12": {
+      "uncertain": 11,
+      "held_observed": 3,
+      "empty_observed": 5
+    },
+    "13": {
+      "uncertain": 9,
+      "empty_observed": 4
+    },
+    "14": {
+      "uncertain": 13,
+      "held_observed": 3,
+      "empty_observed": 5
+    }
+  },
+  "per_arm": {
+    "left": {
+      "held_observed": 35,
+      "uncertain": 56,
+      "empty_observed": 17
+    },
+    "right": {
+      "uncertain": 109,
+      "held_observed": 14,
+      "empty_observed": 42
+    }
+  },
+  "source_candidates_sha256": "a9e88d693dee9261b785997b8a42dc0a69cac270fafb1326c65e1daab48b25b1",
+  "all_candidates_retained": true,
+  "reference_exclusion": "exclude the whole query episode and matching image SHA from both feature banks",
+  "reference_images": 20,
+  "reference_labels_user_approved": false,
+  "independent_accuracy_measured": false,
+  "automatic_tracking": false,
+  "training_executed": false,
+  "approved_rewards": 0,
+  "reviewed": 0,
+  "ready_for_training": false,
+  "automatic_reward_ready": false,
+  "hold_evidence_min_span_s": 0.12,
+  "max_capture_gap_s": 0.25,
+  "protocol_sha256": "99ca1cf03c1a7789fd8f9095118e7b5cffd67be4b9ecbecaaa7df298dfe83ad8",
+  "pipeline_sha256": "072f249e441b7ca066c701fc2071d107cc6dcfc3bf74100321da1cee3de28d8e",
+  "spot_check_candidates": 24
+}
