@@ -17,7 +17,9 @@ output=${XR1_RUN_OUTPUT:-/home/wuyan/lyj/xiaomi-robotics-1/runs/lego-50h-eef-v1-
 [[ "$(git -C "$code" rev-parse HEAD)" == "$revision" ]] || { echo 'Code revision differs'; exit 2; }
 [[ -z "$(git -C "$code" status --porcelain --untracked-files=no)" ]] || { echo 'Tracked source was modified'; exit 2; }
 export PATH=/home/wuyan/.conda/envs/xr1-posttrain/bin:$PATH
-export CUDA_HOME=/home/wuyan/.conda/envs/xr1-posttrain
+# Reuse only the validated CUDA SDK read-only; Python/model dependencies are
+# loaded exclusively from xr1-posttrain. The system CUDA 13.2 is incompatible.
+export CUDA_HOME=${XR1_CUDA_HOME:-/home/wuyan/.conda/envs/vla-openwam}
 export HF_HOME=/home/wuyan/lyj/xiaomi-robotics-1/hf-home
 export HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 PYTHONUNBUFFERED=1
 export OMP_NUM_THREADS=8 OPENBLAS_NUM_THREADS=1 MAX_JOBS=8
