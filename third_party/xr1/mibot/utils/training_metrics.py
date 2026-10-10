@@ -19,6 +19,10 @@ class TrainingMetrics(Callback):
     def on_train_start(self, trainer, pl_module):
         self.last_step = trainer.global_step
 
+    def on_train_batch_start(self, trainer, pl_module, batch, batch_idx):
+        # XR-1 consumes action with pop(); capture its true packed batch first.
+        self.local_batch = int(batch["action"].shape[0])
+
     def on_before_optimizer_step(self, trainer, pl_module, optimizer):
         if trainer.global_step >= 3:
             return
@@ -43,7 +47,7 @@ class TrainingMetrics(Callback):
         engine = trainer.strategy.model
         if engine.global_steps != trainer.global_step:
             raise RuntimeError("Lightning step differs from the actual DeepSpeed optimizer step")
-        local_batch = int(batch["action"].shape[0])
+        local_batch = self.local_batch
         if local_batch != engine.train_micro_batch_size_per_gpu():
             raise RuntimeError("Native token packing dropped samples; the declared global batch is no longer valid")
         self.last_step = trainer.global_step
