@@ -250,11 +250,14 @@ def main(argv=None):
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--check-only", action="store_true")
     parser.add_argument("--resume", action="store_true", help="Restore the same run's committed last.ckpt full state")
+    parser.add_argument("--stop-after", type=int, help="Stop at this cumulative step without changing the run's LR/data contract")
     args = parser.parse_args(argv)
     recipe, stats, provenance = inspect_recipe(args.recipe, args.output)
     if file_hash(recipe["pretrained"]) != recipe["checkpoint_sha256"]:
         raise ValueError("XR-1 pretrained checkpoint SHA256 mismatch")
     config = compose_config(recipe, stats, args.output.resolve())
+    if args.stop_after is not None and not 0 < args.stop_after <= recipe["max_steps"]:
+        parser.error("stop-after must be between 1 and recipe max_steps")
     output = args.output.resolve()
     if args.resume:
         sys.path.insert(0, str(VENDOR))
@@ -273,6 +276,8 @@ def main(argv=None):
         receipt = validate_checkpoint(last, recipe["nproc_per_node"])
         if receipt["global_step"] >= recipe["max_steps"]:
             parser.error("Run already reached its target step")
+        if args.stop_after is not None and args.stop_after <= receipt["global_step"]:
+            parser.error("stop-after must exceed the recovery step")
         config["trainer"]["ckpt_path"] = str(last.resolve())
     if args.check_only:
         print(json.dumps({"status": "config_ready_not_gpu_validated", "provenance": provenance}, indent=2))
@@ -301,6 +306,11 @@ def main(argv=None):
     OmegaConf.save(OmegaConf.create(config), output / f"{config_name}.yaml")
     if not args.resume:
         (output / "provenance.json").write_text(json.dumps(provenance, indent=2) + "\n")
+    if args.stop_after is not None:
+        # Keep the canonical scheduler and data length intact across segments.
+        config["trainer"]["max_steps"] = args.stop_after
+        config_name += "-stop"
+        OmegaConf.save(OmegaConf.create(config), output / f"{config_name}.yaml")
     env = dict(os.environ)
     env["PYTHONPATH"] = str(VENDOR) + os.pathsep + env.get("PYTHONPATH", "")
     env["WANDB_MODE"] = "offline"
