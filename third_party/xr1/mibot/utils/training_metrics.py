@@ -24,6 +24,9 @@ class TrainingMetrics(Callback):
         engine = trainer.strategy.model
         if engine.global_steps != trainer.global_step:
             raise RuntimeError("Lightning step differs from the actual DeepSpeed optimizer step")
+        local_batch = int(batch["action"].shape[0])
+        if local_batch != engine.train_micro_batch_size_per_gpu():
+            raise RuntimeError("Native token packing dropped samples; the declared global batch is no longer valid")
         self.last_step = trainer.global_step
         values = {name: float(value.detach().float().cpu()) if isinstance(value, torch.Tensor) else float(value)
                   for name, value in trainer.callback_metrics.items()}
@@ -35,7 +38,7 @@ class TrainingMetrics(Callback):
             now = time.time()
             record = {"step": trainer.global_step, "time": now,
                       "step_seconds": now - self.last_time if self.last_time is not None else None,
-                      "global_batch": engine.train_batch_size(), "metrics": values,
+                      "global_batch": engine.train_batch_size(), "local_batch": local_batch, "metrics": values,
                       "gpu_peak_allocated_bytes": torch.cuda.max_memory_allocated(),
                       "gpu_peak_reserved_bytes": torch.cuda.max_memory_reserved()}
             self.last_time = now

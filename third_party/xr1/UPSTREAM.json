@@ -47,7 +47,7 @@
     "mibot/utils/async_prefix.py": "2db37d84e10605aa02702b8afd5d7d31293107e46166ae56e779e3bf6a8cf4b2",
     "mibot/utils/checkpoint_contract.py": "2f7dda570ccbe9417ba67466a492fe3c627fe2749351104cc9c61a51f011623d",
     "mibot/utils/periodic_checkpoint.py": "3b4aae6e03a71a8c5b65b70502418129080a4e73d8bb7f52b36ee9339308ed45",
-    "mibot/utils/training_metrics.py": "5f683347749b92115fa9490c81782fa0c5429b443530f58495999b3c65b03942"
+    "mibot/utils/training_metrics.py": "45c7a7b5dcc9d5032dac823572e8fd951894fcfbc6dec9ec9db1a0470f93c835"
   },
   "local_patches": [
     {
