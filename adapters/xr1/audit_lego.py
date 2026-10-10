@@ -5,6 +5,7 @@ or physical robot calibration. Those limitations remain explicit in the report.
 """
 
 import argparse
+from concurrent.futures import ProcessPoolExecutor
 import json
 import os
 from pathlib import Path
@@ -22,7 +23,7 @@ from adapters.xr1.prepare_lego import digest
 from adapters.xr1.prepare_lego import verify_fk_bundle
 
 
-def audit(manifest_path, stats_path, output):
+def audit(manifest_path, stats_path, output, shard=0, shards=1):
     manifest = json.loads(manifest_path.read_text())
     root = Path(manifest["source_repo"])
     source_path = root / "conversion_manifest.json"
@@ -42,6 +43,8 @@ def audit(manifest_path, stats_path, output):
     expected = {e["json"]: e["json_sha256"] for e in manifest["episodes"]}
     if stats["train_manifest_sha256"] != digest(manifest_path) or stats["train_json_sha256"] != expected:
         raise ValueError("Norm is not bound to this exact training split")
+    entries = manifest["episodes"][shard::shards]
+    expected = {e["json"]: e["json_sha256"] for e in entries}
     metadata = _episode_metadata(root, info)
     fk = ForwardKinematics(xml)
     errors = {"fk_position_m": 0.0, "fk_rotation_matrix": 0.0, "source_value": 0.0}
@@ -56,7 +59,7 @@ def audit(manifest_path, stats_path, output):
         if error > tolerance:
             raise ValueError(f"{label} differs from the source: {error}")
 
-    for index, entry in enumerate(manifest["episodes"]):
+    for index, entry in enumerate(entries):
         path = Path(entry["json"])
         if digest(path) != entry["json_sha256"]:
             raise ValueError(f"Derived JSON changed: {path}")
@@ -103,10 +106,10 @@ def audit(manifest_path, stats_path, output):
                     compare(episode[group][f"{name}_arm_joint"], joints[:, arm * 7:arm * 7 + 6], "source_value")
         total += len(state)
         if (index + 1) % 25 == 0:
-            print(json.dumps({"audited_episodes": index + 1, "frames": total}), flush=True)
+            print(json.dumps({"shard": shard, "audited_episodes": index + 1, "frames": total}), flush=True)
     report = {
         "schema_version": 1, "source_contract": "yam-bimanual-v1", "source_dataset": str(root),
-        "source_revision": manifest["source_manifest_sha256"], "train_episode_ids": manifest["episode_ids"],
+        "source_revision": manifest["source_manifest_sha256"], "train_episode_ids": [e["episode_index"] for e in entries],
         "fk_model": str(xml), "fk_model_sha256": manifest["fk_model_sha256"],
         "train_json_sha256": expected, "frames_and_units_verified": True, "target_alignment_verified": True,
         "verification_scope": "nominal_training_contract: documented units, exact source-row preservation and FK; not physical calibration",
@@ -129,6 +132,31 @@ def audit(manifest_path, stats_path, output):
     finally:
         temporary.unlink()
     print(json.dumps({"status": "nominal_training_audit_complete", "output": str(output), "frames": total}), flush=True)
+    return report
+
+
+def parallel_audit(manifest, stats, output, workers):
+    parts = output.with_name(output.name + ".parts")
+    parts.mkdir(exist_ok=False)
+    with ProcessPoolExecutor(max_workers=workers) as pool:
+        tasks = [pool.submit(audit, manifest, stats, parts / f"shard-{i}.json", i, workers) for i in range(workers)]
+        reports = [task.result() for task in tasks]
+    identity = json.loads(manifest.read_text())
+    combined = dict(reports[0])
+    combined["train_episode_ids"] = identity["episode_ids"]
+    combined["train_json_sha256"] = {k: v for r in reports for k, v in r["train_json_sha256"].items()}
+    combined["frames"] = sum(r["frames"] for r in reports)
+    combined["episodes"] = sum(r["episodes"] for r in reports)
+    combined["max_errors"] = {k: max(r["max_errors"][k] for r in reports) for k in combined["max_errors"]}
+    if (combined["train_json_sha256"] != {e["json"]: e["json_sha256"] for e in identity["episodes"]}
+            or combined["episodes"] != len(identity["episodes"])
+            or combined["frames"] != sum(e["frames"] for e in identity["episodes"])
+            or sorted(e for r in reports for e in r["train_episode_ids"]) != sorted(identity["episode_ids"])):
+        raise ValueError("Audit shard membership does not cover the exact training split")
+    with output.open("x") as stream:
+        json.dump(combined, stream, indent=2)
+        stream.write("\n")
+    print(json.dumps({"status": "full_nominal_training_audit_complete", "frames": combined["frames"], "output": str(output)}), flush=True)
 
 
 def main():
@@ -136,8 +164,14 @@ def main():
     parser.add_argument("--manifest", type=Path, required=True)
     parser.add_argument("--stats", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--workers", type=int, default=1)
     args = parser.parse_args()
-    audit(args.manifest, args.stats, args.output)
+    if not 1 <= args.workers <= 8:
+        parser.error("workers must be 1..8")
+    if args.workers == 1:
+        audit(args.manifest, args.stats, args.output)
+    else:
+        parallel_audit(args.manifest, args.stats, args.output, args.workers)
 
 
 if __name__ == "__main__":
