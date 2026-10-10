@@ -6,7 +6,7 @@ from typing import Any, Dict, List, Optional, Tuple
 import hydra
 from lightning import LightningDataModule, LightningModule, Trainer
 from lightning.pytorch.callbacks import ModelCheckpoint, ModelSummary
-from lightning.pytorch.loggers import WandbLogger
+from lightning.pytorch.loggers import CSVLogger, WandbLogger
 
 from mmengine import Config, DATASETS
 from omegaconf import DictConfig
@@ -38,13 +38,14 @@ def prepare(cfg: Dict[str, Any]) -> Tuple[Config, LightningDataModule, Lightning
         checkpoint,
     ]
 
-    logger: List[Any] = [
-        WandbLogger(
-            project=cfg.trainer.pop("project"),
-            name=cfg.trainer.pop("exp_name"),
-            config=cfg,
-        )
-    ]
+    backend = cfg.trainer.pop("logger_backend", "wandb")
+    project, experiment = cfg.trainer.pop("project"), cfg.trainer.pop("exp_name")
+    if backend == "csv":
+        logger = [CSVLogger(save_dir=cfg.trainer.default_root_dir, name="metrics", version="", flush_logs_every_n_steps=1)]
+    elif backend == "wandb":
+        logger = [WandbLogger(project=project, name=experiment, config=cfg)]
+    else:
+        raise ValueError(f"Unknown logger backend: {backend}")
 
     logging.getLogger("lightning.pytorch").setLevel(logging.INFO)
 

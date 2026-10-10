@@ -50,6 +50,7 @@ def inspect_recipe(recipe_path, output):
         "async_prefix_max",
         "optimizer_offload",
         "communication_bucket_size",
+        "logger_backend",
     }
     if recipe.get("schema_version") != 1 or set(recipe) - keys:
         raise ValueError("Invalid XR-1 recipe schema")
@@ -75,6 +76,8 @@ def inspect_recipe(recipe_path, output):
         raise ValueError("keep_period must be a positive multiple of save_interval")
     if type(recipe.get("optimizer_offload", False)) is not bool:
         raise ValueError("optimizer_offload must be boolean")
+    if recipe.get("logger_backend", "wandb") not in ("csv", "wandb"):
+        raise ValueError("logger_backend must be csv or wandb")
     if type(recipe.get("communication_bucket_size", 500000000)) is not int or recipe.get("communication_bucket_size", 500000000) < 1:
         raise ValueError("communication_bucket_size must be a positive integer")
     for field in ("project", "experiment"):
@@ -238,6 +241,9 @@ def compose_config(recipe, stats, output):
     if "keep_period" in recipe:
         with open_dict(config.trainer):
             config.trainer.keep_period = recipe["keep_period"]
+    with open_dict(config.trainer):
+        config.trainer.logger_backend = recipe.get("logger_backend", "wandb")
+        config.trainer.log_every_n_steps = 1
     config.trainer.project = recipe["project"]
     config.trainer.exp_name = recipe["experiment"]
     config.trainer.default_root_dir = str(output / "native")

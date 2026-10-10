@@ -18,6 +18,7 @@
   "gradient_accumulation": 8,
   "optimizer_offload": true,
   "communication_bucket_size": 20000000,
+  "logger_backend": "csv",
   "rtc_mode": "native_async",
   "async_prefix_min": 1,
   "async_prefix_max": 10,
