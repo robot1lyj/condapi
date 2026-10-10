@@ -18,7 +18,7 @@
     "mibot/data/collate/__init__.py": "06842f92f268d5552854377e69b9694968c576197addb8a43d6949c9cc176faf",
     "mibot/data/collate/custom_collate.py": "ed85a33fdb8297d0837a04f362ef26e3ad1b260b26f52d24e9b140597972fb44",
     "mibot/data/datamodule/__init__.py": "06842f92f268d5552854377e69b9694968c576197addb8a43d6949c9cc176faf",
-    "mibot/data/datamodule/base_datamodule.py": "1a54e8d6f16e2798502507bbcb798ca090933b62bdcd5aef201a98b35643a578",
+    "mibot/data/datamodule/base_datamodule.py": "9c2e66120aa4115e3d6aa69dd3005b83449ea50d844c4d36b10412fae9660f4b",
     "mibot/data/datasets/__init__.py": "06842f92f268d5552854377e69b9694968c576197addb8a43d6949c9cc176faf",
     "mibot/data/datasets/json_dataset.py": "c39e175661330a609676d2fe39e0b02371c64a059aa267461453fd56ed3bf602",
     "mibot/models/VLA/XR1.py": "af0f91ac73dce4ad72a9dddc8e19ce25cb82b1c2e52bbaf582b8ec400de17b95",
@@ -73,6 +73,14 @@
         "mibot/utils/periodic_checkpoint.py",
         "mibot/utils/training_metrics.py"
       ]
+    },
+    {
+      "id": "resume-sampler-offset-v1",
+      "date": "2026-10-10",
+      "description": "Optional native DistributedSampler offset computed from restored optimizer step, micro batch and accumulation; preserve seed42 ordering and full dataset length. Native Trainer and DataLoader retained; no augmentation RNG equivalence claim.",
+      "upstream_sha256": {
+        "mibot/data/datamodule/base_datamodule.py": "1a54e8d6f16e2798502507bbcb798ca090933b62bdcd5aef201a98b35643a578"
+      }
     }
   ]
 }

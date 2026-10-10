@@ -49,6 +49,8 @@ def inspect_recipe(recipe_path, output):
         "async_prefix_min",
         "async_prefix_max",
         "optimizer_offload",
+        "offload_pin_memory",
+        "overlap_comm",
         "communication_bucket_size",
         "logger_backend",
         "fk_verification_scope",
@@ -77,6 +79,9 @@ def inspect_recipe(recipe_path, output):
         raise ValueError("keep_period must be a positive multiple of save_interval")
     if type(recipe.get("optimizer_offload", False)) is not bool:
         raise ValueError("optimizer_offload must be boolean")
+    for field in ("offload_pin_memory", "overlap_comm"):
+        if field in recipe and type(recipe[field]) is not bool:
+            raise ValueError(f"{field} must be boolean")
     if recipe.get("logger_backend", "wandb") not in ("csv", "wandb"):
         raise ValueError("logger_backend must be csv or wandb")
     if recipe.get("fk_verification_scope", "independent") not in ("independent", "documented_nominal_training"):
@@ -240,11 +245,16 @@ def compose_config(recipe, stats, output):
     config.trainer.max_steps = recipe["max_steps"]
     accumulation = recipe.get("gradient_accumulation", 1)
     config.trainer.accumulate_grad_batches = accumulation
+    with open_dict(config.data.params):
+        config.data.params.resume_skip_samples = True
     if recipe.get("optimizer_offload", False):
         with open_dict(config.trainer.strategy.params):
             config.trainer.strategy.params.stage = 2
             config.trainer.strategy.params.offload_optimizer = True
-            config.trainer.strategy.params.pin_memory = True
+            # The installed DS 0.18.9 async pinned offload produced corrupted
+            # FFN gradients in the server probe. Use synchronous copies.
+            config.trainer.strategy.params.pin_memory = recipe.get("offload_pin_memory", False)
+            config.trainer.strategy.params.overlap_comm = recipe.get("overlap_comm", False)
         config.trainer.optimizer.type = "deepspeed.ops.adam.DeepSpeedCPUAdam"
     bucket = recipe.get("communication_bucket_size", 500000000)
     config.trainer.strategy.params.allgather_bucket_size = bucket
