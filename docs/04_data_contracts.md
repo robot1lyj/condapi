@@ -2,11 +2,13 @@
 
 ## 本对话 PART 数据审核状态（2026-10-10）
 
-本对话继续整轮终点 `C/N` 标签合同，EXPO 的候选二值奖励不覆盖它。已只读快照审核新 rollout 任务 `46b834a9-7f89-42af-ad64-f61ed9cc9586` 的 7 条闭合集：本会话 `episode_000001/000003/000007/000008/000009/000010/000011`，共 16,504 帧、39 个视频完整解码，59 个原始成员哈希在源端复核未变。另有一条 2 帧 aborted 与一条仍 recording 的记录，未纳入此快照。7 集均无人控制，444 行观测/动作有效性不足，15,718 对相邻转移通过连续性检查，全部最后观测有效；不裁改原件、不跨坏帧拼接。
+当前已只读快照审核任务 `46b834a9-7f89-42af-ad64-f61ed9cc9586` 的14个闭合集：原会话000001/000003/000007/000008/000009/000010/000011/000019/000020/000021/000022/000023/000025和新会话000002；2帧aborted排除保留。共35252帧、实际19.80分钟、126原始成员前后SHA复核一致、84分段视频完整解码。0人工帧/0介入，867行无效观测/动作不进相邻转移，33708对有效；14终点观测均有效，不跨坏帧拼接。原生YAM完整转换14/14及物理动作/状态/来源/时间/H264包载荷复核通过。4处reply差异仅为夹爪略超1裁到1，按submitted_action保留，不伪造残差。
 
-用户提供的 `/home/wuyan-lyj/乐高分拣_rollout记录表.xlsx` 本次读取仍为空模板，检查点及结果尚未填，因此不生成奖励或训练 READY。前两集采于10:56–11:01，后五集采于12:03–12:13，跨过当天 Thor 检查点切换的时段；录制 reply 未保存权重/norm 身份，不能仅按时间认定同一策略。先按来源时段分组，补齐身份后再定训练批次；离线 RL 可记录混合行为来源，但自主成功率不能冒充一个检查点的成绩。
+用户工作簿本次已填14行：每集10块，累计新增正确121/140、分错11、未完成8，5/14全集成功。对应关系、无人介入、任务终点均经本对话确认；仍使用整轮一次C/N奖励，不绑定固定框颜色/位置。原xlsx未改写，权威sidecar为 `operator_labels_v2.json`。用户更正后续基础策略为20w；前两集10:56–11:01与23w容器生命周期重叠，其余12集12:03–15:31与当前20w运行一致。历史reply没有权重/norm指纹，来源冲突留痕，不冒称全部已核实20w。
 
-快照/解码证据位于 `/home/wuyan-lyj/condapi-data/rl/lego-rollout-20261010-expo/` 的 `source_snapshot.json`、`source_recheck.json`、`audit_v1/audit.json`；目录名沿用撤销代码前的临时命名，不代表采用 EXPO 算法。原生 YAM 完整转换已在其 `lerobot_full/` 生成 7 个独立数据集，转换内容仍需按现有 `verify_conversion.py` 复核，不据“转换完成”认定训练可用。没有覆盖原数据或干扰正在采集的 episode。
+3393次采用计划全部按epoch+observation_id和精确时间找到观测；RTC observation_policy_tick实为调度target_start_tick，常与图像所在记录tick差1，不能作为图像join键。队列尚未重建/验收，33708单步对不等于最终RL replay。当前 `training_ready=false`，缺冻结视觉缓存、RTC决策合同及GPU数值验收；不以数据备份成功代替开训就绪。
+
+完整新目录 `/home/wuyan-lyj/condapi-data/rl/lego-rollout14-20261010-parts-v1/`，含source_snapshot/source_recheck、audit_v1、audit_review、decision_observation_join_v2、operator_labels_v2、lerobot_full和conversion_verification。旧7集快照保留来源，不覆盖；新摘要及首轮9训3验提案见[审核报告](reports/rl/parts-rollout14-20261010/README.md)和[摘要JSON](reports/rl/parts-rollout14-20261010/data_audit.json)。服务器新目录 `yam-server:/home/wuyan/lyj/YAM/YAM_data/derived/rl/parts_rollout14_20261010_v1` 已备份raw/完整转换/审核，294成员SHA复核0差异；最新本地摘要为audit_review_v2。本次未写训练配置或改动生产推理。
 
 ## EXPO-FT 双任务数据合同（2026-10-10）
 
