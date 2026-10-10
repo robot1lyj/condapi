@@ -48,6 +48,8 @@ def inspect_recipe(recipe_path, output):
         "rtc_mode",
         "async_prefix_min",
         "async_prefix_max",
+        "optimizer_offload",
+        "communication_bucket_size",
     }
     if recipe.get("schema_version") != 1 or set(recipe) - keys:
         raise ValueError("Invalid XR-1 recipe schema")
@@ -71,6 +73,10 @@ def inspect_recipe(recipe_path, output):
         or recipe["keep_period"] % recipe.get("save_interval", 10000)
     ):
         raise ValueError("keep_period must be a positive multiple of save_interval")
+    if type(recipe.get("optimizer_offload", False)) is not bool:
+        raise ValueError("optimizer_offload must be boolean")
+    if type(recipe.get("communication_bucket_size", 500000000)) is not int or recipe.get("communication_bucket_size", 500000000) < 1:
+        raise ValueError("communication_bucket_size must be a positive integer")
     for field in ("project", "experiment"):
         value = recipe.get(field)
         alphabet = "abcdefghijklmnopqrstuvwxyz0123456789-_"
@@ -215,6 +221,15 @@ def compose_config(recipe, stats, output):
     config.trainer.max_steps = recipe["max_steps"]
     accumulation = recipe.get("gradient_accumulation", 1)
     config.trainer.accumulate_grad_batches = accumulation
+    if recipe.get("optimizer_offload", False):
+        with open_dict(config.trainer.strategy.params):
+            config.trainer.strategy.params.stage = 2
+            config.trainer.strategy.params.offload_optimizer = True
+            config.trainer.strategy.params.pin_memory = True
+        config.trainer.optimizer.type = "deepspeed.ops.adam.DeepSpeedCPUAdam"
+    bucket = recipe.get("communication_bucket_size", 500000000)
+    config.trainer.strategy.params.allgather_bucket_size = bucket
+    config.trainer.strategy.params.reduce_bucket_size = bucket
     # The native dataset sizes itself in micro-batches, while Trainer counts
     # optimizer steps. Without this adjustment, accumulation truncates the data.
     config.data.params.max_steps = recipe["max_steps"] * accumulation
