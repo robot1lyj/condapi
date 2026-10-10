@@ -1,0 +1,44 @@
+{
+  "run_id": "rtc-50h-230000-trt-tf32-cache80-7step-20261010-r1",
+  "phase": "engine_build_tactic_profile",
+  "started_at": "2026-10-10T02:20:25.130351+00:00",
+  "status": "built_experiment_not_accuracy_validated",
+  "source_export": "/artifacts/rtc-50h-230000-onnx-fp32-cache80-7step-20261010-r1",
+  "source_export_report_sha256": "9ec4f764a84c2af737bf67cb920335b38a3c5cde790c4dc0ceecf9305562e98b",
+  "source_onnx_sha256": "436d099d6681e90cb58708b8512d691c3ba1b6ad0a0780cc7a2ae30b8371cd08",
+  "external_weights_sha256": {
+    "sampler.onnx.data": "6eefab0039c1956af6e116e9a5e9548e7f9c3fd3d4cea2d8e001db0370060782"
+  },
+  "tensorrt_version": "10.16.1.11",
+  "command": [
+    "/usr/src/tensorrt/bin/trtexec",
+    "--onnx=/artifacts/rtc-50h-230000-onnx-fp32-cache80-7step-20261010-r1/sampler.onnx",
+    "--saveEngine=/artifacts/rtc-50h-230000-trt-tf32-cache80-7step-20261010-r1/sampler.engine",
+    "--stronglyTyped",
+    "--skipInference",
+    "--builderOptimizationLevel=3",
+    "--maxAuxStreams=0",
+    "--memPoolSize=workspace:8192",
+    "--profilingVerbosity=detailed",
+    "--exportLayerInfo=/artifacts/rtc-50h-230000-trt-tf32-cache80-7step-20261010-r1/layers.json",
+    "--timingCacheFile=/artifacts/rtc-50h-230000-trt-tf32-cache80-7step-20261010-r1/timing.cache"
+  ],
+  "tf32": true,
+  "precision_candidate_kind": "tf32",
+  "quantization": null,
+  "strongly_typed": true,
+  "contract": {
+    "views": 3,
+    "image_resolution": [
+      224,
+      224
+    ],
+    "horizon": 50,
+    "steps": 7,
+    "action_dim": 32
+  },
+  "exit_code": 0,
+  "build_s": 232.79304534499533,
+  "engine_sha256": "1c01c63d0381280b9c33a5471f208ec0aa8dce0a161789cc56cddf4551f7466a",
+  "finished_at": "2026-10-10T02:24:29.140731+00:00"
+}

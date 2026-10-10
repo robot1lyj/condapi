@@ -1,0 +1,15 @@
+Oct 10 10:25:58 thor bash[1613287]: ONLINE_230000_VERIFIED
+Oct 10 10:25:58 thor bash[1624768]: Filesystem         1B-blocks         Used    Available Use% Mounted on
+Oct 10 10:25:58 thor bash[1624768]: /dev/nvme0n1p1 1004162105344 303989633024 649088368640  32% /
+Oct 10 10:26:02 thor bash[1624806]: Filesystem         1B-blocks         Used    Available Use% Mounted on
+Oct 10 10:26:02 thor bash[1624806]: /dev/nvme0n1p1 1004162105344 252053745664 701024256000  27% /
+Oct 10 10:26:02 thor bash[1613287]: DEPLOYED_50H_230000_CLEANED_193000
+ExecMainStatus=0
+ActiveState=inactive
+SubState=dead
+true sha256:a6227665c32d1c7b2b7ca01a2d1a29e18d64bf764e5914db6eb06db5419a8e56 ["/bench/serve_pi05_rtc_trt.py","--engine","/artifacts/rtc-50h-230000-trt-tf32-cache80-7step-20261010-r1","--checkpoint","/ckpt","--norm","/ckpt/assets/yam/norm_stats.json","--warmup-sample","/cases/episode-000095-early.npz","--warmup-rtc","/bench/rtc_warmup_d0.json","--host","192.168.250.1","--port","8000","--allow-validated-tf32-7step","--validation","/artifacts/rtc-50h-230000-trt-tf32-cache80-7step-20261010-r1/validation.json","--jax-reference","/artifacts/rtc-50h-230000-jax-quantile-7step-20261010-r1"]
+OLD_193000_LARGE_FILES_REMOVED
+pi05-rtc-infer Up About a minute
+rtc-60000-convert-20260918 Exited (0) 3 weeks ago
+SERVER_193000_ABSENT
+SERVER_230000_PRESENT
