@@ -16,5 +16,8 @@
   "max_steps": 168772,
   "batch_size": 4,
   "gradient_accumulation": 2,
+  "rtc_mode": "native_async",
+  "async_prefix_min": 1,
+  "async_prefix_max": 10,
   "save_interval": 25000
 }

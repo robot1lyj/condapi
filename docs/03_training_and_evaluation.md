@@ -234,6 +234,8 @@ python adapters/parts/train.py --recipe /data/parts/recipe_v2.json \
 
 ### 乐高 50h 的候选微调配方
 
+2026-10-10 用户指定原生异步前缀扩大为 **1–10 步**。50h recipe 显式设置 `rtc_mode=native_async`、`async_prefix_min=1`、`async_prefix_max=10`；保持原生 50% 概率使用均匀采样的前缀、50% 不使用前缀。模型仍输出 30×60 动作张量（30Hz 下约1秒），其中前 N 步为给定前缀、新生成后缀有 30−N 步；N=10 时后缀20步约0.667秒。前缀范围覆盖约33–333ms，但真实推理延迟与执行对齐仍须测量。训练末尾不足30步的样本仍按原生 mask 处理，不能把20步当作所有样本的有效监督长度。`rtc_mode=disabled` 关闭前缀条件训练；未提供新字段的旧 recipe 保持1–6步默认。实现是固定上游的配置化小补丁，`third_party/xr1/UPSTREAM.json` 保留原文件摘要与本地补丁来源；不改变权重形状。尚未同步本次补丁到服务器、未执行GPU训练或Thor异步验收。
+
 配置 owner 为 [`configs/native/xr1-yam-lego-50h.json`](../configs/native/xr1-yam-lego-50h.json)，平台入口为 [`configs/experiments/xr1-lego-50h.toml`](../configs/experiments/xr1-lego-50h.toml)。这是**候选配方，尚未开训**。固定官方通用 5B `ee21d524` 权重及 SHA256；训练集为 50h 派生版的完整 `train/manifest.json`，预期 2,337 集、5,400,685 帧；原始 `val` 69 集独立保留，不参加训练统计或训练采样。训练入口从 manifest 展开精确 JSON 列表，并核对选集、源转换 manifest、逐集 JSON 哈希、统计 manifest 哈希、FK audit 的源仓/模型/成员，以及官方权重 SHA。完整转换、`normalize.json` 和真实 FK/单位/时序审核完成前，`--check-only` 应拒绝通过。
 
 首版计划为 4 GPU × 每卡 micro-batch 4 × 梯度累积 2，即**有效 global batch 32**；`max_steps=168772`，按上游 `JsonDataset` 的逐帧采样逻辑覆盖 `ceil(5,400,685/32)` 个 optimizer step，约一轮（末尾补取 19 帧）。适配器同时把原生数据集 `max_steps` 设为 optimizer steps × 梯度累积；否则上游 loader 会提前耗尽，仅读约半轮数据。30 步 action horizon、BF16 mixed precision、DeepSpeed、FusedAdam、原生 cosine 日程（warmup 500、最高学习率 2e-5、最低 5e-6）、梯度裁剪 1.0 和随机种子 42 继承固定上游配置。每 25,000 optimizer step 保存，原生 `save_last` 保留；因上游 `save_top_k=-1` 会积累所有定期 checkpoint，训练前须估算磁盘占用并确定保留策略。每卡 micro-batch 4 只是容量起点，需在空闲的 Slurm GPU 节点验证 CUDA/模型初始化、数据解码与显存；若改 micro-batch、累积次数、卡数或步数，须同步重新计算覆盖轮数并产生新配方版本，不能静默沿用本配方的轮数声明。

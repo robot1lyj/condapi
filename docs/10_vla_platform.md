@@ -11,7 +11,7 @@
 | LeRobot 后端 | 共用原生训练 launcher 已实现并用替身测试；无自建 trainer/processor；尚无通用离线推理入口 |
 | Evo-1 | 本地/服务器专用环境已安装并通过CPU检查；YAM真实训练/推理仍待接入 |
 | MolmoAct2 | 原生LeRobot共享后端已注册；两端独立环境CPU检查通过、108包版本一致；仅普通版，不含Think，真实YAM/GPU仍待验收 |
-| Xiaomi-Robotics-1 / XR-1 | 官方 5B checkpoint 和独立服务器模型/清洗环境已准备；本地 `xr1` 后端、固定上游源码、训练配置预检、原生训练入口及 HIL sidecar→末端原生 JSON/视频转换入口已接入。50h 乐高 LeRobot→末端派生版正在服务器生成；FK 审计、训练统计、GPU 训练及部署 IK 尚未验收 |
+| Xiaomi-Robotics-1 / XR-1 | 官方5B checkpoint与独立环境已准备；原生入口和HIL/LeRobot末端转换已接入。2026-10-10复核50h转换与train统计已完成；FK audit仍缺失，GPU训练/部署IK未验收。50h配方已设原生异步前缀1–10步、输出30步；本地配置化补丁尚未同步服务器 |
 | FastWAM、VLA-JEPA | 注册 planned；不得运行或报告已支持 |
 | Conda | Evo-1已有独立环境规格和104个wheel的锁；Pi等bootstrap仍不代表模型环境已安装 |
 | Thor | 原 Pi 容器、TensorRT 引擎、报告保持原状；没有部署此次改造 |

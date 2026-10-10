@@ -43,11 +43,19 @@ def inspect_recipe(recipe_path, output):
         "source_manifest_sha256",
         "expected_episodes",
         "expected_frames",
+        "rtc_mode",
+        "async_prefix_min",
+        "async_prefix_max",
     }
     if recipe.get("schema_version") != 1 or set(recipe) - keys:
         raise ValueError("Invalid XR-1 recipe schema")
     if recipe.get("source_contract") != "yam-bimanual-v1":
         raise ValueError("Only explicitly audited YAM training is registered")
+    if recipe.get("rtc_mode", "native_async") not in ("native_async", "disabled"):
+        raise ValueError("rtc_mode must be native_async or disabled")
+    prefix_min, prefix_max = recipe.get("async_prefix_min", 1), recipe.get("async_prefix_max", 6)
+    if type(prefix_min) is not int or type(prefix_max) is not int or not 1 <= prefix_min <= prefix_max < 30:
+        raise ValueError("async prefix must satisfy 1 <= min <= max < 30")
     for field in ("nproc_per_node", "max_steps", "batch_size"):
         if type(recipe.get(field)) is not int or recipe[field] < 1:
             raise ValueError(f"{field} must be a positive integer")
@@ -171,6 +179,7 @@ def inspect_recipe(recipe_path, output):
             "audit_sha256": file_hash(audit_path),
             "stats_sha256": file_hash(stats_path),
             "upstream_revision": verify_source(),
+            "upstream_manifest_sha256": file_hash(VENDOR / "UPSTREAM.json"),
             "train_manifest_sha256": file_hash(recipe["train_manifest"]) if manifest else None,
         },
     )
@@ -181,6 +190,7 @@ def compose_config(recipe, stats, output):
     from hydra import compose  # noqa: PLC0415
     from hydra import initialize_config_dir  # noqa: PLC0415
     from omegaconf import OmegaConf  # noqa: PLC0415
+    from omegaconf import open_dict  # noqa: PLC0415
 
     with initialize_config_dir(version_base=None, config_dir=str(VENDOR / "configs")):
         config = compose(config_name="config")
@@ -190,6 +200,10 @@ def compose_config(recipe, stats, output):
     for key in ("mean", "std", "q01", "q99"):
         data[key] = stats[key]
     config.model.params.pretrained = recipe["pretrained"]
+    with open_dict(config.model.params.model):
+        config.model.params.model.async_train = recipe.get("rtc_mode", "native_async") == "native_async"
+        config.model.params.model.async_prefix_min = recipe.get("async_prefix_min", 1)
+        config.model.params.model.async_prefix_max = recipe.get("async_prefix_max", 6)
     config.trainer.max_steps = recipe["max_steps"]
     accumulation = recipe.get("gradient_accumulation", 1)
     config.trainer.accumulate_grad_batches = accumulation

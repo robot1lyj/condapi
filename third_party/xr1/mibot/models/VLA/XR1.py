@@ -1,6 +1,5 @@
 # Copyright (C) 2026 Xiaomi Corporation.
 import math
-import random
 
 import torch
 import torch.nn as nn
@@ -20,6 +19,7 @@ from mibot.models.VLM.qwen3vl import (
     STATE_ID,
     Qwen3VLForConditionalGeneration,
 )
+from mibot.utils.async_prefix import sample_prefix_length, validate_prefix_range
 from mibot.utils.model_utils import auto_cast
 
 
@@ -201,6 +201,8 @@ class xr1(nn.Module):
         freq_excluded_dims=None,
         ffn_gradient_checkpointing=True,
         async_train=True,
+        async_prefix_min=1,
+        async_prefix_max=6,
     ):
         super().__init__()
         self.state_shape = (1, 60)
@@ -209,6 +211,9 @@ class xr1(nn.Module):
         self.freq_excluded_dims = list([17, 18, 19] if freq_excluded_dims is None else freq_excluded_dims)
         self.ffn_gradient_checkpointing = bool(ffn_gradient_checkpointing)
         self.async_train = bool(async_train)
+        validate_prefix_range(async_prefix_min, async_prefix_max, self.action_shape[0])
+        self.async_prefix_min = async_prefix_min
+        self.async_prefix_max = async_prefix_max
         self.training_repeat = 4
         self.num_steps = 5
         self.prefix_mask_prob = 0.5
@@ -339,7 +344,7 @@ class xr1(nn.Module):
         action_mask = batch.pop("action_mask")
         state = batch.pop("state")
         if self.training:
-            prefix_length = random.randint(1, 6) if self.async_train and random.random() < 0.5 else 0
+            prefix_length = sample_prefix_length(self.async_train, self.async_prefix_min, self.async_prefix_max)
         else:
             prefix_length = batch.pop("prefix_length", 0)
 
