@@ -1,0 +1,36 @@
+{
+  "route": "pi05_yam_trained_rtc",
+  "status": "fp32_converted_not_accuracy_or_engine_validated",
+  "max_delay_steps": 10,
+  "source_checkpoint": "/checkpoints/200000",
+  "checkpoint_metadata_sha256": "2912d15ba42fe0d742b5ac46e88804dacce69644369b4cf9b7405cf7d8fe7247",
+  "source_params_files_sha256": {
+    "params/_METADATA": "2912d15ba42fe0d742b5ac46e88804dacce69644369b4cf9b7405cf7d8fe7247",
+    "params/_sharding": "1e9d1ab166a3644c567742d374d6ff2bf61bfa33ec505c36e24a3b34ebf700f3",
+    "params/array_metadatas/process_0": "4841ac8c8e3cde2cd592513ceb3fd02594646be0ad08d5d4b83b6807db128d82",
+    "params/d/279ed17f739fc60026c243b90ee7b4e5": "6f27f654854ccfd89fdd245184ec92bf09bf3ca461954de2072e1d34db2842ce",
+    "params/manifest.ocdbt": "5bd9bff5eb78b5562762d87bd9b20c087935b9d557f251ef5929648b839c50db",
+    "params/ocdbt.process_0/d/0d5542427d0056668a5422bf410aa33d": "33708ed844fe8da5c2606be97562d8ccd254a4c77fd5a9c3c2695b3167bccdca",
+    "params/ocdbt.process_0/d/1046be3c5c670f1e7e65f02021e10f7c": "af4c590882ce01fe329581143e7313f9757561773501a644d1ab90c12f301d80",
+    "params/ocdbt.process_0/d/23540ae0f675cf0e7f268febc9d9c0f5": "edb65990f45cb7481c156b3fd31e0079589829c63a14d4e93eecfaae7c0ae430",
+    "params/ocdbt.process_0/d/46989e66df1d2f2ced9dbcbfea463afb": "06be44f88c2638527f7c5cc7c67035e533e748f821058d04de04ca7210487db8",
+    "params/ocdbt.process_0/d/485d79fc257e8dfe1ac8189bc7a99609": "a4b2c7480bf118bad6a4fdb62c39df70ae1cef65a4b91bee8de18b0d3cd2247a",
+    "params/ocdbt.process_0/d/596c94b0bcbd3ff23eda2fd89f251d64": "a71303236a90c53bbd2565aa0aeee2c5e18748d67e4e1eb8840715462149c180",
+    "params/ocdbt.process_0/d/6787475d0619738f2c87959718268084": "b38971585ddef3a8d6286893f2929c64c0e2e0f6d637947b5b6a58f1af7933a5",
+    "params/ocdbt.process_0/d/825c072a79af3208f7712232fe1b3ed8": "0e34df9d89c79afa5c7850cf6b5d5de618be3b446b92eda45c2ee38245fe0480",
+    "params/ocdbt.process_0/d/8a2e9e0b1d59634a87c2660ac42e321b": "b22947ddd7e55383c54c14f9a5a826adc1103be0b2da6b736ff028950b9ac7fa",
+    "params/ocdbt.process_0/d/b7a19625659e2f6d9e01bf2bf9dfeb7c": "7e0aa0aecaf562ff5bc45c02d69d3af883f1f2080c65681690a03bb769b2adb6",
+    "params/ocdbt.process_0/manifest.ocdbt": "3ac7447d9f8610c3e01e0697d787682894a0642c0a4cb0b5ef782757b4577ab4"
+  },
+  "training_contract_sha256": "924c8bfacede0e0bd83328199b4d1fb2e88df7c401ac884fb99f30a7ff08aecb",
+  "norm_stats_sha256": "fd0d9cb2db3ce475c1175c7f21a3a0dd3aa7f59d36edc680e7044cd11b9f1edf",
+  "norm_identity": {
+    "checkpoint_norm_sha256": "fd0d9cb2db3ce475c1175c7f21a3a0dd3aa7f59d36edc680e7044cd11b9f1edf",
+    "training_norm_sha256": "4e95507966eea44a58c2ecf32874e0e066adf1467f390c69395c4a2861dc30dd",
+    "identity_relation": "checkpoint_omitted_one_final_newline"
+  },
+  "conversion_audit_sha256": "5f59ab1416e0c89d4b1bdede54060155d6d26bbb7368401a1e7529ea7a8bad03",
+  "model_weights_sha256": "298714be810f5e7e822bcac55c5efe55789f1c96c0ac4ed0a1caa86f2670e42a",
+  "precision": "FP32 preserved; BF16 compute is a later separately compared candidate",
+  "rtc_semantics": "clean committed prefix at flow time zero; postfix denoised; no guidance fallback"
+}

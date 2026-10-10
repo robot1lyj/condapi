@@ -1,0 +1,280 @@
+2026-10-10T11:38:30+08:00
+pi05-rtc-infer Up About a minute
+pi05-rtc-50h230000-preserved-20261010 Exited (137) 17 minutes ago
+rtc-60000-convert-20260918 Exited (0) 3 weeks ago
+/pi05-rtc-infer ["/bench/serve_pi05_rtc_trt.py","--engine","/artifacts/rtc-50h-200000-trt-tf32-cache80-7step-20261010-r1","--checkpoint","/ckpt","--norm","/ckpt/assets/yam/norm_stats.json","--warmup-sample","/cases/episode-000095-early.npz","--warmup-rtc","/bench/rtc_warmup_d0.json","--host","192.168.250.1","--port","8000","--allow-validated-tf32-7step","--validation","/artifacts/rtc-50h-200000-trt-tf32-cache80-7step-20261010-r1/validation.json","--jax-reference","/artifacts/rtc-50h-200000-jax-quantile-7step-20261010-r1"]
+/pi05-rtc-50h230000-preserved-20261010 ["/bench/serve_pi05_rtc_trt.py","--engine","/artifacts/rtc-50h-230000-trt-tf32-cache80-7step-20261010-r1","--checkpoint","/ckpt","--norm","/ckpt/assets/yam/norm_stats.json","--warmup-sample","/cases/episode-000095-early.npz","--warmup-rtc","/bench/rtc_warmup_d0.json","--host","192.168.250.1","--port","8000","--allow-validated-tf32-7step","--validation","/artifacts/rtc-50h-230000-trt-tf32-cache80-7step-20261010-r1/validation.json","--jax-reference","/artifacts/rtc-50h-230000-jax-quantile-7step-20261010-r1"]
+ActiveState=active
+SubState=running
+NV Power Mode: MAXN
+0
+OK
+Filesystem         1B-blocks         Used    Available Use% Mounted on
+/dev/nvme0n1p1 1004162105344 304034975744 649043025920  32% /
+12440537395	/home/wuyan-lyj/thor/pi/checkpoints/lego-pi05-rtc-base-50h-20260921/230000/params
+14467165872 /home/wuyan-lyj/thor/pi/checkpoints/lego-pi05-rtc-base-50h-20260921/230000-pytorch-fp32-r1/model.safetensors
+12510887936 /home/wuyan-lyj/thor/pi/artifacts/rtc-50h-230000-onnx-fp32-cache80-7step-20261010-r1/sampler.onnx.data
+12516525012 /home/wuyan-lyj/thor/pi/artifacts/rtc-50h-230000-trt-tf32-cache80-7step-20261010-r1/sampler.engine
+Oct 10 11:12:26 thor systemd[1]: Started thor-rtc-50h200000-deploy.service - Thor 50h200000 RTC validated switch; preserve 230000.
+Oct 10 11:20:26 thor bash[1651495]: ["/bench/serve_pi05_rtc_trt.py","--engine","/artifacts/rtc-50h-230000-trt-tf32-cache80-7step-20261010-r1","--checkpoint","/ckpt","--norm","/ckpt/assets/yam/norm_stats.json","--warmup-sample","/cases/episode-000095-early.npz","--warmup-rtc","/bench/rtc_warmup_d0.json","--host","192.168.250.1","--port","8000","--allow-validated-tf32-7step","--validation","/artifacts/rtc-50h-230000-trt-tf32-cache80-7step-20261010-r1/validation.json","--jax-reference","/artifacts/rtc-50h-230000-jax-quantile-7step-20261010-r1"]
+Oct 10 11:20:36 thor bash[1651526]: pi05-rtc-infer
+Oct 10 11:20:50 thor bash[1652168]: Clock backup (retained for recovery): /tmp/thor-maxn-3h0orom4
+Oct 10 11:20:50 thor bash[1652168]: NV Power Mode: 120W
+Oct 10 11:20:50 thor bash[1652168]: 1
+Oct 10 11:20:50 thor bash[1652168]: Storing system configuration in /tmp/thor-maxn-3h0orom4/clocks.conf
+Oct 10 11:20:50 thor bash[1652168]: NV Power Mode: MAXN
+Oct 10 11:20:50 thor bash[1652168]: 0
+Oct 10 11:20:50 thor bash[1652168]: Enabled Legacy persistence mode for GPU 00000000:01:00.0.
+Oct 10 11:20:50 thor bash[1652168]: All done.
+Oct 10 11:20:51 thor bash[1652168]: SOC family:tegra264  Machine:NVIDIA Jetson AGX Thor Developer Kit
+Oct 10 11:20:51 thor bash[1652168]: Online CPUs: 0-13, Offline CPUs:
+Oct 10 11:20:51 thor bash[1652168]: cpu0:  Governor=schedutil MinFreq=2601000 MaxFreq=2601000 CurrentFreq=2601000 IdleStates: WFI=0 cc7=0
+Oct 10 11:20:51 thor bash[1652168]: cpu1:  Governor=schedutil MinFreq=2601000 MaxFreq=2601000 CurrentFreq=2601000 IdleStates: WFI=0 cc7=0
+Oct 10 11:20:51 thor bash[1652168]: cpu2:  Governor=schedutil MinFreq=2601000 MaxFreq=2601000 CurrentFreq=2601000 IdleStates: WFI=0 cc7=0
+Oct 10 11:20:51 thor bash[1652168]: cpu3:  Governor=schedutil MinFreq=2601000 MaxFreq=2601000 CurrentFreq=2601000 IdleStates: WFI=0 cc7=0
+Oct 10 11:20:51 thor bash[1652168]: cpu4:  Governor=schedutil MinFreq=2601000 MaxFreq=2601000 CurrentFreq=2601000 IdleStates: WFI=0 cc7=0
+Oct 10 11:20:51 thor bash[1652168]: cpu5:  Governor=schedutil MinFreq=2601000 MaxFreq=2601000 CurrentFreq=2601000 IdleStates: WFI=0 cc7=0
+Oct 10 11:20:51 thor bash[1652168]: cpu6:  Governor=schedutil MinFreq=2601000 MaxFreq=2601000 CurrentFreq=2601000 IdleStates: WFI=0 cc7=0
+Oct 10 11:20:51 thor bash[1652168]: cpu7:  Governor=schedutil MinFreq=2601000 MaxFreq=2601000 CurrentFreq=2601000 IdleStates: WFI=0 cc7=0
+Oct 10 11:20:51 thor bash[1652168]: cpu8:  Governor=schedutil MinFreq=2601000 MaxFreq=2601000 CurrentFreq=2601000 IdleStates: WFI=0 cc7=0
+Oct 10 11:20:51 thor bash[1652168]: cpu9:  Governor=schedutil MinFreq=2601000 MaxFreq=2601000 CurrentFreq=2601000 IdleStates: WFI=0 cc7=0
+Oct 10 11:20:51 thor bash[1652168]: cpu10: Governor=schedutil MinFreq=2601000 MaxFreq=2601000 CurrentFreq=2601000 IdleStates: WFI=0 cc7=0
+Oct 10 11:20:51 thor bash[1652168]: cpu11: Governor=schedutil MinFreq=2601000 MaxFreq=2601000 CurrentFreq=2601000 IdleStates: WFI=0 cc7=0
+Oct 10 11:20:51 thor bash[1652168]: cpu12: Governor=schedutil MinFreq=2601000 MaxFreq=2601000 CurrentFreq=2601000 IdleStates: WFI=0 cc7=0
+Oct 10 11:20:51 thor bash[1652168]: cpu13: Governor=schedutil MinFreq=2601000 MaxFreq=2601000 CurrentFreq=2601000 IdleStates: WFI=0 cc7=0
+Oct 10 11:20:51 thor bash[1652168]: gpu-gpc-0 MinFreq=1575000000 MaxFreq=1575000000 CurrentFreq=1575000000
+Oct 10 11:20:51 thor bash[1652168]: gpu-nvd-0 MinFreq=1692000000 MaxFreq=1692000000 CurrentFreq=1692000000
+Oct 10 11:20:51 thor bash[1652168]: EMC MinFreq=4266000000 MaxFreq=4266000000 CurrentFreq=4266000000
+Oct 10 11:20:51 thor bash[1652168]: PVA0_VPS0: Online=0 MinFreq=0 MaxFreq=1215000000 CurrentFreq=1215000000
+Oct 10 11:20:51 thor bash[1652168]: PVA0_AXI:  Online=0 MinFreq=0 MaxFreq=909000000 CurrentFreq=909000000
+Oct 10 11:20:51 thor bash[1652168]: FAN Dynamic Speed Control=nvfancontrol hwmon1_pwm1=73
+Oct 10 11:20:51 thor bash[1652168]: FAN Dynamic Speed Control=nvfancontrol hwmon1_pwm1_enable=1
+Oct 10 11:20:51 thor bash[1652168]: NV Power Mode: MAXN
+Oct 10 11:20:54 thor bash[1652439]: E1010 03:20:54.751184      56 cuda_executor.cc:1526] Could not get kernel mode driver version: ( INVALID_ARGUMENT: Version does not match the format X.Y.Z )
+Oct 10 11:20:54 thor bash[1652439]: E1010 03:20:54.763668       1 cuda_executor.cc:1526] Could not get kernel mode driver version: ( INVALID_ARGUMENT: Version does not match the format X.Y.Z )
+Oct 10 11:20:54 thor bash[1652439]: WARNING:absl:Metadata file does not exist: /checkpoints/200000/params/_CHECKPOINT_METADATA
+Oct 10 11:21:52 thor bash[1653452]: W1010 03:21:52.248000 1 torch/utils/_pytree.py:630] <enum 'KernelPreference'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+Oct 10 11:24:33 thor bash[1653452]: /usr/lib/python3.12/copyreg.py:99: FutureWarning: `isinstance(treespec, LeafSpec)` is deprecated, use `isinstance(treespec, TreeSpec) and treespec.is_leaf()` instead.
+Oct 10 11:24:33 thor bash[1653452]:   return cls.__new__(cls, *args)
+Oct 10 11:31:05 thor bash[1653452]: [torch.onnx] Obtain model graph for `Pi05RtcOnnxSampler([...]` with `torch.export.export(..., strict=False)`...
+Oct 10 11:31:05 thor bash[1653452]: [torch.onnx] Obtain model graph for `Pi05RtcOnnxSampler([...]` with `torch.export.export(..., strict=False)`... ✅
+Oct 10 11:31:05 thor bash[1653452]: [torch.onnx] Run decompositions...
+Oct 10 11:31:05 thor bash[1653452]: [torch.onnx] Run decompositions... ✅
+Oct 10 11:31:05 thor bash[1653452]: [torch.onnx] Translate the graph into ONNX...
+Oct 10 11:31:05 thor bash[1653452]: [torch.onnx] Translate the graph into ONNX... ✅
+Oct 10 11:31:05 thor bash[1653452]: [torch.onnx] Optimize the ONNX graph...
+Oct 10 11:31:05 thor bash[1653452]: [torch.onnx] Optimize the ONNX graph... ✅
+Oct 10 11:31:05 thor bash[1653452]: [torch.onnx] Export report has been saved to '/artifacts/rtc-50h-200000-onnx-fp32-cache80-7step-20261010-r1/diagnostics/onnx_export_2026-10-10_03-23-43-184508_success.md'.
+Oct 10 11:31:23 thor bash[1654871]: &&&& RUNNING TensorRT.trtexec [TensorRT v101601] [b11] # /usr/src/tensorrt/bin/trtexec --onnx=/artifacts/rtc-50h-200000-onnx-fp32-cache80-7step-20261010-r1/sampler.onnx --saveEngine=/artifacts/rtc-50h-200000-trt-tf32-cache80-7step-20261010-r1/sampler.engine --stronglyTyped --skipInference --builderOptimizationLevel=3 --maxAuxStreams=0 --memPoolSize=workspace:8192 --profilingVerbosity=detailed --exportLayerInfo=/artifacts/rtc-50h-200000-trt-tf32-cache80-7step-20261010-r1/layers.json --timingCacheFile=/artifacts/rtc-50h-200000-trt-tf32-cache80-7step-20261010-r1/timing.cache
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] === Model Options ===
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Format: ONNX
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Model: /artifacts/rtc-50h-200000-onnx-fp32-cache80-7step-20261010-r1/sampler.onnx
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Output:
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] === Build Options ===
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Memory Pools: workspace: 8192 MiB, dlaSRAM: default, dlaLocalDRAM: default, dlaGlobalDRAM: default, tacticSharedMem: default
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] avgTiming: 8
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Precision: Strongly Typed
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] LayerPrecisions:
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Layer Device Types:
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Decomposable Attentions:
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Calibration:
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Refit: Disabled
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Strip weights: Disabled
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Version Compatible: Disabled
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] ONNX Plugin InstanceNorm: Disabled
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] ONNX kENABLE_UINT8_AND_ASYMMETRIC_QUANTIZATION_DLA flag: Disabled
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] ONNX kREPORT_CAPABILITY_DLA flag: Disabled
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] ONNX kADJUST_FOR_DLA flag: Disabled
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] ONNX kENABLE_PLUGIN_OVERRIDE flag: Disabled
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] TensorRT runtime: full
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Lean DLL Path:
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Tempfile Controls: { in_memory: allow, temporary: allow }
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Exclude Lean Runtime: Disabled
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Sparsity: Disabled
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Safe mode: Disabled
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Build DLA standalone loadable: Disabled
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Allow GPU fallback for DLA: Disabled
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] DirectIO mode: Disabled
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Restricted mode: Disabled
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Skip inference: Enabled
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Save engine: /artifacts/rtc-50h-200000-trt-tf32-cache80-7step-20261010-r1/sampler.engine
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Load engine:
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Profiling verbosity: 2
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Tactic sources: Using default tactic sources
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] timingCacheMode: global
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] timingCacheFile: /artifacts/rtc-50h-200000-trt-tf32-cache80-7step-20261010-r1/timing.cache
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Enable Compilation Cache: Enabled
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Enable Monitor Memory: Disabled
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] CPU Only Mode: Disabled
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] errorOnTimingCacheMiss: Disabled
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Preview Features: Use default preview flags.
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] MaxAuxStreams: 0
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] BuilderOptimizationLevel: 3
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] MaxTactics: -1
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Calibration Profile Index: 0
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Weight Streaming: Disabled
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Runtime Platform: Same As Build
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Debug Tensors:
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Distributive Independence: Disabled
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Mark Unfused Tensors As Debug Tensors: Disabled
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Input(s)s format: fp32:CHW
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Output(s)s format: fp32:CHW
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Input build shapes: model
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Input calibration shapes: model
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] === System Options ===
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Device: 0
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] DLACore:
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Loaded static plugins:
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] setPluginsToSerialize:
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] dynamicPlugins:
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] ignoreParsedPluginLibs: 0
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I]
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] === Inference Options ===
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Batch: Explicit
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Input inference shapes: model
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Iterations: 10
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Duration: 3s (+ 200ms warm up)
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Sleep time: 0ms
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Idle time: 0ms
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Inference Streams: 1
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] ExposeDMA: Disabled
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Data transfers: Enabled
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Spin-wait: Disabled
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Multithreading: Disabled
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] CUDA Graph: Disabled
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Separate profiling: Disabled
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Time Deserialize: Disabled
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Time Refit: Disabled
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] NVTX verbosity: 2
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Persistent Cache Ratio: 0
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Optimization Profile Index: 0
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Weight Streaming Budget: 100.000000%
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Inputs:
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Debug Tensor Save Destinations:
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Dump All Debug Tensor in Formats:
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] === Reporting Options ===
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Verbose: Disabled
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Averages: 10 inferences
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Percentiles: 90,95,99
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Dump refittable layers:Disabled
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Dump output: Disabled
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Profile: Disabled
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Export timing to JSON file:
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Export output to JSON file:
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Export profile to JSON file:
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I]
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] === Device Information ===
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Available Devices:
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I]   Device 0: "NVIDIA Thor" UUID: GPU-a7c66ad2-6dbb-0ab8-c1a2-37ba6dba3600
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Selected Device: NVIDIA Thor
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Selected Device ID: 0
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Selected Device UUID: GPU-a7c66ad2-6dbb-0ab8-c1a2-37ba6dba3600
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Compute Capability: 11.0
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] SMs: 20
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Device Global Memory: 125748 MiB
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Shared Memory per SM: 228 KiB
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Memory Bus Width: 256 bits (ECC disabled)
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Application Compute Clock Rate: 1.04858 GHz
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Application Memory Clock Rate: 4.266 GHz
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I]
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Note: The application clock rates do not reflect the actual clock rates that the GPU is currently running at.
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I]
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] TensorRT version: 10.16.1
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Loading standard plugins
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] [TRT] [MemUsageChange] Init CUDA: CPU +0, GPU +0, now: CPU 29, GPU 85627 (MiB)
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Start parsing network model.
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] [TRT] ----------------------------------------------------------------
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] [TRT] Input filename:   /artifacts/rtc-50h-200000-onnx-fp32-cache80-7step-20261010-r1/sampler.onnx
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] [TRT] ONNX IR version:  0.0.10
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] [TRT] Opset version:    19
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] [TRT] Producer name:    pytorch
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] [TRT] Producer version: 2.12.0a0+5aff3928d8.nv26.05
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] [TRT] Domain:
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] [TRT] Model version:    0
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] [TRT] Doc string:
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] [TRT] ----------------------------------------------------------------
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [W] [TRT] ModelImporter.cpp:739: Make sure input lang_tokens has Int64 binding.
+Oct 10 11:31:23 thor bash[1654871]: [10/10/2026-03:31:23] [I] Finished parsing network model. Parse time: 0.51956
+Oct 10 11:31:24 thor bash[1654871]: [10/10/2026-03:31:24] [W] [TRT] Could not read cache from: /artifacts/rtc-50h-200000-trt-tf32-cache80-7step-20261010-r1/timing.cache. A new cache will be generated and written.
+Oct 10 11:31:24 thor bash[1654871]: [10/10/2026-03:31:24] [I] [TRT] [MemUsageChange] Init builder kernel library: CPU +303, GPU +576, now: CPU 736, GPU 86629 (MiB)
+Oct 10 11:31:24 thor bash[1654871]: [10/10/2026-03:31:24] [W] [TRT] Unused Input: state
+Oct 10 11:31:26 thor bash[1654871]: [10/10/2026-03:31:26] [W] [TRT] [RemoveDeadLayers] Input Tensor state is unused or used only at compile-time, but is not being removed.
+Oct 10 11:31:26 thor bash[1654871]: [10/10/2026-03:31:26] [I] [TRT] Global timing cache in use. Profiling results in this builder pass will be stored.
+Oct 10 11:31:31 thor bash[1654871]: [10/10/2026-03:31:31] [I] [TRT] Compiler backend is used during engine build.
+Oct 10 11:34:39 thor bash[1654871]: [10/10/2026-03:34:39] [I] [TRT] Detected 8 inputs and 1 output network tensors.
+Oct 10 11:34:42 thor bash[1654871]: [10/10/2026-03:34:42] [I] [TRT] Total Host Persistent Memory: 80 bytes
+Oct 10 11:34:42 thor bash[1654871]: [10/10/2026-03:34:42] [I] [TRT] Total Device Persistent Memory: 0 bytes
+Oct 10 11:34:42 thor bash[1654871]: [10/10/2026-03:34:42] [I] [TRT] Max Scratch Memory: 231111680 bytes
+Oct 10 11:34:42 thor bash[1654871]: [10/10/2026-03:34:42] [I] [TRT] [BlockAssignment] Started assigning block shifts. This will take 1 steps to complete.
+Oct 10 11:34:42 thor bash[1654871]: [10/10/2026-03:34:42] [I] [TRT] [BlockAssignment] Algorithm ShiftNTopDown took 0.008602ms to assign 1 blocks to 1 nodes requiring 231111680 bytes.
+Oct 10 11:34:42 thor bash[1654871]: [10/10/2026-03:34:42] [I] [TRT] Total Activation Memory: 231111680 bytes
+Oct 10 11:34:43 thor bash[1654871]: [10/10/2026-03:34:43] [I] [TRT] Total Weights Memory: 12509680512 bytes
+Oct 10 11:34:43 thor bash[1654871]: [10/10/2026-03:34:43] [I] [TRT] Compiler backend is used during engine execution.
+Oct 10 11:34:43 thor bash[1654871]: [10/10/2026-03:34:43] [I] [TRT] Engine generation completed in 197.39 seconds.
+Oct 10 11:34:44 thor bash[1654871]: [10/10/2026-03:34:44] [I] [TRT] The following layers are used for L2 cache management and do not correspond to any layers in the INetworkDefinition: __mye3476013_myl0_0, __mye3476015_myl0_2135
+Oct 10 11:34:44 thor bash[1654871]: [10/10/2026-03:34:44] [I] [TRT] [MemUsageStats] Peak memory usage of TRT CPU/GPU memory allocators: CPU 1188 MiB, GPU 11930 MiB
+Oct 10 11:34:55 thor bash[1654871]: [10/10/2026-03:34:55] [I] Created engine with size: 11936.8 MiB
+Oct 10 11:34:55 thor bash[1654871]: [10/10/2026-03:34:55] [I] Engine built in 211.136 sec.
+Oct 10 11:34:55 thor bash[1654871]: [10/10/2026-03:34:55] [W] [TRT] Could not read cache from: /artifacts/rtc-50h-200000-trt-tf32-cache80-7step-20261010-r1/timing.cache. A new cache will be generated and written.
+Oct 10 11:34:55 thor bash[1654871]: [10/10/2026-03:34:55] [I] [TRT] Serialized 4324 bytes of code generator cache.
+Oct 10 11:34:55 thor bash[1654871]: [10/10/2026-03:34:55] [I] [TRT] Serialized 627617 bytes of compilation cache.
+Oct 10 11:34:55 thor bash[1654871]: [10/10/2026-03:34:55] [I] [TRT] Serialized 14 timing cache entries
+Oct 10 11:34:55 thor bash[1654871]: [10/10/2026-03:34:55] [I] [TRT] Saved 633564 bytes of timing cache to /artifacts/rtc-50h-200000-trt-tf32-cache80-7step-20261010-r1/timing.cache
+Oct 10 11:35:08 thor bash[1654871]: [10/10/2026-03:35:08] [I] [TRT] Loaded engine size: 11936 MiB
+Oct 10 11:35:13 thor bash[1654871]: [10/10/2026-03:35:13] [I] Engine deserialized in 7.61595 sec.
+Oct 10 11:35:13 thor bash[1654871]: [10/10/2026-03:35:13] [I] [TRT] The following layers are used for L2 cache management and do not correspond to any layers in the INetworkDefinition: __mye3476013_myl0_0, __mye3476015_myl0_2135
+Oct 10 11:35:13 thor bash[1654871]: [10/10/2026-03:35:13] [I] Skipped inference phase since --skipInference is added.
+Oct 10 11:35:13 thor bash[1654871]: &&&& PASSED TensorRT.trtexec [TensorRT v101601] [b11] # /usr/src/tensorrt/bin/trtexec --onnx=/artifacts/rtc-50h-200000-onnx-fp32-cache80-7step-20261010-r1/sampler.onnx --saveEngine=/artifacts/rtc-50h-200000-trt-tf32-cache80-7step-20261010-r1/sampler.engine --stronglyTyped --skipInference --builderOptimizationLevel=3 --maxAuxStreams=0 --memPoolSize=workspace:8192 --profilingVerbosity=detailed --exportLayerInfo=/artifacts/rtc-50h-200000-trt-tf32-cache80-7step-20261010-r1/layers.json --timingCacheFile=/artifacts/rtc-50h-200000-trt-tf32-cache80-7step-20261010-r1/timing.cache
+Oct 10 11:35:32 thor bash[1655576]: W1010 03:35:32.929000 1 torch/utils/_pytree.py:630] <enum 'KernelPreference'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+Oct 10 11:35:46 thor bash[1655576]: [10/10/2026-03:35:46] [TRT] [W] Using default stream in enqueueV3() may lead to performance issues due to additional calls to cudaStreamSynchronize() by TensorRT to ensure correct synchronization. Please use non-default stream instead.
+Oct 10 11:35:54 thor bash[1655576]: {"status": "compared_not_robot_task_validated", "observed_at": "2026-10-10T03:35:54.363478+00:00", "engine_sha256": "15ae4a5ceb57b6b6d8743c721cbe43178ab29c714be95cfbf1b9b893574ba71c", "engine_tf32": true, "num_steps": 7, "checkpoint_weights_sha256": "298714be810f5e7e822bcac55c5efe55789f1c96c0ac4ed0a1caa86f2670e42a", "jax_reference_manifest_sha256": "5273cfd8c1b957c34b1164fa33aaff6cb0db941a8b86e536c3372f35643e4ac4", "checkpoint_metadata_sha256": "2912d15ba42fe0d742b5ac46e88804dacce69644369b4cf9b7405cf7d8fe7247", "norm_stats_sha256": "fd0d9cb2db3ce475c1175c7f21a3a0dd3aa7f59d36edc680e7044cd11b9f1edf", "cases_sha256": "198254f4db75170feb9d8e6a1d6443e4ad64f5c4daa6f4f2cec9fb960724c14c", "prefix_use_quantiles": true, "physical_max_abs": 0.0007308224393287599, "physical_mean_abs": 6.754530018826909e-05, "physical_p95_abs": 0.00021515103960595967, "physical_p99_abs": 0.0003731482158971486, "worst_element": {"case_index": 4, "action_step": 41, "dimension": 9}, "per_dimension": [{"dimension": 0, "kind": "joint_rad", "max_abs": 0.00022633196948051992, "mean_abs": 5.0236788331380594e-05, "p95_abs": 0.00015134333907570462}, {"dimension": 1, "kind": "joint_rad", "max_abs": 0.0006874426242022835, "mean_abs": 9.14999797198288e-05, "p95_abs": 0.00030854020367200276}, {"dimension": 2, "kind": "joint_rad", "max_abs": 0.0005482985751597003, "mean_abs": 9.001032580875442e-05, "p95_abs": 0.0002700575959094118}, {"dimension": 3, "kind": "joint_rad", "max_abs": 0.0006236281284761613, "mean_abs": 6.783957100844216e-05, "p95_abs": 0.0002103908598878767}, {"dimension": 4, "kind": "joint_rad", "max_abs": 0.00046658602834193097, "mean_abs": 4.874799937365973e-05, "p95_abs": 0.0001655110237063606}, {"dimension": 5, "kind": "joint_rad", "max_abs": 0.00024133377633173136, "mean_abs": 5.1910554169335064e-05, "p95_abs": 0.0001577567553082193}, {"dimension": 6, "kind": "gripper", "max_abs": 0.00024089892059564466, "mean_abs": 6.2459710112277e-05, "p95_abs": 0.000146681064969256}, {"dimension": 7, "kind": "joint_rad", "max_abs": 0.00041823427761833454, "mean_abs": 4.2149545898861636e-05, "p95_abs": 0.00013690500131087173}, {"dimension": 8, "kind": "joint_rad", "max_abs": 0.0004856450653782929, "mean_abs": 8.545311457204545e-05, "p95_abs": 0.00028366497205904994}, {"dimension": 9, "kind": "joint_rad", "max_abs": 0.0007308224393287599, "mean_abs": 0.00010069074181311002, "p95_abs": 0.00033959852033356165}, {"dimension": 10, "kind": "joint_rad", "max_abs": 0.000521969675981504, "mean_abs": 5.827205392446115e-05, "p95_abs": 0.00018418960787240892}, {"dimension": 11, "kind": "joint_rad", "max_abs": 0.0002656344817273393, "mean_abs": 6.783066898259236e-05, "p95_abs": 0.00020146607386052335}, {"dimension": 12, "kind": "joint_rad", "max_abs": 0.00025539991998468903, "mean_abs": 4.846138372247344e-05, "p95_abs": 0.00013721441300361124}, {"dimension": 13, "kind": "gripper", "max_abs": 0.0005947678335010975, "mean_abs": 8.007176519854546e-05, "p95_abs": 0.00020812139270159064}], "server_infer_p50_ms": 193.137911031954, "server_infer_p95_ms": 372.4758596625178, "steady_server_infer_p50_ms": 193.58824205119163, "steady_server_infer_p95_ms": 194.6659323410131, "steady_server_total_p50_ms": 197.41897098720074, "steady_server_total_p95_ms": 198.20355831179768}
+Oct 10 11:35:56 thor bash[1655824]: bcf41584a66d42cfc454d84a4270b3e04d51b7ba0b6bfb76c70446a3f2a41ab1
+Oct 10 11:35:56 thor bash[1655835]: pi05-rtc-50h200000-candidate
+Oct 10 11:35:56 thor bash[1655953]: curl: (7) Failed to connect to 192.168.250.1 port 8000 after 0 ms: Couldn't connect to server
+Oct 10 11:35:58 thor bash[1655980]: curl: (7) Failed to connect to 192.168.250.1 port 8000 after 0 ms: Couldn't connect to server
+Oct 10 11:36:00 thor bash[1655998]: curl: (7) Failed to connect to 192.168.250.1 port 8000 after 0 ms: Couldn't connect to server
+Oct 10 11:36:02 thor bash[1656026]: curl: (7) Failed to connect to 192.168.250.1 port 8000 after 0 ms: Couldn't connect to server
+Oct 10 11:36:04 thor bash[1656041]: curl: (7) Failed to connect to 192.168.250.1 port 8000 after 0 ms: Couldn't connect to server
+Oct 10 11:36:06 thor bash[1656055]: curl: (7) Failed to connect to 192.168.250.1 port 8000 after 0 ms: Couldn't connect to server
+Oct 10 11:36:08 thor bash[1656069]: curl: (7) Failed to connect to 192.168.250.1 port 8000 after 0 ms: Couldn't connect to server
+Oct 10 11:36:10 thor bash[1656084]: curl: (7) Failed to connect to 192.168.250.1 port 8000 after 0 ms: Couldn't connect to server
+Oct 10 11:36:12 thor bash[1656099]: curl: (7) Failed to connect to 192.168.250.1 port 8000 after 0 ms: Couldn't connect to server
+Oct 10 11:36:14 thor bash[1656112]: curl: (7) Failed to connect to 192.168.250.1 port 8000 after 0 ms: Couldn't connect to server
+Oct 10 11:36:20 thor bash[1656128]: {"status": "passed", "observed_at": "2026-10-10T03:36:20.624840+00:00", "url": "ws://192.168.250.1:8000", "handshake_ms": 2.627552952617407, "metadata": {"robot": "YAM", "hardware_family": "YAM-ABC-compatible", "num_arms": 2, "robot_action_dim": 14, "model_action_dim": 32, "action_horizon": 50, "action_layout": "[left 6 joints, left gripper, right 6 joints, right gripper]", "image_keys": ["observation.images.top_rgb", "observation.images.left_rgb", "observation.images.right_rgb"], "config": "pi05_yam", "backend": "tensorrt_cuda_graph", "rtc_mode": "trained", "rtc_prefix_norm": "quantile", "rtc_joint_step_guard_rad_per_tick": 0.2, "rtc_semantics": "clean aligned committed prefix at flow time zero; postfix denoised; no guidance/fallback", "rtc_max_delay_steps": 10, "checkpoint_weights_sha256": "298714be810f5e7e822bcac55c5efe55789f1c96c0ac4ed0a1caa86f2670e42a", "norm_stats_sha256": "fd0d9cb2db3ce475c1175c7f21a3a0dd3aa7f59d36edc680e7044cd11b9f1edf", "engine_sha256": "15ae4a5ceb57b6b6d8743c721cbe43178ab29c714be95cfbf1b9b893574ba71c", "compute_dtype": "float32", "precision_mode": "fp32_weights_tf32_compute", "denoising_steps": 7, "action_dt_s": 0.03333333333333333, "action_dim": 14, "action_mode": "absolute physical target after checkpoint inverse transforms", "joint_unit": "radian (dataset contract; hardware calibration not claimed)", "gripper_unit": "continuous; nominal 0 closed, 1 open; outputs not clipped", "target_tick_semantics": "30Hz policy tick; observation_policy_tick == target_start_tick == committed_start_tick", "action_0_relative_to_observation_policy_tick": 0, "camera_exposure_to_policy_tick_offset_s": null}, "cases": [{"sample": "episode-000095-early.npz", "delay_steps": 0, "output_shape": [50, 14], "prefix_exact": true, "output_finite": true, "max_new_joint_step_rad": 0.04022817055389072, "server_infer_ms": 215.58370895218104, "roundtrip_ms": 217.02988306060433}, {"sample": "episode-000095-middle.npz", "delay_steps": 1, "output_shape": [50, 14], "prefix_exact": true, "output_finite": true, "max_new_joint_step_rad": 0.005402349482150126, "server_infer_ms": 198.12595297116786, "roundtrip_ms": 199.1563409101218}, {"sample": "episode-000095-late.npz", "delay_steps": 10, "output_shape": [50, 14], "prefix_exact": true, "output_finite": true, "max_new_joint_step_rad": 0.037370751671582436, "server_infer_ms": 197.73117906879634, "roundtrip_ms": 198.31047300249338}, {"sample": "episode-000096-early.npz", "delay_steps": 0, "output_shape": [50, 14], "prefix_exact": true, "output_finite": true, "max_new_joint_step_rad": 0.04589252498158447, "server_infer_ms": 197.7275210665539, "roundtrip_ms": 198.286140919663}, {"sample": "episode-000096-middle.npz", "delay_steps": 1, "output_shape": [50, 14], "prefix_exact": true, "output_finite": true, "max_new_joint_step_rad": 0.05019949056809314, "server_infer_ms": 197.71367602515966, "roundtrip_ms": 198.24739592149854}, {"sample": "episode-000096-late.npz", "delay_steps": 10, "output_shape": [50, 14], "prefix_exact": true, "output_finite": true, "max_new_joint_step_rad": 0.08572244353180158, "server_infer_ms": 197.5575250107795, "roundtrip_ms": 198.1916920049116}, {"sample": "episode-000097-early.npz", "delay_steps": 0, "output_shape": [50, 14], "prefix_exact": true, "output_finite": true, "max_new_joint_step_rad": 0.10197832351278668, "server_infer_ms": 197.8252420667559, "roundtrip_ms": 198.4739820472896}, {"sample": "episode-000097-middle.npz", "delay_steps": 1, "output_shape": [50, 14], "prefix_exact": true, "output_finite": true, "max_new_joint_step_rad": 0.051378280573327606, "server_infer_ms": 197.79252505395561, "roundtrip_ms": 198.34763603284955}, {"sample": "episode-000097-late.npz", "delay_steps": 10, "output_shape": [50, 14], "prefix_exact": true, "output_finite": true, "max_new_joint_step_rad": 0.0716622338063333, "server_infer_ms": 197.8448029840365, "roundtrip_ms": 198.41257098596543}], "server_infer_p50_ms": 197.79252505395561, "server_infer_p95_ms": 208.60060655977577, "roundtrip_p50_ms": 198.34763603284955, "roundtrip_p95_ms": 209.88046620041132}
+Oct 10 11:36:31 thor bash[1656193]: pi05-rtc-50h200000-candidate
+Oct 10 11:36:31 thor bash[1652168]: Restoring system configuration from /tmp/thor-maxn-3h0orom4/clocks.conf
+Oct 10 11:36:31 thor bash[1652168]: Disabled persistence mode for GPU 00000000:01:00.0.
+Oct 10 11:36:31 thor bash[1652168]: All done.
+Oct 10 11:36:31 thor bash[1652168]: NV Power Mode: 120W
+Oct 10 11:36:31 thor bash[1652168]: 1
+Oct 10 11:36:31 thor systemd[1]: thor-rtc-50h200000-deploy.service: Main process exited, code=exited, status=1/FAILURE
+Oct 10 11:36:31 thor systemd[1]: thor-rtc-50h200000-deploy.service: Failed with result 'exit-code'.
+Oct 10 11:36:31 thor systemd[1]: thor-rtc-50h200000-deploy.service: Consumed 1.404s CPU time, 1.2M memory peak, 0B memory swap peak.
+Oct 10 11:37:25 thor python3[1657340]: Enabled Legacy persistence mode for GPU 00000000:01:00.0.
+Oct 10 11:37:25 thor python3[1657340]: All done.
+Oct 10 11:37:25 thor python3[1657340]: SOC family:tegra264  Machine:NVIDIA Jetson AGX Thor Developer Kit
+Oct 10 11:37:25 thor python3[1657340]: Online CPUs: 0-13, Offline CPUs:
+Oct 10 11:37:25 thor python3[1657340]: cpu0:  Governor=schedutil MinFreq=2601000 MaxFreq=2601000 CurrentFreq=2601000 IdleStates: WFI=0 cc7=0
+Oct 10 11:37:25 thor python3[1657340]: cpu1:  Governor=schedutil MinFreq=2601000 MaxFreq=2601000 CurrentFreq=2601000 IdleStates: WFI=0 cc7=0
+Oct 10 11:37:25 thor python3[1657340]: cpu2:  Governor=schedutil MinFreq=2601000 MaxFreq=2601000 CurrentFreq=2601000 IdleStates: WFI=0 cc7=0
+Oct 10 11:37:25 thor python3[1657340]: cpu3:  Governor=schedutil MinFreq=2601000 MaxFreq=2601000 CurrentFreq=2601000 IdleStates: WFI=0 cc7=0
+Oct 10 11:37:25 thor python3[1657340]: cpu4:  Governor=schedutil MinFreq=2601000 MaxFreq=2601000 CurrentFreq=2601000 IdleStates: WFI=0 cc7=0
+Oct 10 11:37:25 thor python3[1657340]: cpu5:  Governor=schedutil MinFreq=2601000 MaxFreq=2601000 CurrentFreq=2601000 IdleStates: WFI=0 cc7=0
+Oct 10 11:37:25 thor python3[1657340]: cpu6:  Governor=schedutil MinFreq=2601000 MaxFreq=2601000 CurrentFreq=2601000 IdleStates: WFI=0 cc7=0
+Oct 10 11:37:25 thor python3[1657340]: cpu7:  Governor=schedutil MinFreq=2601000 MaxFreq=2601000 CurrentFreq=2601000 IdleStates: WFI=0 cc7=0
+Oct 10 11:37:25 thor python3[1657340]: cpu8:  Governor=schedutil MinFreq=2601000 MaxFreq=2601000 CurrentFreq=2601000 IdleStates: WFI=0 cc7=0
+Oct 10 11:37:25 thor python3[1657340]: cpu9:  Governor=schedutil MinFreq=2601000 MaxFreq=2601000 CurrentFreq=2601000 IdleStates: WFI=0 cc7=0
+Oct 10 11:37:25 thor python3[1657340]: cpu10: Governor=schedutil MinFreq=2601000 MaxFreq=2601000 CurrentFreq=2601000 IdleStates: WFI=0 cc7=0
+Oct 10 11:37:25 thor python3[1657340]: cpu11: Governor=schedutil MinFreq=2601000 MaxFreq=2601000 CurrentFreq=2601000 IdleStates: WFI=0 cc7=0
+Oct 10 11:37:25 thor python3[1657340]: cpu12: Governor=schedutil MinFreq=2601000 MaxFreq=2601000 CurrentFreq=2601000 IdleStates: WFI=0 cc7=0
+Oct 10 11:37:25 thor python3[1657340]: cpu13: Governor=schedutil MinFreq=2601000 MaxFreq=2601000 CurrentFreq=2601000 IdleStates: WFI=0 cc7=0
+Oct 10 11:37:25 thor python3[1657340]: gpu-gpc-0 MinFreq=1575000000 MaxFreq=1575000000 CurrentFreq=1575000000
+Oct 10 11:37:25 thor python3[1657340]: gpu-nvd-0 MinFreq=1692000000 MaxFreq=1692000000 CurrentFreq=1692000000
+Oct 10 11:37:25 thor python3[1657340]: EMC MinFreq=4266000000 MaxFreq=4266000000 CurrentFreq=4266000000
+Oct 10 11:37:25 thor python3[1657340]: PVA0_VPS0: Online=0 MinFreq=0 MaxFreq=1215000000 CurrentFreq=1215000000
+Oct 10 11:37:25 thor python3[1657340]: PVA0_AXI:  Online=0 MinFreq=0 MaxFreq=909000000 CurrentFreq=909000000
+Oct 10 11:37:25 thor python3[1657340]: FAN Dynamic Speed Control=nvfancontrol hwmon1_pwm1=73
+Oct 10 11:37:25 thor python3[1657340]: FAN Dynamic Speed Control=nvfancontrol hwmon1_pwm1_enable=1
+Oct 10 11:37:25 thor python3[1657340]: NV Power Mode: MAXN
+Oct 10 11:37:25 thor python3[1657627]: pi05-rtc-infer
+Oct 10 11:37:25 thor python3[1657626]: Watching inference container pi05-rtc-infer
