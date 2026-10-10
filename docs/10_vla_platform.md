@@ -2,7 +2,7 @@
 
 ## 当前状态
 
-状态汇总更新至 2026-09-24。2026-09-09 曾按用户授权将多模型工作树与当时 main 的 Pi 全量训练/续训修复整合；当前功能分支与 main 的关系以 Git 为准。XR-1 原生训练入口和 YAM HIL sidecar 转换入口已写入本地分支；真实 HIL 训练集尚未定位，未启动训练或部署 Thor。架构 owner 为 [01](01_system_architecture.md#多模型接入层)，设备信息归 [02](02_installation_and_environment.md)，模型精度与 Thor 验收归 [08](08_thor_edge_deployment.md)，模型无关训练看板归 [11](11_training_dashboard.md)。
+状态汇总更新至 2026-10-10。2026-09-09 曾按用户授权将多模型工作树与当时 main 的 Pi 全量训练/续训修复整合；当前功能分支与 main 的关系以 Git 为准。XR-1 原生训练入口和 YAM HIL sidecar 转换入口已写入本地分支；真实 HIL 训练集尚未定位，未启动训练。Thor已完成官方5B基础模型原生异步离线性能测试，尚未部署YAM XR-1控制服务。架构 owner 为 [01](01_system_architecture.md#多模型接入层)，设备信息归 [02](02_installation_and_environment.md)，模型精度与 Thor 验收归 [08](08_thor_edge_deployment.md)，模型无关训练看板归 [11](11_training_dashboard.md)。
 
 | 部分 | 状态 |
 |---|---|
@@ -11,10 +11,10 @@
 | LeRobot 后端 | 共用原生训练 launcher 已实现并用替身测试；无自建 trainer/processor；尚无通用离线推理入口 |
 | Evo-1 | 本地/服务器专用环境已安装并通过CPU检查；YAM真实训练/推理仍待接入 |
 | MolmoAct2 | 原生LeRobot共享后端已注册；两端独立环境CPU检查通过、108包版本一致；仅普通版，不含Think，真实YAM/GPU仍待验收 |
-| Xiaomi-Robotics-1 / XR-1 | 官方5B checkpoint与独立环境已准备；原生入口和HIL/LeRobot末端转换已接入。2026-10-10复核50h转换与train统计已完成；FK audit仍缺失，GPU训练/部署IK未验收。50h配方已设原生异步前缀1–10步、输出30步；本地配置化补丁尚未同步服务器 |
+| Xiaomi-Robotics-1 / XR-1 | 官方5B checkpoint与独立环境已准备；原生入口和HIL/LeRobot末端转换已接入。50h转换与train统计完成，FK audit仍缺失、GPU训练/部署IK未验收；配方前缀1–10步/H30，本地补丁未同步。Thor原生BF16/5步/DiT Graph的N=10推理约130ms（224px）或174ms（384px），仅基础模型离线性能，不是YAM实机验收；详见[08](08_thor_edge_deployment.md#xr-1-原生异步-rtc-性能基线2026-10-10) |
 | FastWAM、VLA-JEPA | 注册 planned；不得运行或报告已支持 |
 | Conda | Evo-1已有独立环境规格和104个wheel的锁；Pi等bootstrap仍不代表模型环境已安装 |
-| Thor | 原 Pi 容器、TensorRT 引擎、报告保持原状；没有部署此次改造 |
+| Thor | Pi200000在XR-1测试后按原权重/引擎配置恢复；独立XR-1镜像完成原生异步离线性能测试，未部署YAM XR-1常驻控制服务/IK |
 
 历史 2026-09-09 CPU 回归曾有平台测试52项、与 `scripts/thor`、`skills/mlops-memory/tests` 和下载完整性测试合跑170项通过；这些数值不代表 v0.2 新模块已验收。框架测试替身不冒充模型运行；独立Evo环境实际导入/processor检查见 [环境证据](reports/environments/evo1-20260908/README.md)，MolmoAct2的原生精度/数据差异见 [接入说明](reference/molmoact2_integration.md)。
 

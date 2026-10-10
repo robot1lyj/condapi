@@ -1,0 +1,8 @@
+FROM xiaomi-xr1:thor-20260923
+
+# Keep the Thor-compatible NVIDIA Torch/FlashAttention binaries. Only add the
+# native upstream import dependencies, not its DeepSpeed/training stack.
+RUN python -m pip install --no-cache-dir --index-url https://pypi.tuna.tsinghua.edu.cn/simple \
+    'mmengine==0.10.7' 'lightning==2.5.3' 'liger-kernel==0.6.5'
+ENV HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 TOKENIZERS_PARALLELISM=false
+WORKDIR /workspace

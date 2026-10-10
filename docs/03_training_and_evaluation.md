@@ -234,7 +234,9 @@ python adapters/parts/train.py --recipe /data/parts/recipe_v2.json \
 
 ### 乐高 50h 的候选微调配方
 
-2026-10-10 用户指定原生异步前缀扩大为 **1–10 步**。50h recipe 显式设置 `rtc_mode=native_async`、`async_prefix_min=1`、`async_prefix_max=10`；保持原生 50% 概率使用均匀采样的前缀、50% 不使用前缀。模型仍输出 30×60 动作张量（30Hz 下约1秒），其中前 N 步为给定前缀、新生成后缀有 30−N 步；N=10 时后缀20步约0.667秒。前缀范围覆盖约33–333ms，但真实推理延迟与执行对齐仍须测量。训练末尾不足30步的样本仍按原生 mask 处理，不能把20步当作所有样本的有效监督长度。`rtc_mode=disabled` 关闭前缀条件训练；未提供新字段的旧 recipe 保持1–6步默认。实现是固定上游的配置化小补丁，`third_party/xr1/UPSTREAM.json` 保留原文件摘要与本地补丁来源；不改变权重形状。尚未同步本次补丁到服务器、未执行GPU训练或Thor异步验收。
+2026-10-10 用户指定原生异步前缀扩大为 **1–10 步**。50h recipe 显式设置 `rtc_mode=native_async`、`async_prefix_min=1`、`async_prefix_max=10`；保持原生 50% 概率使用均匀采样的前缀、50% 不使用前缀。模型仍输出 30×60 动作张量（30Hz 下约1秒），其中前 N 步为给定前缀、新生成后缀有 30−N 步；N=10 时后缀20步约0.667秒。前缀范围覆盖约33–333ms，但真实推理延迟与执行对齐仍须测量。训练末尾不足30步的样本仍按原生 mask 处理，不能把20步当作所有样本的有效监督长度。`rtc_mode=disabled` 关闭前缀条件训练；未提供新字段的旧 recipe 保持1–6步默认。实现是固定上游的配置化小补丁，`third_party/xr1/UPSTREAM.json` 保留原文件摘要与本地补丁来源；不改变权重形状。尚未同步本次补丁到服务器、未执行50h GPU训练或YAM实机Thor异步验收。
+
+同日已独立测官方5B基础权重的原生异步Thor延迟：保持BF16/H30/5步去噪，N=10的DiT Graph推理P50约130ms（224px）或174ms（384px）；36组图加速对照逐位一致。较大图像的完整本地路径补测P95约183ms，但主测曾有345ms峰值，不能据此缩小1～10训练范围或保证硬实时。该性能基线不验证50h训练质量、norm、末端参考系或IK，不改变候选配方；完整输入边界、尾延迟与20ms链路＋1 tick预算见[08](08_thor_edge_deployment.md#xr-1-原生异步-rtc-性能基线2026-10-10)和[报告](reports/thor/xr1-rtc-20261010/README.md)。
 
 配置 owner 为 [`configs/native/xr1-yam-lego-50h.json`](../configs/native/xr1-yam-lego-50h.json)，平台入口为 [`configs/experiments/xr1-lego-50h.toml`](../configs/experiments/xr1-lego-50h.toml)。这是**候选配方，尚未开训**。固定官方通用 5B `ee21d524` 权重及 SHA256；训练集为 50h 派生版的完整 `train/manifest.json`，预期 2,337 集、5,400,685 帧；原始 `val` 69 集独立保留，不参加训练统计或训练采样。训练入口从 manifest 展开精确 JSON 列表，并核对选集、源转换 manifest、逐集 JSON 哈希、统计 manifest 哈希、FK audit 的源仓/模型/成员，以及官方权重 SHA。完整转换、`normalize.json` 和真实 FK/单位/时序审核完成前，`--check-only` 应拒绝通过。
 

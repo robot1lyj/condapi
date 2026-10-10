@@ -1,0 +1,22 @@
+2026-10-10T17:52:07+08:00
+ExecMainStatus=0
+Id=thor-xr1-rtc-benchmark-20261010-r1.service
+ActiveState=inactive
+SubState=dead
+
+ExecMainStatus=0
+Id=thor-xr1-rtc-tail-20261010-r1.service
+ActiveState=inactive
+SubState=dead
+
+ExecMainStatus=0
+Id=thor-pi-maxn-50h200000-xr1-restored-20261010.service
+ActiveState=active
+SubState=running
+pi05-rtc-infer Up 3 minutes
+["/bench/serve_pi05_rtc_trt.py","--engine","/artifacts/rtc-50h-200000-trt-tf32-cache80-7step-20261010-r1","--checkpoint","/ckpt","--norm","/ckpt/assets/yam/norm_stats.json","--warmup-sample","/cases/episode-000095-early.npz","--warmup-rtc","/bench/rtc_warmup_d0.json","--host","192.168.250.1","--port","8000","--allow-validated-tf32-7step","--validation","/artifacts/rtc-50h-200000-trt-tf32-cache80-7step-20261010-r1/validation.json","--jax-reference","/artifacts/rtc-50h-200000-jax-quantile-7step-20261010-r1"]
+NV Power Mode: MAXN
+0
+OK
+Filesystem         1B-blocks         Used    Available Use% Mounted on
+/dev/nvme0n1p1 1004162105344 315302957056 637775044608  34% /
