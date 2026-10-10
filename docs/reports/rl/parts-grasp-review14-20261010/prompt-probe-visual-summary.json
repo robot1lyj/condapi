@@ -1,0 +1,25 @@
+{
+  "schema": "parts_visual_box_probe_v1",
+  "images": 12,
+  "normalized_boxes": {
+    "left_finger": [
+      0.245,
+      0.82,
+      0.49,
+      0.36
+    ],
+    "right_finger": [
+      0.755,
+      0.82,
+      0.49,
+      0.36
+    ]
+  },
+  "images_with_any_score_ge_0.50": 12,
+  "elapsed_s": 18.711754294112325,
+  "checkpoint_sha256": "9999e2341ceef5e136daa386eecb55cb414446a00ac2b55eb2dfd2f7c3cf8c9e",
+  "pipeline_sha256": "e4109c3deac24474a313d8a86076954c62efa06ee83344abd88154552e4477bf",
+  "accuracy_measured": false,
+  "automatic_reward_ready": false,
+  "training_executed": false
+}

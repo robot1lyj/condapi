@@ -1,0 +1,19 @@
+{
+  "note": "Physical eligibility ceiling only, not grasp labels. Provisional entry reference and base Z. Sampled imagery v1 is 5Hz; shorter windows require denser fresh visual evidence.",
+  "candidates": 273,
+  "physical_eligible_counts_by_window_s": {
+    "0.15": 199,
+    "0.2": 197,
+    "0.25": 193,
+    "0.5": 175,
+    "1.0": 113
+  },
+  "strict_visual_eligible_counts_by_window_s": {
+    "0.15": 61,
+    "0.2": 54,
+    "0.25": 37,
+    "0.5": 19,
+    "1.0": 2
+  },
+  "approved_rewards": 0
+}

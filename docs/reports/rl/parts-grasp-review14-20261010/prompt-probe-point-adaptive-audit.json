@@ -1,0 +1,571 @@
+{
+  "note": "Appearance/anchor evidence, no human outcome truth or calibrated accuracy.",
+  "images": 12,
+  "images_both_dark_fraction_ge_0_65": 12,
+  "per_image": [
+    {
+      "id": "E01-segment_000000-left-000465-wrist_full",
+      "finger_objects": [
+        {
+          "name": "left_finger",
+          "points_xy": [
+            [
+              95,
+              451
+            ],
+            [
+              545,
+              451
+            ],
+            [
+              320,
+              200
+            ]
+          ],
+          "predicted_mask_quality": 0.9140625,
+          "dark_fraction": 0.9887678462683538,
+          "area": 14779,
+          "bottom_anchor_pixels": 3511
+        },
+        {
+          "name": "right_finger",
+          "points_xy": [
+            [
+              545,
+              451
+            ],
+            [
+              95,
+              451
+            ],
+            [
+              320,
+              200
+            ]
+          ],
+          "predicted_mask_quality": 0.91796875,
+          "dark_fraction": 0.9865611569684153,
+          "area": 14659,
+          "bottom_anchor_pixels": 3479
+        }
+      ]
+    },
+    {
+      "id": "E01-segment_000000-left-000471-wrist_full",
+      "finger_objects": [
+        {
+          "name": "left_finger",
+          "points_xy": [
+            [
+              106,
+              465
+            ],
+            [
+              534,
+              465
+            ],
+            [
+              320,
+              200
+            ]
+          ],
+          "predicted_mask_quality": 0.87890625,
+          "dark_fraction": 0.997190404149557,
+          "area": 13881,
+          "bottom_anchor_pixels": 3591
+        },
+        {
+          "name": "right_finger",
+          "points_xy": [
+            [
+              534,
+              465
+            ],
+            [
+              106,
+              465
+            ],
+            [
+              320,
+              200
+            ]
+          ],
+          "predicted_mask_quality": 0.89453125,
+          "dark_fraction": 0.9948729058347776,
+          "area": 13848,
+          "bottom_anchor_pixels": 3590
+        }
+      ]
+    },
+    {
+      "id": "E01-segment_000000-left-000489-wrist_full",
+      "finger_objects": [
+        {
+          "name": "left_finger",
+          "points_xy": [
+            [
+              209,
+              465
+            ],
+            [
+              431,
+              465
+            ],
+            [
+              320,
+              200
+            ]
+          ],
+          "predicted_mask_quality": 0.921875,
+          "dark_fraction": 0.9986386009006178,
+          "area": 9549,
+          "bottom_anchor_pixels": 2497
+        },
+        {
+          "name": "right_finger",
+          "points_xy": [
+            [
+              431,
+              465
+            ],
+            [
+              209,
+              465
+            ],
+            [
+              320,
+              200
+            ]
+          ],
+          "predicted_mask_quality": 0.9609375,
+          "dark_fraction": 0.9963064584212749,
+          "area": 9476,
+          "bottom_anchor_pixels": 2525
+        }
+      ]
+    },
+    {
+      "id": "E01-segment_000000-left-000501-wrist_full",
+      "finger_objects": [
+        {
+          "name": "left_finger",
+          "points_xy": [
+            [
+              209,
+              465
+            ],
+            [
+              431,
+              465
+            ],
+            [
+              320,
+              200
+            ]
+          ],
+          "predicted_mask_quality": 0.87109375,
+          "dark_fraction": 0.999039039039039,
+          "area": 8325,
+          "bottom_anchor_pixels": 1861
+        },
+        {
+          "name": "right_finger",
+          "points_xy": [
+            [
+              431,
+              465
+            ],
+            [
+              209,
+              465
+            ],
+            [
+              320,
+              200
+            ]
+          ],
+          "predicted_mask_quality": 0.95703125,
+          "dark_fraction": 0.997994511294068,
+          "area": 9474,
+          "bottom_anchor_pixels": 2531
+        }
+      ]
+    },
+    {
+      "id": "E01-segment_000000-left-000818-wrist_full",
+      "finger_objects": [
+        {
+          "name": "left_finger",
+          "points_xy": [
+            [
+              56,
+              451
+            ],
+            [
+              583,
+              451
+            ],
+            [
+              320,
+              200
+            ]
+          ],
+          "predicted_mask_quality": 0.90625,
+          "dark_fraction": 0.9797600697004222,
+          "area": 14921,
+          "bottom_anchor_pixels": 3270
+        },
+        {
+          "name": "right_finger",
+          "points_xy": [
+            [
+              583,
+              451
+            ],
+            [
+              56,
+              451
+            ],
+            [
+              320,
+              200
+            ]
+          ],
+          "predicted_mask_quality": 0.9296875,
+          "dark_fraction": 0.9799674045905201,
+          "area": 14726,
+          "bottom_anchor_pixels": 3249
+        }
+      ]
+    },
+    {
+      "id": "E01-segment_000000-right-000057-wrist_full",
+      "finger_objects": [
+        {
+          "name": "left_finger",
+          "points_xy": [
+            [
+              94,
+              451
+            ],
+            [
+              559,
+              451
+            ],
+            [
+              320,
+              200
+            ]
+          ],
+          "predicted_mask_quality": 0.92578125,
+          "dark_fraction": 0.986999922618587,
+          "area": 12923,
+          "bottom_anchor_pixels": 3331
+        },
+        {
+          "name": "right_finger",
+          "points_xy": [
+            [
+              559,
+              451
+            ],
+            [
+              94,
+              451
+            ],
+            [
+              320,
+              200
+            ]
+          ],
+          "predicted_mask_quality": 0.9140625,
+          "dark_fraction": 0.9874591472220111,
+          "area": 13157,
+          "bottom_anchor_pixels": 3143
+        }
+      ]
+    },
+    {
+      "id": "E01-segment_000000-right-000064-wrist_full",
+      "finger_objects": [
+        {
+          "name": "left_finger",
+          "points_xy": [
+            [
+              108,
+              451
+            ],
+            [
+              548,
+              451
+            ],
+            [
+              320,
+              200
+            ]
+          ],
+          "predicted_mask_quality": 0.6796875,
+          "dark_fraction": 0.9970794392523364,
+          "area": 8560,
+          "bottom_anchor_pixels": 1583
+        },
+        {
+          "name": "right_finger",
+          "points_xy": [
+            [
+              548,
+              451
+            ],
+            [
+              108,
+              451
+            ],
+            [
+              320,
+              200
+            ]
+          ],
+          "predicted_mask_quality": 0.890625,
+          "dark_fraction": 0.9912543153049482,
+          "area": 13035,
+          "bottom_anchor_pixels": 3330
+        }
+      ]
+    },
+    {
+      "id": "E01-segment_000000-right-000070-wrist_full",
+      "finger_objects": [
+        {
+          "name": "left_finger",
+          "points_xy": [
+            [
+              109,
+              465
+            ],
+            [
+              545,
+              465
+            ],
+            [
+              320,
+              200
+            ]
+          ],
+          "predicted_mask_quality": 0.6484375,
+          "dark_fraction": 0.9947226709746904,
+          "area": 9285,
+          "bottom_anchor_pixels": 2135
+        },
+        {
+          "name": "right_finger",
+          "points_xy": [
+            [
+              545,
+              465
+            ],
+            [
+              109,
+              465
+            ],
+            [
+              320,
+              200
+            ]
+          ],
+          "predicted_mask_quality": 0.77734375,
+          "dark_fraction": 0.996665608129565,
+          "area": 12596,
+          "bottom_anchor_pixels": 3482
+        }
+      ]
+    },
+    {
+      "id": "E01-segment_000000-right-000153-wrist_full",
+      "finger_objects": [
+        {
+          "name": "left_finger",
+          "points_xy": [
+            [
+              124,
+              465
+            ],
+            [
+              529,
+              465
+            ],
+            [
+              320,
+              200
+            ]
+          ],
+          "predicted_mask_quality": 0.55859375,
+          "dark_fraction": 0.9941137998691956,
+          "area": 9174,
+          "bottom_anchor_pixels": 1937
+        },
+        {
+          "name": "right_finger",
+          "points_xy": [
+            [
+              529,
+              465
+            ],
+            [
+              124,
+              465
+            ],
+            [
+              320,
+              200
+            ]
+          ],
+          "predicted_mask_quality": 0.69921875,
+          "dark_fraction": 0.9990758632277577,
+          "area": 11903,
+          "bottom_anchor_pixels": 3333
+        }
+      ]
+    },
+    {
+      "id": "E01-segment_000000-right-000156-wrist_full",
+      "finger_objects": [
+        {
+          "name": "left_finger",
+          "points_xy": [
+            [
+              114,
+              465
+            ],
+            [
+              540,
+              465
+            ],
+            [
+              320,
+              200
+            ]
+          ],
+          "predicted_mask_quality": 0.66796875,
+          "dark_fraction": 0.9932147630307392,
+          "area": 9727,
+          "bottom_anchor_pixels": 2025
+        },
+        {
+          "name": "right_finger",
+          "points_xy": [
+            [
+              540,
+              465
+            ],
+            [
+              114,
+              465
+            ],
+            [
+              320,
+              200
+            ]
+          ],
+          "predicted_mask_quality": 0.7734375,
+          "dark_fraction": 0.997333548804137,
+          "area": 12376,
+          "bottom_anchor_pixels": 3443
+        }
+      ]
+    },
+    {
+      "id": "E02-segment_000001-left-000174-wrist_full",
+      "finger_objects": [
+        {
+          "name": "left_finger",
+          "points_xy": [
+            [
+              186,
+              465
+            ],
+            [
+              454,
+              465
+            ],
+            [
+              320,
+              200
+            ]
+          ],
+          "predicted_mask_quality": 0.91796875,
+          "dark_fraction": 0.9982745398773006,
+          "area": 10432,
+          "bottom_anchor_pixels": 2735
+        },
+        {
+          "name": "right_finger",
+          "points_xy": [
+            [
+              454,
+              465
+            ],
+            [
+              186,
+              465
+            ],
+            [
+              320,
+              200
+            ]
+          ],
+          "predicted_mask_quality": 0.890625,
+          "dark_fraction": 0.9973612197028929,
+          "area": 10232,
+          "bottom_anchor_pixels": 2731
+        }
+      ]
+    },
+    {
+      "id": "E12-segment_000000-left-001231-wrist_full",
+      "finger_objects": [
+        {
+          "name": "left_finger",
+          "points_xy": [
+            [
+              194,
+              465
+            ],
+            [
+              446,
+              465
+            ],
+            [
+              320,
+              200
+            ]
+          ],
+          "predicted_mask_quality": 0.95703125,
+          "dark_fraction": 0.9970379146919431,
+          "area": 10128,
+          "bottom_anchor_pixels": 2647
+        },
+        {
+          "name": "right_finger",
+          "points_xy": [
+            [
+              446,
+              465
+            ],
+            [
+              194,
+              465
+            ],
+            [
+              320,
+              200
+            ]
+          ],
+          "predicted_mask_quality": 0.9375,
+          "dark_fraction": 0.9974178170622703,
+          "area": 10069,
+          "bottom_anchor_pixels": 2678
+        }
+      ]
+    }
+  ]
+}

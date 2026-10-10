@@ -1,0 +1,12 @@
+{
+  "dataset": "/home/wuyan-lyj/condapi-data/rl/lego-grasp-review14-20261010-v1",
+  "archive": "/home/wuyan-lyj/condapi-data/rl/lego-grasp-review14-20261010-v1.zip",
+  "archive_bytes": 185197091,
+  "archive_sha256": "eadb6f2689c14e0531d5e2121548cb6815a5ca8fbb9a38e98222d7f3fa0e27de",
+  "zip_crc_passed": true,
+  "archive_members": 12661,
+  "automatic_reward_ready": false,
+  "training_executed": false,
+  "preview_url": "http://127.0.0.1:8757/index.html",
+  "probe_url": "http://127.0.0.1:8757/diagnostics/index.html"
+}

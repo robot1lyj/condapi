@@ -1,0 +1,92 @@
+{
+  "schema": "parts_descriptive_prompt_probe_v1",
+  "jobs": 26,
+  "prompts": [
+    "robot gripper fingers",
+    "robot gripper",
+    "black gripper",
+    "black triangular gripper fingers",
+    "black triangular shapes",
+    "black triangular plastic wedges",
+    "black ribbed triangular fingers",
+    "two black tapered fingers",
+    "black wedge-shaped jaws",
+    "black ridged plastic jaws",
+    "black triangle",
+    "LEGO brick",
+    "plastic building block"
+  ],
+  "counts": {
+    "robot gripper fingers": {
+      "wrist_full_max_ge_0.50": 0,
+      "wrist_crop_max_ge_0.50": 0,
+      "top_full_max_ge_0.50": 0
+    },
+    "robot gripper": {
+      "wrist_full_max_ge_0.50": 0,
+      "wrist_crop_max_ge_0.50": 0,
+      "top_full_max_ge_0.50": 0
+    },
+    "black gripper": {
+      "wrist_full_max_ge_0.50": 0,
+      "wrist_crop_max_ge_0.50": 0,
+      "top_full_max_ge_0.50": 0
+    },
+    "black triangular gripper fingers": {
+      "wrist_full_max_ge_0.50": 1,
+      "wrist_crop_max_ge_0.50": 0,
+      "top_full_max_ge_0.50": 0
+    },
+    "black triangular shapes": {
+      "wrist_full_max_ge_0.50": 0,
+      "wrist_crop_max_ge_0.50": 0,
+      "top_full_max_ge_0.50": 0
+    },
+    "black triangular plastic wedges": {
+      "wrist_full_max_ge_0.50": 0,
+      "wrist_crop_max_ge_0.50": 0,
+      "top_full_max_ge_0.50": 0
+    },
+    "black ribbed triangular fingers": {
+      "wrist_full_max_ge_0.50": 2,
+      "wrist_crop_max_ge_0.50": 2,
+      "top_full_max_ge_0.50": 0
+    },
+    "two black tapered fingers": {
+      "wrist_full_max_ge_0.50": 0,
+      "wrist_crop_max_ge_0.50": 0,
+      "top_full_max_ge_0.50": 0
+    },
+    "black wedge-shaped jaws": {
+      "wrist_full_max_ge_0.50": 0,
+      "wrist_crop_max_ge_0.50": 0,
+      "top_full_max_ge_0.50": 0
+    },
+    "black ridged plastic jaws": {
+      "wrist_full_max_ge_0.50": 0,
+      "wrist_crop_max_ge_0.50": 0,
+      "top_full_max_ge_0.50": 0
+    },
+    "black triangle": {
+      "wrist_full_max_ge_0.50": 0,
+      "wrist_crop_max_ge_0.50": 0,
+      "top_full_max_ge_0.50": 0
+    },
+    "LEGO brick": {
+      "wrist_full_max_ge_0.50": 8,
+      "wrist_crop_max_ge_0.50": 8,
+      "top_full_max_ge_0.50": 2
+    },
+    "plastic building block": {
+      "wrist_full_max_ge_0.50": 11,
+      "wrist_crop_max_ge_0.50": 9,
+      "top_full_max_ge_0.50": 2
+    }
+  },
+  "elapsed_s": 35.109558096854016,
+  "checkpoint_sha256": "9999e2341ceef5e136daa386eecb55cb414446a00ac2b55eb2dfd2f7c3cf8c9e",
+  "pipeline_sha256": "3139f62ecd4c02c296752d4393b57d2a133066fb82f701da7f6b6e7a4a3fa136",
+  "accuracy_measured": false,
+  "automatic_reward_ready": false,
+  "training_executed": false
+}

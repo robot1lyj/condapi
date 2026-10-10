@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LEGO · 逐次抓取审核</title>
+<style>
+:root{color-scheme:light;--ink:#172c36;--muted:#5b6f79;--line:#d7e1e4;--paper:#f4f7f6;--green:#16694d;--red:#aa3434;--amber:#936410}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.55 system-ui,"Microsoft YaHei",sans-serif}
+header{padding:25px 32px 18px;background:#173c42;color:white}header h1{font-size:26px;margin:0 0 5px}header p{margin:0;color:#c2dcdd}
+.stats{display:flex;gap:12px;flex-wrap:wrap;margin-top:18px}.stat{padding:7px 13px;border:1px solid #4b6a6c;border-radius:8px}.stat b{font-size:20px;margin-right:6px}
+.notice{padding:12px 32px;background:#fff3d9;color:#684a13;border-bottom:1px solid #e5d5ae;font-size:14px}
+.toolbar{padding:14px 24px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:white;border-bottom:1px solid var(--line)}
+button,select,input,textarea{font:inherit}button,select,input{padding:8px 11px;border:1px solid #bfced3;border-radius:7px;background:white;color:var(--ink)}
+button{cursor:pointer}button:hover{border-color:#176653;background:#eff8f4}button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid #8bc9bf;outline-offset:2px}
+button.primary{background:var(--green);color:white;border-color:var(--green)}.spacer{flex:1}.hidden{display:none!important}
+.layout{display:grid;grid-template-columns:255px minmax(0,1fr);max-width:1600px;margin:auto;min-height:75vh}
+aside{padding:18px 12px;background:#edf2f1;border-right:1px solid var(--line)}.list{max-height:calc(100vh - 330px);overflow:auto;min-height:280px}.count{font-size:13px;color:var(--muted);margin:0 8px 12px}
+.item{display:block;text-align:left;width:100%;margin-bottom:7px;padding:10px 12px;border-color:transparent}.item.current{border-color:#277564;box-shadow:inset 3px 0 #277564}.item strong{display:block}.item small{color:var(--muted)}
+main{padding:24px;min-width:0}.topline{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:14px}.topline h2{font-size:24px;margin:0}.topline .spacer{min-width:0}.badge{padding:4px 10px;border-radius:30px;background:#e8ecee;font-size:13px;white-space:nowrap}
+.success{color:var(--green);background:#e2f2e9}.failure{color:var(--red);background:#fbe8e4}.uncertain{color:var(--amber);background:#fff0ce}.non_grasp{color:#435e73;background:#e5edf4}
+.video{background:#101c20;border-radius:10px;overflow:hidden}video{width:100%;display:block;aspect-ratio:10/3;max-height:400px}.caption{color:var(--muted);font-size:13px;margin:7px 0 16px}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0}.metric{padding:10px 14px;border:1px solid var(--line);background:white;border-radius:8px}.metric small{display:block;color:var(--muted)}.metric b{font-size:19px}
+.panel{background:white;border:1px solid var(--line);border-radius:10px;padding:18px;margin:14px 0}.panel h3{font-size:16px;margin:0 0 10px}.reasons{margin:0;padding-left:20px;color:var(--muted);font-size:14px}
+.gallery{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.gallery figure{margin:0}.gallery img{width:100%;display:block;border-radius:6px;cursor:pointer;border:1px solid var(--line)}.gallery figcaption{font-size:12px;color:var(--muted);padding-top:5px}
+.choices{display:flex;gap:9px;flex-wrap:wrap}.choices button.selected{outline:2px solid var(--green);outline-offset:2px}textarea{width:100%;min-height:70px;padding:10px;border:1px solid var(--line);border-radius:7px;margin:12px 0 0;resize:vertical}
+.fine{font-size:13px;color:var(--muted)}#status{margin-left:10px;font-size:13px;color:#41655a}footer{padding:16px 32px;font-size:12px;color:var(--muted);border-top:1px solid var(--line)}
+@media(max-width:900px){header{padding:20px}.notice{padding:12px 20px}.layout{grid-template-columns:190px minmax(0,1fr)}main{padding:16px}.gallery,.metrics{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:620px){.layout{display:block}aside{border-right:0}.list{max-height:160px;min-height:0;display:flex;gap:8px}.item{min-width:145px}.toolbar{padding:12px}.topline h2{font-size:20px}}
+</style>
+<header>
+  <h1>LEGO · 逐次抓取审核</h1>
+  <p>三路同步片段 · 原始腕部图像 · SAM3 候选证据</p>
+  <div class="stats" id="stats"></div>
+</header>
+<div class="notice">所有自动标签均待审核，尚未生成可训练奖励。相对抬升暂用各臂 base-Z；向上轴与抓取参考点仍需核实。第一集独立留验，未开始 RL 训练。</div>
+<div class="toolbar">
+  <select id="episode" aria-label="集数"><option value="">全部集数</option></select>
+  <select id="arm" aria-label="机械臂"><option value="">双臂</option><option value="left">左臂</option><option value="right">右臂</option></select>
+  <select id="suggestion" aria-label="自动建议"><option value="">全部自动建议</option><option value="success">建议成功</option><option value="failure">建议失败</option><option value="uncertain">不确定</option></select>
+  <select id="reviewState" aria-label="审核状态"><option value="">全部审核状态</option><option value="pending">未审核</option><option value="done">已审核</option></select>
+  <input id="search" aria-label="查找候选编号" placeholder="查找编号，例如 E03" size="18">
+  <span class="spacer"></span>
+  <button id="import">导入审核 JSON</button><input class="hidden" id="importFile" type="file" accept="application/json,.json">
+  <button class="primary" id="export">导出审核 JSON</button>
+</div>
+<div class="layout">
+  <aside><div class="count" id="count"></div><nav class="list" id="list" aria-label="抓取候选列表"></nav></aside>
+  <main>
+    <div id="empty" class="panel hidden">当前筛选没有候选。可以切换集数、标签或审核状态。</div>
+    <div id="detail">
+      <div class="topline"><h2 id="title"></h2><span id="split" class="badge"></span><span class="spacer"></span><button id="prev">← 上一个</button><button id="next">下一个 →</button></div>
+      <div class="video"><video id="video" controls preload="metadata" playsinline></video></div>
+      <div class="caption" id="source"></div>
+      <div class="metrics" id="metrics"></div>
+      <div class="panel"><h3>自动建议 <span id="autoLabel" class="badge"></span></h3><ul class="reasons" id="reasons"></ul></div>
+      <div class="panel"><h3>关键帧 <span class="fine">点击图片切换原图 / 分割叠加；绿色为积木、蓝色为框</span></h3><div class="gallery" id="gallery"></div></div>
+      <div class="panel">
+        <h3>你的审核 <span id="manualLabel" class="badge">未审核</span></h3>
+        <div class="choices" id="choices">
+          <button data-label="success">抓住并抬起</button><button data-label="failure">抓取失败</button><button data-label="uncertain">仍不确定</button><button data-label="non_grasp">不是抓取</button><button data-label="">清除本条审核</button>
+        </div>
+        <textarea id="notes" aria-label="审核备注" placeholder="备注：例如遮挡、快速放置、候选起点偏晚，或高度参考点不对"></textarea>
+        <p class="fine">这里只审核抓取，不把放错颜色框算作抓取失败。页面不会用自动建议填入你的标签。<span id="status"></span></p>
+      </div>
+      <p class="fine">浏览器可暂存审核，但迁移或清理浏览器前请导出 JSON。审核文件保留未审核与不确定项，不自动晋级为 RL 奖励。</p>
+    </div>
+  </main>
+</div>
+<footer id="identity"></footer>
+<script id="review-data" type="application/json">__REVIEW_DATA__</script>
+<script>
+'use strict';
+const DATA=JSON.parse(document.getElementById('review-data').textContent);
+const $=id=>document.getElementById(id), labels={success:'成功',failure:'失败',uncertain:'不确定',non_grasp:'非抓取'};
+const key='parts-grasp-review:'+DATA.summary.dataset_id, known=new Set(DATA.cards.map(c=>c.candidate_id));
+let reviews={}, visible=[], current=null, displayed=null, storageAvailable=true;
+function validate(records){
+  if(!Array.isArray(records))throw Error('审核条目必须为数组');
+  const result={};
+  for(const r of records){
+    if(!r || !known.has(r.candidate_id) || Object.hasOwn(result,r.candidate_id))throw Error('存在未知或重复候选编号');
+    if(r.review_label!==null && !Object.hasOwn(labels,r.review_label))throw Error('存在不支持的标签');
+    if(typeof r.notes!=='string')throw Error('备注格式错误');
+    result[r.candidate_id]={review_label:r.review_label,notes:r.notes,reviewed_at:r.reviewed_at||null};
+  }
+  return result;
+}
+try{
+  const stored=localStorage.getItem(key);
+  if(stored){const saved=JSON.parse(stored);if(saved.dataset_id===DATA.summary.dataset_id)reviews=validate(saved.records);}
+}catch(e){storageAvailable=false;$('status').textContent='暂存不可用，请及时导出';}
+function records(){return DATA.cards.map(c=>({candidate_id:c.candidate_id,...(reviews[c.candidate_id]||{review_label:null,notes:'',reviewed_at:null})}));}
+function save(){
+  try{localStorage.setItem(key,JSON.stringify({dataset_id:DATA.summary.dataset_id,records:records()}));storageAvailable=true;$('status').textContent='已在此浏览器暂存';}
+  catch(e){storageAvailable=false;$('status').textContent='暂存不可用，请导出审核 JSON';}
+}
+function node(tag,cls,text){const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n;}
+function badge(el,label){el.className='badge '+(label||'');el.textContent=label?labels[label]:'未审核';}
+function counters(){
+  $('stats').replaceChildren();
+  const counts=DATA.summary.suggested_counts, reviewed=Object.values(reviews).filter(r=>r.review_label!==null).length;
+  for(const [value,text] of [[DATA.summary.episodes,'集录像'],[DATA.cards.length,'个候选'],[counts.success||0,'建议成功'],[counts.failure||0,'建议失败'],[counts.uncertain||0,'不确定'],[reviewed,'已审核']]){
+    const s=node('span','stat');s.append(node('b','',String(value)),document.createTextNode(text));$('stats').append(s);
+  }
+}
+function filters(){
+  visible=DATA.cards.filter(c=>(!$('episode').value||c.episode_number===Number($('episode').value))&&(!$('arm').value||c.arm===$('arm').value)&&(!$('suggestion').value||c.suggested_label===$('suggestion').value)&&c.candidate_id.toLowerCase().includes($('search').value.trim().toLowerCase())&&(!$('reviewState').value||(($('reviewState').value==='done')===Boolean(reviews[c.candidate_id]?.review_label))));
+  if(!visible.some(c=>c.candidate_id===current))current=visible[0]?.candidate_id||null;
+  renderList();renderDetail();counters();
+}
+function renderList(){
+  $('count').textContent=`筛选显示 ${visible.length} / ${DATA.cards.length} 个候选`;$('list').replaceChildren();
+  for(const c of visible){const b=node('button','item'+(c.candidate_id===current?' current':''));b.append(node('strong','',c.candidate_id),node('small','',`${c.arm==='left'?'左臂':'右臂'} · 自动${labels[c.suggested_label]} · ${reviews[c.candidate_id]?.review_label?'已审核':'未审核'}`));b.onclick=()=>{current=c.candidate_id;renderList();renderDetail();};$('list').append(b);}
+}
+function renderDetail(){
+  const c=visible.find(x=>x.candidate_id===current);$('empty').classList.toggle('hidden',Boolean(c));$('detail').classList.toggle('hidden',!c);
+  if(!c){$('video').pause();displayed=null;return;}
+  $('title').textContent=`${c.candidate_id} · ${c.arm==='left'?'左臂':'右臂'}`;$('split').textContent=c.split==='validation'?'第一集 · 留验':'训练候选';
+  $('source').textContent=`原始样本行：进入 ${c.entry_row} → 闭爪 ${c.close_row} → 结束 ${c.end_row}。视频左右依次为顶视、左腕、右腕；播放时间保留源间隔。`;
+  if(displayed!==current){$('video').src=c.review_clip.path;$('video').load();displayed=current;}
+  badge($('autoLabel'),c.suggested_label);$('reasons').replaceChildren(...c.reasons.map(r=>node('li','',r)));
+  $('metrics').replaceChildren();
+  for(const [name,value] of [['最大相对高度',c.max_lift_delta_m===null?'未知':`${(c.max_lift_delta_m*100).toFixed(1)} cm`],['连续持物且抬升',`${c.visual_hold_s.toFixed(2)} s`],['连续空手且抬升',`${c.clear_empty_s.toFixed(2)} s`],['片段时长',`${(c.review_clip.source_end_time-c.review_clip.source_start_time).toFixed(2)} s`]]){const m=node('div','metric');m.append(node('small','',name),node('b','',value));$('metrics').append(m);}
+  $('gallery').replaceChildren();
+  for(const g of c.review_gallery){const f=node('figure',''),img=node('img','');img.src=g.overlay;img.alt=`${c.candidate_id} 样本行 ${g.row} 分割叠加`;let raw=false;img.onclick=()=>{raw=!raw;img.src=raw?g.raw:g.overlay;img.alt=`${c.candidate_id} 样本行 ${g.row} ${raw?'原图':'分割叠加'}`;};f.append(img,node('figcaption','',`行 ${g.row} · ΔZ ${g.delta_m===null?'未知':(g.delta_m*100).toFixed(1)+'cm'}${g.held?' · 持物迹象':''}`));$('gallery').append(f);}
+  const r=reviews[current];badge($('manualLabel'),r?.review_label);$('notes').value=r?.notes||'';
+  document.querySelectorAll('#choices button').forEach(b=>b.classList.toggle('selected',Boolean(r?.review_label)&&b.dataset.label===r.review_label));
+  $('prev').disabled=visible[0]?.candidate_id===current;$('next').disabled=visible.at(-1)?.candidate_id===current;
+}
+function step(amount){const i=visible.findIndex(c=>c.candidate_id===current);const c=visible[i+amount];if(c){current=c.candidate_id;renderList();renderDetail();}}
+for(let n=1;n<=DATA.summary.episodes;n++){const o=node('option','',`第 ${n} 集`);o.value=String(n);$('episode').append(o);}
+for(const id of ['episode','arm','suggestion','reviewState'])$(id).onchange=filters;$('search').oninput=filters;
+$('prev').onclick=()=>step(-1);$('next').onclick=()=>step(1);
+document.querySelectorAll('#choices button').forEach(b=>b.onclick=()=>{if(!current)return;reviews[current]={review_label:b.dataset.label||null,notes:$('notes').value,reviewed_at:b.dataset.label?new Date().toISOString():null};save();filters();});
+$('notes').oninput=()=>{if(!current)return;reviews[current]={...(reviews[current]||{review_label:null,reviewed_at:null}),notes:$('notes').value};save();};
+$('export').onclick=()=>{
+  const payload={schema:'parts_grasp_human_review_v1',dataset_id:DATA.summary.dataset_id,exported_at:new Date().toISOString(),ready_for_training:false,records:records()};
+  const url=URL.createObjectURL(new Blob([JSON.stringify(payload,null,2)+'\n'],{type:'application/json;charset=utf-8'}));const a=node('a','');a.href=url;a.download=DATA.summary.dataset_id+'-human-review.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);$('status').textContent='已导出审核文件';
+};
+$('import').onclick=()=>$('importFile').click();
+$('importFile').onchange=async()=>{
+  try{const file=$('importFile').files[0];if(!file)return;const data=JSON.parse(await file.text());if(data.schema!=='parts_grasp_human_review_v1'||data.dataset_id!==DATA.summary.dataset_id)throw Error('不是本数据集的审核文件');reviews=validate(data.records);save();filters();$('status').textContent='已导入审核';}
+  catch(e){alert('导入失败：'+e.message);}finally{$('importFile').value='';}
+};
+document.addEventListener('keydown',e=>{if(['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName))return;if(e.key==='ArrowLeft')step(-1);if(e.key==='ArrowRight')step(1);});
+$('identity').textContent=`数据集 ${DATA.summary.dataset_id} · ${DATA.summary.images} 张唯一腕部图像 · SAM3 自动建议 · approved_reward 全部为空 · 离线页面，无外部请求`;
+filters();
+</script>
+</html>

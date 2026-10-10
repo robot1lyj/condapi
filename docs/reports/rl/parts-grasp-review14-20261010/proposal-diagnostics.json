@@ -1,0 +1,27 @@
+{
+  "counts": {
+    "max_lift_ge_5cm": 211,
+    "any_held_and_lifted": 94,
+    "holding_ge_1s_ignoring_lift": 21
+  },
+  "hold_lifted_quantiles_s": [
+    0.0,
+    0.0,
+    0.4000724353827536,
+    0.5999955245526507,
+    1.1995917400345206
+  ],
+  "hold_without_lift_quantiles_s": [
+    0.0,
+    0.19520784099586308,
+    0.9578527973731983,
+    1.112782620568759,
+    1.7672146260738373
+  ],
+  "success_candidate_ids": [
+    "E02-L004",
+    "E12-L005"
+  ],
+  "approved_rewards": 0,
+  "note": "Diagnostic predicates only; no human ground truth."
+}

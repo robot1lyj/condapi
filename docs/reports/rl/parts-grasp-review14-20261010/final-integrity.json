@@ -1,0 +1,20 @@
+{
+  "schema": "parts_grasp_final_integrity_v1",
+  "candidates": 273,
+  "images": 3846,
+  "clips": 273,
+  "splits": {
+    "validation": 10,
+    "train_candidate": 263
+  },
+  "suggestions": {
+    "uncertain": 271,
+    "success": 2
+  },
+  "source_image_and_prediction_identity": true,
+  "all_clip_shas_matched": true,
+  "original_payload_manifest_unchanged": true,
+  "html_embedded_data_matched": true,
+  "approved_rewards": 0,
+  "training_executed": false
+}

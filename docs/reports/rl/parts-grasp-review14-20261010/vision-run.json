@@ -1,0 +1,23 @@
+{
+  "schema": "parts_review_vision_run_v1",
+  "jobs": 3846,
+  "new_predictions": 3846,
+  "checkpoint_sha256": "9999e2341ceef5e136daa386eecb55cb414446a00ac2b55eb2dfd2f7c3cf8c9e",
+  "batch_size": 4,
+  "parity": {
+    "images": 3,
+    "matched_detections": 7,
+    "max_box_delta_px": 0.11607885360717773
+  },
+  "pipeline_sha256": "72a02ceecb5b7ce43b4be7106778564a9e5a06b727113b65a9d2cf6272b3ab92",
+  "elapsed_s": 1289.5864022099413,
+  "training_executed": false,
+  "parameter_dtypes": [
+    "torch.float32"
+  ],
+  "prompts": {
+    "brick": "LEGO brick",
+    "bin": "plastic storage bin",
+    "gripper": "robot gripper fingers"
+  }
+}

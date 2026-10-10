@@ -1,0 +1,12 @@
+{
+  "schema": "parts_instance_point_probe_v1",
+  "images": 12,
+  "elapsed_s": 17.223634246969596,
+  "checkpoint_sha256": "9999e2341ceef5e136daa386eecb55cb414446a00ac2b55eb2dfd2f7c3cf8c9e",
+  "pipeline_sha256": "93d08a488ef0bede402b51b3279929dbe3a1944472db4cb3cdb99755b52d1d6f",
+  "anchor_method": "longest_bottom_dark_run",
+  "anchors_provisional": true,
+  "accuracy_measured": false,
+  "automatic_reward_ready": false,
+  "training_executed": false
+}

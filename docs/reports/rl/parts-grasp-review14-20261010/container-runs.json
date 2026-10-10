@@ -1,0 +1,97 @@
+[
+  {
+    "name": "parts-grasp-labels-20261010",
+    "state": {
+      "Status": "exited",
+      "Running": false,
+      "Paused": false,
+      "Restarting": false,
+      "OOMKilled": false,
+      "Dead": false,
+      "Pid": 0,
+      "ExitCode": 0,
+      "Error": "",
+      "StartedAt": "2026-10-10T10:25:29.888821245Z",
+      "FinishedAt": "2026-10-10T10:47:07.543484033Z"
+    },
+    "image_id": "sha256:2711020dd277e9114ef6296ddc0ed721de376a4b1156183ed39c6c1450a2439c",
+    "runtime": "nvidia",
+    "network": "none"
+  },
+  {
+    "name": "parts-prompt-probe-20261010-r1",
+    "state": {
+      "Status": "exited",
+      "Running": false,
+      "Paused": false,
+      "Restarting": false,
+      "OOMKilled": false,
+      "Dead": false,
+      "Pid": 0,
+      "ExitCode": 0,
+      "Error": "",
+      "StartedAt": "2026-10-10T10:57:25.872165965Z",
+      "FinishedAt": "2026-10-10T10:58:09.146591468Z"
+    },
+    "image_id": "sha256:2711020dd277e9114ef6296ddc0ed721de376a4b1156183ed39c6c1450a2439c",
+    "runtime": "nvidia",
+    "network": "none"
+  },
+  {
+    "name": "parts-visual-box-probe-20261010",
+    "state": {
+      "Status": "exited",
+      "Running": false,
+      "Paused": false,
+      "Restarting": false,
+      "OOMKilled": false,
+      "Dead": false,
+      "Pid": 0,
+      "ExitCode": 0,
+      "Error": "",
+      "StartedAt": "2026-10-10T10:59:54.850414965Z",
+      "FinishedAt": "2026-10-10T11:00:21.75506482Z"
+    },
+    "image_id": "sha256:2711020dd277e9114ef6296ddc0ed721de376a4b1156183ed39c6c1450a2439c",
+    "runtime": "nvidia",
+    "network": "none"
+  },
+  {
+    "name": "parts-point-probe-20261010",
+    "state": {
+      "Status": "exited",
+      "Running": false,
+      "Paused": false,
+      "Restarting": false,
+      "OOMKilled": false,
+      "Dead": false,
+      "Pid": 0,
+      "ExitCode": 0,
+      "Error": "",
+      "StartedAt": "2026-10-10T11:03:24.013514069Z",
+      "FinishedAt": "2026-10-10T11:03:49.455093395Z"
+    },
+    "image_id": "sha256:2711020dd277e9114ef6296ddc0ed721de376a4b1156183ed39c6c1450a2439c",
+    "runtime": "nvidia",
+    "network": "none"
+  },
+  {
+    "name": "parts-point-adaptive-probe-20261010",
+    "state": {
+      "Status": "exited",
+      "Running": false,
+      "Paused": false,
+      "Restarting": false,
+      "OOMKilled": false,
+      "Dead": false,
+      "Pid": 0,
+      "ExitCode": 0,
+      "Error": "",
+      "StartedAt": "2026-10-10T11:05:59.361774338Z",
+      "FinishedAt": "2026-10-10T11:06:24.665933413Z"
+    },
+    "image_id": "sha256:2711020dd277e9114ef6296ddc0ed721de376a4b1156183ed39c6c1450a2439c",
+    "runtime": "nvidia",
+    "network": "none"
+  }
+]

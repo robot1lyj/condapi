@@ -1,0 +1,20 @@
+{
+  "schema": "parts_review_ui_checks_v1",
+  "test_dataset_id": "qa-only-parts-grasp-20261010",
+  "real_candidate_labels_modified": false,
+  "checks": {
+    "page_rendered": true,
+    "video_ready_state_4": true,
+    "video_size": [
+      960,
+      288
+    ],
+    "video_error": null,
+    "manual_label_persisted_on_reload": true,
+    "notes_persisted_on_reload": true,
+    "json_export_verified": true,
+    "json_import_restored_label_and_notes": true,
+    "unreviewed_filter": true
+  },
+  "preview_interruption": "First attached HTTP server exited143; detached preview used thereafter. No artifact corruption."
+}
