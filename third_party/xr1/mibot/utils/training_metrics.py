@@ -34,7 +34,7 @@ class TrainingMetrics(Callback):
         if isinstance(outputs, dict) and isinstance(outputs.get("loss"), torch.Tensor):
             values["backward_loss"] = float(outputs["loss"].detach().float().cpu())
         if "backward_loss" not in values or any(not math.isfinite(value) for value in values.values()):
-            raise RuntimeError("Missing or non-finite native training metrics; refusing checkpoint publication")
+            raise RuntimeError(f"Missing or non-finite native training metrics; refusing checkpoint publication: {values}")
         finite_at_save = None
         if trainer.global_step % self.save_interval == 0 or trainer.global_step == trainer.max_steps:
             with torch.no_grad():
