@@ -1,5 +1,11 @@
 # 03 · 训练与评估
 
+## 当前整轮残差 RL 路线（2026-10-10）
+
+用户选择第一波约20条固定π0.5检查点的无人干预rollout，保留成功/部分成功/失败，每集终点标C/N进度。现有15条HIL作为独立补充池备份，不默认混入首次训练；暂不抽取额外旧成功示范。采用冻结现有全量微调Pi、独立小残差专家、Cal-QL风格critic-only初始化和后续SAC；无BC actor预热。成熟专家采集的经验后续再用原生OpenPI微调反哺Pi，需单独验收关掉专家后的效果。
+
+本轮新代码归 `packages/residual-rl/`、数据工具归 `scripts/residual_rl/`；未参考下面历史PARTS/RLT实现作为算法依据。准备与异常完整证据见 [HIL1009审核](reports/lego_hil1009_rl_audit_20261010.md)，数据合同见 [04](04_data_contracts.md#整轮-rollout-终点标签与离线初始化2026-10-10)。代码仅静态/纯数组检查；没有GPU训练、训练smoke或生产部署。现有Pi作业未停，当前不要求释放4090。新数据、冻结特征/基线缓存、物理边界和RTC决策合同齐备后再安排获准服务器上的数值验证。
+
 ## RLT 服务端实验接口（2026-09-30）
 
 **状态：代码与离线合同检查已完成；未运行 GPU 网络、训练更新、远端部署或真机实验。** 用户要求参考当前核对的 RLinf 实现，先构建服务端实验接口。源固定为 [RLinf `d34d4c320d08cb982de034aa9a011f08dc0fa217`](https://github.com/RLinf/RLinf/tree/d34d4c320d08cb982de034aa9a011f08dc0fa217)，不随上游 main 自动变化。原生 `rlt_token_transformer.py` 原样保存在 `packages/parts-rl/src/parts_rl/vendor/rlinf/`，附 SOURCE.json、文件哈希及 Apache-2.0 LICENSE；其编码器追加一个 learned RL token，解码器采用移位、stop-gradient teacher 输入和 causal mask，以有效 image prefix 的重建 MSE 训练。另核对了该提交的 RLTMLPPolicy 与 Actor/Critic 更新；后者在本项目按下述动作合同适配，未将完整 RLinf 分布式运行时作为依赖。
