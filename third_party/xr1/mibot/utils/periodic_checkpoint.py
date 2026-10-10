@@ -24,7 +24,28 @@ class PeriodicModelCheckpoint(ModelCheckpoint):
             save_top_k=1, save_last="link", save_weights_only=False, enable_version_counter=False,
         )
 
+    def on_train_start(self, trainer, pl_module):
+        if trainer.ckpt_path and trainer.global_step > 0:
+            error = None
+            if trainer.is_global_zero:
+                try:
+                    receipt = validate_checkpoint(trainer.ckpt_path, trainer.world_size)
+                    if receipt["global_step"] != trainer.global_step:
+                        raise ValueError("Restored global step differs from the commit receipt")
+                except Exception as exc:
+                    error = str(exc)
+            error = trainer.strategy.broadcast(error)
+            if error is not None:
+                raise RuntimeError(f"Invalid restored checkpoint: {error}")
+            # Lightning 2.5.3 does not persist this private counter. Without it,
+            # the first accumulated microstep re-saves the resume source in place.
+            self._last_global_step_saved = trainer.global_step
+            self._last_checkpoint_saved = str(Path(trainer.ckpt_path).resolve())
+
     def _save_checkpoint(self, trainer, filepath):
+        exists = trainer.strategy.broadcast(Path(filepath).exists() if trainer.is_global_zero else None)
+        if exists:
+            raise FileExistsError(f"Refusing to overwrite an existing checkpoint: {filepath}")
         super()._save_checkpoint(trainer, filepath)
         trainer.strategy.barrier()
         error = None
