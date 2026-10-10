@@ -1,8 +1,12 @@
 # 01 · 系统架构
 
+## 并行 RL 实验的所有权（2026-10-10）
+
+用户明确多方案并行，本对话负责此前讨论的 PART 整轮残差专家；EXPO-FT 研究由另一条路线继续，不作为全仓唯一算法。实现隔离到独立工作树/功能分支，保留原生 Pi 与 RTC 服务。PART 当前恢复范围与未完成项归[03](03_training_and_evaluation.md#多方案并行与本对话-part-分工2026-10-10-用户更正)。不能把某个线程的方案切换解释为删除其他实验的授权。
+
 ## EXPO-FT 强化学习架构（2026-10-10，设计草案）
 
-本轮目标是乐高按颜色分拣与蓝牙耳机入充电盒的 RL 微调。**旧 PARTS、RLT、Cal-QL/SAC residual-rl 实现已退役；新 EXPO-FT 学习器尚未实现、未训练、未部署。** 用户授权本仓库清理与设计；YAM 为只读参考，客户端方案尚未发送任务。普通 Pi/RTC、数据、权重及历史证据保留。详见 [论文与代码审读](reports/rl/expo-ft-20261010/README.md)、[训练设计](03_training_and_evaluation.md#expo-ft-学习与评估设计2026-10-10)、[数据核验](04_data_contracts.md#expo-ft-双任务数据合同2026-10-10)、[协议设计](05_inference_and_rollout.md#expo-ft-三方接口草案2026-10-10)。
+该并行研究路线的目标是乐高按颜色分拣与蓝牙耳机入充电盒的 RL 微调。**此前该线程退役旧实现的记录保留；本 PART 分支恢复的整轮 residual-rl 不受本节替代。新 EXPO-FT 学习器尚未实现、未训练、未部署。** 用户授权本仓库清理与设计；YAM 为只读参考，客户端方案尚未发送任务。普通 Pi/RTC、数据、权重及历史证据保留。详见 [论文与代码审读](reports/rl/expo-ft-20261010/README.md)、[训练设计](03_training_and_evaluation.md#expo-ft-学习与评估设计2026-10-10)、[数据核验](04_data_contracts.md#expo-ft-双任务数据合同2026-10-10)、[协议设计](05_inference_and_rollout.md#expo-ft-三方接口草案2026-10-10)。
 
 [打开交互架构图](diagrams/expo-ft-architecture.html) · [编辑图源](diagrams/expo-ft-architecture.json) · [验收记录](diagrams/README.md#expo-ft-强化学习架构)
 

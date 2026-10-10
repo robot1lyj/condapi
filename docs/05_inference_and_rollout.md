@@ -1,5 +1,9 @@
 # 05 · 训练后 policy 端侧与 IPC smoke
 
+## 本对话 PART 推进边界（2026-10-10）
+
+用户明确本对话负责此前讨论的 PART 方向，与 EXPO 等实验并行。本次误加的 `serve_expo.py` 及 EXPO runtime 已撤销，未操作线上服务。本 PART 分支恢复的是整轮残差专家基础，只有纯数组动作约束，不是可部署推理服务。需继续落实同版三视角特征、基础动作及 RTC 决策/执行合同，并在获准 GPU 和 Thor 上验收；不能直接把历史 30Hz 单步 critic 套成执行过的 H50 决策。客户端改造任务仍须按项目规则先展示并由用户审核，不自动发送。
+
 ## EXPO-FT 三方接口草案（2026-10-10）
 
 **以下是拟议v1接口，不是已上线API。** 新RL推理服务尚未实现。旧PARTS/RLT learner与Thor wrapper已删除，现有普通/RTC WebSocket只保留最小兼容：旧 `parts.mode=off/shadow` 忽略RL字段并执行原base，`collect/eval`或未知mode明确拒绝；不返回PARTS能力，也不把收集请求静默当RL执行。`--parts-manifest`已从TRT启动入口移除；未来部署升级需调整旧启动配置，本轮没有操作远端服务。
