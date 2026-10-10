@@ -43,7 +43,7 @@ def prepare(cfg: Dict[str, Any]) -> Tuple[Config, LightningDataModule, Lightning
     project, experiment = cfg.trainer.pop("project"), cfg.trainer.pop("exp_name")
     if backend == "csv":
         logger = [CSVLogger(save_dir=cfg.trainer.default_root_dir, name="metrics", version="", flush_logs_every_n_steps=1)]
-        cfg.trainer["callbacks"].insert(0, TrainingMetrics(cfg.trainer.default_root_dir))
+        cfg.trainer["callbacks"].insert(0, TrainingMetrics(cfg.trainer.default_root_dir, save_interval))
     elif backend == "wandb":
         logger = [WandbLogger(project=project, name=experiment, config=cfg)]
     else:

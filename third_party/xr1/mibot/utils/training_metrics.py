@@ -10,8 +10,9 @@ import torch
 
 
 class TrainingMetrics(Callback):
-    def __init__(self, directory):
+    def __init__(self, directory, save_interval):
         self.path = Path(directory) / "metrics.jsonl"
+        self.save_interval = save_interval
         self.last_step = 0
         self.last_time = None
 
@@ -34,11 +35,22 @@ class TrainingMetrics(Callback):
             values["backward_loss"] = float(outputs["loss"].detach().float().cpu())
         if "backward_loss" not in values or any(not math.isfinite(value) for value in values.values()):
             raise RuntimeError("Missing or non-finite native training metrics; refusing checkpoint publication")
+        finite_at_save = None
+        if trainer.global_step % self.save_interval == 0 or trainer.global_step == trainer.max_steps:
+            with torch.no_grad():
+                finite = torch.ones((), dtype=torch.bool, device=pl_module.device)
+                for parameter in pl_module.parameters():
+                    for chunk in parameter.detach().reshape(-1).split(32 * 1024 * 1024):
+                        finite.logical_and_(torch.isfinite(chunk).all())
+                finite_at_save = bool(finite)
+            if not finite_at_save:
+                raise RuntimeError("Non-finite model parameters; refusing checkpoint publication")
         if trainer.is_global_zero:
             now = time.time()
             record = {"step": trainer.global_step, "time": now,
                       "step_seconds": now - self.last_time if self.last_time is not None else None,
                       "global_batch": engine.train_batch_size(), "local_batch": local_batch, "metrics": values,
+                      "parameters_finite_at_save": finite_at_save,
                       "gpu_peak_allocated_bytes": torch.cuda.max_memory_allocated(),
                       "gpu_peak_reserved_bytes": torch.cuda.max_memory_reserved()}
             self.last_time = now
