@@ -32,3 +32,23 @@ node ~/.codex/skills/archify/bin/archify.mjs visual-check docs/diagrams/architec
 ```
 
 浏览器不在 PATH 时设置 `ARCHIFY_CHROME` 指向已有 Chromium 可执行文件。
+
+## EXPO-FT 强化学习架构
+
+[交互HTML](expo-ft-architecture.html) · [图源](expo-ft-architecture.json) · [确定性回执](expo-ft-architecture.delivery.json) · [浏览器回执](expo-ft-architecture.visual-check.json) · [截图](expo-ft-architecture.visual-check.html)。
+
+本图为2026-10-10架构草案，事实与实现状态归[01](../01_system_architecture.md#expo-ft-强化学习架构2026-10-10设计草案)。9个主要节点展示服务器学习发布、Thor慢候选/快Edit-Q、YAM控制记录。底部上传节点表示YAM到服务器的逻辑通道，不属于Thor容器。不把设计画成已部署拓扑；不含未经验证的源码行引用。
+
+验收分别记录：
+
+- diagram_type: architecture
+- validation: 9/9 showcase, 0 errors, 0 warnings
+- browser_evidence: passed（1440×900、1600×1000、1920×1080、2048×1320均无横纵溢出）
+- visual_review: passed（实际查看2048×1320浅色、1440×900深色截图；无节点/文字遮挡，主线与边界完整；未声称逐项交互或导出验收）
+- correction_rounds: 0（目视检查后无需修改；此前3次单标签几何修复逐次减少诊断至0）
+
+使用原版Archify 2.17生成。初次浏览器探测未找到Chrome，指定已有Chromium后完整复测通过；最终回执绑定当前HTML字节。
+
+- specification_sha256: `832874cfcede2e972c58e8d8da4ca6a20d759f3a194ba8dd6018a94e280f7326`
+
+- artifact_sha256: `b7a3342fcd89f8038519aed66cdd662740f12fe2faeaf3b6be4b2e2014b45fd2`

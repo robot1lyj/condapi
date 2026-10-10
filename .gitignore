@@ -30,9 +30,6 @@ eggs/
 lib/
 lib64/
 parts/
-!/adapters/parts/
-!/scripts/parts/
-!/configs/parts/
 sdist/
 var/
 wheels/

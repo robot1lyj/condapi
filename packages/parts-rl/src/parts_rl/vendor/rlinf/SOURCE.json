@@ -1,8 +1,0 @@
-{
-  "repository": "https://github.com/RLinf/RLinf",
-  "commit": "d34d4c320d08cb982de034aa9a011f08dc0fa217",
-  "path": "rlinf/models/embodiment/modules/rlt_token_transformer.py",
-  "sha256": "d72364f58436af345164d9bb574d7f7edf054e5c9d1e94d367ae075b53779332",
-  "license": "Apache-2.0",
-  "changes": []
-}

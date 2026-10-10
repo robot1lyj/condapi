@@ -1,5 +1,47 @@
 # 05 · 训练后 policy 端侧与 IPC smoke
 
+## EXPO-FT 三方接口草案（2026-10-10）
+
+**以下是拟议v1接口，不是已上线API。** 新RL推理服务尚未实现。旧PARTS/RLT learner与Thor wrapper已删除，现有普通/RTC WebSocket只保留最小兼容：旧 `parts.mode=off/shadow` 忽略RL字段并执行原base，`collect/eval`或未知mode明确拒绝；不返回PARTS能力，也不把收集请求静默当RL执行。`--parts-manifest`已从TRT启动入口移除；未来部署升级需调整旧启动配置，本轮没有操作远端服务。
+
+### 三个接口面
+
+| 接口面 | 拟议操作 | 责任 |
+|---|---|---|
+| YAM ↔ Thor，直连以太网 | capabilities、propose、select、cancel | 有界在途、最新观测、RTC承诺、deadline；不经过GPU服务器 |
+| YAM → GPU服务器，异步数据通道 | upload_chunk、commit_episode、query_ack | 新目录落盘、幂等重传、完整性；不得阻塞控制与录制 |
+| GPU服务器 → Thor，策略发布 | stage_bundle、validate_bundle、activate_at_boundary | 整束同版、精度/延迟校验、episode边界切换、旧束可回退 |
+
+`propose`与`select`是逻辑两阶段：可以在同一WebSocket多路复用，或采用独立的有界连接，具体传输在客户端审核后选定。当前单在途policy worker不能直接假设能并发支持两阶段；必须明确job类型、取消、request ID和回复路由。保持现有普通infer通道可用。
+
+### 请求/回复字段草案
+
+- `capabilities`：协议版本、bundle/task/norm身份、H=50、14D维序、action/state单位、相机键、支持的C/d范围、RTC能力、N、编辑mask、物理约束版本及返回动作模式。客户端缺能力时只能保持base-only/shadow，不能猜默认。
+- `propose`请求：run/episode/epoch/request、慢观测 `o_s`、其record_tick与target_start_tick、prompt/task、已承诺物理prefix及start/length/hash、同版bundle、候选预算。回复：candidate_set_id、生成身份/时间、有效目标区间、未承诺窗口、候选哈希；数组缓存位置由协议明确。
+- `select`请求：candidate_set_id、最新三图/state `o_e`、decision_tick、目标窗口start/C、仍不可修改的prefix、deadline与剩余budget。Thor先用慢state解码旧候选再按快state重编码，选Q、解回物理14D。回复：选中/编辑来源、Q摘要、物理动作、target ticks、bundle ID、过期时间、约束结果、服务端耗时。
+- YAM的本地execution journal：逐tick记录请求选择结果、**实际提交值**、human/safety/base/edit来源；人工或epoch变更取消旧candidate_set。上传的执行回执是Replay事实，网络收到回复不是已执行证明。
+
+慢路径和快速路径的state锚点不同；输出协议不能传32D padding，不在客户端重新应用Pi delta。快路径`select`之前已承诺的任何tick都不可修改；未执行的旧候选只是proposal，不等于不可编辑的承诺。选中后由YAM统一提交该窗口，再供下一次慢采样作physical prefix。
+
+### 时序与失败语义
+
+1. episode启动前YAM核对task、reward、bundle与当前控制合同，显式进入off/shadow/collect/eval之一；页面切换不发运动指令。
+2. 队列还有d步时发起慢采样；输入已有prefix逐值固定，N候选只生成未来可执行部分。
+3. 到快速决策边界，获取最新有效观测，选取对应 `[d:d+C]`候选；实际d由tick差定义，不能靠固定网络ping代替。目标前若尚有不可更改tick，再次核对窗口无交集。
+4. Thor回复必须在YAM提交期限前到达，且episode/epoch/prefix/bundle全部吻合；否则丢弃并记原因。同epoch可用基础队列按既有合同继续，耗尽则HOLD。不能重复发送最后一条残差充当新动作。
+5. 人工接管复用既有高优先级仲裁，取消陈旧请求；按真实human命令记录，恢复按YAM已有HOLD/新epoch流程。终点标注/落盘失败不改变物理控制所有权。
+6. episode闭合后outbox离线上传，server校验文件/时间/标签才授予训练视图READY；重复ACK不重复计训练样本。异步更新发布在下一episode边界，不能混搭新Pi旧Q旧norm。
+
+预算为 `相机/state配对 + 编码 + 直连上行 + 轻量视觉/Edit/Q + 直连下行 + 仲裁余量 < 提交截止时间`。慢采样需被剩余队列覆盖；模型C/d限制与实际p99不符则禁止collect，先调整设计，不降低30 Hz伪装满足。总体目标是可持续30 Hz物理控制，不承诺神经网络每tick完整重算。
+
+### 行为束与回退
+
+行为束含：schema/task/reward、Pi原始checkpoint引用和导出权重、norm、encoder/Edit/Q、相机/单位、C/H/d/N、编辑与安全mask、源码/后端版本、精度/延迟报告。若采用noise-Q，它属于训练恢复包；仅当推理确实使用时才进端侧包。episode锁定bundle ID，快慢阶段不能跨bundle。
+
+先在Thor shadow重放同样观测，比对base候选、edit、Q排序及绝对输出，再测直连链路和真实现场。现有trained RTC遇到非法prefix仍拒绝，不改成不受约束的普通推理；普通/auto RTC原有关闭及回退路径保持。RL降级使用一整套已验收base路径及其RTC合同；不是把trained模型随便切成不匹配模式。
+
+客户端实施范围与逐文件替换计划见 [客户端提案](reference/expo_ft_client_proposal.md)。未向客户端聊天发出新任务，本仓库不修改外部YAM目录。
+
 本页保留 YAM 训练后 policy 的输入输出协议、Thor 本地推理验收和 Thor↔3588 的直连以太网推理通道。模型运行在 NVIDIA Jetson AGX Thor；3588 负责相机采集和机械臂控制，YAM 机械臂控制、CAN、GUI、home pose、控制频率和真机安全不在本仓库适配范围，也不要从独立 YAM-ABC-Reproduce 代码推断本项目合同。
 
 Thor 系统、容器、Pi0.5 转换和 TensorRT 方案见 [08 · Thor 端侧部署](08_thor_edge_deployment.md)。

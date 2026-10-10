@@ -1,10 +1,70 @@
 # 01 · 系统架构
 
+## EXPO-FT 强化学习架构（2026-10-10，设计草案）
+
+本轮目标是乐高按颜色分拣与蓝牙耳机入充电盒的 RL 微调。**旧 PARTS、RLT、Cal-QL/SAC residual-rl 实现已退役；新 EXPO-FT 学习器尚未实现、未训练、未部署。** 用户授权本仓库清理与设计；YAM 为只读参考，客户端方案尚未发送任务。普通 Pi/RTC、数据、权重及历史证据保留。详见 [论文与代码审读](reports/rl/expo-ft-20261010/README.md)、[训练设计](03_training_and_evaluation.md#expo-ft-学习与评估设计2026-10-10)、[数据核验](04_data_contracts.md#expo-ft-双任务数据合同2026-10-10)、[协议设计](05_inference_and_rollout.md#expo-ft-三方接口草案2026-10-10)。
+
+[打开交互架构图](diagrams/expo-ft-architecture.html) · [编辑图源](diagrams/expo-ft-architecture.json) · [验收记录](diagrams/README.md#expo-ft-强化学习架构)
+
+### 决策：一个学习闭环，三个运行位置
+
+| 位置 / owner | 负责 | 不承担 |
+|---|---|---|
+| GPU 服务器 / condapi | 数据接收审计、Replay、EXPO-FT 更新、评估、原生 checkpoint、联合策略发布 | 逐 tick 控制、相机采集、机械臂 reset |
+| Thor / condapi Pi 系列容器 | Pi 候选生成、轻量视觉编码器、Edit actor、Q 选择、模型版本装载、协议响应 | 梯度更新、SDK/CAN 写入、成功事实裁决 |
+| YAM 客户端 / 外部仓库 | 三相机与 state 对齐、RTC 时间轴、唯一动作仲裁、人工接管、实际执行记录、终点标注、outbox | VLA/critic 训练、替服务器认定 training_ready |
+
+上游把训练和推理放在 learner 侧、DROID 放在 actor 侧；我们保留算法所有权，**将上游推理职责移至 Thor**。远程服务器网络不进入30 Hz控制关键路径。图中“持久上传与接收”是逻辑传输通道：发送端在YAM、落盘接收端在服务器；无需在Thor转存全量视频。图中版本库发布整束至Thor，整束包含Pi、视觉编码器、Edit与Q，图内省略它们之间重复的装载连线。
+
+初期采用**episode/batch 间更新 + 固定行为版本采集**，先排除在线换权重的混杂；待端侧时延和恢复验证后再研究低滞后的异步发布。首版不要求GPU服务器与机器人保持每步同步，也不为提高UTD阻塞现场控制。
+
+### 算法组成与保留的原生实现
+
+1. 复用作者 EXPO-FT 的 learner / Edit / Q / replay 抽样逻辑，固定源码后维护小范围 YAM 适配；VLA loss、参数树、优化器与 checkpoint 继续由 OpenPI 系列实现拥有。控制层只负责文件、身份、校验和子进程，不能导入JAX/Torch。
+2. 每任务各有 `Pi + Edit + Q + critic encoder + norm + task/reward contract` 联合策略。Pi给出N个H50动作块，Edit/Q处理将实际执行的C步；Q同时比较基础和编辑候选。学习器在同一闭环内用执行经验更新VLA原生流匹配目标，不恢复“永远冻结Pi、等小专家成熟再另训”的旧路线。
+3. 使用三路RGB的独立轻量视觉编码器，首选对照作者ResNet-50结构；不继续依赖冻结Pi缓存token、均值池化或旧RLT重建器。三视图共享/独立权重、输入拼接方式必须与固定版本训练/推理一致，端侧性能以实测为准。
+4. 使用统一双臂14D动作与任务级价值。默认建模两臂和夹爪协同；不再将“单活动臂六关节 + 下探抓取资格”写死为RL定义。每维可编辑mask和物理边界是任务合同，允许首轮锁定夹爪等消融，但须显式区别于完整算法。
+5. 标准EXPO-FT作为数值/离线对照；生产设计面向作者 **Real-Time EXPO-FT** 的慢候选、最新观测快编辑及延迟一致备份。它是2026-09的新论文，不能当成5月原文已有能力，也不能把原RTC加残差直接叫作已复现实时算法。
+
+### 拟建模块（本轮只有设计，以下路径尚未创建）
+
+| 拟建位置 | 边界与接口 |
+|---|---|
+| `adapters/expo_ft/` | 薄编排、指定Conda prefix、调用固定上游入口、适配 `LeRobotYamDataConfig/YamInputs/YamOutputs`；不复制第二套Pi训练循环 |
+| 固定上游源码目录 | EXPO learner、real-time learner、Q/Edit/encoder；小范围补丁显式记录，不整包替换现有 `src/openpi` |
+| `packages/vla-platform/.../rl_contracts.py` | 标准库 schema、task/行为包身份、manifest/上传完整性、拒绝未知单位 |
+| `scripts/thor/` 下独立EXPO服务入口 | Pi系列同一容器；完整算法包加载和同版推理；旧普通/RTC入口可独立启动 |
+| 服务端 ingest / replay assembler | 新目录接收、sha和episode闭合、标签审查、双时刻/实际执行拼接；不覆写原始数据 |
+| YAM `hil/rl/`（客户端提案） | 任务会话、协议适配、journal/outbox、奖励标注；通过现有仲裁接口集成 |
+
+环境规划：服务器新增独立的Pi-RL Conda prefix，依赖按固定EXPO/OpenPI兼容性审计确定，**不照搬上游uv、不修改正在训练的Pi环境**。Thor沿用Pi系列容器规划，具体JAX或PyTorch/ONNX执行路线须对齐数值后决定。跨框架转换若尚不可用，属于实现缺口，不以永久冻结VLA掩盖。新学习器恢复需带optimizer、target Q、target Pi、温度、随机状态、Replay水位和采样状态；推理包仅导出需要的组件。
+
+### 实时设计中的关键适配
+
+- 慢Pi使用采样时观测 `o_s` 与已承诺prefix；快速Edit/Q使用最新观测 `o_e`。两者都要记录，不能只在原请求上生成整块残差后称为实时反馈。
+- `H=50`为Pi预测长度，`C`为执行/critic窗口，`d`为推理消耗的tick；三者分开。作者实现要求 `0≤d≤C` 且 `2C≤H`；本项目不能从现有d=10直接套用论文C=4/8。选C需先测双臂、三图、多候选的p99时延，窗口覆盖须满足 `d+C≤50`。
+- YAM模型的关节delta相对于**该次观测state**。旧观测生成的归一化候选必须用旧state解回物理absolute，再以快速观测state重编码供Edit/Q；回包只给物理absolute14D。跨时刻直接复用归一化残差会产生参考点漂移。已承诺动作以物理值保存，不随norm或Pi版本重解码。
+- 现场快路径含相机对齐、编码传输、Thor轻量编码/Edit/Q和回包；不能把“小网络”直接等同于33 ms以内。过期候选、超时、epoch变化不能执行；可用且同epoch的基础动作按既有合同降级，队列耗尽则由YAM HOLD。记录真实延迟及降级原因。
+- RTC训练的时间变量约定不同：论文式子用clean prefix时间1，本项目/OpenPI实现以时间0表示clean；这是参数化差异，不能机械复制公式数值。需核对loss、inpainting和回放，而不是改现有RTC前缀语义。
+
+### 分期落地与完成条件
+
+| 阶段 | 交付物 / 退出条件 |
+|---|---|
+| 0（本轮） | 论文下载、源码审读、旧RL退役、双任务文件清单核验、服务端/客户端设计与架构图 |
+| 1 | 新合同和assembler的纯数据验证；成功/失败/人工/缺帧/重传/换版本回放，不执行训练 |
+| 2 | 获准GPU上的EXPO更新、保存恢复、YAM动作往返、同一数据的上游数值对照；具体训练配方另定 |
+| 3 | Thor base-only→shadow，验证候选/Edit/Q同版装载、精度与延迟；YAM客户端改造先经用户审核 |
+| 4 | 乐高任务固定版本小批实验，再耳机任务；成功率、人工率、时长与干预分开评价 |
+| 5 | 同合同比较标准EXPO、实时EXPO、关Edit/关在线VLA更新，决定发布频率与共享模型策略 |
+
+不得将架构图、文件齐全、端口监听、静态测试称为训练或真机就绪。客户端具体改造清单见 [待审核方案](reference/expo_ft_client_proposal.md)，本轮未发送。旧代码删除范围及可恢复基线见 [退役清单](reports/rl/expo-ft-20261010/retirement.json)。
+
 交互架构图：[Archify 总览](diagrams/architecture.html) · [可编辑图源](diagrams/architecture.json) · [生成与验收记录](diagrams/README.md)。图示区分已实现入口、待验收模型和仓库外控制侧；不代表远端实时运行状态。
 
 ## 多模型接入层
 
-2026-09-30 PARTS左右抓取残差服务端已实现，另按用户要求增加固定RLinf源码的RLT实验接口。用户确认瓶颈为下降高度不足、YAM端有FK、动作采用活动臂六关节有界增量。YAM客户端拥有高度/持物门控、关爪力矩结果、奖励及执行时间轴；Thor冻结Pi生成候选；GPU服务器训练左右actor/critics。RLT先在缓存最终image prefix上训练原生token模块，再冻结token训练actor/critics，不更新Pi、不训练阶段分类器。模型留在packages/parts-rl，控制包仅标准库，adapters/rlt复用PARTS Actor/Critic编排，未复制Pi训练循环或YAM控制。旧PARTS路径保留；TRT仅off/shadow，RLT为独立eager实验路径，GPU训练/数值/延迟与远端部署均未验收。协议归 [05](05_inference_and_rollout.md#rlt-eager-实验服务2026-09-30)，操作和版本差异归 [03](03_training_and_evaluation.md#rlt-服务端实验接口2026-09-30)，数据归04。
+旧PARTS/RLT服务端路线已于2026-10-10退役；现阶段RL能力为本页EXPO-FT设计草案，不能视为已有可运行后端。历史方案保留在03/04/05对应章节。
 
 模型无关遥测使用标准库 `vla_platform.metrics.write_metrics`，训练器只需输出标量事件。LeRobot 共享入口采集原生结构化 tracker；Pi 保持原生日志；独立只读看板统一消费 JSONL/CSV/Trainer-state，不导入模型环境。指标合同、配置与局限归 [11](11_training_dashboard.md)。
 2026-09-08 工作树改造：采用 **LeRobot 原生能力 + 薄接入层**，不是自研训练框架。LeRobot 负责其支持模型的网络、loss、数据集、处理器、优化器和 checkpoint；原版 OpenPI 是 Pi 的独立实现后端。RLinf 仅作为未来有具体 DAgger/RL 需求时的可选后端，不作为所有模型的强制依赖。

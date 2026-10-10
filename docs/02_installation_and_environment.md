@@ -4,7 +4,9 @@
 
 服务器信息于 2026-09-04 按用户提供的《琶洲模方智算平台用户操作手册》（本地参考文件：`/home/wuyan-lyj/下载/琶洲模方智算平台用户操作手册_带目录.pdf`）以及 SSH/Slurm 只读核验建立；Thor 官方版本和端侧方案于 2026-09-05 更新。一次性状态每次操作前都要重新检查。
 
-## PARTS 独立环境（2026-09-30，本地代码准备）
+## 历史 PARTS 独立环境（2026-09-30，已退役）
+
+2026-10-10旧PARTS环境模板和包代码已删除；以下为历史记录，不可作为现行安装步骤。新EXPO-FT拟使用独立Pi-RL Conda prefix，尚未安装，环境设计见[01](01_system_architecture.md#expo-ft-强化学习架构2026-10-10设计草案)。
 
 `environments/parts.yml`仅声明Python3.12/pip bootstrap；`packages/parts-rl/pyproject.toml`候选依赖NumPy2.x、Torch2.7.1、HDF5。正式安装在独立服务器prefix并验证CUDA，不将learner依赖安装到标准库控制层或现有Pi训练环境。本轮未创建服务器环境或启动GPU训练，依赖可导入不等于learner更新通过。
 

@@ -31,7 +31,6 @@ class WebsocketPolicyServer:
         port: int | None = None,
         rtc_mode: str = "off",
         metadata: dict | None = None,
-        parts_extension: Any | None = None,
     ) -> None:
         self._policy = policy
         self._host = host
@@ -39,9 +38,6 @@ class WebsocketPolicyServer:
         self._rtc_mode = rtc_mode
         self._metadata = dict(metadata or {})
         self._metadata.setdefault("rtc_mode", self._rtc_mode)
-        self._parts_extension = parts_extension
-        if parts_extension is not None:
-            self._metadata["parts"] = parts_extension.metadata
         logging.getLogger("websockets.server").setLevel(logging.INFO)
 
     def serve_forever(self) -> None:
@@ -69,7 +65,7 @@ class WebsocketPolicyServer:
             try:
                 start_time = time.monotonic()
                 payload = msgpack_numpy.unpackb(await websocket.recv())
-                obs, rtc_payload, parts_payload = _split_request(payload)
+                obs, rtc_payload = _split_payload(payload)
                 if self._rtc_mode == "only" and rtc_payload is None:
                     raise RequestError("RTC payload required when rtc_mode=only.")
                 if self._rtc_mode == "off" and rtc_payload is not None:
@@ -77,7 +73,7 @@ class WebsocketPolicyServer:
                     rtc_payload = None
 
                 infer_time = time.monotonic()
-                action, rtc_used, rtc_warnings, rtc_error = self._infer_with_parts(obs, rtc_payload, parts_payload)
+                action, rtc_used, rtc_warnings, rtc_error = self._infer(obs, rtc_payload)
                 infer_time = time.monotonic() - infer_time
 
                 action["server_timing"] = {
@@ -146,18 +142,6 @@ class WebsocketPolicyServer:
                     logger.warning("RTC inference failed, falling back to normal inference: %s", exc)
         return self._policy.infer(obs), rtc_used, rtc_warnings, rtc_error
 
-    def _infer_with_parts(self, obs: dict, rtc_payload: dict | None, parts_payload: dict | None):
-        if parts_payload is None or parts_payload.get("mode") == "off":
-            return self._infer(obs, rtc_payload)
-        if self._parts_extension is None:
-            if parts_payload.get("mode") == "shadow":
-                return self._infer(obs, rtc_payload)
-            raise RequestError("PARTS collect/eval unsupported by this service")
-        try:
-            return self._parts_extension.infer(obs, rtc_payload, parts_payload, lambda: self._infer(obs, rtc_payload))
-        except (ValueError, TypeError, KeyError) as exc:
-            raise RequestError(f"PARTS request rejected: {exc}") from exc
-
 
 def _health_check(connection: _server.ServerConnection, request: _server.Request) -> _server.Response | None:
     if request.path == "/healthz":
@@ -167,11 +151,6 @@ def _health_check(connection: _server.ServerConnection, request: _server.Request
 
 
 def _split_payload(payload: object) -> tuple[dict, dict | None]:
-    obs, rtc, _ = _split_request(payload)
-    return obs, rtc
-
-
-def _split_request(payload: object) -> tuple[dict, dict | None, dict | None]:
     if isinstance(payload, dict) and any(key in payload for key in ("obs", "rtc", "type", "parts")):
         msg_type = payload.get("type", "infer")
         if msg_type != "infer":
@@ -184,13 +163,18 @@ def _split_request(payload: object) -> tuple[dict, dict | None, dict | None]:
             raise RequestError("RTC payload must be an object.")
         if not isinstance(obs, dict):
             raise RequestError("Observation must be an object.")
-        parts_payload = payload.get("parts")
-        if parts_payload is not None and not isinstance(parts_payload, dict):
-            raise RequestError("PARTS payload must be an object.")
-        return obs, rtc_payload, parts_payload
+        # Keep base-policy clients using old observation-only shadow envelopes
+        # compatible. Never silently execute a retired collect/eval request.
+        legacy = payload.get("parts")
+        if legacy is not None:
+            if not isinstance(legacy, dict):
+                raise RequestError("Retired PARTS payload must be an object.")
+            if legacy.get("mode") not in ("off", "shadow"):
+                raise RequestError("PARTS collect/eval has been retired; use the base policy without RL.")
+        return obs, rtc_payload
     if not isinstance(payload, dict):
         raise RequestError("Observation must be an object.")
-    return payload, None, None
+    return payload, None
 
 
 def _parse_rtc_payload(payload: dict[str, Any], metadata: dict | None) -> tuple[dict[str, Any], list[str]]:

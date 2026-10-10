@@ -1,8 +1,0 @@
-name: yam-parts-rl
-channels:
-  - conda-forge
-dependencies:
-  - python=3.12
-  - pip
-# Install packages/parts-rl separately in this server-only prefix.
-# This bootstrap does not certify CUDA, replay or training availability.

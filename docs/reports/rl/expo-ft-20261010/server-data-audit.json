@@ -1,0 +1,483 @@
+{
+  "observed_at": "2026-10-10T05:09:36.744155+00:00",
+  "scope": "read-only manifest/file-presence audit; no full decode",
+  "tasks": {
+    "lego_sorting": {
+      "train": {
+        "manifest_episodes": 4458,
+        "frames": 10374181,
+        "hours": 96.05723148148148,
+        "tasks": [
+          "sort the legos into containers by color"
+        ],
+        "revisions": [
+          "68651e4929d9fb00f798937b2d62617cab5c771d"
+        ],
+        "camera_files": {
+          "left_wrist": 4458,
+          "right_wrist": 4458,
+          "top": 4458
+        },
+        "three_camera_present": 4458,
+        "complete_examples": [
+          95,
+          96,
+          97
+        ],
+        "parquet_files": 600,
+        "sample_parquet": {
+          "path": "/home/wuyan/lyj/YAM/YAM_data/ABC-130k-two-tasks/lego_sorting/train/data/source-file-000.parquet",
+          "schema": "observation.state: list<element: float>\n  child 0, element: float\naction: list<element: float>\n  child 0, element: float\ntimestamp: float\nframe_index: int64\nepisode_index: int64\nindex: int64\ntask_index: int64\nlanguage_persistent: list<element: struct<camera: null, content: string, role: string, style: string, timestamp: double,  (... 18 chars omitted)\n  child 0, element: struct<camera: null, content: string, role: string, style: string, timestamp: double, tool_calls: nu (... 3 chars omitted)\n      child 0, camera: null\n      child 1, content: string\n      child 2, role: string\n      child 3, style: string\n      child 4, timestamp: double\n      child 5, tool_calls: null\nlanguage_events: list<element: null>\n  child 0, element: null\n-- schema metadata --\npandas: '{\"index_columns\": [], \"column_indexes\": [], \"columns\": [{\"name\":' + 1213",
+          "sample": {
+            "observation.state": [
+              -0.509079098701477,
+              0.9992752075195312,
+              0.7127870321273804,
+              -0.07686731964349747,
+              -0.11005569249391556,
+              -0.5365453362464905,
+              0.9965254068374634,
+              0.8211261034011841,
+              1.0080491304397583,
+              0.770008385181427,
+              -0.17223620414733887,
+              0.3385595381259918,
+              -0.31986725330352783,
+              0.9962074756622314
+            ],
+            "action": [
+              -0.5138835906982422,
+              0.9894176125526428,
+              0.7240389585494995,
+              -0.058291271328926086,
+              -0.08283495903015137,
+              -0.5460959076881409,
+              0.998033344745636,
+              0.8344855308532715,
+              0.983281672000885,
+              0.7868094444274902,
+              -0.139592245221138,
+              0.2902444899082184,
+              -0.32827189564704895,
+              0.998033344745636
+            ],
+            "timestamp": 0.0,
+            "frame_index": 0,
+            "episode_index": 95,
+            "index": 291754,
+            "task_index": 70,
+            "language_persistent": [],
+            "language_events": []
+          }
+        }
+      },
+      "val": {
+        "manifest_episodes": 69,
+        "frames": 165142,
+        "hours": 1.5290925925925927,
+        "tasks": [
+          "sort the legos into containers by color"
+        ],
+        "revisions": [
+          "46ca817c39d3df08115a75c31b3cd3867e3d875a"
+        ],
+        "camera_files": {
+          "left_wrist": 69,
+          "right_wrist": 69,
+          "top": 69
+        },
+        "three_camera_present": 69,
+        "complete_examples": [
+          421,
+          423,
+          425
+        ],
+        "parquet_files": 2,
+        "sample_parquet": {
+          "path": "/home/wuyan/lyj/YAM/YAM_data/ABC-130k-two-tasks/lego_sorting/val/data/source-file-001.parquet",
+          "schema": "observation.state: list<element: float>\n  child 0, element: float\naction: list<element: float>\n  child 0, element: float\ntimestamp: float\nframe_index: int64\nepisode_index: int64\nindex: int64\ntask_index: int64\nlanguage_persistent: list<element: null>\n  child 0, element: null\nlanguage_events: list<element: null>\n  child 0, element: null\n-- schema metadata --\npandas: '{\"index_columns\": [], \"column_indexes\": [], \"columns\": [{\"name\":' + 1212",
+          "sample": {
+            "observation.state": [
+              -0.01125352829694748,
+              1.5428777933120728,
+              0.3892957866191864,
+              0.848210871219635,
+              0.023079270496964455,
+              0.049782559275627136,
+              0.9972304701805115,
+              -0.002861066721379757,
+              1.5363928079605103,
+              0.3931105434894562,
+              0.8630884289741516,
+              -0.022697795182466507,
+              0.025749599561095238,
+              0.999268651008606
+            ],
+            "action": [
+              -0.0015339574310928583,
+              1.5373363494873047,
+              0.40842241048812866,
+              0.846769392490387,
+              0.03996892273426056,
+              0.05367115139961243,
+              0.9977104663848877,
+              5.992112710373476e-05,
+              1.530918836593628,
+              0.4080389142036438,
+              0.8574951887130737,
+              -0.00395481800660491,
+              0.02761165425181389,
+              1.0
+            ],
+            "timestamp": 0.0,
+            "frame_index": 0,
+            "episode_index": 421,
+            "index": 1323555,
+            "task_index": 58,
+            "language_persistent": [],
+            "language_events": []
+          }
+        }
+      }
+    },
+    "earbuds_charging_case": {
+      "train": {
+        "manifest_episodes": 2095,
+        "frames": 8233457,
+        "hours": 76.23571296296296,
+        "tasks": [
+          "insert the wireless bluetooth earbuds into the charging case"
+        ],
+        "revisions": [
+          "68651e4929d9fb00f798937b2d62617cab5c771d"
+        ],
+        "camera_files": {
+          "left_wrist": 2095,
+          "right_wrist": 2095,
+          "top": 2095
+        },
+        "three_camera_present": 2095,
+        "complete_examples": [
+          28,
+          29,
+          155
+        ],
+        "parquet_files": 591,
+        "sample_parquet": {
+          "path": "/home/wuyan/lyj/YAM/YAM_data/ABC-130k-two-tasks/earbuds_charging_case/train/data/source-file-000.parquet",
+          "schema": "observation.state: list<element: float>\n  child 0, element: float\naction: list<element: float>\n  child 0, element: float\ntimestamp: float\nframe_index: int64\nepisode_index: int64\nindex: int64\ntask_index: int64\nlanguage_persistent: list<element: struct<camera: null, content: string, role: string, style: string, timestamp: double,  (... 18 chars omitted)\n  child 0, element: struct<camera: null, content: string, role: string, style: string, timestamp: double, tool_calls: nu (... 3 chars omitted)\n      child 0, camera: null\n      child 1, content: string\n      child 2, role: string\n      child 3, style: string\n      child 4, timestamp: double\n      child 5, tool_calls: null\nlanguage_events: list<element: null>\n  child 0, element: null\n-- schema metadata --\npandas: '{\"index_columns\": [], \"column_indexes\": [], \"columns\": [{\"name\":' + 1213",
+          "sample": {
+            "observation.state": [
+              -0.04749370738863945,
+              0.839436948299408,
+              0.6395437717437744,
+              -0.008201723918318748,
+              0.08373387902975082,
+              -0.23517967760562897,
+              0.9904853701591492,
+              0.09327077120542526,
+              1.3704508543014526,
+              0.15354390442371368,
+              1.1137179136276245,
+              0.361066609621048,
+              0.03795681521296501,
+              0.9881011247634888
+            ],
+            "action": [
+              -0.04601942375302315,
+              0.7380167245864868,
+              0.7009361386299133,
+              -0.08882884681224823,
+              0.020209303125739098,
+              -0.29590287804603577,
+              0.9890429973602295,
+              0.08435375988483429,
+              1.368310809135437,
+              0.18558116257190704,
+              1.1412817239761353,
+              0.35589873790740967,
+              0.05826059356331825,
+              0.9890429973602295
+            ],
+            "timestamp": 0.0,
+            "frame_index": 0,
+            "episode_index": 28,
+            "index": 90108,
+            "task_index": 16,
+            "language_persistent": [
+              {
+                "camera": null,
+                "content": "Pick up the charging case from the center of the board.",
+                "role": "assistant",
+                "style": "subtask",
+                "timestamp": 0.0,
+                "tool_calls": null
+              },
+              {
+                "camera": null,
+                "content": "pass from the right arm to the left",
+                "role": "assistant",
+                "style": "subtask",
+                "timestamp": 6.133333333333334,
+                "tool_calls": null
+              },
+              {
+                "camera": null,
+                "content": "pass from the left arm to the right",
+                "role": "assistant",
+                "style": "subtask",
+                "timestamp": 9.433333333333334,
+                "tool_calls": null
+              },
+              {
+                "camera": null,
+                "content": "pass from the right arm to the left",
+                "role": "assistant",
+                "style": "subtask",
+                "timestamp": 16.466666666666665,
+                "tool_calls": null
+              },
+              {
+                "camera": null,
+                "content": "Open the charging case.",
+                "role": "assistant",
+                "style": "subtask",
+                "timestamp": 20.933333333333334,
+                "tool_calls": null
+              },
+              {
+                "camera": null,
+                "content": "Pick up the right earbud from the center of the board.",
+                "role": "assistant",
+                "style": "subtask",
+                "timestamp": 24.1,
+                "tool_calls": null
+              },
+              {
+                "camera": null,
+                "content": "Insert the right earbud into the right side groove of the charging case.",
+                "role": "assistant",
+                "style": "subtask",
+                "timestamp": 29.733333333333334,
+                "tool_calls": null
+              },
+              {
+                "camera": null,
+                "content": "Adjust the right earbud in the right side groove of the charging case.",
+                "role": "assistant",
+                "style": "subtask",
+                "timestamp": 35.43333333333333,
+                "tool_calls": null
+              },
+              {
+                "camera": null,
+                "content": "Pick up the left earbud from the center of the board.",
+                "role": "assistant",
+                "style": "subtask",
+                "timestamp": 41.733333333333334,
+                "tool_calls": null
+              },
+              {
+                "camera": null,
+                "content": "Insert the left earbud into the left side groove of the charging case.",
+                "role": "assistant",
+                "style": "subtask",
+                "timestamp": 49.333333333333336,
+                "tool_calls": null
+              },
+              {
+                "camera": null,
+                "content": "Close the charging case with the earbuds.",
+                "role": "assistant",
+                "style": "subtask",
+                "timestamp": 55.333333333333336,
+                "tool_calls": null
+              },
+              {
+                "camera": null,
+                "content": "Place the charging case with the earbuds at the center of the board.",
+                "role": "assistant",
+                "style": "subtask",
+                "timestamp": 58.3,
+                "tool_calls": null
+              },
+              {
+                "camera": null,
+                "content": "Pick up the charging case from the center of the board.",
+                "role": "assistant",
+                "style": "subtask",
+                "timestamp": 61.6,
+                "tool_calls": null
+              },
+              {
+                "camera": null,
+                "content": "pass from the right arm to the left",
+                "role": "assistant",
+                "style": "subtask",
+                "timestamp": 65.86666666666666,
+                "tool_calls": null
+              },
+              {
+                "camera": null,
+                "content": "pass from the left arm to the right",
+                "role": "assistant",
+                "style": "subtask",
+                "timestamp": 70.5,
+                "tool_calls": null
+              },
+              {
+                "camera": null,
+                "content": "pass from the right arm to the left",
+                "role": "assistant",
+                "style": "subtask",
+                "timestamp": 73.86666666666666,
+                "tool_calls": null
+              },
+              {
+                "camera": null,
+                "content": "Open the charging case.",
+                "role": "assistant",
+                "style": "subtask",
+                "timestamp": 75.43333333333334,
+                "tool_calls": null
+              },
+              {
+                "camera": null,
+                "content": "Pick up the right earbud from the center of the board.",
+                "role": "assistant",
+                "style": "subtask",
+                "timestamp": 77.66666666666667,
+                "tool_calls": null
+              },
+              {
+                "camera": null,
+                "content": "Insert the right earbud into the right side groove of the charging case.",
+                "role": "assistant",
+                "style": "subtask",
+                "timestamp": 83.36666666666666,
+                "tool_calls": null
+              },
+              {
+                "camera": null,
+                "content": "Adjust the right earbud in the right side groove of the charging case.",
+                "role": "assistant",
+                "style": "subtask",
+                "timestamp": 91.43333333333334,
+                "tool_calls": null
+              },
+              {
+                "camera": null,
+                "content": "Pick up the left earbud from the center of the board.",
+                "role": "assistant",
+                "style": "subtask",
+                "timestamp": 94.0,
+                "tool_calls": null
+              },
+              {
+                "camera": null,
+                "content": "Insert the left earbud into the left side groove of the charging case.",
+                "role": "assistant",
+                "style": "subtask",
+                "timestamp": 100.76666666666667,
+                "tool_calls": null
+              },
+              {
+                "camera": null,
+                "content": "Close the charging case with the earbuds.",
+                "role": "assistant",
+                "style": "subtask",
+                "timestamp": 105.7,
+                "tool_calls": null
+              },
+              {
+                "camera": null,
+                "content": "Place the charging case with the earbuds at the center of the board.",
+                "role": "assistant",
+                "style": "subtask",
+                "timestamp": 109.13333333333334,
+                "tool_calls": null
+              },
+              {
+                "camera": null,
+                "content": "reset both arms",
+                "role": "assistant",
+                "style": "subtask",
+                "timestamp": 112.9,
+                "tool_calls": null
+              }
+            ],
+            "language_events": []
+          }
+        }
+      },
+      "val": {
+        "manifest_episodes": 17,
+        "frames": 62173,
+        "hours": 0.575675925925926,
+        "tasks": [
+          "insert the wireless bluetooth earbuds into the charging case"
+        ],
+        "revisions": [
+          "46ca817c39d3df08115a75c31b3cd3867e3d875a"
+        ],
+        "camera_files": {
+          "left_wrist": 17,
+          "right_wrist": 17,
+          "top": 17
+        },
+        "three_camera_present": 17,
+        "complete_examples": [
+          522,
+          524,
+          526
+        ],
+        "parquet_files": 1,
+        "sample_parquet": {
+          "path": "/home/wuyan/lyj/YAM/YAM_data/ABC-130k-two-tasks/earbuds_charging_case/val/data/source-file-002.parquet",
+          "schema": "observation.state: list<element: float>\n  child 0, element: float\naction: list<element: float>\n  child 0, element: float\ntimestamp: float\nframe_index: int64\nepisode_index: int64\nindex: int64\ntask_index: int64\nlanguage_persistent: list<element: null>\n  child 0, element: null\nlanguage_events: list<element: null>\n  child 0, element: null\n-- schema metadata --\npandas: '{\"index_columns\": [], \"column_indexes\": [], \"columns\": [{\"name\":' + 1212",
+          "sample": {
+            "observation.state": [
+              -0.02880140393972397,
+              1.5463111400604248,
+              0.3713664412498474,
+              0.9172579646110535,
+              -0.09174486994743347,
+              0.002861066721379757,
+              0.9894899725914001,
+              0.04711223021149635,
+              1.4982452392578125,
+              0.4079881012439728,
+              0.7265201807022095,
+              0.09136339277029037,
+              0.024223696440458298,
+              0.9986667633056641
+            ],
+            "action": [
+              -0.01533968560397625,
+              1.5509033203125,
+              0.3832060694694519,
+              0.9186181426048279,
+              -0.08453203737735748,
+              0.01463126577436924,
+              0.9886595606803894,
+              0.05942920967936516,
+              1.500239372253418,
+              0.4302510619163513,
+              0.7562525272369385,
+              0.10141842067241669,
+              0.010361967608332634,
+              0.9979729056358337
+            ],
+            "timestamp": 0.0,
+            "frame_index": 0,
+            "episode_index": 522,
+            "index": 1658486,
+            "task_index": 62,
+            "language_persistent": [],
+            "language_events": []
+          }
+        }
+      }
+    }
+  }
+}

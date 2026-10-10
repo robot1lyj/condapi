@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "deliver",
+  "type": "architecture",
+  "input": "/home/wuyan-lyj/condapi/docs/diagrams/expo-ft-architecture.json",
+  "output": "/home/wuyan-lyj/condapi/docs/diagrams/expo-ft-architecture.html",
+  "specification": {
+    "sha256": "832874cfcede2e972c58e8d8da4ca6a20d759f3a194ba8dd6018a94e280f7326",
+    "bytes": 5371
+  },
+  "artifact": {
+    "sha256": "b7a3342fcd89f8038519aed66cdd662740f12fe2faeaf3b6be4b2e2014b45fd2",
+    "bytes": 814203
+  },
+  "validation": {
+    "checksPassed": 9,
+    "checkCount": 9,
+    "compositionProfile": "showcase",
+    "compositionStatus": "pass",
+    "errors": 0,
+    "warnings": 0
+  }
+}

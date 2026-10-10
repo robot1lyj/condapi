@@ -1,5 +1,52 @@
 # 04 · 数据合同
 
+## EXPO-FT 双任务数据合同（2026-10-10）
+
+本节为新设计；旧PARTS/RLT/整轮残差章节保留历史，不自动成为EXPO训练合同。原始数据、原始奖励标注和转换目录均未修改。本次通过既有 `yam-server` 只读访问登录节点，读取manifest、文件存在性及每split一个Parquet首行；未进行训练、视频全量解码或数据修复。证据见 [server-data-audit.json](reports/rl/expo-ft-20261010/server-data-audit.json)。
+
+### 两个任务已经有数据，不以记忆旧状态代替现状
+
+根目录：`/home/wuyan/lyj/YAM/YAM_data/ABC-130k-two-tasks/`。
+
+| 任务 / split | manifest集数 | 帧数 | 30 fps小时 | 三路非空视频齐全的集数 |
+|---|---:|---:|---:|---:|
+| `lego_sorting/train` | 4,458 | 10,374,181 | 96.057 | 4,458 |
+| `lego_sorting/val` | 69 | 165,142 | 1.529 | 69 |
+| `earbuds_charging_case/train` | 2,095 | 8,233,457 | 76.236 | 2,095 |
+| `earbuds_charging_case/val` | 17 | 62,173 | 0.576 | 17 |
+
+乐高prompt：`sort the legos into containers by color`。耳机prompt：`insert the wireless bluetooth earbuds into the charging case`。耳机指“放入充电盒”，不擅自推成耳罩/外壳压装。train源revision为 `68651e4929d9fb00f798937b2d62617cab5c771d`，val为 `46ca817c39d3df08115a75c31b3cd3867e3d875a`。视频目录名 `top/left_wrist/right_wrist` 映射为既有 `observation.images.top_rgb/left_rgb/right_rgb`，不可按字典排序改变语义。
+
+本次每split首个Parquet抽样均有 `observation.state` 与单数 `action`，首行长度均为14；这不是全量shape/NaN/单位审核。文件存在性不证明可完整解码、视频帧数对齐或轨迹成功。尤其耳机尚未在 `processed/` 发现已发布的同类LeRobot目录；需用已有转换/审计工具写新目录后才确定READY和专属norm。已推翻09-08“耳机未找到三路齐全轨迹”的旧观察，仅更新当前证据，不删除历史。
+
+### 三层存储与训练池
+
+1. **raw（不可变）**：原始示范和在线episode包；保存三图时间索引、物理absolute action/state、实际提交值、设备反馈、人工/策略来源、提示词、原文件哈希。只写新接收目录，不覆写来源。
+2. **audited events / transitions**：验证身份、完整性、tick/epoch、双时刻观测与prefix、实际执行、奖励/终止和分组划分；审核结果独立sidecar。隔离缺数据/未知奖励，不能自动当0。
+3. **训练视图**：任务隔离的Q/Edit replay、已审核专家/成功VLA池、独立评估池。训练时按该Pi的delta mask `(6,-1,6,-1)`、norm及32D内部padding变换，raw保持14D绝对物理语义。derived标签变更产生新版本，不改raw。
+
+### 在线最小记录
+
+| 类别 | 必须表达的事实 |
+|---|---|
+| 身份 | schema、task/reward版本、run/episode/request/candidate ID、epoch、行为bundle ID、Pi/norm/Edit/Q/encoder版本、客户端源码/运行配置身份 |
+| 观测 | 慢生成与快决策各自的三图frame ref、曝光/采样时间、state及采样时间、单调控制tick；不能以视频帧率反推真实耗时 |
+| 行为 | 慢Pi各候选/随机种子与生成身份、edit、Q评分/选择ID、物理选中动作、已承诺prefix及其哈希、目标tick、有效长度/期限 |
+| 执行 | 实际提交动作（与反馈state分开）、逐tick source、人工mask、限幅/保护改动、被丢弃或未执行行、执行回执、降级原因 |
+| 转移 | 起止观测、实际执行步数、逐step reward事件及label版本、terminated/truncated/abort原因、next observation有效性 |
+| 发布 | 分片哈希、episode闭合、outbox水位/幂等ACK、来源group、train/eval用途、审计状态及缺口 |
+
+慢候选payload可在Thor保存一次，通过request/candidate ID与sha关联YAM执行记录，避免每视频帧重复H50×N；只有两端引用闭合后服务端才能建Replay。不同主机monotonic时间不能直接相减；tick属于YAM时轴，网络耗时分别记录本机send/receive或显式校准的时钟映射。
+
+### 转移与奖励的正确性
+
+- Critic使用**实际执行动作**重编码的窗口；human、安全裁剪、基础降级不能仍归到原“候选已执行”。未执行的H50后缀不作为发生过的动作训练Q。完整C窗口的R和discount按[03](03_training_and_evaluation.md#expo-ft-学习与评估设计2026-10-10)一致构建。
+- terminated任务成功/正常失败可定义已知终点；time-limit若是任务合同内预算耗尽可为明确失败，若仅是外部截断且有效next observation可按合同bootstrap。设备故障、丢帧、人工停止的未知终点不能默认failure=0或挪奖到前一帧。
+- 人工介入是有来源的行为数据；可参与Q和受控示范池，但不可计入自主成功率。人工接管导致epoch切换时不跨epoch拼C，保存边界与实际动作，不复制未发生的基础动作。
+- 原20条无人rollout的C/N标签、旧PARTS局部抓取reward、旧token缓存均保留为原语义。没有明确映射时不复用为EXPO主reward，不重新挂一个schema就声称兼容。
+- 颜色和槽位判断必须依据视觉/任务语义及复核，不能把FK低位或gripper effort当成任务成功。未经审核的历史示范只进VLA监督池，不触发上游默认 `is_success=True`。
+- 以episode、采集会话、物料/摆放组划分留出；相邻窗口/复制轨迹不得跨split。reward classifier训练集也遵守同一分组隔离，避免分类器给自己训练样本打分造成假提升。
+
 ## 整轮 rollout 终点标签与离线初始化（2026-10-10）
 
 当前第一批为固定检查点的约20条无人rollout，不筛成功。每集记录唯一集身份（跨会话时含会话）、开始待分拣数N、最终新增正确数C、分错数W、结束原因；未完成数N−C−W由工具计算。R=C/N仅在正常任务终点发一次。正常结束允许部分成功或全失败；预设任务预算结束可作为明确终点。紧急停止、设备故障、混色待审核先保留未知奖励，不自动记0。不要求每次抓放按键，不绑定固定框的位置/颜色；评分类别不明确时保留终点图像复核。

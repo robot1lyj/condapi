@@ -20,7 +20,7 @@
 
 XR-1 的本地原生训练入口已接入，尚不能把现有 YAM 14D joint action 数据直接拿来开训。所选 checkpoint、版本锁、`decord` wheel 元数据修复和原生 state/action 语义见 [XR-1 环境报告](reports/environments/xr1-20260924/README.md)；操作与待完成项见下文。
 
-不复制 LeRobot 的 registry、trainer、processor 或 dataset 实现；`configs/models/*.toml` 只选后端、policy_type 和已接通能力，入口集中在 `adapters/<backend>/backend.toml`。具体模型在子进程中调用上游；Pi 调用既有 OpenPI。原作者代码用于对照，不强制每个模型维护双实现。RLinf 的 DAgger/RL 接入不是当前范围。2026-09-30用户要求优先完成服务端：PARTS已有独立残差包/训练入口、raw审核/replay和Thor可选候选扩展；操作归 [03](03_training_and_evaluation.md#已实现代码与实际训练步骤)、数据归04、协议归05。当前未注册到通用vla模型列表/capability，须使用显式scripts/parts与adapters/parts入口；未GPU训练/部署，客户端后续指令须用户审核。
+不复制 LeRobot 的 registry、trainer、processor 或 dataset 实现；`configs/models/*.toml` 只选后端、policy_type 和已接通能力，入口集中在 `adapters/<backend>/backend.toml`。具体模型在子进程中调用上游；Pi 调用既有 OpenPI。原作者代码用于对照，不强制每个模型维护双实现。RLinf 的 DAgger/RL 接入不是当前范围。2026-10-10按用户要求删除旧PARTS/RLT/residual-rl代码，转为[EXPO-FT架构设计](01_system_architecture.md#expo-ft-强化学习架构2026-10-10设计草案)。新后端尚未实现或注册到vla能力列表；未训练/部署，客户端改造仍须用户审核。
 
 ## 2026-09-24 · XR-1 原生训练入口
 

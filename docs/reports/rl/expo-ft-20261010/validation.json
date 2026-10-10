@@ -1,0 +1,34 @@
+{
+  "scope": "static and lightweight protocol/data tests only; no training, model forward, GPU or device execution",
+  "targeted_transport_tests": {
+    "passed": 18
+  },
+  "broader_platform_and_transport": {
+    "passed": 77,
+    "skipped": 9,
+    "failed": 6
+  },
+  "baseline_platform_test_verification": {
+    "commit": "b9e89ad9aa17fd35d8858a1be5acec39e3c7db52",
+    "passed": 34,
+    "failed": 6,
+    "same_failures": true,
+    "causes": [
+      "five fixture plans require missing /path/to/request.json",
+      "registry expectation omits existing xr1-5b"
+    ]
+  },
+  "static": {
+    "ruff": "passed (3 changed Python files)",
+    "ast": "passed (3 changed Python files)",
+    "deleted_files": 50,
+    "remaining_legacy_import_matches": 0,
+    "git_diff_check": "passed"
+  },
+  "limitations": [
+    "No new EXPO learner implementation",
+    "No GPU training or training smoke",
+    "No numerical/latency/robot validation",
+    "YAM external repository unmodified; client task not sent"
+  ]
+}

@@ -1,0 +1,273 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "YAM 强化学习 · EXPO-FT 架构草案",
+    "locale": "zh-CN",
+    "quality_profile": "showcase",
+    "viewBox": [
+      1380,
+      780
+    ]
+  },
+  "components": [
+    {
+      "id": "release",
+      "type": "cloud",
+      "label": "联合策略版本库",
+      "sublabel": "Pi + Edit + Q + norm",
+      "pos": [
+        70,
+        110
+      ],
+      "size": [
+        280,
+        86
+      ]
+    },
+    {
+      "id": "learner",
+      "type": "backend",
+      "label": "EXPO-FT 学习器",
+      "sublabel": "原生流匹配 + Edit / Q 更新",
+      "pos": [
+        70,
+        345
+      ],
+      "size": [
+        280,
+        86
+      ]
+    },
+    {
+      "id": "replay",
+      "type": "database",
+      "label": "审计与双任务 Replay",
+      "sublabel": "原始示范 / 在线经验 / 留出集",
+      "pos": [
+        70,
+        580
+      ],
+      "size": [
+        280,
+        86
+      ]
+    },
+    {
+      "id": "proposal",
+      "type": "backend",
+      "label": "Pi 慢速候选生成",
+      "sublabel": "H50 · RTC 已承诺前缀固定",
+      "pos": [
+        550,
+        110
+      ],
+      "size": [
+        280,
+        86
+      ]
+    },
+    {
+      "id": "selection",
+      "type": "backend",
+      "label": "快速 Edit + Q 选择",
+      "sublabel": "最新观测 · 双臂动作块",
+      "pos": [
+        550,
+        345
+      ],
+      "size": [
+        280,
+        86
+      ]
+    },
+    {
+      "id": "transfer",
+      "type": "messagebus",
+      "label": "持久上传与接收",
+      "sublabel": "异步分片 · 幂等确认",
+      "pos": [
+        550,
+        580
+      ],
+      "size": [
+        280,
+        86
+      ]
+    },
+    {
+      "id": "observe",
+      "type": "external",
+      "label": "观测与 RTC 时间轴",
+      "sublabel": "三路 RGB / 14D / tick",
+      "pos": [
+        1030,
+        110
+      ],
+      "size": [
+        280,
+        86
+      ]
+    },
+    {
+      "id": "execute",
+      "type": "security",
+      "label": "动作仲裁与人工接管",
+      "sublabel": "唯一控制写入者 · 物理约束",
+      "pos": [
+        1030,
+        345
+      ],
+      "size": [
+        280,
+        86
+      ]
+    },
+    {
+      "id": "journal",
+      "type": "database",
+      "label": "执行事实与任务终点",
+      "sublabel": "实际 action / 标签 / outbox",
+      "pos": [
+        1030,
+        580
+      ],
+      "size": [
+        280,
+        86
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "GPU 服务器 · condapi 学习与发布",
+      "wraps": [
+        "release",
+        "learner",
+        "replay"
+      ],
+      "pad": 30
+    },
+    {
+      "kind": "region",
+      "label": "Thor · Pi 系列容器 / 仅推理",
+      "wraps": [
+        "proposal",
+        "selection"
+      ],
+      "pad": 30
+    },
+    {
+      "kind": "region",
+      "label": "YAM 客户端 · 待审核实施",
+      "wraps": [
+        "observe",
+        "execute",
+        "journal"
+      ],
+      "pad": 30
+    }
+  ],
+  "connections": [
+    {
+      "id": "learn",
+      "from": "replay",
+      "to": "learner",
+      "label": "审核后的经验",
+      "variant": "emphasis"
+    },
+    {
+      "id": "publish",
+      "from": "learner",
+      "to": "release",
+      "label": "评估后固定版本",
+      "variant": "emphasis"
+    },
+    {
+      "id": "load",
+      "from": "release",
+      "to": "proposal",
+      "label": "异步发布整束",
+      "variant": "dashed"
+    },
+    {
+      "id": "slow-observation",
+      "from": "observe",
+      "to": "proposal",
+      "label": "直连观测与前缀",
+      "variant": "emphasis"
+    },
+    {
+      "id": "proposals",
+      "from": "proposal",
+      "to": "selection",
+      "label": "N 组候选",
+      "variant": "emphasis",
+      "labelDy": 75
+    },
+    {
+      "id": "dispatch",
+      "from": "selection",
+      "to": "execute",
+      "label": "直连动作回复",
+      "variant": "emphasis",
+      "labelDy": 38
+    },
+    {
+      "id": "latest-observation",
+      "from": "observe",
+      "to": "selection",
+      "label": "最新观测 / 时间预算",
+      "variant": "dashed"
+    },
+    {
+      "id": "record",
+      "from": "execute",
+      "to": "journal",
+      "label": "记录真实执行",
+      "variant": "emphasis",
+      "labelDy": 75
+    },
+    {
+      "id": "upload",
+      "from": "journal",
+      "to": "transfer",
+      "label": "闭合数据包",
+      "variant": "dashed"
+    },
+    {
+      "id": "ingest",
+      "from": "transfer",
+      "to": "replay",
+      "label": "完整性与奖励审计",
+      "variant": "dashed"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "两任务分开起步",
+      "items": [
+        "乐高：按颜色分拣；耳机：放入充电盒",
+        "分离奖励、Replay、归一化及评估"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "算法与实时适配",
+      "items": [
+        "同步 EXPO-FT 用于数值对照",
+        "实时扩展需验证双时刻观测与端侧延迟"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "本轮边界",
+      "items": [
+        "完成设计与旧 RL 退役；新学习器待实现",
+        "YAM 只读分析；未训练、未部署或发任务"
+      ]
+    }
+  ]
+}
