@@ -166,17 +166,16 @@ def inspect_recipe(recipe_path, output):
     if recipe.get("fk_verification_scope", "independent") == "independent":
         if any(audit[key] is not True for key in required[-2:]):
             raise ValueError("Independent YAM units and target timing must be verified")
-    else:
-        # A documented nominal experiment is explicit in the recipe. It must
-        # never turn missing raw-unit/capture-time evidence into verified facts.
-        if (audit.get("verification_scope") != "documented_nominal_training"
-                or any(audit.get(key) is not True for key in (
-                    "nominal_fk_verified", "source_row_alignment_verified", "documented_unit_contract_verified"))
-                or audit["frames_and_units_verified"] is not False
-                or audit["target_alignment_verified"] is not False
-                or audit.get("robot_calibration_verified") is not False
-                or audit.get("raw_command_capture_timing_verified") is not False):
-            raise ValueError("Incomplete nominal FK audit or falsely promoted independent verification")
+    # A documented nominal experiment is explicit in the recipe. It must
+    # never turn missing raw-unit/capture-time evidence into verified facts.
+    elif (audit.get("verification_scope") != "documented_nominal_training"
+            or any(audit.get(key) is not True for key in (
+                "nominal_fk_verified", "source_row_alignment_verified", "documented_unit_contract_verified"))
+            or audit["frames_and_units_verified"] is not False
+            or audit["target_alignment_verified"] is not False
+            or audit.get("robot_calibration_verified") is not False
+            or audit.get("raw_command_capture_timing_verified") is not False):
+        raise ValueError("Incomplete nominal FK audit or falsely promoted independent verification")
     identity_fields = ("source_dataset", "source_revision", "fk_model_sha256")
     if any(not isinstance(audit[key], str) or not audit[key] for key in identity_fields):
         raise ValueError("YAM source and FK identity must be recorded")
