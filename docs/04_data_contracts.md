@@ -2,13 +2,17 @@
 
 ## 本对话 PART 数据审核状态（2026-10-10）
 
+**最新用途改为 PARTS 左右夹爪局部抓取，整轮 C/N 仅作评估。** 下列原始审核事实继续有效；其中旧整轮奖励、单步转移和旧 9/3 提案不自动成为当前训练合同。用户最新指定第一集验证，其余数据用于准备。逐抓取候选需包含原始 episode/epoch/tick、经 `video_indices` 对齐的图像引用及采样时间、进入抓取的 FK 参考位置、同参考下抬升差、持物/空手的视觉证据、连续保持区间和 reason。图像帧号不能直接当控制行号，模型没检测到积木不能直接标空手或 reward=0。
+
+实际扫描 14 集共 **70,504 条单臂 FK 记录均有效**，但 `height_valid`、桌面标定及局部 attempt 记录均为 0。`left_base/right_base` 的 FK 位姿可用于相对位移研究；向上轴及参考点必须验证，不能只因绝对 `height_m` 缺失就否认相对抬升可用，也不能未经验证直接把 base-Z 当重力向上。用户确认 0.05 m 相对抬升，结合新鲜腕部视觉连续持物 1 s；不确定保留 null/review。环境、来源扫描和视觉证据归[本轮报告](reports/thor/parts-vision-20261010/README.md)。
+
 当前已只读快照审核任务 `46b834a9-7f89-42af-ad64-f61ed9cc9586` 的14个闭合集：原会话000001/000003/000007/000008/000009/000010/000011/000019/000020/000021/000022/000023/000025和新会话000002；2帧aborted排除保留。共35252帧、实际19.80分钟、126原始成员前后SHA复核一致、84分段视频完整解码。0人工帧/0介入，867行无效观测/动作不进相邻转移，33708对有效；14终点观测均有效，不跨坏帧拼接。原生YAM完整转换14/14及物理动作/状态/来源/时间/H264包载荷复核通过。4处reply差异仅为夹爪略超1裁到1，按submitted_action保留，不伪造残差。
 
-用户工作簿本次已填14行：每集10块，累计新增正确121/140、分错11、未完成8，5/14全集成功。对应关系、无人介入、任务终点均经本对话确认；仍使用整轮一次C/N奖励，不绑定固定框颜色/位置。原xlsx未改写，权威sidecar为 `operator_labels_v2.json`。用户更正后续基础策略为20w；前两集10:56–11:01与23w容器生命周期重叠，其余12集12:03–15:31与当前20w运行一致。历史reply没有权重/norm指纹，来源冲突留痕，不冒称全部已核实20w。
+用户工作簿本次已填14行：每集10块，累计新增正确121/140、分错11、未完成8，5/14全集成功。对应关系、无人介入、任务终点均经本对话确认；整轮一次C/N保留为评估标签，不绑定固定框颜色/位置。原xlsx未改写，权威sidecar为 `operator_labels_v2.json`。用户更正后续基础策略为20w；前两集10:56–11:01与23w容器生命周期重叠，其余12集12:03–15:31与当前20w运行一致。历史reply没有权重/norm指纹，来源冲突留痕，不冒称全部已核实20w。
 
 3393次采用计划全部按epoch+observation_id和精确时间找到观测；RTC observation_policy_tick实为调度target_start_tick，常与图像所在记录tick差1，不能作为图像join键。队列尚未重建/验收，33708单步对不等于最终RL replay。当前 `training_ready=false`，缺冻结视觉缓存、RTC决策合同及GPU数值验收；不以数据备份成功代替开训就绪。
 
-完整新目录 `/home/wuyan-lyj/condapi-data/rl/lego-rollout14-20261010-parts-v1/`，含source_snapshot/source_recheck、audit_v1、audit_review、decision_observation_join_v2、operator_labels_v2、lerobot_full和conversion_verification。旧7集快照保留来源，不覆盖；新摘要及首轮9训3验提案见[审核报告](reports/rl/parts-rollout14-20261010/README.md)和[摘要JSON](reports/rl/parts-rollout14-20261010/data_audit.json)。服务器新目录 `yam-server:/home/wuyan/lyj/YAM/YAM_data/derived/rl/parts_rollout14_20261010_v1` 已备份raw/完整转换/审核，294成员SHA复核0差异；最新本地摘要为audit_review_v2。本次未写训练配置或改动生产推理。
+完整新目录 `/home/wuyan-lyj/condapi-data/rl/lego-rollout14-20261010-parts-v1/`，含source_snapshot/source_recheck、audit_v1、audit_review、decision_observation_join_v2、operator_labels_v2、lerobot_full和conversion_verification。旧7集快照保留来源，不覆盖；新摘要及已被替代的首轮9训3验提案见[审核报告](reports/rl/parts-rollout14-20261010/README.md)和[摘要JSON](reports/rl/parts-rollout14-20261010/data_audit.json)。服务器新目录 `yam-server:/home/wuyan/lyj/YAM/YAM_data/derived/rl/parts_rollout14_20261010_v1` 已备份raw/完整转换/审核，294成员SHA复核0差异；最新本地摘要为audit_review_v2。本次未写训练配置或改动生产推理。
 
 ## EXPO-FT 双任务数据合同（2026-10-10）
 

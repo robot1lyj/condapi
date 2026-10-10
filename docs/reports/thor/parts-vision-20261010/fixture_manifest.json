@@ -1,0 +1,33 @@
+{
+  "source_episode_id": "d1afbec884974b49bc91a78bba802f8d",
+  "items": [
+    {
+      "view": "top",
+      "source": "/home/wuyan-lyj/condapi-data/rl/lego-rollout14-20261010-parts-v1/raw/session_20261010_152639_34de10/episode_000002/segment_000000/top.mp4",
+      "video_frame_index": 600,
+      "path": "top-frame600.png",
+      "sha256": "5fa08347ba38cc9c70abf1401cd8613063357fc14416d251a2d355d457f3717a",
+      "pts": 307200,
+      "time_base": "1/15360"
+    },
+    {
+      "view": "left",
+      "source": "/home/wuyan-lyj/condapi-data/rl/lego-rollout14-20261010-parts-v1/raw/session_20261010_152639_34de10/episode_000002/segment_000000/left.mp4",
+      "video_frame_index": 600,
+      "path": "left-frame600.png",
+      "sha256": "9d60045cdc2aed4b6f1bb5e1f58fa95c2983bf7d6da4b8072df7a6a23f73e1c8",
+      "pts": 307200,
+      "time_base": "1/15360"
+    },
+    {
+      "view": "right",
+      "source": "/home/wuyan-lyj/condapi-data/rl/lego-rollout14-20261010-parts-v1/raw/session_20261010_152639_34de10/episode_000002/segment_000000/right.mp4",
+      "video_frame_index": 600,
+      "path": "right-frame600.png",
+      "sha256": "169a9bc088cedfff9a8d2b349f02f233b5b8e367bb0d07be67336bfb1f202614",
+      "pts": 307200,
+      "time_base": "1/15360"
+    }
+  ],
+  "labels": null
+}

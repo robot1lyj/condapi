@@ -4,9 +4,15 @@
 
 服务器信息于 2026-09-04 按用户提供的《琶洲模方智算平台用户操作手册》（本地参考文件：`/home/wuyan-lyj/下载/琶洲模方智算平台用户操作手册_带目录.pdf`）以及 SSH/Slurm 只读核验建立；Thor 官方版本和端侧方案于 2026-09-05 更新。一次性状态每次操作前都要重新检查。
 
+## PARTS 抓取视觉环境（2026-10-10）
+
+用户授权先安装 Thor 侧自动抓取监督环境。已新增独立 Docker 镜像 `parts-vision:thor-sam3-0570b3a-20261010-r3`，固定官方 SAM3 revision `0570b3a5be9c4e694f23d85232fb55f4a6f1f7fc`，继承 NVIDIA ARM64 PyTorch 26.05 的 Torch/CUDA/Triton 栈。私有 `/opt/parts-vision` venv 用 NumPy1.26.4 满足 SAM3 `<2` 约束，不覆盖镜像系统 NumPy，也不安装到 Pi 容器或 Thor 宿主 Python。基础镜像 digest、依赖锁定、实际前向证据归[本轮报告](reports/thor/parts-vision-20261010/README.md)。
+
+本地只下载/校验权重、做纯数组与静态检查，模型前向在 Thor 临时离线容器运行；没有训练。SAM3 使用上游 BF16 autocast 计算，参数保持 FP32，未生成 BF16 权重副本。官方账户当前仍 pending review；用户提供公开 `1038lab/sam3` 后，已核对其 `sam3.pt` 与官方 metadata 的大小和 SHA256 完全一致，按固定 revision 本地下载并校验后再传 Thor。模型来源、许可证、转运与真实前向结果以报告为准；模型可加载不等于抓取奖励已验收。
+
 ## 历史 PARTS 独立环境（2026-09-30，已退役）
 
-2026-10-10旧PARTS环境模板和包代码已删除；以下为历史记录，不可作为现行安装步骤。新EXPO-FT拟使用独立Pi-RL Conda prefix，尚未安装，环境设计见[01](01_system_architecture.md#expo-ft-强化学习架构2026-10-10设计草案)。
+2026-10-10较早时删除的是9月旧PARTS环境模板和包代码；同日后续按用户要求新增的 `packages/parts-rl/` 与上节 SAM3 环境是不同实现。以下为历史记录，不可作为现行安装步骤。新EXPO-FT拟使用独立Pi-RL Conda prefix，尚未安装，环境设计见[01](01_system_architecture.md#expo-ft-强化学习架构2026-10-10设计草案)。
 
 `environments/parts.yml`仅声明Python3.12/pip bootstrap；`packages/parts-rl/pyproject.toml`候选依赖NumPy2.x、Torch2.7.1、HDF5。正式安装在独立服务器prefix并验证CUDA，不将learner依赖安装到标准库控制层或现有Pi训练环境。本轮未创建服务器环境或启动GPU训练，依赖可导入不等于learner更新通过。
 

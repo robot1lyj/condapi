@@ -1,0 +1,11 @@
+{
+  "schema": "parts_vision_source_pose_availability_v1",
+  "counts": {
+    "arm_rows": 70504,
+    "pose_valid": 70504,
+    "height_valid": 0,
+    "table_calibration_present": 0,
+    "local_attempt_present": 0
+  },
+  "note": "FK base-frame positions are available; tabletop calibrated heights and local attempt labels are not inferred."
+}

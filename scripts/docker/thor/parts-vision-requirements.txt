@@ -1,0 +1,10 @@
+# NVIDIA Torch/Torchvision/Triton/CUDA remain constrained to the base image.
+numpy==1.26.4
+timm==1.0.27
+ftfy==6.1.1
+iopath==0.1.10
+av==15.1.0
+h5py==3.16.0
+pytest==8.4.2
+# setuptools >=82 removed pkg_resources, used by pinned SAM3 model_builder.
+setuptools==80.9.0

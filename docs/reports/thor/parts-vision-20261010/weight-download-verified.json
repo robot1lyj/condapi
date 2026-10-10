@@ -1,0 +1,22 @@
+{
+  "checked_at": "2026-10-10T09:49:58.938190+00:00",
+  "download_url": "https://huggingface.co/1038lab/sam3/resolve/ea8e153c669a0284a496c0ec65a53b8e4f5ca7e7/sam3.pt",
+  "repositories": {
+    "facebook/sam3": {
+      "revision": "3c879f39826c281e95690f02c7821c4de09afae7",
+      "size": 3450062241,
+      "sha256": "9999e2341ceef5e136daa386eecb55cb414446a00ac2b55eb2dfd2f7c3cf8c9e"
+    },
+    "1038lab/sam3": {
+      "revision": "ea8e153c669a0284a496c0ec65a53b8e4f5ca7e7",
+      "size": 3450062241,
+      "sha256": "9999e2341ceef5e136daa386eecb55cb414446a00ac2b55eb2dfd2f7c3cf8c9e"
+    }
+  },
+  "official_download_access": "pending_author_review",
+  "license_source": "https://github.com/facebookresearch/sam3/blob/0570b3a5be9c4e694f23d85232fb55f4a6f1f7fc/LICENSE",
+  "download_complete": true,
+  "downloaded_size": 3450062241,
+  "downloaded_sha256": "9999e2341ceef5e136daa386eecb55cb414446a00ac2b55eb2dfd2f7c3cf8c9e",
+  "elapsed_s": 517.2602649300006
+}

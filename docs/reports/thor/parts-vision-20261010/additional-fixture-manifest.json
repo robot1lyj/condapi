@@ -1,0 +1,589 @@
+{
+  "schema": "parts_vision_fixture_v2",
+  "selection": "manual frame sampling for held/empty/occlusion visual review; no reward assignment; base axes unverified",
+  "source_episode_id": "d1afbec884974b49bc91a78bba802f8d",
+  "items": [
+    {
+      "view": "right",
+      "data_row": 560,
+      "tick": 4546,
+      "epoch": 738,
+      "time": 1058263.152876512,
+      "source_h5": "/home/wuyan-lyj/condapi-data/rl/lego-rollout14-20261010-parts-v1/raw/session_20261010_152639_34de10/episode_000002/segment_000000/samples.h5",
+      "source_video": "/home/wuyan-lyj/condapi-data/rl/lego-rollout14-20261010-parts-v1/raw/session_20261010_152639_34de10/episode_000002/segment_000000/right.mp4",
+      "video_frame_index": 560,
+      "pts": 286720,
+      "time_base": "1/15360",
+      "path": "right-row560-video560.png",
+      "sha256": "44125eba3e9f92d8798b0327daf7b476b60e99bcbb814b601735dd313712bae0",
+      "measured_openness": 0.261472765332988,
+      "pose": {
+        "position": [
+          0.3747769098967663,
+          0.30628659123565716,
+          0.14565489402179152
+        ],
+        "orientation": [
+          [
+            -0.790571731833307,
+            -0.3924747335812536,
+            0.4700637407058854
+          ],
+          [
+            -0.2657529381865194,
+            0.9114524616883054,
+            0.3140537946396444
+          ],
+          [
+            -0.5516989329981687,
+            0.12336123208955016,
+            -0.8248698647338443
+          ]
+        ],
+        "pose_frame": "right_base",
+        "pose_ref": "linear_4310/grasp_site",
+        "pose_sampled_at": 1058263.153332962,
+        "pose_valid": true,
+        "feedback_age_s": 0.00394236808642745,
+        "height_m": null,
+        "height_valid": false,
+        "height_reference": "table",
+        "height_frame": null,
+        "table_position_m": null,
+        "table_frame": null,
+        "table_calibration_id": null,
+        "h_entry_m": 0.05,
+        "h_goal_m": null,
+        "error_m": null,
+        "table": null,
+        "fk_model": "i2rt/YAM/linear_4310",
+        "units": "m",
+        "attempt_id": null,
+        "phase": "READY",
+        "eligible": false,
+        "empty_hand": false,
+        "source": "rules_auto_v2",
+        "selector_state": "UNKNOWN",
+        "selector_schema": "rules_auto_v2",
+        "selector_config_sha": "98eae04d91b1f8c4a496d95f50973bc769fd02c13a568d2cfe82b82126f0fd4b",
+        "reason_codes": [
+          "control_not_policy"
+        ],
+        "holding_locked": false,
+        "actual_open_confirmed": false,
+        "closing_detected": false,
+        "closure_tick": null,
+        "closure_time": null,
+        "rearm_ready": false,
+        "gaps": [
+          "table",
+          "close_delta",
+          "release_position",
+          "confirm_s",
+          "max_confirmation_gap_s"
+        ],
+        "entry_armed": false,
+        "force_feedback": {
+          "position": 0.261472765332988,
+          "velocity": -0.0012951300501475255,
+          "effort_nm": 0.11477411477411437,
+          "sdk_updated_at": 1791617360.4460819,
+          "sampled_at": 1058263.153037217,
+          "feedback_age_s": 0.0034859180450439453,
+          "valid": true
+        },
+        "elapsed_s": 0,
+        "confirmation_s": 0,
+        "confirmation_samples": 0,
+        "force_valid": true,
+        "effort_nm": 0.11477411477411437
+      },
+      "grasp_reward": null
+    },
+    {
+      "view": "right",
+      "data_row": 640,
+      "tick": 4626,
+      "epoch": 738,
+      "time": 1058265.819575861,
+      "source_h5": "/home/wuyan-lyj/condapi-data/rl/lego-rollout14-20261010-parts-v1/raw/session_20261010_152639_34de10/episode_000002/segment_000000/samples.h5",
+      "source_video": "/home/wuyan-lyj/condapi-data/rl/lego-rollout14-20261010-parts-v1/raw/session_20261010_152639_34de10/episode_000002/segment_000000/right.mp4",
+      "video_frame_index": 640,
+      "pts": 327680,
+      "time_base": "1/15360",
+      "path": "right-row640-video640.png",
+      "sha256": "3bbabee1d1abadd77b73e6bba582f12c88cefda9c29d0cc5ae1ec7f42c24f516",
+      "measured_openness": 0.3808402391126075,
+      "pose": {
+        "position": [
+          0.39815178774565846,
+          0.3147644931402283,
+          0.12495625480271595
+        ],
+        "orientation": [
+          [
+            -0.7848895410454994,
+            -0.3903768958803696,
+            0.4812008806311484
+          ],
+          [
+            -0.2746335088313689,
+            0.9153093050962522,
+            0.29459346875174636
+          ],
+          [
+            -0.5554501275401386,
+            0.09906944618308278,
+            -0.8256272770739963
+          ]
+        ],
+        "pose_frame": "right_base",
+        "pose_ref": "linear_4310/grasp_site",
+        "pose_sampled_at": 1058265.820067018,
+        "pose_valid": true,
+        "feedback_age_s": 0.006155505543574691,
+        "height_m": null,
+        "height_valid": false,
+        "height_reference": "table",
+        "height_frame": null,
+        "table_position_m": null,
+        "table_frame": null,
+        "table_calibration_id": null,
+        "h_entry_m": 0.05,
+        "h_goal_m": null,
+        "error_m": null,
+        "table": null,
+        "fk_model": "i2rt/YAM/linear_4310",
+        "units": "m",
+        "attempt_id": null,
+        "phase": "READY",
+        "eligible": false,
+        "empty_hand": false,
+        "source": "rules_auto_v2",
+        "selector_state": "UNKNOWN",
+        "selector_schema": "rules_auto_v2",
+        "selector_config_sha": "98eae04d91b1f8c4a496d95f50973bc769fd02c13a568d2cfe82b82126f0fd4b",
+        "reason_codes": [
+          "control_not_policy"
+        ],
+        "holding_locked": false,
+        "actual_open_confirmed": false,
+        "closing_detected": false,
+        "closure_tick": null,
+        "closure_time": null,
+        "rearm_ready": false,
+        "gaps": [
+          "table",
+          "close_delta",
+          "release_position",
+          "confirm_s",
+          "max_confirmation_gap_s"
+        ],
+        "entry_armed": false,
+        "force_feedback": {
+          "position": 0.3808402391126075,
+          "velocity": 1.7082765361445924,
+          "effort_nm": -0.4615384615384617,
+          "sdk_updated_at": 1791617363.1107132,
+          "sampled_at": 1058265.819846814,
+          "feedback_age_s": 0.005664348602294922,
+          "valid": true
+        },
+        "elapsed_s": 0,
+        "confirmation_s": 0,
+        "confirmation_samples": 0,
+        "force_valid": true,
+        "effort_nm": -0.4615384615384617
+      },
+      "grasp_reward": null
+    },
+    {
+      "view": "right",
+      "data_row": 760,
+      "tick": 4746,
+      "epoch": 738,
+      "time": 1058269.819533739,
+      "source_h5": "/home/wuyan-lyj/condapi-data/rl/lego-rollout14-20261010-parts-v1/raw/session_20261010_152639_34de10/episode_000002/segment_000000/samples.h5",
+      "source_video": "/home/wuyan-lyj/condapi-data/rl/lego-rollout14-20261010-parts-v1/raw/session_20261010_152639_34de10/episode_000002/segment_000000/right.mp4",
+      "video_frame_index": 760,
+      "pts": 389120,
+      "time_base": "1/15360",
+      "path": "right-row760-video760.png",
+      "sha256": "e6675b270fbe742b1e19ccc1787d8cb53a0c641986f39d4ccae93e1e52d5167b",
+      "measured_openness": 0.5983318226941171,
+      "pose": {
+        "position": [
+          0.44231041022587914,
+          0.3559603054755989,
+          0.1478250045537688
+        ],
+        "orientation": [
+          [
+            -0.7125700278305114,
+            -0.4294846410683274,
+            0.5547854526968374
+          ],
+          [
+            -0.2692400541965381,
+            0.8975921389092543,
+            0.3490532128265768
+          ],
+          [
+            -0.647884054946462,
+            0.09935439222661575,
+            -0.7552317234408328
+          ]
+        ],
+        "pose_frame": "right_base",
+        "pose_ref": "linear_4310/grasp_site",
+        "pose_sampled_at": 1058269.819913482,
+        "pose_valid": true,
+        "feedback_age_s": 0.009504260495305061,
+        "height_m": null,
+        "height_valid": false,
+        "height_reference": "table",
+        "height_frame": null,
+        "table_position_m": null,
+        "table_frame": null,
+        "table_calibration_id": null,
+        "h_entry_m": 0.05,
+        "h_goal_m": null,
+        "error_m": null,
+        "table": null,
+        "fk_model": "i2rt/YAM/linear_4310",
+        "units": "m",
+        "attempt_id": null,
+        "phase": "READY",
+        "eligible": false,
+        "empty_hand": false,
+        "source": "rules_auto_v2",
+        "selector_state": "UNKNOWN",
+        "selector_schema": "rules_auto_v2",
+        "selector_config_sha": "98eae04d91b1f8c4a496d95f50973bc769fd02c13a568d2cfe82b82126f0fd4b",
+        "reason_codes": [
+          "control_not_policy"
+        ],
+        "holding_locked": false,
+        "actual_open_confirmed": false,
+        "closing_detected": false,
+        "closure_tick": null,
+        "closure_time": null,
+        "rearm_ready": false,
+        "gaps": [
+          "table",
+          "close_delta",
+          "release_position",
+          "confirm_s",
+          "max_confirmation_gap_s"
+        ],
+        "entry_armed": false,
+        "force_feedback": {
+          "position": 0.5983318226941171,
+          "velocity": 1.0607115110708272,
+          "effort_nm": 0.10500610500610463,
+          "sdk_updated_at": 1791617367.107099,
+          "sampled_at": 1058269.819692695,
+          "feedback_age_s": 0.009124517440795898,
+          "valid": true
+        },
+        "elapsed_s": 0,
+        "confirmation_s": 0,
+        "confirmation_samples": 0,
+        "force_valid": true,
+        "effort_nm": 0.10500610500610463
+      },
+      "grasp_reward": null
+    },
+    {
+      "view": "right",
+      "data_row": 880,
+      "tick": 4866,
+      "epoch": 738,
+      "time": 1058273.819639781,
+      "source_h5": "/home/wuyan-lyj/condapi-data/rl/lego-rollout14-20261010-parts-v1/raw/session_20261010_152639_34de10/episode_000002/segment_000000/samples.h5",
+      "source_video": "/home/wuyan-lyj/condapi-data/rl/lego-rollout14-20261010-parts-v1/raw/session_20261010_152639_34de10/episode_000002/segment_000000/right.mp4",
+      "video_frame_index": 880,
+      "pts": 450560,
+      "time_base": "1/15360",
+      "path": "right-row880-video880.png",
+      "sha256": "2f33a3d2f81da505a3520e167f016df70ad9f296f7f92adc2953ad04659c06b9",
+      "measured_openness": 0.2537172514998489,
+      "pose": {
+        "position": [
+          0.1925695715170402,
+          0.24274959257245307,
+          0.06940657222836982
+        ],
+        "orientation": [
+          [
+            -0.8898536337648647,
+            -0.37952805331229633,
+            0.2532172332690768
+          ],
+          [
+            -0.33405509548487994,
+            0.9199952942701214,
+            0.20497768586219614
+          ],
+          [
+            -0.3107534451233888,
+            0.09781163156706948,
+            -0.9454444357412729
+          ]
+        ],
+        "pose_frame": "right_base",
+        "pose_ref": "linear_4310/grasp_site",
+        "pose_sampled_at": 1058273.820983756,
+        "pose_valid": true,
+        "feedback_age_s": 0.00972748757340014,
+        "height_m": null,
+        "height_valid": false,
+        "height_reference": "table",
+        "height_frame": null,
+        "table_position_m": null,
+        "table_frame": null,
+        "table_calibration_id": null,
+        "h_entry_m": 0.05,
+        "h_goal_m": null,
+        "error_m": null,
+        "table": null,
+        "fk_model": "i2rt/YAM/linear_4310",
+        "units": "m",
+        "attempt_id": null,
+        "phase": "READY",
+        "eligible": false,
+        "empty_hand": false,
+        "source": "rules_auto_v2",
+        "selector_state": "UNKNOWN",
+        "selector_schema": "rules_auto_v2",
+        "selector_config_sha": "98eae04d91b1f8c4a496d95f50973bc769fd02c13a568d2cfe82b82126f0fd4b",
+        "reason_codes": [
+          "control_not_policy"
+        ],
+        "holding_locked": false,
+        "actual_open_confirmed": false,
+        "closing_detected": false,
+        "closure_tick": null,
+        "closure_time": null,
+        "rearm_ready": false,
+        "gaps": [
+          "table",
+          "close_delta",
+          "release_position",
+          "confirm_s",
+          "max_confirmation_gap_s"
+        ],
+        "entry_armed": false,
+        "force_feedback": {
+          "position": 0.2537172514998489,
+          "velocity": -0.06864189265781885,
+          "effort_nm": 0.11477411477411437,
+          "sdk_updated_at": 1791617371.1084058,
+          "sampled_at": 1058273.820258686,
+          "feedback_age_s": 0.008383512496948242,
+          "valid": true
+        },
+        "elapsed_s": 0,
+        "confirmation_s": 0,
+        "confirmation_samples": 0,
+        "force_valid": true,
+        "effort_nm": 0.11477411477411437
+      },
+      "grasp_reward": null
+    },
+    {
+      "view": "left",
+      "data_row": 800,
+      "tick": 4786,
+      "epoch": 738,
+      "time": 1058271.152865185,
+      "source_h5": "/home/wuyan-lyj/condapi-data/rl/lego-rollout14-20261010-parts-v1/raw/session_20261010_152639_34de10/episode_000002/segment_000000/samples.h5",
+      "source_video": "/home/wuyan-lyj/condapi-data/rl/lego-rollout14-20261010-parts-v1/raw/session_20261010_152639_34de10/episode_000002/segment_000000/left.mp4",
+      "video_frame_index": 800,
+      "pts": 409600,
+      "time_base": "1/15360",
+      "path": "left-row800-video800.png",
+      "sha256": "d167e8485951b5f02f96c908cdac0e06eb9b6e39f3e312618715ee0bd74195d3",
+      "measured_openness": 0.3508074714653955,
+      "pose": {
+        "position": [
+          0.2955863336898504,
+          -0.12473241839248564,
+          0.07024908817439225
+        ],
+        "orientation": [
+          [
+            -0.8806460176877187,
+            -0.21581580973459596,
+            0.42176548910426903
+          ],
+          [
+            -0.25527642106644777,
+            0.9660944959668786,
+            -0.0386700621929739
+          ],
+          [
+            -0.399119706827749,
+            -0.1417214208618565,
+            -0.9058799581018605
+          ]
+        ],
+        "pose_frame": "left_base",
+        "pose_ref": "linear_4310/grasp_site",
+        "pose_sampled_at": 1058271.154172118,
+        "pose_valid": true,
+        "feedback_age_s": 0.007073801709339023,
+        "height_m": null,
+        "height_valid": false,
+        "height_reference": "table",
+        "height_frame": null,
+        "table_position_m": null,
+        "table_frame": null,
+        "table_calibration_id": null,
+        "h_entry_m": 0.05,
+        "h_goal_m": null,
+        "error_m": null,
+        "table": null,
+        "fk_model": "i2rt/YAM/linear_4310",
+        "units": "m",
+        "attempt_id": null,
+        "phase": "READY",
+        "eligible": false,
+        "empty_hand": false,
+        "source": "rules_auto_v2",
+        "selector_state": "UNKNOWN",
+        "selector_schema": "rules_auto_v2",
+        "selector_config_sha": "98eae04d91b1f8c4a496d95f50973bc769fd02c13a568d2cfe82b82126f0fd4b",
+        "reason_codes": [
+          "control_not_policy"
+        ],
+        "holding_locked": false,
+        "actual_open_confirmed": false,
+        "closing_detected": false,
+        "closure_tick": null,
+        "closure_time": null,
+        "rearm_ready": false,
+        "gaps": [
+          "table",
+          "close_delta",
+          "release_position",
+          "confirm_s",
+          "max_confirmation_gap_s"
+        ],
+        "entry_armed": false,
+        "force_feedback": {
+          "position": 0.3508074714653955,
+          "velocity": 0.001291819515220846,
+          "effort_nm": 0.4761904761904763,
+          "sdk_updated_at": 1791617368.4443817,
+          "sampled_at": 1058271.153617962,
+          "feedback_age_s": 0.005766868591308594,
+          "valid": true
+        },
+        "elapsed_s": 0,
+        "confirmation_s": 0,
+        "confirmation_samples": 0,
+        "force_valid": true,
+        "effort_nm": 0.4761904761904763
+      },
+      "grasp_reward": null
+    },
+    {
+      "view": "left",
+      "data_row": 960,
+      "tick": 4946,
+      "epoch": 738,
+      "time": 1058276.486274964,
+      "source_h5": "/home/wuyan-lyj/condapi-data/rl/lego-rollout14-20261010-parts-v1/raw/session_20261010_152639_34de10/episode_000002/segment_000000/samples.h5",
+      "source_video": "/home/wuyan-lyj/condapi-data/rl/lego-rollout14-20261010-parts-v1/raw/session_20261010_152639_34de10/episode_000002/segment_000000/left.mp4",
+      "video_frame_index": 960,
+      "pts": 491520,
+      "time_base": "1/15360",
+      "path": "left-row960-video960.png",
+      "sha256": "1ced557e1f33426bc326cca46f4f25352006c4e84dc3bbf6f02335e021036e15",
+      "measured_openness": 0.3373540981665746,
+      "pose": {
+        "position": [
+          0.21219766205942034,
+          -0.15596730603788417,
+          0.08693679621690996
+        ],
+        "orientation": [
+          [
+            -0.8998736758911424,
+            -0.20962813774616268,
+            0.38247014432925275
+          ],
+          [
+            -0.2759051021133392,
+            0.9527648431085758,
+            -0.12694695098393924
+          ],
+          [
+            -0.33779245412825826,
+            -0.21976168365155602,
+            -0.915205474378646
+          ]
+        ],
+        "pose_frame": "left_base",
+        "pose_ref": "linear_4310/grasp_site",
+        "pose_sampled_at": 1058276.486755038,
+        "pose_valid": true,
+        "feedback_age_s": 0.007528204005211592,
+        "height_m": null,
+        "height_valid": false,
+        "height_reference": "table",
+        "height_frame": null,
+        "table_position_m": null,
+        "table_frame": null,
+        "table_calibration_id": null,
+        "h_entry_m": 0.05,
+        "h_goal_m": null,
+        "error_m": null,
+        "table": null,
+        "fk_model": "i2rt/YAM/linear_4310",
+        "units": "m",
+        "attempt_id": null,
+        "phase": "READY",
+        "eligible": false,
+        "empty_hand": false,
+        "source": "rules_auto_v2",
+        "selector_state": "UNKNOWN",
+        "selector_schema": "rules_auto_v2",
+        "selector_config_sha": "98eae04d91b1f8c4a496d95f50973bc769fd02c13a568d2cfe82b82126f0fd4b",
+        "reason_codes": [
+          "control_not_policy"
+        ],
+        "holding_locked": false,
+        "actual_open_confirmed": false,
+        "closing_detected": false,
+        "closure_tick": null,
+        "closure_time": null,
+        "rearm_ready": false,
+        "gaps": [
+          "table",
+          "close_delta",
+          "release_position",
+          "confirm_s",
+          "max_confirmation_gap_s"
+        ],
+        "entry_armed": false,
+        "force_feedback": {
+          "position": 0.3373540981665746,
+          "velocity": 0.027128209819637768,
+          "effort_nm": 0.7106227106227099,
+          "sdk_updated_at": 1791617373.775953,
+          "sampled_at": 1058276.486470377,
+          "feedback_age_s": 0.007048130035400391,
+          "valid": true
+        },
+        "elapsed_s": 0,
+        "confirmation_s": 0,
+        "confirmation_samples": 0,
+        "force_valid": true,
+        "effort_nm": 0.7106227106227099
+      },
+      "grasp_reward": null
+    }
+  ]
+}

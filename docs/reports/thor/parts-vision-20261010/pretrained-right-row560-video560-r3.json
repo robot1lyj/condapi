@@ -1,0 +1,127 @@
+{
+  "schema": "parts_vision_environment_audit_v1",
+  "architecture": "aarch64",
+  "python": "3.12.3 (main, Mar 23 2026, 19:04:32) [GCC 13.3.0]",
+  "torch": "2.12.0a0+5aff3928d8.nv26.05",
+  "torchvision": "0.27.0a0+6214cb20.nv26.05",
+  "cuda_build": "13.2",
+  "gpu": "NVIDIA Thor",
+  "capability": [
+    11,
+    0
+  ],
+  "packages": {
+    "sam3": "0.1.0",
+    "numpy": "1.26.4",
+    "timm": "1.0.27",
+    "ftfy": "6.1.1",
+    "iopath": "0.1.10",
+    "av": "15.1.0",
+    "h5py": "3.16.0",
+    "setuptools": "80.9.0",
+    "triton": "3.7.0+gitb4e20bb.nv26.5"
+  },
+  "pretrained_weights_loaded": true,
+  "reward_generation_ready": false,
+  "robot_connected": false,
+  "training_executed": false,
+  "pip_check": {
+    "exit_code": 0,
+    "output": "No broken requirements found.\n"
+  },
+  "cuda_checks": {
+    "matmul_finite": true,
+    "torchvision_nms": [
+      0
+    ]
+  },
+  "inference": {
+    "mode": "pretrained",
+    "model_load_s": 11.714847958181053,
+    "first_inference_s": 1.4910108039621264,
+    "parameter_count": 840509750,
+    "parameter_dtypes": [
+      "torch.float32"
+    ],
+    "compute_mode": "upstream_bfloat16_autocast_original_parameter_storage",
+    "tf32_matmul": true,
+    "tf32_cudnn": true,
+    "prompt": "LEGO brick",
+    "raw_outputs": {
+      "pred_boxes": {
+        "shape": [
+          1,
+          200,
+          4
+        ],
+        "numel": 800,
+        "finite": true
+      },
+      "pred_logits": {
+        "shape": [
+          1,
+          200,
+          1
+        ],
+        "numel": 200,
+        "finite": true
+      },
+      "pred_masks": {
+        "shape": [
+          1,
+          200,
+          288,
+          288
+        ],
+        "numel": 16588800,
+        "finite": true
+      },
+      "presence_logit_dec": {
+        "shape": [
+          1,
+          1
+        ],
+        "numel": 1,
+        "finite": true
+      }
+    },
+    "outputs": {
+      "masks": {
+        "shape": [
+          0,
+          1,
+          480,
+          640
+        ],
+        "finite": true
+      },
+      "boxes": {
+        "shape": [
+          0,
+          4
+        ],
+        "finite": true
+      },
+      "scores": {
+        "shape": [
+          0
+        ],
+        "finite": true
+      }
+    },
+    "peak_allocated_bytes": 4068212736,
+    "semantic_accuracy_validated": false
+  },
+  "checkpoint_sha256": "9999e2341ceef5e136daa386eecb55cb414446a00ac2b55eb2dfd2f7c3cf8c9e",
+  "prediction_evidence": {
+    "source_image": "/fixtures/right-row560-video560.png",
+    "source_sha256": "44125eba3e9f92d8798b0327daf7b476b60e99bcbb814b601735dd313712bae0",
+    "detections": 0,
+    "boxes_xyxy": [],
+    "scores": [],
+    "directory": "/reports/pretrained-right-row560-video560-r3",
+    "grasp_reward": null,
+    "reason": "object masks alone do not establish grasp success"
+  },
+  "status": "environment_checked_not_reward_validated"
+}
