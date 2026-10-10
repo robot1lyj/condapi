@@ -19,6 +19,24 @@ class TrainingMetrics(Callback):
     def on_train_start(self, trainer, pl_module):
         self.last_step = trainer.global_step
 
+    def on_before_optimizer_step(self, trainer, pl_module, optimizer):
+        if trainer.global_step >= 3:
+            return
+        partitions = trainer.strategy.model.optimizer.single_partition_of_fp32_groups
+        bad = []
+        for index, parameter in enumerate(partitions):
+            if parameter.grad is None:
+                continue
+            count = sum(int((~torch.isfinite(chunk)).sum()) for chunk in
+                        parameter.grad.detach().reshape(-1).split(32 * 1024 * 1024))
+            if count:
+                bad.append({"partition": index, "nonfinite_gradients": count})
+        flag = torch.tensor(bool(bad), device=pl_module.device, dtype=torch.int32)
+        torch.distributed.all_reduce(flag, op=torch.distributed.ReduceOp.MAX)
+        print(f"XR1_GRADIENT_AUDIT rank={trainer.global_rank} step={trainer.global_step} bad={bad}", flush=True)
+        if flag.item():
+            raise RuntimeError(f"Non-finite gradients before optimizer update: {bad}")
+
     def on_train_batch_end(self, trainer, pl_module, outputs, batch, batch_idx):
         if trainer.global_step <= self.last_step:
             return

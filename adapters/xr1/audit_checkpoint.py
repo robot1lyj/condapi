@@ -34,7 +34,8 @@ def main():
         state = torch.load(path, map_location="cpu", mmap=True, weights_only=False)
         row = {"file": str(path), "bad_tensors": [], "checked_elements": 0,
                "global_step": state.get("global_step"), "engine_global_steps": state.get("global_steps")}
-        for name, value in tensors(state):
+        audited_state = state.get("module", state) if "model_states.pt" in path.name else state
+        for name, value in tensors(audited_state):
             if not value.is_floating_point():
                 continue
             count = 0
