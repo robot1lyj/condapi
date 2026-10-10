@@ -1,0 +1,151 @@
+{
+  "schema": "parts_fingertip_snapshot_visual_audit_v1",
+  "reviewer": "assistant_visual_inspection",
+  "method": "Original wrist images, SAM3 tip overlays, and static video snapshots at approximately -0.2/0/+0.2s. No automatic tracking; no VLM labeling workflow.",
+  "scope": "Current sampled frame holding state, not full-attempt success/failure. E01-R001 may be after release; E04-R003 has earlier object crossing.",
+  "records": [
+    {
+      "candidate_id": "E01-L001",
+      "row": 507,
+      "label": "held_at_snapshot",
+      "reason": "原图及前后约0.2秒回放均可见积木位于两指之间，判此时明显持物。",
+      "approved_reward": null
+    },
+    {
+      "candidate_id": "E01-R001",
+      "row": 147,
+      "label": "empty_at_snapshot",
+      "reason": "所选抬升画面两指间无物体，后方蓝框及黄色积木属于背景；这里只审核此时持物状态，不把整次尝试判失败。",
+      "approved_reward": null
+    },
+    {
+      "candidate_id": "E02-L004",
+      "row": 1986,
+      "label": "held_at_snapshot",
+      "reason": "原图及前后约0.2秒回放均可见积木位于两指之间，判此时明显持物。",
+      "approved_reward": null
+    },
+    {
+      "candidate_id": "E12-L005",
+      "row": 1243,
+      "label": "held_at_snapshot",
+      "reason": "原图及前后约0.2秒回放均可见积木位于两指之间，判此时明显持物。",
+      "approved_reward": null
+    },
+    {
+      "candidate_id": "E04-L001",
+      "row": 416,
+      "label": "held_at_snapshot",
+      "reason": "原图及前后约0.2秒回放均可见积木位于两指之间，判此时明显持物。",
+      "approved_reward": null
+    },
+    {
+      "candidate_id": "E04-L002",
+      "row": 637,
+      "label": "held_at_snapshot",
+      "reason": "原图及前后约0.2秒回放均可见积木位于两指之间，判此时明显持物。",
+      "approved_reward": null
+    },
+    {
+      "candidate_id": "E04-L003",
+      "row": 831,
+      "label": "held_at_snapshot",
+      "reason": "原图及前后约0.2秒回放均可见积木位于两指之间，判此时明显持物。",
+      "approved_reward": null
+    },
+    {
+      "candidate_id": "E04-L004",
+      "row": 1101,
+      "label": "empty_at_snapshot",
+      "reason": "两指间为空，后方蓝框覆盖尖端连接带，黄色积木在背景框中。",
+      "approved_reward": null
+    },
+    {
+      "candidate_id": "E04-L005",
+      "row": 1245,
+      "label": "held_at_snapshot",
+      "reason": "蓝色积木明显夹在两指间，反光与暗孔使宽松色彩占比仍低于80%。",
+      "approved_reward": null
+    },
+    {
+      "candidate_id": "E04-R001",
+      "row": 101,
+      "label": "empty_at_snapshot",
+      "reason": "两指间为空，连接带正对蓝框。",
+      "approved_reward": null
+    },
+    {
+      "candidate_id": "E04-R003",
+      "row": 247,
+      "label": "empty_at_snapshot",
+      "reason": "所选帧两指间为空；前约0.2秒有红色积木经过指间，故不能仅凭当前帧判整次尝试结果。",
+      "approved_reward": null
+    },
+    {
+      "candidate_id": "E04-R004",
+      "row": 496,
+      "label": "empty_at_snapshot",
+      "reason": "两指间为空，蓝框斜边经过连接区域。",
+      "approved_reward": null
+    },
+    {
+      "candidate_id": "E04-R006",
+      "row": 903,
+      "label": "empty_at_snapshot",
+      "reason": "两指间为空，蓝框覆盖连接区域。",
+      "approved_reward": null
+    },
+    {
+      "candidate_id": "E04-R007",
+      "row": 970,
+      "label": "empty_at_snapshot",
+      "reason": "两指间为空，黄色积木位于后方蓝框内。",
+      "approved_reward": null
+    },
+    {
+      "candidate_id": "E03-L002",
+      "row": 543,
+      "label": "held_at_snapshot",
+      "reason": "原图及前后约0.2秒回放均可见积木位于两指之间，判此时明显持物。",
+      "approved_reward": null
+    },
+    {
+      "candidate_id": "E03-R001",
+      "row": 130,
+      "label": "held_at_snapshot",
+      "reason": "原图及前后约0.2秒回放均可见积木位于两指之间，判此时明显持物。",
+      "approved_reward": null
+    },
+    {
+      "candidate_id": "E07-L002",
+      "row": 444,
+      "label": "held_at_snapshot",
+      "reason": "原图及前后约0.2秒回放均可见积木位于两指之间，判此时明显持物。",
+      "approved_reward": null
+    },
+    {
+      "candidate_id": "E07-R001",
+      "row": 110,
+      "label": "held_at_snapshot",
+      "reason": "原图及前后约0.2秒回放均可见积木位于两指之间，判此时明显持物。",
+      "approved_reward": null
+    },
+    {
+      "candidate_id": "E10-L001",
+      "row": 242,
+      "label": "held_at_snapshot",
+      "reason": "蓝色积木明显夹在两指间，暗孔、阴影和反光降低连接带色彩占比。",
+      "approved_reward": null
+    },
+    {
+      "candidate_id": "E10-R001",
+      "row": 147,
+      "label": "held_at_snapshot",
+      "reason": "原图及前后约0.2秒回放均可见积木位于两指之间，判此时明显持物。",
+      "approved_reward": null
+    }
+  ],
+  "summary_text": "20例均完成目视核对：13例此时明显持物、7例此时指间为空。保守色彩定义：持物检出4/13，空手误报5/7；阴影宽松对照：持物检出11/13，空手误报6/7。该20例为定向诊断小样本，第二种定义是探索性对照，不是独立测试集验收。每例结果仅描述所选时刻，全部奖励仍未批准。",
+  "automatic_reward_ready": false,
+  "training_executed": false
+}

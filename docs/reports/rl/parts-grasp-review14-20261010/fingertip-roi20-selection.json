@@ -1,0 +1,8 @@
+{
+  "rule": "Two previously suggested held attempts + E01 first left/right + E04 first 5 eligible per arm + E03/E07/E10 first eligible per arm. Within each attempt choose maximal entry-relative lift with openness<0.60 and lift>=0.05m; selected before occupancy computation.",
+  "count": 20,
+  "threshold": 0.8,
+  "automatic_tracking": false,
+  "automatic_reward_ready": false,
+  "training_executed": false
+}

@@ -1,0 +1,46 @@
+{
+  "images": 20,
+  "held_snapshots": 13,
+  "empty_snapshots": 7,
+  "metrics": {
+    "threshold_met": {
+      "tp": 4,
+      "fp": 5,
+      "tn": 2,
+      "fn": 9,
+      "unknown": 0
+    },
+    "shadow_tolerant_threshold_met": {
+      "tp": 11,
+      "fp": 6,
+      "tn": 1,
+      "fn": 2,
+      "unknown": 0
+    }
+  },
+  "threshold": 0.8,
+  "half_width_px": 6,
+  "neural_inference_host": "Thor",
+  "neural_inference_container": "parts-fingertip-roi20-20261010",
+  "neural_inference_exit_code": 0,
+  "automatic_tracking": false,
+  "training_executed": false,
+  "automatic_reward_ready": false,
+  "all_approved_reward_null": true,
+  "qualitative_audit_not_operator_approval": true,
+  "selection_not_random": true,
+  "shadow_profile_exploratory": true,
+  "analysis_script_sha256": "a4c64d0ed018da0889459ffbd2f59ea1b35b72faf07386244656a95a051d651f",
+  "sam3_run": {
+    "schema": "parts_instance_point_probe_v1",
+    "images": 20,
+    "elapsed_s": 18.782487282063812,
+    "checkpoint_sha256": "9999e2341ceef5e136daa386eecb55cb414446a00ac2b55eb2dfd2f7c3cf8c9e",
+    "pipeline_sha256": "93d08a488ef0bede402b51b3279929dbe3a1944472db4cb3cdb99755b52d1d6f",
+    "anchor_method": "longest_bottom_dark_run",
+    "anchors_provisional": true,
+    "accuracy_measured": false,
+    "automatic_reward_ready": false,
+    "training_executed": false
+  }
+}

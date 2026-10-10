@@ -1,0 +1,1336 @@
+{
+  "schema": "parts_fingertip_roi_probe_v1",
+  "threshold": 0.8,
+  "comparison": "strictly_greater",
+  "half_width_px": 6,
+  "tip_method": "seed_component_y_quantile_0.01_x_median_5px",
+  "color_rule": "maxRGB>=60 and RGBchroma>=45 and RGBchroma/maxRGB>=0.25",
+  "shadow_tolerant_color_rule": "maxRGB>=30 and RGBchroma>=12 and RGBchroma/maxRGB>=0.20",
+  "comparison_exploratory": true,
+  "records": [
+    {
+      "job": {
+        "id": "E01-L001",
+        "image": "images/E01-L001.jpg",
+        "sha256": "1630ebbb0fa1af1abf87cdddd7eb33f757fc288a959e550540aca1c02dbc8445",
+        "view": "wrist_full",
+        "arm": "left",
+        "episode_number": 1,
+        "source_frame_key": "E01-segment_000000-left-000507",
+        "row": 507,
+        "time": 1041914.244072914,
+        "lift_delta_m": 0.1232881979870821,
+        "openness": 0.28421327363623144,
+        "clip": "clips/E01-L001.mp4",
+        "approved_reward": null
+      },
+      "measurement": {
+        "tips_xy": [
+          [
+            260,
+            353
+          ],
+          [
+            382,
+            356
+          ]
+        ],
+        "polygon_xy": [
+          [
+            260,
+            359
+          ],
+          [
+            382,
+            362
+          ],
+          [
+            382,
+            350
+          ],
+          [
+            260,
+            347
+          ]
+        ],
+        "gap_px": 122.03687967167957,
+        "roi_pixels": 1334,
+        "usable_fraction": 0.8342714196372732,
+        "color_pixels": 103,
+        "color_fraction": 0.07721139430284858,
+        "finger_quality": [
+          0.88671875,
+          0.953125
+        ],
+        "finger_dark_fraction": [
+          0.9990267113658484,
+          0.9972689075630252
+        ],
+        "shadow_tolerant_color_fraction": 0.9490254872563718,
+        "geometry_valid": true,
+        "threshold_met": false,
+        "shadow_tolerant_threshold_met": true,
+        "approved_reward": null
+      },
+      "visualization": "roi/E01-L001.jpg"
+    },
+    {
+      "job": {
+        "id": "E01-R001",
+        "image": "images/E01-R001.jpg",
+        "sha256": "bd86acfbef71e1cfbe3a71905c5561d59861604fafb78b42b1557d0417aefb74",
+        "view": "wrist_full",
+        "arm": "right",
+        "episode_number": 1,
+        "source_frame_key": "E01-segment_000000-right-000147",
+        "row": 147,
+        "time": 1041902.111289623,
+        "lift_delta_m": 0.0689521463770901,
+        "openness": 0.5660958608485477,
+        "clip": "clips/E01-R001.mp4",
+        "approved_reward": null
+      },
+      "measurement": {
+        "tips_xy": [
+          [
+            217,
+            364
+          ],
+          [
+            429,
+            363
+          ]
+        ],
+        "polygon_xy": [
+          [
+            217,
+            370
+          ],
+          [
+            429,
+            369
+          ],
+          [
+            429,
+            357
+          ],
+          [
+            217,
+            358
+          ]
+        ],
+        "gap_px": 212.00235847744713,
+        "roi_pixels": 2457,
+        "usable_fraction": 0.8873239436619719,
+        "color_pixels": 2317,
+        "color_fraction": 0.9430199430199431,
+        "finger_quality": [
+          0.859375,
+          0.82421875
+        ],
+        "finger_dark_fraction": [
+          0.9990668159761105,
+          1.0
+        ],
+        "shadow_tolerant_color_fraction": 0.9873829873829874,
+        "geometry_valid": true,
+        "threshold_met": true,
+        "shadow_tolerant_threshold_met": true,
+        "approved_reward": null
+      },
+      "visualization": "roi/E01-R001.jpg"
+    },
+    {
+      "job": {
+        "id": "E02-L004",
+        "image": "images/E02-L004.jpg",
+        "sha256": "47a7abdac951fffcefc9b8388e309a54674bd0de186ec38fb85a4695722a3ce9",
+        "view": "wrist_full",
+        "arm": "left",
+        "episode_number": 2,
+        "source_frame_key": "E02-segment_000001-left-000186",
+        "row": 1986,
+        "time": 1042165.562179887,
+        "lift_delta_m": 0.15178984610297547,
+        "openness": 0.35161467386332473,
+        "clip": "clips/E02-L004.mp4",
+        "approved_reward": null
+      },
+      "measurement": {
+        "tips_xy": [
+          [
+            240,
+            353
+          ],
+          [
+            401,
+            355
+          ]
+        ],
+        "polygon_xy": [
+          [
+            240,
+            359
+          ],
+          [
+            401,
+            361
+          ],
+          [
+            401,
+            349
+          ],
+          [
+            240,
+            347
+          ]
+        ],
+        "gap_px": 161.01242188104618,
+        "roi_pixels": 1811,
+        "usable_fraction": 0.8599240265906932,
+        "color_pixels": 430,
+        "color_fraction": 0.23743787962451685,
+        "finger_quality": [
+          0.92578125,
+          0.921875
+        ],
+        "finger_dark_fraction": [
+          0.9972941631233089,
+          0.9981308411214953
+        ],
+        "shadow_tolerant_color_fraction": 0.9503036996134733,
+        "geometry_valid": true,
+        "threshold_met": false,
+        "shadow_tolerant_threshold_met": true,
+        "approved_reward": null
+      },
+      "visualization": "roi/E02-L004.jpg"
+    },
+    {
+      "job": {
+        "id": "E12-L005",
+        "image": "images/E12-L005.jpg",
+        "sha256": "2cd6c907841350cf49bd44d8313e36a63bf1c2fc985e7abde3c44b1aa13de19c",
+        "view": "wrist_full",
+        "arm": "left",
+        "episode_number": 12,
+        "source_frame_key": "E12-segment_000000-left-001243",
+        "row": 1243,
+        "time": 1056808.20178826,
+        "lift_delta_m": 0.15182466410629183,
+        "openness": 0.3257169302630939,
+        "clip": "clips/E12-L005.mp4",
+        "approved_reward": null
+      },
+      "measurement": {
+        "tips_xy": [
+          [
+            247,
+            352
+          ],
+          [
+            394,
+            355
+          ]
+        ],
+        "polygon_xy": [
+          [
+            247,
+            358
+          ],
+          [
+            394,
+            361
+          ],
+          [
+            394,
+            349
+          ],
+          [
+            247,
+            346
+          ]
+        ],
+        "gap_px": 147.03060905811415,
+        "roi_pixels": 1633,
+        "usable_fraction": 0.8487525987525988,
+        "color_pixels": 1457,
+        "color_fraction": 0.8922229026331905,
+        "finger_quality": [
+          0.94140625,
+          0.94921875
+        ],
+        "finger_dark_fraction": [
+          0.9983059292476333,
+          0.9987974746968634
+        ],
+        "shadow_tolerant_color_fraction": 0.9748928352725046,
+        "geometry_valid": true,
+        "threshold_met": true,
+        "shadow_tolerant_threshold_met": true,
+        "approved_reward": null
+      },
+      "visualization": "roi/E12-L005.jpg"
+    },
+    {
+      "job": {
+        "id": "E04-L001",
+        "image": "images/E04-L001.jpg",
+        "sha256": "b767ffafa330e11753cfc5a2bc85f58ce0562d1fc850a73e3c30a44e39550ea2",
+        "view": "wrist_full",
+        "arm": "left",
+        "episode_number": 4,
+        "source_frame_key": "E04-segment_000000-left-000416",
+        "row": 416,
+        "time": 1046061.861892692,
+        "lift_delta_m": 0.13066991228084143,
+        "openness": 0.36231010563588734,
+        "clip": "clips/E04-L001.mp4",
+        "approved_reward": null
+      },
+      "measurement": {
+        "tips_xy": [
+          [
+            240,
+            355
+          ],
+          [
+            404,
+            354
+          ]
+        ],
+        "polygon_xy": [
+          [
+            240,
+            361
+          ],
+          [
+            404,
+            360
+          ],
+          [
+            404,
+            348
+          ],
+          [
+            240,
+            349
+          ]
+        ],
+        "gap_px": 164.00304875214974,
+        "roi_pixels": 1867,
+        "usable_fraction": 0.8703962703962704,
+        "color_pixels": 720,
+        "color_fraction": 0.38564542046063205,
+        "finger_quality": [
+          0.91015625,
+          0.9453125
+        ],
+        "finger_dark_fraction": [
+          0.997002997002997,
+          0.9976849618983312
+        ],
+        "shadow_tolerant_color_fraction": 0.9737546866630958,
+        "geometry_valid": true,
+        "threshold_met": false,
+        "shadow_tolerant_threshold_met": true,
+        "approved_reward": null
+      },
+      "visualization": "roi/E04-L001.jpg"
+    },
+    {
+      "job": {
+        "id": "E04-L002",
+        "image": "images/E04-L002.jpg",
+        "sha256": "b476bc53f8ab3733624c974a61f4b3580fa9ce5192ae9662ac2115ca92b44ee8",
+        "view": "wrist_full",
+        "arm": "left",
+        "episode_number": 4,
+        "source_frame_key": "E04-segment_000000-left-000637",
+        "row": 637,
+        "time": 1046069.267936137,
+        "lift_delta_m": 0.16664653013932904,
+        "openness": 0.3632518417668048,
+        "clip": "clips/E04-L002.mp4",
+        "approved_reward": null
+      },
+      "measurement": {
+        "tips_xy": [
+          [
+            239,
+            354
+          ],
+          [
+            403,
+            356
+          ]
+        ],
+        "polygon_xy": [
+          [
+            239,
+            360
+          ],
+          [
+            403,
+            362
+          ],
+          [
+            403,
+            350
+          ],
+          [
+            239,
+            348
+          ]
+        ],
+        "gap_px": 164.01219466856725,
+        "roi_pixels": 1875,
+        "usable_fraction": 0.8741258741258742,
+        "color_pixels": 662,
+        "color_fraction": 0.35306666666666664,
+        "finger_quality": [
+          0.921875,
+          0.875
+        ],
+        "finger_dark_fraction": [
+          0.9981512114430281,
+          0.9945673646779929
+        ],
+        "shadow_tolerant_color_fraction": 0.9722666666666666,
+        "geometry_valid": true,
+        "threshold_met": false,
+        "shadow_tolerant_threshold_met": true,
+        "approved_reward": null
+      },
+      "visualization": "roi/E04-L002.jpg"
+    },
+    {
+      "job": {
+        "id": "E04-L003",
+        "image": "images/E04-L003.jpg",
+        "sha256": "ae818e25c9dbf6e59fbb98963dcd5e627450c08abf66cbc8855b8cf4c39f3c14",
+        "view": "wrist_full",
+        "arm": "left",
+        "episode_number": 4,
+        "source_frame_key": "E04-segment_000000-left-000831",
+        "row": 831,
+        "time": 1046075.806323457,
+        "lift_delta_m": 0.17873415058019987,
+        "openness": 0.36204103816991096,
+        "clip": "clips/E04-L003.mp4",
+        "approved_reward": null
+      },
+      "measurement": {
+        "tips_xy": [
+          [
+            240,
+            353
+          ],
+          [
+            402,
+            354
+          ]
+        ],
+        "polygon_xy": [
+          [
+            240,
+            359
+          ],
+          [
+            402,
+            360
+          ],
+          [
+            402,
+            348
+          ],
+          [
+            240,
+            347
+          ]
+        ],
+        "gap_px": 162.00308639035245,
+        "roi_pixels": 1834,
+        "usable_fraction": 0.8655025955639453,
+        "color_pixels": 1755,
+        "color_fraction": 0.9569247546346783,
+        "finger_quality": [
+          0.94140625,
+          0.921875
+        ],
+        "finger_dark_fraction": [
+          0.9977680737506065,
+          0.99527983816588
+        ],
+        "shadow_tolerant_color_fraction": 0.9841875681570338,
+        "geometry_valid": true,
+        "threshold_met": true,
+        "shadow_tolerant_threshold_met": true,
+        "approved_reward": null
+      },
+      "visualization": "roi/E04-L003.jpg"
+    },
+    {
+      "job": {
+        "id": "E04-L004",
+        "image": "images/E04-L004.jpg",
+        "sha256": "4e57d44be44d0636049ce5382622993bfdeece85a18ae41a6daa56c5ca51b9ed",
+        "view": "wrist_full",
+        "arm": "left",
+        "episode_number": 4,
+        "source_frame_key": "E04-segment_000000-left-001101",
+        "row": 1101,
+        "time": 1046084.881504264,
+        "lift_delta_m": 0.137912640845099,
+        "openness": 0.2716343696018339,
+        "clip": "clips/E04-L004.mp4",
+        "approved_reward": null
+      },
+      "measurement": {
+        "tips_xy": [
+          [
+            271,
+            356
+          ],
+          [
+            369,
+            355
+          ]
+        ],
+        "polygon_xy": [
+          [
+            271,
+            362
+          ],
+          [
+            369,
+            361
+          ],
+          [
+            369,
+            349
+          ],
+          [
+            271,
+            350
+          ]
+        ],
+        "gap_px": 98.00510190801293,
+        "roi_pixels": 1004,
+        "usable_fraction": 0.7801087801087802,
+        "color_pixels": 980,
+        "color_fraction": 0.9760956175298805,
+        "finger_quality": [
+          0.8828125,
+          0.9296875
+        ],
+        "finger_dark_fraction": [
+          0.9990348525469169,
+          0.999268318177067
+        ],
+        "shadow_tolerant_color_fraction": 1.0,
+        "geometry_valid": true,
+        "threshold_met": true,
+        "shadow_tolerant_threshold_met": true,
+        "approved_reward": null
+      },
+      "visualization": "roi/E04-L004.jpg"
+    },
+    {
+      "job": {
+        "id": "E04-L005",
+        "image": "images/E04-L005.jpg",
+        "sha256": "4ae6b7d45c969079bddc2d6b49fb3557310910e81ae7ea36692370050586fe61",
+        "view": "wrist_full",
+        "arm": "left",
+        "episode_number": 4,
+        "source_frame_key": "E04-segment_000000-left-001245",
+        "row": 1245,
+        "time": 1046089.726568101,
+        "lift_delta_m": 0.1316461019501984,
+        "openness": 0.37320733800793227,
+        "clip": "clips/E04-L005.mp4",
+        "approved_reward": null
+      },
+      "measurement": {
+        "tips_xy": [
+          [
+            239,
+            353
+          ],
+          [
+            400,
+            356
+          ]
+        ],
+        "polygon_xy": [
+          [
+            239,
+            359
+          ],
+          [
+            400,
+            362
+          ],
+          [
+            400,
+            350
+          ],
+          [
+            239,
+            347
+          ]
+        ],
+        "gap_px": 161.02794788483146,
+        "roi_pixels": 1836,
+        "usable_fraction": 0.8717948717948718,
+        "color_pixels": 528,
+        "color_fraction": 0.2875816993464052,
+        "finger_quality": [
+          0.9375,
+          0.91796875
+        ],
+        "finger_dark_fraction": [
+          0.9987771611325369,
+          0.9979077508321446
+        ],
+        "shadow_tolerant_color_fraction": 0.7843137254901961,
+        "geometry_valid": true,
+        "threshold_met": false,
+        "shadow_tolerant_threshold_met": false,
+        "approved_reward": null
+      },
+      "visualization": "roi/E04-L005.jpg"
+    },
+    {
+      "job": {
+        "id": "E04-R001",
+        "image": "images/E04-R001.jpg",
+        "sha256": "109d640d86d0b7a98f9b17395952dba353d662424b271c9dba82a9b8af48f243",
+        "view": "wrist_full",
+        "arm": "right",
+        "episode_number": 4,
+        "source_frame_key": "E04-segment_000000-right-000101",
+        "row": 101,
+        "time": 1046051.165630237,
+        "lift_delta_m": 0.11294638770632315,
+        "openness": 0.2953947084466311,
+        "clip": "clips/E04-R001.mp4",
+        "approved_reward": null
+      },
+      "measurement": {
+        "tips_xy": [
+          [
+            271,
+            363
+          ],
+          [
+            374,
+            363
+          ]
+        ],
+        "polygon_xy": [
+          [
+            271,
+            369
+          ],
+          [
+            374,
+            369
+          ],
+          [
+            374,
+            357
+          ],
+          [
+            271,
+            357
+          ]
+        ],
+        "gap_px": 103.0,
+        "roi_pixels": 1096,
+        "usable_fraction": 0.8106508875739645,
+        "color_pixels": 1090,
+        "color_fraction": 0.9945255474452555,
+        "finger_quality": [
+          0.89453125,
+          0.9375
+        ],
+        "finger_dark_fraction": [
+          0.9972275795564127,
+          0.9979812373827336
+        ],
+        "shadow_tolerant_color_fraction": 1.0,
+        "geometry_valid": true,
+        "threshold_met": true,
+        "shadow_tolerant_threshold_met": true,
+        "approved_reward": null
+      },
+      "visualization": "roi/E04-R001.jpg"
+    },
+    {
+      "job": {
+        "id": "E04-R003",
+        "image": "images/E04-R003.jpg",
+        "sha256": "ab5f61ab390dd398676428672838647e28910e8f9f410fc34285cb3adac173ce",
+        "view": "wrist_full",
+        "arm": "right",
+        "episode_number": 4,
+        "source_frame_key": "E04-segment_000000-right-000247",
+        "row": 247,
+        "time": 1046056.166990865,
+        "lift_delta_m": 0.07394677388470937,
+        "openness": 0.25567298977081443,
+        "clip": "clips/E04-R003.mp4",
+        "approved_reward": null
+      },
+      "measurement": {
+        "tips_xy": [
+          [
+            281,
+            363
+          ],
+          [
+            364,
+            363
+          ]
+        ],
+        "polygon_xy": [
+          [
+            281,
+            369
+          ],
+          [
+            364,
+            369
+          ],
+          [
+            364,
+            357
+          ],
+          [
+            281,
+            357
+          ]
+        ],
+        "gap_px": 83.0,
+        "roi_pixels": 844,
+        "usable_fraction": 0.7728937728937729,
+        "color_pixels": 0,
+        "color_fraction": 0.0,
+        "finger_quality": [
+          0.8125,
+          0.8828125
+        ],
+        "finger_dark_fraction": [
+          0.9974375400384369,
+          0.9963975155279503
+        ],
+        "shadow_tolerant_color_fraction": 0.0035545023696682463,
+        "geometry_valid": true,
+        "threshold_met": false,
+        "shadow_tolerant_threshold_met": false,
+        "approved_reward": null
+      },
+      "visualization": "roi/E04-R003.jpg"
+    },
+    {
+      "job": {
+        "id": "E04-R004",
+        "image": "images/E04-R004.jpg",
+        "sha256": "f0db6f33c3dad6ffe1f59e390e1596c4b272094c7d0bdedb3408416ac06559c4",
+        "view": "wrist_full",
+        "arm": "right",
+        "episode_number": 4,
+        "source_frame_key": "E04-segment_000000-right-000496",
+        "row": 496,
+        "time": 1046064.536363269,
+        "lift_delta_m": 0.10247608334774311,
+        "openness": 0.261472765332988,
+        "clip": "clips/E04-R004.mp4",
+        "approved_reward": null
+      },
+      "measurement": {
+        "tips_xy": [
+          [
+            279,
+            363
+          ],
+          [
+            366,
+            363
+          ]
+        ],
+        "polygon_xy": [
+          [
+            279,
+            369
+          ],
+          [
+            366,
+            369
+          ],
+          [
+            366,
+            357
+          ],
+          [
+            279,
+            357
+          ]
+        ],
+        "gap_px": 87.0,
+        "roi_pixels": 873,
+        "usable_fraction": 0.7631118881118881,
+        "color_pixels": 686,
+        "color_fraction": 0.7857961053837342,
+        "finger_quality": [
+          0.8671875,
+          0.9375
+        ],
+        "finger_dark_fraction": [
+          0.9947203016970458,
+          0.9912636889381076
+        ],
+        "shadow_tolerant_color_fraction": 0.8510882016036655,
+        "geometry_valid": true,
+        "threshold_met": false,
+        "shadow_tolerant_threshold_met": true,
+        "approved_reward": null
+      },
+      "visualization": "roi/E04-R004.jpg"
+    },
+    {
+      "job": {
+        "id": "E04-R006",
+        "image": "images/E04-R006.jpg",
+        "sha256": "7ca70194eb648d9b50776a8cc967f37ca80ff9b8f7beaa6cde2b351cd879d54d",
+        "view": "wrist_full",
+        "arm": "right",
+        "episode_number": 4,
+        "source_frame_key": "E04-segment_000000-right-000903",
+        "row": 903,
+        "time": 1046078.207269231,
+        "lift_delta_m": 0.1083151414220396,
+        "openness": 0.2986992317320556,
+        "clip": "clips/E04-R006.mp4",
+        "approved_reward": null
+      },
+      "measurement": {
+        "tips_xy": [
+          [
+            272,
+            364
+          ],
+          [
+            375,
+            364
+          ]
+        ],
+        "polygon_xy": [
+          [
+            272,
+            370
+          ],
+          [
+            375,
+            370
+          ],
+          [
+            375,
+            358
+          ],
+          [
+            272,
+            358
+          ]
+        ],
+        "gap_px": 103.0,
+        "roi_pixels": 1123,
+        "usable_fraction": 0.8306213017751479,
+        "color_pixels": 1094,
+        "color_fraction": 0.9741763134461264,
+        "finger_quality": [
+          0.82421875,
+          0.94140625
+        ],
+        "finger_dark_fraction": [
+          1.0,
+          0.9996429421566294
+        ],
+        "shadow_tolerant_color_fraction": 1.0,
+        "geometry_valid": true,
+        "threshold_met": true,
+        "shadow_tolerant_threshold_met": true,
+        "approved_reward": null
+      },
+      "visualization": "roi/E04-R006.jpg"
+    },
+    {
+      "job": {
+        "id": "E04-R007",
+        "image": "images/E04-R007.jpg",
+        "sha256": "7070362cfb7b9d73c77a157514323e1e3c7f827abfab5e699eb793e655330622",
+        "view": "wrist_full",
+        "arm": "right",
+        "episode_number": 4,
+        "source_frame_key": "E04-segment_000000-right-000970",
+        "row": 970,
+        "time": 1046080.480157246,
+        "lift_delta_m": 0.069455558553219,
+        "openness": 0.32992360481678074,
+        "clip": "clips/E04-R007.mp4",
+        "approved_reward": null
+      },
+      "measurement": {
+        "tips_xy": [
+          [
+            263,
+            363
+          ],
+          [
+            382,
+            363
+          ]
+        ],
+        "polygon_xy": [
+          [
+            263,
+            369
+          ],
+          [
+            382,
+            369
+          ],
+          [
+            382,
+            357
+          ],
+          [
+            263,
+            357
+          ]
+        ],
+        "gap_px": 119.0,
+        "roi_pixels": 1284,
+        "usable_fraction": 0.823076923076923,
+        "color_pixels": 1245,
+        "color_fraction": 0.969626168224299,
+        "finger_quality": [
+          0.91796875,
+          0.94140625
+        ],
+        "finger_dark_fraction": [
+          0.9971214738054116,
+          0.9993219572833089
+        ],
+        "shadow_tolerant_color_fraction": 0.9976635514018691,
+        "geometry_valid": true,
+        "threshold_met": true,
+        "shadow_tolerant_threshold_met": true,
+        "approved_reward": null
+      },
+      "visualization": "roi/E04-R007.jpg"
+    },
+    {
+      "job": {
+        "id": "E03-L002",
+        "image": "images/E03-L002.jpg",
+        "sha256": "633c45a92d8c916f028e44717b4485eeeef537f93a8e2bfb91322bd641e1531f",
+        "view": "wrist_full",
+        "arm": "left",
+        "episode_number": 3,
+        "source_frame_key": "E03-segment_000000-left-000543",
+        "row": 543,
+        "time": 1045904.772142698,
+        "lift_delta_m": 0.11175988498509204,
+        "openness": 0.30271166192211013,
+        "clip": "clips/E03-L002.mp4",
+        "approved_reward": null
+      },
+      "measurement": {
+        "tips_xy": [
+          [
+            258,
+            352
+          ],
+          [
+            384,
+            355
+          ]
+        ],
+        "polygon_xy": [
+          [
+            258,
+            358
+          ],
+          [
+            384,
+            361
+          ],
+          [
+            384,
+            349
+          ],
+          [
+            258,
+            346
+          ]
+        ],
+        "gap_px": 126.03570922560003,
+        "roi_pixels": 1387,
+        "usable_fraction": 0.8400969109630527,
+        "color_pixels": 422,
+        "color_fraction": 0.304253785147801,
+        "finger_quality": [
+          0.90234375,
+          0.953125
+        ],
+        "finger_dark_fraction": [
+          0.998975199836032,
+          0.9984547233954878
+        ],
+        "shadow_tolerant_color_fraction": 0.9538572458543619,
+        "geometry_valid": true,
+        "threshold_met": false,
+        "shadow_tolerant_threshold_met": true,
+        "approved_reward": null
+      },
+      "visualization": "roi/E03-L002.jpg"
+    },
+    {
+      "job": {
+        "id": "E03-R001",
+        "image": "images/E03-R001.jpg",
+        "sha256": "1926065ba22edd8378af8d077e5e7931f05ee07e0671c01299e756972e7e23e0",
+        "view": "wrist_full",
+        "arm": "right",
+        "episode_number": 3,
+        "source_frame_key": "E03-segment_000000-right-000130",
+        "row": 130,
+        "time": 1045890.880883072,
+        "lift_delta_m": 0.1311000882264806,
+        "openness": 0.36688031421295714,
+        "clip": "clips/E03-R001.mp4",
+        "approved_reward": null
+      },
+      "measurement": {
+        "tips_xy": [
+          [
+            243,
+            365
+          ],
+          [
+            403,
+            365
+          ]
+        ],
+        "polygon_xy": [
+          [
+            243,
+            371
+          ],
+          [
+            403,
+            371
+          ],
+          [
+            403,
+            359
+          ],
+          [
+            243,
+            359
+          ]
+        ],
+        "gap_px": 160.0,
+        "roi_pixels": 1827,
+        "usable_fraction": 0.8729096989966555,
+        "color_pixels": 1680,
+        "color_fraction": 0.9195402298850575,
+        "finger_quality": [
+          0.90234375,
+          0.921875
+        ],
+        "finger_dark_fraction": [
+          0.995991295384263,
+          0.99852924538975
+        ],
+        "shadow_tolerant_color_fraction": 0.9786535303776683,
+        "geometry_valid": true,
+        "threshold_met": true,
+        "shadow_tolerant_threshold_met": true,
+        "approved_reward": null
+      },
+      "visualization": "roi/E03-R001.jpg"
+    },
+    {
+      "job": {
+        "id": "E07-L002",
+        "image": "images/E07-L002.jpg",
+        "sha256": "6ec436542e18dc6898969cfbb5eeab9ca324af8ab26554b06152d836ac3326bc",
+        "view": "wrist_full",
+        "arm": "left",
+        "episode_number": 7,
+        "source_frame_key": "E07-segment_000000-left-000444",
+        "row": 444,
+        "time": 1046468.41856772,
+        "lift_delta_m": 0.12418640182250021,
+        "openness": 0.22891990937807755,
+        "clip": "clips/E07-L002.mp4",
+        "approved_reward": null
+      },
+      "measurement": {
+        "tips_xy": [
+          [
+            275,
+            354
+          ],
+          [
+            364,
+            353
+          ]
+        ],
+        "polygon_xy": [
+          [
+            275,
+            360
+          ],
+          [
+            364,
+            359
+          ],
+          [
+            364,
+            347
+          ],
+          [
+            275,
+            348
+          ]
+        ],
+        "gap_px": 89.00561780022652,
+        "roi_pixels": 904,
+        "usable_fraction": 0.7726495726495727,
+        "color_pixels": 107,
+        "color_fraction": 0.11836283185840708,
+        "finger_quality": [
+          0.796875,
+          0.93359375
+        ],
+        "finger_dark_fraction": [
+          0.993572513731448,
+          0.9945934017433521
+        ],
+        "shadow_tolerant_color_fraction": 0.9037610619469026,
+        "geometry_valid": true,
+        "threshold_met": false,
+        "shadow_tolerant_threshold_met": true,
+        "approved_reward": null
+      },
+      "visualization": "roi/E07-L002.jpg"
+    },
+    {
+      "job": {
+        "id": "E07-R001",
+        "image": "images/E07-R001.jpg",
+        "sha256": "dc3892497334b8b4b9b0a2eae85d3b3afbdf40bcae1207548b9e3be36ba420d5",
+        "view": "wrist_full",
+        "arm": "right",
+        "episode_number": 7,
+        "source_frame_key": "E07-segment_000000-right-000110",
+        "row": 110,
+        "time": 1046457.059968304,
+        "lift_delta_m": 0.12355821742130416,
+        "openness": 0.28494162458457406,
+        "clip": "clips/E07-R001.mp4",
+        "approved_reward": null
+      },
+      "measurement": {
+        "tips_xy": [
+          [
+            261,
+            364
+          ],
+          [
+            384,
+            363
+          ]
+        ],
+        "polygon_xy": [
+          [
+            261,
+            370
+          ],
+          [
+            384,
+            369
+          ],
+          [
+            384,
+            357
+          ],
+          [
+            261,
+            358
+          ]
+        ],
+        "gap_px": 123.00406497347964,
+        "roi_pixels": 1363,
+        "usable_fraction": 0.8455334987593052,
+        "color_pixels": 0,
+        "color_fraction": 0.0,
+        "finger_quality": [
+          0.921875,
+          0.9453125
+        ],
+        "finger_dark_fraction": [
+          0.9998694346520434,
+          0.9989020373307308
+        ],
+        "shadow_tolerant_color_fraction": 0.9493763756419662,
+        "geometry_valid": true,
+        "threshold_met": false,
+        "shadow_tolerant_threshold_met": true,
+        "approved_reward": null
+      },
+      "visualization": "roi/E07-R001.jpg"
+    },
+    {
+      "job": {
+        "id": "E10-L001",
+        "image": "images/E10-L001.jpg",
+        "sha256": "1952cfb7a4893c7d570cc5f45c3823d86f2314324757a08c6b51b5b0ea9291ea",
+        "view": "wrist_full",
+        "arm": "left",
+        "episode_number": 10,
+        "source_frame_key": "E10-segment_000000-left-000242",
+        "row": 242,
+        "time": 1056526.302776494,
+        "lift_delta_m": 0.14025494950596787,
+        "openness": 0.31959564541213037,
+        "clip": "clips/E10-L001.mp4",
+        "approved_reward": null
+      },
+      "measurement": {
+        "tips_xy": [
+          [
+            250,
+            353
+          ],
+          [
+            394,
+            354
+          ]
+        ],
+        "polygon_xy": [
+          [
+            250,
+            359
+          ],
+          [
+            394,
+            360
+          ],
+          [
+            394,
+            348
+          ],
+          [
+            250,
+            347
+          ]
+        ],
+        "gap_px": 144.00347218036097,
+        "roi_pixels": 1595,
+        "usable_fraction": 0.8461538461538461,
+        "color_pixels": 99,
+        "color_fraction": 0.06206896551724138,
+        "finger_quality": [
+          0.9296875,
+          0.953125
+        ],
+        "finger_dark_fraction": [
+          0.9948427545757913,
+          0.9966316623736874
+        ],
+        "shadow_tolerant_color_fraction": 0.6852664576802507,
+        "geometry_valid": true,
+        "threshold_met": false,
+        "shadow_tolerant_threshold_met": false,
+        "approved_reward": null
+      },
+      "visualization": "roi/E10-L001.jpg"
+    },
+    {
+      "job": {
+        "id": "E10-R001",
+        "image": "images/E10-R001.jpg",
+        "sha256": "8d5d3d3a2ae2576e95fb7a0c7cc9f228918cfa211327633a8a8c759f0c4b72f5",
+        "view": "wrist_full",
+        "arm": "right",
+        "episode_number": 10,
+        "source_frame_key": "E10-segment_000000-right-000147",
+        "row": 147,
+        "time": 1056523.123427716,
+        "lift_delta_m": 0.1245366333753217,
+        "openness": 0.374905585048988,
+        "clip": "clips/E10-R001.mp4",
+        "approved_reward": null
+      },
+      "measurement": {
+        "tips_xy": [
+          [
+            244,
+            365
+          ],
+          [
+            401,
+            364
+          ]
+        ],
+        "polygon_xy": [
+          [
+            244,
+            371
+          ],
+          [
+            401,
+            370
+          ],
+          [
+            401,
+            358
+          ],
+          [
+            244,
+            359
+          ]
+        ],
+        "gap_px": 157.00318468107582,
+        "roi_pixels": 1795,
+        "usable_fraction": 0.873904576436222,
+        "color_pixels": 1628,
+        "color_fraction": 0.9069637883008357,
+        "finger_quality": [
+          0.94921875,
+          0.59375
+        ],
+        "finger_dark_fraction": [
+          0.9986251145737856,
+          0.9997732169180179
+        ],
+        "shadow_tolerant_color_fraction": 1.0,
+        "geometry_valid": true,
+        "threshold_met": true,
+        "shadow_tolerant_threshold_met": true,
+        "approved_reward": null
+      },
+      "visualization": "roi/E10-R001.jpg"
+    }
+  ],
+  "automatic_tracking": false,
+  "automatic_reward_ready": false,
+  "training_executed": false,
+  "pipeline_sha256": "a4c64d0ed018da0889459ffbd2f59ea1b35b72faf07386244656a95a051d651f"
+}
