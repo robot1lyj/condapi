@@ -1,5 +1,11 @@
 # 07 · 变更历史
 
+## 2026-10-11 · 对齐 PLD 首轮与 RECAP 后续路线
+
+本 PART 分工与 EXPO-FT 独立。用户确认冻结 Pi0.5、整段抓取残差 SAC + 价值初始化、交还 Pi 放置，首轮左右臂都启用；RLT token 与 RECAP 后置。[当前计划](03_training_and_evaluation.md#pld-主线与-recap-后续路线2026-10-11)区分奖励来源、阶段切分与策略学习；核对 RECAP 原文后纠正“必须逐阶段人工结束标签”的表述。先修14集切段/核验窗/空手参考并抽检，不直接训练。
+
+收拢重复旧提案，旧 RLT/PARTS 命令从当前 owner 移至 Git 基线 `1160183a14c87a8bfe913b4c732c610c92af6c43` 可追溯，原始数据/封存分类/权重/独立报告保留；旧状态机与开度工具标为历史，未修改实现。[计划图验收](reports/rl/parts-grasp-review14-20261010/README.md#2026-10-11-计划图验收)为9/9、四尺寸浏览器和深浅目视通过。本轮仅文档、图与索引，未重分类、训练/训练smoke、操作GPU/Thor/3588或发送客户端任务；范围确认不替代正式训练配方。
+
 ## 2026-10-10 · 退役旧RL并设计EXPO-FT双任务闭环
 
 按用户明确要求删除本仓库PARTS、RLT及residual-rl共50个源码/配置/测试文件，去除Thor与WebSocket旧扩展注入；普通/RTC保留，旧shadow只兼容base，collect/eval拒绝。历史数据、权重、报告和纯Pi推理对照保留。恢复基线与完整删除清单见[退役记录](reports/rl/expo-ft-20261010/retirement.json)。

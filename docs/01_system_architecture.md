@@ -1,12 +1,12 @@
 # 01 · 系统架构
 
-## 并行 RL 实验的所有权（2026-10-10）
+## 并行 RL 实验的所有权（2026-10-11）
 
-用户明确多方案并行，本对话负责此前讨论的 PART 整轮残差专家；EXPO-FT 研究由另一条路线继续，不作为全仓唯一算法。实现隔离到独立工作树/功能分支，保留原生 Pi 与 RTC 服务。PART 当前恢复范围与未完成项归[03](03_training_and_evaluation.md#多方案并行与本对话-part-分工2026-10-10-用户更正)。不能把某个线程的方案切换解释为删除其他实验的授权。
+用户明确多方案并行。本分工当前为 **PLD 式整段抓取残差专家**：冻结 Pi0.5，SAC + 价值初始化，首轮左右臂都覆盖，成功后交还 Pi 放置；通用奖励与 RECAP 后训练后置。研究与实施顺序唯一归[03](03_training_and_evaluation.md#pld-主线与-recap-后续路线2026-10-11)，[架构图](reports/rl/parts-grasp-review14-20261010/pld-plan.html)仅表示方案，尚无新 learner 或推理接入。EXPO-FT 由独立路线推进；实现隔离到功能分支，保留原生 Pi 与 RTC，不把一条路线切换解释为删除其他实验的授权。
 
 ## EXPO-FT 强化学习架构（2026-10-10，设计草案）
 
-该并行研究路线的目标是乐高按颜色分拣与蓝牙耳机入充电盒的 RL 微调。**此前该线程退役旧实现的记录保留；本 PART 分支恢复的整轮 residual-rl 不受本节替代。新 EXPO-FT 学习器尚未实现、未训练、未部署。** 用户授权本仓库清理与设计；YAM 为只读参考，客户端方案尚未发送任务。普通 Pi/RTC、数据、权重及历史证据保留。详见 [论文与代码审读](reports/rl/expo-ft-20261010/README.md)、[训练设计](03_training_and_evaluation.md#expo-ft-学习与评估设计2026-10-10)、[数据核验](04_data_contracts.md#expo-ft-双任务数据合同2026-10-10)、[协议设计](05_inference_and_rollout.md#expo-ft-三方接口草案2026-10-10)。
+该并行研究路线的目标是乐高按颜色分拣与蓝牙耳机入充电盒的 RL 微调。**此前该线程退役旧实现的记录保留；本分工的 PLD 计划不受本节替代。新 EXPO-FT 学习器尚未实现、未训练、未部署。** 用户授权本仓库清理与设计；YAM 为只读参考，客户端方案尚未发送任务。普通 Pi/RTC、数据、权重及历史证据保留。详见 [论文与代码审读](reports/rl/expo-ft-20261010/README.md)、[训练设计](03_training_and_evaluation.md#expo-ft-学习与评估设计2026-10-10)、[数据核验](04_data_contracts.md#expo-ft-双任务数据合同2026-10-10)、[协议设计](05_inference_and_rollout.md#expo-ft-三方接口草案2026-10-10)。
 
 [打开交互架构图](diagrams/expo-ft-architecture.html) · [编辑图源](diagrams/expo-ft-architecture.json) · [验收记录](diagrams/README.md#expo-ft-强化学习架构)
 
@@ -68,7 +68,7 @@
 
 ## 多模型接入层
 
-旧PARTS/RLT服务端路线已于2026-10-10退役；现阶段RL能力为本页EXPO-FT设计草案，不能视为已有可运行后端。历史方案保留在03/04/05对应章节。
+旧 PARTS/RLT learner 与服务入口已退役；本分支保留少量历史抓取工具，当前 PLD 和并行 EXPO-FT 均为设计，不能视为已有可运行 RL 后端。当前计划见本页顶部及03，04/05中的9月合同仅为历史。
 
 模型无关遥测使用标准库 `vla_platform.metrics.write_metrics`，训练器只需输出标量事件。LeRobot 共享入口采集原生结构化 tracker；Pi 保持原生日志；独立只读看板统一消费 JSONL/CSV/Trainer-state，不导入模型环境。指标合同、配置与局限归 [11](11_training_dashboard.md)。
 2026-09-08 工作树改造：采用 **LeRobot 原生能力 + 薄接入层**，不是自研训练框架。LeRobot 负责其支持模型的网络、loss、数据集、处理器、优化器和 checkpoint；原版 OpenPI 是 Pi 的独立实现后端。RLinf 仅作为未来有具体 DAgger/RL 需求时的可选后端，不作为所有模型的强制依赖。

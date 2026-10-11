@@ -1,0 +1,170 @@
+{
+  "schema_version": 1,
+  "diagram_type": "dataflow",
+  "meta": {
+    "title": "PLD 小专家学习闭环 · 方案设计",
+    "locale": "zh-CN",
+    "quality_profile": "showcase",
+    "viewBox": [
+      1080,
+      480
+    ]
+  },
+  "stages": [
+    {
+      "label": "基础策略"
+    },
+    {
+      "label": "动作修正"
+    },
+    {
+      "label": "真实执行"
+    },
+    {
+      "label": "结果监督"
+    },
+    {
+      "label": "经验学习"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "frozen_pi",
+      "type": "backend",
+      "label": "冻结 Pi0.5",
+      "sublabel": "参考动作与当前观测",
+      "stage": 0,
+      "row": 0,
+      "tag": "首轮不更新 VLA"
+    },
+    {
+      "id": "grasp_expert",
+      "type": "backend",
+      "label": "轻量残差专家",
+      "sublabel": "修正整段抓取动作",
+      "stage": 1,
+      "row": 0,
+      "tag": "首轮候选：SAC"
+    },
+    {
+      "id": "executed_motion",
+      "type": "security",
+      "label": "动作约束与执行",
+      "sublabel": "保留 RTC 已承诺前缀",
+      "stage": 2,
+      "row": 0,
+      "tag": "沿用现有控制层"
+    },
+    {
+      "id": "outcome_reward",
+      "type": "backend",
+      "label": "抓取结果判定",
+      "sublabel": "成功 / 空抓 / 不确定",
+      "stage": 3,
+      "row": 0,
+      "tag": "短视频证据，无跟踪"
+    },
+    {
+      "id": "versioned_replay",
+      "type": "database",
+      "label": "版本化经验池",
+      "sublabel": "实际动作、结果与来源",
+      "stage": 4,
+      "row": 0,
+      "tag": "14 集 + 新交互"
+    },
+    {
+      "id": "offline_online_learner",
+      "type": "backend",
+      "label": "服务器学习器",
+      "sublabel": "价值初始化与在线 SAC",
+      "stage": 4,
+      "row": 1,
+      "tag": "不在工作站训练"
+    },
+    {
+      "id": "reviewed_snapshot",
+      "type": "security",
+      "label": "候选专家版本",
+      "sublabel": "回放、影子与现场对照",
+      "stage": 1,
+      "row": 1,
+      "tag": "验收后才启用"
+    }
+  ],
+  "flows": [
+    {
+      "id": "base_reference",
+      "from": "frozen_pi",
+      "to": "grasp_expert",
+      "label": "参考动作",
+      "variant": "emphasis"
+    },
+    {
+      "id": "bounded_edit",
+      "from": "grasp_expert",
+      "to": "executed_motion",
+      "label": "有界修正",
+      "variant": "emphasis"
+    },
+    {
+      "id": "actual_outcome",
+      "from": "executed_motion",
+      "to": "outcome_reward",
+      "label": "真实结果",
+      "variant": "emphasis"
+    },
+    {
+      "id": "audited_reward",
+      "from": "outcome_reward",
+      "to": "versioned_replay",
+      "label": "可信奖励",
+      "variant": "emphasis"
+    },
+    {
+      "id": "sample_replay",
+      "from": "versioned_replay",
+      "to": "offline_online_learner",
+      "label": "混合采样",
+      "labelDy": 24
+    },
+    {
+      "id": "candidate_export",
+      "from": "offline_online_learner",
+      "to": "reviewed_snapshot",
+      "label": "固定快照"
+    },
+    {
+      "id": "accepted_snapshot",
+      "from": "reviewed_snapshot",
+      "to": "grasp_expert",
+      "label": "验收后发布"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "本轮只更新计划",
+      "items": [
+        "先对齐，再实现与训练",
+        "零残差专家不代表已经提升"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "先修奖励数据",
+      "items": [
+        "修切段、核验窗口与空手参考",
+        "不确定项保留，不补成失败"
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "后续研究与蒸馏",
+      "items": [
+        "专家有效后蒸馏回 Pi",
+        "通用奖励与 RECAP 后训练后置"
+      ]
+    }
+  ]
+}
