@@ -1,0 +1,94 @@
+{
+  "dataset_id": "lego-grasp-reclassified14-20261011-v3r3",
+  "candidates_sha256": "7426b4973a0a4d3f367e70e398838bd1c9dd2a51e2e682322dbb4d2846948b0c",
+  "candidate_count": 342,
+  "image_hashes_and_decode_ok": 9348,
+  "clips_hashes_and_full_decode_ok": 342,
+  "decoded_clip_frames": 12278,
+  "raw_h5_hashes_unchanged": 28,
+  "all_montage_and_audit_evidence_hashes_ok": true,
+  "vlm_parse_errors": 0,
+  "assistant_visual_audits": 342,
+  "additional_full_context_audits": 16,
+  "user_reviewed": 0,
+  "approved_rewards": 0,
+  "tracking": false,
+  "training_executed": false,
+  "vlm_assistant_label_agreement_count": 203,
+  "vlm_assistant_label_agreement_fraction": 0.5935672514619883,
+  "agreement_is_not_independent_accuracy": true,
+  "both_models_success_but_visual_failure": [
+    "E02-R001-v3",
+    "E07-L008-v3",
+    "E08-R001-v3",
+    "E10-L009-v3",
+    "E10-R009-v3",
+    "E10-R015-v3",
+    "E14-R001-v3",
+    "E14-R011-v3"
+  ],
+  "by_episode": {
+    "1": {
+      "success": 10,
+      "failure": 3
+    },
+    "2": {
+      "success": 10,
+      "failure": 15
+    },
+    "3": {
+      "failure": 10,
+      "success": 10
+    },
+    "4": {
+      "success": 10,
+      "failure": 38
+    },
+    "5": {
+      "success": 10,
+      "failure": 6
+    },
+    "6": {
+      "success": 10,
+      "failure": 4
+    },
+    "7": {
+      "success": 9,
+      "failure": 17
+    },
+    "8": {
+      "success": 10,
+      "failure": 19
+    },
+    "9": {
+      "success": 11,
+      "failure": 7
+    },
+    "10": {
+      "success": 10,
+      "failure": 23
+    },
+    "11": {
+      "success": 10,
+      "failure": 20
+    },
+    "12": {
+      "success": 9,
+      "failure": 13
+    },
+    "13": {
+      "failure": 12,
+      "success": 10
+    },
+    "14": {
+      "success": 7,
+      "failure": 19
+    }
+  },
+  "duration_s": 3.754891206990578,
+  "feature_crop_and_source_hashes_ok": 6282,
+  "legacy_ids_mapped_once": 273,
+  "validation_candidates": 13,
+  "train_candidates": 329,
+  "http_resources_200": 685
+}

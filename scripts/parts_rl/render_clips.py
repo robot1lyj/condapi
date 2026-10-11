@@ -5,6 +5,7 @@ from fractions import Fraction
 import hashlib
 import json
 from pathlib import Path
+import shutil
 
 import av
 import h5py
@@ -16,13 +17,36 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--dataset", type=Path, required=True)
     parser.add_argument("--source", type=Path, required=True)
+    parser.add_argument("--reuse", type=Path, help="Copy clips only when the source episode, arm and time window match")
     args = parser.parse_args()
     candidates = json.loads((args.dataset / "candidates-unscored.json").read_text())
     episodes = json.loads((args.dataset / "episodes.json").read_text())
+    (args.dataset / "clips").mkdir(exist_ok=True)
     outputs = []
+    reused_ids = set()
+    if args.reuse:
+        old_candidates = json.loads((args.reuse / "candidates-unscored.json").read_text())
+        old_clips = {c["candidate_id"]: c for c in json.loads((args.reuse / "clip-manifest.json").read_text())}
+        identity = lambda c: (c["episode_id"], c["arm"], c["entry_time"], c["end_time"])  # noqa: E731
+        available = {identity(c): old_clips[c["candidate_id"]] for c in old_candidates}
+        for candidate in candidates:
+            old = available.get(identity(candidate))
+            if old is None:
+                continue
+            source = args.reuse / old["path"]
+            if hashlib.sha256(source.read_bytes()).hexdigest() != old["sha256"]:
+                raise ValueError("cached clip SHA mismatch")
+            path = f"clips/{candidate['candidate_id']}.mp4"
+            if (args.dataset / path).exists():
+                raise ValueError("write only a new clip")
+            shutil.copyfile(source, args.dataset / path)
+            outputs.append({**old, "candidate_id": candidate["candidate_id"], "path": path, "reused_from": str(source)})
+            reused_ids.add(candidate["candidate_id"])
     for episode in episodes:
         number = episode["number"]
-        selected = [c for c in candidates if c["episode_number"] == number]
+        selected = [c for c in candidates if c["episode_number"] == number and c["candidate_id"] not in reused_ids]
+        if not selected:
+            continue
         writers = {}
         for candidate in selected:
             name = f"clips/{candidate['candidate_id']}.mp4"
@@ -37,16 +61,23 @@ def main():
             stream.codec_context.time_base = Fraction(1, 1000)
             stream.time_base = Fraction(1, 1000)
             stream.options = {"crf": "25", "preset": "veryfast", "bf": "0"}
-            writers[candidate["candidate_id"]] = {"container": container, "stream": stream, "frames": 0,
-                                                   "first_time": None, "last_time": None, "path": name}
+            writers[candidate["candidate_id"]] = {
+                "container": container,
+                "stream": stream,
+                "frames": 0,
+                "first_time": None,
+                "last_time": None,
+                "path": name,
+            }
         folder = args.source / "raw" / episode["source_path"]
         manifest = json.loads((folder / "manifest.json").read_text())
         offset = 0
         for segment in manifest["segments"]:
             directory = folder / segment["path"]
             with h5py.File(directory / "samples.h5") as handle:
-                times, ticks = handle["time"][:], handle["tick"][:]
-                references, valid = handle["video_indices"][:], handle["observation_valid"][:]
+                committed = int(handle["committed_rows"][()])
+                times, ticks = handle["time"][:committed], handle["tick"][:committed]
+                references, valid = handle["video_indices"][:committed], handle["observation_valid"][:committed]
             containers = [av.open(str(directory / f"{view}.mp4")) for view in ("top", "left", "right")]
             for container in containers:
                 container.streams.video[0].codec_context.thread_count = 1
@@ -73,8 +104,11 @@ def main():
                     canvas.paste(image, (column * 320, 48))
                     draw.text((column * 320 + 5, 30), f"{view} video {references[row, column]}", fill="white")
                 relative = float(times[row] - episode["start_time"])
-                draw.text((5, 6), f"E{number:02d} t={relative:.2f}s row={offset + row} tick={ticks[row]}",
-                          fill="white" if valid[row] else "#ff6666")
+                draw.text(
+                    (5, 6),
+                    f"E{number:02d} t={relative:.2f}s row={offset + row} tick={ticks[row]}",
+                    fill="white" if valid[row] else "#ff6666",
+                )
                 for candidate in active:
                     writer = writers[candidate["candidate_id"]]
                     if writer["first_time"] is None:
@@ -98,10 +132,17 @@ def main():
             if not writer["frames"]:
                 raise RuntimeError("candidate has no rendered review frames")
             path = args.dataset / writer["path"]
-            outputs.append({"candidate_id": candidate["candidate_id"], "path": writer["path"],
-                            "frames": writer["frames"], "source_start_time": writer["first_time"],
-                            "source_end_time": writer["last_time"], "rate_hz": 10,
-                            "sha256": hashlib.sha256(path.read_bytes()).hexdigest()})
+            outputs.append(
+                {
+                    "candidate_id": candidate["candidate_id"],
+                    "path": writer["path"],
+                    "frames": writer["frames"],
+                    "source_start_time": writer["first_time"],
+                    "source_end_time": writer["last_time"],
+                    "rate_hz": 10,
+                    "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+                }
+            )
         print(json.dumps({"episode": number, "clips": len(selected)}), flush=True)
     (args.dataset / "clip-manifest.json").write_text(json.dumps(outputs, indent=2) + "\n")
 

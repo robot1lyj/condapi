@@ -1,0 +1,9 @@
+{
+  "dataset_id": "lego-grasp-reclassified14-20261011-v3r3",
+  "path": "/home/wuyan-lyj/thor/parts-vision/datasets/lego-grasp-reclassified14-20261011-v3r3",
+  "manifest_sha256": "04ebaf76e6865d98b9ff63b0a88add85e58ef58a8128bc127577848db6e42320",
+  "members_checked": 16737,
+  "bytes": 1176278067,
+  "mismatches": [],
+  "training_executed": false
+}

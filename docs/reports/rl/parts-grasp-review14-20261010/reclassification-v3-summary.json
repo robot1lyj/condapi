@@ -1,0 +1,47 @@
+{
+  "schema": "revised_grasp_binary_v3",
+  "dataset_id": "lego-grasp-reclassified14-20261011-v3r3",
+  "episodes": 14,
+  "candidates": 342,
+  "suggested_counts": {
+    "success": 136,
+    "failure": 206
+  },
+  "confidence_counts": {
+    "high": 331,
+    "medium": 11
+  },
+  "audit_flag_counts": {
+    "dino_weak_or_mixed": 146,
+    "vlm_dino_disagreement": 48,
+    "vlm_visual_audit_disagreement": 139,
+    "vlm_medium_confidence": 86,
+    "visual_audit_medium_confidence": 11
+  },
+  "assistant_visually_audited": 342,
+  "user_reviewed": 0,
+  "approved_rewards": 0,
+  "automatic_tracking": false,
+  "training_executed": false,
+  "accuracy": null,
+  "accuracy_note": "No independent human-labelled test set; binary coverage is not accuracy",
+  "references": 50,
+  "same_episode_references_excluded": true,
+  "preparation": {
+    "schema": "physical_grasp_review_v3",
+    "source": "/home/wuyan-lyj/condapi-data/rl/lego-rollout14-20261010-parts-v1",
+    "previous": "/home/wuyan-lyj/condapi-data/rl/lego-grasp-classified14-20261010-v2",
+    "episodes": 14,
+    "attempt_proposals": 342,
+    "images": 9348,
+    "legacy_candidates": 273,
+    "legacy_unmapped": 0,
+    "tracking": false,
+    "training_executed": false,
+    "camera_gaps_do_not_terminate_physical_attempts": true,
+    "height_gate": false,
+    "reference": "closure row only; height is supporting evidence",
+    "script_sha256": "33f49a694f7b40664242fb69a415c137181c40704e2296da72121301684f390f"
+  },
+  "pipeline_sha256": "2f340d00f7f63e988712a5caa0abe4ab112ded5ff6f8068d14f522831d1199e0"
+}

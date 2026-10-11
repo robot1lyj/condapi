@@ -1,0 +1,11 @@
+{
+  "dataset_id": "lego-grasp-reclassified14-20261011-v3r3",
+  "candidates_sha256": "7426b4973a0a4d3f367e70e398838bd1c9dd2a51e2e682322dbb4d2846948b0c",
+  "formal_user_reviews": 0,
+  "isolated_qa_identity": "7426b4973a0a4d3f367e70e398838bd1c9dd2a51e2e682322dbb4d2846948b0c-uiqa",
+  "video_browser_ready_state": 4,
+  "medium_confidence_filter_count": 11,
+  "save_reload_export_clear_import_reload_checked": true,
+  "browser_formal_zero_reviews_verified": true,
+  "training_ready": false
+}

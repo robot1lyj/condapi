@@ -1,0 +1,46 @@
+{
+  "dino": {
+    "model": "timm/vit_small_patch16_dinov3.lvd1689m",
+    "revision": "3bf4720a82ec2066db88137180ff1f83a675cef0",
+    "weights_sha256": "2a1ec16ae28ffa07bc0ead0241ee7df9fc26451fe6f9f839b7b3afa0a906b040",
+    "model_params_dtype": "torch.float32",
+    "autocast": "bfloat16",
+    "versions": {
+      "torch": "2.12.0a0+5aff3928d8.nv26.5.50603568",
+      "timm": "1.0.27",
+      "safetensors": "0.7.0"
+    },
+    "elapsed_s": 24.286287668161094,
+    "images": 6282,
+    "peak_cuda_allocated_bytes": 127606272,
+    "jobs_sha256": "c0f884ba247919fd2ae493a05633921ebaafdd6838543ea3b018ffbbb8ace919",
+    "pipeline_sha256": "a0cc7e44ad7cb1d96bbb544a22e04f947cf34e1ba1938663770d442ff13770d9",
+    "gradient_updates": 0
+  },
+  "vlm": {
+    "model_id": "Qwen/Qwen3-VL-4B-Instruct",
+    "model_revision": "ebb281ec70b05090aa6165b016eac8ec08e71b17",
+    "elapsed_s": 450.46569214900956,
+    "candidates": 342,
+    "processed_this_run": 329,
+    "script_sha256": "5a92bc5a5a031e574a2dacdc6e3cf7105e4fc8aa551eb1039adc3549b23a3e19",
+    "tracking": false,
+    "training_executed": false,
+    "prompt_sha256": "dab49c2887f0e79ead9e845f9593fa447b51e76db11051cda309e703595be158"
+  },
+  "vlm_weight_shards": [
+    {
+      "file": "model-00001-of-00002.safetensors",
+      "sha256": "30a01a0556622645a3cce87b655bbbbbc1f170c196099f1b666c93202c3339a9"
+    },
+    {
+      "file": "model-00002-of-00002.safetensors",
+      "sha256": "046296a2a387efb43b0c997d5833c789604d168834f6e0d3064bf7bb13d002a6"
+    }
+  ],
+  "notes": [
+    "Frozen Thor inference only; no neural inference on workstation",
+    "Original executed scripts are retained; post-inference resume guards are not claimed as executed forward",
+    "Snapshot-reference VLM pilot13 is diagnostic, not the adopted final labeler"
+  ]
+}
