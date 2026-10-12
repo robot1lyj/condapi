@@ -1,0 +1,117 @@
+{
+  "scope": "entry predictions only; not robot success rate",
+  "runs": [
+    {
+      "id": "mc-calql-mixed-s0",
+      "step": 5000,
+      "validation_attempts": 12,
+      "rmse": 0.6340901871915876,
+      "auc": 0.4,
+      "constant_one_rmse": 0.4097102175372224,
+      "train_mean_prediction": 0.37689149870239075,
+      "train_mean_rmse": 0.5560131069129594,
+      "arms": {
+        "left": {
+          "attempts": 5,
+          "successes": 5,
+          "failures": 0,
+          "auc": null,
+          "empty_mean_q": null,
+          "held_mean_q": 0.5404501557350159
+        },
+        "right": {
+          "attempts": 7,
+          "successes": 5,
+          "failures": 2,
+          "auc": 0.0,
+          "empty_mean_q": 0.39628806710243225,
+          "held_mean_q": 0.13953424990177155
+        }
+      }
+    },
+    {
+      "id": "mc-calql-mixed-s1",
+      "step": 5000,
+      "validation_attempts": 12,
+      "rmse": 0.6284248862317175,
+      "auc": 0.65,
+      "constant_one_rmse": 0.4097102175372224,
+      "train_mean_prediction": 0.37689149870239075,
+      "train_mean_rmse": 0.5560131069129594,
+      "arms": {
+        "left": {
+          "attempts": 5,
+          "successes": 5,
+          "failures": 0,
+          "auc": null,
+          "empty_mean_q": null,
+          "held_mean_q": 0.5109560489654541
+        },
+        "right": {
+          "attempts": 7,
+          "successes": 5,
+          "failures": 2,
+          "auc": 0.4,
+          "empty_mean_q": 0.21127928793430328,
+          "held_mean_q": 0.13387787342071533
+        }
+      }
+    },
+    {
+      "id": "mc-td-mixed-s0",
+      "step": 5000,
+      "validation_attempts": 12,
+      "rmse": 0.6366587649289887,
+      "auc": 0.4,
+      "constant_one_rmse": 0.4097102175372224,
+      "train_mean_prediction": 0.37689149870239075,
+      "train_mean_rmse": 0.5560131069129594,
+      "arms": {
+        "left": {
+          "attempts": 5,
+          "successes": 5,
+          "failures": 0,
+          "auc": null,
+          "empty_mean_q": null,
+          "held_mean_q": 0.53773033618927
+        },
+        "right": {
+          "attempts": 7,
+          "successes": 5,
+          "failures": 2,
+          "auc": 0.0,
+          "empty_mean_q": 0.39209914207458496,
+          "held_mean_q": 0.13599294424057007
+        }
+      }
+    },
+    {
+      "id": "td-mixed-s0",
+      "step": 5000,
+      "validation_attempts": 12,
+      "rmse": 1.2423609397531876,
+      "auc": 0.35,
+      "constant_one_rmse": 0.4097102175372224,
+      "train_mean_prediction": 0.37689149870239075,
+      "train_mean_rmse": 0.5560131069129594,
+      "arms": {
+        "left": {
+          "attempts": 5,
+          "successes": 5,
+          "failures": 0,
+          "auc": null,
+          "empty_mean_q": null,
+          "held_mean_q": -0.40057307481765747
+        },
+        "right": {
+          "attempts": 7,
+          "successes": 5,
+          "failures": 2,
+          "auc": 0.5,
+          "empty_mean_q": -0.2902342975139618,
+          "held_mean_q": -0.33560067415237427
+        }
+      }
+    }
+  ]
+}

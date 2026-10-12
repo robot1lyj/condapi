@@ -78,6 +78,19 @@
 
 新增2312校准诊断（新run目录v2，不覆盖v1）：四组均用成功/失败混合、同一replay/特征/split及5000更新预算。E为混合TD-only；F为TD＋MC回报锚点（系数1）；G/H为F加低权重Cal-QL（0.01，seed0/1）。MC锚点为 `mean((Q_behavior - recorded_MC_return)^2)`，只在有物理连续真实结局的样本定义，标签仍不作输入。它是本项目的行为价值初始化扩展，奖励定义/位置不变，不称原文完整Cal-QL。F/G/H的对比检验回报传播和低权重保守项，仍不训练actor或生成非零动作。
 
+2312也已完成，全部5000步，每组16.6–26.6秒；固定特征无需重算。最终结果如下，完整数值归[results-v2.json](results-v2.json)：
+
+| 组 | 入口MC RMSE | 全体入口AUC | 右臂入口AUC |
+|---|---:|---:|---:|
+| E 混合TD | 1.2424 | 0.35 | 0.5 |
+| F MC＋TD | 0.6367 | 0.40 | 0.0 |
+| G MC＋TD＋低权重Cal-QL seed0 | 0.6341 | 0.40 | 0.0 |
+| H 同G seed1 | 0.6284 | 0.65 | 0.4 |
+
+**数值稳定不是价值验收。** 用混合训练集入口平均回报作常数预测，E01的RMSE为0.5560；恒预测1为0.4097。F/G/H都未胜过这两个简单基线。第一轮成功组的训练均值常数也达到0.3932，因此早期best checkpoint约0.39并没有证明学到比常数更好的信息。左臂验证全成功不能算AUC；右臂仅5成功/2失败，整体AUC可受臂间差异影响，必须同时报告同臂指标。[基线分析v1](baselines-v1.json)、[v2](baselines-v2.json)及可重算入口 `scripts/pld_rl/analyze_runs.py`留存。E01反复用于诊断/调参，仍只能作为开发验证，不能升级成最终独立测试。当前不推荐任何一组用于动作优化，也没有专家成功率提升结论。
+
+第一轮训练代码固定 `149abbab352f2edfd11a68d3b3ff02e91c8c4dc0`；第二轮代码身份在results-v2与每组run.json中固定。两轮共48个checkpoint（含best与每1000步）、160份逐次预测NPZ、全部原始日志/配置/环境保留服务器；后续文档/分析提交不改变已训练代码身份。
+
 完整分类证据16,751个文件、1,183,489,617字节已在服务器逐文件SHA登记并与本地一致；记录归[classification-transfer-audit.json](classification-transfer-audit.json)。独立环境补齐依赖后，发现来源克隆中的LeRobot/packaging版本冲突；仅在新prefix固定packaging25.0后pip check通过。初始/最终freeze、冲突与修复日志均保留。GPU检查与feature身份分别归[gpu-checks.json](gpu-checks.json)、[feature-manifest.json](feature-manifest.json)。
 
 ## 下一步

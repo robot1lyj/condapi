@@ -8,7 +8,7 @@
 
 服务器prefix `/home/wuyan/.conda/envs/pld-grasp-rl-v3`，通过原生Conda克隆已安装的PyTorch环境并在独立prefix补齐PyAV/HDF5，不修改来源 `vla-molmoact2-train`。实际GPU检查为Python3.12、Torch2.10.0+cu128、torchvision0.25.0+cu128、NumPy2.2.6、Pillow12.3.0、h5py3.14.0、av16.0.1；真实CUDA更新与checkpoint/优化器恢复一致性在Slurm2311的4090上通过，完整结果归[本轮报告](reports/rl/pld-offline14-20261012/README.md)。这不表示在线动作投影或真机推理已验收。
 
-登录节点的 `/home` 为NFS，计算节点gpu001的 `/home` 为本地磁盘。本次登录节点克隆慢，切到计算节点后又发现共享Conda缓存Python包缺文件；保留失败prefix/log，不删除或修补共享缓存。解决方式为本地下载源环境141个Conda记录的原始包、逐包验证SHA/MD5，传到服务器独立 `pld-grasp/install/conda-pkgs-v3`，在已分配GPU作业内用 `CONDA_PKGS_DIRS=<独立缓存> conda create --offline --clone <来源prefix> -p <新prefix>`。依赖补装和pip freeze也只在新prefix。后续不要复用损坏的共享Python缓存推断环境已就绪。
+登录节点的 `/home` 为NFS，计算节点gpu001的 `/home` 为本地磁盘。本次登录节点克隆慢，切到计算节点后又发现共享Conda缓存Python包缺文件；保留失败prefix/log，不删除或修补共享缓存。解决方式为本地下载源环境141个Conda记录的原始包、逐包验证SHA/MD5，传到服务器独立 `pld-grasp/install/conda-pkgs-v3`，在已分配GPU作业内用 `CONDA_PKGS_DIRS=<独立缓存> conda create --offline --clone <来源prefix> -p <新prefix>`。仅在新prefix将来源克隆的packaging26.3固定为25.0，解决其与LeRobot的元数据冲突，pip check通过；初始/最终freeze及Conda显式清单均保留。后续不要复用损坏的共享Python缓存推断环境已就绪。
 
 ## PARTS 抓取视觉环境（2026-10-10）
 

@@ -1,0 +1,53 @@
+{
+  "passed": true,
+  "runs": [
+    {
+      "run": "mc-calql-mixed-s0",
+      "rows": 201,
+      "last_step": 5000,
+      "invalid_lines": 0
+    },
+    {
+      "run": "mc-calql-mixed-s1",
+      "rows": 201,
+      "last_step": 5000,
+      "invalid_lines": 0
+    },
+    {
+      "run": "mc-td-mixed-s0",
+      "rows": 201,
+      "last_step": 5000,
+      "invalid_lines": 0
+    },
+    {
+      "run": "td-mixed-s0",
+      "rows": 201,
+      "last_step": 5000,
+      "invalid_lines": 0
+    },
+    {
+      "run": "calql-success-s0",
+      "rows": 201,
+      "last_step": 5000,
+      "invalid_lines": 0
+    },
+    {
+      "run": "calql-success-s1",
+      "rows": 201,
+      "last_step": 5000,
+      "invalid_lines": 0
+    },
+    {
+      "run": "calql-mixed-s0",
+      "rows": 201,
+      "last_step": 5000,
+      "invalid_lines": 0
+    },
+    {
+      "run": "td-success-s0",
+      "rows": 201,
+      "last_step": 5000,
+      "invalid_lines": 0
+    }
+  ]
+}

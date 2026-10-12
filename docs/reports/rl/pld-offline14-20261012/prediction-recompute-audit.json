@@ -1,0 +1,8 @@
+{
+  "passed": true,
+  "runs": 8,
+  "auc_exact_match": true,
+  "rmse_max_absolute_difference": 1.8829845593870687e-06,
+  "rmse_absolute_tolerance": 5e-06,
+  "reason": "FP32 CUDA evaluation uses 12-entry batches; saved predictions use all 311 entries"
+}
