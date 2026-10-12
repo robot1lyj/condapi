@@ -1,0 +1,183 @@
+{
+  "schema": "parts_method_page_validation_v1",
+  "report_sha256": "79198fa73aef7ebb09cc6ae571b61a2f2b09294f0247b43792d36559cc2bae16",
+  "report_data_sha256": "a40f0f7c6aef1855215a084403917b8940551bb9ccce9a38b97075821869a311",
+  "static_checks": {
+    "media_files_verified": 44,
+    "relative_links_exist": true,
+    "unique_ids": true,
+    "removed_overview_rules_progress_metrics": true,
+    "dino_box_is_fixed_preprocessing": true,
+    "qwen_output_from_saved_record": true
+  },
+  "video_decode": [
+    {
+      "path": "progress-media/E01-L004-v3.mp4",
+      "decoded_frames": 37,
+      "monotone_pts": true
+    },
+    {
+      "path": "progress-media/E05-L006-v3.mp4",
+      "decoded_frames": 24,
+      "monotone_pts": true
+    },
+    {
+      "path": "progress-media/E02-R007-v3.mp4",
+      "decoded_frames": 25,
+      "monotone_pts": true
+    },
+    {
+      "path": "progress-media/E04-L015-v3.mp4",
+      "decoded_frames": 24,
+      "monotone_pts": true
+    },
+    {
+      "path": "progress-media/E04-L016-v3.mp4",
+      "decoded_frames": 35,
+      "monotone_pts": true
+    }
+  ],
+  "diagrams": [
+    {
+      "name": "grasp-judgement-architecture",
+      "type": "architecture",
+      "spec_sha256": "7fc7d44aaf0d3e1b78588fc988f2d38b35595c5c314bb477ce5f294b6987a418",
+      "artifact_sha256": "d4a3f8cba3b97e5110d2406baa891a0ca9005e74577a6ba9e342bfb7168f52e5",
+      "delivery": {
+        "schemaVersion": 1,
+        "ok": true,
+        "command": "deliver",
+        "type": "architecture",
+        "input": "/home/wuyan-lyj/.codex/worktrees/parts-rollout/condapi/docs/reports/rl/parts-grasp-review14-20261010/grasp-judgement-architecture.json",
+        "output": "/home/wuyan-lyj/.codex/worktrees/parts-rollout/condapi/docs/reports/rl/parts-grasp-review14-20261010/grasp-judgement-architecture.html",
+        "specification": {
+          "sha256": "7fc7d44aaf0d3e1b78588fc988f2d38b35595c5c314bb477ce5f294b6987a418",
+          "bytes": 3478
+        },
+        "artifact": {
+          "sha256": "d4a3f8cba3b97e5110d2406baa891a0ca9005e74577a6ba9e342bfb7168f52e5",
+          "bytes": 805160
+        },
+        "validation": {
+          "checksPassed": 9,
+          "checkCount": 9,
+          "compositionProfile": "showcase",
+          "compositionStatus": "pass",
+          "errors": 0,
+          "warnings": 0
+        }
+      },
+      "browser_evidence": "grasp-judgement-architecture.visual-check.json",
+      "visual_review": {
+        "status": "pass",
+        "reviewer": "assistant_image_review",
+        "screenshots": [
+          "grasp-judgement-architecture.visual-check.1440x900.dark.png",
+          "grasp-judgement-architecture.visual-check.2048x1320.light.png"
+        ]
+      }
+    },
+    {
+      "name": "pld-rl-architecture",
+      "type": "architecture",
+      "spec_sha256": "0b5f3225cd5e584e659eb658053840b7812ba4180c305383c34fff2b884f2b50",
+      "artifact_sha256": "06d7835d101f2d399a9c13ef17e5f3b43a1d60a2573b50b96966b40ade83786d",
+      "delivery": {
+        "schemaVersion": 1,
+        "ok": true,
+        "command": "deliver",
+        "type": "architecture",
+        "input": "/home/wuyan-lyj/.codex/worktrees/parts-rollout/condapi/docs/reports/rl/parts-grasp-review14-20261010/pld-rl-architecture.json",
+        "output": "/home/wuyan-lyj/.codex/worktrees/parts-rollout/condapi/docs/reports/rl/parts-grasp-review14-20261010/pld-rl-architecture.html",
+        "specification": {
+          "sha256": "0b5f3225cd5e584e659eb658053840b7812ba4180c305383c34fff2b884f2b50",
+          "bytes": 4524
+        },
+        "artifact": {
+          "sha256": "06d7835d101f2d399a9c13ef17e5f3b43a1d60a2573b50b96966b40ade83786d",
+          "bytes": 811549
+        },
+        "validation": {
+          "checksPassed": 9,
+          "checkCount": 9,
+          "compositionProfile": "showcase",
+          "compositionStatus": "pass",
+          "errors": 0,
+          "warnings": 0
+        }
+      },
+      "browser_evidence": "pld-rl-architecture.visual-check.json",
+      "visual_review": {
+        "status": "pass",
+        "reviewer": "assistant_image_review",
+        "screenshots": [
+          "pld-rl-architecture.visual-check.1440x900.dark.png",
+          "pld-rl-architecture.visual-check.2048x1320.light.png"
+        ]
+      }
+    },
+    {
+      "name": "qwen-dino-detail",
+      "type": "architecture",
+      "spec_sha256": "69119942ba558f34249671f339bf09b7165d0a34ce9bb8fbea8fccaf27b5fbdb",
+      "artifact_sha256": "0d79b14d2793e1b94dabf9374e2a619d7b1dd39757f72c54aaf4a9de985881a9",
+      "delivery": {
+        "schemaVersion": 1,
+        "ok": true,
+        "command": "deliver",
+        "type": "architecture",
+        "input": "/home/wuyan-lyj/.codex/worktrees/parts-rollout/condapi/docs/reports/rl/parts-grasp-review14-20261010/qwen-dino-detail.json",
+        "output": "/home/wuyan-lyj/.codex/worktrees/parts-rollout/condapi/docs/reports/rl/parts-grasp-review14-20261010/qwen-dino-detail.html",
+        "specification": {
+          "sha256": "69119942ba558f34249671f339bf09b7165d0a34ce9bb8fbea8fccaf27b5fbdb",
+          "bytes": 3576
+        },
+        "artifact": {
+          "sha256": "0d79b14d2793e1b94dabf9374e2a619d7b1dd39757f72c54aaf4a9de985881a9",
+          "bytes": 804294
+        },
+        "validation": {
+          "checksPassed": 9,
+          "checkCount": 9,
+          "compositionProfile": "showcase",
+          "compositionStatus": "pass",
+          "errors": 0,
+          "warnings": 0
+        }
+      },
+      "browser_evidence": "qwen-dino-detail.visual-check.json",
+      "visual_review": {
+        "status": "pass",
+        "reviewer": "assistant_image_review",
+        "screenshots": [
+          "qwen-dino-detail.visual-check.1440x900.dark.png",
+          "qwen-dino-detail.visual-check.2048x1320.light.png"
+        ]
+      }
+    }
+  ],
+  "report_browser": {
+    "status": "checked",
+    "sections": [
+      "architecture",
+      "models",
+      "workflow",
+      "examples",
+      "rl"
+    ],
+    "rendered_architecture_diagrams": 3,
+    "qwen_input_images": 5,
+    "real_example_cards": 3,
+    "horizontal_overflow": false,
+    "observed_viewport_width": 1422,
+    "observed_document_width": 1405,
+    "visual_review": [
+      "RL section",
+      "DINO query boxes and reference images",
+      "Qwen five-frame inputs and raw JSON"
+    ],
+    "scope": "desktop, vertically scrolling single page; no mobile/browser-wide claim"
+  },
+  "training_executed": false,
+  "reward_publication_executed": false
+}

@@ -4,7 +4,7 @@
 
 **用户已确认：先完成路线二——冻结 Pi0.5，用轻量 RL 专家修正整段抓取动作，首轮左右臂都启用；路线一——通用奖励/价值模型与 RECAP 式 VLA 后训练后置。** 框架面向多任务，乐高抓取仅为首个验证场景。其他线程的 EXPO-FT 独立并行，本分工不实现或替换它。本轮已实现离线切段、视觉核验与抽检工具，并在 Thor 完成冻结模型前向；未修改 learner、生产推理或客户端，不生成训练配方/作业，不启动训练。
 
-本节为本分工唯一当前研究计划；[架构图](reports/rl/parts-grasp-review14-20261010/pld-plan.html)展示拟议闭环，不代表已实现系统。数据实验、失败诊断和抽检证据仍归[逐抓取报告](reports/rl/parts-grasp-review14-20261010/README.md)，数据合同归[04](04_data_contracts.md#本对话-part-数据审核状态2026-10-11)，端侧边界归[05](05_inference_and_rollout.md#本对话-part-推进边界2026-10-11)。
+[一页方法说明](reports/rl/parts-grasp-review14-20261010/project-progress.html)汇总判定架构、Qwen＋DINO细节及执行样例、RL架构。本节为本分工唯一当前研究计划；[架构图](reports/rl/parts-grasp-review14-20261010/pld-plan.html)展示拟议闭环，不代表已实现系统。数据实验、失败诊断和抽检证据仍归[逐抓取报告](reports/rl/parts-grasp-review14-20261010/README.md)，数据合同归[04](04_data_contracts.md#本对话-part-数据审核状态2026-10-11)，端侧边界归[05](05_inference_and_rollout.md#本对话-part-推进边界2026-10-11)。
 
 ### 摘要、假设与两条路线
 

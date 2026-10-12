@@ -1,0 +1,175 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "抓取结果判定：当前组件架构",
+    "locale": "zh-CN",
+    "quality_profile": "showcase",
+    "viewBox": [
+      960,
+      540
+    ]
+  },
+  "layout": {
+    "mode": "grid",
+    "cols": 3,
+    "origin": [
+      60,
+      80
+    ],
+    "cellW": 220,
+    "cellH": 74,
+    "gapX": 110,
+    "gapY": 92
+  },
+  "components": [
+    {
+      "id": "source",
+      "type": "database",
+      "label": "原始记录",
+      "sublabel": "三视角 RGB、状态、FK",
+      "row": 0,
+      "col": 0
+    },
+    {
+      "id": "event",
+      "type": "backend",
+      "label": "候选提取器",
+      "sublabel": "开闭迟滞、物理连续性",
+      "row": 0,
+      "col": 1
+    },
+    {
+      "id": "gate",
+      "type": "security",
+      "label": "抬升资格审计",
+      "sublabel": "闭爪后相对 ΔZ ≥5cm",
+      "row": 0,
+      "col": 2
+    },
+    {
+      "id": "dino",
+      "type": "backend",
+      "label": "DINOv3 对照器",
+      "sublabel": "固定裁剪、持物／空手参考",
+      "row": 1,
+      "col": 1
+    },
+    {
+      "id": "vlm",
+      "type": "backend",
+      "label": "Qwen3-VL 序列判断",
+      "sublabel": "前景持物、背景、滑落",
+      "row": 1,
+      "col": 2
+    },
+    {
+      "id": "review",
+      "type": "external",
+      "label": "序列复核与用户抽检",
+      "sublabel": "保留模型证据和人工修改",
+      "row": 2,
+      "col": 1
+    },
+    {
+      "id": "labels",
+      "type": "database",
+      "label": "版本化标签侧车",
+      "sublabel": "327 二分类、15 资格排除",
+      "row": 2,
+      "col": 2
+    }
+  ],
+  "connections": [
+    {
+      "id": "source-event",
+      "from": "source",
+      "to": "event",
+      "label": "",
+      "variant": "default"
+    },
+    {
+      "id": "event-gate",
+      "from": "event",
+      "to": "gate",
+      "label": "",
+      "variant": "default"
+    },
+    {
+      "id": "event-dino",
+      "from": "event",
+      "to": "dino",
+      "label": "腕部选图",
+      "variant": "default",
+      "labelDy": 30
+    },
+    {
+      "id": "gate-vlm",
+      "from": "gate",
+      "to": "vlm",
+      "label": "合格视觉证据",
+      "variant": "default",
+      "labelDy": 30
+    },
+    {
+      "id": "dino-review",
+      "from": "dino",
+      "to": "review",
+      "label": "相似度线索",
+      "variant": "default",
+      "labelDy": 30
+    },
+    {
+      "id": "vlm-review",
+      "from": "vlm",
+      "to": "review",
+      "label": "序列结论",
+      "variant": "default"
+    },
+    {
+      "id": "review-labels",
+      "from": "review",
+      "to": "labels",
+      "label": "审核结论",
+      "variant": "default",
+      "labelDy": 30
+    },
+    {
+      "id": "gate-labels",
+      "from": "gate",
+      "to": "labels",
+      "label": "资格约束",
+      "variant": "security",
+      "fromSide": "right",
+      "toSide": "right",
+      "via": [
+        [
+          910,
+          110
+        ],
+        [
+          910,
+          442
+        ]
+      ]
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "已经运行",
+      "items": [
+        "14集；冻结模型在Thor前向",
+        "助手采样序列复核＋用户13条抽检"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "判断边界",
+      "items": [
+        "5cm只是资格，不代表抓住",
+        "不跟踪；SAM3不再作为强制门槛"
+      ]
+    }
+  ]
+}

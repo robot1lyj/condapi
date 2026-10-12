@@ -1,0 +1,212 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "PLD 式残差 RL：拟实现架构",
+    "locale": "zh-CN",
+    "quality_profile": "showcase"
+  },
+  "layout": {
+    "mode": "grid",
+    "cols": 4,
+    "origin": [
+      60,
+      80
+    ],
+    "cellW": 210,
+    "cellH": 74,
+    "gapX": 80,
+    "gapY": 58
+  },
+  "components": [
+    {
+      "id": "observation",
+      "type": "external",
+      "label": "当前观测与任务",
+      "sublabel": "三图、14D状态、活动臂",
+      "row": 0,
+      "col": 1
+    },
+    {
+      "id": "pi",
+      "type": "backend",
+      "label": "冻结 Pi0.5",
+      "sublabel": "基础动作先验",
+      "row": 1,
+      "col": 0
+    },
+    {
+      "id": "actor",
+      "type": "backend",
+      "label": "轻量残差 Actor",
+      "sublabel": "活动臂6关节＋夹爪",
+      "row": 1,
+      "col": 1
+    },
+    {
+      "id": "projection",
+      "type": "security",
+      "label": "约束与 RTC 投影",
+      "sublabel": "限位、连续性、承诺前缀",
+      "row": 1,
+      "col": 2
+    },
+    {
+      "id": "robot",
+      "type": "external",
+      "label": "真实执行与录制",
+      "sublabel": "沿用现有双臂控制层",
+      "row": 1,
+      "col": 3
+    },
+    {
+      "id": "reward",
+      "type": "backend",
+      "label": "结果与奖励适配器",
+      "sublabel": "核验终点一次1/0或不发奖",
+      "row": 2,
+      "col": 3
+    },
+    {
+      "id": "replay",
+      "type": "database",
+      "label": "版本化 Replay",
+      "sublabel": "实际动作、时间与奖励来源",
+      "row": 2,
+      "col": 2
+    },
+    {
+      "id": "learner",
+      "type": "backend",
+      "label": "服务器 SAC＋双Q",
+      "sublabel": "Cal-QL价值初始化；在线更新",
+      "row": 2,
+      "col": 1
+    },
+    {
+      "id": "release",
+      "type": "security",
+      "label": "专家版本验收",
+      "sublabel": "离线、影子、现场对照",
+      "row": 2,
+      "col": 0
+    },
+    {
+      "id": "distill",
+      "type": "backend",
+      "label": "成熟经验蒸馏回 Pi",
+      "sublabel": "后续原生 OpenPI SFT",
+      "row": 3,
+      "col": 1
+    }
+  ],
+  "connections": [
+    {
+      "id": "observation-pi",
+      "from": "observation",
+      "to": "pi",
+      "label": "当前输入",
+      "variant": "default"
+    },
+    {
+      "id": "observation-actor",
+      "from": "observation",
+      "to": "actor",
+      "label": "",
+      "variant": "default"
+    },
+    {
+      "id": "pi-actor",
+      "from": "pi",
+      "to": "actor",
+      "label": "基础动作",
+      "variant": "default",
+      "labelDy": 30
+    },
+    {
+      "id": "actor-projection",
+      "from": "actor",
+      "to": "projection",
+      "label": "有界残差",
+      "variant": "emphasis"
+    },
+    {
+      "id": "projection-robot",
+      "from": "projection",
+      "to": "robot",
+      "label": "实际目标",
+      "variant": "emphasis"
+    },
+    {
+      "id": "robot-reward",
+      "from": "robot",
+      "to": "reward",
+      "label": "结果录像",
+      "variant": "default",
+      "labelDy": 30
+    },
+    {
+      "id": "reward-replay",
+      "from": "reward",
+      "to": "replay",
+      "label": "一次结果奖励",
+      "variant": "default"
+    },
+    {
+      "id": "replay-learner",
+      "from": "replay",
+      "to": "learner",
+      "label": "混合经验",
+      "variant": "default"
+    },
+    {
+      "id": "learner-release",
+      "from": "learner",
+      "to": "release",
+      "label": "固定快照",
+      "variant": "default",
+      "labelDy": 30
+    },
+    {
+      "id": "learner-distill",
+      "from": "learner",
+      "to": "distill",
+      "label": "专家成熟后",
+      "variant": "dashed",
+      "labelDy": 30
+    },
+    {
+      "id": "release-actor",
+      "from": "release",
+      "to": "actor",
+      "label": "验收后加载",
+      "variant": "dashed"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "已确认范围",
+      "items": [
+        "首轮左右都覆盖，按活动臂仲裁",
+        "抓住并持稳后交还Pi运输放置"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "尚未上线",
+      "items": [
+        "Replay／learner／推理接入待实现",
+        "14集零残差不能证明修正有效"
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "框架复用",
+      "items": [
+        "替换任务入口、动作界限和奖励适配",
+        "RLT token、通用奖励与RECAP后置"
+      ]
+    }
+  ]
+}

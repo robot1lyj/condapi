@@ -1,0 +1,175 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Qwen＋DINO：两路视觉证据如何合并",
+    "locale": "zh-CN",
+    "quality_profile": "showcase",
+    "viewBox": [
+      1040,
+      460
+    ]
+  },
+  "layout": {
+    "mode": "grid",
+    "cols": 3,
+    "origin": [
+      60,
+      30
+    ],
+    "cellW": 230,
+    "cellH": 66,
+    "gapX": 115,
+    "gapY": 38
+  },
+  "components": [
+    {
+      "id": "attempt-images",
+      "type": "database",
+      "label": "同一次抓取的腕部序列",
+      "sublabel": "闭爪前后，截止释放前",
+      "row": 0,
+      "col": 1,
+      "size": [
+        230,
+        66
+      ]
+    },
+    {
+      "id": "dino-encoder",
+      "type": "backend",
+      "label": "DINOv3 冻结编码",
+      "sublabel": "固定裁剪 → ROI 与 CLS",
+      "row": 1,
+      "col": 0,
+      "size": [
+        230,
+        66
+      ]
+    },
+    {
+      "id": "qwen-sequence",
+      "type": "backend",
+      "label": "Qwen3-VL-4B",
+      "sublabel": "最多五帧，按时间排序",
+      "row": 1,
+      "col": 2,
+      "size": [
+        230,
+        66
+      ]
+    },
+    {
+      "id": "dino-reference",
+      "type": "database",
+      "label": "持物／空手参考图",
+      "sublabel": "排除同集与同图 SHA",
+      "row": 2,
+      "col": 1,
+      "size": [
+        230,
+        66
+      ]
+    },
+    {
+      "id": "dino-margins",
+      "type": "backend",
+      "label": "两类最近邻相似度差",
+      "sublabel": "持物支持、空手支持、混合",
+      "row": 2,
+      "col": 0,
+      "size": [
+        230,
+        66
+      ]
+    },
+    {
+      "id": "qwen-evidence",
+      "type": "backend",
+      "label": "语义判断与证据帧",
+      "sublabel": "前景持物／背景／提前滑落",
+      "row": 2,
+      "col": 2,
+      "size": [
+        230,
+        66
+      ]
+    },
+    {
+      "id": "review-outcome",
+      "type": "external",
+      "label": "序列复核 → 抓到／未持住",
+      "sublabel": "结合抬升资格与用户纠正",
+      "row": 3,
+      "col": 1,
+      "size": [
+        230,
+        66
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "to-dino",
+      "from": "attempt-images",
+      "to": "dino-encoder",
+      "label": "指间裁剪"
+    },
+    {
+      "id": "to-qwen",
+      "from": "attempt-images",
+      "to": "qwen-sequence",
+      "label": "前后选图"
+    },
+    {
+      "id": "dino-to-margins",
+      "from": "dino-encoder",
+      "to": "dino-margins",
+      "label": "特征向量",
+      "labelDy": 24
+    },
+    {
+      "id": "reference-to-margins",
+      "from": "dino-reference",
+      "to": "dino-margins",
+      "label": "余弦对照"
+    },
+    {
+      "id": "qwen-to-evidence",
+      "from": "qwen-sequence",
+      "to": "qwen-evidence",
+      "label": "结构化输出",
+      "labelDy": 24
+    },
+    {
+      "id": "margins-to-review",
+      "from": "dino-margins",
+      "to": "review-outcome",
+      "label": "相似度线索"
+    },
+    {
+      "id": "semantic-to-review",
+      "from": "qwen-evidence",
+      "to": "review-outcome",
+      "label": "语义线索"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "DINO看“像不像”",
+      "items": [
+        "ROI看指间局部，CLS看裁剪整体",
+        "冻结特征；不训练二分类器"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Qwen看“发生了什么”",
+      "items": [
+        "黑色三角夹指之间是否实际持物",
+        "闭爪、高度与颜色不能单独证明成功"
+      ]
+    }
+  ]
+}

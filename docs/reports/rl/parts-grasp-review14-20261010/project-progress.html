@@ -1,0 +1,593 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>VLA 抓取修正 · 方法说明</title><style>
+
+:root{--ink:#233f3a;--muted:#6a7b74;--line:#dce5dd;--green:#227859;--paper:#f6f8f4}*{box-sizing:border-box}html{scroll-padding-top:24px}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.8 system-ui,-apple-system,"Noto Sans CJK SC",sans-serif}main{max-width:1200px;padding:48px 32px 64px;margin:auto}h1,h2,h3,p{margin:0}h1{font-size:36px;line-height:1.35;letter-spacing:-.6px}h2{font-size:25px;line-height:1.5}h3{font-size:18px}a{color:var(--green);text-underline-offset:4px}button,select{font:inherit}a:focus-visible,summary:focus-visible{outline:3px solid #449776;outline-offset:4px}.kicker{font-size:12px;letter-spacing:.12em;color:var(--green);margin-bottom:14px}.intro{max-width:880px;margin-top:16px;color:var(--muted);font-size:17px}nav{display:flex;flex-wrap:wrap;gap:9px 24px;margin:22px 0 0}nav a{font-size:14px;text-decoration:none}section{margin-top:42px;padding-top:30px;border-top:1px solid var(--line)}.heading{display:flex;gap:16px;align-items:baseline;justify-content:space-between;margin-bottom:14px}.heading a{font-size:12px;white-space:nowrap}.muted{color:var(--muted)}.diagram{background:#fff;border:1px solid var(--line);border-radius:12px;padding:22px}.diagram svg{display:block;width:100%;height:auto;font-family:ui-monospace,"Noto Sans CJK SC",monospace}.description{margin:15px 0;color:var(--muted);max-width:1000px}.two{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:18px}.two p{margin-top:6px;color:var(--muted);font-size:14px}.technical{font:12px/1.8 ui-monospace,monospace;overflow-wrap:anywhere;color:#40715b;background:#eef4ee;border-radius:6px;padding:9px 12px;margin-top:10px}.caption{font-size:13px;color:var(--muted);margin-top:12px}.samples{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin-top:20px}.sample{background:#fff;border:1px solid var(--line);border-radius:12px;padding:17px;min-width:0}.sample-id{font:11px ui-monospace,monospace;color:var(--muted);margin:6px 0 13px}.frames{display:grid;grid-template-columns:1fr 1fr;gap:8px}.frames figure{margin:0;min-width:0}.frames img{width:100%;aspect-ratio:16/15;object-fit:contain;display:block;background:#f0f4ef;border-radius:6px}.frames figcaption{font-size:11px;color:var(--muted);margin-top:5px}.sample p{font-size:13px;margin-top:12px;color:var(--muted)}.result{display:inline-block;margin:12px 0 0;padding:2px 8px;font-size:12px;border-radius:5px;background:#e6f3e9;color:#24734d}.result.empty{background:#faece8;color:#9d5145}.result.excluded{background:#f4efdf;color:#8a7135}details{margin-top:12px;font-size:12px}summary{cursor:pointer;color:var(--green)}video{width:100%;display:block;margin-top:10px;border-radius:7px;background:#172422}.formula{margin-top:15px;border-left:3px solid #71a88a;padding:10px 15px;color:#3e6856;font-size:14px}.status{font-size:12px;color:var(--muted);white-space:nowrap}@media(max-width:760px){main{padding:28px 16px 45px}h1{font-size:29px}h2{font-size:22px}.heading{align-items:start;flex-direction:column;gap:5px}.two,.samples{grid-template-columns:1fr}.diagram{padding:8px}.sample{max-width:600px}.frames img{max-height:260px}.intro{font-size:16px}nav{gap:8px 18px}}@media print{body{background:white}main{max-width:none;padding:0}nav,.heading a,details{display:none}.diagram,.sample{break-inside:avoid}section{break-inside:avoid}}
+.diagram .c-lane{fill:#f4f7f9;stroke:#ccd8e4;stroke-dasharray:6 6}.diagram .t-dim{fill:#76889a}.diagram .sigil-fill{fill:#72849a;stroke:none}.diagram .c-grid{fill:none;stroke:#eaf0f3}.diagram .c-mask,.diagram .label-mask,.diagram .l-mask{fill:#fff}.diagram .c-frontend{fill:#e0f7fb;stroke:#159cb8}.diagram .c-backend{fill:#ddf5eb;stroke:#039977}.diagram .c-database{fill:#eee8fb;stroke:#8a4ff0}.diagram .c-cloud{fill:#e7effb;stroke:#5685c8}.diagram .c-security{fill:#fce9ee;stroke:#ec4370}.diagram .c-messagebus{fill:#fff0d7;stroke:#d39535}.diagram .c-external{fill:#ecedf0;stroke:#6d8099}.diagram .c-boundary,.diagram .lane-boundary,.diagram .region-boundary{fill:#fafcfd;stroke:#d2deea;stroke-dasharray:6 5}.diagram [class^="a-"],.diagram [class*=" a-"]{fill:none;stroke:#9baabe}.diagram .a-emphasis{stroke:#009d79}.diagram .a-security{stroke:#ec4370;stroke-dasharray:5 4}.diagram .a-dashed{stroke:#9850ef;stroke-dasharray:5 4}.diagram .m-default{fill:#9baabe}.diagram .m-emphasis{fill:#009d79}.diagram .m-security{fill:#ec4370}.diagram .m-dashed{fill:#9850ef}.diagram text{fill:#20394b}.diagram .t-context,.diagram .t-label,.diagram .t-sub,.diagram .t-muted{fill:#71849a}.diagram .t-emphasis{fill:#008c68}.diagram .t-security{fill:#df3962}.diagram .t-dashed{fill:#8b45d7}.diagram .icon,.diagram .semantic-sigil{fill:none;stroke:#72849a;stroke-width:1}.diagram .legend-label{fill:#6e8097}
+
+.execution-block{margin-top:22px;background:#fff;border:1px solid var(--line);padding:22px;border-radius:12px}.execution-dino{display:grid;grid-template-columns:1.15fr .85fr 1fr;gap:24px;margin:18px 0}.execution-dino figure{margin:0;min-width:0}.execution-dino svg{width:100%;height:auto;display:block}.execution-dino figcaption{font-size:12px;color:var(--muted);margin-top:8px}.execution-dino h4{font-size:14px;margin:0 0 9px}.dino-references{display:grid;grid-template-columns:1fr 1fr;gap:10px}.dino-references img{width:100%;display:block;border-radius:6px}.qwen-inputs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-top:15px}.qwen-inputs figure{margin:0;min-width:0}.qwen-inputs img{display:block;width:100%;height:164px;object-fit:contain;background:#f4f6f2;border:2px solid transparent;border-radius:7px}.qwen-inputs .cited img{border-color:#359569}.qwen-inputs figcaption{font-size:11px;color:var(--muted);margin-top:6px}.qwen-response{margin-top:16px;padding:14px 17px;background:#eff6ef;border-radius:8px;font-size:12px;color:#35674f}pre{margin:9px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font:12px/1.8 ui-monospace,monospace}.box-legend{font-size:12px;line-height:1.8;color:var(--muted)}@media(max-width:760px){.execution-dino{grid-template-columns:1fr}.execution-dino figure{max-width:380px}.qwen-inputs{grid-template-columns:repeat(2,minmax(0,1fr))}.execution-block{padding:16px}}
+</style></head><body><main>
+<header><div class="kicker">VLA / RL · 方法说明</div><h1>从抓取结果判定，到 VLA 动作修正</h1><p class="intro">用真实录像判断每次抓取是否抓住并持稳，再把结果作为奖励，让轻量 RL 专家修正 Pi0.5 的动作。先用乐高抓取验证这条链路，后续通过替换任务入口和奖励适配器，扩展到其他任务。</p><nav aria-label="方法导航"><a href="#architecture">判定架构</a><a href="#models">Qwen＋DINO 细节</a><a href="#workflow">模型执行示意</a><a href="#examples">真实样例</a><a href="#rl">RL 架构</a></nav></header>
+
+<section id="architecture"><div class="heading"><h2>抓取结果怎么判断</h2><a href="grasp-judgement-architecture.html" target="_blank" rel="noopener">展开架构图 ↗</a></div><div class="diagram"><svg viewBox="0 0 960 540" role="img" lang="zh-CN" aria-labelledby="va-archify-diagram-title va-archify-diagram-description" data-preset="classic" data-quality-profile="showcase">
+        <title id="va-archify-diagram-title">抓取结果判定：当前组件架构</title>
+        <desc id="va-archify-diagram-description">由 Archify 生成的架构图。</desc>
+        <!-- Definitions -->
+        <defs>
+          <marker id="va-arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" class="m-default" />
+          </marker>
+          <marker id="va-arrowhead-emphasis" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" class="m-emphasis" />
+          </marker>
+          <marker id="va-arrowhead-security" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" class="m-security" />
+          </marker>
+          <marker id="va-arrowhead-dashed" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" class="m-dashed" />
+          </marker>
+          <pattern id="va-grid" width="40" height="40" patternUnits="userSpaceOnUse">
+            <path d="M 40 0 L 0 0 0 40" class="c-grid" stroke-width="0.5"/>
+          </pattern>
+        </defs>
+
+        <!-- Background Grid -->
+        <rect width="100%" height="100%" fill="url(#va-grid)" />
+
+        <!-- Boundaries (behind everything) -->
+
+
+        <!-- Connection paths (before components for correct z-order) -->
+        <path data-edge-from="source" data-edge-to="event" data-edge-key="0" data-edge-id="va-source-event" data-composition-points="180,110;390,110" d="M 180 110 L 390 110" class="a-default" stroke-width="1.5" marker-end="url(#va-arrowhead)"/>
+        <path data-edge-from="event" data-edge-to="gate" data-edge-key="1" data-edge-id="va-event-gate" data-composition-points="510,110;720,110" d="M 510 110 L 720 110" class="a-default" stroke-width="1.5" marker-end="url(#va-arrowhead)"/>
+        <path data-edge-from="event" data-edge-to="dino" data-edge-label="腕部选图" data-edge-key="2" data-edge-id="va-event-dino" data-composition-points="450,140;450,246" d="M 450 140 L 450 246" class="a-default" stroke-width="1.5" marker-end="url(#va-arrowhead)"/>
+        <path data-edge-from="gate" data-edge-to="vlm" data-edge-label="合格视觉证据" data-edge-key="3" data-edge-id="va-gate-vlm" data-composition-points="780,140;780,246" d="M 780 140 L 780 246" class="a-default" stroke-width="1.5" marker-end="url(#va-arrowhead)"/>
+        <path data-edge-from="dino" data-edge-to="review" data-edge-label="相似度线索" data-edge-key="4" data-edge-id="va-dino-review" data-composition-points="450,306;450,412" d="M 450 306 L 450 412" class="a-default" stroke-width="1.5" marker-end="url(#va-arrowhead)"/>
+        <path data-edge-from="vlm" data-edge-to="review" data-edge-label="序列结论" data-edge-key="5" data-edge-id="va-vlm-review" data-composition-points="720,276;615,276;615,435;510,435" d="M 720 276 L 623 276 Q 615 276 615 284 L 615 427 Q 615 435 607 435 L 510 435" class="a-default" stroke-width="1.5" marker-end="url(#va-arrowhead)"/>
+        <path data-edge-from="review" data-edge-to="labels" data-edge-label="审核结论" data-edge-key="6" data-edge-id="va-review-labels" data-composition-points="510,449;720,449" d="M 510 449 L 720 449" class="a-default" stroke-width="1.5" marker-end="url(#va-arrowhead)"/>
+        <path data-edge-from="gate" data-edge-to="labels" data-edge-label="资格约束" data-edge-key="7" data-edge-id="va-gate-labels" data-composition-points="840,110;910,110;910,442;840,442" d="M 840 110 L 902 110 Q 910 110 910 118 L 910 434 Q 910 442 902 442 L 840 442" class="a-security" stroke-width="1.5" marker-end="url(#va-arrowhead-security)"/>
+
+        <!-- Components -->
+        <g id="va-node-source" data-node-id="va-source" data-node-label="原始记录" aria-label="聚焦原始记录，三视角 RGB、状态、FK, 架构组件" data-node-kind="database" data-node-sublabel="三视角 RGB、状态、FK" data-node-context="架构组件">
+          <title>原始记录 · 三视角 RGB、状态、FK · 架构组件</title>
+          <rect x="60" y="80" width="120" height="60" rx="6" class="c-mask"/>
+          <rect x="60" y="80" width="120" height="60" rx="6" class="c-database" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(66 86) scale(0.6875)">
+            <ellipse cx="8" cy="4" rx="5" ry="2"/>
+            <path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/>
+          </g>
+          <text data-node-label="" data-detail-anchor="" x="120" y="108" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">原始记录</text>
+        <text data-detail="context" x="120" y="124" class="t-muted" font-size="9" text-anchor="middle">三视角 RGB、状态、FK</text>
+        </g>
+
+        <g id="va-node-event" data-node-id="va-event" data-node-label="候选提取器" aria-label="聚焦候选提取器，开闭迟滞、物理连续性, 架构组件" data-node-kind="backend" data-node-sublabel="开闭迟滞、物理连续性" data-node-context="架构组件">
+          <title>候选提取器 · 开闭迟滞、物理连续性 · 架构组件</title>
+          <rect x="390" y="80" width="120" height="60" rx="6" class="c-mask"/>
+          <rect x="390" y="80" width="120" height="60" rx="6" class="c-backend" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(396 86) scale(0.6875)">
+            <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
+          </g>
+          <text data-node-label="" data-detail-anchor="" x="450" y="108" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">候选提取器</text>
+        <text data-detail="context" x="450" y="124" class="t-muted" font-size="9" text-anchor="middle">开闭迟滞、物理连续性</text>
+        </g>
+
+        <g id="va-node-gate" data-node-id="va-gate" data-node-label="抬升资格审计" aria-label="聚焦抬升资格审计，闭爪后相对 ΔZ ≥5cm, 架构组件" data-node-kind="security" data-node-sublabel="闭爪后相对 ΔZ ≥5cm" data-node-context="架构组件">
+          <title>抬升资格审计 · 闭爪后相对 ΔZ ≥5cm · 架构组件</title>
+          <rect x="720" y="80" width="120" height="60" rx="6" class="c-mask"/>
+          <rect x="720" y="80" width="120" height="60" rx="6" class="c-security" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="security" class="semantic-sigil s-security" transform="translate(726 86) scale(0.6875)">
+            <path d="M8 2.2 13 4v3.5c0 3.1-1.8 5.4-5 6.5-3.2-1.1-5-3.4-5-6.5V4Z"/>
+            <path d="m5.8 8 1.5 1.5 3-3"/>
+          </g>
+          <text data-node-label="" data-detail-anchor="" x="780" y="108" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">抬升资格审计</text>
+        <text data-detail="context" x="780" y="124" class="t-muted" font-size="9" text-anchor="middle">闭爪后相对 ΔZ ≥5cm</text>
+        </g>
+
+        <g id="va-node-dino" data-node-id="va-dino" data-node-label="DINOv3 对照器" aria-label="聚焦DINOv3 对照器，固定裁剪、持物／空手参考, 架构组件" data-node-kind="backend" data-node-sublabel="固定裁剪、持物／空手参考" data-node-context="架构组件">
+          <title>DINOv3 对照器 · 固定裁剪、持物／空手参考 · 架构组件</title>
+          <rect x="390" y="246" width="120" height="60" rx="6" class="c-mask"/>
+          <rect x="390" y="246" width="120" height="60" rx="6" class="c-backend" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(396 252) scale(0.6875)">
+            <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
+          </g>
+          <text data-node-label="" data-detail-anchor="" x="450" y="274" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">DINOv3 对照器</text>
+        <text data-detail="context" x="450" y="290" class="t-muted" font-size="7.7" text-anchor="middle">固定裁剪、持物／空手参考</text>
+        </g>
+
+        <g id="va-node-vlm" data-node-id="va-vlm" data-node-label="Qwen3-VL 序列判断" aria-label="聚焦Qwen3-VL 序列判断，前景持物、背景、滑落, 架构组件" data-node-kind="backend" data-node-sublabel="前景持物、背景、滑落" data-node-context="架构组件">
+          <title>Qwen3-VL 序列判断 · 前景持物、背景、滑落 · 架构组件</title>
+          <rect x="720" y="246" width="120" height="60" rx="6" class="c-mask"/>
+          <rect x="720" y="246" width="120" height="60" rx="6" class="c-backend" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(726 252) scale(0.6875)">
+            <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
+          </g>
+          <text data-node-label="" data-detail-anchor="" x="780" y="274" class="t-primary" font-size="10.9" font-weight="600" text-anchor="middle">Qwen3-VL 序列判断</text>
+        <text data-detail="context" x="780" y="290" class="t-muted" font-size="9" text-anchor="middle">前景持物、背景、滑落</text>
+        </g>
+
+        <g id="va-node-review" data-node-id="va-review" data-node-label="序列复核与用户抽检" aria-label="聚焦序列复核与用户抽检，保留模型证据和人工修改, 架构组件" data-node-kind="external" data-node-sublabel="保留模型证据和人工修改" data-node-context="架构组件">
+          <title>序列复核与用户抽检 · 保留模型证据和人工修改 · 架构组件</title>
+          <rect x="390" y="412" width="120" height="60" rx="6" class="c-mask"/>
+          <rect x="390" y="412" width="120" height="60" rx="6" class="c-external" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="external" class="semantic-sigil s-external" transform="translate(396 418) scale(0.6875)">
+            <rect x="2.5" y="5" width="8.5" height="8" rx="1.5"/>
+            <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5"/>
+          </g>
+          <text data-node-label="" data-detail-anchor="" x="450" y="440" class="t-primary" font-size="10.3" font-weight="600" text-anchor="middle">序列复核与用户抽检</text>
+        <text data-detail="context" x="450" y="456" class="t-muted" font-size="8.4" text-anchor="middle">保留模型证据和人工修改</text>
+        </g>
+
+        <g id="va-node-labels" data-node-id="va-labels" data-node-label="版本化标签侧车" aria-label="聚焦版本化标签侧车，327 二分类、15 资格排除, 架构组件" data-node-kind="database" data-node-sublabel="327 二分类、15 资格排除" data-node-context="架构组件">
+          <title>版本化标签侧车 · 327 二分类、15 资格排除 · 架构组件</title>
+          <rect x="720" y="412" width="120" height="60" rx="6" class="c-mask"/>
+          <rect x="720" y="412" width="120" height="60" rx="6" class="c-database" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(726 418) scale(0.6875)">
+            <ellipse cx="8" cy="4" rx="5" ry="2"/>
+            <path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/>
+          </g>
+          <text data-node-label="" data-detail-anchor="" x="780" y="440" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">版本化标签侧车</text>
+        <text data-detail="context" x="780" y="456" class="t-muted" font-size="8.1" text-anchor="middle">327 二分类、15 资格排除</text>
+        </g>
+
+        <!-- Connection labels -->
+
+
+        <g data-detail="context" data-edge-from="event" data-edge-to="dino" data-edge-label="腕部选图" data-edge-key="2" data-edge-id="va-event-dino">
+          <rect x="425.8" y="150" width="48.4" height="14" rx="3" class="c-mask"/>
+          <text x="450" y="160" class="t-muted" font-size="8" text-anchor="middle">腕部选图</text>
+        </g>
+        <g data-detail="context" data-edge-from="gate" data-edge-to="vlm" data-edge-label="合格视觉证据" data-edge-key="3" data-edge-id="va-gate-vlm">
+          <rect x="746.2" y="150" width="67.6" height="14" rx="3" class="c-mask"/>
+          <text x="780" y="160" class="t-muted" font-size="8" text-anchor="middle">合格视觉证据</text>
+        </g>
+        <g data-detail="context" data-edge-from="dino" data-edge-to="review" data-edge-label="相似度线索" data-edge-key="4" data-edge-id="va-dino-review">
+          <rect x="421" y="316" width="58" height="14" rx="3" class="c-mask"/>
+          <text x="450" y="326" class="t-muted" font-size="8" text-anchor="middle">相似度线索</text>
+        </g>
+        <g data-detail="context" data-edge-from="vlm" data-edge-to="review" data-edge-label="序列结论" data-edge-key="5" data-edge-id="va-vlm-review">
+          <rect x="590.8" y="335.5" width="48.4" height="14" rx="3" class="c-mask"/>
+          <text x="615" y="345.5" class="t-muted" font-size="8" text-anchor="middle">序列结论</text>
+        </g>
+        <g data-detail="context" data-edge-from="review" data-edge-to="labels" data-edge-label="审核结论" data-edge-key="6" data-edge-id="va-review-labels">
+          <rect x="590.8" y="459" width="48.4" height="14" rx="3" class="c-mask"/>
+          <text x="615" y="469" class="t-muted" font-size="8" text-anchor="middle">审核结论</text>
+        </g>
+        <g data-detail="context" data-edge-from="gate" data-edge-to="labels" data-edge-label="资格约束" data-edge-key="7" data-edge-id="va-gate-labels">
+          <rect x="885.8" y="256" width="48.4" height="14" rx="3" class="c-mask"/>
+          <text x="910" y="266" class="t-security" font-size="8" text-anchor="middle">资格约束</text>
+        </g>
+
+        <!-- Boundary labels (foreground masks keep routes out of titles) -->
+
+
+        <!-- Legend -->
+        <g data-legend="" data-legend-bridge="">
+          <text x="40" y="504" class="t-primary" font-size="12" font-weight="650">图例</text>
+          <g data-legend-semantic-kind="backend" data-legend-kind="backend" data-legend-label="后端" data-legend-x="40" data-legend-baseline="524" data-legend-width="63">
+            <rect x="40" y="515" width="16" height="10" rx="2.5" class="c-backend" stroke-width="1"/>
+            <text x="62" y="524" class="t-muted" font-size="10" font-weight="500">后端</text>
+          </g>
+          <g data-legend-semantic-kind="database" data-legend-kind="database" data-legend-label="数据库" data-legend-x="125" data-legend-baseline="524" data-legend-width="73">
+            <rect x="125" y="515" width="16" height="10" rx="2.5" class="c-database" stroke-width="1"/>
+            <text x="147" y="524" class="t-muted" font-size="10" font-weight="500">数据库</text>
+          </g>
+          <g data-legend-semantic-kind="security" data-legend-kind="security" data-legend-label="安全" data-legend-x="220" data-legend-baseline="524" data-legend-width="63">
+            <rect x="220" y="515" width="16" height="10" rx="2.5" class="c-security" stroke-width="1"/>
+            <text x="242" y="524" class="t-muted" font-size="10" font-weight="500">安全</text>
+          </g>
+          <g data-legend-semantic-kind="external" data-legend-kind="external" data-legend-label="外部系统" data-legend-x="305" data-legend-baseline="524" data-legend-width="83">
+            <rect x="305" y="515" width="16" height="10" rx="2.5" class="c-external" stroke-width="1"/>
+            <text x="327" y="524" class="t-muted" font-size="10" font-weight="500">外部系统</text>
+          </g>
+        </g>
+      </svg></div><p class="caption">先确认本次闭爪后有抬升核验画面，再综合指间局部、前后画面和复核结果。抬升相对闭爪时的 FK 高度达到 5 cm，只代表具备核验条件，不能单独证明抓住。</p></section>
+
+<section id="models"><div class="heading"><h2>Qwen＋DINO 各自做什么</h2><a href="qwen-dino-detail.html" target="_blank" rel="noopener">展开细节图 ↗</a></div><div class="diagram"><svg viewBox="0 0 1040 460" role="img" lang="zh-CN" aria-labelledby="qd-archify-diagram-title qd-archify-diagram-description" data-preset="classic" data-quality-profile="showcase">
+        <title id="qd-archify-diagram-title">Qwen＋DINO：两路视觉证据如何合并</title>
+        <desc id="qd-archify-diagram-description">由 Archify 生成的架构图。</desc>
+        <!-- Definitions -->
+        <defs>
+          <marker id="qd-arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" class="m-default" />
+          </marker>
+          <marker id="qd-arrowhead-emphasis" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" class="m-emphasis" />
+          </marker>
+          <marker id="qd-arrowhead-security" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" class="m-security" />
+          </marker>
+          <marker id="qd-arrowhead-dashed" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" class="m-dashed" />
+          </marker>
+          <pattern id="qd-grid" width="40" height="40" patternUnits="userSpaceOnUse">
+            <path d="M 40 0 L 0 0 0 40" class="c-grid" stroke-width="0.5"/>
+          </pattern>
+        </defs>
+
+        <!-- Background Grid -->
+        <rect width="100%" height="100%" fill="url(#qd-grid)" />
+
+        <!-- Boundaries (behind everything) -->
+
+
+        <!-- Connection paths (before components for correct z-order) -->
+        <path data-edge-from="attempt-images" data-edge-to="dino-encoder" data-edge-label="指间裁剪" data-edge-key="0" data-edge-id="qd-to-dino" data-composition-points="405,63;347.5,63;347.5,167;290,167" d="M 405 63 L 355.5 63 Q 347.5 63 347.5 71 L 347.5 159 Q 347.5 167 339.5 167 L 290 167" class="a-default" stroke-width="1.5" marker-end="url(#qd-arrowhead)"/>
+        <path data-edge-from="attempt-images" data-edge-to="qwen-sequence" data-edge-label="前后选图" data-edge-key="1" data-edge-id="qd-to-qwen" data-composition-points="635,63;692.5,63;692.5,167;750,167" d="M 635 63 L 684.5 63 Q 692.5 63 692.5 71 L 692.5 159 Q 692.5 167 700.5 167 L 750 167" class="a-default" stroke-width="1.5" marker-end="url(#qd-arrowhead)"/>
+        <path data-edge-from="dino-encoder" data-edge-to="dino-margins" data-edge-label="特征向量" data-edge-key="2" data-edge-id="qd-dino-to-margins" data-composition-points="175,200;175,238" d="M 175 200 L 175 238" class="a-default" stroke-width="1.5" marker-end="url(#qd-arrowhead)"/>
+        <path data-edge-from="dino-reference" data-edge-to="dino-margins" data-edge-label="余弦对照" data-edge-key="3" data-edge-id="qd-reference-to-margins" data-composition-points="405,264;290,264" d="M 405 264 L 290 264" class="a-default" stroke-width="1.5" marker-end="url(#qd-arrowhead)"/>
+        <path data-edge-from="qwen-sequence" data-edge-to="qwen-evidence" data-edge-label="结构化输出" data-edge-key="4" data-edge-id="qd-qwen-to-evidence" data-composition-points="865,200;865,238" d="M 865 200 L 865 238" class="a-default" stroke-width="1.5" marker-end="url(#qd-arrowhead)"/>
+        <path data-edge-from="dino-margins" data-edge-to="review-outcome" data-edge-label="相似度线索" data-edge-key="5" data-edge-id="qd-margins-to-review" data-composition-points="290,278;347.5,278;347.5,375;405,375" d="M 290 278 L 339.5 278 Q 347.5 278 347.5 286 L 347.5 367 Q 347.5 375 355.5 375 L 405 375" class="a-default" stroke-width="1.5" marker-end="url(#qd-arrowhead)"/>
+        <path data-edge-from="qwen-evidence" data-edge-to="review-outcome" data-edge-label="语义线索" data-edge-key="6" data-edge-id="qd-semantic-to-review" data-composition-points="750,271;692.5,271;692.5,375;635,375" d="M 750 271 L 700.5 271 Q 692.5 271 692.5 279 L 692.5 367 Q 692.5 375 684.5 375 L 635 375" class="a-default" stroke-width="1.5" marker-end="url(#qd-arrowhead)"/>
+
+        <!-- Components -->
+        <g id="qd-node-attempt-images" data-node-id="qd-attempt-images" data-node-label="同一次抓取的腕部序列" aria-label="聚焦同一次抓取的腕部序列，闭爪前后，截止释放前, 架构组件" data-node-kind="database" data-node-sublabel="闭爪前后，截止释放前" data-node-context="架构组件">
+          <title>同一次抓取的腕部序列 · 闭爪前后，截止释放前 · 架构组件</title>
+          <rect x="405" y="30" width="230" height="66" rx="6" class="c-mask"/>
+          <rect x="405" y="30" width="230" height="66" rx="6" class="c-database" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(411 36) scale(0.6875)">
+            <ellipse cx="8" cy="4" rx="5" ry="2"/>
+            <path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/>
+          </g>
+          <text data-node-label="" data-detail-anchor="" x="520" y="61" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">同一次抓取的腕部序列</text>
+        <text data-detail="context" x="520" y="77" class="t-muted" font-size="9" text-anchor="middle">闭爪前后，截止释放前</text>
+        </g>
+
+        <g id="qd-node-dino-encoder" data-node-id="qd-dino-encoder" data-node-label="DINOv3 冻结编码" aria-label="聚焦DINOv3 冻结编码，固定裁剪 → ROI 与 CLS, 架构组件" data-node-kind="backend" data-node-sublabel="固定裁剪 → ROI 与 CLS" data-node-context="架构组件">
+          <title>DINOv3 冻结编码 · 固定裁剪 → ROI 与 CLS · 架构组件</title>
+          <rect x="60" y="134" width="230" height="66" rx="6" class="c-mask"/>
+          <rect x="60" y="134" width="230" height="66" rx="6" class="c-backend" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(66 140) scale(0.6875)">
+            <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
+          </g>
+          <text data-node-label="" data-detail-anchor="" x="175" y="165" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">DINOv3 冻结编码</text>
+        <text data-detail="context" x="175" y="181" class="t-muted" font-size="9" text-anchor="middle">固定裁剪 → ROI 与 CLS</text>
+        </g>
+
+        <g id="qd-node-qwen-sequence" data-node-id="qd-qwen-sequence" data-node-label="Qwen3-VL-4B" aria-label="聚焦Qwen3-VL-4B，最多五帧，按时间排序, 架构组件" data-node-kind="backend" data-node-sublabel="最多五帧，按时间排序" data-node-context="架构组件">
+          <title>Qwen3-VL-4B · 最多五帧，按时间排序 · 架构组件</title>
+          <rect x="750" y="134" width="230" height="66" rx="6" class="c-mask"/>
+          <rect x="750" y="134" width="230" height="66" rx="6" class="c-backend" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(756 140) scale(0.6875)">
+            <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
+          </g>
+          <text data-node-label="" data-detail-anchor="" x="865" y="165" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Qwen3-VL-4B</text>
+        <text data-detail="context" x="865" y="181" class="t-muted" font-size="9" text-anchor="middle">最多五帧，按时间排序</text>
+        </g>
+
+        <g id="qd-node-dino-reference" data-node-id="qd-dino-reference" data-node-label="持物／空手参考图" aria-label="聚焦持物／空手参考图，排除同集与同图 SHA, 架构组件" data-node-kind="database" data-node-sublabel="排除同集与同图 SHA" data-node-context="架构组件">
+          <title>持物／空手参考图 · 排除同集与同图 SHA · 架构组件</title>
+          <rect x="405" y="238" width="230" height="66" rx="6" class="c-mask"/>
+          <rect x="405" y="238" width="230" height="66" rx="6" class="c-database" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(411 244) scale(0.6875)">
+            <ellipse cx="8" cy="4" rx="5" ry="2"/>
+            <path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/>
+          </g>
+          <text data-node-label="" data-detail-anchor="" x="520" y="269" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">持物／空手参考图</text>
+        <text data-detail="context" x="520" y="285" class="t-muted" font-size="9" text-anchor="middle">排除同集与同图 SHA</text>
+        </g>
+
+        <g id="qd-node-dino-margins" data-node-id="qd-dino-margins" data-node-label="两类最近邻相似度差" aria-label="聚焦两类最近邻相似度差，持物支持、空手支持、混合, 架构组件" data-node-kind="backend" data-node-sublabel="持物支持、空手支持、混合" data-node-context="架构组件">
+          <title>两类最近邻相似度差 · 持物支持、空手支持、混合 · 架构组件</title>
+          <rect x="60" y="238" width="230" height="66" rx="6" class="c-mask"/>
+          <rect x="60" y="238" width="230" height="66" rx="6" class="c-backend" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(66 244) scale(0.6875)">
+            <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
+          </g>
+          <text data-node-label="" data-detail-anchor="" x="175" y="269" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">两类最近邻相似度差</text>
+        <text data-detail="context" x="175" y="285" class="t-muted" font-size="9" text-anchor="middle">持物支持、空手支持、混合</text>
+        </g>
+
+        <g id="qd-node-qwen-evidence" data-node-id="qd-qwen-evidence" data-node-label="语义判断与证据帧" aria-label="聚焦语义判断与证据帧，前景持物／背景／提前滑落, 架构组件" data-node-kind="backend" data-node-sublabel="前景持物／背景／提前滑落" data-node-context="架构组件">
+          <title>语义判断与证据帧 · 前景持物／背景／提前滑落 · 架构组件</title>
+          <rect x="750" y="238" width="230" height="66" rx="6" class="c-mask"/>
+          <rect x="750" y="238" width="230" height="66" rx="6" class="c-backend" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(756 244) scale(0.6875)">
+            <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
+          </g>
+          <text data-node-label="" data-detail-anchor="" x="865" y="269" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">语义判断与证据帧</text>
+        <text data-detail="context" x="865" y="285" class="t-muted" font-size="9" text-anchor="middle">前景持物／背景／提前滑落</text>
+        </g>
+
+        <g id="qd-node-review-outcome" data-node-id="qd-review-outcome" data-node-label="序列复核 → 抓到／未持住" aria-label="聚焦序列复核 → 抓到／未持住，结合抬升资格与用户纠正, 架构组件" data-node-kind="external" data-node-sublabel="结合抬升资格与用户纠正" data-node-context="架构组件">
+          <title>序列复核 → 抓到／未持住 · 结合抬升资格与用户纠正 · 架构组件</title>
+          <rect x="405" y="342" width="230" height="66" rx="6" class="c-mask"/>
+          <rect x="405" y="342" width="230" height="66" rx="6" class="c-external" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="external" class="semantic-sigil s-external" transform="translate(411 348) scale(0.6875)">
+            <rect x="2.5" y="5" width="8.5" height="8" rx="1.5"/>
+            <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5"/>
+          </g>
+          <text data-node-label="" data-detail-anchor="" x="520" y="373" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">序列复核 → 抓到／未持住</text>
+        <text data-detail="context" x="520" y="389" class="t-muted" font-size="9" text-anchor="middle">结合抬升资格与用户纠正</text>
+        </g>
+
+        <!-- Connection labels -->
+        <g data-detail="context" data-edge-from="attempt-images" data-edge-to="dino-encoder" data-edge-label="指间裁剪" data-edge-key="0" data-edge-id="qd-to-dino">
+          <rect x="323.3" y="95" width="48.4" height="14" rx="3" class="c-mask"/>
+          <text x="347.5" y="105" class="t-muted" font-size="8" text-anchor="middle">指间裁剪</text>
+        </g>
+        <g data-detail="context" data-edge-from="attempt-images" data-edge-to="qwen-sequence" data-edge-label="前后选图" data-edge-key="1" data-edge-id="qd-to-qwen">
+          <rect x="668.3" y="95" width="48.4" height="14" rx="3" class="c-mask"/>
+          <text x="692.5" y="105" class="t-muted" font-size="8" text-anchor="middle">前后选图</text>
+        </g>
+        <g data-detail="context" data-edge-from="dino-encoder" data-edge-to="dino-margins" data-edge-label="特征向量" data-edge-key="2" data-edge-id="qd-dino-to-margins">
+          <rect x="150.8" y="204" width="48.4" height="14" rx="3" class="c-mask"/>
+          <text x="175" y="214" class="t-muted" font-size="8" text-anchor="middle">特征向量</text>
+        </g>
+        <g data-detail="context" data-edge-from="dino-reference" data-edge-to="dino-margins" data-edge-label="余弦对照" data-edge-key="3" data-edge-id="qd-reference-to-margins">
+          <rect x="323.3" y="244" width="48.4" height="14" rx="3" class="c-mask"/>
+          <text x="347.5" y="254" class="t-muted" font-size="8" text-anchor="middle">余弦对照</text>
+        </g>
+        <g data-detail="context" data-edge-from="qwen-sequence" data-edge-to="qwen-evidence" data-edge-label="结构化输出" data-edge-key="4" data-edge-id="qd-qwen-to-evidence">
+          <rect x="836" y="204" width="58" height="14" rx="3" class="c-mask"/>
+          <text x="865" y="214" class="t-muted" font-size="8" text-anchor="middle">结构化输出</text>
+        </g>
+        <g data-detail="context" data-edge-from="dino-margins" data-edge-to="review-outcome" data-edge-label="相似度线索" data-edge-key="5" data-edge-id="qd-margins-to-review">
+          <rect x="318.5" y="306.5" width="58" height="14" rx="3" class="c-mask"/>
+          <text x="347.5" y="316.5" class="t-muted" font-size="8" text-anchor="middle">相似度线索</text>
+        </g>
+        <g data-detail="context" data-edge-from="qwen-evidence" data-edge-to="review-outcome" data-edge-label="语义线索" data-edge-key="6" data-edge-id="qd-semantic-to-review">
+          <rect x="668.3" y="303" width="48.4" height="14" rx="3" class="c-mask"/>
+          <text x="692.5" y="313" class="t-muted" font-size="8" text-anchor="middle">语义线索</text>
+        </g>
+
+        <!-- Boundary labels (foreground masks keep routes out of titles) -->
+
+
+        <!-- Legend -->
+
+      </svg></div><div class="two"><div><h3>DINOv3：对照“持物”和“空手”</h3><p>固定裁出夹指附近的腕部画面，缩放为 256×256。冻结的 ViT-S/16 同时提取指间区域特征（ROI）和整张裁剪特征（CLS），分别与持物、空手参考图做余弦相似度比较；排除同集和同图，避免自己给自己投票。</p><div class="technical">m = 最近持物参考相似度 − 最近空手参考相似度<br>闭爪后 ≥0.45s 的选图：两张支持图的 ROI、CLS 差值都 &gt;0.02 → 支持持物；全部都 &lt;−0.02 → 支持空手；其余为混合证据。</div></div><div><h3>Qwen3-VL-4B：理解前后发生了什么</h3><p>最多选五张时间排序的腕部图：开始画面、闭爪后的画面、约 1.1 秒、最高点、核验末尾，重复帧去重。首图保留原腕部视野，后续放大夹指附近；输出成功／失败、置信等级、证据帧及简短理由。</p><div class="technical">提示重点：黑色三角夹指之间是否夹着前景积木；远处蓝框和散落积木属于背景；提前滑落算失败，运输后正常释放仍算成功。不能仅凭闭爪、颜色或高度判断。</div></div></div><p class="caption">两路提供互补线索，不做“模型一致就自动判成功”。当前仍结合序列复核和用户抽检；SAM3 作为历史几何基线保留，自动跟踪关闭。</p></section>
+
+<section id="workflow"><div class="heading"><h2>Qwen＋DINO 的一次实际执行</h2><span class="status">真实输入与原始输出 · E01-L004-v3</span></div>
+<p class="description">用一次已确认抓住的片段展示实际执行过程。下面的框表示固定裁剪和特征取样区域，并非 DINO 自动检测出来的物体框。</p>
+<div class="execution-block"><h3>DINO：裁剪 → 区域特征 → 参考图对照</h3><div id="dino-execution" class="execution-dino"></div><div id="dino-values" class="technical"></div><p class="caption">本张图的 ROI 和 CLS 都支持持物；整段抓取没有凑齐两张“双分支都达标”的支持图，因此 DINO 段级输出仍是混合证据。</p></div>
+<div class="execution-block"><h3>Qwen：按时间看五张图 → 返回判断与证据</h3><p class="caption">A 为原腕部图，B–E 为放大图；绿色边框标出 Qwen 在回答中引用的 C、D 帧。</p><div id="qwen-inputs" class="qwen-inputs"></div><div class="qwen-response"><span>Qwen 原始回答（仅调整缩进）</span><pre id="qwen-answer"></pre></div><p class="caption">回答含义：抬升／运输时，红色积木可见地夹在两指间，背景容器发生变化。这个“high”是模型自报置信等级，不是校准概率。</p></div>
+<div class="formula">本例合并：Qwen 判断成功 ＋ DINO 提供部分持物支持 → 序列复核与用户抽检确认抓到 → 候选奖励 1。</div></section>
+
+<section id="examples"><div class="heading"><h2>三个真实样例</h2></div><p class="muted">左图为闭爪附近，右图为本次核验末尾；点击可看原腕部图，下方可播放三视角视频。</p><div id="samples" class="samples"></div></section>
+
+<section id="rl"><div class="heading"><h2>RL 如何修正 VLA 动作</h2><a href="pld-rl-architecture.html" target="_blank" rel="noopener">展开 RL 架构图 ↗</a></div><p class="status">方案设计 · 尚未训练或部署</p><p class="description">冻结 Pi0.5，让轻量专家在整段抓取中修正接近、对准、下降、闭爪、抬升和持稳，成功后交还 Pi 完成运输放置。首轮左右臂都覆盖，按活动臂仲裁修正窗口。</p><div class="diagram"><svg viewBox="0 0 1090 604" role="img" lang="zh-CN" aria-labelledby="rl-archify-diagram-title rl-archify-diagram-description" data-preset="classic" data-quality-profile="showcase">
+        <title id="rl-archify-diagram-title">PLD 式残差 RL：拟实现架构</title>
+        <desc id="rl-archify-diagram-description">由 Archify 生成的架构图。</desc>
+        <!-- Definitions -->
+        <defs>
+          <marker id="rl-arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" class="m-default" />
+          </marker>
+          <marker id="rl-arrowhead-emphasis" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" class="m-emphasis" />
+          </marker>
+          <marker id="rl-arrowhead-security" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" class="m-security" />
+          </marker>
+          <marker id="rl-arrowhead-dashed" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" class="m-dashed" />
+          </marker>
+          <pattern id="rl-grid" width="40" height="40" patternUnits="userSpaceOnUse">
+            <path d="M 40 0 L 0 0 0 40" class="c-grid" stroke-width="0.5"/>
+          </pattern>
+        </defs>
+
+        <!-- Background Grid -->
+        <rect width="100%" height="100%" fill="url(#rl-grid)" />
+
+        <!-- Boundaries (behind everything) -->
+
+
+        <!-- Connection paths (before components for correct z-order) -->
+        <path data-edge-from="observation" data-edge-to="pi" data-edge-label="当前输入" data-edge-key="0" data-edge-id="rl-observation-pi" data-composition-points="350,110;265,110;265,235;180,235" d="M 350 110 L 273 110 Q 265 110 265 118 L 265 227 Q 265 235 257 235 L 180 235" class="a-default" stroke-width="1.5" marker-end="url(#rl-arrowhead)"/>
+        <path data-edge-from="observation" data-edge-to="actor" data-edge-key="1" data-edge-id="rl-observation-actor" data-composition-points="410,140;410,212" d="M 410 140 L 410 212" class="a-default" stroke-width="1.5" marker-end="url(#rl-arrowhead)"/>
+        <path data-edge-from="pi" data-edge-to="actor" data-edge-label="基础动作" data-edge-key="2" data-edge-id="rl-pi-actor" data-composition-points="180,249;204,249;204,265;326,265;326,235;350,235" d="M 180 249 L 196 249 Q 204 249 204 257 L 204 257 Q 204 265 212 265 L 318 265 Q 326 265 326 257 L 326 243 Q 326 235 334 235 L 350 235" class="a-default" stroke-width="1.5" marker-end="url(#rl-arrowhead)"/>
+        <path data-edge-from="actor" data-edge-to="projection" data-edge-label="有界残差" data-edge-key="3" data-edge-id="rl-actor-projection" data-composition-points="470,242;640,242" d="M 470 242 L 640 242" class="a-emphasis" stroke-width="1.8" marker-end="url(#rl-arrowhead-emphasis)"/>
+        <path data-edge-from="projection" data-edge-to="robot" data-edge-label="实际目标" data-edge-key="4" data-edge-id="rl-projection-robot" data-composition-points="760,242;930,242" d="M 760 242 L 930 242" class="a-emphasis" stroke-width="1.8" marker-end="url(#rl-arrowhead-emphasis)"/>
+        <path data-edge-from="robot" data-edge-to="reward" data-edge-label="结果录像" data-edge-key="5" data-edge-id="rl-robot-reward" data-composition-points="990,272;990,344" d="M 990 272 L 990 344" class="a-default" stroke-width="1.5" marker-end="url(#rl-arrowhead)"/>
+        <path data-edge-from="reward" data-edge-to="replay" data-edge-label="一次结果奖励" data-edge-key="6" data-edge-id="rl-reward-replay" data-composition-points="930,374;760,374" d="M 930 374 L 760 374" class="a-default" stroke-width="1.5" marker-end="url(#rl-arrowhead)"/>
+        <path data-edge-from="replay" data-edge-to="learner" data-edge-label="混合经验" data-edge-key="7" data-edge-id="rl-replay-learner" data-composition-points="640,374;470,374" d="M 640 374 L 470 374" class="a-default" stroke-width="1.5" marker-end="url(#rl-arrowhead)"/>
+        <path data-edge-from="learner" data-edge-to="release" data-edge-label="固定快照" data-edge-key="8" data-edge-id="rl-learner-release" data-composition-points="350,381;180,381" d="M 350 381 L 180 381" class="a-default" stroke-width="1.5" marker-end="url(#rl-arrowhead)"/>
+        <path data-edge-from="learner" data-edge-to="distill" data-edge-label="专家成熟后" data-edge-key="9" data-edge-id="rl-learner-distill" data-composition-points="410,404;410,476" d="M 410 404 L 410 476" class="a-dashed" stroke-width="1.5" marker-end="url(#rl-arrowhead-dashed)"/>
+        <path data-edge-from="release" data-edge-to="actor" data-edge-label="验收后加载" data-edge-key="10" data-edge-id="rl-release-actor" data-composition-points="180,367;265,367;265,249;350,249" d="M 180 367 L 257 367 Q 265 367 265 359 L 265 257 Q 265 249 273 249 L 350 249" class="a-dashed" stroke-width="1.5" marker-end="url(#rl-arrowhead-dashed)"/>
+
+        <!-- Components -->
+        <g id="rl-node-observation" data-node-id="rl-observation" data-node-label="当前观测与任务" aria-label="聚焦当前观测与任务，三图、14D状态、活动臂, 架构组件" data-node-kind="external" data-node-sublabel="三图、14D状态、活动臂" data-node-context="架构组件">
+          <title>当前观测与任务 · 三图、14D状态、活动臂 · 架构组件</title>
+          <rect x="350" y="80" width="120" height="60" rx="6" class="c-mask"/>
+          <rect x="350" y="80" width="120" height="60" rx="6" class="c-external" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="external" class="semantic-sigil s-external" transform="translate(356 86) scale(0.6875)">
+            <rect x="2.5" y="5" width="8.5" height="8" rx="1.5"/>
+            <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5"/>
+          </g>
+          <text data-node-label="" data-detail-anchor="" x="410" y="108" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">当前观测与任务</text>
+        <text data-detail="context" x="410" y="124" class="t-muted" font-size="8.8" text-anchor="middle">三图、14D状态、活动臂</text>
+        </g>
+
+        <g id="rl-node-pi" data-node-id="rl-pi" data-node-label="冻结 Pi0.5" aria-label="聚焦冻结 Pi0.5，基础动作先验, 架构组件" data-node-kind="backend" data-node-sublabel="基础动作先验" data-node-context="架构组件">
+          <title>冻结 Pi0.5 · 基础动作先验 · 架构组件</title>
+          <rect x="60" y="212" width="120" height="60" rx="6" class="c-mask"/>
+          <rect x="60" y="212" width="120" height="60" rx="6" class="c-backend" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(66 218) scale(0.6875)">
+            <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
+          </g>
+          <text data-node-label="" data-detail-anchor="" x="120" y="240" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">冻结 Pi0.5</text>
+        <text data-detail="context" x="120" y="256" class="t-muted" font-size="9" text-anchor="middle">基础动作先验</text>
+        </g>
+
+        <g id="rl-node-actor" data-node-id="rl-actor" data-node-label="轻量残差 Actor" aria-label="聚焦轻量残差 Actor，活动臂6关节＋夹爪, 架构组件" data-node-kind="backend" data-node-sublabel="活动臂6关节＋夹爪" data-node-context="架构组件">
+          <title>轻量残差 Actor · 活动臂6关节＋夹爪 · 架构组件</title>
+          <rect x="350" y="212" width="120" height="60" rx="6" class="c-mask"/>
+          <rect x="350" y="212" width="120" height="60" rx="6" class="c-backend" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(356 218) scale(0.6875)">
+            <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
+          </g>
+          <text data-node-label="" data-detail-anchor="" x="410" y="240" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">轻量残差 Actor</text>
+        <text data-detail="context" x="410" y="256" class="t-muted" font-size="9" text-anchor="middle">活动臂6关节＋夹爪</text>
+        </g>
+
+        <g id="rl-node-projection" data-node-id="rl-projection" data-node-label="约束与 RTC 投影" aria-label="聚焦约束与 RTC 投影，限位、连续性、承诺前缀, 架构组件" data-node-kind="security" data-node-sublabel="限位、连续性、承诺前缀" data-node-context="架构组件">
+          <title>约束与 RTC 投影 · 限位、连续性、承诺前缀 · 架构组件</title>
+          <rect x="640" y="212" width="120" height="60" rx="6" class="c-mask"/>
+          <rect x="640" y="212" width="120" height="60" rx="6" class="c-security" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="security" class="semantic-sigil s-security" transform="translate(646 218) scale(0.6875)">
+            <path d="M8 2.2 13 4v3.5c0 3.1-1.8 5.4-5 6.5-3.2-1.1-5-3.4-5-6.5V4Z"/>
+            <path d="m5.8 8 1.5 1.5 3-3"/>
+          </g>
+          <text data-node-label="" data-detail-anchor="" x="700" y="240" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">约束与 RTC 投影</text>
+        <text data-detail="context" x="700" y="256" class="t-muted" font-size="8.4" text-anchor="middle">限位、连续性、承诺前缀</text>
+        </g>
+
+        <g id="rl-node-robot" data-node-id="rl-robot" data-node-label="真实执行与录制" aria-label="聚焦真实执行与录制，沿用现有双臂控制层, 架构组件" data-node-kind="external" data-node-sublabel="沿用现有双臂控制层" data-node-context="架构组件">
+          <title>真实执行与录制 · 沿用现有双臂控制层 · 架构组件</title>
+          <rect x="930" y="212" width="120" height="60" rx="6" class="c-mask"/>
+          <rect x="930" y="212" width="120" height="60" rx="6" class="c-external" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="external" class="semantic-sigil s-external" transform="translate(936 218) scale(0.6875)">
+            <rect x="2.5" y="5" width="8.5" height="8" rx="1.5"/>
+            <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5"/>
+          </g>
+          <text data-node-label="" data-detail-anchor="" x="990" y="240" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">真实执行与录制</text>
+        <text data-detail="context" x="990" y="256" class="t-muted" font-size="9" text-anchor="middle">沿用现有双臂控制层</text>
+        </g>
+
+        <g id="rl-node-reward" data-node-id="rl-reward" data-node-label="结果与奖励适配器" aria-label="聚焦结果与奖励适配器，核验终点一次1/0或不发奖, 架构组件" data-node-kind="backend" data-node-sublabel="核验终点一次1/0或不发奖" data-node-context="架构组件">
+          <title>结果与奖励适配器 · 核验终点一次1/0或不发奖 · 架构组件</title>
+          <rect x="930" y="344" width="120" height="60" rx="6" class="c-mask"/>
+          <rect x="930" y="344" width="120" height="60" rx="6" class="c-backend" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(936 350) scale(0.6875)">
+            <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
+          </g>
+          <text data-node-label="" data-detail-anchor="" x="990" y="372" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">结果与奖励适配器</text>
+        <text data-detail="context" x="990" y="388" class="t-muted" font-size="8.1" text-anchor="middle">核验终点一次1/0或不发奖</text>
+        </g>
+
+        <g id="rl-node-replay" data-node-id="rl-replay" data-node-label="版本化 Replay" aria-label="聚焦版本化 Replay，实际动作、时间与奖励来源, 架构组件" data-node-kind="database" data-node-sublabel="实际动作、时间与奖励来源" data-node-context="架构组件">
+          <title>版本化 Replay · 实际动作、时间与奖励来源 · 架构组件</title>
+          <rect x="640" y="344" width="120" height="60" rx="6" class="c-mask"/>
+          <rect x="640" y="344" width="120" height="60" rx="6" class="c-database" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(646 350) scale(0.6875)">
+            <ellipse cx="8" cy="4" rx="5" ry="2"/>
+            <path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/>
+          </g>
+          <text data-node-label="" data-detail-anchor="" x="700" y="372" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">版本化 Replay</text>
+        <text data-detail="context" x="700" y="388" class="t-muted" font-size="7.7" text-anchor="middle">实际动作、时间与奖励来源</text>
+        </g>
+
+        <g id="rl-node-learner" data-node-id="rl-learner" data-node-label="服务器 SAC＋双Q" aria-label="聚焦服务器 SAC＋双Q，Cal-QL价值初始化；在线更新, 架构组件" data-node-kind="backend" data-node-sublabel="Cal-QL价值初始化；在线更新" data-node-context="架构组件">
+          <title>服务器 SAC＋双Q · Cal-QL价值初始化；在线更新 · 架构组件</title>
+          <rect x="350" y="344" width="120" height="60" rx="6" class="c-mask"/>
+          <rect x="350" y="344" width="120" height="60" rx="6" class="c-backend" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(356 350) scale(0.6875)">
+            <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
+          </g>
+          <text data-node-label="" data-detail-anchor="" x="410" y="372" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">服务器 SAC＋双Q</text>
+        <text data-detail="context" x="410" y="388" class="t-muted" font-size="7.1" text-anchor="middle">Cal-QL价值初始化；在线更新</text>
+        </g>
+
+        <g id="rl-node-release" data-node-id="rl-release" data-node-label="专家版本验收" aria-label="聚焦专家版本验收，离线、影子、现场对照, 架构组件" data-node-kind="security" data-node-sublabel="离线、影子、现场对照" data-node-context="架构组件">
+          <title>专家版本验收 · 离线、影子、现场对照 · 架构组件</title>
+          <rect x="60" y="344" width="120" height="60" rx="6" class="c-mask"/>
+          <rect x="60" y="344" width="120" height="60" rx="6" class="c-security" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="security" class="semantic-sigil s-security" transform="translate(66 350) scale(0.6875)">
+            <path d="M8 2.2 13 4v3.5c0 3.1-1.8 5.4-5 6.5-3.2-1.1-5-3.4-5-6.5V4Z"/>
+            <path d="m5.8 8 1.5 1.5 3-3"/>
+          </g>
+          <text data-node-label="" data-detail-anchor="" x="120" y="372" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">专家版本验收</text>
+        <text data-detail="context" x="120" y="388" class="t-muted" font-size="9" text-anchor="middle">离线、影子、现场对照</text>
+        </g>
+
+        <g id="rl-node-distill" data-node-id="rl-distill" data-node-label="成熟经验蒸馏回 Pi" aria-label="聚焦成熟经验蒸馏回 Pi，后续原生 OpenPI SFT, 架构组件" data-node-kind="backend" data-node-sublabel="后续原生 OpenPI SFT" data-node-context="架构组件">
+          <title>成熟经验蒸馏回 Pi · 后续原生 OpenPI SFT · 架构组件</title>
+          <rect x="350" y="476" width="120" height="60" rx="6" class="c-mask"/>
+          <rect x="350" y="476" width="120" height="60" rx="6" class="c-backend" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(356 482) scale(0.6875)">
+            <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
+          </g>
+          <text data-node-label="" data-detail-anchor="" x="410" y="504" class="t-primary" font-size="10.9" font-weight="600" text-anchor="middle">成熟经验蒸馏回 Pi</text>
+        <text data-detail="context" x="410" y="520" class="t-muted" font-size="9" text-anchor="middle">后续原生 OpenPI SFT</text>
+        </g>
+
+        <!-- Connection labels -->
+        <g data-detail="context" data-edge-from="observation" data-edge-to="pi" data-edge-label="当前输入" data-edge-key="0" data-edge-id="rl-observation-pi">
+          <rect x="240.8" y="152.5" width="48.4" height="14" rx="3" class="c-mask"/>
+          <text x="265" y="162.5" class="t-muted" font-size="8" text-anchor="middle">当前输入</text>
+        </g>
+
+        <g data-detail="context" data-edge-from="pi" data-edge-to="actor" data-edge-label="基础动作" data-edge-key="2" data-edge-id="rl-pi-actor">
+          <rect x="179.8" y="267" width="48.4" height="14" rx="3" class="c-mask"/>
+          <text x="204" y="277" class="t-muted" font-size="8" text-anchor="middle">基础动作</text>
+        </g>
+        <g data-detail="context" data-edge-from="actor" data-edge-to="projection" data-edge-label="有界残差" data-edge-key="3" data-edge-id="rl-actor-projection">
+          <rect x="530.8" y="222" width="48.4" height="14" rx="3" class="c-mask"/>
+          <text x="555" y="232" class="t-backend" font-size="8" text-anchor="middle">有界残差</text>
+        </g>
+        <g data-detail="context" data-edge-from="projection" data-edge-to="robot" data-edge-label="实际目标" data-edge-key="4" data-edge-id="rl-projection-robot">
+          <rect x="820.8" y="222" width="48.4" height="14" rx="3" class="c-mask"/>
+          <text x="845" y="232" class="t-backend" font-size="8" text-anchor="middle">实际目标</text>
+        </g>
+        <g data-detail="context" data-edge-from="robot" data-edge-to="reward" data-edge-label="结果录像" data-edge-key="5" data-edge-id="rl-robot-reward">
+          <rect x="965.8" y="282" width="48.4" height="14" rx="3" class="c-mask"/>
+          <text x="990" y="292" class="t-muted" font-size="8" text-anchor="middle">结果录像</text>
+        </g>
+        <g data-detail="context" data-edge-from="reward" data-edge-to="replay" data-edge-label="一次结果奖励" data-edge-key="6" data-edge-id="rl-reward-replay">
+          <rect x="811.2" y="354" width="67.6" height="14" rx="3" class="c-mask"/>
+          <text x="845" y="364" class="t-muted" font-size="8" text-anchor="middle">一次结果奖励</text>
+        </g>
+        <g data-detail="context" data-edge-from="replay" data-edge-to="learner" data-edge-label="混合经验" data-edge-key="7" data-edge-id="rl-replay-learner">
+          <rect x="530.8" y="354" width="48.4" height="14" rx="3" class="c-mask"/>
+          <text x="555" y="364" class="t-muted" font-size="8" text-anchor="middle">混合经验</text>
+        </g>
+        <g data-detail="context" data-edge-from="learner" data-edge-to="release" data-edge-label="固定快照" data-edge-key="8" data-edge-id="rl-learner-release">
+          <rect x="240.8" y="391" width="48.4" height="14" rx="3" class="c-mask"/>
+          <text x="265" y="401" class="t-muted" font-size="8" text-anchor="middle">固定快照</text>
+        </g>
+        <g data-detail="context" data-edge-from="learner" data-edge-to="distill" data-edge-label="专家成熟后" data-edge-key="9" data-edge-id="rl-learner-distill">
+          <rect x="381" y="414" width="58" height="14" rx="3" class="c-mask"/>
+          <text x="410" y="424" class="t-messagebus" font-size="8" text-anchor="middle">专家成熟后</text>
+        </g>
+        <g data-detail="context" data-edge-from="release" data-edge-to="actor" data-edge-label="验收后加载" data-edge-key="10" data-edge-id="rl-release-actor">
+          <rect x="236" y="288" width="58" height="14" rx="3" class="c-mask"/>
+          <text x="265" y="298" class="t-messagebus" font-size="8" text-anchor="middle">验收后加载</text>
+        </g>
+
+        <!-- Boundary labels (foreground masks keep routes out of titles) -->
+
+
+        <!-- Legend -->
+        <g data-legend="" data-legend-bridge="">
+          <text x="40" y="568" class="t-primary" font-size="12" font-weight="650">图例</text>
+          <g data-legend-semantic-kind="backend" data-legend-kind="backend" data-legend-label="后端" data-legend-x="40" data-legend-baseline="588" data-legend-width="63">
+            <rect x="40" y="579" width="16" height="10" rx="2.5" class="c-backend" stroke-width="1"/>
+            <text x="62" y="588" class="t-muted" font-size="10" font-weight="500">后端</text>
+          </g>
+          <g data-legend-semantic-kind="database" data-legend-kind="database" data-legend-label="数据库" data-legend-x="125" data-legend-baseline="588" data-legend-width="73">
+            <rect x="125" y="579" width="16" height="10" rx="2.5" class="c-database" stroke-width="1"/>
+            <text x="147" y="588" class="t-muted" font-size="10" font-weight="500">数据库</text>
+          </g>
+          <g data-legend-semantic-kind="security" data-legend-kind="security" data-legend-label="安全" data-legend-x="220" data-legend-baseline="588" data-legend-width="63">
+            <rect x="220" y="579" width="16" height="10" rx="2.5" class="c-security" stroke-width="1"/>
+            <text x="242" y="588" class="t-muted" font-size="10" font-weight="500">安全</text>
+          </g>
+          <g data-legend-semantic-kind="external" data-legend-kind="external" data-legend-label="外部系统" data-legend-x="305" data-legend-baseline="588" data-legend-width="83">
+            <rect x="305" y="579" width="16" height="10" rx="2.5" class="c-external" stroke-width="1"/>
+            <text x="327" y="588" class="t-muted" font-size="10" font-weight="500">外部系统</text>
+          </g>
+        </g>
+      </svg></div><div class="two"><div><h3>训练小专家</h3><p>采用 PLD 式残差 SAC，先用离线数据做 Cal-QL 价值初始化，再用真实修正尝试更新 Actor 和 Critic。当前录像没有残差探索，不能仅凭离线数据证明修正有效。</p></div><div><h3>把结果反馈给前面的动作</h3><p>抓取结束时的 1／0 沿实际执行序列传播到此前动作，学习哪些调整更容易抓住。一次结果不重复奖励每张图；缺证据的片段不强行填 0。专家成熟后，再把有效经验蒸馏回 Pi。</p></div></div><div class="formula">执行动作 = Pi 基础动作 ＋ 有界残差 → 限位、连续性与 RTC 前缀约束 → 真实执行 → 结果奖励 → 更新专家</div></section>
+</main><script id="report-data" type="application/json">{"episodes": 14, "candidates": 342, "eligible": 327, "excluded": 15, "success": 136, "failure": 191, "classified": 327, "classification_completion_percent": 100.0, "qualification_percent": 95.6, "grasp_success_share_percent": 41.6, "user_reviewed": 13, "original_proposals_agree": 12, "review_corrections": 1, "reviewed_eligible": 8, "medium_total": 11, "medium_reviewed": 11, "approved_rewards": 0, "single_lift_image_count": 7, "excluded_ids": ["E01-R006-v3", "E02-R002-v3", "E02-R015-v3", "E04-L011-v3", "E04-L015-v3", "E04-R013-v3", "E04-R030-v3", "E07-L008-v3", "E08-L008-v3", "E09-R005-v3", "E10-L006-v3", "E12-R003-v3", "E12-R012-v3", "E14-L003-v3", "E14-R015-v3"], "source_candidates_sha256": "7426b4973a0a4d3f367e70e398838bd1c9dd2a51e2e682322dbb4d2846948b0c", "human_review_sha256": "8249f3d28bb8c4030574c62cfebfabf837af999ead992a53c859cb0a74cbc582", "qualification_sha256": "d7e91f5a1d3c591b1b3030711dd2af4d6fa0deff00aed3831eb81d402e14e80e", "training_executed": false, "samples": [{"id": "E01-L004-v3", "category": "success", "title": "抓住并持物", "explanation": "抬升后前景积木仍在指间；用户抽检确认为抓到。", "arm": "left", "images": [{"image": "progress-media/E01-L004-v3-830.jpg", "crop": "progress-media/E01-L004-v3-830-crop.jpg", "row": 830, "time_s": 0.0, "rise_cm": 0.0, "stage": "闭爪附近"}, {"image": "progress-media/E01-L004-v3-873.jpg", "crop": "progress-media/E01-L004-v3-873-crop.jpg", "row": 873, "time_s": 1.436, "rise_cm": 11.46, "stage": "首次合格抬升图"}, {"image": "progress-media/E01-L004-v3-896.jpg", "crop": "progress-media/E01-L004-v3-896-crop.jpg", "row": 896, "time_s": 2.2, "rise_cm": 12.49, "stage": "释放前核验末图"}], "clip": "progress-media/E01-L004-v3.mp4", "curve": [[0.0, 0.0], [0.0361, -0.1127], [0.0669, -0.1314], [0.1066, -0.1549], [0.1337, -0.1799], [0.1671, -0.2322], [0.2014, -0.2711], [0.2337, -0.3676], [0.267, -0.418], [0.3003, -0.4593], [0.3338, -0.4993], [0.371, -0.5564], [0.4026, -0.595], [0.4337, -0.6199], [0.4671, -0.6584], [0.5003, -0.6703], [0.5336, -0.6731], [0.5671, -0.6731], [0.6003, -0.6731], [0.6338, -0.6754], [0.667, -0.6759], [0.7003, -0.6646], [0.7339, -0.6114], [0.7723, -0.5623], [0.8006, -0.4624], [0.8338, -0.3341], [0.867, -0.1604], [0.9006, 0.0061], [0.9337, 0.2231], [0.967, 0.4922], [1.0004, 0.8036], [1.034, 1.191], [1.0681, 1.6857], [1.1125, 2.3171], [1.1347, 2.8132], [1.1678, 3.5176], [1.2003, 4.0734], [1.2338, 5.08], [1.267, 5.9713], [1.3003, 7.0984], [1.334, 8.2218], [1.3679, 9.3488], [1.4005, 10.3989], [1.4355, 11.457], [1.4671, 12.2632], [1.5003, 13.607], [1.5367, 14.2749], [1.57, 15.26], [1.6003, 15.8857], [1.6336, 16.3526], [1.667, 16.5177], [1.7004, 16.6379], [1.7337, 16.586], [1.767, 16.4139], [1.8003, 15.8806], [1.8346, 15.5412], [1.8673, 15.1717], [1.9005, 14.7314], [1.9341, 14.4], [1.9677, 13.8992], [2.0005, 13.8651], [2.0337, 13.262], [2.067, 12.9037], [2.1023, 12.6858], [2.1354, 12.5413], [2.1686, 12.4787], [2.2005, 12.4888]], "max_rise_cm": 16.64, "vlm": "success", "dino": null, "effective_label": "success", "review_label": "success", "eligible": true, "proposed_reward": 1}, {"id": "E05-L006-v3", "category": "failure", "title": "抬升后的空抓", "explanation": "已有抬升证据，核验画面指间为空；两模型与用户结论一致。", "arm": "left", "images": [{"image": "progress-media/E05-L006-v3-1259.jpg", "crop": "progress-media/E05-L006-v3-1259-crop.jpg", "row": 1259, "time_s": 0.0, "rise_cm": 0.0, "stage": "闭爪附近"}, {"image": "progress-media/E05-L006-v3-1281.jpg", "crop": "progress-media/E05-L006-v3-1281-crop.jpg", "row": 1281, "time_s": 0.733, "rise_cm": 6.17, "stage": "首次合格抬升图"}, {"image": "progress-media/E05-L006-v3-1289.jpg", "crop": "progress-media/E05-L006-v3-1289-crop.jpg", "row": 1289, "time_s": 1.0, "rise_cm": 12.63, "stage": "释放前核验末图"}], "clip": "progress-media/E05-L006-v3.mp4", "curve": [[0.0, 0.0], [0.0336, -0.0255], [0.067, -0.0362], [0.1065, -0.0583], [0.1339, -0.0371], [0.1671, 0.0278], [0.2002, 0.113], [0.2335, 0.2663], [0.2677, 0.3417], [0.3009, 0.6006], [0.3355, 0.8664], [0.3674, 1.1298], [0.4002, 1.5019], [0.4334, 1.8792], [0.4695, 2.2019], [0.5046, 2.4981], [0.5334, 3.0277], [0.5668, 3.4458], [0.6018, 3.8242], [0.6334, 4.3236], [0.6668, 4.8977], [0.7003, 5.1957], [0.7334, 6.1734], [0.7668, 7.0008], [0.8001, 7.8416], [0.8334, 8.8332], [0.8668, 9.7746], [0.9007, 10.5888], [0.9334, 11.4386], [0.967, 12.0975], [1.0003, 12.6316]], "max_rise_cm": 12.63, "vlm": "failure", "dino": "failure", "effective_label": "failure", "review_label": "failure", "eligible": true, "proposed_reward": 0}, {"id": "E02-R007-v3", "category": "correction", "title": "纠正背景造成的误报", "explanation": "Qwen最初报成功，DINO证据混合；序列复核和用户抽检确认未持住。", "arm": "right", "images": [{"image": "progress-media/E02-R007-v3-913.jpg", "crop": "progress-media/E02-R007-v3-913-crop.jpg", "row": 913, "time_s": 0.0, "rise_cm": 0.0, "stage": "闭爪附近"}, {"image": "progress-media/E02-R007-v3-930.jpg", "crop": "progress-media/E02-R007-v3-930-crop.jpg", "row": 930, "time_s": 0.562, "rise_cm": 6.77, "stage": "首次合格抬升图"}, {"image": "progress-media/E02-R007-v3-939.jpg", "crop": "progress-media/E02-R007-v3-939-crop.jpg", "row": 939, "time_s": 0.862, "rise_cm": 12.56, "stage": "释放前核验末图"}], "clip": "progress-media/E02-R007-v3.mp4", "curve": [[0.0, 0.0], [0.0284, -0.0222], [0.0619, -0.0981], [0.0951, -0.1507], [0.1285, -0.1621], [0.1618, -0.1416], [0.1978, -0.0739], [0.2284, 0.0228], [0.2618, 0.1956], [0.2951, 0.4174], [0.3284, 0.6842], [0.3617, 1.1833], [0.3968, 1.9113], [0.429, 2.8251], [0.4722, 3.6684], [0.4953, 4.8217], [0.5287, 5.7493], [0.5618, 6.7693], [0.595, 7.6393], [0.6284, 8.6357], [0.6619, 9.6287], [0.6965, 10.6297], [0.7296, 11.5848], [0.7621, 12.2451], [0.7951, 12.7504], [0.8292, 12.8011], [0.8617, 12.5642]], "max_rise_cm": 12.8, "vlm": "success", "dino": null, "effective_label": "failure", "review_label": "failure", "eligible": true, "proposed_reward": 0}, {"id": "E04-L015-v3", "category": "excluded", "title": "没有抬升，不记空抓0", "explanation": "闭爪后仍下降，核验窗内没有抬升；用户改为非独立抓取，候选奖励为null。", "arm": "left", "images": [{"image": "progress-media/E04-L015-v3-2615.jpg", "crop": "progress-media/E04-L015-v3-2615-crop.jpg", "row": 2615, "time_s": 0.0, "rise_cm": 0.0, "stage": "闭爪附近"}, {"image": "progress-media/E04-L015-v3-2631.jpg", "crop": "progress-media/E04-L015-v3-2631-crop.jpg", "row": 2631, "time_s": 0.536, "rise_cm": -1.02, "stage": "核验中段"}, {"image": "progress-media/E04-L015-v3-2640.jpg", "crop": "progress-media/E04-L015-v3-2640-crop.jpg", "row": 2640, "time_s": 0.836, "rise_cm": -0.69, "stage": "释放前核验末图"}], "clip": "progress-media/E04-L015-v3.mp4", "curve": [[0.0, 0.0], [0.0333, -0.1282], [0.0667, -0.313], [0.1001, -0.4966], [0.1337, -0.6072], [0.169, -0.7438], [0.2026, -0.8062], [0.2358, -0.8513], [0.2696, -0.8463], [0.3025, -0.8794], [0.3402, -0.8847], [0.3691, -0.8971], [0.4026, -0.9159], [0.4361, -0.941], [0.4692, -0.9693], [0.5026, -0.9937], [0.5359, -1.0239], [0.5692, -1.0254], [0.6025, -1.0456], [0.6358, -1.0174], [0.6735, -1.0046], [0.703, -0.9687], [0.7358, -0.9205], [0.7691, -0.8463], [0.8025, -0.8018], [0.8358, -0.6926]], "max_rise_cm": 0.0, "vlm": "success", "dino": null, "effective_label": "non_grasp", "review_label": "non_grasp", "eligible": false, "proposed_reward": null}, {"id": "E04-L016-v3", "category": "success", "title": "下一次重试才真正抬升", "explanation": "该次候选有自己的抬升和持物证据；不能把这段的成功借给上一段。", "arm": "left", "images": [{"image": "progress-media/E04-L016-v3-2656.jpg", "crop": "progress-media/E04-L016-v3-2656-crop.jpg", "row": 2656, "time_s": 0.0, "rise_cm": 0.0, "stage": "闭爪附近"}, {"image": "progress-media/E04-L016-v3-2690.jpg", "crop": "progress-media/E04-L016-v3-2690-crop.jpg", "row": 2690, "time_s": 1.144, "rise_cm": 20.38, "stage": "首次合格抬升图"}, {"image": "progress-media/E04-L016-v3-2714.jpg", "crop": "progress-media/E04-L016-v3-2714-crop.jpg", "row": 2714, "time_s": 1.964, "rise_cm": 14.11, "stage": "释放前核验末图"}], "clip": "progress-media/E04-L016-v3.mp4", "curve": [[0.0, 0.0], [0.0333, -0.1484], [0.0668, -0.2494], [0.1068, -0.3095], [0.1419, -0.3877], [0.1753, -0.4989], [0.2086, -0.5386], [0.242, -0.5759], [0.2754, -0.604], [0.3154, -0.6451], [0.3421, -0.7002], [0.376, -0.7468], [0.4089, -0.7437], [0.4422, -0.7389], [0.4753, -0.6726], [0.5098, -0.5841], [0.5442, -0.416], [0.5773, -0.2333], [0.6108, 0.1062], [0.6474, 0.4737], [0.6774, 1.1392], [0.7107, 1.8444], [0.744, 2.5477], [0.7774, 4.2602], [0.8107, 5.716], [0.8453, 7.2397], [0.8784, 8.9203], [0.9163, 10.1353], [0.9494, 12.1107], [0.9778, 13.6741], [1.0111, 15.3529], [1.0443, 17.0471], [1.0773, 18.1867], [1.1108, 19.5854], [1.1441, 20.3771], [1.1774, 20.3771], [1.2107, 21.2729], [1.244, 21.2536], [1.2773, 21.1172], [1.3107, 20.7696], [1.345, 20.3083], [1.3773, 20.0396], [1.4107, 20.0968], [1.444, 19.1275], [1.4773, 18.5718], [1.5107, 18.1409], [1.5447, 17.6166], [1.5786, 16.9013], [1.6274, 16.11], [1.6624, 15.6034], [1.695, 15.1976], [1.7275, 14.8269], [1.7609, 14.5249], [1.7941, 14.3008], [1.8343, 14.1125], [1.8636, 14.0315], [1.8972, 14.0211], [1.9308, 14.056], [1.9644, 14.1136]], "max_rise_cm": 21.27, "vlm": "success", "dino": "success", "effective_label": "success", "review_label": null, "eligible": true, "proposed_reward": 1}], "execution": {"candidate_id": "E01-L004-v3", "row": 896, "original": "progress-media/dino-query-original.jpg", "crop": "progress-media/dino-query-crop.png", "fixed_crop_xyxy": [160, 180, 480, 480], "roi_patch_rows": [3, 16], "roi_patch_cols": [4, 12], "roi_box_in_resized_crop": [64, 48, 192, 256], "scores": {"id": "E01-segment_000000-left-000896", "excluded_episode": 1, "roi": {"margin": 0.02185821533203125, "nearest": {"held_at_snapshot": {"id": "REF031", "similarity": 0.8472073078155518}, "empty_at_snapshot": {"id": "REF045", "similarity": 0.8253490924835205}}}, "cls": {"margin": 0.053438544273376465, "nearest": {"held_at_snapshot": {"id": "REF031", "similarity": 0.7376940846443176}, "empty_at_snapshot": {"id": "REF045", "similarity": 0.6842555403709412}}}}, "roi_references": [{"id": "REF031", "label": "held_at_snapshot", "image": "progress-media/dino-held_at_snapshot.png", "similarity": 0.8472073078155518}, {"id": "REF045", "label": "empty_at_snapshot", "image": "progress-media/dino-empty_at_snapshot.png", "similarity": 0.8253490924835205}], "dino_attempt_outcome": null, "qwen_inputs": [{"image": "progress-media/qwen-input-A.png", "letter": "A", "row": 823, "time_s": -0.2420203919755295, "cited": false}, {"image": "progress-media/qwen-input-B.png", "letter": "B", "row": 843, "time_s": 0.43370281194802374, "cited": false}, {"image": "progress-media/qwen-input-C.png", "letter": "C", "row": 864, "time_s": 1.1347064159344882, "cited": true}, {"image": "progress-media/qwen-input-D.png", "letter": "D", "row": 881, "time_s": 1.7003522330196574, "cited": true}, {"image": "progress-media/qwen-input-E.png", "letter": "E", "row": 896, "time_s": 2.200478184968233, "cited": false}], "qwen_raw_response": "{\"outcome\":\"success\", \"confidence\":\"high\", \"color\":\"red\", \"evidence_frames\":[\"C\",\"D\"], \"reason\":\"red brick visibly held between fingers during lift/carry with background bin change\"}", "qwen_model": "Qwen/Qwen3-VL-4B-Instruct", "qwen_prompt_sha256": "dab49c2887f0e79ead9e845f9593fa447b51e76db11051cda309e703595be158"}, "assets_sha256": {"progress-media/E01-L004-v3-830.jpg": "c4200ed1d18b0ebef4a60868b8c0ec4a24e896d427dbd9d2574000a17ee95e37", "progress-media/E01-L004-v3-830-crop.jpg": "41dd8ae2a45448231e23fbb88791857fa4b056d97805c28a3af438b4a7dd3dc0", "progress-media/E01-L004-v3-873.jpg": "330b7b5fa04b9fa44857bf52d45edf2e17249e305bfadf7cbd0b97561e3161cf", "progress-media/E01-L004-v3-873-crop.jpg": "60245525ce29392b92e47506e38f04f70d8c2779776a0da894ba7cabe805f562", "progress-media/E01-L004-v3-896.jpg": "0cc44cfe18669e1848feca4ee6a2c3f918b1e537f8619c58396f7febd4128776", "progress-media/E01-L004-v3-896-crop.jpg": "5c8a222d2f1cd63d55173bdb1c1489723060404985bae997c323d6d676634e30", "progress-media/E01-L004-v3.mp4": "a374fa6b0aa846ad89ebd4251ea112873dc6f05108a93ae4505c3d2f1fb6b92b", "progress-media/E05-L006-v3-1259.jpg": "abdbcf4d206b9b39b8632885557b25f7fb6f14d39cfa00bfd0b20ceca10652be", "progress-media/E05-L006-v3-1259-crop.jpg": "ae78b5b7a675b8bb17d88c34d2821ddf051a709083dd38d93bc3703f0104ec63", "progress-media/E05-L006-v3-1281.jpg": "89c80579b0a44d6bde3a237ac4bed6b4d189f974ec2ee72b97ed57fad256ab6e", "progress-media/E05-L006-v3-1281-crop.jpg": "5d906acc3094cbcb1ee725e4c468561ce82811e2fa419fd5ecc887b198034b78", "progress-media/E05-L006-v3-1289.jpg": "a3da0894a90afac87bc63bc118087d03c807a25c58d30d88b3bfa0d72f6e09a6", "progress-media/E05-L006-v3-1289-crop.jpg": "bd6cfb48d37a1416fe17d9b22f9a3fa10ee370d8de1ff73eadcd9eaaf8dc8e90", "progress-media/E05-L006-v3.mp4": "93d10825da28c6f403f51aba417f559e6234529fac431a8f029cbd9a14fe7b77", "progress-media/E02-R007-v3-913.jpg": "bc2043ff33900e9a73d425d07cfa660ea4b80fbe712b252f478ff9236ab7e190", "progress-media/E02-R007-v3-913-crop.jpg": "19735d2f2e75266d5a9a0b9431389cfaf095fda8d31555b4dbe3259987905c4e", "progress-media/E02-R007-v3-930.jpg": "8db723ada228d7ba9750e571f8f67cb5d724d04e81a4ebc31ec0a47fe8f6e248", "progress-media/E02-R007-v3-930-crop.jpg": "893e9ca23d80c83fc5cd0b5a685a9373f7314eaa28eadf6a599e8f05da074aa2", "progress-media/E02-R007-v3-939.jpg": "81ddb01d9bf837a847d29fc346ad20fb702027a2ae34a1ae1dc4fd70abedb43f", "progress-media/E02-R007-v3-939-crop.jpg": "3d2c5ae840feb9212074a50b0a0fb5c53257b1d3971c43d1328a2eac2cbf4255", "progress-media/E02-R007-v3.mp4": "c028ce0ec8879eeb242b18163320473986eb06d4dd7b5c33acac198637e73cd3", "progress-media/E04-L015-v3-2615.jpg": "6cf160ef76fbcd4d80ab57fcbe3cca8b04474f626cb9d83685952408c9430990", "progress-media/E04-L015-v3-2615-crop.jpg": "510108c752b4e232367d0c8d630cf7b2311695e1e7d06e59d29d3a5e0f79db5c", "progress-media/E04-L015-v3-2631.jpg": "13c06402b269f7401e33b4100a3aebb5dcbcc6622bab3b93aa843f32ad568980", "progress-media/E04-L015-v3-2631-crop.jpg": "a075635cf7cdfbe41f25aece76df27c4c607fbc05278a193597708de5d766907", "progress-media/E04-L015-v3-2640.jpg": "c396d3a8659a56e075be3050afd6790d85699f991909eb1dd53bdad8c4b47488", "progress-media/E04-L015-v3-2640-crop.jpg": "12a6a23074a1e7e890393fd6f9967d74b945517ab4b8bf7e0383b19d00576907", "progress-media/E04-L015-v3.mp4": "6ac068db56403532f142269f0f71b51581e3add1426035ba3f8bba1ef4c5717a", "progress-media/E04-L016-v3-2656.jpg": "6c86f683ae89319487272b16f9a10d27a7bf18155e574f7337c89617b3f5f5d0", "progress-media/E04-L016-v3-2656-crop.jpg": "34e5e4e4c11362d87f6e68bbc9a3a0cd3f343671763a54a34a07bc2413261613", "progress-media/E04-L016-v3-2690.jpg": "aedcc18266d87a7ca36496c3eec6eab80f98697b3b0a79d7334684fbacf37de6", "progress-media/E04-L016-v3-2690-crop.jpg": "e3429a7c71fd7aa98cec43e33041d30f80fb4ea88210d837a42e43c13cfc25f9", "progress-media/E04-L016-v3-2714.jpg": "1d41ddc9b232fb84488443576d8e01a40d33c23cf267a4a7f9744f057ca2a78b", "progress-media/E04-L016-v3-2714-crop.jpg": "e4423a6e85e94cda0e9d97b77b09dcfc59125937b90ef668c4ebda842cae89a3", "progress-media/E04-L016-v3.mp4": "3855ade13d4c5eb8a04a81f5186b3f871139a00735ab3522052280b67642fc78", "progress-media/dino-query-original.jpg": "0cc44cfe18669e1848feca4ee6a2c3f918b1e537f8619c58396f7febd4128776", "progress-media/dino-query-crop.png": "77fe30b29079c91500f68e7821bc784774e50b6d7f6ed477593fd0c0ed78a244", "progress-media/dino-held_at_snapshot.png": "2deecbddaee9438259ab26c7759f5803083e46e8b7fdff36e284ba1202b91ba5", "progress-media/dino-empty_at_snapshot.png": "db1cd4ac9b5784c7b8b089964fa50f76c0c8caa555b40d8ba2e8c1a31aecc0e2", "progress-media/qwen-input-A.png": "e3515d96a34097fa71bf852cffc98c5674835564ecfa1411968685b71f3bac3c", "progress-media/qwen-input-B.png": "a400df6124787c3bbdd33cbe6bc551b30d7ba59f324f88f06f3e53601526583d", "progress-media/qwen-input-C.png": "485974cbcce4ef54b48bdbeae3208a1f275d819790987acb693d68beb8aa22a6", "progress-media/qwen-input-D.png": "af411d155c040bfe4cf9d8c5e60815886158784cf9af1daad2485e9146e785a1", "progress-media/qwen-input-E.png": "6256c7e070340802e3349d056a8cf4c754e286970b9f1b89796734548bb5a2bd"}}</script><script>
+'use strict';
+const D=JSON.parse(document.getElementById('report-data').textContent);
+const node=(tag,cls,text)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(text!==undefined)e.textContent=text;return e;};
+
+const E=D.execution,ns='http://www.w3.org/2000/svg';
+function imageBox(image,viewBox,rectangles){const svg=document.createElementNS(ns,'svg');svg.setAttribute('viewBox',viewBox);svg.setAttribute('role','img');svg.setAttribute('aria-label','DINO 固定裁剪与区域取样示意');const wh=viewBox.split(' ').slice(2);const img=document.createElementNS(ns,'image');img.setAttribute('href',image);img.setAttribute('width',wh[0]);img.setAttribute('height',wh[1]);svg.append(img);for(const r of rectangles){const rect=document.createElementNS(ns,'rect');for(const[k,v]of Object.entries(r))rect.setAttribute(k,v);svg.append(rect);}return svg;}
+const dinoContainer=document.getElementById('dino-execution');
+const sourceFigure=node('figure');sourceFigure.append(node('h4','','① 原腕部图：固定裁剪框'),imageBox(E.original,'0 0 640 480',[{x:160,y:180,width:320,height:300,fill:'none',stroke:'#46d097','stroke-width':5}]),node('figcaption','','绿色：实际裁剪范围 (160,180)–(480,480)'));dinoContainer.append(sourceFigure);
+const cropFigure=node('figure'),roi=[{x:64,y:48,width:128,height:208,fill:'#a286e7','fill-opacity':.15,stroke:'#b38af5','stroke-width':3}];for(let i=4;i<=12;i++)roi.push({x:i*16,y:48,width:.6,height:208,fill:'#b38af5','fill-opacity':.35});for(let i=3;i<=16;i++)roi.push({x:64,y:i*16,width:128,height:.6,fill:'#b38af5','fill-opacity':.35});cropFigure.append(node('h4','','② 缩放后取 ROI／CLS'),imageBox(E.crop,'0 0 256 256',roi),node('figcaption','','紫色：用于池化的指间 patch；CLS 使用整张裁剪。'));dinoContainer.append(cropFigure);
+const refPanel=node('div'),refs=node('div','dino-references');refPanel.append(node('h4','','③ ROI 最近参考图'));for(const r of E.roi_references){const f=node('figure'),im=node('img');im.src=r.image;im.alt=r.label==='held_at_snapshot'?'持物最近参考图':'空手最近参考图';f.append(im,node('figcaption','',(r.label==='held_at_snapshot'?'持物 ':'空手 ')+r.id+'\n余弦 '+r.similarity.toFixed(4)));refs.append(f);}refPanel.append(refs,node('p','caption','两张参考均来自其他 episode。相似度不是抓住的概率。'));dinoContainer.append(refPanel);
+document.getElementById('dino-values').textContent='本图 ROI 差值 '+E.scores.roi.margin.toFixed(4)+'；CLS 差值 '+E.scores.cls.margin.toFixed(4)+'。差值 = 最近持物相似度 − 最近空手相似度；单图双分支均 >0.02。';
+for(const f of E.qwen_inputs){const figure=node('figure',f.cited?'cited':''),image=node('img');image.src=f.image;image.alt='Qwen 输入 '+f.letter+'，记录行 '+f.row;figure.append(image,node('figcaption','',f.letter+' · '+f.time_s.toFixed(2)+'s'+(f.cited?' · 回答引用':'')));document.getElementById('qwen-inputs').append(figure);}
+document.getElementById('qwen-answer').textContent=JSON.stringify(JSON.parse(E.qwen_raw_response),null,2);
+
+for(const id of ['E01-L004-v3','E05-L006-v3','E04-L015-v3']){
+ const s=D.samples.find(x=>x.id===id),card=node('article','sample'),frames=node('div','frames');
+ card.dataset.sampleId=id;card.append(node('h3','',s.title),node('div','sample-id',id+' · '+(s.arm==='left'?'左臂':'右臂')));
+ for(const f of [s.images[0],s.images.at(-1)]){const figure=node('figure'),a=node('a'),img=node('img');a.href=f.image;a.target='_blank';a.rel='noopener';img.src=f.crop;img.alt=id+' '+f.stage;img.loading='lazy';a.append(img);figure.append(a,node('figcaption','',(f===s.images[0]?'闭爪附近':'核验末尾')+' · ΔZ '+f.rise_cm.toFixed(2)+'cm'));frames.append(figure);}
+ card.append(frames,node('span','result'+(s.eligible?(s.effective_label==='failure'?' empty':''):' excluded'),s.eligible?(s.effective_label==='success'?'抓到 → 候选奖励 1':'未持住 → 候选奖励 0'):'无抬升核验 → 不记奖励'),node('p','',s.explanation));
+ const detail=node('details'),video=node('video');detail.append(node('summary','','播放三视角视频'));video.controls=true;video.preload='none';video.playsInline=true;video.src=s.clip;video.setAttribute('aria-label',id+'三视角视频');detail.append(video);detail.addEventListener('toggle',()=>{if(!detail.open)video.pause();});card.append(detail);document.getElementById('samples').append(card);
+}
+</script></body></html>
