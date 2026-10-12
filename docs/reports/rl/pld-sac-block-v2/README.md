@@ -93,3 +93,32 @@ epoch/request_id/observation_id均复制原请求token，不建立第二套计�
 7. 真机probe/eval交替比较抓起持住率、空抓率、双臂分项、整轮C/N、掉落/分错、耗时和保护触发。训练loss不等于成功率。
 
 服务端数据与实验归档沿用 `/home/wuyan/lyj/pld-grasp/`；Thor派生产物写新版本目录，保留原件、SHA、奖励审核版本、代码、配置、checkpoint、优化器、RNG和排除审计。旧v1资产只作历史，禁止混用schema。论文方法依据：[PLD](https://arxiv.org/html/2511.00091v1)、[SAC](https://spinningup.openai.com/en/latest/algorithms/sac.html)；当前是PLD式工程适配，不是完整论文复现。
+
+## 数据管家操作入口
+
+`Replay-Curator`只运行CPU数据处理，不导入Torch。Qwen/DINO继续使用原独立Thor视觉环境。本版先验证闭环，抓取门控、物理切段与持物判定是第一个任务适配器；SAC与执行来源/replay合同可复用，换任务仍需定义可核验的结果，不能宣称当前夹爪规则适用于所有任务。
+
+```bash
+# Thor离线：输入原录制episode路径，顺序固定并保存在manifest。
+python scripts/pld_rl/curate_recording.py \
+  --episodes /data/raw/session_a/episode_000001 /data/raw/session_a/episode_000002 \
+  --validation-episodes /data/raw/session_a/episode_000002 \
+  --export-evidence --output /data/releases/round01-candidates-v1
+
+# 在原Qwen/DINO流程判读、抽检后发布reviewed.json。这里不自动发奖。
+python scripts/pld_rl/curate_recording.py \
+  --episodes /data/raw/session_a/episode_000001 /data/raw/session_a/episode_000002 \
+  --validation-episodes /data/raw/session_a/episode_000002 \
+  --rewards /data/releases/round01-reviewed-v1.json \
+  --output /data/releases/round01-reward-release-v1
+
+# Thor离线或服务器：核对不可变发布SHA后生成训练replay。
+python scripts/pld_rl/prepare_blocks.py \
+  --curator /data/releases/round01-reward-release-v1 \
+  --bundles /data/bundles/round01-bootstrap \
+  --output /data/releases/round01-replay-v1
+```
+
+这些是接口示例路径，不是当前实际采集包或立即开训命令。输出目录必须新建，不能覆盖。`reviewed.json`每项字段为`candidate_id/candidate_sha256/status(held|empty)/approved=true/reviewer/evidence_rows`，其中evidence_rows选自同一候选内释放前、≥5cm且新鲜的取样帧行。审核SHA绑定原始H5和视频SHA、候选内容；不能修改数据后复用旧批准。新响应输入按原生`observation_id`关联原记录，不能假设图像行号、控制tick、请求收到时刻三者相同。
+
+客户端转交文本单独放在[client-request.md](client-request.md)，供用户审核和转发；本任务未自动发送给客户端agent。

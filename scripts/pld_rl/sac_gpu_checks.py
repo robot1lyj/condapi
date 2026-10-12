@@ -39,7 +39,7 @@ def native_hil_roundtrip(output, snapshot, bundle):
     with h5py.File(folder / "samples.h5", "w") as f:
         f["committed_rows"] = len(rows)
         columns = {"time": "time", "tick": "tick", "epoch": "epoch", "measured_state": "measured_state",
-                   "observation_state": "measured_state", "submitted_action": "submitted_action",
+                   "observation_state": "measured_state", "observation_valid": "observation_valid", "submitted_action": "submitted_action",
                    "is_intervention": "is_intervention", "camera_host_received_at": "camera_times", "video_indices": "video_indices"}
         for name, key in columns.items():
             f[name] = np.asarray([r[key] for r in rows])

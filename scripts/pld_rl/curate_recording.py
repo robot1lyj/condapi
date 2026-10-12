@@ -28,7 +28,7 @@ def read_episode(folder):
     import h5py  # noqa: PLC0415 -- needed only by the portable offline entrypoint
 
     rows, hashes = [], {}
-    required = ("time", "tick", "epoch", "measured_state", "observation_state", "submitted_action", "is_intervention",
+    required = ("time", "tick", "epoch", "measured_state", "observation_state", "observation_valid", "submitted_action", "is_intervention",
                 "video_indices", "camera_host_received_at")
     for path in sorted(folder.glob("segment_*/samples.h5")):
         hashes[str(path)] = sha256(path)
@@ -44,6 +44,7 @@ def read_episode(folder):
                 rows.append({"time": float(data["time"][i]), "tick": int(data["tick"][i]), "epoch": int(data["epoch"][i]),
                              "episode_id": folder.name, "measured_state": data["measured_state"][i].tolist(),
                              "measured_state_valid": clock_valid and bool(masks["measured_state"][i]),
+                             "observation_valid": bool(data["observation_valid"][i]) and bool(masks["observation_valid"][i]),
                              "submitted_action": data["submitted_action"][i].tolist(),
                              "submitted_valid": clock_valid and bool(masks["submitted_action"][i]),
                              "is_intervention": bool(data["is_intervention"][i]),
@@ -115,7 +116,15 @@ def export_evidence(candidates, output):
     write_json(output / "image-jobs.json", list(jobs.values()))
     # Unqualified cases remain in candidates.json; do not feed evidence-free
     # attempts to a forced binary VLM prompt.
-    write_json(output / "candidates-prepared.json", [c for c in candidates if c["evidence_eligible"] and c.get("montage")])
+    prepared = []
+    for c in candidates:
+        if c["evidence_eligible"] and c.get("montage"):
+            # Keep full raw evidence for review, but a local-reward judge must
+            # not inspect a later Pi recovery as if the specialist achieved it.
+            frames = [f for f in c["frames"] if f["tick"] <= c.get("scoring_end_tick", float("inf"))]
+            if any(f["lift_from_closure_m"] >= .05 for f in frames):
+                prepared.append({**c, "frames": frames})
+    write_json(output / "candidates-prepared.json", prepared)
 
 
 def main():
@@ -140,10 +149,21 @@ def main():
         rows, source_hashes = read_episode(folder)
         hashes.update(source_hashes)
         c = physical_candidates(rows, fk, number)
+        w, rejected = reconstruct_intervals(rows)
+        groups = defaultdict(list)
+        for interval in w:
+            groups[interval["proposal"]["window_id"]].append(interval)
         for candidate in c:
+            matched = []
+            for window in groups.values():
+                first, last = window[0]["proposal"], window[-1]["receipt"]
+                if (last.get("window_end") and first["arm"] == candidate["arm"] and first["epoch"] == candidate["epoch"]
+                        and first["start_tick"] <= candidate["close_tick"] < last["end_tick"]):
+                    matched.append(last["end_tick"])
+            if len(matched) == 1:
+                candidate["scoring_end_tick"] = matched[0]
             candidate["source_release_sha256"] = fingerprint(source_hashes)
             candidate["candidate_sha256"] = fingerprint(candidate)
-        w, rejected = reconstruct_intervals(rows)
         split = "val" if str(folder) in validation else "train"
         relevant = [r for r in approved if r["candidate_id"] in {q["candidate_id"] for q in c}]
         linked, rewards, association = associate_rewards(w, c, relevant, rows, split)
@@ -162,7 +182,8 @@ def main():
     for name, value in (("windows", windows), ("records", records)):
         (args.output / f"{name}.jsonl").write_text("".join(json.dumps(r, allow_nan=False) + "\n" for r in value))
     outputs = {p.name: sha256(p) for p in args.output.iterdir() if p.is_file()}
-    write_json(args.output / "manifest.json", {"schema": "pld_curator_v2", "episodes_in_order": list(map(str, folders)),
+    write_json(args.output / "manifest.json", {"schema": "pld_curator_v2", "producer": "Replay-Curator",
+               "episodes_in_order": list(map(str, folders)),
                "sources_sha256": hashes, "outputs_sha256": outputs,
                "review_sha256": sha256(args.rewards) if args.rewards else None,
                "ready_for_replay_compilation": bool(records), "robot_success_rate": None})

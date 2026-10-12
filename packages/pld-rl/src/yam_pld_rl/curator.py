@@ -85,8 +85,8 @@ def reconstruct_intervals(rows):
             raise ValueError("duplicate epoch/tick in raw recording")
         by_tick[key] = i
         oid = row["details"].get("obs_id")
-        if oid:
-            observations[(row["epoch"], oid)] = row["raw_ref"]
+        if oid is not None and row.get("observation_valid", False):
+            observations.setdefault((row["epoch"], oid), row["raw_ref"])
         reply = row["details"].get("policy_reply") or {}
         token = reply.get("token") or {}
         if not token or "actions" not in reply:
@@ -195,6 +195,8 @@ def associate_rewards(records, candidates, rewards, rows, split):
             last = window[-1]
             if not last["receipt"]["window_end"]:
                 raise ValueError("missing Thor window handoff observation")
+            if last["receipt"]["window_end_reason"] not in {"lift_guard", "reopened", "timeout"}:
+                raise ValueError("window truncated by observation gap or invalid handoff")
             match = matches[key]
             if len(match) != 1 or counts[match[0]["candidate_id"]] != 1:
                 raise ValueError("online window does not uniquely match one physical closure")

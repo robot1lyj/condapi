@@ -50,7 +50,7 @@ class BlockRuntime:
 
     @property
     def metadata(self):
-        return {"schema": SCHEMA, "snapshot_sha256": self.snapshot,
+        return {"schema": SCHEMA, "expert": "PLD-Corrector", "snapshot_sha256": self.snapshot,
                 "contract_sha256": fingerprint(self.contract), "modes": ["off", "shadow", "probe", "collect", "eval"],
                 "block_steps": self.contract["block_steps"], "segmentation_owner": "server",
                 "gate_owner": "thor", "recording": "native_HIL_with_full_pld_reply"}

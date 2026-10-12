@@ -102,7 +102,7 @@ def main():
             rng.bit_generator.state = ckpt["numpy_rng"]
             torch.set_rng_state(ckpt["torch_rng"].cpu())
             torch.cuda.set_rng_state(ckpt["cuda_rng"].cpu())
-    run = {**identity, "policy_contract": policy_contract, "job": os.environ["SLURM_JOB_ID"],
+    run = {**identity, "producer": "SAC-Coach", "policy_contract": policy_contract, "job": os.environ["SLURM_JOB_ID"],
            "hostname": os.uname().nodename, "torch": torch.__version__, "gpu": torch.cuda.get_device_name(),
            "replay": replay_manifest, "pi_updated": False, "robot_success_rate": None,
            "parent_checkpoint": str(args.initialize_learner) if args.initialize_learner else None,

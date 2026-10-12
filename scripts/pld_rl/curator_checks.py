@@ -76,7 +76,7 @@ def native_fixture(snapshot="fixture"):
             d["policy_reply"] = {"token": tokens[b], "pld": q, "actions": q.get("actions", q["base"]),
                                  "discarded": False, "error": None}
         rows.append({"time": 10000+t/30, "tick": t, "epoch": 0, "episode_id": "ep", "details": d,
-                     "measured_state": state.tolist(), "measured_state_valid": True,
+                     "measured_state": state.tolist(), "measured_state_valid": True, "observation_valid": True,
                      "submitted_action": origin["actions"][index], "submitted_valid": True,
                      "is_intervention": False, "intervention_valid": True, "raw_ref": f"fixture/row{t}",
                      "camera_times": [10000+t/30]*3, "camera_valid": [True]*3, "video_indices": [t]*3,
@@ -125,12 +125,14 @@ class CuratorChecks(unittest.TestCase):
             self.assertTrue(audit)
 
     def test_review_release_missing_handoff_and_late_outcome(self):
-        for mutation in ("hash", "handoff", "late"):
+        for mutation in ("hash", "handoff", "late", "gap"):
             _, rows, candidates, reviews = native_fixture()
             if mutation == "hash":
                 reviews[0]["candidate_sha256"] = "stale"
             elif mutation == "handoff":
                 rows[-1]["details"]["policy_reply"]["pld"]["gate"]["ended"] = None
+            elif mutation == "gap":
+                rows[-1]["details"]["policy_reply"]["pld"]["gate"]["ended"]["reason"] = "observation_gap"
             else:
                 reviews[0]["evidence_rows"] = [29]
             windows, _ = reconstruct_intervals(rows)
