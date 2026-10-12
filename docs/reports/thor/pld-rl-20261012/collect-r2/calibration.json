@@ -1,0 +1,38 @@
+{
+  "schema": "pld_collect_calibration_v1",
+  "source_hashes": {
+    "/home/wuyan-lyj/condapi-data/rl/lego-pld-probe-20261012-e01-v1/raw/session_20261012_180423_471f9a/episode_000001/manifest.json": "3dd136a2fbfce1081bf9e528b920276b3a05b6d70d1a5be913112229adbc601a",
+    "/home/wuyan-lyj/condapi-data/rl/lego-pld-probe-20261012-e01-v1/raw/session_20261012_180423_471f9a/episode_000001/segment_000000/samples.h5": "b1134b4bc7f53db07f529625f767617a888a868b5b8648b69326def53a9f84cd",
+    "/home/wuyan-lyj/condapi-data/rl/lego-pld-probe-20261012-e01-v1/raw/session_20261012_180423_471f9a/episode_000001/segment_000001/samples.h5": "907acce35f429ccf8f124115487ea5a006eab1cb8a3c23f8a2b3bc0a29b0ec87",
+    "/home/wuyan-lyj/condapi-data/rl/lego-pld-probe-20261012-e01-v1/raw/session_20261012_180423_471f9a/policy_events.jsonl": "7367f0097b62e9a168245c52e1b2c1a6b3bf4d90738786dc886e7f0ecea46e5c",
+    "/home/wuyan-lyj/condapi-data/rl/lego-pld-probe-20261012-e01-v1/raw/session_20261012_180423_471f9a/episode_000001/segment_000000/left.mp4": "5eacda962644cf22a14a27c0899ee762c66f9611422222fc698d6050e6244044",
+    "/home/wuyan-lyj/condapi-data/rl/lego-pld-probe-20261012-e01-v1/raw/session_20261012_180423_471f9a/episode_000001/segment_000000/right.mp4": "a9c1281f21ff9db6cb79d543f63cb51fec700a9b4cc8550de7100f7904f588bf",
+    "/home/wuyan-lyj/condapi-data/rl/lego-pld-probe-20261012-e01-v1/raw/session_20261012_180423_471f9a/episode_000001/segment_000000/top.mp4": "312c291e1cbfcb0aaaeb7705a0528ec2e75591fe37d97d4c942062b1ffc6bb5e",
+    "/home/wuyan-lyj/condapi-data/rl/lego-pld-probe-20261012-e01-v1/raw/session_20261012_180423_471f9a/episode_000001/segment_000001/left.mp4": "196be11be65f48e07a59ab0efa1d794db1d89e59fd28addb4735d4df7e48dece",
+    "/home/wuyan-lyj/condapi-data/rl/lego-pld-probe-20261012-e01-v1/raw/session_20261012_180423_471f9a/episode_000001/segment_000001/right.mp4": "253a34cdd7c643910b880b3d187e90fc4421d63e543015c06f6b0598947af0b2",
+    "/home/wuyan-lyj/condapi-data/rl/lego-pld-probe-20261012-e01-v1/raw/session_20261012_180423_471f9a/episode_000001/segment_000001/top.mp4": "e7fa747d7d42ae7a81e2672456be9ea2db9be454f54aa6fc21d0179e54afb5dd"
+  },
+  "legacy_candidates_sha256": "ec3589782934af87eb4b9bb766407c1049e2d096bfc2c4b8c011a8ab5b3f15a7",
+  "legacy_replay_mismatches": 0,
+  "legacy_candidate_coverage": 20,
+  "legacy_candidates": 20,
+  "relative_candidates": 38,
+  "relative_candidate_arms": {
+    "left": 6,
+    "right": 32
+  },
+  "qualified_relative_candidates": 35,
+  "online_windows": 37,
+  "online_window_arms": {
+    "right": 31,
+    "left": 6
+  },
+  "multiple_relative_closures": [],
+  "boundary_rejections": [],
+  "sampled_fk_corner_max_m": 0.022551121968793275,
+  "contract_sha256": "97bf9c4b4b5173477a9c3bf01e6f1ab4656b47d6757d919237daeec7278d6601",
+  "script_sha256": "a881ef3778881626b11307072220a0f150089a19860aa1274b83449645e706bb",
+  "training": false,
+  "robot_execution": false,
+  "success_rate": null
+}

@@ -12,6 +12,8 @@
 
 首集“乐高分拣-pld-rl”真实probe：3356行/320回复/3347动作来源tick及6视频完整解码通过；20个闭爪候选全部有5cm证据，不等于全成功。232tick仅夹爪上限0.98裁剪，诊断重建按manifest复现后116/116区间核验通过，原始与实际动作均保留，训练合同仍严格。在线窗口覆盖17/20且有一窗口合并两次抓取，不能直接赋含糊局部奖励；奖励与训练记录仍为0。[审核与三端原件路径](reports/rl/lego-pld-probe-20261012-e01/README.md)为当前事实owner。
 
+后续修订：上述20是legacy_v2候选，不是整集总尝试数；relative_v3为38收拢候选（左6/右32），35有抬升资格。新ID不继承旧奖励，原始/v1/v2不覆盖。collect-r2保持原客户端`base/actions`网络语义，新增`physical_base/physical_actions`作为SDK夹爪[0.02,0.98]映射后的训练坐标；`raw_base`保留Pi，RTC网络前缀逐值保持，未知改写仍拒绝。编译器重算映射/可行幅度/解码/特征；管家按原token证明延迟到下一前缀的`actor_effects_before_handoff`，不压缩时间或重写来源。新bundle合同`97bf9c4b…`、actor快照`ac5d1e0d…`与部署回执绑定；旧诊断不自动升级训练资格。当前bootstrap零更新，首两集collect仍待实际录制与抽检，不存在已发布的新真实修正奖励。[现行合同与回执](reports/thor/pld-rl-20261012/collect-r2/deployment.json)和[v2说明](reports/rl/pld-sac-block-v2/README.md)为当前依据。
+
 ### 本次不可变训练数据版本（2026-10-12）
 
 服务器根目录 `/home/wuyan/lyj/pld-grasp/`：`datasets/classifications/` 保留完整v3r3分类及抬升资格侧车；`datasets/replays/pld-offline14-20261012-v2/` 保存奖励、整轮标签、逐次身份、原始图像引用、replay、训练集归一化及后续特征缓存；`datasets/catalog/<版本>.json`绑定来源与SHA，`datasets/index.json`仅作导航。原始录像继续保存在已验证目录 `/home/wuyan/lyj/YAM/YAM_data/derived/rl/parts_rollout14_20261010_v1/raw/`，不覆盖。实验配置、环境清单、日志、逐次预测与全部checkpoint按实验版本归 `runs/pld-grasp-offline-20261012-v{1,2}/` 及 `runs/pld-methods14-20261012-v{1,2}/`；新十组追加50个checkpoint和400个逐次预测，索引绑定代码/比较SHA，原数据与前八组不覆盖；新数据/奖励创建新版本，不覆盖旧结论。失败样本及16条缺精确终点转移的已知结果也保留，不能只归档成功。

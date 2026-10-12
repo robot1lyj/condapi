@@ -1,5 +1,7 @@
 # 08 · Thor 端侧部署
 
+**当前PLD部署（2026-10-12 19:55 CST）**：用户确认停止客户端后，`pld-rl:thor-collect-20261012-r2`在原`ws://192.168.250.1:8000` healthy/MAXN；原Pi20w权重、7步FP32/TF32 engine和quantile RTC不变。gate v2、现场高度校准及零均值探索actor已安装，五模式开放，首两集边界关节±0.02rad/夹爪±0.05。候选与生产各48例模式输入＋普通RTC9例通过，生产含actor P95=224.21ms；原客户端校验器16例通过，无需客户端改代码。新actor还没有跨IPC真机rollout，首两集collect用于此验证；不称已有成功率改善。镜像ID`37ab017566…`、source2612e08、actor快照`ac5d1e0d…`、合同`97bf9c4b…`，完整SHA与回退归[部署报告](reports/thor/pld-rl-20261012/README.md#collect-r2-当前上线1955-cst)。原probe容器与collect-r1都已停止保留；旧Pi也保留。未操作3588。以下15:31及16:24为同日历史阶段。
+
 2026-10-12 15:31 CST，按用户明确要求新增并上线`pld-rl`容器，接管`ws://192.168.250.1:8000`，旧`pi05-rtc-infer`停止保留。复用原20w trained RTC、7步FP32/TF32/quantile engine；本机普通RTC9例＋probe9例通过，MAXN新会话active。当前仅off/probe诊断，actor未加载、修正未启用，collect/eval/shadow明确拒绝，诊断记录不进SAC。客户端/跨IPC仍待联调，没有操作3588。用户指定的新容器仍复用Pi系列基础镜像和唯一生产地址，不改变其他模型的默认容器规则。身份、延迟、回执与回退边界归[本次上线](reports/thor/pld-rl-20261012/README.md)，分工与训练归[PLD-Grasp方案](reports/rl/pld-sac-block-v2/README.md)。下方旧部署条目保留历史，不代表当前容器和电源会话。
 
 16:24补齐并复验Thor离线Replay-Curator：固定bfa5859源码包，复用已装数据镜像，以无网络/无GPU的runc CPU容器处理原生UUID/HDF5/session侧车并导出probe审计。左右两条模拟原生录像104行/16回复/86来源tick通过，全部源/输出/图片哈希复核，奖励与训练记录为0；不冒充真机通过。在线pld-rl的镜像/权重/握手不变，本机health与off/probe能力重新确认。[发布路径与回执](reports/thor/pld-rl-20261012/README.md#零修正probe数据链路补齐1624-cst)记录CPU启动器及两轮真实probe步骤；没有操作3588或开始训练。

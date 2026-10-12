@@ -44,7 +44,7 @@ def physical_candidates(rows, fk, episode_number=1, *, segmentation="relative_v3
             fresh = [i for i in range(close, end + 1)
                      if rows[i]["video_indices"][col] >= 0 and rows[i]["camera_valid"][col]
                      and 0 <= times[i] - rows[i]["camera_times"][col] <= 0.3 and np.isfinite(z[i])]
-            lifted = [i for i in fresh if z[i] - z[reference] >= 0.05]
+            lifted = [i for i in fresh if i >= reference and z[i] - z[reference] >= 0.05]
             picks = [event["entry"], close, reference]
             if fresh:
                 picks += [min(fresh, key=lambda i: abs(times[i] - times[close] - t)) for t in (0.2, 0.45, 0.75, 1.15)]
@@ -64,7 +64,9 @@ def physical_candidates(rows, fk, episode_number=1, *, segmentation="relative_v3
                 frames.append({"row": i, "raw_ref": rows[i]["raw_ref"], "tick": int(ticks[i]), "epoch": int(epochs[i]),
                                "time": float(times[i]), "since_close_s": float(times[i] - times[close]),
                                "openness": float(g[i]), "position_m": xyz[i].tolist(),
-                               "lift_from_closure_m": float(z[i] - z[reference]), "views": views})
+                               "lift_from_closure_m": float(z[i] - z[reference]) if i >= reference else 0.0,
+                               "height_from_reference_m": float(z[i] - z[reference]),
+                               "before_reference": i < reference, "views": views})
             version = "v3" if segmentation == "relative_v3" else "v2"
             result.append({"candidate_id": f"E{episode_number:02d}-{arm[0].upper()}{serial:03d}-{version}",
                            "episode_number": episode_number, "episode_id": rows[close]["episode_id"], "arm": arm,

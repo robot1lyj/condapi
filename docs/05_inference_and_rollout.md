@@ -2,11 +2,11 @@
 
 ## 本对话 PART 推进边界（2026-10-11）
 
-**当前已确认PLD式整段抓取修正、左右臂覆盖；已实现PLD-SAC短块训练/回流及可选Thor推理入口，服务器合成闭环与Thor独立推理测试通过，pld-rl已接管原地址提供off/probe诊断；未激活真机修正。** 唯一学习状态归[03](03_training_and_evaluation.md#pld-主线与-recap-后续路线2026-10-11)。拟冻结Pi0.5，专家按活动臂修正接近/对准、下降、闭爪和抬升持物，成功后交还Pi放置；旧H50×1夹爪投影及±0.50上限仅为历史工具，不成为新动作合同。
+**当前PLD-Grasp左右臂整段抓取修正已安装零均值探索包，pld-rl collect-r2在原8000地址开放五模式，可开始两集collect试采；尚无新actor的真机rollout或成功率提升证据。** 本机真实输入/普通RTC及原客户端校验器通过；跨IPC新actor验证留给首两集。冻结Pi0.5，专家只改活动臂7D未承诺后缀，交还Pi运输/放置。当前学习状态归[03](03_training_and_evaluation.md#pld-主线与-recap-后续路线2026-10-11)，[现场操作与字段](reports/rl/pld-sac-block-v2/README.md)替代下文早期probe-only步骤；旧H50×1及±0.50仅历史。
 
-新接口 `pld_sac_block_v2` 的[模式、字段与分工](reports/rl/pld-sac-block-v2/README.md)替代v1客户端切段/固定执行块要求：Thor连接独立门控选择窗口和活动臂，客户端只复制原token身份与上个实际命令、按原RTC执行并完整保存pld响应。8tick是修正包络长度，不是客户端推理周期；原前缀数值及历史来源保持。数据管家与视觉裁判优先Thor离线处理，训练仍在GPU服务器。`--pld-bundle/--pld-encoder`仅为可选入口，不传保持Pi；正式修正须待实际限位与客户端联调验收；用户明确要求的新pld-rl已上线probe-only诊断，动作仍Pi，不启用collect/eval/shadow。
+新接口 `pld_sac_block_v2` 的[模式、字段与分工](reports/rl/pld-sac-block-v2/README.md)替代v1客户端切段/固定执行块要求：Thor连接独立门控选择窗口和活动臂，客户端只复制原token身份与上个实际命令、按原RTC执行并完整保存pld响应。8tick是修正包络长度，不是客户端推理周期；原前缀数值及历史来源保持。数据管家与视觉裁判优先Thor离线处理，训练仍在GPU服务器。`--pld-bundle/--pld-encoder`是可选入口，不传保持Pi；当前正式合同/探索包与原客户端字段校验通过，五模式开放，新actor跨IPC与真机边界在首两集试采核验。
 
-2026-10-12下一步已确定为两轮零修正probe：客户端新版按原RTC录制完整session，Thor离线CPU管家合并原生UUID/HDF5/事件侧车并检查输入、前缀和真实提交来源；不用人工逐抓取按键。用户已委托Thor侧确定专家边界，先按这批录像的Pi变化/FK位移选范围，不激活“放大十倍”或把此前小幅候选当最终学习上限。操作归[probe采集与验收](reports/rl/pld-sac-block-v2/README.md#先采两轮零修正probe)，录制字段归[04](04_data_contracts.md)。
+早期两轮probe计划在首集实查后已推进为两集collect试采；用户委托Thor选择范围并批准升级。当前动作边界来自首集Pi/FK校准，不激活十倍放大，也不当作最优学习上限。原RTC完整session、UUID/HDF5/事件侧车保留，不用人工逐抓取按键。[当前操作](reports/rl/pld-sac-block-v2/README.md#当前先采两轮collect以下probe步骤保留为历史)，录制字段归[04](04_data_contracts.md)。
 
 新服务需先核对当前观测、实际决策节奏、物理单位、动作界限及 RTC 承诺；只修改未承诺后缀，任何投影后已承诺前缀仍逐值保持。左右臂共用网络、窗口重叠时仲裁活动臂为工程提案，需记录选中/跳过及实际执行。未训练 actor、端口监听或离线价值初始化均不能证明动作收益；零残差确定性输出等于基础 Pi。奖励判定可异步处理录像，不要求人工预判失败后键盘接管。
 

@@ -1,5 +1,26 @@
 # pld-rl 推理容器上线（2026-10-12）
 
+## collect-r2 当前上线（19:55 CST）
+
+用户批准修正门控并确认客户端已停推理后，`pld-rl:thor-collect-20261012-r2`已在原8000地址healthy/MAXN，五模式开放。可录两集collect，初始actor为**零均值有界探索**，尚无真机改善证据；`replay_contract_ready=true`只表示正式记录合同已装好，不代表已有训练数据。Pi仍为原50h/200000七步trained RTC，权重/engine/norm均未更换。
+
+| 项目 | 当前证据 |
+|---|---|
+| 镜像 / 运行源码 | `sha256:37ab017566f6984cee94c8b546745c7cf9af4316863c4094bb35c1c00c611c64` / `2612e08f8c2668e665ca07ba00dcf5b5bcc318af` |
+| actor快照 / 合同 | `ac5d1e0df8eb8ba7c13d4f8446c31dc2674526d9d21478c3fca353d7e98d8e2d` / `97bf9c4b4b5173477a9c3bf01e6f1ab4656b47d6757d919237daeec7278d6601` |
+| actor初始化 | Slurm2321，固定e4e1a7b导出checkpoint0/完整优化器与RNG；0梯度更新，不用旧漂移actor |
+| 半径 / 连续性 | 每关节±0.02rad、夹爪±0.05；残差每tick guard 0.008rad/0.02；SDK原0.02–0.98端点不改 |
+| 本机输入验收 | 候选与生产各48例probe/shadow/eval/collect，左右臂均触发；普通RTC各9例d=0/1/10通过 |
+| 延迟 | 生产含actor P50/P95=222.86/224.21ms；普通Pi路径198.88/199.71ms；不是跨IPC物理控制端到端计时 |
+| 原客户端兼容 | 对真实返回包调用只读YAM原`validate_reply`，16例通过；字段保留、前缀精确，未改客户端 |
+| 尚待验证 | 新actor跨IPC/真机rollout、实际非零修正效果、首两集奖励；本机输入测试没有连接执行器 |
+
+新版gate按Pi未承诺计划提前选择、相对开合确认/重新允许，闭合后跟踪下降低点，连续上升且≥5cm交还Pi，无额外1s保持。现场FK闭合高度范围过滤框边收拢；它不是语义检测器，换场景须重新校准/替换适配。网络`base/actions`满足原客户端校验；训练用新增`physical_base/physical_actions`，SDK端点映射不冒充残差；RTC延迟执行沿原token核验。[方案与采集步骤](../../rl/pld-sac-block-v2/README.md)定义奖励及训练边界。
+
+[部署](collect-r2/deployment.json)、[模式与延迟](collect-r2/production-bundle-smoke.json)、[普通RTC](collect-r2/production-rtc-smoke.json)、[客户端校验](collect-r2/client-wire-validation-r2.json)、[校准](collect-r2/calibration.json)、[合同](collect-r2/contract.json)、[初始化](collect-r2/bootstrap-run.json)保留独立身份。41项本地轻量回归通过；Thor离线CPU/runc独立导出v3为38候选/116旧诊断区间、奖励0，未训练，[离线回执](collect-r2/curator-launcher.json)保留原始只读边界。
+
+当前release为`/home/wuyan-lyj/thor/pi/services/pld-collect-20261012-r2/`，actor与encoder只读复用r1文件。原probe容器`pld-rl-probe-retained-20261012-r1`、r1探索容器`pld-rl-retained-pld-collect-20261012-r2`及旧Pi都已停止保留；镜像、权重、旧日志不删除。r1为本轮中间工程版本，补齐客户端wire字段兼容后以r2为正式试采版本，未在r1执行真机探索。未操作3588，无客户端任务消息。以下15:31条目是首版历史，不代表当前能力。
+
 用户明确要求新增名为`pld-rl`的容器，并允许停止原Pi推理。2026-10-12 15:31 CST完成切换：**`pld-rl` running/healthy，`ws://192.168.250.1:8000`不变，旧`pi05-rtc-infer`已停止并保留**。当前只是`probe_diagnostics_only`，实际动作仍全部来自Pi，没有加载或执行RL actor。
 
 ## 当前合同

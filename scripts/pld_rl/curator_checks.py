@@ -92,6 +92,17 @@ def native_fixture(snapshot="fixture"):
 
 
 class CuratorChecks(unittest.TestCase):
+    def test_precontact_height_is_not_postgrasp_lift_evidence(self):
+        _, rows, _, _ = native_fixture()
+        for row in rows:
+            row["measured_state"][6] = .9 if row["tick"] < 6 else .7
+            row["measured_state"][0] = .1 if row["tick"] < 10 else .01
+        candidates = physical_candidates(rows, FixtureFK())
+        self.assertEqual(len(candidates), 1)
+        self.assertFalse(candidates[0]["evidence_eligible"])
+        self.assertFalse(candidates[0]["lift_rows"])
+        self.assertTrue(all(f["lift_from_closure_m"] == 0 for f in candidates[0]["frames"] if f["before_reference"]))
+
     def test_delayed_effect_in_next_native_prefix_is_still_verified(self):
         c, rows, candidates, reviews = native_fixture()
         first = rows[0]["details"]["policy_reply"]["pld"]

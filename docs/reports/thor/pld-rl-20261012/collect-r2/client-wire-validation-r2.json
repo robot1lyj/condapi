@@ -1,0 +1,90 @@
+{
+  "status": "passed",
+  "reference_validator_sha256": "e119b1903459e3170b88a2c664f8947369ee022285043bf7bbbc5e6706b6ef13",
+  "wire_sha256": "02a147f87165be0b02f2df9a38dd5a8ab7bdfc1c13fdc707848c21cba7546c57",
+  "cases": [
+    {
+      "mode": "probe",
+      "sample": "obs-0.npz",
+      "passed": true
+    },
+    {
+      "mode": "probe",
+      "sample": "obs-1.npz",
+      "passed": true
+    },
+    {
+      "mode": "probe",
+      "sample": "obs-2.npz",
+      "passed": true
+    },
+    {
+      "mode": "probe",
+      "sample": "obs-3.npz",
+      "passed": true
+    },
+    {
+      "mode": "shadow",
+      "sample": "obs-0.npz",
+      "passed": true
+    },
+    {
+      "mode": "shadow",
+      "sample": "obs-1.npz",
+      "passed": true
+    },
+    {
+      "mode": "shadow",
+      "sample": "obs-2.npz",
+      "passed": true
+    },
+    {
+      "mode": "shadow",
+      "sample": "obs-3.npz",
+      "passed": true
+    },
+    {
+      "mode": "eval",
+      "sample": "obs-0.npz",
+      "passed": true
+    },
+    {
+      "mode": "eval",
+      "sample": "obs-1.npz",
+      "passed": true
+    },
+    {
+      "mode": "eval",
+      "sample": "obs-2.npz",
+      "passed": true
+    },
+    {
+      "mode": "eval",
+      "sample": "obs-3.npz",
+      "passed": true
+    },
+    {
+      "mode": "collect",
+      "sample": "obs-0.npz",
+      "passed": true
+    },
+    {
+      "mode": "collect",
+      "sample": "obs-1.npz",
+      "passed": true
+    },
+    {
+      "mode": "collect",
+      "sample": "obs-2.npz",
+      "passed": true
+    },
+    {
+      "mode": "collect",
+      "sample": "obs-3.npz",
+      "passed": true
+    }
+  ],
+  "robot_connected": false,
+  "client_modified": false,
+  "cross_IPC_new_actor_tested": false
+}

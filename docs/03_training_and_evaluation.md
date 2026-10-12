@@ -2,11 +2,11 @@
 
 ## PLD 主线与 RECAP 后续路线（2026-10-11）
 
-**用户已确认：先完成PLD式整段抓取修正，首轮左右臂都启用；RECAP路线后置。** 当前方案升级为[PLD-SAC v2职责与接口](reports/rl/pld-sac-block-v2/README.md)：Thor在线运行Pi-Base与PLD-Grasp；Thor离线优先运行Replay-Curator与Qwen-DINO Judge；GPU服务器复核入库、归档并运行SAC-Coach。客户端复用原RTC和连续HIL，不切段、不编号、不判奖。当前`pld-rl`已上线off/probe诊断，动作仍全部Pi；actor未加载，尚无真实非零修正数据或提升证据。诊断probe不直接进入SAC，正式物理合同与actor安装后再采训练数据。v1合成验证保留历史；v2实现/验收独立记录，不能沿用旧回执合同或把旧离线actor漂移当改进。
+**用户已确认：先完成PLD式整段抓取修正，首轮左右臂都启用；RECAP路线后置。** 当前方案为[PLD-SAC v2职责与接口](reports/rl/pld-sac-block-v2/README.md)：Thor在线运行Pi-Base与PLD-Grasp；Thor离线运行Replay-Curator与Qwen-DINO Judge；GPU服务器归档并运行SAC-Coach。客户端复用原RTC和连续HIL，不切段、不编号、不判奖。当前`pld-rl`已安装零均值探索actor、开放五模式，可开始两集collect；尚无真实修正数据或提升证据。旧诊断probe不直接进入SAC；bootstrap不是已训练专家。v1及旧离线诊断保留，不能沿用不兼容回执或把漂移当改进。
 
-2026-10-12当前执行顺序：先采两轮零修正probe；数据管家已补原生UUID和完整session事件侧车的读取、去重、取消隔离与独立probe审计。用户将动作边界选择交给Thor侧，最后确认按probe中的Pi动作变化与FK位移再定正式探索范围；±0.01rad/夹爪±0.02仅是小幅候选，“放大十倍”尚未启用。当前不开始训练，也不安装随机修正actor；客户端跨IPC及容器误介入由这两轮真机录像验收。细节归[v2方案](reports/rl/pld-sac-block-v2/README.md#先采两轮零修正probe)。
+2026-10-12 19:55当前：用户确认停止推理后，Thor已升级collect-r2，零均值bootstrap actor已加载，五模式开放；Slurm2321只导出checkpoint0，没有梯度更新，不称训练有效。左右48例真实输入模式测试、普通RTC9例与原客户端校验器16例通过，含actor生产推理P95=224.21ms；41项轻量回归通过。下一步重新连接后录两集collect做跨IPC/真机联调，第一集预留验证；先审核实际非零修正与奖励，再扩至约60次有效尝试/每臂≥20，之后才做真实SAC更新。Pi冻结、整轮C/N仅评估。[当前操作](reports/rl/pld-sac-block-v2/README.md#当前先采两轮collect以下probe步骤保留为历史)与[部署回执](reports/thor/pld-rl-20261012/collect-r2/deployment.json)为当前事实。
 
-首集真实probe已完成：320回复/116活动区间来源核验与三视频完整解码通过，原夹爪端点限幅在诊断侧正确归因、客户端不用改。16窗口覆盖17/20物理闭爪，短暂重新张开漏采样及宽积木开度高于closed阈值导致漏触发/跨两次抓取；正式修正前优先完善Thor因果门控与物理基线语义，本轮线上未变、无训练或奖励发布。[首集审核](reports/rl/lego-pld-probe-20261012-e01/README.md)保存几何幅度分析及三端归档。
+首集320回复/116诊断区间及视频通过。原“20次”是legacy候选数量，合并了部分重抓；新相对切段38收拢候选（左6/右32），35有抬升资格，1个框边动作由现场高度校准过滤。新在线回放37窗口（左6/右31），0跨两次新版闭合；36唯一关联、1个左臂因仲裁晚进入暂不发奖，不当作成功率。用户授权后已修复在线开合、抬升退出与SDK物理基线；首两集边界为关节±0.02rad/夹爪±0.05，FK最大采样位移2.255cm，不是碰撞保证或最终最优范围。原件、旧IDs、失败部署/处理尝试与全部版本保留。[首集审核](reports/rl/lego-pld-probe-20261012-e01/README.md)和[v2方案](reports/rl/pld-sac-block-v2/README.md)持有证据。
 
 [一页方法说明](reports/rl/parts-grasp-review14-20261010/project-progress.html)汇总判定架构、Qwen＋DINO细节及执行样例、RL架构。本节为本分工唯一当前研究计划；[架构图](reports/rl/parts-grasp-review14-20261010/pld-plan.html)展示拟议闭环，不代表已实现系统。数据实验、失败诊断和抽检证据仍归[逐抓取报告](reports/rl/parts-grasp-review14-20261010/README.md)，数据合同归[04](04_data_contracts.md#本对话-part-数据审核状态2026-10-11)，端侧边界归[05](05_inference_and_rollout.md#本对话-part-推进边界2026-10-11)。
 

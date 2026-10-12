@@ -15,7 +15,11 @@ from block_fixtures import records
 from block_fixtures import stats
 from yam_pld_rl.block_contract import decode
 from yam_pld_rl.block_contract import feasible_scale
+from yam_pld_rl.block_contract import fingerprint
+from yam_pld_rl.block_contract import observation_vector
+from yam_pld_rl.block_contract import physical_baseline
 from yam_pld_rl.block_contract import validate_contract
+from yam_pld_rl.block_contract import wire_plan
 from yam_pld_rl.block_replay import compile_replay
 
 
@@ -70,6 +74,29 @@ class ContractChecks(unittest.TestCase):
         self.assertTrue(np.all(data["reward"][data["terminal"] == 0] == 0))
         self.assertTrue(np.allclose(data["discount"], .99 ** data["dt"]))
         self.assertTrue(np.all(data["nx"][data["terminal"] == 1] == 0))
+
+    def test_sdk_wire_prefix_and_physical_training_coordinates_are_distinct(self):
+        self.c["baseline_transform"] = "sdk_gripper_endpoints_v1"
+        for index in (6, 13):
+            self.c["lower"][index], self.c["upper"][index] = .02, .98
+            self.c["max_target_step"][index] = .96
+        for row in self.records:
+            p = row["proposal"]
+            delay = p["delay_steps"]
+            raw = np.asarray(p["base"]).copy()
+            raw[:delay, 6] = 1.01
+            physical = physical_baseline(raw, delay, self.c)
+            actions = decode(physical, p["action"], p["arm"], delay, self.c)
+            p.update(raw_base=raw.tolist(), physical_base=physical.tolist(),
+                     base=wire_plan(physical, raw, delay).tolist(), physical_actions=actions.tolist(),
+                     actions=wire_plan(actions, raw, delay).tolist(), wire_actions=wire_plan(actions, raw, delay).tolist(),
+                     contract_sha256=fingerprint(self.c))
+            p["x"] = observation_vector(np.asarray(p["x"])[:1536], p["state"], physical, p["previous_command"],
+                                         p["arm"], delay, p["elapsed_seconds"], p["scale"], stats()).tolist()
+            row["receipt"]["submitted_actions"] = actions[:p["end_tick"]-p["start_tick"]].tolist()
+        data, audit = compile_replay(self.records, self.labels, self.c, self.snapshots)
+        self.assertFalse(audit["excluded"])
+        self.assertEqual(len(data["x"]), 24)
 
     def test_bad_execution_is_not_silently_relabeled(self):
         for field, value in (("client_modified", True), ("human_intervention", True), ("status", "canceled")):

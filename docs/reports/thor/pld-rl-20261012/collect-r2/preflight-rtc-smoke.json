@@ -1,0 +1,185 @@
+{
+  "status": "passed",
+  "observed_at": "2026-10-12T11:53:37.215232+00:00",
+  "url": "ws://192.168.250.1:8001",
+  "handshake_ms": 2.673967042937875,
+  "metadata": {
+    "robot": "YAM",
+    "hardware_family": "YAM-ABC-compatible",
+    "num_arms": 2,
+    "robot_action_dim": 14,
+    "model_action_dim": 32,
+    "action_horizon": 50,
+    "action_layout": "[left 6 joints, left gripper, right 6 joints, right gripper]",
+    "image_keys": [
+      "observation.images.top_rgb",
+      "observation.images.left_rgb",
+      "observation.images.right_rgb"
+    ],
+    "config": "pi05_yam",
+    "backend": "tensorrt_cuda_graph",
+    "rtc_mode": "trained",
+    "rtc_prefix_norm": "quantile",
+    "rtc_joint_step_guard_rad_per_tick": 0.2,
+    "rtc_semantics": "clean aligned committed prefix at flow time zero; postfix denoised; no guidance/fallback",
+    "rtc_max_delay_steps": 10,
+    "checkpoint_weights_sha256": "298714be810f5e7e822bcac55c5efe55789f1c96c0ac4ed0a1caa86f2670e42a",
+    "norm_stats_sha256": "fd0d9cb2db3ce475c1175c7f21a3a0dd3aa7f59d36edc680e7044cd11b9f1edf",
+    "engine_sha256": "15ae4a5ceb57b6b6d8743c721cbe43178ab29c714be95cfbf1b9b893574ba71c",
+    "compute_dtype": "float32",
+    "precision_mode": "fp32_weights_tf32_compute",
+    "denoising_steps": 7,
+    "action_dt_s": 0.03333333333333333,
+    "action_dim": 14,
+    "action_mode": "absolute physical target after checkpoint inverse transforms",
+    "joint_unit": "radian (dataset contract; hardware calibration not claimed)",
+    "gripper_unit": "continuous; nominal 0 closed, 1 open; outputs not clipped",
+    "target_tick_semantics": "30Hz policy tick; observation_policy_tick == target_start_tick == committed_start_tick",
+    "action_0_relative_to_observation_policy_tick": 0,
+    "camera_exposure_to_policy_tick_offset_s": null,
+    "inference_profile": "pld-rl",
+    "pld": {
+      "schema": "pld_sac_block_v2",
+      "expert": "PLD-Grasp",
+      "snapshot_sha256": "ac5d1e0df8eb8ba7c13d4f8446c31dc2674526d9d21478c3fca353d7e98d8e2d",
+      "contract_sha256": "97bf9c4b4b5173477a9c3bf01e6f1ab4656b47d6757d919237daeec7278d6601",
+      "modes": [
+        "off",
+        "shadow",
+        "probe",
+        "collect",
+        "eval"
+      ],
+      "block_steps": 8,
+      "segmentation_owner": "thor_offline_or_server",
+      "actor_loaded": true,
+      "replay_contract_ready": true,
+      "actor_phase": "bootstrap_exploration",
+      "gate_owner": "thor",
+      "recording": "native_HIL_with_full_pld_reply"
+    }
+  },
+  "cases": [
+    {
+      "sample": "episode-000095-early.npz",
+      "delay_steps": 0,
+      "output_shape": [
+        50,
+        14
+      ],
+      "prefix_exact": true,
+      "output_finite": true,
+      "max_new_joint_step_rad": 0.05280337734207552,
+      "server_infer_ms": 199.33908991515636,
+      "roundtrip_ms": 200.5580549594015
+    },
+    {
+      "sample": "episode-000095-middle.npz",
+      "delay_steps": 1,
+      "output_shape": [
+        50,
+        14
+      ],
+      "prefix_exact": true,
+      "output_finite": true,
+      "max_new_joint_step_rad": 0.007454064081854339,
+      "server_infer_ms": 197.92495388537645,
+      "roundtrip_ms": 198.86226998642087
+    },
+    {
+      "sample": "episode-000095-late.npz",
+      "delay_steps": 10,
+      "output_shape": [
+        50,
+        14
+      ],
+      "prefix_exact": true,
+      "output_finite": true,
+      "max_new_joint_step_rad": 0.05636124074375859,
+      "server_infer_ms": 197.90392694994807,
+      "roundtrip_ms": 198.4188170172274
+    },
+    {
+      "sample": "episode-000096-early.npz",
+      "delay_steps": 0,
+      "output_shape": [
+        50,
+        14
+      ],
+      "prefix_exact": true,
+      "output_finite": true,
+      "max_new_joint_step_rad": 0.04294358547008681,
+      "server_infer_ms": 197.73174892179668,
+      "roundtrip_ms": 198.33635189570487
+    },
+    {
+      "sample": "episode-000096-middle.npz",
+      "delay_steps": 1,
+      "output_shape": [
+        50,
+        14
+      ],
+      "prefix_exact": true,
+      "output_finite": true,
+      "max_new_joint_step_rad": 0.049910689140216125,
+      "server_infer_ms": 198.29045701771975,
+      "roundtrip_ms": 198.82797705940902
+    },
+    {
+      "sample": "episode-000096-late.npz",
+      "delay_steps": 10,
+      "output_shape": [
+        50,
+        14
+      ],
+      "prefix_exact": true,
+      "output_finite": true,
+      "max_new_joint_step_rad": 0.08974946145143115,
+      "server_infer_ms": 197.84567202441394,
+      "roundtrip_ms": 198.3563129324466
+    },
+    {
+      "sample": "episode-000097-early.npz",
+      "delay_steps": 0,
+      "output_shape": [
+        50,
+        14
+      ],
+      "prefix_exact": true,
+      "output_finite": true,
+      "max_new_joint_step_rad": 0.10917611283136264,
+      "server_infer_ms": 197.65590596944094,
+      "roundtrip_ms": 198.18919384852052
+    },
+    {
+      "sample": "episode-000097-middle.npz",
+      "delay_steps": 1,
+      "output_shape": [
+        50,
+        14
+      ],
+      "prefix_exact": true,
+      "output_finite": true,
+      "max_new_joint_step_rad": 0.04906646176026985,
+      "server_infer_ms": 199.71431698650122,
+      "roundtrip_ms": 200.40553994476795
+    },
+    {
+      "sample": "episode-000097-late.npz",
+      "delay_steps": 10,
+      "output_shape": [
+        50,
+        14
+      ],
+      "prefix_exact": true,
+      "output_finite": true,
+      "max_new_joint_step_rad": 0.06373281447470025,
+      "server_infer_ms": 199.23162600025535,
+      "roundtrip_ms": 199.95412812568247
+    }
+  ],
+  "server_infer_p50_ms": 197.92495388537645,
+  "server_infer_p95_ms": 199.56422615796328,
+  "roundtrip_p50_ms": 198.82797705940902,
+  "roundtrip_p95_ms": 200.49704895354807
+}
