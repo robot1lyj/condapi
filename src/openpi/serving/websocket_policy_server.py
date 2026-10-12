@@ -31,13 +31,19 @@ class WebsocketPolicyServer:
         port: int | None = None,
         rtc_mode: str = "off",
         metadata: dict | None = None,
+        pld_runtime=None,
     ) -> None:
         self._policy = policy
         self._host = host
         self._port = port
         self._rtc_mode = rtc_mode
+        self._pld_runtime = pld_runtime
+        if pld_runtime is not None and rtc_mode != "trained":
+            raise ValueError("PLD block v1 requires trained RTC; ordinary path remains available without PLD")
         self._metadata = dict(metadata or {})
         self._metadata.setdefault("rtc_mode", self._rtc_mode)
+        if pld_runtime is not None:
+            self._metadata["pld"] = pld_runtime.metadata
         logging.getLogger("websockets.server").setLevel(logging.INFO)
 
     def serve_forever(self) -> None:
@@ -66,6 +72,7 @@ class WebsocketPolicyServer:
                 start_time = time.monotonic()
                 payload = msgpack_numpy.unpackb(await websocket.recv())
                 obs, rtc_payload = _split_payload(payload)
+                pld_request = _pld_payload(payload, enabled=self._pld_runtime is not None)
                 if self._rtc_mode == "only" and rtc_payload is None:
                     raise RequestError("RTC payload required when rtc_mode=only.")
                 if self._rtc_mode == "off" and rtc_payload is not None:
@@ -74,6 +81,11 @@ class WebsocketPolicyServer:
 
                 infer_time = time.monotonic()
                 action, rtc_used, rtc_warnings, rtc_error = self._infer(obs, rtc_payload)
+                if pld_request is not None and pld_request.get("mode") != "off":
+                    try:
+                        action = self._pld_runtime(obs, rtc_payload, pld_request, action)
+                    except (ValueError, KeyError, TypeError) as exc:
+                        raise RequestError(f"PLD request rejected: {exc}") from exc
                 infer_time = time.monotonic() - infer_time
 
                 action["server_timing"] = {
@@ -151,7 +163,7 @@ def _health_check(connection: _server.ServerConnection, request: _server.Request
 
 
 def _split_payload(payload: object) -> tuple[dict, dict | None]:
-    if isinstance(payload, dict) and any(key in payload for key in ("obs", "rtc", "type", "parts")):
+    if isinstance(payload, dict) and any(key in payload for key in ("obs", "rtc", "type", "parts", "pld")):
         msg_type = payload.get("type", "infer")
         if msg_type != "infer":
             raise RequestError(f"Unsupported message type: {msg_type}")
@@ -175,6 +187,17 @@ def _split_payload(payload: object) -> tuple[dict, dict | None]:
     if not isinstance(payload, dict):
         raise RequestError("Observation must be an object.")
     return payload, None
+
+
+def _pld_payload(payload, *, enabled):
+    extension = payload.get("pld")
+    if extension is None:
+        return None
+    if not isinstance(extension, dict) or extension.get("mode") not in {"off", "shadow", "probe", "collect", "eval"}:
+        raise RequestError("Invalid PLD extension/mode")
+    if extension["mode"] != "off" and not enabled:
+        raise RequestError("PLD bundle is not loaded; do not silently execute base for a residual request")
+    return extension
 
 
 def _parse_rtc_payload(payload: dict[str, Any], metadata: dict | None) -> tuple[dict[str, Any], list[str]]:

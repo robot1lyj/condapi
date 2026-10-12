@@ -1,0 +1,17 @@
+{
+  "schema": "pld_sac_block_v1",
+  "task": "sort the legos into containers by color",
+  "base_weights_sha256": null,
+  "joint_unit": "radian",
+  "gripper_unit": "0_closed_1_open",
+  "action_dt_s": 0.03333333333333333,
+  "block_steps": 8,
+  "max_attempt_seconds": 15,
+  "discount_per_second": 0.99,
+  "radius": [0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.02, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.02],
+  "lower": null,
+  "upper": null,
+  "max_target_step": null,
+  "limits_evidence": null,
+  "status": "proposal: copy into a new release, fill actual limits/base identity, review before robot use"
+}

@@ -6,6 +6,7 @@ import json
 import logging
 import math
 from pathlib import Path
+import sys
 
 from benchmark_pi05 import digest
 from benchmark_pi05 import read_observation
@@ -63,6 +64,8 @@ def main():
     parser.add_argument("--allow-validated-tf32-7step", action="store_true")
     parser.add_argument("--validation", type=Path, help="new quantile-prefix validation receipt")
     parser.add_argument("--jax-reference", type=Path, help="corrected original-JAX reference directory")
+    parser.add_argument("--pld-bundle", type=Path, help="optional immutable PLD-SAC bundle; default is unchanged Pi")
+    parser.add_argument("--pld-encoder", type=Path, help="official frozen ResNet18 weights matching PLD bundle")
     args = parser.parse_args()
     if not torch.cuda.is_available():
         parser.error("Thor CUDA required")
@@ -150,8 +153,17 @@ def main():
         "camera_exposure_to_policy_tick_offset_s": None,
     }
     logging.info("READY ws://%s:%d trained-RTC", args.host, args.port)
+    pld_runtime = None
+    if args.pld_bundle is not None:
+        if args.pld_encoder is None:
+            parser.error("--pld-encoder required with --pld-bundle")
+        sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "packages/pld-rl/src"))
+        from yam_pld_rl.runtime import BlockRuntime  # noqa: PLC0415
+
+        pld_runtime = BlockRuntime(args.pld_bundle, args.pld_encoder,
+                                   base_weights_sha256=manifest["model_weights_sha256"])
     WebsocketPolicyServer(serving, host=args.host, port=args.port, rtc_mode="trained",
-                          metadata=metadata).serve_forever()
+                          metadata=metadata, pld_runtime=pld_runtime).serve_forever()
 
 
 if __name__ == "__main__":

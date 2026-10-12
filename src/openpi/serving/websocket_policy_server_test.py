@@ -4,6 +4,7 @@ import pytest
 
 from openpi.serving.websocket_policy_server import RequestError
 from openpi.serving.websocket_policy_server import WebsocketPolicyServer
+from openpi.serving.websocket_policy_server import _pld_payload
 from openpi.serving.websocket_policy_server import _split_payload
 
 
@@ -83,3 +84,14 @@ def test_auto_rtc_keeps_ordinary_fallback_for_bad_envelope():
     assert action == {"actions": [6]}
     assert not used
     assert "action_horizon" in error
+
+
+def test_pld_requires_loaded_runtime_and_trained_rtc():
+    for mode in ("collect", "eval", "probe", "shadow"):
+        with pytest.raises(RequestError, match="not loaded"):
+            _pld_payload({"pld": {"mode": mode}}, enabled=False)
+    assert _pld_payload({"pld": {"mode": "off"}}, enabled=False) == {"mode": "off"}
+    with pytest.raises(ValueError, match="trained RTC"):
+        WebsocketPolicyServer(BasePolicy(), rtc_mode="off", pld_runtime=object())
+    obs = {"sentinel": [3]}
+    assert _split_payload({"obs": obs, "pld": {"mode": "off"}}) == (obs, None)
