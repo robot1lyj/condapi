@@ -1,8 +1,8 @@
-# PLD 抓取专家：第一轮离线价值初始化
+# PLD 抓取专家：离线价值初始化与多算法对照
 
-独立包，不读取或复用已退役 RL learner。VLA 继续使用原生 OpenPI；本包只训练小型双 Q。
+独立包，不读取或复用已退役 RL learner。VLA 继续使用原生 OpenPI；本包训练独立小 actor / critic。
 
-本轮用户授权使用服务器四卡，先比较 `configs/pld_rl/offline14-{a,b,c,d}.json`：成功 Cal-QL 两个 seed、成功/失败混合 Cal-QL、成功 TD-only。每卡一组，不做四卡 DDP。没有更新 Pi 或 actor，也没有生产部署。
+此前两轮八组 critic-only 诊断使用 `configs/pld_rl/offline14-{a..h}.json`。用户继续授权四卡多论文实验，`configs/pld_rl/methods14-*.json` 比较 PLD-IQL、PLD-TD3BC、PLD-ReBRAC 八组，每组 20,000 更新、每卡一组、分两波。本次更新小 actor / critic，Pi 与视觉冻结，不做生产部署。具体归[对照报告](../../docs/reports/rl/pld-methods14-20261012/README.md)。
 
 ## 实现与论文的关系
 

@@ -9,8 +9,9 @@ from pathlib import Path
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--run-root", type=Path, required=True)
+    p.add_argument("--phase", default="offline critic initialization")
     args = p.parse_args()
-    result = {"phase": "offline critic initialization", "robot_success_rate_measured": False, "runs": []}
+    result = {"phase": args.phase, "robot_success_rate_measured": False, "runs": []}
     for config_path in sorted((args.run_root / "configs").glob("*.json")):
         name = json.loads(config_path.read_text())["id"]
         directory = args.run_root / name

@@ -28,7 +28,7 @@ def analyze(root):
         score = np.minimum(p["q1"], p["q2"])
         valid = p["mc_valid"] & p["entry_precedes_closure"]
         train = valid & (p["episode"] != 1)
-        if config["success_only"]:
+        if config.get("success_only", False):
             train &= p["outcome"] == 1
         val = valid & (p["episode"] == 1)
         train_mean = float(p["mc_return"][train].mean())

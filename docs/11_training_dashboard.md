@@ -4,6 +4,8 @@
 
 2026-10-12新增PLD两轮八组初始化诊断，复用同一看板与 `vla_platform.metrics.write_metrics`，配置[pld-offline14-20261012.json](../configs/dashboards/pld-offline14-20261012.json)，本地端口8766；原VLA端口8765不改。`scripts/pld_rl/sync_dashboard.py`每10秒只读镜像metrics、身份、状态与最新验证结果，第二轮用 `--ids`指定四个新run并保存独立本地cache；错误保留旧缓存并记sync-state。API已验到八组、5000步、无无效行，使用前仍核对源mtime。主要观察TD/MC误差、入口AUC、Q分歧、梯度和吞吐；AUC只有12次验证/2次失败，绝不是机器人成功率。原始曲线、各次预测和checkpoint保存在服务器，页面平滑不改变原值。
 
+同日用户授权继续多论文实验，8766配置新增八组 PLD-IQL / PLD-TD3BC / PLD-ReBRAC，旧八组ID不变，仅统一展示名。新组区分actor实际更新数、动作残差RMS、边界饱和、末步奖励误差与critic自评增益；actor本轮会更新，在线环境步数仍为0。不同算法loss不直接排名，自评gain不显示为成功率。细节归[多算法报告](reports/rl/pld-methods14-20261012/README.md)。
+
 看板只读本地指标，不依赖模型环境、不上传 W&B、不启动或停止训练。模型环境继续按系列使用 Conda；训练器继续复用 OpenPI 或 LeRobot，新增模型不需要复制看板或训练循环。
 
 ```bash

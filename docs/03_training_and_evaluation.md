@@ -2,7 +2,7 @@
 
 ## PLD 主线与 RECAP 后续路线（2026-10-11）
 
-**用户已确认：先完成路线二——冻结 Pi0.5，用轻量 RL 专家修正整段抓取动作，首轮左右臂都启用；路线一——通用奖励/价值模型与 RECAP 式 VLA 后训练后置。** 框架面向多任务，乐高抓取仅为首个验证场景。其他线程的 EXPO-FT独立并行。2026-10-12用户授权四卡实验、释放占位2310；2311/2312已完成两轮共八组critic初始化诊断。新实现归 `packages/pld-rl/`、`scripts/pld_rl/`；Pi/actor未更新，生产推理/客户端未改。数值运行通过，但入口价值未胜过常数基线，**尚未验收为可用于动作优化的critic**。运行证据、配方与失败分析归[实验报告](reports/rl/pld-offline14-20261012/README.md)。
+**用户已确认：先完成路线二——冻结 Pi0.5，用轻量 RL 专家修正整段抓取动作，首轮左右臂都启用；路线一——通用奖励/价值模型与 RECAP 式 VLA 后训练后置。** 框架面向多任务，乐高抓取仅为首个验证场景。其他线程的 EXPO-FT独立并行。2026-10-12用户授权四卡实验、释放占位2310；2311/2312已完成两轮共八组critic初始化诊断。该八组只训练critic。用户随后授权多论文对照，新增 PLD-IQL / PLD-TD3BC / PLD-ReBRAC 八组离线 actor/critic 配方，详情归[多算法报告](reports/rl/pld-methods14-20261012/README.md)。新实现归 `packages/pld-rl/`、`scripts/pld_rl/`；Pi与视觉冻结，生产推理/客户端未改。数值运行通过，但入口价值未胜过常数基线，**尚未验收为可用于动作优化的critic**。运行证据、配方与失败分析归[实验报告](reports/rl/pld-offline14-20261012/README.md)。
 
 [一页方法说明](reports/rl/parts-grasp-review14-20261010/project-progress.html)汇总判定架构、Qwen＋DINO细节及执行样例、RL架构。本节为本分工唯一当前研究计划；[架构图](reports/rl/parts-grasp-review14-20261010/pld-plan.html)展示拟议闭环，不代表已实现系统。数据实验、失败诊断和抽检证据仍归[逐抓取报告](reports/rl/parts-grasp-review14-20261010/README.md)，数据合同归[04](04_data_contracts.md#本对话-part-数据审核状态2026-10-11)，端侧边界归[05](05_inference_and_rollout.md#本对话-part-推进边界2026-10-11)。
 

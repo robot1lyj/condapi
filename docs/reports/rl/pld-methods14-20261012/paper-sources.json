@@ -1,0 +1,54 @@
+[
+  {
+    "repository": "ikostrikov/implicit_q_learning",
+    "branch": "master",
+    "accessed": "2026-10-12",
+    "files": [
+      {
+        "path": "actor.py",
+        "url": "https://raw.githubusercontent.com/ikostrikov/implicit_q_learning/master/actor.py",
+        "sha256": "8c4a438ec595c7f2c74804428458a6f6c7af05552c1bc7d908ec02a3a8eaada1"
+      },
+      {
+        "path": "critic.py",
+        "url": "https://raw.githubusercontent.com/ikostrikov/implicit_q_learning/master/critic.py",
+        "sha256": "2ba5e9a735ee9cf88e071869a23f98f37a0056500e4704e95b45f8840f1c4abd"
+      },
+      {
+        "path": "learner.py",
+        "url": "https://raw.githubusercontent.com/ikostrikov/implicit_q_learning/master/learner.py",
+        "sha256": "80e35a82fdebdc478370b6c6e1b5c826e22572efcbda0a44dffc1b550d262128"
+      },
+      {
+        "path": "policy.py",
+        "url": "https://raw.githubusercontent.com/ikostrikov/implicit_q_learning/master/policy.py",
+        "sha256": "3c2a1c27982b5b1844b478184c62a98ba0dece2ca31afd7c850eb7e1d34c4ad3"
+      }
+    ]
+  },
+  {
+    "repository": "sfujim/TD3_BC",
+    "branch": "main",
+    "accessed": "2026-10-12",
+    "files": [
+      {
+        "path": "TD3_BC.py",
+        "url": "https://raw.githubusercontent.com/sfujim/TD3_BC/main/TD3_BC.py",
+        "sha256": "2d4d5c20f21cd90ca27982864ad589f6960b1d84f0f14bed80ca1db6f2beab45"
+      }
+    ]
+  },
+  {
+    "repository": "tinkoff-ai/ReBRAC",
+    "branch": "main",
+    "accessed": "2026-10-12",
+    "files": [
+      {
+        "path": "algorithms/offline/rebrac.py",
+        "url": "https://raw.githubusercontent.com/tinkoff-ai/CORL/main/algorithms/offline/rebrac.py",
+        "sha256": "e2aa23c8281c83c2a2097e5b737ddccce3596ef815fc401b70e3532a9825ffef",
+        "note": "authors CORL implementation; original ReBRAC raw paths unavailable"
+      }
+    ]
+  }
+]
