@@ -1,0 +1,15 @@
+{
+  "status": "passed",
+  "source_commit": "fea5baa90141d74f711c9e97d5758f882881d397",
+  "offline_container": "pld-curator-probe-20261012T103108332827",
+  "source_verified_intervals": 116,
+  "sdk_limited_intervals": 12,
+  "raw_and_output_hashes_verified": true,
+  "exported_images_verified": true,
+  "training": false,
+  "rewards": 0,
+  "production_image_id": "sha256:080d09d5426928029a8e78e6a213e8cd6d27e20b8482518701f088a1d6323499",
+  "production_running": true,
+  "production_health": "healthy",
+  "inference_changed": false
+}

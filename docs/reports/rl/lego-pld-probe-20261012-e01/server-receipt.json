@@ -1,0 +1,12 @@
+{
+  "schema": "pld_probe_archive_v1",
+  "name": "lego-probe-20261012-e01-v1",
+  "purpose": "zero_residual_diagnostics",
+  "path": "/home/wuyan/lyj/pld-grasp/datasets/rollouts/lego-probe-20261012-e01-v1",
+  "files": 11,
+  "bytes": 154960923,
+  "all_raw_hashes_verified": true,
+  "training_ready": false,
+  "source_episode_id": "3923343be14e481f9ba9cb34788198c1",
+  "source_archive_sha256": "4e86b5ed252802de0e37e15339cf2a47ce3d077fab2a4aaaaa55cdace7c105cc"
+}

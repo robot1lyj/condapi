@@ -4,6 +4,8 @@
 
 16:24补齐并复验Thor离线Replay-Curator：固定bfa5859源码包，复用已装数据镜像，以无网络/无GPU的runc CPU容器处理原生UUID/HDF5/session侧车并导出probe审计。左右两条模拟原生录像104行/16回复/86来源tick通过，全部源/输出/图片哈希复核，奖励与训练记录为0；不冒充真机通过。在线pld-rl的镜像/权重/握手不变，本机health与off/probe能力重新确认。[发布路径与回执](reports/thor/pld-rl-20261012/README.md#零修正probe数据链路补齐1624-cst)记录CPU启动器及两轮真实probe步骤；没有操作3588或开始训练。
 
+首集真实probe后，离线管家固定fea5baa发布到`/home/wuyan-lyj/thor/pld-grasp/releases/probe-curator-20261012-r2/code/`，仅诊断侧复现manifest声明的夹爪端点裁剪。CPU容器116/116区间来源、源/输出/图片SHA通过；在线镜像与门控未变、running/healthy。原件及v1排除保留，训练资格仍false；门控漏采样/宽物体问题归[首集审核](reports/rl/lego-pld-probe-20261012-e01/README.md)，不能以数据链路通过代替正式残差策略就绪。
+
 
 OpenWAM独立镜像、官方权重、LoRA合并与压缩候选见 [14 · OpenWAM推理实验](reference/thor/14_openwam_inference.md)。2026-09-23 用户暂停 OpenWAM，Thor 的已停止试验容器已清理；原始权重、环境镜像和日志保留。Pi 当前测试部署见下方当前决策；历史136000证据归[136000报告](reports/thor/rtc-20h-136000-20260923/README.md)。
 

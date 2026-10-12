@@ -6,6 +6,8 @@
 
 2026-10-12当前执行顺序：先采两轮零修正probe；数据管家已补原生UUID和完整session事件侧车的读取、去重、取消隔离与独立probe审计。用户将动作边界选择交给Thor侧，最后确认按probe中的Pi动作变化与FK位移再定正式探索范围；±0.01rad/夹爪±0.02仅是小幅候选，“放大十倍”尚未启用。当前不开始训练，也不安装随机修正actor；客户端跨IPC及容器误介入由这两轮真机录像验收。细节归[v2方案](reports/rl/pld-sac-block-v2/README.md#先采两轮零修正probe)。
 
+首集真实probe已完成：320回复/116活动区间来源核验与三视频完整解码通过，原夹爪端点限幅在诊断侧正确归因、客户端不用改。16窗口覆盖17/20物理闭爪，短暂重新张开漏采样及宽积木开度高于closed阈值导致漏触发/跨两次抓取；正式修正前优先完善Thor因果门控与物理基线语义，本轮线上未变、无训练或奖励发布。[首集审核](reports/rl/lego-pld-probe-20261012-e01/README.md)保存几何幅度分析及三端归档。
+
 [一页方法说明](reports/rl/parts-grasp-review14-20261010/project-progress.html)汇总判定架构、Qwen＋DINO细节及执行样例、RL架构。本节为本分工唯一当前研究计划；[架构图](reports/rl/parts-grasp-review14-20261010/pld-plan.html)展示拟议闭环，不代表已实现系统。数据实验、失败诊断和抽检证据仍归[逐抓取报告](reports/rl/parts-grasp-review14-20261010/README.md)，数据合同归[04](04_data_contracts.md#本对话-part-数据审核状态2026-10-11)，端侧边界归[05](05_inference_and_rollout.md#本对话-part-推进边界2026-10-11)。
 
 ### 摘要、假设与两条路线

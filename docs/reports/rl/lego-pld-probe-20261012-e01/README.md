@@ -16,6 +16,8 @@ Thor服务推理耗时P50/P95为204.09/204.83ms；客户端worker耗时238.72/24
 
 初版12个**推理决策区间**因raw回复与下发不同被严格排除，不是12次失败。修订后仅在诊断模式按原manifest上下限复现这层转换，116/116区间都有来源核验，其中12个保留known_sdk_limited_ticks；raw计划、原token和实际命令不改，不把差值标为RL修正。未知改写仍拒绝；正式actor训练合同的严格检查没有放宽，诊断records/rewards为空。
 
+修订固定`fea5baa90141d74f711c9e97d5758f882881d397`，28项轻量回归通过；Thor独立CPU复验116区间、源/输出/选中图SHA全部通过。[Thor回执](thor-verification.json)记录结果。正式expert动作合同后续应显式区分raw Pi计划和SDK限幅后的物理基线，不能把既有端点裁剪当作学习到的残差；本轮只完善诊断归因，没有改变在线推理。
+
 ## 真正需要完善的窗口判定
 
 在线有16个窗口、116个活动决策；20个闭爪候选中17个处于同臂窗口内，即本集启发式覆盖85%，不表示视觉分类准确率。所有窗口最终按lift_guard结束。
@@ -35,3 +37,7 @@ Thor服务推理耗时P50/P95为204.09/204.83ms；客户端worker耗时238.72/24
 [summary.json](summary.json)、[probe-audit.json](probe-audit.json)、[clamp-analysis.json](clamp-analysis.json)、[逐窗口/运动/视频核验](detail-review.json)、[因果重放](gate-debug.json)、[重启阈值证据](missed-rearm-analysis.json)保留逐项计数与来源SHA。
 
 工作站完整原件、v1/v2派生、20个候选蒙太奇、16个窗口进入图和可复现分析脚本：`/home/wuyan-lyj/condapi-data/rl/lego-pld-probe-20261012-e01-v1/`。Thor原件：`/home/wuyan-lyj/thor/pld-grasp/datasets/lego-probe-20261012-e01-v1/`；全部CPU检查/视频核验：`/home/wuyan-lyj/thor/pld-grasp/checks/lego-probe-20261012-e01-v1/`。v1排除记录保留，修订写新目录，不覆盖原数据、历史14集或已有实验。所有检查无GPU训练、无机械臂动作或人工奖励伪造。
+
+Thor新版离线发布：`/home/wuyan-lyj/thor/pld-grasp/releases/probe-curator-20261012-r2/code/`，源码tar SHA `e588fbcfa7847c2f5a7e5162fa3ed9252ceab62cbedb1ae9957c4b579023d307`；修订后的检查目录为`/home/wuyan-lyj/thor/pld-grasp/checks/lego-probe-20261012-e01-v2/`。在线pld-rl原镜像仍running/healthy，门控和动作没有改动。
+
+GPU服务器论文归档：`/home/wuyan/lyj/pld-grasp/datasets/rollouts/lego-probe-20261012-e01-v1/`，原始11成员逐项SHA一致，完整派生/选中图片亦复核；独立catalog条目标记purpose=zero_residual_diagnostics、training_ready=false。[归档回执](server-receipt.json)绑定源集UUID与原始tar。未触及现有训练/数据版本。
