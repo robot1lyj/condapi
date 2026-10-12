@@ -37,6 +37,7 @@ def compile_replay(records, labels, contract, snapshots):
             raise ValueError("duplicate attempt reward; create an explicit new reward release")
         label_map[key] = label
     groups, seen = defaultdict(list), set()
+    executed_ticks = defaultdict(set)
     for row in records:
         p = row["proposal"]
         key = (p["run_id"], p["episode_id"], p["attempt_id"])
@@ -45,6 +46,13 @@ def compile_replay(records, labels, contract, snapshots):
             raise ValueError("duplicate decision ID")
         seen.add(unique)
         groups[key].append(row)
+        receipt = row.get("receipt", {})
+        if receipt.get("status") == "executed":
+            slot = (*key[:2], integer(receipt["epoch"], "epoch"))
+            claim = set(receipt["ticks"])
+            if executed_ticks[slot].intersection(claim):
+                raise ValueError("overlapping executed decisions: cannot choose which reward owns these ticks")
+            executed_ticks[slot].update(claim)
     # A physical tick cannot be assigned to two residual decisions, even if
     # their active arms differ. Canceled/rejected proposals remain in raw logs.
     occupied = defaultdict(set)
@@ -54,10 +62,12 @@ def compile_replay(records, labels, contract, snapshots):
             label = label_map[key]
             if label["status"] not in {"held", "empty"} or not label.get("reviewer") or not label.get("evidence"):
                 raise ValueError("not a reviewed binary outcome with evidence")
-            if label["lift_m"] < 0.05 or label.get("view_valid") is not True:
+            if (not np.isfinite(label["lift_m"]) or label["lift_m"] < 0.05 or label.get("view_valid") is not True):
                 raise ValueError("missing lift/visual evidence; absence of segmentation is not empty")
             if label["status"] == "held" and label.get("held_after_lift") is not True:
                 raise ValueError("success must be retained after lifting")
+            if label["status"] == "empty" and label.get("held_after_lift") is not False:
+                raise ValueError("contradictory or missing empty outcome evidence")
             attempt.sort(key=lambda r: r["proposal"]["start_tick"])
             last = attempt[-1]["proposal"]
             if last["decision_id"] != label["final_decision_id"] or last["end_tick"] != label["outcome_tick"]:

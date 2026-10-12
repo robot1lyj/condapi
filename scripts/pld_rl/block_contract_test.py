@@ -74,11 +74,19 @@ class ContractChecks(unittest.TestCase):
         self.assertIn("actual actions differ", audit["excluded"][0]["reason"])
 
     def test_no_lift_and_wrong_endpoint_are_not_failures(self):
-        for field, value in (("lift_m", .01), ("outcome_tick", 0), ("status", "unscored")):
+        for field, value in (("lift_m", .01), ("lift_m", float("nan")), ("outcome_tick", 0), ("status", "unscored")):
             labels = copy.deepcopy(self.labels)
             labels[0][field] = value
             _, audit = compile_replay(self.records, labels, self.c, self.snapshots)
             self.assertEqual(len(audit["excluded"]), 1)
+
+    def test_two_attempts_cannot_claim_the_same_executed_ticks(self):
+        changed = copy.deepcopy(self.records[:3])
+        for record in changed:
+            record["proposal"]["attempt_id"] = "another-attempt"
+            record["proposal"]["decision_id"] += "duplicate"
+        with self.assertRaisesRegex(ValueError, "overlapping executed"):
+            compile_replay(self.records + changed, self.labels, self.c, self.snapshots)
 
     def test_changed_observation_and_duplicates_rejected(self):
         changed = copy.deepcopy(self.records)

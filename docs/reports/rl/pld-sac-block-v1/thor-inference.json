@@ -1,0 +1,19 @@
+{
+  "status": "passed_inference_fixture_only",
+  "torch": "2.12.0a0+5aff3928d8.nv26.05",
+  "gpu": "NVIDIA Thor",
+  "bootstrap_snapshot": "6bfda1982a8fa5395702667784d574685400365371bb95b84590801b216af27e",
+  "samples": 6,
+  "postprocessor_ms_p50": 18.515706527978182,
+  "postprocessor_ms_max": 21.351258037611842,
+  "Pi_latency_included": false,
+  "cross_IPC_tested": false,
+  "robot_connected": false,
+  "checks": [
+    "official ResNet18 forward",
+    "zero-head exact Pi",
+    "both active arms",
+    "FP64 prefix and inactive arm exact",
+    "bounded nonzero stochastic output"
+  ]
+}

@@ -2,7 +2,7 @@
 
 ## 本对话 PART 推进边界（2026-10-11）
 
-**当前已确认PLD式整段抓取修正、左右臂覆盖；已实现PLD-SAC短块训练/回流及可选Thor推理入口，服务器合成闭环通过；未激活真机专家。** 唯一学习状态归[03](03_training_and_evaluation.md#pld-主线与-recap-后续路线2026-10-11)。拟冻结Pi0.5，专家按活动臂修正接近/对准、下降、闭爪和抬升持物，成功后交还Pi放置；旧H50×1夹爪投影及±0.50上限仅为历史工具，不成为新动作合同。
+**当前已确认PLD式整段抓取修正、左右臂覆盖；已实现PLD-SAC短块训练/回流及可选Thor推理入口，服务器合成闭环与Thor独立推理测试通过；未激活真机专家。** 唯一学习状态归[03](03_training_and_evaluation.md#pld-主线与-recap-后续路线2026-10-11)。拟冻结Pi0.5，专家按活动臂修正接近/对准、下降、闭爪和抬升持物，成功后交还Pi放置；旧H50×1夹爪投影及±0.50上限仅为历史工具，不成为新动作合同。
 
 新接口 `pld` 与退役 `parts` 分开；`probe/collect/eval/shadow/off`、8可编辑tick、已承诺前缀保护、完整执行回执和任务结果侧车详见[客户端提案](reports/rl/pld-sac-block-v1/client-and-first-rollout.md)。`serve_pi05_rtc_trt.py --pld-bundle ... --pld-encoder ...` 仅为可选入口，默认仍为Pi；物理contract模板缺真实限位时拒绝加载。不能直接将旧14集单步replay冒充新块回放。
 

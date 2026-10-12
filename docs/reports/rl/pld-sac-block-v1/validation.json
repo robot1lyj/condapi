@@ -20,5 +20,19 @@
     "export reload and infer"
   ],
   "robot_deployed": false,
-  "robot_success_rate": null
+  "robot_success_rate": null,
+  "code_commit": "a1f3abdc392923faf0674d596eb585b040c883a4",
+  "server_run": "/home/wuyan/lyj/pld-grasp/runs/sac-block-validation-20261012-v1",
+  "job_state": "COMPLETED",
+  "exit_code": "0:0",
+  "job_elapsed_seconds": 7,
+  "synthetic_update_seconds": 0.7224622489884496,
+  "synthetic_critic_updates": 40,
+  "synthetic_actor_updates": 18,
+  "workstation_checks": {
+    "array_contracts": 8,
+    "transport": 20,
+    "training_or_model_forward": false,
+    "additional_gates": "NaN lift, contradictory empty evidence and cross-attempt tick overlap rejected"
+  }
 }

@@ -1,5 +1,8 @@
 # 08 · Thor 端侧部署
 
+2026-10-12 PLD-SAC可选后处理器已在Thor现有Pi容器内用独立进程验证：冻结ResNet18＋残差actor，合成输入6例、左右臂/float64前缀/零均值等价与有界采样通过，新增处理P50约18.52ms（不含Pi/IPC）。原Pi服务/启动配置未更换，未启用真实修正，未操作3588。正式bundle仍待真实限位、base身份及客户端动作块回执联调；[验收与资产](reports/rl/pld-sac-block-v1/README.md)不是新的生产部署就绪声明。
+
+
 OpenWAM独立镜像、官方权重、LoRA合并与压缩候选见 [14 · OpenWAM推理实验](reference/thor/14_openwam_inference.md)。2026-09-23 用户暂停 OpenWAM，Thor 的已停止试验容器已清理；原始权重、环境镜像和日志保留。Pi 当前测试部署见下方当前决策；历史136000证据归[136000报告](reports/thor/rtc-20h-136000-20260923/README.md)。
 
 逐步安装指导的冷记忆入口：[Thor 安装系列 00](reference/thor/00_start_here.md)。该组按 G0–G5 持有设备预检、ISO/USB 制作、固件/NVMe 安装、宿主/容器检查、Pi 工程闸门及故障交接；本页继续持有版本、精度决策和当前状态。指导 agent 不得把下文安装概览当成跳过目标确认的操作脚本。
