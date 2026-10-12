@@ -1,0 +1,35 @@
+{
+  "status": "passed",
+  "episodes": [
+    {
+      "status": "passed",
+      "episode_id": "3923343be14e481f9ba9cb34788198c1",
+      "counts": {
+        "accepted_probe_replies": 320,
+        "active_right": 66,
+        "active_left": 50,
+        "known_sdk_clamped_ticks": 232,
+        "source_verified_ticks": 3347
+      },
+      "raw_rows": 3356,
+      "three_view_referenced_rows": 3348,
+      "sidecar_events": 640,
+      "cancelled_requests": 0,
+      "errors": [],
+      "notes": [
+        {
+          "request": [
+            11,
+            "598"
+          ],
+          "reason": "previous tick outside this episode; context retained"
+        }
+      ],
+      "training_ready": false,
+      "robot_success_rate": null,
+      "semantic_gate_review_required": true
+    }
+  ],
+  "training_ready": false,
+  "robot_success_rate": null
+}

@@ -239,6 +239,23 @@ class CuratorChecks(unittest.TestCase):
             self.assertTrue(audit)
             self.assertTrue(all(w["receipt"]["status"] == "rejected" for w in windows))
 
+    def test_declared_sdk_clipping_is_proven_only_for_diagnostics(self):
+        _, rows, _, _ = native_fixture()
+        original = copy.deepcopy(rows)
+        lo, hi = [-2.] * 14, [2.] * 14
+        hi[6] = .12
+        limits = {"lower": lo, "upper": hi, "joint_unit": "radian", "gripper_unit": "0_closed_1_open"}
+        for row in rows:
+            row["submitted_action"] = np.clip(row["submitted_action"], lo, hi).tolist()
+        windows, audit = reconstruct_intervals(rows, diagnostics=True, action_limits=limits)
+        self.assertFalse(audit)
+        self.assertTrue(all(w["receipt"]["status"] == "executed" for w in windows))
+        self.assertTrue(all(w["receipt"]["diagnostic_only"] for w in windows))
+        self.assertTrue(all(w["receipt"]["known_sdk_limited_ticks"] for w in windows))
+        self.assertEqual(rows[0]["details"]["policy_reply"], original[0]["details"]["policy_reply"])
+        _, audit = reconstruct_intervals(rows, action_limits=limits)
+        self.assertTrue(audit)  # No bypass of the formal actor's action contract.
+
 
 if __name__ == "__main__":
     unittest.main()

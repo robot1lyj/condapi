@@ -99,7 +99,7 @@ def native_replies(rows, events=()):
     return replies, cancelled
 
 
-def reconstruct_intervals(rows, events=(), *, diagnostics=False):
+def reconstruct_intervals(rows, events=(), *, diagnostics=False, action_limits=None):
     """Actual [observation_i, observation_i+1) transitions at native cadence.
 
     Committed-prefix origins can belong to older replies. They must match both
@@ -107,6 +107,14 @@ def reconstruct_intervals(rows, events=(), *, diagnostics=False):
     """
     by_tick, observations, origins, proposals = {}, {}, {}, {}
     audit = []
+    declared_bounds = None
+    if diagnostics and action_limits is not None:
+        lo, hi = (np.asarray(action_limits[k], dtype=np.float64) for k in ("lower", "upper"))
+        if (lo.shape != (14,) or hi.shape != (14,) or not np.isfinite(lo).all() or not np.isfinite(hi).all()
+                or np.any(lo >= hi) or action_limits.get("joint_unit") != "radian"
+                or action_limits.get("gripper_unit") != "0_closed_1_open"):
+            raise ValueError("invalid native SDK bounds for diagnostic action attribution")
+        declared_bounds = lo, hi
     for i, row in enumerate(rows):
         key = (row["epoch"], row["tick"])
         if key in by_tick:
@@ -169,6 +177,7 @@ def reconstruct_intervals(rows, events=(), *, diagnostics=False):
             successor = origins[(epoch, str(nxt["request_id"]))]
             if successor["discarded"] is not False or successor["error"]:
                 raise ValueError("next observation response canceled/rejected")
+            limited_ticks = []
             for t, row in zip(range(begin, end), selected, strict=True):
                 if not row["submitted_valid"] or row["is_intervention"] or not row["intervention_valid"]:
                     raise ValueError("invalid or human-controlled actual action")
@@ -184,8 +193,11 @@ def reconstruct_intervals(rows, events=(), *, diagnostics=False):
                 if (own and t - begin < p["delay_steps"]) or (not own and (t - begin >= p["delay_steps"]
                                                                           or token["observation_policy_tick"] >= begin)):
                     raise ValueError("RTC prefix source rewritten or new proposal never took over")
-                if not np.allclose(row["submitted_action"], np.asarray(source["actions"])[k], atol=1e-6, rtol=0):
-                    raise ValueError("actual submission differs from native selected source")
+                target = np.asarray(source["actions"])[k]
+                if not np.allclose(row["submitted_action"], target, atol=1e-6, rtol=0):
+                    if declared_bounds is None or not np.allclose(row["submitted_action"], np.clip(target, *declared_bounds), atol=1e-6, rtol=0):
+                        raise ValueError("actual submission differs from native selected source")
+                    limited_ticks.append({"tick": t, "dimensions": np.flatnonzero(np.abs(target - row["submitted_action"]) > 1e-6).tolist()})
             obs_ref = observations[(epoch, p["observation_id"])]
             next_ref = observations[(epoch, nxt["observation_id"])]
             ended = nxt["gate"].get("ended") or {}
@@ -197,7 +209,8 @@ def reconstruct_intervals(rows, events=(), *, diagnostics=False):
                        "observation_ref": obs_ref, "next_observation_ref": next_ref,
                        "raw_refs": [r["raw_ref"] for r in selected],
                        "window_end": ended.get("window_id") == p["window_id"], "window_end_reason": ended.get("reason"),
-                       "diagnostic_only": p.get("replay_eligible") is False,
+                       "diagnostic_only": p.get("replay_eligible") is False or bool(limited_ticks),
+                       "known_sdk_limited_ticks": limited_ticks,
                        "reply_refs": replies[(epoch, str(p["request_id"]))]["refs"]}
             result.append({"proposal": {**copy.deepcopy(p), "end_tick": end}, "receipt": receipt})
         except (ValueError, KeyError, TypeError, IndexError) as exc:

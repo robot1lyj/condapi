@@ -1,0 +1,22 @@
+[
+  {
+    "candidate_id": "E01-R005-v2",
+    "range_ticks": [
+      88896,
+      88954
+    ],
+    "raw_30Hz_peak_openness": 0.6504623635029566,
+    "inference_observation_peak_openness": 0.6474952101707458,
+    "rearm_threshold": 0.65
+  },
+  {
+    "candidate_id": "E01-R006-v2",
+    "range_ticks": [
+      88896,
+      89332
+    ],
+    "raw_30Hz_peak_openness": 0.6677942509387543,
+    "inference_observation_peak_openness": 0.6474952101707458,
+    "rearm_threshold": 0.65
+  }
+]

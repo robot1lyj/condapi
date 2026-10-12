@@ -1,0 +1,28 @@
+{
+  "task": "乐高分拣-pld-rl",
+  "task_id": "bc9a8957-7195-4e56-99e7-dd57811842c9",
+  "session": "session_20261012_180423_471f9a",
+  "episode": "episode_000001",
+  "episode_id": "3923343be14e481f9ba9cb34788198c1",
+  "source_root": "/home/wuyan-lyj/condapi-data/rl/lego-pld-probe-20261012-e01-v1/raw",
+  "mode": "probe",
+  "intervals": 116,
+  "source_verified_intervals": 116,
+  "sdk_limited_intervals": 12,
+  "native_files": 11,
+  "raw_bytes": 154960923,
+  "raw_archive_sha256": "4e86b5ed252802de0e37e15339cf2a47ce3d077fab2a4aaaaa55cdace7c105cc",
+  "training": false,
+  "reward_records": 0,
+  "robot_success_rate": null,
+  "formal_radius_selected": false,
+  "inference_changed": false,
+  "evidence_sha256": {
+    "clamp-analysis.json": "ed755eb0d7a9c937e12ab07058e457408b20103dbf0c849be4969b16144e4687",
+    "detail-review.json": "600ac0e59b7fc8a275b33861821e5ecb23c00e82f25399c1714c75df758f2052",
+    "probe-audit.json": "0aa46ee9c084c740f6aa105c0af7909c05d14c7072db01fb29eb7f32fb73015a",
+    "gate-debug.json": "f4521e71b32ba3e48f74f2ea61ecd051f00b04f0d0c31832f3cdc379d6c8e2c2",
+    "copy-receipt.json": "179633c03e14e10b756fe59778d78fe456e0fe769f6972a2b6e31452f869d416",
+    "missed-rearm-analysis.json": "daf6407b04feeec9543cc40628f940ba1a030e3563772c49a79ce30fe833a903"
+  }
+}

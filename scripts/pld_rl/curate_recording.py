@@ -113,15 +113,17 @@ def main():
     episode_ids = set()
     for number, folder in enumerate(folders, 1):
         rows, events, source_hashes = read_episode(folder)
+        native_manifest = json.loads((folder / "manifest.json").read_text())
         if rows[0]["episode_id"] in episode_ids:
             raise ValueError("duplicate native episode UUID across inputs")
         episode_ids.add(rows[0]["episode_id"])
         policy_events.extend(events)
         if args.probe_audit:
-            probe_reports.append(audit_probe(rows, events, json.loads((folder / "manifest.json").read_text())))
+            probe_reports.append(audit_probe(rows, events, native_manifest))
         hashes.update(source_hashes)
         c = physical_candidates(rows, fk, number)
-        w, rejected = reconstruct_intervals(rows, events, diagnostics=args.probe_audit)
+        w, rejected = reconstruct_intervals(rows, events, diagnostics=args.probe_audit,
+                                            action_limits=native_manifest.get("action_limits") if args.probe_audit else None)
         groups = defaultdict(list)
         for interval in w:
             groups[interval["proposal"]["window_id"]].append(interval)

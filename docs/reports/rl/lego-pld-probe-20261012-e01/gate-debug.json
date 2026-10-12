@@ -1,0 +1,364 @@
+{
+  "causal_replay_mismatches": 0,
+  "samples": [
+    {
+      "tick": 88938,
+      "openness_left_right": [
+        0.9055573344230652,
+        0.6092274785041809
+      ],
+      "future_min_left_right": [
+        0.9059425592422485,
+        0.2845980306335092
+      ],
+      "blocked_before": [
+        "right"
+      ],
+      "blocked_after": [
+        "right"
+      ],
+      "active": false,
+      "arm": null,
+      "close_z": null,
+      "peak": null
+    },
+    {
+      "tick": 88948,
+      "openness_left_right": [
+        0.9104272723197937,
+        0.5263131260871887
+      ],
+      "future_min_left_right": [
+        0.9052027004363538,
+        0.24584427742382886
+      ],
+      "blocked_before": [
+        "right"
+      ],
+      "blocked_after": [
+        "right"
+      ],
+      "active": false,
+      "arm": null,
+      "close_z": null,
+      "peak": null
+    },
+    {
+      "tick": 88959,
+      "openness_left_right": [
+        0.9099969267845154,
+        0.36189910769462585
+      ],
+      "future_min_left_right": [
+        0.880835211283207,
+        0.23687973500928283
+      ],
+      "blocked_before": [
+        "right"
+      ],
+      "blocked_after": [
+        "right"
+      ],
+      "active": false,
+      "arm": null,
+      "close_z": null,
+      "peak": null
+    },
+    {
+      "tick": 88970,
+      "openness_left_right": [
+        0.9067284464836121,
+        0.2515904903411865
+      ],
+      "future_min_left_right": [
+        0.8577838883453608,
+        0.2352525540571511
+      ],
+      "blocked_before": [
+        "right"
+      ],
+      "blocked_after": [
+        "right"
+      ],
+      "active": false,
+      "arm": null,
+      "close_z": null,
+      "peak": null
+    },
+    {
+      "tick": 89313,
+      "openness_left_right": [
+        0.9133394956588745,
+        0.6364046931266785
+      ],
+      "future_min_left_right": [
+        0.9127103090286255,
+        0.2574034896298349
+      ],
+      "blocked_before": [
+        "right"
+      ],
+      "blocked_after": [
+        "right"
+      ],
+      "active": false,
+      "arm": null,
+      "close_z": null,
+      "peak": null
+    },
+    {
+      "tick": 89323,
+      "openness_left_right": [
+        0.9156250357627869,
+        0.6416759490966797
+      ],
+      "future_min_left_right": [
+        0.9184901118278503,
+        0.28395386244079474
+      ],
+      "blocked_before": [
+        "right"
+      ],
+      "blocked_after": [
+        "right"
+      ],
+      "active": false,
+      "arm": null,
+      "close_z": null,
+      "peak": null
+    },
+    {
+      "tick": 89334,
+      "openness_left_right": [
+        0.9237297773361206,
+        0.4294887185096741
+      ],
+      "future_min_left_right": [
+        0.9268568158149719,
+        0.24574755833628775
+      ],
+      "blocked_before": [
+        "right"
+      ],
+      "blocked_after": [
+        "right"
+      ],
+      "active": false,
+      "arm": null,
+      "close_z": null,
+      "peak": null
+    },
+    {
+      "tick": 89345,
+      "openness_left_right": [
+        0.9289439916610718,
+        0.30500197410583496
+      ],
+      "future_min_left_right": [
+        0.924766296129942,
+        0.23301347440454365
+      ],
+      "blocked_before": [
+        "right"
+      ],
+      "blocked_after": [
+        "right"
+      ],
+      "active": false,
+      "arm": null,
+      "close_z": null,
+      "peak": null
+    },
+    {
+      "tick": 89356,
+      "openness_left_right": [
+        0.9285621643066406,
+        0.25594857335090637
+      ],
+      "future_min_left_right": [
+        0.8854370256140829,
+        0.2262628634879887
+      ],
+      "blocked_before": [
+        "right"
+      ],
+      "blocked_after": [
+        "right"
+      ],
+      "active": false,
+      "arm": null,
+      "close_z": null,
+      "peak": null
+    },
+    {
+      "tick": 90922,
+      "openness_left_right": [
+        0.9570059180259705,
+        0.7680623531341553
+      ],
+      "future_min_left_right": [
+        0.5077227679413557,
+        0.7620966498497129
+      ],
+      "blocked_before": [],
+      "blocked_after": [],
+      "active": true,
+      "arm": "left",
+      "close_z": null,
+      "peak": 0.9570059180259705
+    },
+    {
+      "tick": 90933,
+      "openness_left_right": [
+        0.8428018689155579,
+        0.7680090069770813
+      ],
+      "future_min_left_right": [
+        0.47300347596770526,
+        0.7552914519435168
+      ],
+      "blocked_before": [],
+      "blocked_after": [],
+      "active": true,
+      "arm": "left",
+      "close_z": null,
+      "peak": 0.9570059180259705
+    },
+    {
+      "tick": 90943,
+      "openness_left_right": [
+        0.654278576374054,
+        0.7680090069770813
+      ],
+      "future_min_left_right": [
+        0.4988143023360372,
+        0.7664371132850647
+      ],
+      "blocked_before": [],
+      "blocked_after": [],
+      "active": true,
+      "arm": "left",
+      "close_z": null,
+      "peak": 0.9570059180259705
+    },
+    {
+      "tick": 90954,
+      "openness_left_right": [
+        0.6676104068756104,
+        0.7679538130760193
+      ],
+      "future_min_left_right": [
+        0.4998010993003845,
+        0.769153892993927
+      ],
+      "blocked_before": [],
+      "blocked_after": [],
+      "active": true,
+      "arm": "left",
+      "close_z": null,
+      "peak": 0.9570059180259705
+    },
+    {
+      "tick": 90965,
+      "openness_left_right": [
+        0.6826577186584473,
+        0.7801938056945801
+      ],
+      "future_min_left_right": [
+        0.516272246837616,
+        0.7808729652811289
+      ],
+      "blocked_before": [],
+      "blocked_after": [],
+      "active": true,
+      "arm": "left",
+      "close_z": null,
+      "peak": 0.9570059180259705
+    },
+    {
+      "tick": 91081,
+      "openness_left_right": [
+        0.9476641416549683,
+        0.5809954404830933
+      ],
+      "future_min_left_right": [
+        0.3194841526044309,
+        0.6264742016792297
+      ],
+      "blocked_before": [],
+      "blocked_after": [],
+      "active": true,
+      "arm": "left",
+      "close_z": null,
+      "peak": 0.9798199534416199
+    },
+    {
+      "tick": 91091,
+      "openness_left_right": [
+        0.818759024143219,
+        0.6732578277587891
+      ],
+      "future_min_left_right": [
+        0.26883180628699066,
+        0.6812596917152405
+      ],
+      "blocked_before": [],
+      "blocked_after": [],
+      "active": true,
+      "arm": "left",
+      "close_z": null,
+      "peak": 0.9798199534416199
+    },
+    {
+      "tick": 91101,
+      "openness_left_right": [
+        0.6573652625083923,
+        0.7116240859031677
+      ],
+      "future_min_left_right": [
+        0.23885732152810693,
+        0.7163624167442322
+      ],
+      "blocked_before": [],
+      "blocked_after": [],
+      "active": true,
+      "arm": "left",
+      "close_z": null,
+      "peak": 0.9798199534416199
+    },
+    {
+      "tick": 91112,
+      "openness_left_right": [
+        0.3621341288089752,
+        0.7239037156105042
+      ],
+      "future_min_left_right": [
+        0.23915603035515548,
+        0.7248810529708862
+      ],
+      "blocked_before": [],
+      "blocked_after": [],
+      "active": true,
+      "arm": "left",
+      "close_z": 0.015263410093083823,
+      "peak": 0.9798199534416199
+    },
+    {
+      "tick": 91123,
+      "openness_left_right": [
+        0.31507402658462524,
+        0.7330606579780579
+      ],
+      "future_min_left_right": [
+        0.23881533841216565,
+        0.7397577166557312
+      ],
+      "blocked_before": [],
+      "blocked_after": [],
+      "active": true,
+      "arm": "left",
+      "close_z": 0.015263410093083823,
+      "peak": 0.9798199534416199
+    }
+  ]
+}

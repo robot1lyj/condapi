@@ -1,0 +1,48 @@
+{
+  "changed_ticks": 232,
+  "dimensions_counts": {
+    "6": 232,
+    "13": 62
+  },
+  "max_abs_difference": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.01298543294948351,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.004348412472784613
+  ],
+  "lower_bound_clipped_coordinates": 0,
+  "upper_bound_clipped_coordinates": 294,
+  "examples": [
+    {
+      "tick": 88039,
+      "dimension": 6,
+      "raw_pi": 0.9809264756614566,
+      "submitted": 0.98
+    },
+    {
+      "tick": 88040,
+      "dimension": 6,
+      "raw_pi": 0.9807962058368326,
+      "submitted": 0.98
+    },
+    {
+      "tick": 88041,
+      "dimension": 6,
+      "raw_pi": 0.9825120012579561,
+      "submitted": 0.98
+    }
+  ],
+  "matches_declared_sdk_bounds": true,
+  "joint_coordinates_unchanged": true,
+  "RL_residual": false
+}
