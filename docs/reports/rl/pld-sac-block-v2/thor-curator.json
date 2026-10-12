@@ -1,0 +1,12 @@
+{
+  "status": "passed_cpu_synthetic_only",
+  "producer": "Replay-Curator",
+  "source_commit": "e2b60f1",
+  "neural_judgement_executed": false,
+  "training_executed": false,
+  "robot_connected": false,
+  "candidates": 1,
+  "transitions": 3,
+  "terminal_reward_sum": 1,
+  "seconds": 0.5515814719256014
+}

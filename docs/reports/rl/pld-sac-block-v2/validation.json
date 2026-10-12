@@ -1,0 +1,45 @@
+{
+  "status": "passed_synthetic_and_inference_only",
+  "code_commit": "e2b60f17cf5e583e1940b38e166b7c1955229fc4",
+  "local_checks": {
+    "array_contract": 8,
+    "native_curator": 5,
+    "websocket_protocol": 21,
+    "training_or_neural_forward": false
+  },
+  "server": {
+    "job_id": 2317,
+    "state": "COMPLETED",
+    "exit_code": "0:0",
+    "allocated_gpu": "1x RTX4090",
+    "elapsed_seconds": 7,
+    "raw_hil_roundtrip": true,
+    "sac_critic_updates": 40,
+    "sac_actor_updates": 18,
+    "artifact_root": "/home/wuyan/lyj/pld-grasp/runs/sac-block-validation-20261012-v2-r2"
+  },
+  "thor": {
+    "artifact_root": "/home/wuyan-lyj/thor/pi/cache/pld-sac-validation-20261012-v2-r2",
+    "neural_forward_samples": 6,
+    "cpu_curator_roundtrip": true,
+    "training": false,
+    "Qwen_DINO_relabeling": false
+  },
+  "reports_sha256": {
+    "thor-inference.json": "af1d7486aa363f5841f3d647868417b5e7b9777dd1ceb5cc174c0366c3c7f813",
+    "server-validation.json": "7307509f54771f9ff8186003379f3bdf3ef8adb927a20428142041c069c02231",
+    "fk-validation.json": "d60b95a277399eb987a9f2c5db86ab9a5cb92f619c8b2af3692c29777a0240e8",
+    "thor-curator.json": "13da83205c1409265a1e0a1ed7c3461ce03e948f33423e09c17e790fd962b0b3"
+  },
+  "robot_deployed": false,
+  "client_modified": false,
+  "cross_IPC_tested": false,
+  "remaining": [
+    "client RL mode and complete pld reply recording",
+    "actual limits/step bounds/base identity",
+    "real probe observation/source alignment and gate coverage",
+    "corrected rollout collection and reviewed reward release",
+    "real probe/eval task comparison"
+  ],
+  "meaning": "Synthetic tests validate implementation; no learned correction benefit or production readiness claim."
+}

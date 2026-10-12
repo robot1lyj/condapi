@@ -1,0 +1,9 @@
+{
+  "status": "passed",
+  "model_sha256": "a7362a0d3e7bffd822b2ba9992c1fb4b00862eb86277a4f11326018680d9dcc3",
+  "mujoco": "3.3.7",
+  "poses": 1000,
+  "max_coordinate_error_m": 6.661338147750939e-16,
+  "robot_calibration_verified": false,
+  "scope": "same pinned MJCF kinematics only; no table calibration or limit verification"
+}

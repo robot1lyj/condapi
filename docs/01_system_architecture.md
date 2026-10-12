@@ -2,7 +2,7 @@
 
 ## 并行 RL 实验的所有权（2026-10-11）
 
-用户明确多方案并行。本分工当前为 **PLD 式整段抓取残差专家**：冻结 Pi0.5，SAC + 价值初始化，首轮左右臂都覆盖，成功后交还 Pi 放置；通用奖励与 RECAP 后训练后置。研究与实施顺序唯一归[03](03_training_and_evaluation.md#pld-主线与-recap-后续路线2026-10-11)，[架构图](reports/rl/parts-grasp-review14-20261010/pld-plan.html)仅表示方案，尚无新 learner 或推理接入。EXPO-FT 由独立路线推进；实现隔离到功能分支，保留原生 Pi 与 RTC，不把一条路线切换解释为删除其他实验的授权。
+用户明确多方案并行。本分工当前为**PLD式整段抓取残差专家**，实现与当前分工归[PLD-SAC v2](reports/rl/pld-sac-block-v2/README.md)：Thor在线Pi-Base＋PLD-Corrector，离线优先Replay-Curator＋Qwen-DINO Judge；GPU服务器归档/复核并运行SAC-Coach；外部客户端仅复用RTC执行与连续录制。抓取切段、正式编号、奖励不由客户端承担。代码与合成闭环不代表真机启用，学习状态唯一归[03](03_training_and_evaluation.md#pld-主线与-recap-后续路线2026-10-11)。RECAP后置；EXPO-FT属于独立并行路线，本分工不改动其实现或授权。
 
 ## EXPO-FT 强化学习架构（2026-10-10，设计草案）
 
@@ -68,7 +68,7 @@
 
 ## 多模型接入层
 
-旧 PARTS/RLT learner 与服务入口已退役；本分支保留少量历史抓取工具，当前 PLD 和并行 EXPO-FT 均为设计，不能视为已有可运行 RL 后端。当前计划见本页顶部及03，04/05中的9月合同仅为历史。
+旧 PARTS/RLT learner 与服务入口已退役；本分支保留少量历史抓取工具，PLD-SAC已新增独立学习/推理接口与合成验证，尚未启用真机；并行EXPO-FT仍按其独立状态管理，不能据旧入口启动。当前计划见本页顶部及03，04/05中的9月合同仅为历史。
 
 模型无关遥测使用标准库 `vla_platform.metrics.write_metrics`，训练器只需输出标量事件。LeRobot 共享入口采集原生结构化 tracker；Pi 保持原生日志；独立只读看板统一消费 JSONL/CSV/Trainer-state，不导入模型环境。指标合同、配置与局限归 [11](11_training_dashboard.md)。
 2026-09-08 工作树改造：采用 **LeRobot 原生能力 + 薄接入层**，不是自研训练框架。LeRobot 负责其支持模型的网络、loss、数据集、处理器、优化器和 checkpoint；原版 OpenPI 是 Pi 的独立实现后端。RLinf 仅作为未来有具体 DAgger/RL 需求时的可选后端，不作为所有模型的强制依赖。

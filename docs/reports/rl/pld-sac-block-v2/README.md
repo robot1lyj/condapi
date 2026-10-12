@@ -122,3 +122,17 @@ python scripts/pld_rl/prepare_blocks.py \
 这些是接口示例路径，不是当前实际采集包或立即开训命令。输出目录必须新建，不能覆盖。`reviewed.json`每项字段为`candidate_id/candidate_sha256/status(held|empty)/approved=true/reviewer/evidence_rows`，其中evidence_rows选自同一候选内释放前、≥5cm且新鲜的取样帧行。审核SHA绑定原始H5和视频SHA、候选内容；不能修改数据后复用旧批准。新响应输入按原生`observation_id`关联原记录，不能假设图像行号、控制tick、请求收到时刻三者相同。
 
 客户端转交文本单独放在[client-request.md](client-request.md)，供用户审核和转发；本任务未自动发送给客户端agent。
+
+## 已完成验收与实际剩余条件
+
+代码固定 `e2b60f1`；[验证汇总](validation.json)绑定逐项报告SHA。
+
+- 本地34项轻量检查通过：8项数组合同、5项原生录制/门控/关联、21项WebSocket协议；没有本地训练或神经网络前向。
+- Slurm **2317**，1×4090，退出0：8次合成尝试/24条数组transition校验；另将原生H5＋三MP4走完候选导出、审核版本绑定、实际来源核验、replay编译，得到1次合成尝试/3个可变长度transition；再进行40次critic、18次actor更新及导出重载。作业7秒，只是数值测试，不是专家收敛。见[服务器报告](server-validation.json)。
+- Thor用独立前向进程验证6例，自动选择左右臂、零均值等于Pi、float64前缀与另一臂不变、有界非零采样通过。新增后处理P50 **19.84ms**，最大 **40.95ms**，少量样本且不含Pi/IPC，不是生产P95。见[Thor前向](thor-inference.json)。
+- Thor现有Qwen视觉镜像中，CPU数据管家完整走过H5＋三视频→候选→合成审核→奖励关联→replay，3条transition且只出现1次末端奖励。该验证未运行Qwen/DINO、没有训练，标签由合成测试oracle提供。见[Thor数据管家](thor-curator.json)。
+- NumPy FK与MuJoCo同一固定MJCF的1000组关节输入对照，最大坐标差约`6.66e-16m`；这证明软件运动学一致，不证明现场桌面标定/物理限位。依赖wheel本地下载后传服务器，几何校验在隔离路径运行，原训练环境未安装MuJoCo。见[FK报告](fk-validation.json)。
+
+服务器所有原始合成文件、三视频、图像、输入/审核SHA、配置、日志、优化器/checkpoint和bundle保存在 `runs/sac-block-validation-20261012-v2-r2/`；Thor独立资产在 `thor/pi/cache/pld-sac-validation-20261012-v2-r2/`。前一版r1保留，未覆盖。合成测试不进入用户真实训练看板或论文成功率统计。
+
+**仍需客户端改造、实际限位/base身份、真实probe时序与门控覆盖验收。没有操作3588，没有切换生产服务，没有启用真机RL。** 下一步先probe，核对输入观测来源、前缀、逐tick提交值和采集完整性，再进入collect；本轮没有开始真实数据SAC训练。
