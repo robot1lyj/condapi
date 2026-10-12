@@ -1,0 +1,27 @@
+{
+  "project": "pld-vla-action-correction",
+  "mode": "compose",
+  "text_type": "literature_review_and_exploratory_research_plan",
+  "language": "zh",
+  "target_reader": "project researchers and prospective paper collaborators",
+  "current_round": 1,
+  "version": "0.1",
+  "updated_at": "2026-10-12",
+  "scores": [],
+  "status": "exploratory_literature_draft",
+  "priority": "literature-first; hypotheses evolve alongside experiments; novelty not locked",
+  "reference_records": 25,
+  "technical_debts": [
+    "Selected-method reading is not full-paper or code-level reproduction audit",
+    "Independent reward-model test data and truth labels are not yet available",
+    "Pi-only trajectories lack nonzero residual behavioral support",
+    "Candidate innovation and cross-task benefits remain unverified",
+    "No RL training, deployment or distillation results for this proposed framework"
+  ],
+  "scope": {
+    "paper_research_only": true,
+    "project_code_changes": false,
+    "dataset_reprocessing": false,
+    "training_or_deployment": false
+  }
+}
