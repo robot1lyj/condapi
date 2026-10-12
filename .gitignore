@@ -176,3 +176,6 @@ cython_debug/
 
 # Live training dashboard mirrors (not evidence records).
 artifacts/training_dashboard/
+
+# Read-only local mirrors of server PLD method experiments.
+/artifacts/pld-methods*/

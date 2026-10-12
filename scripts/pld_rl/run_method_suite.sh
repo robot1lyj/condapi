@@ -1,5 +1,5 @@
 #!/bin/bash
-# Four allocated GPUs, two waves; no robot or VLA training entry is invoked.
+# Up to four allocated GPUs; no robot or VLA training entry is invoked.
 set -euo pipefail
 : "${PLD_RUN_ROOT:?}"
 source "$PLD_RUN_ROOT/run.env"
@@ -10,13 +10,14 @@ mkdir -p "$PLD_RUN_ROOT/configs"
 "$PLD_ENV_PREFIX/bin/python" -m pip check > "$PLD_RUN_ROOT/pip-check.txt"
 "$PLD_ENV_PREFIX/bin/python" scripts/pld_rl/method_gpu_checks.py --output "$PLD_RUN_ROOT/gpu-checks.json"
 IFS=, read -r -a devices <<< "${CUDA_VISIBLE_DEVICES:-0,1,2,3}"
-[[ ${#devices[@]} == 4 ]] || exit 2
-recipes=(pld-iql-s0 pld-iql-s1 pld-td3bc-s0 pld-rebrac-s0 pld-iql-e09-s0 pld-iql-e09-s1 pld-td3bc-s1 pld-rebrac-s1)
+(( ${#devices[@]} >= 1 && ${#devices[@]} <= 4 )) || exit 2
+IFS=, read -r -a recipes <<< "${PLD_METHOD_RECIPES:-pld-iql-s0,pld-iql-s1,pld-td3bc-s0,pld-rebrac-s0,pld-iql-e09-s0,pld-iql-e09-s1,pld-td3bc-s1,pld-rebrac-s1}"
 failed=0
-for wave in 0 1; do
+for ((offset=0; offset<${#recipes[@]}; offset+=${#devices[@]})); do
     pids=()
-    for index in 0 1 2 3; do
-        recipe=${recipes[$((wave*4+index))]}
+    for ((index=0; index<${#devices[@]} && offset+index<${#recipes[@]}; index++)); do
+        recipe=${recipes[$((offset+index))]}
+        [[ "$recipe" =~ ^pld-[a-z0-9-]+$ ]] || exit 2
         config="configs/pld_rl/methods14-$recipe.json"
         id=$("$PLD_ENV_PREFIX/bin/python" -c 'import json,sys; print(json.load(open(sys.argv[1]))["id"])' "$config")
         [[ "$id" =~ ^[a-z0-9-]+$ ]] || exit 2
