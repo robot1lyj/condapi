@@ -18,7 +18,9 @@ from yam_pld_rl.block_contract import feasible_scale
 from yam_pld_rl.block_contract import fingerprint
 from yam_pld_rl.block_contract import integer
 from yam_pld_rl.block_contract import observation_vector
+from yam_pld_rl.block_contract import physical_baseline
 from yam_pld_rl.block_contract import validate_contract
+from yam_pld_rl.block_contract import wire_plan
 from yam_pld_rl.data import sha256
 from yam_pld_rl.intervention import InterventionSession
 from yam_pld_rl.kinematics import YamKinematics
@@ -47,6 +49,13 @@ class BlockRuntime:
         self.encoder.requires_grad_(requires_grad=False).to(device).eval()
         self.transform = ResNet18_Weights.IMAGENET1K_V1.transforms()
         self.fk = YamKinematics(bundle / "fk.xml")
+        torch.set_num_threads(2)
+        with torch.inference_mode():
+            for _ in range(2):
+                self.encoder(torch.zeros((3, 3, 224, 224), device=device))
+                self.actor(torch.zeros((1, self.manifest["observation_dim"]), device=device), deterministic=True)
+        if str(device).startswith("cuda"):
+            torch.cuda.synchronize()
 
     @property
     def metadata(self):
@@ -84,18 +93,23 @@ class BlockRuntime:
         if isinstance(rid, bool) or not isinstance(rid, (str, int)) or not 0 < len(str(rid)) <= 160:
             raise ValueError("native request_id required")
         array(output["actions"], (50, 14), "Pi actions")
-        base = np.asarray(output["actions"])
+        raw_base = np.asarray(output["actions"])
+        base = physical_baseline(raw_base, delay, c)
         state = array(obs["observation.state"], (14,), "state")
         previous = array(request["previous_command"], (14,), "last submitted command")
-        heights = self.fk.heights(state)
-        gate = session.select(request, rtc, state, base, heights)
+        gate_heights = self.fk.gate_heights(state, base, c)
+        heights = {arm: gate_heights[arm] for arm in ("left", "right")}
+        gate = session.select(request, rtc, state, base, gate_heights)
         trace = {**{k: request[k] for k in ("run_id", "episode_id", "mode", "request_id")},
                  **self.metadata, "epoch": epoch, "observation_id": observation_id,
                  "decision_id": f"e{epoch}:r{rid}", "gate": gate,
                  "start_tick": tick, "delay_steps": delay, "base": base, "state": state,
-                 "previous_command": previous, "base_z_m": heights}
+                 "previous_command": previous, "base_z_m": heights, "raw_base": raw_base,
+                 "baseline_transform": c.get("baseline_transform"), "actions": base,
+                 "wire_actions": wire_plan(base, raw_base, delay),
+                 "replay_eligible": True, "residual_applied": False}
         if not gate["active"]:
-            return {**output, "pld": trace}
+            return {**output, "actions": trace["wire_actions"], "pld": trace}
         arm, elapsed = gate["arm"], gate["elapsed_seconds"]
         scale = feasible_scale(base, previous, arm, delay, c)
         images = []
@@ -114,11 +128,14 @@ class BlockRuntime:
         u = u[0].cpu().numpy()
         action = scale * u if mode in {"collect", "eval"} else np.zeros(7, dtype=np.float32)
         actions = decode(base, action, arm, delay, c)
+        wire = wire_plan(actions, raw_base, delay)
         trace.update(arm=arm, window_id=gate["window_id"], elapsed_seconds=elapsed,
                      envelope_end_tick=tick + delay + c["block_steps"], x=x, scale=scale, sample_u=u,
                      action=action, log_prob_u=float(logp[0]), actions=actions,
+                     wire_actions=wire,
+                     residual_applied=bool(np.any(action)),
                      encoder_ms_included_total_ms=(time.monotonic() - start) * 1000)
-        return {**output, "actions": actions, "pld": trace}
+        return {**output, "actions": wire, "pld": trace}
 
 
 class RuntimeSession:

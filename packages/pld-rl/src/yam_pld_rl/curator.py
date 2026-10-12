@@ -13,9 +13,10 @@ import numpy as np
 
 from yam_pld_rl.block_contract import fingerprint
 from yam_pld_rl.grasp_events import physical_events
+from yam_pld_rl.grasp_events import relative_physical_events
 
 
-def physical_candidates(rows, fk, episode_number=1):
+def physical_candidates(rows, fk, episode_number=1, *, segmentation="relative_v3"):
     times = np.asarray([r["time"] for r in rows], dtype=np.float64)
     states = np.asarray([r["measured_state"] for r in rows], dtype=np.float64)
     valid = np.asarray([r["measured_state_valid"] for r in rows])
@@ -28,9 +29,12 @@ def physical_candidates(rows, fk, episode_number=1):
     for arm, axis, col in (("left", 6, 1), ("right", 13, 2)):
         xyz, g = positions[arm], states[:, axis]
         z = xyz[:, 2]
-        events = physical_events(times, g, z, valid, epochs, ticks)
+        if segmentation not in {"legacy_v2", "relative_v3"}:
+            raise ValueError("unknown physical segmentation")
+        events = (relative_physical_events if segmentation == "relative_v3" else physical_events)(times, g, z, valid, epochs, ticks)
         for serial, event in enumerate(events, 1):
             close, end = event["close"], event["end"]
+            reference = event.get("reference", close)
             minimum = g[close]
             for i in range(close + 1, end + 1):
                 minimum = min(minimum, g[i])
@@ -40,8 +44,8 @@ def physical_candidates(rows, fk, episode_number=1):
             fresh = [i for i in range(close, end + 1)
                      if rows[i]["video_indices"][col] >= 0 and rows[i]["camera_valid"][col]
                      and 0 <= times[i] - rows[i]["camera_times"][col] <= 0.3 and np.isfinite(z[i])]
-            lifted = [i for i in fresh if z[i] - z[close] >= 0.05]
-            picks = [event["entry"], close]
+            lifted = [i for i in fresh if z[i] - z[reference] >= 0.05]
+            picks = [event["entry"], close, reference]
             if fresh:
                 picks += [min(fresh, key=lambda i: abs(times[i] - times[close] - t)) for t in (0.2, 0.45, 0.75, 1.15)]
             if lifted:
@@ -60,13 +64,15 @@ def physical_candidates(rows, fk, episode_number=1):
                 frames.append({"row": i, "raw_ref": rows[i]["raw_ref"], "tick": int(ticks[i]), "epoch": int(epochs[i]),
                                "time": float(times[i]), "since_close_s": float(times[i] - times[close]),
                                "openness": float(g[i]), "position_m": xyz[i].tolist(),
-                               "lift_from_closure_m": float(z[i] - z[close]), "views": views})
-            result.append({"candidate_id": f"E{episode_number:02d}-{arm[0].upper()}{serial:03d}-v2",
+                               "lift_from_closure_m": float(z[i] - z[reference]), "views": views})
+            version = "v3" if segmentation == "relative_v3" else "v2"
+            result.append({"candidate_id": f"E{episode_number:02d}-{arm[0].upper()}{serial:03d}-{version}",
                            "episode_number": episode_number, "episode_id": rows[close]["episode_id"], "arm": arm,
                            "epoch": int(epochs[close]), "entry_row": event["entry"], "close_row": close,
                            "end_row": event["end"], "inspection_end_row": end, "end_reason": event["end_reason"],
                            "close_tick": int(ticks[close]), "close_time": float(times[close]),
-                           "reference_base_z_m": float(z[close]), "frames": frames,
+                           "reference_base_z_m": float(z[reference]), "reference_row": reference,
+                           "segmentation": segmentation, "frames": frames,
                            "lift_rows": lifted, "evidence_eligible": bool(lifted), "approved_reward": None})
     return result
 
@@ -108,7 +114,7 @@ def reconstruct_intervals(rows, events=(), *, diagnostics=False, action_limits=N
     by_tick, observations, origins, proposals = {}, {}, {}, {}
     audit = []
     declared_bounds = None
-    if diagnostics and action_limits is not None:
+    if action_limits is not None:
         lo, hi = (np.asarray(action_limits[k], dtype=np.float64) for k in ("lower", "upper"))
         if (lo.shape != (14,) or hi.shape != (14,) or not np.isfinite(lo).all() or not np.isfinite(hi).all()
                 or np.any(lo >= hi) or action_limits.get("joint_unit") != "radian"
@@ -145,7 +151,7 @@ def reconstruct_intervals(rows, events=(), *, diagnostics=False, action_limits=N
                     or p["start_tick"] != token["observation_policy_tick"] or p["observation_id"] != token["observation_id"]
                     or p["episode_id"] != rows[0]["episode_id"]):
                 raise ValueError("PLD trace differs from native request token/episode")
-            if value["discarded"] is False and not value["error"] and not np.allclose(reply["actions"], p.get("actions", p["base"]), atol=1e-6, rtol=0):
+            if value["discarded"] is False and not value["error"] and not np.allclose(reply["actions"], p.get("wire_actions", p.get("actions", p["base"])), atol=1e-6, rtol=0):
                 raise ValueError("reply actions differ from PLD plan")
         except (ValueError, KeyError, TypeError) as exc:
             value.update(discarded=True, error=str(exc))
@@ -195,7 +201,10 @@ def reconstruct_intervals(rows, events=(), *, diagnostics=False, action_limits=N
                     raise ValueError("RTC prefix source rewritten or new proposal never took over")
                 target = np.asarray(source["actions"])[k]
                 if not np.allclose(row["submitted_action"], target, atol=1e-6, rtol=0):
-                    if declared_bounds is None or not np.allclose(row["submitted_action"], np.clip(target, *declared_bounds), atol=1e-6, rtol=0):
+                    known_mapping = diagnostics or p.get("baseline_transform") == "sdk_gripper_endpoints_v1"
+                    delta = np.flatnonzero(np.abs(target - row["submitted_action"]) > 1e-6)
+                    if (not known_mapping or declared_bounds is None or not set(delta).issubset({6, 13})
+                            or not np.allclose(row["submitted_action"], np.clip(target, *declared_bounds), atol=1e-6, rtol=0)):
                         raise ValueError("actual submission differs from native selected source")
                     limited_ticks.append({"tick": t, "dimensions": np.flatnonzero(np.abs(target - row["submitted_action"]) > 1e-6).tolist()})
             obs_ref = observations[(epoch, p["observation_id"])]
@@ -209,7 +218,7 @@ def reconstruct_intervals(rows, events=(), *, diagnostics=False, action_limits=N
                        "observation_ref": obs_ref, "next_observation_ref": next_ref,
                        "raw_refs": [r["raw_ref"] for r in selected],
                        "window_end": ended.get("window_id") == p["window_id"], "window_end_reason": ended.get("reason"),
-                       "diagnostic_only": p.get("replay_eligible") is False or bool(limited_ticks),
+                       "diagnostic_only": p.get("replay_eligible") is False or (bool(limited_ticks) and diagnostics),
                        "known_sdk_limited_ticks": limited_ticks,
                        "reply_refs": replies[(epoch, str(p["request_id"]))]["refs"]}
             result.append({"proposal": {**copy.deepcopy(p), "end_tick": end}, "receipt": receipt})
@@ -222,6 +231,34 @@ def reconstruct_intervals(rows, events=(), *, diagnostics=False, action_limits=N
         p = ordered[-1]
         result.append({"proposal": copy.deepcopy(p), "receipt": {"status": "rejected", "reason": "no next observation"}})
         audit.append({"decision": p["decision_id"], "reason": "no next observation"})
+    # A residual may first execute in the NEXT observation interval's RTC
+    # prefix. Keep transition spans unchanged, but verify its eventual effect
+    # against original native ownership before this window's handoff.
+    window_ends = {}
+    for record in result:
+        p, receipt = record["proposal"], record["receipt"]
+        if receipt.get("window_end"):
+            window_ends[(p["epoch"], p["window_id"])] = receipt["end_tick"]
+    selected_by_origin = defaultdict(list)
+    for row in rows:
+        selection = row["details"].get("policy_selection") or {}
+        token = selection.get("request") or {}
+        if token and row["submitted_valid"] and not row["is_intervention"]:
+            selected_by_origin[(token["epoch"], str(token["request_id"]))].append((row, selection))
+    for record in result:
+        p, receipt = record["proposal"], record["receipt"]
+        if receipt["status"] != "executed" or diagnostics:
+            continue
+        terminal = window_ends.get((p["epoch"], p["window_id"]), p.get("end_tick", p["start_tick"]))
+        effects = []
+        for row, selection in selected_by_origin[(p["epoch"], str(p["request_id"]))]:
+            k = selection["model_index"]
+            if (p["start_tick"] <= row["tick"] < terminal and k == row["tick"] - p["start_tick"]
+                    and selection.get("fusion") == "rtc" and selection.get("target_tick") == row["tick"]
+                    and 0 <= k < 50 and np.allclose(row["submitted_action"], p["actions"][k], atol=1e-6, rtol=0)
+                    and np.any(np.abs(np.asarray(p["actions"])[k] - np.asarray(p["base"])[k]) > 1e-6)):
+                effects.append({"tick": row["tick"], "model_index": k, "submitted_action": row["submitted_action"]})
+        receipt["actor_effects_before_handoff"] = effects
     return result, audit
 
 

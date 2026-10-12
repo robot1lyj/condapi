@@ -36,9 +36,12 @@ def validate_contract(c):
     if not c.get("limits_evidence") or not c.get("base_weights_sha256") or not c.get("task"):
         raise ValueError("physical limits evidence, task and base identity required")
     from yam_pld_rl.intervention import DEFAULT_GATE  # noqa: PLC0415 -- gate imports the array contract
+    from yam_pld_rl.intervention import LEGACY_GATE  # noqa: PLC0415 -- gate imports the array contract
 
-    if c.get("gate") != DEFAULT_GATE or c.get("fk_model_sha256") != MODEL_SHA256:
+    if c.get("gate") not in (DEFAULT_GATE, LEGACY_GATE) or c.get("fk_model_sha256") != MODEL_SHA256:
         raise ValueError("explicit pinned Thor gate and FK geometry required")
+    if c.get("baseline_transform") not in (None, "sdk_gripper_endpoints_v1"):
+        raise ValueError("unsupported physical baseline transform")
     k = integer(c["block_steps"], "block_steps", 4)
     if k > 20 or c["action_dt_s"] != 1 / 30 or not 0 < c["discount_per_second"] <= 1:
         raise ValueError("invalid block/time contract")
@@ -51,6 +54,13 @@ def validate_contract(c):
         raise ValueError("invalid residual increment guard")
     if not 0 < c["max_attempt_seconds"] <= 30:
         raise ValueError("explicit bounded attempt duration required")
+    if c.get("grasp_z_range_m"):
+        if not c.get("grasp_scope_evidence"):
+            raise ValueError("scene scope calibration evidence required")
+        for arm in ("left", "right"):
+            limits = array(c["grasp_z_range_m"][arm], (2,), "grasp height scope")
+            if limits[0] >= limits[1]:
+                raise ValueError("invalid grasp height scope")
 
 
 def envelope_weights(delay, c):
@@ -61,6 +71,28 @@ def envelope_weights(delay, c):
     # Zero at both ends prevents residual discontinuities at Pi handoff.
     w[delay : delay + k] = np.minimum(np.arange(k), np.arange(k)[::-1]) / ((k - 1) // 2)
     return w
+
+
+def physical_baseline(raw, delay, c):
+    """Physical commands after SDK gripper endpoints; raw RTC stays separate."""
+    array(raw, (50, 14), "raw Pi")
+    out = np.asarray(raw).copy()
+    if c.get("baseline_transform") != "sdk_gripper_endpoints_v1":
+        return out
+    lo, hi = (np.asarray(c[k]) for k in ("lower", "upper"))
+    joints = [0, 1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12]
+    if np.any(out[:, joints] < lo[joints]) or np.any(out[:, joints] > hi[joints]):
+        raise ValueError("Pi joint target outside declared SDK bounds")
+    for index in (6, 13):
+        out[:, index] = np.clip(out[:, index], lo[index], hi[index])
+    return out
+
+
+def wire_plan(physical, raw, delay):
+    """Preserve native committed prefix bytes, including existing SDK mapping."""
+    out = np.asarray(physical).copy()
+    out[:delay] = np.asarray(raw)[:delay]
+    return out
 
 
 def feasible_scale(base, previous_command, arm, delay, c):

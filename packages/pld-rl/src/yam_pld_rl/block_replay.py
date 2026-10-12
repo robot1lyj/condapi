@@ -11,7 +11,9 @@ from yam_pld_rl.block_contract import feasible_scale
 from yam_pld_rl.block_contract import fingerprint
 from yam_pld_rl.block_contract import integer
 from yam_pld_rl.block_contract import observation_vector
+from yam_pld_rl.block_contract import physical_baseline
 from yam_pld_rl.block_contract import validate_contract
+from yam_pld_rl.block_contract import wire_plan
 
 
 def compile_replay(records, labels, contract, snapshots):
@@ -123,6 +125,10 @@ def compile_replay(records, labels, contract, snapshots):
                 if abs(dt - n * contract["action_dt_s"]) > max(0.05, n * contract["action_dt_s"] * 0.15):
                     raise ValueError("actual time inconsistent with policy ticks")
                 scale = feasible_scale(p["base"], p["previous_command"], arm, delay, contract)
+                if contract.get("baseline_transform"):
+                    baseline = physical_baseline(p["raw_base"], delay, contract)
+                    if not np.array_equal(baseline, np.asarray(p["base"])):
+                        raise ValueError("physical Pi baseline differs from declared SDK transform")
                 if not np.allclose(scale, array(p["scale"], (7,), "scale"), atol=1e-6, rtol=0):
                     raise ValueError("feasible scale differs")
                 u, action = array(p["sample_u"], (7,), "u"), array(p["action"], (7,), "action")
@@ -132,12 +138,25 @@ def compile_replay(records, labels, contract, snapshots):
                 predicted = decode(p["base"], action, arm, delay, contract)
                 if not np.allclose(predicted, array(p["actions"], (50, 14), "proposal actions"), atol=1e-6, rtol=0):
                     raise ValueError("proposal decoder mismatch")
+                if contract.get("baseline_transform") and not np.array_equal(
+                    wire_plan(predicted, p["raw_base"], delay), np.asarray(p["wire_actions"])
+                ):
+                    raise ValueError("wire plan changed native RTC prefix or physical suffix")
                 actual = array(r["submitted_actions"], (n, 14), "actually submitted targets")
                 if not np.allclose(actual, predicted[:n], atol=1e-6, rtol=0):
                     raise ValueError("actual actions differ; cannot relabel a clipped proposal as executed")
                 realized = bool(np.any(np.abs(actual - np.asarray(p["base"])[:n]) > 1e-6))
-                if mode == "collect" and np.any(np.abs(action) > 1e-6) and not realized:
-                    raise ValueError("planned correction never executed before next observation")
+                if "actor_effects_before_handoff" in r:
+                    realized = False
+                    for effect in r["actor_effects_before_handoff"]:
+                        effect_tick = integer(effect["tick"], "actor effect tick")
+                        k = integer(effect["model_index"], "actor effect index")
+                        if (effect_tick != begin + k or not 0 <= k < 50
+                                or not begin <= effect_tick < label["terminal_tick"]
+                                or not np.allclose(effect["submitted_action"], predicted[k], atol=1e-6, rtol=0)
+                                or not np.any(np.abs(predicted[k] - np.asarray(p["base"])[k]) > 1e-6)):
+                            raise ValueError("invalid delayed native actor effect proof")
+                        realized = True
                 slot = (*key[:2], epoch)
                 claims.append((slot, set(range(begin, end))))
                 if occupied[slot].intersection(claims[-1][1]):
@@ -161,6 +180,8 @@ def compile_replay(records, labels, contract, snapshots):
                               "arm": arm == "right", "attempt": "/".join(key), "episode": "/".join(key[:2]),
                               "decision": p["decision_id"]})
                 previous_end, previous_time = end, times[-1]
+            if mode == "collect" and not any(row["realized_nonzero"] for row in local):
+                raise ValueError("collect window has no verified nonzero executed correction")
             rows.extend(local)
             for slot, claim in claims:
                 occupied[slot].update(claim)

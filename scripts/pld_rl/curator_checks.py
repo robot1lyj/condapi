@@ -92,6 +92,41 @@ def native_fixture(snapshot="fixture"):
 
 
 class CuratorChecks(unittest.TestCase):
+    def test_delayed_effect_in_next_native_prefix_is_still_verified(self):
+        c, rows, candidates, reviews = native_fixture()
+        first = rows[0]["details"]["policy_reply"]["pld"]
+        second = rows[8]["details"]["policy_reply"]["pld"]
+        third = rows[19]["details"]["policy_reply"]["pld"]
+        second["delay_steps"] = 10  # 11-tick interval; first nonzero is next prefix
+        second["actions"] = decode(second["base"], second["action"], "left", 10, c).tolist()
+        third["base"][:2] = second["actions"][11:13]
+        third["actions"] = decode(third["base"], third["action"], "left", 2, c).tolist()
+        for proposal in (second, third):
+            proposal["x"] = observation_vector(np.asarray(proposal["x"])[:1536], proposal["state"],
+                proposal["base"], proposal["previous_command"], "left", proposal["delay_steps"],
+                proposal["elapsed_seconds"], proposal["scale"], stats()).tolist()
+        for row in rows:
+            reply = row["details"].get("policy_reply")
+            if reply and reply["pld"] in (second, third):
+                reply["actions"] = reply["pld"]["actions"]
+            selection = row["details"]["policy_selection"]
+            if 8 <= row["tick"] < 18:
+                selection["request"] = rows[0]["details"]["policy_reply"]["token"]
+                selection["model_index"] = row["tick"]
+            source = {1: first, 2: second, 3: third}.get(selection["request"]["request_id"])
+            if source:
+                row["submitted_action"] = source["actions"][selection["model_index"]]
+        intervals, rejected = reconstruct_intervals(rows)
+        self.assertFalse(rejected)
+        self.assertTrue(any(e["tick"] >= intervals[1]["receipt"]["end_tick"]
+                            for e in intervals[1]["receipt"]["actor_effects_before_handoff"]))
+        linked, labels, rejected = associate_rewards(intervals, candidates, reviews, rows, "train")
+        self.assertFalse(rejected)
+        data, audit = compile_replay(linked, labels, c, {"fixture": {"contract": c,
+                                      "encoder_sha256": "fixture", "normalization": stats()}})
+        self.assertFalse(audit["excluded"])
+        self.assertTrue(data["realized_nonzero"][1])
+
     def test_native_cadence_prefix_and_reward(self):
         c, rows, candidates, reviews = native_fixture()
         windows, audit = reconstruct_intervals(rows)
@@ -150,13 +185,13 @@ class CuratorChecks(unittest.TestCase):
         base[5:,13] = .4
         request = {"run_id": "r", "episode_id": "e", "epoch": 0, "mode": "collect"}
         def select(session, tick, z=0):
-            return session.select(request, {"observation_policy_tick": tick}, state, base, {"left": z,"right": z})
+            return session.select(request, {"observation_policy_tick": tick, "delay_steps": 0}, state, base, {"left": z,"right": z})
         gate = select(first, 0)
         self.assertEqual(gate["arm"], "right")
         self.assertIsNone(second.active)
         state[13] = .4
         select(first, 5)
-        self.assertTrue(select(first, 10, .06)["active"])
+        self.assertTrue(select(first, 10, .03)["active"])
         self.assertEqual(select(first, 15, .06)["ended"]["reason"], "lift_guard")
         state[13] = .9
         request["epoch"] = 1

@@ -96,6 +96,7 @@ def main():
     p.add_argument("--rewards", type=Path, help="reviewed candidate_id/status/approved/reviewer/evidence_rows JSON list")
     p.add_argument("--export-evidence", action="store_true", help="decode selected images for the existing Qwen/DINO tools")
     p.add_argument("--probe-audit", action="store_true", help="audit diagnostic probe; never publish training rewards")
+    p.add_argument("--segmentation", choices=("legacy_v2", "relative_v3"), default="relative_v3")
     p.add_argument("--output", type=Path, required=True)
     args = p.parse_args()
     if args.probe_audit and args.rewards:
@@ -121,9 +122,9 @@ def main():
         if args.probe_audit:
             probe_reports.append(audit_probe(rows, events, native_manifest))
         hashes.update(source_hashes)
-        c = physical_candidates(rows, fk, number)
+        c = physical_candidates(rows, fk, number, segmentation=args.segmentation)
         w, rejected = reconstruct_intervals(rows, events, diagnostics=args.probe_audit,
-                                            action_limits=native_manifest.get("action_limits") if args.probe_audit else None)
+                                            action_limits=native_manifest.get("action_limits"))
         groups = defaultdict(list)
         for interval in w:
             groups[interval["proposal"]["window_id"]].append(interval)

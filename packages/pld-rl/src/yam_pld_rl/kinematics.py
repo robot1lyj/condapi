@@ -67,3 +67,12 @@ class YamKinematics:
     def heights(self, state):
         return {arm: float(self.position(np.asarray(state)[offset:offset + 6])[2])
                 for arm, offset in (("left", 0), ("right", 7))}
+
+    def gate_heights(self, state, base, contract):
+        result = self.heights(state)
+        if contract.get("grasp_z_range_m"):
+            result["planned_z_m"] = {
+                arm: [float(self.position(row[offset:offset + 6])[2]) for row in base]
+                for arm, offset in (("left", 0), ("right", 7))
+            }
+        return result
