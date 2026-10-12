@@ -5,6 +5,7 @@ import dataclasses
 import json
 import logging
 import math
+import os
 from pathlib import Path
 import sys
 
@@ -64,7 +65,9 @@ def main():
     parser.add_argument("--allow-validated-tf32-7step", action="store_true")
     parser.add_argument("--validation", type=Path, help="new quantile-prefix validation receipt")
     parser.add_argument("--jax-reference", type=Path, help="corrected original-JAX reference directory")
-    parser.add_argument("--pld-bundle", type=Path, help="optional immutable PLD-SAC bundle; default is unchanged Pi")
+    pld = parser.add_mutually_exclusive_group()
+    pld.add_argument("--pld-bundle", type=Path, help="optional immutable PLD-SAC bundle; default is unchanged Pi")
+    pld.add_argument("--pld-probe-only", action="store_true", help="record gate diagnostics without actor or residuals")
     parser.add_argument("--pld-encoder", type=Path, help="official frozen ResNet18 weights matching PLD bundle")
     args = parser.parse_args()
     if not torch.cuda.is_available():
@@ -152,7 +155,6 @@ def main():
         "action_0_relative_to_observation_policy_tick": 0,
         "camera_exposure_to_policy_tick_offset_s": None,
     }
-    logging.info("READY ws://%s:%d trained-RTC", args.host, args.port)
     pld_runtime = None
     if args.pld_bundle is not None:
         if args.pld_encoder is None:
@@ -162,6 +164,15 @@ def main():
 
         pld_runtime = BlockRuntime(args.pld_bundle, args.pld_encoder,
                                    base_weights_sha256=manifest["model_weights_sha256"])
+    elif args.pld_probe_only:
+        sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "packages/pld-rl/src"))
+        from yam_pld_rl.probe_runtime import ProbeRuntime  # noqa: PLC0415
+
+        pld_runtime = ProbeRuntime(Path(__file__).resolve().parents[2] / "third_party/yam-fk-model/yam_linear4310.xml",
+                                   base_weights_sha256=manifest["model_weights_sha256"], norm_sha256=digest(args.norm),
+                                   engine_sha256=report["engine_sha256"], source_revision=os.environ.get("PLD_SOURCE_REVISION", "unknown"))
+    metadata["inference_profile"] = "pld-rl" if pld_runtime is not None else "pi05"
+    logging.info("Starting ws://%s:%d trained-RTC profile=%s", args.host, args.port, metadata["inference_profile"])
     WebsocketPolicyServer(serving, host=args.host, port=args.port, rtc_mode="trained",
                           metadata=metadata, pld_runtime=pld_runtime).serve_forever()
 

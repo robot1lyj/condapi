@@ -104,12 +104,19 @@ def test_pld_requires_loaded_runtime_and_trained_rtc():
 
 def test_pld_transport_applies_only_explicit_mode_and_recovers_rejection():
     class Policy:
+        calls = 0
+
         def infer_rtc(self, obs, rtc):
+            self.calls += 1
             return {"actions": np.ones((50, 14), dtype=np.float64)}
 
     class Runtime:
         def __init__(self):
             self.metadata = {"fixture": True}
+
+        def validate_request(self, obs, rtc, request):
+            if request.get("invalid_before_inference"):
+                raise ValueError("unsupported mode before Pi inference")
 
         def __call__(self, obs, rtc, request, action):
             if request.get("invalid"):
@@ -123,7 +130,8 @@ def test_pld_transport_applies_only_explicit_mode_and_recovers_rejection():
             self.results = []
             packer = msgpack_numpy.Packer()
             self.requests = [packer.pack({"obs": {}, "rtc": {}, "pld": p}) for p in (
-                {"mode": "collect", "invalid": True}, {"mode": "off"}, {"mode": "collect"})]
+                {"mode": "collect", "invalid_before_inference": True}, {"mode": "collect", "invalid": True},
+                {"mode": "off"}, {"mode": "collect"})]
 
         async def recv(self):
             if not self.requests:
@@ -134,12 +142,15 @@ def test_pld_transport_applies_only_explicit_mode_and_recovers_rejection():
             self.results.append(payload if isinstance(payload, str) else msgpack_numpy.unpackb(payload))
 
     socket = Socket()
-    server = WebsocketPolicyServer(Policy(), rtc_mode="trained", pld_runtime=Runtime())
+    policy = Policy()
+    server = WebsocketPolicyServer(policy, rtc_mode="trained", pld_runtime=Runtime())
     asyncio.run(server._handler(socket))  # noqa: SLF001
     assert "PLD request rejected" in socket.results[1]
-    assert np.all(socket.results[2]["actions"] == 1)
-    assert np.all(socket.results[3]["actions"] == 2)
-    assert socket.results[3]["pld"]["fixture"]
+    assert "PLD request rejected" in socket.results[2]
+    assert np.all(socket.results[3]["actions"] == 1)
+    assert np.all(socket.results[4]["actions"] == 2)
+    assert socket.results[4]["pld"]["fixture"]
+    assert policy.calls == 3
 
 
 def test_pld_gate_sessions_are_isolated_and_reset_when_off():

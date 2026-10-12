@@ -113,6 +113,8 @@ def reconstruct_intervals(rows):
         if not p["gate"]["active"]:
             continue
         try:
+            if p.get("replay_eligible") is False:
+                raise ValueError("probe-only diagnostics lack the formal actor/physical contract; not SAC replay")
             if (p["epoch"] != nxt["epoch"] or p["run_id"] != nxt["run_id"] or p["episode_id"] != nxt["episode_id"]
                     or p["mode"] != nxt["mode"] or p["snapshot_sha256"] != nxt["snapshot_sha256"]):
                 raise ValueError("identity changed before next observation")

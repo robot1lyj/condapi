@@ -62,6 +62,8 @@ Actor输入三路冻结ResNet18特征、14D状态、Pi计划、上个实际下�
 
 只设置一个 `RL模式`：`off` 原Pi；`shadow` 计算但不执行修正；`probe` 记录同合同零修正基线；`collect` 执行随机有界修正并采集；`eval` 执行确定性均值用于A/B。客户端不根据某次是否抓取自动切模式。每整轮固定模式、checkpoint、actor、合同；新actor在整轮结束后加载。
 
+能力按握手`pld.modes`启用，不能假定所有部署都支持五项。新`pld-rl`容器的首个部署阶段为`probe_diagnostics_only`：只支持`off/probe`，未加载actor，`collect/eval/shadow`明确拒绝。此时probe记录原Pi与Thor门控，用于联调，`replay_eligible=false`，不进入SAC；正式物理合同和actor包安装后再切换成完整五模式。协议schema仍为`pld_sac_block_v2`，两个阶段的contract/snapshot身份不同，客户端每轮重新读取握手。
+
 沿用 `{type:"infer",obs,rtc}`，外层新增：
 
 ```json

@@ -39,7 +39,7 @@ class WebsocketPolicyServer:
         self._rtc_mode = rtc_mode
         self._pld_runtime = pld_runtime
         if pld_runtime is not None and rtc_mode != "trained":
-            raise ValueError("PLD block v1 requires trained RTC; ordinary path remains available without PLD")
+            raise ValueError("PLD requires trained RTC; ordinary path remains available without PLD")
         self._metadata = dict(metadata or {})
         self._metadata.setdefault("rtc_mode", self._rtc_mode)
         if pld_runtime is not None:
@@ -81,6 +81,11 @@ class WebsocketPolicyServer:
                     logger.debug("Ignoring rtc payload because rtc_mode=off.")
                     rtc_payload = None
 
+                if pld_request is not None and hasattr(pld_session, "validate_request"):
+                    try:
+                        pld_session.validate_request(obs, rtc_payload, pld_request)
+                    except (ValueError, KeyError, TypeError) as exc:
+                        raise RequestError(f"PLD request rejected: {exc}") from exc
                 infer_time = time.monotonic()
                 action, rtc_used, rtc_warnings, rtc_error = self._infer(obs, rtc_payload)
                 if pld_request is not None and pld_request.get("mode") != "off":

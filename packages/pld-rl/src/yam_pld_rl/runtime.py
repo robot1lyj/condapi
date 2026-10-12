@@ -52,7 +52,8 @@ class BlockRuntime:
     def metadata(self):
         return {"schema": SCHEMA, "expert": "PLD-Grasp", "snapshot_sha256": self.snapshot,
                 "contract_sha256": fingerprint(self.contract), "modes": ["off", "shadow", "probe", "collect", "eval"],
-                "block_steps": self.contract["block_steps"], "segmentation_owner": "server",
+                "block_steps": self.contract["block_steps"], "segmentation_owner": "thor_offline_or_server",
+                "actor_loaded": True, "replay_contract_ready": True, "actor_phase": self.manifest["phase"],
                 "gate_owner": "thor", "recording": "native_HIL_with_full_pld_reply"}
 
     def new_session(self):

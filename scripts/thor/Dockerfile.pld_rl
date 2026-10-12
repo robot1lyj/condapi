@@ -1,0 +1,16 @@
+# Derived from the already validated Pi image: no pip, weight or engine changes.
+ARG BASE_IMAGE=openpi-pi:thor-trained-rtc-candidate-20260916
+FROM ${BASE_IMAGE}
+ARG SOURCE_REVISION
+ENV PLD_SOURCE_REVISION=${SOURCE_REVISION}
+LABEL org.opencontainers.image.revision=${SOURCE_REVISION}
+LABEL ai.wuyan.inference.profile="PLD-Grasp"
+COPY packages/pld-rl/src /opt/pld-rl/packages/pld-rl/src
+COPY scripts/thor /opt/pld-rl/scripts/thor
+COPY third_party/yam-fk-model/yam_linear4310.xml /opt/pld-rl/third_party/yam-fk-model/yam_linear4310.xml
+COPY src/openpi/serving/websocket_policy_server.py /usr/local/lib/python3.12/dist-packages/openpi/serving/websocket_policy_server.py
+ENV OPENPI_DATA_HOME=/cache JAX_PLATFORMS=cpu HF_HUB_OFFLINE=1 WANDB_MODE=disabled
+WORKDIR /app
+ENTRYPOINT ["python", "/opt/pld-rl/scripts/thor/serve_pi05_rtc_trt.py"]
+ENV PLD_HEALTH_PORT=8000
+HEALTHCHECK --interval=30s --timeout=3s --start-period=120s --retries=3 CMD python -c "import os,urllib.request; assert urllib.request.urlopen('http://192.168.250.1:'+os.environ['PLD_HEALTH_PORT']+'/healthz',timeout=2).read().strip()==b'OK'"
