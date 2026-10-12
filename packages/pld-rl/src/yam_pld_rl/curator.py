@@ -251,12 +251,14 @@ def reconstruct_intervals(rows, events=(), *, diagnostics=False, action_limits=N
             continue
         terminal = window_ends.get((p["epoch"], p["window_id"]), p.get("end_tick", p["start_tick"]))
         effects = []
+        physical_actions = np.asarray(p.get("physical_actions", p["actions"]))
+        physical_base = np.asarray(p.get("physical_base", p["base"]))
         for row, selection in selected_by_origin[(p["epoch"], str(p["request_id"]))]:
             k = selection["model_index"]
             if (p["start_tick"] <= row["tick"] < terminal and k == row["tick"] - p["start_tick"]
                     and selection.get("fusion") == "rtc" and selection.get("target_tick") == row["tick"]
-                    and 0 <= k < 50 and np.allclose(row["submitted_action"], p["actions"][k], atol=1e-6, rtol=0)
-                    and np.any(np.abs(np.asarray(p["actions"])[k] - np.asarray(p["base"])[k]) > 1e-6)):
+                    and 0 <= k < 50 and np.allclose(row["submitted_action"], physical_actions[k], atol=1e-6, rtol=0)
+                    and np.any(np.abs(physical_actions[k] - physical_base[k]) > 1e-6)):
                 effects.append({"tick": row["tick"], "model_index": k, "submitted_action": row["submitted_action"]})
         receipt["actor_effects_before_handoff"] = effects
     return result, audit

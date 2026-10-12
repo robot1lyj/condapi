@@ -29,7 +29,7 @@ def main():
     contract = json.loads((args.cases.parent/"contract.json").read_text())
     if suite["source_kind"] != "real_yam_recording":
         raise ValueError("real recorded inputs required")
-    packer, rows, active_arms = msgpack_numpy.Packer(), [], set()
+    packer, rows, active_arms, client_samples = msgpack_numpy.Packer(), [], set(), []
     with connect(args.url, compression=None, max_size=None) as ws:
         metadata = msgpack_numpy.unpackb(ws.recv())
         identity = metadata["pld"]
@@ -57,7 +57,7 @@ def main():
                         raise ValueError(reply)
                     result = msgpack_numpy.unpackb(reply)
                     trace = result["pld"]
-                    raw, base = np.asarray(trace["raw_base"]), np.asarray(trace["base"])
+                    raw, base = np.asarray(trace["raw_base"]), np.asarray(trace["physical_base"])
                     if not np.array_equal(base, physical_baseline(raw, d, contract)):
                         raise ValueError("wrong SDK physical baseline")
                     expected = base
@@ -70,8 +70,11 @@ def main():
                             raise ValueError("collect has no stochastic residual")
                     wire = wire_plan(expected, raw, d)
                     if (not np.array_equal(result["actions"], wire) or not np.array_equal(wire[:d], prefix)
-                            or not np.isfinite(wire).all()):
+                            or not np.isfinite(wire).all() or not np.array_equal(trace["actions"], wire)
+                            or (mode in {"probe", "shadow"} and not np.array_equal(wire, trace["base"]))):
                         raise ValueError("wire output or native prefix changed")
+                    if repeat == 0:
+                        client_samples.append({"request": request, "response": result})
                     rows.append({"mode": mode, "sample": case["sample"], "repeat": repeat,
                                  "active": trace["gate"]["active"], "arm": trace.get("arm"),
                                  "infer_ms": result["server_timing"]["infer_ms"], "roundtrip_ms": elapsed,
@@ -86,6 +89,8 @@ def main():
               "max_p95_ms": args.max_p95_ms, "robot_connected": False, "cross_IPC_tested": False,
               "training": False, "zero_mean_actor_is_not_an_improved_expert": True}
     args.output.write_text(json.dumps(report, indent=2)+"\n")
+    args.output.with_suffix(".wire.json").write_text(json.dumps(client_samples,
+        default=lambda value: value.tolist() if hasattr(value, "tolist") else value)+"\n")
     print(json.dumps({k: report[k] for k in ("status", "active_arms", "active_server_p50_ms", "active_server_p95_ms")}))
     if status != "passed":
         raise SystemExit(2)

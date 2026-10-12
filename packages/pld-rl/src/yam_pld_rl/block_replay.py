@@ -124,10 +124,11 @@ def compile_replay(records, labels, contract, snapshots):
                 dt = times[-1] - times[0]
                 if abs(dt - n * contract["action_dt_s"]) > max(0.05, n * contract["action_dt_s"] * 0.15):
                     raise ValueError("actual time inconsistent with policy ticks")
-                scale = feasible_scale(p["base"], p["previous_command"], arm, delay, contract)
+                base = p.get("physical_base", p["base"])
+                scale = feasible_scale(base, p["previous_command"], arm, delay, contract)
                 if contract.get("baseline_transform"):
                     baseline = physical_baseline(p["raw_base"], delay, contract)
-                    if not np.array_equal(baseline, np.asarray(p["base"])):
+                    if not np.array_equal(baseline, np.asarray(base)):
                         raise ValueError("physical Pi baseline differs from declared SDK transform")
                 if not np.allclose(scale, array(p["scale"], (7,), "scale"), atol=1e-6, rtol=0):
                     raise ValueError("feasible scale differs")
@@ -135,8 +136,8 @@ def compile_replay(records, labels, contract, snapshots):
                 expected_a = np.zeros(7) if mode == "probe" else scale * u
                 if np.any(np.abs(u) > 1.000001) or not np.allclose(action, expected_a, atol=1e-6, rtol=0):
                     raise ValueError("wrong actor action")
-                predicted = decode(p["base"], action, arm, delay, contract)
-                if not np.allclose(predicted, array(p["actions"], (50, 14), "proposal actions"), atol=1e-6, rtol=0):
+                predicted = decode(base, action, arm, delay, contract)
+                if not np.allclose(predicted, array(p.get("physical_actions", p["actions"]), (50, 14), "proposal actions"), atol=1e-6, rtol=0):
                     raise ValueError("proposal decoder mismatch")
                 if contract.get("baseline_transform") and not np.array_equal(
                     wire_plan(predicted, p["raw_base"], delay), np.asarray(p["wire_actions"])
@@ -145,7 +146,7 @@ def compile_replay(records, labels, contract, snapshots):
                 actual = array(r["submitted_actions"], (n, 14), "actually submitted targets")
                 if not np.allclose(actual, predicted[:n], atol=1e-6, rtol=0):
                     raise ValueError("actual actions differ; cannot relabel a clipped proposal as executed")
-                realized = bool(np.any(np.abs(actual - np.asarray(p["base"])[:n]) > 1e-6))
+                realized = bool(np.any(np.abs(actual - np.asarray(base)[:n]) > 1e-6))
                 if "actor_effects_before_handoff" in r:
                     realized = False
                     for effect in r["actor_effects_before_handoff"]:
@@ -154,7 +155,7 @@ def compile_replay(records, labels, contract, snapshots):
                         if (effect_tick != begin + k or not 0 <= k < 50
                                 or not begin <= effect_tick < label["terminal_tick"]
                                 or not np.allclose(effect["submitted_action"], predicted[k], atol=1e-6, rtol=0)
-                                or not np.any(np.abs(predicted[k] - np.asarray(p["base"])[k]) > 1e-6)):
+                                or not np.any(np.abs(predicted[k] - np.asarray(base)[k]) > 1e-6)):
                             raise ValueError("invalid delayed native actor effect proof")
                         realized = True
                 slot = (*key[:2], epoch)
@@ -165,7 +166,7 @@ def compile_replay(records, labels, contract, snapshots):
                 x = array(p["x"], (FEATURE_DIM,), "x")
                 if not np.array_equal(x[-7:], scale):
                     raise ValueError("scale is not bound to policy observation")
-                reconstructed = observation_vector(x[:1536], p["state"], p["base"], p["previous_command"],
+                reconstructed = observation_vector(x[:1536], p["state"], base, p["previous_command"],
                                                    arm, delay, p["elapsed_seconds"], scale,
                                                    snapshots[snapshot]["normalization"])
                 if not np.allclose(x, reconstructed, atol=1e-6, rtol=0):

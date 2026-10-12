@@ -103,9 +103,10 @@ class BlockRuntime:
         trace = {**{k: request[k] for k in ("run_id", "episode_id", "mode", "request_id")},
                  **self.metadata, "epoch": epoch, "observation_id": observation_id,
                  "decision_id": f"e{epoch}:r{rid}", "gate": gate,
-                 "start_tick": tick, "delay_steps": delay, "base": base, "state": state,
+                 "start_tick": tick, "delay_steps": delay, "base": wire_plan(base, raw_base, delay), "state": state,
+                 "physical_base": base, "physical_actions": base,
                  "previous_command": previous, "base_z_m": heights, "raw_base": raw_base,
-                 "baseline_transform": c.get("baseline_transform"), "actions": base,
+                 "baseline_transform": c.get("baseline_transform"), "actions": wire_plan(base, raw_base, delay),
                  "wire_actions": wire_plan(base, raw_base, delay),
                  "replay_eligible": True, "residual_applied": False}
         if not gate["active"]:
@@ -131,7 +132,7 @@ class BlockRuntime:
         wire = wire_plan(actions, raw_base, delay)
         trace.update(arm=arm, window_id=gate["window_id"], elapsed_seconds=elapsed,
                      envelope_end_tick=tick + delay + c["block_steps"], x=x, scale=scale, sample_u=u,
-                     action=action, log_prob_u=float(logp[0]), actions=actions,
+                     action=action, log_prob_u=float(logp[0]), actions=wire, physical_actions=actions,
                      wire_actions=wire,
                      residual_applied=bool(np.any(action)),
                      encoder_ms_included_total_ms=(time.monotonic() - start) * 1000)

@@ -49,6 +49,10 @@ def smoke(args, name, port, tag):
     result = json.loads((args.release/filename).read_text())
     if result["status"] != "passed":
         raise ValueError("recorded-input or latency gate failed")
+    run(["docker", "exec", name, "python", "/opt/pld-rl/scripts/thor/smoke_pi05_rtc_ws.py",
+         "--url", f"ws://192.168.250.1:{port}", "--cases", "/cases/cases.json",
+         "--expected-weights-sha256", result["metadata"]["checkpoint_weights_sha256"],
+         "--expected-prefix-norm", "quantile", "--output", f"/deployment/{tag}-rtc-smoke.json"], capture=False)
     return filename, result
 
 
