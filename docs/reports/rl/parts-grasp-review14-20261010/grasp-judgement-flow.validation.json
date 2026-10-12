@@ -1,0 +1,30 @@
+{
+  "diagram_type": "workflow",
+  "output": "/home/wuyan-lyj/.codex/worktrees/parts-rollout/condapi/docs/reports/rl/parts-grasp-review14-20261010/grasp-judgement-flow.html",
+  "specification_sha256": "ae9129f795b2afb48f0b38ca274f1ca3e129487560d8ab31bf50a6234d6f7783",
+  "artifact_sha256": "7808fd5f345e2b929534017c4a1ee8c3c55998a2f67b381409eceda937c1bd51",
+  "validation": {
+    "artifact_checks": 9,
+    "composition_errors": 0,
+    "composition_warnings": 0,
+    "quality": "showcase"
+  },
+  "browser_evidence": "passed",
+  "automated_browser_receipt": "grasp-judgement-flow.visual-check.json",
+  "visual_review": "passed",
+  "visual_review_scope": [
+    "1440x900 light",
+    "1440x900 dark",
+    "2048x1320 light",
+    "2048x1320 dark"
+  ],
+  "visual_review_method": "image-capable assistant inspected the four artifact-bound PNGs; separate from automated measurements",
+  "correction_rounds": 1,
+  "data_qualification": {
+    "candidates": 342,
+    "has_5cm_evidence": 327,
+    "excluded_without_lift_evidence": 15,
+    "user_reviewed": 13,
+    "training_started": false
+  }
+}

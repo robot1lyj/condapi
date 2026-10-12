@@ -1,0 +1,230 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "抓到还是空抓：实际判定流程",
+    "locale": "zh-CN",
+    "quality_profile": "showcase"
+  },
+  "lanes": [
+    {
+      "id": "evidence",
+      "label": "记录与取证"
+    },
+    {
+      "id": "models",
+      "label": "冻结视觉模型"
+    },
+    {
+      "id": "audit",
+      "label": "证据复核"
+    },
+    {
+      "id": "result",
+      "label": "标签与奖励"
+    }
+  ],
+  "phases": [
+    {
+      "id": "inputs",
+      "label": "原始记录 → 抓取候选",
+      "fromCol": 0,
+      "toCol": 1
+    },
+    {
+      "id": "eligibility",
+      "label": "本次补回抬升门槛",
+      "fromCol": 2,
+      "toCol": 2,
+      "variant": "security"
+    },
+    {
+      "id": "labels",
+      "label": "视觉判定 → 抽检",
+      "fromCol": 3,
+      "toCol": 4,
+      "variant": "emphasis"
+    }
+  ],
+  "mainPath": [
+    "recordings",
+    "time_alignment",
+    "lift_gate",
+    "evidence_images",
+    "dino_features",
+    "sequence_review",
+    "user_review",
+    "reward_proposals"
+  ],
+  "nodes": [
+    {
+      "id": "recordings",
+      "lane": "evidence",
+      "col": 0,
+      "type": "database",
+      "label": "14 集原始记录",
+      "sublabel": "三路视频＋状态＋FK",
+      "width": 178
+    },
+    {
+      "id": "time_alignment",
+      "lane": "evidence",
+      "col": 1,
+      "type": "backend",
+      "label": "对齐与候选切段",
+      "sublabel": "图像索引＋夹爪迟滞",
+      "width": 178
+    },
+    {
+      "id": "lift_gate",
+      "lane": "evidence",
+      "col": 2,
+      "type": "security",
+      "label": "抬升达到 5 cm？",
+      "sublabel": "闭爪后、释放前有有效图",
+      "tag": "本次修复：资格门槛",
+      "width": 194
+    },
+    {
+      "id": "evidence_images",
+      "lane": "evidence",
+      "col": 3,
+      "type": "backend",
+      "label": "准备多帧证据",
+      "sublabel": "闭爪前后＋抬升后＋顶视",
+      "width": 194
+    },
+    {
+      "id": "not_verifiable",
+      "lane": "models",
+      "col": 2,
+      "type": "security",
+      "label": "不进入奖励池",
+      "sublabel": "未核验／调整动作；不记 0",
+      "width": 194
+    },
+    {
+      "id": "dino_features",
+      "lane": "models",
+      "col": 3,
+      "type": "backend",
+      "label": "DINOv3 对照",
+      "sublabel": "指间裁剪 ↔ 持物／空手参考",
+      "tag": "排除同集与同图参考",
+      "width": 194
+    },
+    {
+      "id": "qwen_sequence",
+      "lane": "models",
+      "col": 4,
+      "type": "backend",
+      "label": "Qwen3-VL 判断",
+      "sublabel": "多帧前景、背景与提前滑落",
+      "tag": "模型高置信也可能错",
+      "width": 194
+    },
+    {
+      "id": "sequence_review",
+      "lane": "audit",
+      "col": 3,
+      "type": "external",
+      "label": "助手序列复核",
+      "sublabel": "结合双腕／顶视修正误判",
+      "tag": "本批有目视复核",
+      "width": 194
+    },
+    {
+      "id": "user_review",
+      "lane": "result",
+      "col": 3,
+      "type": "frontend",
+      "label": "你的抽检结果",
+      "sublabel": "保留原标签、修改与备注",
+      "width": 194
+    },
+    {
+      "id": "reward_proposals",
+      "lane": "result",
+      "col": 4,
+      "type": "database",
+      "label": "逐次奖励候选",
+      "sublabel": "抓到 1／空抓 0，只发一次",
+      "tag": "未发布；未启动 RL",
+      "width": 194
+    }
+  ],
+  "edges": [
+    {
+      "from": "recordings",
+      "to": "time_alignment",
+      "role": "main"
+    },
+    {
+      "from": "time_alignment",
+      "to": "lift_gate",
+      "role": "main"
+    },
+    {
+      "from": "lift_gate",
+      "to": "evidence_images",
+      "label": "有抬升证据",
+      "role": "main",
+      "variant": "emphasis"
+    },
+    {
+      "from": "lift_gate",
+      "to": "not_verifiable",
+      "label": "未达标",
+      "role": "error",
+      "variant": "security"
+    },
+    {
+      "from": "evidence_images",
+      "to": "dino_features",
+      "role": "main"
+    },
+    {
+      "from": "evidence_images",
+      "to": "qwen_sequence",
+      "role": "branch"
+    },
+    {
+      "from": "dino_features",
+      "to": "sequence_review",
+      "role": "main"
+    },
+    {
+      "from": "qwen_sequence",
+      "to": "sequence_review",
+      "role": "branch"
+    },
+    {
+      "from": "sequence_review",
+      "to": "user_review",
+      "role": "main"
+    },
+    {
+      "from": "user_review",
+      "to": "reward_proposals",
+      "role": "main"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "amber",
+      "title": "5 cm 只是核验资格",
+      "items": [
+        "达到高度仍须看指间是否持物；高度本身不代表成功",
+        "E04-L015-v3 尚未抬升，不能按“抬升后空手”给 0"
+      ]
+    },
+    {
+      "dot": "slate",
+      "title": "这批实际用了什么",
+      "items": [
+        "DINOv3＋Qwen3-VL＋序列复核＋用户抽检；SAM3 是历史基线",
+        "无自动跟踪、无强制等待一秒；尚非已验收的自动奖励器"
+      ]
+    }
+  ]
+}

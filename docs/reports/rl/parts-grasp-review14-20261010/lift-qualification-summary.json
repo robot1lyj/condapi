@@ -1,0 +1,60 @@
+{
+  "schema": "grasp_lift_qualification_v1",
+  "dataset_id": "lego-grasp-lift-audit14-20261012-v1",
+  "source_dataset": "/home/wuyan-lyj/condapi-data/rl/lego-grasp-reclassified14-20261011-v3r3",
+  "source_candidates_sha256": "7426b4973a0a4d3f367e70e398838bd1c9dd2a51e2e682322dbb4d2846948b0c",
+  "human_review_sha256": "8249f3d28bb8c4030574c62cfebfabf837af999ead992a53c859cb0a74cbc582",
+  "trace_sha256": {
+    "E01": "2feecd36ec405e32c09024fe93db22c117a3eeb452d18539f20f1e4832df1492",
+    "E02": "e05d721b1e481a3d8277f2d3980a622e23d9220ede1968446e53ede29275fe42",
+    "E03": "be558195cb0b600c42362d19094b5d12ce4dd0251f8105841fca59b466e9a21c",
+    "E04": "3056a60a429113ec9bff3d80e1aa19e9c863e5c6e8284f507cba0aa3e2710352",
+    "E05": "0f7457a89c6493cc0e78667312a7e2b74c34c2f6826af0c41e5973e1c176253e",
+    "E06": "a694b9f05880a26aa13e33396d38045c33f6614c21ae0d261cc65dec98c0f52d",
+    "E07": "97488216556ccb21b76738417e6bd891318d9e7331248e280bdb53a795314c08",
+    "E08": "c02c319436723dfac1240dfdf84dd3235c60ea54eb2b1a9a4cebc5ef83789344",
+    "E09": "e9fcd6ba01fbbca43f021d701a6ce9ab9f73adef6add8124b73fca923e84b8b9",
+    "E10": "5c67b402e47b8bfc4c4e6b0d62006d40c535b5fa420f8d1a0551197d72930ba9",
+    "E11": "d67da24281e8459ac15ef6186bc47c8282523d1dadc678230cb3604d9bbb36c3",
+    "E12": "1c18b2e45eab5bf5b813b4d9fba113c5f56549350de03f6e3d6f89c481594c17",
+    "E13": "80b8734162efb4167beae645e3faac985e8bb44cc9c7505ac37b4dbc65b6f4af",
+    "E14": "beb951bccbe08375b2816228f038bd187eef80a3a9f3029f3e172dff84fb79f6"
+  },
+  "minimum_relative_base_z_rise_m": 0.05,
+  "candidates": 342,
+  "user_reviewed": 13,
+  "qualified_visual_proposals": {
+    "success": 136,
+    "failure": 191
+  },
+  "excluded_ids": [
+    "E01-R006-v3",
+    "E02-R002-v3",
+    "E02-R015-v3",
+    "E04-L011-v3",
+    "E04-L015-v3",
+    "E04-R013-v3",
+    "E04-R030-v3",
+    "E07-L008-v3",
+    "E08-L008-v3",
+    "E09-R005-v3",
+    "E10-L006-v3",
+    "E12-R003-v3",
+    "E12-R012-v3",
+    "E14-L003-v3",
+    "E14-R015-v3"
+  ],
+  "single_selected_lift_frame_ids": [
+    "E02-R019-v3",
+    "E06-L006-v3",
+    "E07-L003-v3",
+    "E08-L010-v3",
+    "E09-L006-v3",
+    "E10-L002-v3",
+    "E10-L009-v3"
+  ],
+  "approved_rewards": 0,
+  "ready_for_training": false,
+  "neural_inference": false,
+  "note": "Eligibility is necessary, not proof of correct labels; original artifacts remain unchanged."
+}
