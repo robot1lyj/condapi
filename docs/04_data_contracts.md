@@ -1,5 +1,13 @@
 # 04 · 数据合同
 
+## 耳机50h选集及只读审计（2026-10-12）
+
+按用户首次SFT配置准备要求，从耳机原train按seed42随机选完整轨迹，冻结1,384集/5,402,194帧@30fps=50.020315h；原val17集/62,173帧隔离，不参与norm或梯度。来源manifest原字节、哈希、源ID及新转换ID映射保留在 [选集记录](reports/training/earbuds-pi05-50h-20261012/README.md)，具体训练配方归03。
+
+本次 `yam-server` 只读审计了选中train和全部val的5,464,367帧，14D state/action全部有限，帧号连续且时间戳满足30fps；4,203个三相机视频文件非空，18个代表性首帧解码成功（224×224 AV1）。完整数值范围和来源在 [server-audit.json](reports/training/earbuds-pi05-50h-20261012/server-audit.json)。夹爪action均[0,1]，state最大1.0001812，不裁剪原值。物理单位沿用同revision发布者语义加固定port顺序与数值支持，raw→port单位保持仍是推断，见 [耳机合同](reports/training/earbuds-pi05-50h-20261012/contract.json)。未独立标定、逐集审核成功或全视频解码；尚无已发布的耳机LeRobot目录和专属norm，不宣称训练READY。
+
+数据准备配置只写新目录 `processed/earbuds_lerobot_50h_v1_20261012/{train,val}`，独立copy视频并完整审核后，再用train计算H50/delta统计。`source-episodes.json`为原train源ID，`episodes.json`为转换后连续ID；不得互换，不复用乐高norm。准备作业不调用训练，当前未提交任何数据转换或训练作业。
+
 ## EXPO-FT 双任务数据合同（2026-10-10）
 
 本节为新设计；旧PARTS/RLT/整轮残差章节保留历史，不自动成为EXPO训练合同。原始数据、原始奖励标注和转换目录均未修改。本次通过既有 `yam-server` 只读访问登录节点，读取manifest、文件存在性及每split一个Parquet首行；未进行训练、视频全量解码或数据修复。证据见 [server-data-audit.json](reports/rl/expo-ft-20261010/server-data-audit.json)。

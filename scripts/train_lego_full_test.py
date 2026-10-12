@@ -1,4 +1,5 @@
 import dataclasses
+import hashlib
 import json
 from types import SimpleNamespace
 from unittest.mock import Mock
@@ -111,3 +112,50 @@ def test_base_rtc_with_new_subset_norm(tmp_path):
     assert not config.resume
     with pytest.raises(ValueError, match="Norm episode selection"):
         entry.make_config(init_params=str(params), assets_dir=str(assets), train_episodes=[2])
+
+
+def test_other_task_requires_matching_dataset_norm(tmp_path):
+    dataset = tmp_path / "earbuds" / "train"
+    (dataset / "meta").mkdir(parents=True)
+    (dataset / "conversion_manifest.json").write_text('{"split":"train"}')
+    (dataset / "meta/info.json").write_text('{"total_episodes":2}')
+    params = tmp_path / "pi05_base" / "params"
+    params.mkdir(parents=True)
+    assets = tmp_path / "earbuds_norm"
+    norm = assets / "yam" / "norm_stats.json"
+    norm.parent.mkdir(parents=True)
+    norm.write_text("{}")
+    provenance = {
+        "dataset": str(dataset),
+        "selected_episode_ids": [0, 1],
+        "validation_split_included": False,
+        "manifest_sha256": hashlib.sha256((dataset / "conversion_manifest.json").read_bytes()).hexdigest(),
+        "info_sha256": hashlib.sha256((dataset / "meta/info.json").read_bytes()).hexdigest(),
+    }
+    path = norm.parent / "provenance.json"
+    path.write_text(json.dumps(provenance))
+    arguments = {
+        "dataset": str(dataset),
+        "init_params": str(params),
+        "assets_dir": str(assets),
+        "train_episodes": [0, 1],
+        "rtc_training_max_delay": 10,
+    }
+    config = entry.make_config(**arguments)
+    assert config.data.repo_id == str(dataset)
+    assert config.data.assets.assets_dir == str(assets)
+    assert config.data.base_config.prompt_from_task
+    provenance["dataset"] = "/wrong/lego/train"
+    path.write_text(json.dumps(provenance))
+    with pytest.raises(ValueError, match="Norm dataset"):
+        entry.make_config(**arguments)
+    provenance["dataset"] = str(dataset)
+    path.write_text(json.dumps(provenance))
+    (dataset / "meta/info.json").write_text("{}")
+    with pytest.raises(ValueError, match="Norm source changed"):
+        entry.make_config(**arguments)
+
+
+def test_task_override_cannot_fall_back_to_lego_assets():
+    with pytest.raises(ValueError, match="requires explicit"):
+        entry.make_config(dataset="/earbuds/train")

@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "run_name": "earbuds_pi05_rtc_base_50h_20261012",
+  "source_root": "/home/wuyan/lyj/YAM/YAM_data/ABC-130k-two-tasks/earbuds_charging_case",
+  "dataset_root": "/home/wuyan/lyj/YAM/YAM_data/processed/earbuds_lerobot_50h_v1_20261012",
+  "assets_root": "/home/wuyan/lyj/YAM/training-assets/earbuds_rtc_50h_20261012",
+  "report": "docs/reports/training/earbuds-pi05-50h-20261012",
+  "python": "/home/wuyan/.conda/envs/condapi-yam/bin/python",
+  "init_params": "/home/wuyan/.cache/openpi/openpi-assets/checkpoints/pi05_base/params",
+  "task": "insert the wireless bluetooth earbuds into the charging case",
+  "training": {
+    "config": "pi05_yam",
+    "batch_size": 32,
+    "fsdp_devices": 4,
+    "horizon": 50,
+    "rtc_training_max_delay": 10,
+    "num_workers": 2,
+    "peak_lr": 1e-05,
+    "decay_lr": 1e-06,
+    "warmup_steps": 1000,
+    "decay_steps": 338000,
+    "first_stop_step": 170000,
+    "total_steps": 338000,
+    "save_interval": 1000,
+    "keep_period": 5000,
+    "seed": 42,
+    "ema_decay": null,
+    "adam_eps": 1e-06
+  },
+  "automatic_training_start": false
+}

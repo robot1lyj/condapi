@@ -1,4 +1,4 @@
-"""Pinned Lego full-finetuning entrypoint. Launch only inside a four-GPU allocation."""
+"""Pi0.5 YAM full-finetuning entrypoint, with pinned Lego defaults and explicit task overrides."""
 
 import argparse
 import dataclasses
@@ -29,8 +29,15 @@ def make_config(
     warmup_steps=None,
     decay_steps=None,
     assets_dir=None,
+    dataset=None,
 ):
     config = configs.get_config("pi05_yam")
+    if dataset is not None:
+        if init_params is None or assets_dir is None or train_episodes is None:
+            raise ValueError("--dataset requires explicit --init-params, --assets-dir and --train-episodes-file")
+        dataset = str(Path(dataset).expanduser().resolve())
+        if Path(dataset).name != "train" or ".incomplete" in dataset:
+            raise ValueError("--dataset must be a published train split")
     batch_size = int(os.environ.get("LEGO_BATCH_SIZE", "32"))
     num_workers = int(os.environ.get("LEGO_NUM_WORKERS", "2"))
     save_interval = int(os.environ.get("LEGO_SAVE_INTERVAL", "2000"))
@@ -63,6 +70,16 @@ def make_config(
             provenance = json.loads(provenance_path.read_text())
             if provenance.get("selected_episode_ids") != sorted(train_episodes):
                 raise ValueError("Norm episode selection differs from training subset")
+            if dataset is not None:
+                if provenance.get("dataset") != dataset or provenance.get("validation_split_included") is not False:
+                    raise ValueError("Norm dataset differs from training dataset or includes validation")
+                for filename, field in (
+                    ("conversion_manifest.json", "manifest_sha256"),
+                    ("meta/info.json", "info_sha256"),
+                ):
+                    actual = hashlib.sha256((Path(dataset) / filename).read_bytes()).hexdigest()
+                    if provenance.get(field) != actual:
+                        raise ValueError(f"Norm source changed: {filename}")
         init_params = str(params)
         peak_lr = float(os.environ.get("LEGO_PEAK_LR", "3e-6"))
         decay_lr = float(os.environ.get("LEGO_DECAY_LR", "3e-7"))
@@ -100,7 +117,7 @@ def make_config(
         ),
         data=dataclasses.replace(
             config.data,
-            repo_id="/home/wuyan/lyj/YAM/YAM_data/processed/lego_lerobot_v1_20260907/train",
+            repo_id=dataset or "/home/wuyan/lyj/YAM/YAM_data/processed/lego_lerobot_v1_20260907/train",
             assets=configs.AssetsConfig(assets_dir=assets_dir, asset_id="yam"),
             base_config=dataclasses.replace(config.data.base_config, train_episodes=train_episodes),
         ),
@@ -157,6 +174,7 @@ def main():
         "--rtc-training-max-delay", type=int, default=0, help="Inclusive bound; 0 disables RTC training"
     )
     parser.add_argument("--assets-dir", help="Explicit norm assets root (contains yam/norm_stats.json)")
+    parser.add_argument("--dataset", help="Published train split for another YAM task; requires explicit subset/norm")
     parser.add_argument("--warmup-steps", type=int)
     parser.add_argument("--decay-steps", type=int, help="Keep fixed when extending/resuming the same run")
     args = parser.parse_args()
@@ -177,6 +195,7 @@ def main():
         warmup_steps=args.warmup_steps,
         decay_steps=args.decay_steps,
         assets_dir=args.assets_dir,
+        dataset=args.dataset,
     )
     if args.resume:
         require_resume_checkpoint(config)
