@@ -1,6 +1,6 @@
 # 08 · Thor 端侧部署
 
-当前[PLD-SAC v2方案](reports/rl/pld-sac-block-v2/README.md)：Thor在线负责Pi-Base＋PLD-Corrector因果门控/双臂仲裁，离线优先运行Replay-Curator（CPU）和Qwen-DINO Judge（独立视觉前向）；训练仅GPU服务器。2026-10-12只读实查Pi20w容器运行但未加载PLD，Qwen/DINO批任务已完成退出。v1独立前向6例/P50 18.52ms仅作历史，不能替代v2、客户端互通或真实配方验收。现有生产入口保持，未操作3588；v2测试、资产和剩余条件归方案记录。
+当前[PLD-SAC v2方案](reports/rl/pld-sac-block-v2/README.md)：Thor在线负责Pi-Base＋PLD-Grasp因果门控/双臂仲裁，离线优先运行Replay-Curator（CPU）和Qwen-DINO Judge（独立视觉前向）；训练仅GPU服务器。2026-10-12只读实查Pi20w容器运行但未加载PLD，Qwen/DINO批任务已完成退出。v1独立前向6例/P50 18.52ms仅作历史，不能替代v2、客户端互通或真实配方验收。现有生产入口保持，未操作3588；v2测试、资产和剩余条件归方案记录。
 
 
 OpenWAM独立镜像、官方权重、LoRA合并与压缩候选见 [14 · OpenWAM推理实验](reference/thor/14_openwam_inference.md)。2026-09-23 用户暂停 OpenWAM，Thor 的已停止试验容器已清理；原始权重、环境镜像和日志保留。Pi 当前测试部署见下方当前决策；历史136000证据归[136000报告](reports/thor/rtc-20h-136000-20260923/README.md)。
