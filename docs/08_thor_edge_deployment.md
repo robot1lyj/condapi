@@ -2,6 +2,8 @@
 
 2026-10-12 15:31 CST，按用户明确要求新增并上线`pld-rl`容器，接管`ws://192.168.250.1:8000`，旧`pi05-rtc-infer`停止保留。复用原20w trained RTC、7步FP32/TF32/quantile engine；本机普通RTC9例＋probe9例通过，MAXN新会话active。当前仅off/probe诊断，actor未加载、修正未启用，collect/eval/shadow明确拒绝，诊断记录不进SAC。客户端/跨IPC仍待联调，没有操作3588。用户指定的新容器仍复用Pi系列基础镜像和唯一生产地址，不改变其他模型的默认容器规则。身份、延迟、回执与回退边界归[本次上线](reports/thor/pld-rl-20261012/README.md)，分工与训练归[PLD-Grasp方案](reports/rl/pld-sac-block-v2/README.md)。下方旧部署条目保留历史，不代表当前容器和电源会话。
 
+16:24补齐并复验Thor离线Replay-Curator：固定bfa5859源码包，复用已装数据镜像，以无网络/无GPU的runc CPU容器处理原生UUID/HDF5/session侧车并导出probe审计。左右两条模拟原生录像104行/16回复/86来源tick通过，全部源/输出/图片哈希复核，奖励与训练记录为0；不冒充真机通过。在线pld-rl的镜像/权重/握手不变，本机health与off/probe能力重新确认。[发布路径与回执](reports/thor/pld-rl-20261012/README.md#零修正probe数据链路补齐1624-cst)记录CPU启动器及两轮真实probe步骤；没有操作3588或开始训练。
+
 
 OpenWAM独立镜像、官方权重、LoRA合并与压缩候选见 [14 · OpenWAM推理实验](reference/thor/14_openwam_inference.md)。2026-09-23 用户暂停 OpenWAM，Thor 的已停止试验容器已清理；原始权重、环境镜像和日志保留。Pi 当前测试部署见下方当前决策；历史136000证据归[136000报告](reports/thor/rtc-20h-136000-20260923/README.md)。
 

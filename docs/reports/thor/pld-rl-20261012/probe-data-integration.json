@@ -1,0 +1,22 @@
+{
+  "status": "passed",
+  "source_commit": "bfa58595afcde615066750c831431ce0c8b60205",
+  "offline_container": "pld-curator-probe-20261012T082325334095",
+  "offline_image_id": "sha256:2711020dd277e9114ef6296ddc0ed721de376a4b1156183ed39c6c1450a2439c",
+  "cpu_only": true,
+  "network": "none",
+  "readonly_rootfs": true,
+  "raw_and_source_hashes_verified": true,
+  "outputs_and_exported_images_verified": true,
+  "episodes": 2,
+  "accepted_probe_replies": 16,
+  "source_verified_ticks": 86,
+  "raw_rows": 104,
+  "synthetic_only": true,
+  "training": false,
+  "reward_records": 0,
+  "production_container_running": true,
+  "production_health": "healthy",
+  "production_image_id": "sha256:080d09d5426928029a8e78e6a213e8cd6d27e20b8482518701f088a1d6323499",
+  "cross_IPC_tested": false
+}

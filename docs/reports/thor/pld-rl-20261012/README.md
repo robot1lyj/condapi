@@ -46,6 +46,16 @@ Thor完整发布目录：`/home/wuyan-lyj/thor/pi/services/pld-rl-20261012-r1/`�
 
 MAXN交接使用短命Docker管理客户端连接宿主systemd（宿主PID命名空间，仅systemd客户端/共享库/通信目录只读挂载、drop全部capabilities）；模型容器没有这些宿主管理挂载或host PID能力，没有新增sudoers、设备控制或持久开机配置。复用原已验证`maxn_session.py`与`watch_docker_container.py`，通过systemd transient unit跟随`pld-rl`。失败回退逻辑在控制器中，**本次没有故意触发失败验证**，不冒称已演练回退。
 
+## 零修正probe数据链路补齐（16:24 CST）
+
+源码固定`bfa58595afcde615066750c831431ce0c8b60205`，客户端只读参照固定YAM `187f7dc5493696b16ddbb2596c8c14db4b3cd7a8`。新增原生manifest UUID、session侧车合并/去重、取消与错误隔离、独立probe协议审计和Thor CPU启动器。27项轻量回归通过（13动作/probe合同、10管家、4原生读取/审计）；另用客户端原录制器＋真实NumPy ProbeRuntime导出左右两条模拟记录，在工作站和Thor都通过完整读取/证据导出。未运行本地VLA前向或训练。
+
+Thor检查共104行、16个正常probe回复、86个来源核验tick；两条记录都包含三视频索引。源文件、处理代码、输出及选中图片SHA复核一致；records/rewards为空，训练资格false。这是**模拟原生录制链路验收**，不计机器人成功率，也不代替跨IPC/真机测试。[检查回执](probe-data-integration.json)、[原生probe审计](probe-native-audit.json)、[CPU容器启动参数](probe-curator-launcher.json)保留。
+
+离线源码发布：`/home/wuyan-lyj/thor/pld-grasp/releases/probe-curator-20261012-r1/code/`；源码tar SHA `6679f34d1ed9c6ddabad05ec5190c673e4dbd1eef7bbe50f3d4eb8607898cdf8`。检查与完整派生输出：`/home/wuyan-lyj/thor/pld-grasp/checks/probe-native-20261012-r1/`。工作站原始模拟夹具、全部检查版本：`/home/wuyan-lyj/condapi-data/rl/pld-probe-integration-20261012-r1/`；模拟包SHA `9a0c63fc4f41f283d8ef0049314ca2258e2e240ce06adcf5b775fadb83e92070`。不覆盖真实14集或已有派生版本。
+
+复用已有数据处理镜像`sha256:2711020dd277e9114ef6296ddc0ed721de376a4b1156183ed39c6c1450a2439c`，无安装；以runc/2CPU/4GiB、无网络/无GPU/只读根、源码和原始文件只读挂载运行，输出独立目录。在线Pi镜像、权重、engine和握手均未修改。16:24重新读取Thor本机health/握手：healthy、原20w、仍仅off/probe、actor未加载；诊断SHA与上文相同。
+
 ## 下一步
 
-客户端按握手只启用off/probe，先约2集诊断，核查完整trace、原RTC来源/前缀、三视频与逐tick实际提交动作，并抽查容器误介入。提供真实限位、最大步幅与夹爪映射后，服务器导出正式零均值探索包；再安装到Thor，完成完整合同probe验收后小批collect、判奖、SAC更新和Pi/eval对比。[当前训练方案](../../rl/pld-sac-block-v2/README.md)仍只用抓取1/0，整轮C/N不参与SAC更新。
+服务端已经具备开始零修正probe的条件。客户端新版部署后按握手选择probe，先采2轮诊断，复制完整session（包括policy_events.jsonl），核查完整trace、原RTC来源/前缀、三视频与逐tick实际提交动作，并抽查容器误介入。用户最后确认先probe，再由Thor按Pi变化/FK位移选择正式探索范围，尚未执行十倍放大；客户端只如实报告已有限位/夹爪映射，没有步进上限就保留null，无需自行新增限速。正式合同/actor验收后再小批collect、判奖、SAC更新与Pi/eval对比。[当前训练方案](../../rl/pld-sac-block-v2/README.md)仍只用抓取1/0，整轮C/N不参与SAC更新。

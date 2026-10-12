@@ -1,5 +1,9 @@
 # 07 · 变更历史
 
+## 2026-10-12 · 补齐原生PLD数据关联并准备零修正probe
+
+只读审核YAM 187f7dc，31项客户端模拟测试通过；服务端随后补manifest UUID/session事件侧车读取、同token去重、取消和错误阻断、独立probe审计及CPU启动器。bfa5859固定源码部署Thor新离线目录，以现有镜像runc/无GPU/无网络运行；27项回归及左右两条原生模拟录制104行/16回复/86来源tick通过，源/输出/图片哈希核验，records/rewards为空。在线pld-rl healthy/诊断握手不变，未操作3588、VLA权重、训练或向客户端任务发指令。用户将动作范围选择交Thor，最后确认先零修正probe，再根据Pi变化与FK位移选择正式范围；未启用十倍放大。[部署与证据](reports/thor/pld-rl-20261012/README.md#零修正probe数据链路补齐1624-cst)明确模拟/真机边界。
+
 ## 2026-10-12 · 实现PLD-SAC动作块闭环与客户端待审合同
 
 用户确认先完成PLD-SAC训练/推理闭环。新增小残差SAC、状态相关可行幅度、RTC前缀保真、执行回执校验、末块奖励、resume/跨轮初始化和bundle导出。首版不移植不兼容的旧critic，不声称Cal-QL完整复现；不训练Pi。2315在一张4090执行合成数据端到端验证并完成；本地仅数组/传输测试。Thor同容器独立进程仅前向推理测试通过，未更换生产服务或连接机械臂。客户端需求与首批probe/collect/eval方案已写为[待审说明](reports/rl/pld-sac-block-v1/client-and-first-rollout.md)，未操作3588或发送客户端任务。新真实训练尚未开始，物理限位/基础权重绑定与跨IPC联调待补齐。
