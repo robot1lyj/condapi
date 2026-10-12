@@ -7,6 +7,7 @@ new transient service, and restores the old service on failed validation.
 
 import argparse
 import datetime
+import hashlib
 import json
 from pathlib import Path
 import shlex
@@ -91,7 +92,7 @@ def power_service(args, container, unit):
     # Docker is already the authorized root deployment interface. This small
     # ephemeral client only connects to the host systemd manager; production
     # model containers get neither systemd sockets nor extra capabilities.
-    argv = ["docker","run","--rm","--network","none","--user","0","--cap-drop","ALL",
+    argv = ["docker","run","--rm","--network","none","--pid","host","--user","0","--cap-drop","ALL",
             "--security-opt","no-new-privileges",
             "-v","/usr/bin/systemd-run:/systemd-run:ro",
             "-v","/usr/lib/aarch64-linux-gnu/systemd:/usr/lib/aarch64-linux-gnu/systemd:ro",
@@ -156,6 +157,7 @@ def main():
         write(args.release/"deployment.json",{"status":"online_probe_only","observed_at":datetime.datetime.now(datetime.UTC).isoformat(),
               "container":"pld-rl","container_id":inspect("pld-rl")["Id"],"image_id":image["Id"],
               "source_revision":image["Config"]["Labels"]["org.opencontainers.image.revision"],
+              "deploy_controller_sha256":hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
               "url":"ws://192.168.250.1:8000","weights_sha256":receipt["weights_sha256"],"reports":reports,
               "previous_container_state":inspect(args.source_container)["State"]["Status"],"power":power,
               "actor_loaded":False,"collect_enabled":False,"cross_IPC_tested":False})
