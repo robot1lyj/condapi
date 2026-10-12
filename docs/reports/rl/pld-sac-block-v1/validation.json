@@ -1,0 +1,24 @@
+{
+  "status": "passed_synthetic_only",
+  "job": "2315",
+  "gpu": "NVIDIA GeForce RTX 4090",
+  "replay_audit": {
+    "accepted_attempts": 8,
+    "transitions": 24,
+    "excluded": [],
+    "reward_location": "last fully executed decision of each reviewed attempt"
+  },
+  "checks": [
+    "zero equals Pi bitwise",
+    "bounded nonzero collection",
+    "FP64 RTC prefix exact",
+    "other arm unchanged",
+    "terminal target ignores poisoned next observation",
+    "exact optimizer resume",
+    "delayed reward compilation",
+    "CLI 40 SAC updates",
+    "export reload and infer"
+  ],
+  "robot_deployed": false,
+  "robot_success_rate": null
+}

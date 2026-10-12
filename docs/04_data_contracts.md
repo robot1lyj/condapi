@@ -4,6 +4,8 @@
 
 **当前用途为已确认的 PLD 式整段抓取修正，首轮左右臂都覆盖，整轮 C/N 仍作评估。** 学习路线唯一归[03](03_training_and_evaluation.md#pld-主线与-recap-后续路线2026-10-11)。2026-10-12用户接受审核并授权实验，新replay v2已发布327条奖励，311次尝试构成合法单步行为价值初始化数据；这不代表在线动作/RTC合同已验收。E01验证、E02–E14训练。原始episode/epoch/tick、`video_indices`图像引用、闭爪FK参考、抬升差、持物/空手证据、窗口与排除原因全部保留；图像帧号不是控制行号，没检测到积木不能直接记失败。
 
+新PLD-SAC v1另用决策块合同：proposal保留原Pi计划、输入向量、可行scale、采样u和实际offset；receipt保留逐tick实际下发、float64时间、epoch/来源与观测引用。奖励按attempt最后完整块1/0，只在末块出现；不按人工审核按键时间对齐。`prepare_blocks.py`拒绝重复/跨epoch/断点/客户端改写/无合格终态的尝试，排除项保留原因。旧14集单步replay不自动转换或混入。具体字段和首轮标注样例见[新合同](reports/rl/pld-sac-block-v1/client-and-first-rollout.md)。
+
 ### 本次不可变训练数据版本（2026-10-12）
 
 服务器根目录 `/home/wuyan/lyj/pld-grasp/`：`datasets/classifications/` 保留完整v3r3分类及抬升资格侧车；`datasets/replays/pld-offline14-20261012-v2/` 保存奖励、整轮标签、逐次身份、原始图像引用、replay、训练集归一化及后续特征缓存；`datasets/catalog/<版本>.json`绑定来源与SHA，`datasets/index.json`仅作导航。原始录像继续保存在已验证目录 `/home/wuyan/lyj/YAM/YAM_data/derived/rl/parts_rollout14_20261010_v1/raw/`，不覆盖。实验配置、环境清单、日志、逐次预测与全部checkpoint按实验版本归 `runs/pld-grasp-offline-20261012-v{1,2}/` 及 `runs/pld-methods14-20261012-v{1,2}/`；新十组追加50个checkpoint和400个逐次预测，索引绑定代码/比较SHA，原数据与前八组不覆盖；新数据/奖励创建新版本，不覆盖旧结论。失败样本及16条缺精确终点转移的已知结果也保留，不能只归档成功。

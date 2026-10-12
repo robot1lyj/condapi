@@ -1,6 +1,11 @@
 """Transport regression after retiring legacy RL; no model or training loop."""
 
+import asyncio
+
+import numpy as np
+from openpi_client import msgpack_numpy
 import pytest
+import websockets
 
 from openpi.serving.websocket_policy_server import RequestError
 from openpi.serving.websocket_policy_server import WebsocketPolicyServer
@@ -95,3 +100,43 @@ def test_pld_requires_loaded_runtime_and_trained_rtc():
         WebsocketPolicyServer(BasePolicy(), rtc_mode="off", pld_runtime=object())
     obs = {"sentinel": [3]}
     assert _split_payload({"obs": obs, "pld": {"mode": "off"}}) == (obs, None)
+
+
+def test_pld_transport_applies_only_explicit_mode_and_recovers_rejection():
+    class Policy:
+        def infer_rtc(self, obs, rtc):
+            return {"actions": np.ones((50, 14), dtype=np.float64)}
+
+    class Runtime:
+        def __init__(self):
+            self.metadata = {"fixture": True}
+
+        def __call__(self, obs, rtc, request, action):
+            if request.get("invalid"):
+                raise ValueError("fixture invalid receipt")
+            return {"actions": action["actions"] * 2, "pld": {"fixture": True}}
+
+    class Socket:
+        remote_address = ("fixture", 0)
+
+        def __init__(self):
+            self.results = []
+            packer = msgpack_numpy.Packer()
+            self.requests = [packer.pack({"obs": {}, "rtc": {}, "pld": p}) for p in (
+                {"mode": "collect", "invalid": True}, {"mode": "off"}, {"mode": "collect"})]
+
+        async def recv(self):
+            if not self.requests:
+                raise websockets.ConnectionClosedOK(None, None)
+            return self.requests.pop(0)
+
+        async def send(self, payload):
+            self.results.append(payload if isinstance(payload, str) else msgpack_numpy.unpackb(payload))
+
+    socket = Socket()
+    server = WebsocketPolicyServer(Policy(), rtc_mode="trained", pld_runtime=Runtime())
+    asyncio.run(server._handler(socket))  # noqa: SLF001
+    assert "PLD request rejected" in socket.results[1]
+    assert np.all(socket.results[2]["actions"] == 1)
+    assert np.all(socket.results[3]["actions"] == 2)
+    assert socket.results[3]["pld"]["fixture"]

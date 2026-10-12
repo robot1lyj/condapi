@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "runs": [{
+    "id": "pld-sac-r01",
+    "name": "PLD-SAC R01 · 待真实修正数据",
+    "model": "冻结Pi / 活动臂短块残差SAC",
+    "backend": "PyTorch / FP32",
+    "metrics": "../../artifacts/pld-sac-r01/metrics.jsonl",
+    "batch_size": 256,
+    "stage_steps": 1000,
+    "total_steps": 1000,
+    "save_interval": 250,
+    "metric_labels": {
+      "loss": "双Q训练误差",
+      "val_loss": "留出整轮Bellman误差",
+      "train/q_abs_max": "Q绝对最大值",
+      "train/q_disagreement": "双Q分歧",
+      "train/actor_loss": "SAC actor目标",
+      "train/entropy": "潜变量熵",
+      "alpha": "自动熵温度",
+      "train/residual_rms": "可执行归一化偏移RMS",
+      "train/residual_saturation": "潜变量边界饱和比例",
+      "actor_updates": "Actor累计更新次数",
+      "online_environment_steps": "真实带修正决策块数（非30Hz帧数）",
+      "online_executed_seconds": "真实带修正决策覆盖秒数",
+      "val/terminal_rmse": "末块奖励RMSE"
+    },
+    "parameters": {
+      "状态": "尚未采集新协议数据，不展示合成测试为训练成果",
+      "基线": "同合同probe零修正记录",
+      "奖励": "一次抓取末块1/0，中间0",
+      "蒸馏": "本轮不更新Pi",
+      "物理边界": "以审核后的contract为准",
+      "真机成功率": "单独A/B评估，不能由Q或loss推算"
+    }
+  }]
+}
