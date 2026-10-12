@@ -16,9 +16,14 @@ def create(args, source, name, port):
     command = source["Config"]["Cmd"].copy()
     if command[0].endswith("serve_pi05_rtc_trt.py"):
         command.pop(0)
-    if "--pld-probe-only" not in command:
-        raise ValueError("this upgrade expects the retained original probe service")
-    command.remove("--pld-probe-only")
+    if "--pld-probe-only" in command:
+        command.remove("--pld-probe-only")
+    elif "--pld-bundle" in command:
+        for flag in ("--pld-bundle", "--pld-encoder"):
+            index = command.index(flag)
+            del command[index:index+2]
+    else:
+        raise ValueError("this upgrade expects an existing PLD service")
     command[command.index("--port")+1] = str(port)
     command += ["--pld-bundle", "/pld-bundle", "--pld-encoder", "/pld-encoder.pth"]
     argv = ["docker", "create", "--name", name, "--restart", "no", "--runtime", "nvidia",
@@ -26,7 +31,7 @@ def create(args, source, name, port):
     for bind in source["HostConfig"]["Binds"]:
         if not bind.startswith("/home/wuyan-lyj/thor/pi/"):
             raise ValueError("unexpected source mount")
-        if bind.split(":")[1] != "/deployment":
+        if bind.split(":")[1] not in {"/deployment", "/pld-bundle", "/pld-encoder.pth", "/pld-cases"}:
             argv += ["-v", bind]
     argv += ["-v", f"{args.release}:/deployment", "-v", f"{args.bundle}:/pld-bundle:ro",
              "-v", f"{args.encoder}:/pld-encoder.pth:ro", "-v", f"{args.cases}:/pld-cases:ro"]
@@ -69,7 +74,7 @@ def main():
     args = p.parse_args()
     source = inspect("pld-rl")
     image_id = json.loads(run(["docker", "image", "inspect", args.image]))[0]["Id"]
-    candidate = "pld-rl-collect-preflight-20261012-r1"
+    candidate = "pld-rl-preflight-" + args.release.name
     if args.phase == "preflight":
         write(args.release/"source-container.json", {"id": source["Id"], "image": source["Image"],
               "command": source["Config"]["Cmd"], "mounts": source["HostConfig"]["Binds"]})
@@ -86,13 +91,13 @@ def main():
     receipt = json.loads((args.release/"preflight.json").read_text())
     if receipt["status"] != "passed" or receipt["source_id"] != source["Id"] or receipt["image_id"] != image_id:
         raise ValueError("preflight identity changed")
-    retained = "pld-rl-probe-retained-20261012-r1"
+    retained = "pld-rl-retained-" + args.release.name
     run(["docker", "stop", "pld-rl"])
     run(["docker", "rename", "pld-rl", retained])
     try:
         await_normal_power()
         create(args, source, "pld-rl", 8000)
-        power_service(args, "pld-rl", "thor-pld-collect-maxn-20261012-r1")
+        power_service(args, "pld-rl", "thor-" + args.release.name + "-maxn")
         filename, result = smoke(args, "pld-rl", 8000, "production")
         if result["metadata"]["pld"]["snapshot_sha256"] != receipt["snapshot_sha256"]:
             raise ValueError("production actor differs from preflight")
@@ -106,10 +111,10 @@ def main():
               "robot_rollout_of_new_actor": False, "cross_IPC_new_actor_tested": False, "training_updates": 0})
     except Exception:
         run(["docker", "stop", "pld-rl"])
-        run(["docker", "rename", "pld-rl", "pld-rl-collect-failed-20261012-r1"])
+        run(["docker", "rename", "pld-rl", "pld-rl-failed-" + args.release.name])
         await_normal_power()
         run(["docker", "rename", retained, "pld-rl"])
-        power_service(args, "pld-rl", "thor-pld-probe-rollback-20261012-r1")
+        power_service(args, "pld-rl", "thor-" + args.release.name + "-rollback")
         raise
 
 
