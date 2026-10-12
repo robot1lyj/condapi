@@ -6,7 +6,7 @@
 
 ### 本次不可变训练数据版本（2026-10-12）
 
-服务器根目录 `/home/wuyan/lyj/pld-grasp/`：`datasets/classifications/` 保留完整v3r3分类及抬升资格侧车；`datasets/replays/pld-offline14-20261012-v2/` 保存奖励、整轮标签、逐次身份、原始图像引用、replay、训练集归一化及后续特征缓存；`datasets/catalog/<版本>.json`绑定来源与SHA，`datasets/index.json`仅作导航。原始录像继续保存在已验证目录 `/home/wuyan/lyj/YAM/YAM_data/derived/rl/parts_rollout14_20261010_v1/raw/`，不覆盖。实验配置、环境清单、日志、逐次预测与全部checkpoint归 `runs/pld-grasp-offline-20261012-v1/`；新数据/奖励创建新版本，不覆盖旧结论。失败样本及16条缺精确终点转移的已知结果也保留，不能只归档成功。
+服务器根目录 `/home/wuyan/lyj/pld-grasp/`：`datasets/classifications/` 保留完整v3r3分类及抬升资格侧车；`datasets/replays/pld-offline14-20261012-v2/` 保存奖励、整轮标签、逐次身份、原始图像引用、replay、训练集归一化及后续特征缓存；`datasets/catalog/<版本>.json`绑定来源与SHA，`datasets/index.json`仅作导航。原始录像继续保存在已验证目录 `/home/wuyan/lyj/YAM/YAM_data/derived/rl/parts_rollout14_20261010_v1/raw/`，不覆盖。实验配置、环境清单、日志、逐次预测与全部checkpoint按实验版本归 `runs/pld-grasp-offline-20261012-v{1,2}/` 及 `runs/pld-methods14-20261012-v{1,2}/`；新十组追加50个checkpoint和400个逐次预测，索引绑定代码/比较SHA，原数据与前八组不覆盖；新数据/奖励创建新版本，不覆盖旧结论。失败样本及16条缺精确终点转移的已知结果也保留，不能只归档成功。
 
 311次含299训练/12验证，31,077条转移含29,842训练/1,235验证；成功127、失败184。奖励只在每次尝试精确核验终点对应转移写1/0，中间0；终点停止bootstrap。以真实dt作 `discount=0.99^dt`，MC校准回报只沿物理连续后缀定义；相机缺帧移除观察转移，不把缺口压紧拼接。原始记录证明保留行的Pi `base_target`等于实际下发动作，行为残差0；关节目标减当前状态、夹爪保持absolute，不擅改物理单位。输入当前三相机、当前/过去状态与动作、当前Pi参考及队列标量，不包含未来结果标签。冻结ResNet18提取每视角512维，三视角共1536维；不复用用于标签调试的DINO/Qwen特征。
 

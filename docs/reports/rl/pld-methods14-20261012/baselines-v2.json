@@ -1,0 +1,61 @@
+{
+  "scope": "entry predictions only; not robot success rate",
+  "runs": [
+    {
+      "id": "pld-rebrac-c0p01-s0",
+      "step": 20000,
+      "validation_attempts": 12,
+      "rmse": 1.6713315119824779,
+      "auc": 0.45,
+      "constant_one_rmse": 0.4097102175372224,
+      "train_mean_prediction": 0.37689149870239075,
+      "train_mean_rmse": 0.5560131069129594,
+      "arms": {
+        "left": {
+          "attempts": 5,
+          "successes": 5,
+          "failures": 0,
+          "auc": null,
+          "empty_mean_q": null,
+          "held_mean_q": -1.2691346406936646
+        },
+        "right": {
+          "attempts": 7,
+          "successes": 5,
+          "failures": 2,
+          "auc": 0.9,
+          "empty_mean_q": -0.5834395885467529,
+          "held_mean_q": -0.2523197829723358
+        }
+      }
+    },
+    {
+      "id": "pld-rebrac-c0p01-s1",
+      "step": 20000,
+      "validation_attempts": 12,
+      "rmse": 1.5117635308950719,
+      "auc": 0.7,
+      "constant_one_rmse": 0.4097102175372224,
+      "train_mean_prediction": 0.37689149870239075,
+      "train_mean_rmse": 0.5560131069129594,
+      "arms": {
+        "left": {
+          "attempts": 5,
+          "successes": 5,
+          "failures": 0,
+          "auc": null,
+          "empty_mean_q": null,
+          "held_mean_q": -0.5257146954536438
+        },
+        "right": {
+          "attempts": 7,
+          "successes": 5,
+          "failures": 2,
+          "auc": 0.7,
+          "empty_mean_q": -0.9419654607772827,
+          "held_mean_q": -0.6444752216339111
+        }
+      }
+    }
+  ]
+}

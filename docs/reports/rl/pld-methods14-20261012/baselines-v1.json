@@ -1,0 +1,229 @@
+{
+  "scope": "entry predictions only; not robot success rate",
+  "runs": [
+    {
+      "id": "pld-iql-e09-s0",
+      "step": 20000,
+      "validation_attempts": 12,
+      "rmse": 0.6736768909943602,
+      "auc": 0.5,
+      "constant_one_rmse": 0.4097102175372224,
+      "train_mean_prediction": 0.37689149870239075,
+      "train_mean_rmse": 0.5560131069129594,
+      "arms": {
+        "left": {
+          "attempts": 5,
+          "successes": 5,
+          "failures": 0,
+          "auc": null,
+          "empty_mean_q": null,
+          "held_mean_q": 1.0788599252700806
+        },
+        "right": {
+          "attempts": 7,
+          "successes": 5,
+          "failures": 2,
+          "auc": 0.4,
+          "empty_mean_q": 1.2103663682937622,
+          "held_mean_q": 1.0642622709274292
+        }
+      }
+    },
+    {
+      "id": "pld-iql-e09-s1",
+      "step": 20000,
+      "validation_attempts": 12,
+      "rmse": 0.6849341291330753,
+      "auc": 0.45,
+      "constant_one_rmse": 0.4097102175372224,
+      "train_mean_prediction": 0.37689149870239075,
+      "train_mean_rmse": 0.5560131069129594,
+      "arms": {
+        "left": {
+          "attempts": 5,
+          "successes": 5,
+          "failures": 0,
+          "auc": null,
+          "empty_mean_q": null,
+          "held_mean_q": 1.0700327157974243
+        },
+        "right": {
+          "attempts": 7,
+          "successes": 5,
+          "failures": 2,
+          "auc": 0.4,
+          "empty_mean_q": 1.2401577234268188,
+          "held_mean_q": 1.1099380254745483
+        }
+      }
+    },
+    {
+      "id": "pld-iql-s0",
+      "step": 20000,
+      "validation_attempts": 12,
+      "rmse": 0.8350101084607668,
+      "auc": 0.5,
+      "constant_one_rmse": 0.4097102175372224,
+      "train_mean_prediction": 0.37689149870239075,
+      "train_mean_rmse": 0.5560131069129594,
+      "arms": {
+        "left": {
+          "attempts": 5,
+          "successes": 5,
+          "failures": 0,
+          "auc": null,
+          "empty_mean_q": null,
+          "held_mean_q": 0.050735849887132645
+        },
+        "right": {
+          "attempts": 7,
+          "successes": 5,
+          "failures": 2,
+          "auc": 0.5,
+          "empty_mean_q": 0.29935014247894287,
+          "held_mean_q": 0.10129211097955704
+        }
+      }
+    },
+    {
+      "id": "pld-iql-s1",
+      "step": 20000,
+      "validation_attempts": 12,
+      "rmse": 0.802047939931316,
+      "auc": 0.45,
+      "constant_one_rmse": 0.4097102175372224,
+      "train_mean_prediction": 0.37689149870239075,
+      "train_mean_rmse": 0.5560131069129594,
+      "arms": {
+        "left": {
+          "attempts": 5,
+          "successes": 5,
+          "failures": 0,
+          "auc": null,
+          "empty_mean_q": null,
+          "held_mean_q": 0.12338726222515106
+        },
+        "right": {
+          "attempts": 7,
+          "successes": 5,
+          "failures": 2,
+          "auc": 0.4,
+          "empty_mean_q": 0.404723584651947,
+          "held_mean_q": 0.1243777722120285
+        }
+      }
+    },
+    {
+      "id": "pld-rebrac-s0",
+      "step": 20000,
+      "validation_attempts": 12,
+      "rmse": 15.535456178974439,
+      "auc": 0.5,
+      "constant_one_rmse": 0.4097102175372224,
+      "train_mean_prediction": 0.37689149870239075,
+      "train_mean_rmse": 0.5560131069129594,
+      "arms": {
+        "left": {
+          "attempts": 5,
+          "successes": 5,
+          "failures": 0,
+          "auc": null,
+          "empty_mean_q": null,
+          "held_mean_q": -15.578521728515625
+        },
+        "right": {
+          "attempts": 7,
+          "successes": 5,
+          "failures": 2,
+          "auc": 1.0,
+          "empty_mean_q": -14.916397094726562,
+          "held_mean_q": -13.591113090515137
+        }
+      }
+    },
+    {
+      "id": "pld-rebrac-s1",
+      "step": 20000,
+      "validation_attempts": 12,
+      "rmse": 15.890197091617623,
+      "auc": 0.85,
+      "constant_one_rmse": 0.4097102175372224,
+      "train_mean_prediction": 0.37689149870239075,
+      "train_mean_rmse": 0.5560131069129594,
+      "arms": {
+        "left": {
+          "attempts": 5,
+          "successes": 5,
+          "failures": 0,
+          "auc": null,
+          "empty_mean_q": null,
+          "held_mean_q": -14.980047225952148
+        },
+        "right": {
+          "attempts": 7,
+          "successes": 5,
+          "failures": 2,
+          "auc": 0.7,
+          "empty_mean_q": -15.761359214782715,
+          "held_mean_q": -14.844151496887207
+        }
+      }
+    },
+    {
+      "id": "pld-td3bc-s0",
+      "step": 20000,
+      "validation_attempts": 12,
+      "rmse": 0.8596334705936296,
+      "auc": 0.1,
+      "constant_one_rmse": 0.4097102175372224,
+      "train_mean_prediction": 0.37689149870239075,
+      "train_mean_rmse": 0.5560131069129594,
+      "arms": {
+        "left": {
+          "attempts": 5,
+          "successes": 5,
+          "failures": 0,
+          "auc": null,
+          "empty_mean_q": null,
+          "held_mean_q": 0.24745845794677734
+        },
+        "right": {
+          "attempts": 7,
+          "successes": 5,
+          "failures": 2,
+          "auc": 0.1,
+          "empty_mean_q": 1.108437418937683,
+          "held_mean_q": 0.36873993277549744
+        }
+      }
+    },
+    {
+      "id": "pld-td3bc-s1",
+      "step": 20000,
+      "validation_attempts": 12,
+      "rmse": 0.7362857877546912,
+      "auc": 0.1,
+      "constant_one_rmse": 0.4097102175372224,
+      "train_mean_prediction": 0.37689149870239075,
+      "train_mean_rmse": 0.5560131069129594,
+      "arms": {
+        "left": {
+          "attempts": 5,
+          "successes": 5,
+          "failures": 0,
+          "auc": null,
+          "empty_mean_q": null,
+          "held_mean_q": 0.2681475579738617
+        },
+        "right": {
+          "attempts": 7,
+          "successes": 5,
+          "failures": 2,
+          "auc": 0.0,
+          "empty_mean_q": 0.6535237431526184,
+          "held_mean_q": 0.29314059019088745
+        }
+      }
+    }
+  ]
+}

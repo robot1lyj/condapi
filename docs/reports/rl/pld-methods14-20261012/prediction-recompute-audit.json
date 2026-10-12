@@ -1,0 +1,56 @@
+{
+  "passed": true,
+  "absolute_tolerance": 1e-05,
+  "runs": [
+    {
+      "id": "pld-iql-e09-s0",
+      "saved_prediction_rmse_difference": 3.165701090157569e-08,
+      "saved_prediction_auc_equal": true
+    },
+    {
+      "id": "pld-iql-e09-s1",
+      "saved_prediction_rmse_difference": 2.8385171990663594e-09,
+      "saved_prediction_auc_equal": true
+    },
+    {
+      "id": "pld-iql-s0",
+      "saved_prediction_rmse_difference": 1.1010384937115703e-08,
+      "saved_prediction_auc_equal": true
+    },
+    {
+      "id": "pld-iql-s1",
+      "saved_prediction_rmse_difference": 1.4157706118567148e-09,
+      "saved_prediction_auc_equal": true
+    },
+    {
+      "id": "pld-rebrac-s0",
+      "saved_prediction_rmse_difference": 6.362547466665092e-08,
+      "saved_prediction_auc_equal": true
+    },
+    {
+      "id": "pld-rebrac-s1",
+      "saved_prediction_rmse_difference": 4.128825104032785e-08,
+      "saved_prediction_auc_equal": true
+    },
+    {
+      "id": "pld-td3bc-s0",
+      "saved_prediction_rmse_difference": 1.7808116870021706e-08,
+      "saved_prediction_auc_equal": true
+    },
+    {
+      "id": "pld-td3bc-s1",
+      "saved_prediction_rmse_difference": 1.536052074424532e-08,
+      "saved_prediction_auc_equal": true
+    },
+    {
+      "id": "pld-rebrac-c0p01-s0",
+      "saved_prediction_rmse_difference": 4.033336109543484e-08,
+      "saved_prediction_auc_equal": true
+    },
+    {
+      "id": "pld-rebrac-c0p01-s1",
+      "saved_prediction_rmse_difference": 2.7751793085784016e-08,
+      "saved_prediction_auc_equal": true
+    }
+  ]
+}

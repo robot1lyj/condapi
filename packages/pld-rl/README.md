@@ -2,13 +2,13 @@
 
 独立包，不读取或复用已退役 RL learner。VLA 继续使用原生 OpenPI；本包训练独立小 actor / critic。
 
-此前两轮八组 critic-only 诊断使用 `configs/pld_rl/offline14-{a..h}.json`。用户继续授权四卡多论文实验，`configs/pld_rl/methods14-*.json` 比较 PLD-IQL、PLD-TD3BC、PLD-ReBRAC 八组，每组 20,000 更新、每卡一组、分两波。本次更新小 actor / critic，Pi 与视觉冻结，不做生产部署。具体归[对照报告](../../docs/reports/rl/pld-methods14-20261012/README.md)。
+此前两轮八组 critic-only 诊断使用 `configs/pld_rl/offline14-{a..h}.json`。用户继续授权四卡多论文实验，`configs/pld_rl/methods14-*.json` 比较 PLD-IQL、PLD-TD3BC、PLD-ReBRAC 主比较八组，另补两组低critic惩罚对照；每组 20,000 更新、每卡一组、分两波。本次更新小 actor / critic，Pi 与视觉冻结，不做生产部署。具体归[对照报告](../../docs/reports/rl/pld-methods14-20261012/README.md)。
 
 ## 实现与论文的关系
 
 - PLD：[论文 §3.1](https://arxiv.org/html/2511.00091v1#S3.SS1)，冻结 VLA、残差 SAC、critic 初始化、后续离线/在线回放和蒸馏。
 - Cal-QL：[论文式 5.1](https://arxiv.org/html/2303.05479#S5)，`mean(max(Q_proposal, MC_return)) - Q_behavior`，本版用十个归一化局部提案估计期望。
-- 当前离线阶段明确评估记录中的零残差行为，用 logged-next-action 做 TD 备份，无 actor 更新和 SAC 熵项。因此称“Cal-QL 风格行为价值初始化”，不冒充完整上游 Cal-QL/PLD 复现。
+- 历史 critic-only 阶段明确评估记录中的零残差行为，用 logged-next-action 做 TD 备份，无 actor 更新和 SAC 熵项。因此称“Cal-QL 风格行为价值初始化”，不冒充完整上游 Cal-QL/PLD 复现。
 - 冻结官方 ImageNet ResNet18 三视角特征，替代计划中的 ResNet10；仅训练 256×256 的双 Q。该替代须作为实验条件报告。奖励判定的 SAM/DINO/Qwen 输出不进入策略观测。
 - 单步物理执行间隔初始化，动作 horizon=1；后续在线短块、因果入口、RTC 前缀与物理修正上限需独立验收。当前权重不声明在线可用。
 
