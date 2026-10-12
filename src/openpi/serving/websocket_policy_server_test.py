@@ -140,3 +140,53 @@ def test_pld_transport_applies_only_explicit_mode_and_recovers_rejection():
     assert np.all(socket.results[2]["actions"] == 1)
     assert np.all(socket.results[3]["actions"] == 2)
     assert socket.results[3]["pld"]["fixture"]
+
+
+def test_pld_gate_sessions_are_isolated_and_reset_when_off():
+    class Policy:
+        def infer_rtc(self, obs, rtc):
+            return {"actions": np.zeros((50, 14))}
+
+    class Session:
+        def __init__(self):
+            self.counter = 0
+
+        def reset(self):
+            self.counter = 0
+
+        def __call__(self, obs, rtc, request, action):
+            self.counter += 1
+            return {**action, "pld": {"counter": self.counter}}
+
+    class Runtime:
+        @property
+        def metadata(self):
+            return {"fixture": True}
+
+        def new_session(self):
+            return Session()
+
+    class Socket:
+        remote_address = ("fixture", 0)
+
+        def __init__(self, modes):
+            self.results = []
+            packer = msgpack_numpy.Packer()
+            self.requests = [packer.pack({"obs": {}, "rtc": {}, "pld": {"mode": mode}}) for mode in modes]
+
+        async def recv(self):
+            if not self.requests:
+                raise websockets.ConnectionClosedOK(None, None)
+            return self.requests.pop(0)
+
+        async def send(self, payload):
+            self.results.append(msgpack_numpy.unpackb(payload))
+
+    server = WebsocketPolicyServer(Policy(), rtc_mode="trained", pld_runtime=Runtime())
+    first, second = Socket(["collect", "off", "collect"]), Socket(["collect"])
+    asyncio.run(server._handler(first))  # noqa: SLF001
+    asyncio.run(server._handler(second))  # noqa: SLF001
+    assert first.results[1]["pld"]["counter"] == 1
+    assert "pld" not in first.results[2]
+    assert first.results[3]["pld"]["counter"] == 1
+    assert second.results[1]["pld"]["counter"] == 1

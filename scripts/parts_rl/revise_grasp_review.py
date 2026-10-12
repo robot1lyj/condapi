@@ -6,6 +6,7 @@ import hashlib
 import json
 from pathlib import Path
 import shutil
+import sys
 
 import av
 import h5py
@@ -13,59 +14,12 @@ import numpy as np
 from PIL import Image
 from PIL import ImageDraw
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "packages/pld-rl/src"))
+from yam_pld_rl.grasp_events import physical_events
+
 
 def write(path, data):
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2, allow_nan=False) + "\n")
-
-
-def physical_events(times, g, z, state_valid, epochs, ticks):
-    # Missing camera observations must not reset a physically continuous attempt.
-    physical = state_valid & np.isfinite(g) & np.isfinite(z)
-    events = []
-    active = None
-    peak = None
-    peak_row = None
-    armed = False
-    minimum = 1.0
-    for row in range(len(times)):
-        connected = row == 0 or (
-            epochs[row] == epochs[row - 1]
-            and ticks[row] == ticks[row - 1] + 1
-            and 0 < times[row] - times[row - 1] <= 0.15
-        )
-        if not physical[row] or not connected:
-            if active is not None:
-                events[active].update(end=max(events[active]["close"], row - 1), end_reason="trace_gap")
-            active = None
-            peak = None
-            peak_row = None
-            armed = False
-            if not physical[row]:
-                continue
-        value = float(g[row])
-        if active is not None:
-            minimum = min(minimum, value)
-            if value >= 0.65 and value - minimum >= 0.18 and times[row] - times[events[active]["close"]] >= 0.2:
-                events[active].update(end=row, end_reason="reopened")
-                active = None
-                peak = value
-                peak_row = row
-                armed = True
-            continue
-        if peak is None or value >= peak:
-            peak = value
-            peak_row = row
-        armed |= value >= 0.65
-        # Retain the open reference through slow closure. The old 0.8s peak
-        # expiry lost real attempts even after camera-gap repair.
-        if armed and value <= 0.62 and peak - value >= 0.18:
-            events.append(
-                {"entry": max(peak_row, row - 15), "close": row, "end": len(times) - 1, "end_reason": "episode_end"}
-            )
-            active = len(events) - 1
-            minimum = value
-            armed = False
-    return events
 
 
 def select_rows(times, close, end, valid, z):

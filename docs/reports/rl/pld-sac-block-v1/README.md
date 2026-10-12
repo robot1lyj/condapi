@@ -1,5 +1,7 @@
 # PLD-SAC 首个真实交互闭环
 
+> 历史v1：已被[当前v2职责与接口](../pld-sac-block-v2/README.md)替代。客户端抓取编号与固定d+8执行要求已撤回，下面只保留当时合同和验证原件。
+
 这是 PLD 式冻结 Pi＋残差 SAC 的工程版本，目标是修正接近、对准、下降、闭爪、抬起这一整段抓取；完成后 Pi 负责运输与放置。左右臂都可进入，同一时刻只修正一只臂，避免首轮把双臂交互的责任混在一起。框架中的动作解码、执行回执、SAC、版本与奖励接口可复用；抓取的进入/结束与视觉判定属于任务适配器。
 
 原论文：[PLD §3.1/附录](https://arxiv.org/html/2511.00091v1)。算法参考：[SAC 原理与目标](https://spinningup.openai.com/en/latest/algorithms/sac.html)。当前是 **PLD-style SAC online**，不是完整 PLD 复现：采用冻结 ResNet18、YAM 关节短块、分批在线更新；本版没有移植 CalQL 初始化、论文的 probing 调度或完成最终 VLA 蒸馏。

@@ -17,7 +17,8 @@ from yam_pld_rl.block_contract import validate_contract
 def compile_replay(records, labels, contract, snapshots):
     """Reject a broken attempt as a unit, never reconnect across a lost command.
 
-    A label is keyed to the final completed block, NOT a human keypress time.
+    Curator assigns attempt IDs after physical segmentation. Actual intervals
+    follow native RTC observations, not the planned residual envelope length.
     Snapshots maps accepted manifest hashes to full immutable manifest content.
     """
     validate_contract(contract)
@@ -70,8 +71,10 @@ def compile_replay(records, labels, contract, snapshots):
                 raise ValueError("contradictory or missing empty outcome evidence")
             attempt.sort(key=lambda r: r["proposal"]["start_tick"])
             last = attempt[-1]["proposal"]
-            if last["decision_id"] != label["final_decision_id"] or last["end_tick"] != label["outcome_tick"]:
-                raise ValueError("reward endpoint differs from completed block")
+            if last["decision_id"] != label["final_decision_id"] or last["end_tick"] != label["terminal_tick"]:
+                raise ValueError("reward endpoint differs from actual transition")
+            if not attempt[0]["proposal"]["start_tick"] <= label["close_tick"] <= label["outcome_tick"] <= last["end_tick"]:
+                raise ValueError("outcome outside intervention window; cannot credit later Pi recovery")
             arm, mode, snapshot = last["arm"], last["mode"], last["snapshot_sha256"]
             if mode not in {"probe", "collect"}:
                 raise ValueError("shadow/evaluation are not training data")
@@ -81,21 +84,23 @@ def compile_replay(records, labels, contract, snapshots):
             previous_time = None
             for index, record in enumerate(attempt):
                 p, r = record["proposal"], record["receipt"]
-                if (p["contract_sha256"] != cid or p["snapshot_sha256"] not in snapshots
+                if (p["schema"] != contract["schema"] or p["contract_sha256"] != cid or p["snapshot_sha256"] not in snapshots
                         or p["snapshot_sha256"] != snapshot or p["arm"] != arm or p["mode"] != mode):
                     raise ValueError("attempt changes contract/snapshot/arm/mode")
                 begin, end = integer(p["start_tick"], "start"), integer(p["end_tick"], "end")
                 delay = integer(p["delay_steps"], "delay")
-                if end - begin != delay + contract["block_steps"]:
-                    raise ValueError("block duration mismatch")
+                if not 0 < end - begin <= 50:
+                    raise ValueError("actual interval outside proposal horizon")
                 if previous_end is not None and begin != previous_end:
                     raise ValueError("gap/overlap between decisions; no fabricated adjacency")
                 epoch_now = integer(r["epoch"], "epoch")
                 if epoch is not None and epoch_now != epoch:
                     raise ValueError("controller epoch changed mid-attempt")
                 epoch = epoch_now
-                if r["decision_id"] != p["decision_id"] or r["status"] != "executed":
-                    raise ValueError("proposal not completely executed")
+                if r["decision_id"] != p["decision_id"] or r["status"] != "executed" or r.get("source_verified") is not True:
+                    raise ValueError("actual interval/source not verified")
+                if p["epoch"] != epoch_now or p["window_id"] != last["window_id"]:
+                    raise ValueError("online window or epoch changed")
                 if r["start_tick"] != begin or r["end_tick"] != end:
                     raise ValueError("actual execution interval mismatch")
                 if r.get("human_intervention") is not False or r.get("client_modified") is not False:
@@ -130,6 +135,9 @@ def compile_replay(records, labels, contract, snapshots):
                 actual = array(r["submitted_actions"], (n, 14), "actually submitted targets")
                 if not np.allclose(actual, predicted[:n], atol=1e-6, rtol=0):
                     raise ValueError("actual actions differ; cannot relabel a clipped proposal as executed")
+                realized = bool(np.any(np.abs(actual - np.asarray(p["base"])[:n]) > 1e-6))
+                if mode == "collect" and np.any(np.abs(action) > 1e-6) and not realized:
+                    raise ValueError("planned correction never executed before next observation")
                 slot = (*key[:2], epoch)
                 claims.append((slot, set(range(begin, end))))
                 if occupied[slot].intersection(claims[-1][1]):
@@ -149,7 +157,7 @@ def compile_replay(records, labels, contract, snapshots):
                 local.append({"x": x, "nx": nx, "scale": scale, "next_scale": nx[-7:], "action": action,
                               "reward": float(terminal and label["status"] == "held"), "terminal": float(terminal),
                               "discount": contract["discount_per_second"] ** dt, "dt": dt,
-                              "online": mode == "collect", "train": label["split"] == "train",
+                              "online": mode == "collect", "realized_nonzero": realized, "train": label["split"] == "train",
                               "arm": arm == "right", "attempt": "/".join(key), "episode": "/".join(key[:2]),
                               "decision": p["decision_id"]})
                 previous_end, previous_time = end, times[-1]
@@ -168,4 +176,4 @@ def compile_replay(records, labels, contract, snapshots):
         raise ValueError(f"no eligible replay: {excluded}")
     data = {key: np.asarray([r[key] for r in rows]) for key in rows[0]}
     return data, {"accepted_attempts": len({r["attempt"] for r in rows}), "transitions": len(rows),
-                  "excluded": excluded, "reward_location": "last fully executed decision of each reviewed attempt"}
+                  "excluded": excluded, "reward_location": "last verified native observation interval of a server-associated window"}

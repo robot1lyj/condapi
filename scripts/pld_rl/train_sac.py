@@ -6,6 +6,7 @@ import argparse
 import json
 import os
 from pathlib import Path
+import shutil
 import subprocess
 import sys
 import time
@@ -26,8 +27,9 @@ from yam_pld_rl.sac import SacLearner
 
 def export_bundle(path, learner, contract, normalization, encoder_sha, config, provenance):
     path.mkdir(exist_ok=False)
+    shutil.copyfile(ROOT / "third_party/yam-fk-model/yam_linear4310.xml", path / "fk.xml")
     torch.save({k: v.cpu() for k, v in learner.actor.state_dict().items()}, path / "actor.pt")
-    write_json(path / "manifest.json", {"schema": "pld_sac_bundle_v1", "contract": contract,
+    write_json(path / "manifest.json", {"schema": "pld_sac_bundle_v2", "contract": contract,
                "normalization": normalization, "encoder_sha256": encoder_sha, "config": config,
                "observation_dim": FEATURE_DIM, "actor_sha256": sha256(path / "actor.pt"),
                "provenance": provenance, "robot_validated": False,
@@ -78,7 +80,7 @@ def main():
             arrays = {k: data[k] for k in data.files}
         train = arrays["train"].astype(bool)
         online = arrays["online"].astype(bool)
-        if not np.any(train & online & (np.abs(arrays["action"]).max(1) > 1e-6)):
+        if not np.any(train & online & arrays["realized_nonzero"].astype(bool) & (np.abs(arrays["action"]).max(1) > 1e-6)):
             raise ValueError("SAC actor updates require actual nonzero executed corrections")
         for is_online in (False, True):
             mask = train & (online == is_online)
@@ -108,7 +110,7 @@ def main():
            "phase": "online replay SAC update" if args.replay else "zero-mean exploration bootstrap",
            "offline_probe_attempts": len(groups[False]), "online_attempts": len(groups[True]),
            "mix": "50% probe / 50% collect when both exist; otherwise collect only",
-           "adaptations": ["YAM joint block rather than EE action", "frozen ResNet18",
+           "adaptations": ["YAM joint envelope with native RTC cadence rather than EE action", "frozen ResNet18",
                            "no transplant of incompatible historical critics", "no CalQL pretraining in this version"]}
     write_json(args.output / "run.json", run)
 

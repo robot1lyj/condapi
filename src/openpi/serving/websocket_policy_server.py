@@ -63,6 +63,8 @@ class WebsocketPolicyServer:
     async def _handler(self, websocket: _server.ServerConnection):
         logger.info(f"Connection from {websocket.remote_address} opened")
         packer = msgpack_numpy.Packer()
+        pld_session = (self._pld_runtime.new_session() if hasattr(self._pld_runtime, "new_session")
+                       else self._pld_runtime)
 
         await websocket.send(packer.pack(self._metadata))
 
@@ -83,9 +85,11 @@ class WebsocketPolicyServer:
                 action, rtc_used, rtc_warnings, rtc_error = self._infer(obs, rtc_payload)
                 if pld_request is not None and pld_request.get("mode") != "off":
                     try:
-                        action = self._pld_runtime(obs, rtc_payload, pld_request, action)
+                        action = pld_session(obs, rtc_payload, pld_request, action)
                     except (ValueError, KeyError, TypeError) as exc:
                         raise RequestError(f"PLD request rejected: {exc}") from exc
+                elif hasattr(pld_session, "reset"):
+                    pld_session.reset()
                 infer_time = time.monotonic() - infer_time
 
                 action["server_timing"] = {
@@ -107,6 +111,8 @@ class WebsocketPolicyServer:
                 logger.info(f"Connection from {websocket.remote_address} closed")
                 break
             except RequestError as exc:
+                if hasattr(pld_session, "reset"):
+                    pld_session.reset()
                 await websocket.send(str(exc))
                 continue
             except Exception:

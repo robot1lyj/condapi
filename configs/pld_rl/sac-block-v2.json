@@ -1,0 +1,20 @@
+{
+  "id": "pld-sac-block-v2",
+  "seed": 0,
+  "width": 256,
+  "depth": 3,
+  "critic_layer_norm": true,
+  "learning_rate": 0.0003,
+  "batch_size": 256,
+  "steps": 1000,
+  "critic_warmup_steps": 100,
+  "critic_actor_ratio": 2,
+  "gradient_clip": 1.0,
+  "tau": 0.005,
+  "initial_std": 0.2,
+  "max_std": 0.5,
+  "initial_alpha": 0.01,
+  "target_entropy": -3.5,
+  "log_interval": 20,
+  "save_interval": 250
+}

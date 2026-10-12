@@ -74,7 +74,7 @@ class ContractChecks(unittest.TestCase):
         self.assertIn("actual actions differ", audit["excluded"][0]["reason"])
 
     def test_no_lift_and_wrong_endpoint_are_not_failures(self):
-        for field, value in (("lift_m", .01), ("lift_m", float("nan")), ("outcome_tick", 0), ("status", "unscored")):
+        for field, value in (("lift_m", .01), ("lift_m", float("nan")), ("terminal_tick", 0), ("status", "unscored")):
             labels = copy.deepcopy(self.labels)
             labels[0][field] = value
             _, audit = compile_replay(self.records, labels, self.c, self.snapshots)

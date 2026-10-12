@@ -2,7 +2,7 @@
 
 ## PLD 主线与 RECAP 后续路线（2026-10-11）
 
-**用户已确认：先完成路线二——冻结 Pi0.5，用轻量 RL 专家修正整段抓取动作，首轮左右臂都启用；路线一——通用奖励/价值模型与 RECAP 式后训练后置。** 2026-10-12 在八组 critic、十组离线 actor 对照之后，用户决定收拢为真实 PLD-SAC 闭环。已实现短块残差 actor/双Q/温度更新、实际执行回执 replay、延迟奖励、版本导出与可选 Thor postprocessor；服务器2315合成数据端到端通过。尚无真实非零修正经验或机器人提升证据，客户端接入与物理合同待审核。当前实现/验收归[PLD-SAC v1](reports/rl/pld-sac-block-v1/README.md)，[客户端与首批采集提案](reports/rl/pld-sac-block-v1/client-and-first-rollout.md)已准备但未发送。旧实验保留为诊断，不用漂移 actor 直接部署，也不以行为Q的常数基线比较代替真机策略评估。
+**用户已确认：先完成PLD式整段抓取修正，首轮左右臂都启用；RECAP路线后置。** 当前方案升级为[PLD-SAC v2职责与接口](reports/rl/pld-sac-block-v2/README.md)：Thor在线运行Pi-Base与PLD-Corrector；Thor离线优先运行Replay-Curator与Qwen-DINO Judge；GPU服务器复核入库、归档并运行SAC-Coach。客户端复用原RTC和连续HIL，不切段、不编号、不判奖。当前现场只启用Pi，尚无真实非零修正数据或提升证据。v1合成验证保留历史；v2实现/验收独立记录，不能沿用旧回执合同或把旧离线actor漂移当改进。
 
 [一页方法说明](reports/rl/parts-grasp-review14-20261010/project-progress.html)汇总判定架构、Qwen＋DINO细节及执行样例、RL架构。本节为本分工唯一当前研究计划；[架构图](reports/rl/parts-grasp-review14-20261010/pld-plan.html)展示拟议闭环，不代表已实现系统。数据实验、失败诊断和抽检证据仍归[逐抓取报告](reports/rl/parts-grasp-review14-20261010/README.md)，数据合同归[04](04_data_contracts.md#本对话-part-数据审核状态2026-10-11)，端侧边界归[05](05_inference_and_rollout.md#本对话-part-推进边界2026-10-11)。
 
@@ -90,7 +90,7 @@
 
 2026-10-11 用户明确确认：①整段抓取并持住，交还 Pi 放置；②PLD 式残差 SAC + 价值初始化；③RLT token 与 RECAP 后置；④首轮左右臂都启用。共享网络及窗口重叠仲裁是当前工程提案，正式配方须包含具体行为，不能将“两侧覆盖”报成“两侧同时修正已验收”。
 
-2026-10-12当前工作已转为PLD-SAC动作块闭环。实现、GPU合成验证、客户端提案与首批预算见本节开头；历史18组实验不代表在线专家。先完成客户端回执/物理限位/Thor与IPC时序联调，首包为零均值有界探索，再用真实结果更新。
+2026-10-12当前工作已转为PLD-SAC动作块闭环。实现、GPU合成验证、客户端提案与首批预算见本节开头；历史18组实验不代表在线专家。先完成客户端完整trace留存/物理限位/Thor与IPC时序联调，首包为零均值有界探索，再用真实结果更新。
 
 ## EXPO-FT 学习与评估设计（2026-10-10）
 

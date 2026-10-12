@@ -6,8 +6,9 @@ import json
 import numpy as np
 
 from yam_pld_rl.data import action_coordinates
+from yam_pld_rl.kinematics import MODEL_SHA256
 
-SCHEMA = "pld_sac_block_v1"
+SCHEMA = "pld_sac_block_v2"
 HORIZON = 50
 FEATURE_DIM = 1536 + 14 + 50 * 14 + 14 + 2 + 2 + 7
 
@@ -34,6 +35,10 @@ def validate_contract(c):
         raise ValueError("unsupported schema or units")
     if not c.get("limits_evidence") or not c.get("base_weights_sha256") or not c.get("task"):
         raise ValueError("physical limits evidence, task and base identity required")
+    from yam_pld_rl.intervention import DEFAULT_GATE  # noqa: PLC0415 -- gate imports the array contract
+
+    if c.get("gate") != DEFAULT_GATE or c.get("fk_model_sha256") != MODEL_SHA256:
+        raise ValueError("explicit pinned Thor gate and FK geometry required")
     k = integer(c["block_steps"], "block_steps", 4)
     if k > 20 or c["action_dt_s"] != 1 / 30 or not 0 < c["discount_per_second"] <= 1:
         raise ValueError("invalid block/time contract")

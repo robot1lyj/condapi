@@ -958,3 +958,7 @@ text80 实验完成 ONNX、TensorRT 构建和 W 正式回放。完整 policy P50
 用户要求把本地 OpenWAM 纳入训练/推理模型选择，本任务负责微调接口。迁入固定 revision `7c5861e45cfe1339a0323f0e0b03a3316c37971c` 的运行时源码和许可，新增独立后端、Conda bootstrap、YAM LeRobot v2/v3 只读 reader、训练子集统计、14D/显式80D映射、原生 fine-tune/resume 与离线 infer。复用原生 trainer/normalizer/checkpoint，未开训、未同步服务器/Thor、未操作3588。所有示例预算为接口模板，不作为 DAgger 某轮配方确认。
 
 验证包括轻量配置/数据/视频/归一化/平台回归，不运行本地训练 smoke。完整模型依赖、GPU 首训与真实恢复、Thor 容器/精度/性能仍未验收；操作和局限归 [10](10_vla_platform.md#2026-09-22--openwam-微调接入)，语义归 [04](04_data_contracts.md#openwam-yam-数据投影)。保留既有未提交的看板与其他任务改动，本功能分支不自动合并 main。
+
+## 2026-10-12 · PLD-SAC v2职责与原生录制闭环
+
+按用户纠正撤回客户端抓取编号/活动臂/阶段时间和固定d+8执行要求。Thor连接独立门控负责在线介入，数据管家优先Thor离线运行（同入口可在服务器执行），Qwen/DINO仍为Thor独立批推理，GPU服务器负责SAC训练与实验归档。新增原生HIL来源核验、物理切段、正式编号与奖励关联入口；严格区分在线窗口和离线抓取，取消/HIL/来源不符与窗口后Pi补救不冒充有效修正。当前现场仍是Pi20w，PLD未启用；方案及客户端转交文本归[当前v2](reports/rl/pld-sac-block-v2/README.md)，v1资产与旧14集保留。
