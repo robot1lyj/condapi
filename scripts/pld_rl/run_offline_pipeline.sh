@@ -13,20 +13,27 @@ if [[ ${#devices[@]} != 4 ]]; then
     echo 'Expected an allocation with four GPUs' >&2
     exit 2
 fi
-CUDA_VISIBLE_DEVICES="${devices[0]}" "$PLD_ENV_PREFIX/bin/python" scripts/pld_rl/cache_features.py \
-    --replay "$PLD_REPLAY_ROOT" --raw-root "$PLD_RAW_ROOT" --weights "$PLD_ENCODER_WEIGHTS" \
-    > "$PLD_RUN_ROOT/feature-cache.log" 2>&1
-"$PLD_ENV_PREFIX/bin/python" scripts/pld_rl/register_dataset.py \
-    --project-root "$PLD_PROJECT_ROOT" --replay "$PLD_REPLAY_ROOT" --raw-root "$PLD_RAW_ROOT" \
-    --classification "$PLD_CLASSIFICATION_ROOT"
-ids=(calql-success-s0 calql-success-s1 calql-mixed-s0 td-success-s0)
-letters=(a b c d)
+if [[ ! -f "$PLD_REPLAY_ROOT/feature-manifest.json" ]]; then
+    CUDA_VISIBLE_DEVICES="${devices[0]}" "$PLD_ENV_PREFIX/bin/python" scripts/pld_rl/cache_features.py \
+        --replay "$PLD_REPLAY_ROOT" --raw-root "$PLD_RAW_ROOT" --weights "$PLD_ENCODER_WEIGHTS" \
+        > "$PLD_RUN_ROOT/feature-cache.log" 2>&1
+fi
+if [[ ! -f "$PLD_PROJECT_ROOT/datasets/catalog/$(basename "$PLD_REPLAY_ROOT").json" ]]; then
+    "$PLD_ENV_PREFIX/bin/python" scripts/pld_rl/register_dataset.py \
+        --project-root "$PLD_PROJECT_ROOT" --replay "$PLD_REPLAY_ROOT" --raw-root "$PLD_RAW_ROOT" \
+        --classification "$PLD_CLASSIFICATION_ROOT"
+fi
+IFS=, read -r -a letters <<< "${PLD_EXPERIMENT_LETTERS:-a,b,c,d}"
+if [[ ${#letters[@]} != 4 ]]; then exit 2; fi
 pids=()
 for index in 0 1 2 3; do
-    cp "configs/pld_rl/offline14-${letters[$index]}.json" "$PLD_RUN_ROOT/configs/${ids[$index]}.json"
+    config="configs/pld_rl/offline14-${letters[$index]}.json"
+    id=$("$PLD_ENV_PREFIX/bin/python" -c 'import json,sys; print(json.load(open(sys.argv[1]))["id"])' "$config")
+    [[ "$id" =~ ^[a-z0-9-]+$ ]] || exit 2
+    cp "$config" "$PLD_RUN_ROOT/configs/$id.json"
     CUDA_VISIBLE_DEVICES="${devices[$index]}" "$PLD_ENV_PREFIX/bin/python" scripts/pld_rl/train_offline.py \
-        --replay "$PLD_REPLAY_ROOT" --config "$PLD_RUN_ROOT/configs/${ids[$index]}.json" \
-        --output "$PLD_RUN_ROOT/${ids[$index]}" > "$PLD_RUN_ROOT/${ids[$index]}.log" 2>&1 &
+        --replay "$PLD_REPLAY_ROOT" --config "$PLD_RUN_ROOT/configs/$id.json" \
+        --output "$PLD_RUN_ROOT/$id" > "$PLD_RUN_ROOT/$id.log" 2>&1 &
     pids+=("$!")
 done
 failed=0

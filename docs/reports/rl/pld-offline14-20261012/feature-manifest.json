@@ -1,0 +1,20 @@
+{
+  "encoder": "torchvision resnet18 IMAGENET1K_V1, frozen FP32, fc removed",
+  "weights_sha256": "f37072fd47e89c5e827621c5baffa7500819f7896bbacec160b1a16c560e07ec",
+  "torch": "2.10.0+cu128",
+  "preprocessing": "official weight transforms, Resize256 CenterCrop224 ImageNet normalization; per-view L2",
+  "views": [
+    "top",
+    "left",
+    "right"
+  ],
+  "observations": 26829,
+  "images": 80487,
+  "features_sha256": "99f984921dc5f482d7ba1e21be92013cbb6bfc031d6741ccb09a0d6a01583c34",
+  "frame_jobs_sha256": "624e3f9e0fcc1ce6bb2893c9fc3a81232104eaf6efc386b70cc86de864c8828d",
+  "replay_sha256": "2c3eb47bc7e22a46300c2964855095b227c04dc29c87b03dc15103479cb2c076",
+  "seconds": 345.79805298300926,
+  "gpu": "NVIDIA GeForce RTX 4090",
+  "reward_model_features_reused": false,
+  "future_frames_in_observation": false
+}

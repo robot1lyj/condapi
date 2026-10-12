@@ -132,7 +132,7 @@ def main():
         "eval_interval",
         "save_interval",
     }
-    if set(cfg) != required:
+    if not required <= set(cfg) or set(cfg) - required - {"mc_coefficient"}:
         raise ValueError("unexpected or missing recipe fields")
     if args.resume is None:
         args.output.mkdir(exist_ok=False)
@@ -199,7 +199,8 @@ def main():
         "normalization": stats,
         "actor_updated": False,
         "deployable": False,
-        "method": "Cal-QL Eq5.1 finite local proposal expectation + logged zero-residual behavior TD backup",
+        "method": "logged behavior TD; optional Cal-QL Eq5.1 local proposal expectation and project MC-return regression anchor",
+        "mc_anchor_is_project_extension": bool(cfg.get("mc_coefficient", 0)),
         "proposal_units": "training action std units; NOT approved physical deployment bounds",
         "phase": "critic-only offline initialization",
         "precision": "FP32, TF32 disabled",
@@ -277,6 +278,11 @@ def main():
                 )
             q1, q2 = model(x, action)
             td_loss = ((q1 - y).square().mean() + (q2 - y).square().mean()) / 2
+            known = tensors["mc_valid"][ids].bool()
+            mc_loss = torch.zeros((), device="cuda")
+            if cfg.get("mc_coefficient", 0) and known.any():
+                mc = tensors["mc_return"][ids][known]
+                mc_loss = ((q1[known] - mc).square().mean() + (q2[known] - mc).square().mean()) / 2
             penalty = torch.zeros((), device="cuda")
             proposal_mean = torch.zeros((), device="cuda")
             if cfg["calql_coefficient"]:
@@ -287,7 +293,6 @@ def main():
                 xp = x[:, None, :].expand(-1, k, -1).reshape(-1, x.shape[-1])
                 s1, s2 = model(xp, proposals.reshape(-1, 7))
                 s1, s2 = s1.reshape(-1, k), s2.reshape(-1, k)
-                known = tensors["mc_valid"][ids].bool()
                 if known.any():
                     mc = tensors["mc_return"][ids][known]
                     penalty = (
@@ -295,7 +300,7 @@ def main():
                         + calibrated_penalty(s2[known], q2[known], mc).mean()
                     ) / 2
                 proposal_mean = (s1.mean() + s2.mean()) / 2
-            loss = td_loss + cfg["calql_coefficient"] * penalty
+            loss = td_loss + cfg["calql_coefficient"] * penalty + cfg.get("mc_coefficient", 0) * mc_loss
             if not torch.isfinite(loss) or max(q1.abs().max().item(), q2.abs().max().item()) > 100:
                 raise FloatingPointError("nonfinite loss or |Q|>100")
             optimizer.zero_grad(set_to_none=True)
@@ -312,6 +317,7 @@ def main():
                     loss.item(),
                     td_loss.item(),
                     penalty.item(),
+                    mc_loss.item(),
                     q1.mean().item(),
                     q2.mean().item(),
                     proposal_mean.item(),
@@ -328,6 +334,7 @@ def main():
                             "loss",
                             "train/td_loss",
                             "train/calql_penalty",
+                            "train/mc_loss",
                             "q/q1",
                             "q/q2",
                             "q/proposal_mean",

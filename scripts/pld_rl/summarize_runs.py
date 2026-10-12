@@ -11,7 +11,8 @@ def main():
     p.add_argument("--run-root", type=Path, required=True)
     args = p.parse_args()
     result = {"phase": "offline critic initialization", "robot_success_rate_measured": False, "runs": []}
-    for name in ["calql-success-s0", "calql-success-s1", "calql-mixed-s0", "td-success-s0"]:
+    for config_path in sorted((args.run_root / "configs").glob("*.json")):
+        name = json.loads(config_path.read_text())["id"]
         directory = args.run_root / name
         item = {"id": name}
         for file in ["run.json", "status.json", "latest-evaluation.json"]:
