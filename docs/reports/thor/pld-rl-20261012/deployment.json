@@ -1,0 +1,20 @@
+{
+  "status": "online_probe_only",
+  "observed_at": "2026-10-12T07:31:26.305917+00:00",
+  "container": "pld-rl",
+  "container_id": "7cd2f8fcf631974ae30258be3c863fbaf8a45cf46986c69f7264f96a88a61c36",
+  "image_id": "sha256:080d09d5426928029a8e78e6a213e8cd6d27e20b8482518701f088a1d6323499",
+  "source_revision": "7804a55e287703efe15ff83d448c747e9e59cca7",
+  "deploy_controller_sha256": "2ba697c2565f3bf4bb13480b7d5325d79f0e3143c3272f43f063c6a25b0a06d9",
+  "url": "ws://192.168.250.1:8000",
+  "weights_sha256": "298714be810f5e7e822bcac55c5efe55789f1c96c0ac4ed0a1caa86f2670e42a",
+  "reports": [
+    "production-smoke_pi05_rtc_ws.json",
+    "production-smoke_pld_probe_ws.json"
+  ],
+  "previous_container_state": "exited",
+  "power": "NV Power Mode: MAXN\n0",
+  "actor_loaded": false,
+  "collect_enabled": false,
+  "cross_IPC_tested": false
+}

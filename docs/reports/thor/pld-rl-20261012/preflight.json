@@ -1,0 +1,11 @@
+{
+  "status": "passed",
+  "image_id": "sha256:080d09d5426928029a8e78e6a213e8cd6d27e20b8482518701f088a1d6323499",
+  "weights_sha256": "298714be810f5e7e822bcac55c5efe55789f1c96c0ac4ed0a1caa86f2670e42a",
+  "source_container_id": "bcf41584a66d42cfc454d84a4270b3e04d51b7ba0b6bfb76c70446a3f2a41ab1",
+  "reports": [
+    "preflight-smoke_pi05_rtc_ws.json",
+    "preflight-smoke_pld_probe_ws.json"
+  ],
+  "container": "pld-rl-preflight-20261012-r1"
+}

@@ -4,7 +4,7 @@
 
 **训练与评估分开：** 只有合格视觉证据的抓起持住1/明确空抓0进入SAC，中间transition为0；高度不代表成功，缺证据不伪装空抓。整轮`C/N`继续记录，只作评估，**本阶段不参与SAC更新**。验收与纯Pi比较左右臂空抓率、抓起持住率、抓取耗时，并检查容器调整误介入及整轮表现是否退步。
 
-**当前现场状态（2026-10-12 只读实查）**：Thor 的 `pi05-rtc-infer` 正在运行 Pi 20w trained RTC，启动参数没有 PLD bundle；Qwen/DINO 批处理容器已完成退出，不是常驻奖励服务；没有启用带修正 rollout。v1 有合成数值及独立 Thor 前向验证，不能代替 v2/客户端/真机验收。本版实现和验收以本目录记录为准。
+**当前现场状态（2026-10-12 15:31 CST）**：用户要求的`pld-rl`容器已接管`ws://192.168.250.1:8000`，旧`pi05-rtc-infer`停止保留；基础策略仍为原20w trained RTC。当前off/probe诊断，没有加载actor或施加修正；collect/eval/shadow明确拒绝，诊断trace不进入SAC。Qwen/DINO仍按独立批任务运行，未变成在线控制依赖。真实录像普通RTC＋probe各9例通过，当前MAXN/healthy；客户端跨IPC与真机采集待联调。[上线证据](../../thor/pld-rl-20261012/README.md)独立保留。
 
 ## 固定分工
 
@@ -139,4 +139,4 @@ python scripts/pld_rl/prepare_blocks.py \
 
 服务器所有原始合成文件、三视频、图像、输入/审核SHA、配置、日志、优化器/checkpoint和bundle保存在 `runs/sac-block-validation-20261012-v2-r2/`；Thor独立资产在 `thor/pi/cache/pld-sac-validation-20261012-v2-r2/`。前一版r1保留，未覆盖。合成测试不进入用户真实训练看板或论文成功率统计。
 
-**仍需客户端改造、实际限位/base身份、真实probe时序与门控覆盖验收。没有操作3588，没有切换生产服务，没有启用真机RL。** 下一步先probe，核对输入观测来源、前缀、逐tick提交值和采集完整性，再进入collect；本轮没有开始真实数据SAC训练。
+**仍需客户端实际联调、真实限位和门控覆盖验收。基础20w身份已核对，生产服务已切到pld-rl诊断入口；没有操作3588，没有启用真机修正。** 下一步先probe，核对输入观测来源、前缀、逐tick提交值和采集完整性，再进入collect；本轮没有开始真实数据SAC训练。

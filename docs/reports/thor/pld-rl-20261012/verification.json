@@ -1,0 +1,23 @@
+{
+  "status": "passed_thor_local_only",
+  "local_lightweight_checks": 38,
+  "report_sha256": {
+    "deployment.json": "b62e0262d40e116a9f5c696ba6c76368a137317dfb32fe897bfd3f01bb914de1",
+    "preflight.json": "6d644d807a5c2f116954513cabdf3d7b77c0ec308d6f929049fbd0849a46ea5f",
+    "probe-smoke.json": "564b348bb531754ac873a4cdae2fbb83058f794e57f97ab0238fe397bc8e3639",
+    "rtc-smoke.json": "e9916d8cfd8039b3446b5a8158b8da3f2c67745be208b246692dbc7a94d21e22"
+  },
+  "production_container_state": "running healthy",
+  "previous_container_state": "exited; retained",
+  "active_power_unit": "thor-pld-rl-maxn-20261012-r1.service",
+  "power": "MAXN",
+  "production_listener": "192.168.250.1:8000",
+  "port_8001_listening": false,
+  "training_run": false,
+  "actor_loaded": false,
+  "robot_task_validated": false,
+  "cross_IPC_tested": false,
+  "source_code_commit": "7804a55e287703efe15ff83d448c747e9e59cca7",
+  "controller_git_commit": "bb127b4",
+  "phase": "probe_diagnostics_only"
+}

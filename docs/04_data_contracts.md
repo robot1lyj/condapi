@@ -6,6 +6,8 @@
 
 当前[PLD-SAC v2合同](reports/rl/pld-sac-block-v2/README.md)复用原生HIL：完整policy_reply.pld＋原token、逐tick policy_selection来源、实际submitted_action、float64时间/有效位和三视频。客户端不提供attempt_id/arm/elapsed，不强制d+8执行节奏。Replay-Curator在Thor离线优先运行（同入口可在服务器执行），生成正式抓取ID，按实际观测区间核验来源与提交值，关联审核后局部1/0奖励；证据tick与transition终点分开存。窗口缺少唯一物理闭爪、执行取消/断档/HIL/改写或证据只出现在后续Pi补救时排除并留审计。候选/审核/源文件SHA绑定，原件及全部排除项保留；旧14集不是新策略的非零修正经验。
 
+上线的`pld-rl`首阶段为probe-only诊断，trace显式`replay_eligible=false`，不含正式actor输入/边界合同。数据管家保留并审计这些窗口，但拒绝编为SAC；不能把诊断contract/snapshot SHA当正式策略身份。完整trace、实际提交、视频仍用于客户端时序/触发覆盖与容器误介入审核，既有原始数据和正式奖励版本不变。
+
 ### 本次不可变训练数据版本（2026-10-12）
 
 服务器根目录 `/home/wuyan/lyj/pld-grasp/`：`datasets/classifications/` 保留完整v3r3分类及抬升资格侧车；`datasets/replays/pld-offline14-20261012-v2/` 保存奖励、整轮标签、逐次身份、原始图像引用、replay、训练集归一化及后续特征缓存；`datasets/catalog/<版本>.json`绑定来源与SHA，`datasets/index.json`仅作导航。原始录像继续保存在已验证目录 `/home/wuyan/lyj/YAM/YAM_data/derived/rl/parts_rollout14_20261010_v1/raw/`，不覆盖。实验配置、环境清单、日志、逐次预测与全部checkpoint按实验版本归 `runs/pld-grasp-offline-20261012-v{1,2}/` 及 `runs/pld-methods14-20261012-v{1,2}/`；新十组追加50个checkpoint和400个逐次预测，索引绑定代码/比较SHA，原数据与前八组不覆盖；新数据/奖励创建新版本，不覆盖旧结论。失败样本及16条缺精确终点转移的已知结果也保留，不能只归档成功。

@@ -1,0 +1,170 @@
+{
+  "status": "passed",
+  "observed_at": "2026-10-12T07:31:25.622232+00:00",
+  "url": "ws://192.168.250.1:8000",
+  "metadata": {
+    "robot": "YAM",
+    "hardware_family": "YAM-ABC-compatible",
+    "num_arms": 2,
+    "robot_action_dim": 14,
+    "model_action_dim": 32,
+    "action_horizon": 50,
+    "action_layout": "[left 6 joints, left gripper, right 6 joints, right gripper]",
+    "image_keys": [
+      "observation.images.top_rgb",
+      "observation.images.left_rgb",
+      "observation.images.right_rgb"
+    ],
+    "config": "pi05_yam",
+    "backend": "tensorrt_cuda_graph",
+    "rtc_mode": "trained",
+    "rtc_prefix_norm": "quantile",
+    "rtc_joint_step_guard_rad_per_tick": 0.2,
+    "rtc_semantics": "clean aligned committed prefix at flow time zero; postfix denoised; no guidance/fallback",
+    "rtc_max_delay_steps": 10,
+    "checkpoint_weights_sha256": "298714be810f5e7e822bcac55c5efe55789f1c96c0ac4ed0a1caa86f2670e42a",
+    "norm_stats_sha256": "fd0d9cb2db3ce475c1175c7f21a3a0dd3aa7f59d36edc680e7044cd11b9f1edf",
+    "engine_sha256": "15ae4a5ceb57b6b6d8743c721cbe43178ab29c714be95cfbf1b9b893574ba71c",
+    "compute_dtype": "float32",
+    "precision_mode": "fp32_weights_tf32_compute",
+    "denoising_steps": 7,
+    "action_dt_s": 0.03333333333333333,
+    "action_dim": 14,
+    "action_mode": "absolute physical target after checkpoint inverse transforms",
+    "joint_unit": "radian (dataset contract; hardware calibration not claimed)",
+    "gripper_unit": "continuous; nominal 0 closed, 1 open; outputs not clipped",
+    "target_tick_semantics": "30Hz policy tick; observation_policy_tick == target_start_tick == committed_start_tick",
+    "action_0_relative_to_observation_policy_tick": 0,
+    "camera_exposure_to_policy_tick_offset_s": null,
+    "inference_profile": "pld-rl",
+    "pld": {
+      "schema": "pld_sac_block_v2",
+      "expert": "PLD-Grasp",
+      "phase": "probe_diagnostics_only",
+      "snapshot_sha256": "8ec6645a3ec984ae3b68c05cac33244030b8d0d1640ce459706682d5dcb511e0",
+      "contract_sha256": "f405be16d4e845bc6bd112384d5a9ad684d42488b367de82ae5ff7a54eee9184",
+      "modes": [
+        "off",
+        "probe"
+      ],
+      "actor_loaded": false,
+      "replay_contract_ready": false,
+      "gate_owner": "thor",
+      "curator_owner": "thor_offline_or_server",
+      "recording": "native_HIL_with_full_pld_reply",
+      "disabled_reason": "formal actor bundle and verified physical limits not installed"
+    }
+  },
+  "cases": [
+    {
+      "sample": "episode-000095-early.npz",
+      "delay": 0,
+      "finite": true,
+      "whole_chunk_equals_pi": true,
+      "prefix_exact": true,
+      "gate_active": false,
+      "server_ms": 200.96364780329168,
+      "roundtrip_ms": 202.18426687642932
+    },
+    {
+      "sample": "episode-000095-middle.npz",
+      "delay": 1,
+      "finite": true,
+      "whole_chunk_equals_pi": true,
+      "prefix_exact": true,
+      "gate_active": false,
+      "server_ms": 200.37545985542238,
+      "roundtrip_ms": 201.1819512117654
+    },
+    {
+      "sample": "episode-000095-late.npz",
+      "delay": 10,
+      "finite": true,
+      "whole_chunk_equals_pi": true,
+      "prefix_exact": true,
+      "gate_active": false,
+      "server_ms": 200.0320851802826,
+      "roundtrip_ms": 200.7073990534991
+    },
+    {
+      "sample": "episode-000096-early.npz",
+      "delay": 0,
+      "finite": true,
+      "whole_chunk_equals_pi": true,
+      "prefix_exact": true,
+      "gate_active": false,
+      "server_ms": 200.28127217665315,
+      "roundtrip_ms": 201.03066600859165
+    },
+    {
+      "sample": "episode-000096-middle.npz",
+      "delay": 1,
+      "finite": true,
+      "whole_chunk_equals_pi": true,
+      "prefix_exact": true,
+      "gate_active": true,
+      "server_ms": 200.08566393516958,
+      "roundtrip_ms": 200.84782713092864
+    },
+    {
+      "sample": "episode-000096-late.npz",
+      "delay": 10,
+      "finite": true,
+      "whole_chunk_equals_pi": true,
+      "prefix_exact": true,
+      "gate_active": false,
+      "server_ms": 200.0019180122763,
+      "roundtrip_ms": 200.82521415315568
+    },
+    {
+      "sample": "episode-000097-early.npz",
+      "delay": 0,
+      "finite": true,
+      "whole_chunk_equals_pi": true,
+      "prefix_exact": true,
+      "gate_active": false,
+      "server_ms": 199.9157469253987,
+      "roundtrip_ms": 200.59427479282022
+    },
+    {
+      "sample": "episode-000097-middle.npz",
+      "delay": 1,
+      "finite": true,
+      "whole_chunk_equals_pi": true,
+      "prefix_exact": true,
+      "gate_active": false,
+      "server_ms": 199.41273098811507,
+      "roundtrip_ms": 200.05287299863994
+    },
+    {
+      "sample": "episode-000097-late.npz",
+      "delay": 10,
+      "finite": true,
+      "whole_chunk_equals_pi": true,
+      "prefix_exact": true,
+      "gate_active": false,
+      "server_ms": 199.38277802430093,
+      "roundtrip_ms": 200.10729297064245
+    }
+  ],
+  "rejections": [
+    {
+      "mode": "collect",
+      "response": "PLD request rejected: probe-only deployment: collect/eval/shadow unavailable; no actor or verified limits installed"
+    },
+    {
+      "mode": "eval",
+      "response": "PLD request rejected: probe-only deployment: collect/eval/shadow unavailable; no actor or verified limits installed"
+    },
+    {
+      "mode": "shadow",
+      "response": "PLD request rejected: probe-only deployment: collect/eval/shadow unavailable; no actor or verified limits installed"
+    }
+  ],
+  "robot_connected": false,
+  "cross_IPC_tested": false,
+  "previous_command_kind": "offline_fixture_anchor_not_actual",
+  "training": false,
+  "roundtrip_p50_ms": 200.82521415315568,
+  "roundtrip_p95_ms": 201.78334061056376
+}

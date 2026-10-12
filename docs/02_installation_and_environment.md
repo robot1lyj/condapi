@@ -1,5 +1,7 @@
 # 02 · 服务器与 Thor 环境
 
+2026-10-12用户要求的PLD-Grasp推理隔离已落地：`pld-rl:thor-probe-20261012-r1`继承已验证Pi系列镜像，仅复制源码，没有pip/权重/engine变更。当前off/probe诊断，不载入actor；原Pi容器停止保留，正式地址不变。环境/镜像身份和MAXN交接证据归[上线报告](reports/thor/pld-rl-20261012/README.md)，训练仍仅GPU服务器。
+
 本页是训练服务器、conda、数据预检和训练资源的操作 owner，也记录 Thor 从零安装的入口。YAM 数据语义见 [04 · 数据合同](04_data_contracts.md)，Pi0.5 端侧转换和验收见 [08 · Thor 端侧部署](08_thor_edge_deployment.md)，训练入口见 [03 · 训练与评估](03_training_and_evaluation.md)。
 
 服务器信息于 2026-09-04 按用户提供的《琶洲模方智算平台用户操作手册》（本地参考文件：`/home/wuyan-lyj/下载/琶洲模方智算平台用户操作手册_带目录.pdf`）以及 SSH/Slurm 只读核验建立；Thor 官方版本和端侧方案于 2026-09-05 更新。一次性状态每次操作前都要重新检查。
