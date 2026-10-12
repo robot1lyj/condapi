@@ -53,6 +53,16 @@ class ContractChecks(unittest.TestCase):
         with self.assertRaises(ValueError):
             validate_contract(self.c)
 
+    def test_server_residual_increment_guard_and_zero_path(self):
+        self.c["max_residual_step"] = [.001] * 14
+        base = np.full((50, 14), .25, dtype=np.float64)
+        scale = feasible_scale(base, base[0], "right", 9, self.c)
+        out = decode(base, scale, "right", 9, self.c)
+        self.assertLessEqual(np.abs(np.diff(out - base, axis=0)).max(), .0010001)
+        self.assertEqual(decode(base, np.zeros(7), "right", 9, self.c).tobytes(), base.tobytes())
+        with self.assertRaisesRegex(ValueError, "residual increment"):
+            decode(base, np.ones(7), "right", 9, self.c)
+
     def test_reward_only_once_and_dt(self):
         data, audit = compile_replay(self.records, self.labels, self.c, self.snapshots)
         self.assertEqual(audit["transitions"], 24)

@@ -4,6 +4,8 @@
 
 **用户已确认：先完成PLD式整段抓取修正，首轮左右臂都启用；RECAP路线后置。** 当前方案升级为[PLD-SAC v2职责与接口](reports/rl/pld-sac-block-v2/README.md)：Thor在线运行Pi-Base与PLD-Grasp；Thor离线优先运行Replay-Curator与Qwen-DINO Judge；GPU服务器复核入库、归档并运行SAC-Coach。客户端复用原RTC和连续HIL，不切段、不编号、不判奖。当前`pld-rl`已上线off/probe诊断，动作仍全部Pi；actor未加载，尚无真实非零修正数据或提升证据。诊断probe不直接进入SAC，正式物理合同与actor安装后再采训练数据。v1合成验证保留历史；v2实现/验收独立记录，不能沿用旧回执合同或把旧离线actor漂移当改进。
 
+2026-10-12当前执行顺序：先采两轮零修正probe；数据管家已补原生UUID和完整session事件侧车的读取、去重、取消隔离与独立probe审计。用户将动作边界选择交给Thor侧，最后确认按probe中的Pi动作变化与FK位移再定正式探索范围；±0.01rad/夹爪±0.02仅是小幅候选，“放大十倍”尚未启用。当前不开始训练，也不安装随机修正actor；客户端跨IPC及容器误介入由这两轮真机录像验收。细节归[v2方案](reports/rl/pld-sac-block-v2/README.md#先采两轮零修正probe)。
+
 [一页方法说明](reports/rl/parts-grasp-review14-20261010/project-progress.html)汇总判定架构、Qwen＋DINO细节及执行样例、RL架构。本节为本分工唯一当前研究计划；[架构图](reports/rl/parts-grasp-review14-20261010/pld-plan.html)展示拟议闭环，不代表已实现系统。数据实验、失败诊断和抽检证据仍归[逐抓取报告](reports/rl/parts-grasp-review14-20261010/README.md)，数据合同归[04](04_data_contracts.md#本对话-part-数据审核状态2026-10-11)，端侧边界归[05](05_inference_and_rollout.md#本对话-part-推进边界2026-10-11)。
 
 ### 摘要、假设与两条路线

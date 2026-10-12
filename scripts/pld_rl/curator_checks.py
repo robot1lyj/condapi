@@ -177,6 +177,68 @@ class CuratorChecks(unittest.TestCase):
         self.assertTrue(np.isfinite(point).all())
         self.assertTrue(-1 < point[2] < 1)
 
+    def test_sidecar_only_reply_restores_provenance_without_fake_rows(self):
+        _, rows, _, _ = native_fixture()
+        original = len(rows)
+        reply = rows[8]["details"].pop("policy_reply")
+        events = [{"event": "reply", "details": {"policy_reply": reply}, "audit_ref": "session/policy_events.jsonl#line=2"}]
+        windows, audit = reconstruct_intervals(rows, events)
+        self.assertFalse(audit)
+        self.assertEqual(len(windows), 3)
+        self.assertEqual(len(rows), original)
+        self.assertEqual(windows[1]["receipt"]["reply_refs"], [events[0]["audit_ref"]])
+
+    def test_cancelled_none_actions_are_retained_and_cannot_bootstrap(self):
+        _, rows, _, _ = native_fixture()
+        reply = rows[8]["details"].pop("policy_reply")
+        reply.update(actions=None, discarded=True, error="cancelled_by_epoch")
+        reply["pld"]["future_unknown"] = {"nested": [1, 2, 3]}
+        events = [{"event": "reply", "details": {"policy_reply": reply}, "audit_ref": "audit#line=2"}]
+        windows, audit = reconstruct_intervals(rows, events)
+        # The following decision still has this cancelled source in its RTC
+        # prefix, so all three intervals lack valid execution provenance.
+        self.assertTrue(all(w["receipt"]["status"] == "rejected" for w in windows))
+        self.assertEqual(len(audit), 3)
+        self.assertEqual(windows[1]["proposal"]["future_unknown"]["nested"], [1, 2, 3])
+
+    def test_sidecar_duplicate_and_conflict(self):
+        _, rows, _, _ = native_fixture()
+        reply = copy.deepcopy(rows[8]["details"]["policy_reply"])
+        events = [{"event": "reply", "details": {"policy_reply": reply}, "audit_ref": "audit#line=2"}]
+        windows, audit = reconstruct_intervals(rows, events)
+        self.assertFalse(audit)
+        self.assertEqual(len(windows), 3)
+        self.assertEqual(len(windows[1]["receipt"]["reply_refs"]), 2)
+        reply["actions"][4][0] += .01
+        with self.assertRaisesRegex(ValueError, "conflicting HDF5/sidecar"):
+            reconstruct_intervals(rows, events)
+
+    def test_diagnostic_execution_proof_cannot_publish_rewards(self):
+        _, rows, candidates, reviews = native_fixture()
+        for row in rows:
+            if row["details"].get("policy_reply"):
+                row["details"]["policy_reply"]["pld"]["replay_eligible"] = False
+        windows, audit = reconstruct_intervals(rows, diagnostics=True)
+        self.assertFalse(audit)
+        self.assertTrue(all(w["receipt"]["diagnostic_only"] for w in windows))
+        linked, labels, excluded = associate_rewards(windows, candidates, reviews, rows, "train")
+        self.assertFalse(linked)
+        self.assertFalse(labels)
+        self.assertIn("diagnostic probe", excluded[0]["reason"])
+
+    def test_cancel_without_reply_and_malformed_trace_are_not_bridged(self):
+        for mutation in ("cancel_without_reply", "malformed"):
+            _, rows, _, _ = native_fixture()
+            reply = rows[8]["details"].pop("policy_reply")
+            if mutation == "malformed":
+                reply["pld"]["episode_id"] = "wrong-uuid"
+                events = [{"event": "reply", "details": {"policy_reply": reply}, "audit_ref": "audit#line=2"}]
+            else:
+                events = [{"event": "cancelled", "details": {"policy_reply": {"token": reply["token"]}}, "audit_ref": "audit#line=2"}]
+            windows, audit = reconstruct_intervals(rows, events)
+            self.assertTrue(audit)
+            self.assertTrue(all(w["receipt"]["status"] == "rejected" for w in windows))
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -26,9 +26,10 @@
   ],
   "lower": null,
   "upper": null,
-  "max_target_step": null,
+  "max_target_step": [0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.96, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.96],
+  "max_residual_step": [0.004, 0.004, 0.004, 0.004, 0.004, 0.004, 0.008, 0.004, 0.004, 0.004, 0.004, 0.004, 0.004, 0.008],
   "limits_evidence": null,
-  "status": "proposal: copy into a new release, fill actual limits/base identity, review before robot use",
+  "status": "small-amplitude candidate only; Thor selects formal radius from probe/FK analysis and fills actual manifest limits/base identity; diagnostic probe remains unchanged",
   "gate": {
     "open": 0.65,
     "closed": 0.62,

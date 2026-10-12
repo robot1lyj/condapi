@@ -71,7 +71,35 @@ def physical_candidates(rows, fk, episode_number=1):
     return result
 
 
-def reconstruct_intervals(rows):
+def native_replies(rows, events=()):
+    """Join HDF5 and sidecar by native token; never manufacture a control row."""
+    replies, cancelled = {}, set()
+    entries = [(row["details"].get("policy_reply"), row["raw_ref"]) for row in rows]
+    for event in events:
+        payload = event.get("details", {}).get("policy_reply") or {}
+        token = payload.get("token") or {}
+        if event.get("event") == "cancelled" and token:
+            cancelled.add((token["epoch"], str(token["request_id"])))
+        if event.get("event") == "reply":
+            entries.append((payload, event["audit_ref"]))
+    for reply, ref in entries:
+        if not reply or not reply.get("token"):
+            continue
+        token = reply["token"]
+        key = (token["epoch"], str(token["request_id"]))
+        # Timing/context can be present only in one copy. Execution status and
+        # model output must agree in every copy of a received reply.
+        value = {k: reply.get(k) for k in ("token", "actions", "discarded", "error", "pld")}
+        if key in replies:
+            if fingerprint(replies[key]["value"]) != fingerprint(value):
+                raise ValueError("same native reply identity has conflicting HDF5/sidecar copies")
+            replies[key]["refs"].append(ref)
+        else:
+            replies[key] = {"value": value, "reply": reply, "refs": [ref]}
+    return replies, cancelled
+
+
+def reconstruct_intervals(rows, events=(), *, diagnostics=False):
     """Actual [observation_i, observation_i+1) transitions at native cadence.
 
     Committed-prefix origins can belong to older replies. They must match both
@@ -87,25 +115,35 @@ def reconstruct_intervals(rows):
         oid = row["details"].get("obs_id")
         if oid is not None and row.get("observation_valid", False):
             observations.setdefault((row["epoch"], oid), row["raw_ref"])
-        reply = row["details"].get("policy_reply") or {}
+    replies, cancelled = native_replies(rows, events)
+    barriers = set()
+    for event in events:
+        if event.get("event") == "cancelled":
+            token = (event.get("details", {}).get("policy_reply") or {}).get("token") or {}
+            if token.get("observation_policy_tick") is not None:
+                barriers.add((token["epoch"], token["observation_policy_tick"]))
+    for origin, entry in replies.items():
+        reply = entry["reply"]
         token = reply.get("token") or {}
-        if not token or "actions" not in reply:
-            continue
-        origin = (token["epoch"], str(token["request_id"]))
         value = {"token": token, "actions": reply["actions"], "discarded": reply.get("discarded"), "error": reply.get("error")}
-        if origin in origins and fingerprint(origins[origin]) != fingerprint(value):
-            raise ValueError("same native reply identity has conflicting actions/status")
+        if origin in cancelled:
+            value.update(discarded=True, error=value["error"] or "request cancelled")
         origins[origin] = value
         p = reply.get("pld")
         if p is None:
             continue
-        if origin in proposals and fingerprint(proposals[origin]) != fingerprint(p):
-            raise ValueError("same native reply identity has conflicting PLD trace")
-        if (p["epoch"] != token["epoch"] or str(p["request_id"]) != str(token["request_id"])
-                or p["start_tick"] != token["observation_policy_tick"] or p["observation_id"] != token["observation_id"]):
-            raise ValueError("PLD trace differs from native request token")
-        if not np.allclose(reply["actions"], p.get("actions", p["base"]), atol=1e-6, rtol=0):
-            raise ValueError("reply actions differ from PLD plan")
+        try:
+            if (p["epoch"] != token["epoch"] or str(p["request_id"]) != str(token["request_id"])
+                    or p["start_tick"] != token["observation_policy_tick"] or p["observation_id"] != token["observation_id"]
+                    or p["episode_id"] != rows[0]["episode_id"]):
+                raise ValueError("PLD trace differs from native request token/episode")
+            if value["discarded"] is False and not value["error"] and not np.allclose(reply["actions"], p.get("actions", p["base"]), atol=1e-6, rtol=0):
+                raise ValueError("reply actions differ from PLD plan")
+        except (ValueError, KeyError, TypeError) as exc:
+            value.update(discarded=True, error=str(exc))
+            barriers.add((token["epoch"], token["observation_policy_tick"]))
+            audit.append({"request": list(origin), "reason": str(exc), "refs": entry["refs"]})
+            continue
         proposals[origin] = p
     ordered = sorted(proposals.values(), key=lambda p: (p["epoch"], p["start_tick"]))
     result = []
@@ -113,7 +151,7 @@ def reconstruct_intervals(rows):
         if not p["gate"]["active"]:
             continue
         try:
-            if p.get("replay_eligible") is False:
+            if p.get("replay_eligible") is False and not diagnostics:
                 raise ValueError("probe-only diagnostics lack the formal actor/physical contract; not SAC replay")
             if (p["epoch"] != nxt["epoch"] or p["run_id"] != nxt["run_id"] or p["episode_id"] != nxt["episode_id"]
                     or p["mode"] != nxt["mode"] or p["snapshot_sha256"] != nxt["snapshot_sha256"]):
@@ -121,11 +159,16 @@ def reconstruct_intervals(rows):
             begin, end, epoch = p["start_tick"], nxt["start_tick"], p["epoch"]
             if not 0 < end - begin <= 50:
                 raise ValueError("missing/reordered next observation or expired horizon")
+            if any(e == epoch and begin < t <= end for e, t in barriers):
+                raise ValueError("interval crosses a cancelled or malformed native request")
             indexes = [by_tick[(epoch, t)] for t in range(begin, end + 1)]
             selected = [rows[i] for i in indexes[:-1]]
             origin = origins[(epoch, str(p["request_id"]))]
             if origin["discarded"] is not False or origin["error"]:
                 raise ValueError("proposal canceled/rejected")
+            successor = origins[(epoch, str(nxt["request_id"]))]
+            if successor["discarded"] is not False or successor["error"]:
+                raise ValueError("next observation response canceled/rejected")
             for t, row in zip(range(begin, end), selected, strict=True):
                 if not row["submitted_valid"] or row["is_intervention"] or not row["intervention_valid"]:
                     raise ValueError("invalid or human-controlled actual action")
@@ -153,7 +196,9 @@ def reconstruct_intervals(rows):
                        "human_intervention": False, "client_modified": False,
                        "observation_ref": obs_ref, "next_observation_ref": next_ref,
                        "raw_refs": [r["raw_ref"] for r in selected],
-                       "window_end": ended.get("window_id") == p["window_id"], "window_end_reason": ended.get("reason")}
+                       "window_end": ended.get("window_id") == p["window_id"], "window_end_reason": ended.get("reason"),
+                       "diagnostic_only": p.get("replay_eligible") is False,
+                       "reply_refs": replies[(epoch, str(p["request_id"]))]["refs"]}
             result.append({"proposal": {**copy.deepcopy(p), "end_tick": end}, "receipt": receipt})
         except (ValueError, KeyError, TypeError, IndexError) as exc:
             # Preserve a rejected slot so a window cannot silently reconnect
@@ -192,6 +237,8 @@ def associate_rewards(records, candidates, rewards, rows, split):
     output, labels, audit = [], [], []
     for key, window in windows.items():
         try:
+            if any(r["proposal"].get("replay_eligible") is False or r["receipt"].get("diagnostic_only") for r in window):
+                raise ValueError("diagnostic probe cannot publish training rewards")
             if any(r["receipt"]["status"] != "executed" for r in window):
                 raise ValueError("window contains rejected execution intervals")
             last = window[-1]

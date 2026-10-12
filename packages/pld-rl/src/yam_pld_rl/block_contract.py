@@ -47,6 +47,8 @@ def validate_contract(c):
     step = array(c["max_target_step"], (14,), "max_target_step")
     if np.any(lo >= hi) or np.any(radius <= 0) or np.any(step <= 0):
         raise ValueError("invalid limits/radius/step")
+    if "max_residual_step" in c and np.any(array(c["max_residual_step"], (14,), "max_residual_step") <= 0):
+        raise ValueError("invalid residual increment guard")
     if not 0 < c["max_attempt_seconds"] <= 30:
         raise ValueError("explicit bounded attempt duration required")
 
@@ -89,6 +91,8 @@ def feasible_scale(base, previous_command, arm, delay, c):
         dw = abs(wi - (w[delay + i - 1] if delay + i else 0))
         if dw > 0:
             bound = np.minimum(bound, (step[axes] - np.abs(differences[i, axes])) / dw)
+            if "max_residual_step" in c:
+                bound = np.minimum(bound, np.asarray(c["max_residual_step"])[axes] / dw)
     return np.clip(bound / np.asarray(c["radius"])[axes], 0, 1).astype(np.float32)
 
 
@@ -106,6 +110,8 @@ def decode(base, scaled_action, arm, delay, c):
     # Do not even round-trip the committed prefix / inactive arm / zero head.
     for row in np.flatnonzero(weights):
         out[row, axes] += weights[row] * offset
+    if "max_residual_step" in c and np.any(np.abs(np.diff(out - base, axis=0)) > np.asarray(c["max_residual_step"]) + 2e-7):
+        raise ValueError("residual increment exceeds the Thor guard")
     return out
 
 

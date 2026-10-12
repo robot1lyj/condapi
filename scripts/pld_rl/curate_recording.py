@@ -22,46 +22,8 @@ from yam_pld_rl.curator import reconstruct_intervals
 from yam_pld_rl.data import sha256
 from yam_pld_rl.data import write_json
 from yam_pld_rl.kinematics import YamKinematics
-
-
-def read_episode(folder):
-    import h5py  # noqa: PLC0415 -- needed only by the portable offline entrypoint
-
-    rows, hashes = [], {}
-    required = ("time", "tick", "epoch", "measured_state", "observation_state", "observation_valid", "submitted_action", "is_intervention",
-                "video_indices", "camera_host_received_at")
-    for path in sorted(folder.glob("segment_*/samples.h5")):
-        hashes[str(path)] = sha256(path)
-        with h5py.File(path) as f:
-            n = int(f["committed_rows"][()])
-            if n < 0 or any(len(f[k]) < n for k in (*required, "details")):
-                raise ValueError("invalid committed row count")
-            data = {k: f[k][:n] for k in required}
-            masks = {k: f[k + "__valid"][:n] for k in required if k + "__valid" in f}
-            for i, raw in enumerate(f["details"][:n]):
-                details = json.loads(raw)
-                clock_valid = all(bool(masks[k][i]) for k in ("time", "tick", "epoch"))
-                rows.append({"time": float(data["time"][i]), "tick": int(data["tick"][i]), "epoch": int(data["epoch"][i]),
-                             "episode_id": folder.name, "measured_state": data["measured_state"][i].tolist(),
-                             "measured_state_valid": clock_valid and bool(masks["measured_state"][i]),
-                             "observation_valid": bool(data["observation_valid"][i]) and bool(masks["observation_valid"][i]),
-                             "submitted_action": data["submitted_action"][i].tolist(),
-                             "submitted_valid": clock_valid and bool(masks["submitted_action"][i]),
-                             "is_intervention": bool(data["is_intervention"][i]),
-                             "intervention_valid": bool(masks["is_intervention"][i]),
-                             "camera_times": data["camera_host_received_at"][i].tolist(),
-                             "camera_valid": masks["camera_host_received_at"][i].tolist(),
-                             "video_indices": data["video_indices"][i].tolist(), "details": details,
-                             "raw_ref": f"{folder.parent.name}/{folder.name}/{path.parent.name}/samples.h5#row={i}",
-                             "videos": {v: str(path.parent / f"{v}.mp4") for v in ("top", "left", "right")}})
-    if not rows:
-        raise ValueError(f"no committed native HIL rows: {folder}")
-    # Capture provenance for the original videos without copying or modifying them.
-    for video in sorted({p for row in rows for p in row["videos"].values()}):
-        if not Path(video).is_file() or not Path(video).stat().st_size:
-            raise ValueError(f"missing source video; cannot publish visual provenance: {video}")
-        hashes[video] = sha256(video)
-    return rows, hashes
+from yam_pld_rl.native_recording import read_episode
+from yam_pld_rl.probe_audit import audit_probe
 
 
 def export_evidence(candidates, output):
@@ -133,8 +95,11 @@ def main():
     p.add_argument("--validation-episodes", nargs="*", default=[], help="resolved episode paths; split at episode level")
     p.add_argument("--rewards", type=Path, help="reviewed candidate_id/status/approved/reviewer/evidence_rows JSON list")
     p.add_argument("--export-evidence", action="store_true", help="decode selected images for the existing Qwen/DINO tools")
+    p.add_argument("--probe-audit", action="store_true", help="audit diagnostic probe; never publish training rewards")
     p.add_argument("--output", type=Path, required=True)
     args = p.parse_args()
+    if args.probe_audit and args.rewards:
+        p.error("diagnostic probe cannot be combined with --rewards")
     folders = [p.resolve() for p in args.episodes]
     if len(folders) != len(set(folders)):
         p.error("duplicate raw episode")
@@ -144,12 +109,19 @@ def main():
     args.output.mkdir(parents=True, exist_ok=False)
     fk = YamKinematics(ROOT / "third_party/yam-fk-model/yam_linear4310.xml")
     approved = json.loads(args.rewards.read_text()) if args.rewards else []
-    candidates, windows, records, labels, audit, hashes = [], [], [], [], [], {}
+    candidates, windows, records, labels, audit, hashes, probe_reports, policy_events = [], [], [], [], [], {}, [], []
+    episode_ids = set()
     for number, folder in enumerate(folders, 1):
-        rows, source_hashes = read_episode(folder)
+        rows, events, source_hashes = read_episode(folder)
+        if rows[0]["episode_id"] in episode_ids:
+            raise ValueError("duplicate native episode UUID across inputs")
+        episode_ids.add(rows[0]["episode_id"])
+        policy_events.extend(events)
+        if args.probe_audit:
+            probe_reports.append(audit_probe(rows, events, json.loads((folder / "manifest.json").read_text())))
         hashes.update(source_hashes)
         c = physical_candidates(rows, fk, number)
-        w, rejected = reconstruct_intervals(rows)
+        w, rejected = reconstruct_intervals(rows, events, diagnostics=args.probe_audit)
         groups = defaultdict(list)
         for interval in w:
             groups[interval["proposal"]["window_id"]].append(interval)
@@ -166,7 +138,7 @@ def main():
             candidate["candidate_sha256"] = fingerprint(candidate)
         split = "val" if str(folder) in validation else "train"
         relevant = [r for r in approved if r["candidate_id"] in {q["candidate_id"] for q in c}]
-        linked, rewards, association = associate_rewards(w, c, relevant, rows, split)
+        linked, rewards, association = ([], [], []) if args.probe_audit else associate_rewards(w, c, relevant, rows, split)
         candidates.extend(c)
         windows.extend(w)
         records.extend(linked)
@@ -179,15 +151,25 @@ def main():
         export_evidence(candidates, args.output)
     for name, value in (("candidates", candidates), ("rewards", labels), ("audit", audit)):
         write_json(args.output / f"{name}.json", value)
-    for name, value in (("windows", windows), ("records", records)):
+    for name, value in (("windows", windows), ("records", records), ("policy-events", policy_events)):
         (args.output / f"{name}.jsonl").write_text("".join(json.dumps(r, allow_nan=False) + "\n" for r in value))
+    if args.probe_audit:
+        write_json(args.output / "probe-audit.json", {"status": "passed" if all(r["status"] == "passed" for r in probe_reports) else "failed",
+                   "episodes": probe_reports, "training_ready": False, "robot_success_rate": None})
     outputs = {p.name: sha256(p) for p in args.output.iterdir() if p.is_file()}
     write_json(args.output / "manifest.json", {"schema": "pld_curator_v2", "producer": "Replay-Curator",
+               "producer_files_sha256": {name: sha256(ROOT / name) for name in (
+                   "scripts/pld_rl/curate_recording.py", "packages/pld-rl/src/yam_pld_rl/native_recording.py",
+                   "packages/pld-rl/src/yam_pld_rl/probe_audit.py", "packages/pld-rl/src/yam_pld_rl/curator.py",
+                   "packages/pld-rl/src/yam_pld_rl/grasp_events.py", "packages/pld-rl/src/yam_pld_rl/kinematics.py")},
                "episodes_in_order": list(map(str, folders)),
                "sources_sha256": hashes, "outputs_sha256": outputs,
                "review_sha256": sha256(args.rewards) if args.rewards else None,
-               "ready_for_replay_compilation": bool(records), "robot_success_rate": None})
+               "ready_for_replay_compilation": bool(records) and not args.probe_audit,
+               "purpose": "probe_diagnostics" if args.probe_audit else "reward_association", "robot_success_rate": None})
     print(json.dumps({"candidates": len(candidates), "actual_intervals": len(windows), "reviewed_windows": len(labels)}))
+    if args.probe_audit and any(r["status"] != "passed" for r in probe_reports):
+        raise SystemExit(2)  # Keep evidence, but never report a failed audit as a successful job.
 
 
 if __name__ == "__main__":

@@ -44,11 +44,15 @@ Qwen 没有迁往服务器；数据管家也不需要 GPU。先录制、后切�
 
 Actor输入三路冻结ResNet18特征、14D状态、Pi计划、上个实际下发命令、活动臂、RTC延迟、窗口已过去时间和可行幅度。输出活动臂7D残差，含6关节与夹爪，因此能够修正抓取整段，而非只改开合。8 tick 是**修正包络长度**，不是要求客户端执行8帧后再推理；原RTC调度不变，实际执行区间由录制重建。前缀、非活动臂与包络外Pi动作保持原值。
 
-物理半径仍是待审核提案：关节各±0.01rad、夹爪±0.02；实际上下限与每tick最大目标变化必须来自现有控制合同。模板留空，禁止拿合成合同部署。零均值初始化的确定性输出等于Pi，collect才采样小幅随机探索；第一包不是已经改善的专家。
+2026-10-12用户将专家边界选择交给Thor侧，随后明确先完成零修正probe，再按Pi动作变化与FK位移选正式探索范围；此前“放大十倍”不激活。关节±0.01rad、夹爪±0.02仅保留为小幅候选，不冒称论文标准或最终学习上限。[边界候选](../../../../configs/pld_rl/grasp-server-boundary-v1.json)区分总修正、修正每tick变化与总目标变化；可选残差增量检查已实现，但当前诊断probe不用它。正式上下限取实际录制manifest.action_limits；SDK没有独立slew cap时仍保留null，Thor自己的增量guard不能写成客户端已有保护。零均值确定性输出等于Pi，collect才采样有界探索；第一包不是已经改善的专家。
 
 ## 数据与奖励
 
 复用原录制的 epoch/tick/time、policy_reply.token、policy_selection.request/model_index、submitted_action、三路视频及有效位。客户端新增的是完整 `policy_reply.pld` 留存和模式身份，不新增逐抓取按键或固定动作块回执。已承诺前缀仍保留原请求来源，不能重标成最新请求。
+
+Replay-Curator现按每集manifest中的原生episode UUID关联，文件夹名仅作位置引用。读取整个session的policy_events.jsonl并按原请求UUID过滤，保存request/reply/cancelled/evaluation和未知字段；HDF5与侧车的同一回复按原token去重，冲突明确拒绝。晚到回复不制造视频帧或控制行，取消/错误的请求不能作为下一观测，也不能跨过去拼接训练区间。源manifest、H5、视频、侧车和处理代码SHA进入新派生版本。整轮C/N保持evaluation_only。
+
+`--probe-audit`独立核验UUID、输入state、上一真实命令、完整Pi块相等、RTC前缀、逐tick来源和SDK声明限幅；诊断窗口可以重建执行证据，但records/rewards为空，ready_for_replay_compilation=false。已知SDK限幅单独计数，不冒充专家修正；不明动作改写失败。协议通过不等于抓取成功率，也不等于容器语义门控通过。
 
 数据管家按原物理轨迹规则切出闭爪候选，保留慢闭爪的张开起点；相机掉帧不拆断物理尝试。然后核查闭爪后的相对5cm抬升与新鲜图像，在释放前取多帧。视觉裁判沿用现有Qwen序列＋DINO参考，避免“桌上积木仍在腕部中心”的假成功；不用自动跟踪。缺证据不改成失败。
 
@@ -139,4 +143,21 @@ python scripts/pld_rl/prepare_blocks.py \
 
 服务器所有原始合成文件、三视频、图像、输入/审核SHA、配置、日志、优化器/checkpoint和bundle保存在 `runs/sac-block-validation-20261012-v2-r2/`；Thor独立资产在 `thor/pi/cache/pld-sac-validation-20261012-v2-r2/`。前一版r1保留，未覆盖。合成测试不进入用户真实训练看板或论文成功率统计。
 
-**仍需客户端实际联调、真实限位和门控覆盖验收。基础20w身份已核对，生产服务已切到pld-rl诊断入口；没有操作3588，没有启用真机修正。** 下一步先probe，核对输入观测来源、前缀、逐tick提交值和采集完整性，再进入collect；本轮没有开始真实数据SAC训练。
+## 先采两轮零修正probe
+
+客户端新版部署后，使用原“模型推理＋RTC”，RL模式选择probe，仍连接ws://192.168.250.1:8000；每集从开始到正常任务结束保持同一mode/模型身份。按原流程运行两轮乐高分拣，左右臂都保留，不用逐次抓取编号或按键；若因安全需要暂停或人工介入，保留真实记录，不把它写成无人干预。结束后可按原集号记C/N，只作评估。probe动作全部来自原Pi，没有随机探索。
+
+每轮结束后复制完整session，包含episode的manifest/H5/三视频和session级policy_events.jsonl；不只复制MP4，也不只复制episode目录。在Thor用固定源码包和CPU容器处理，原件只读，输出必须是新目录：
+
+```bash
+python3 scripts/thor/run_pld_curator.py \
+  --code /path/to/pinned-source \
+  --raw-root /path/to/copied-sessions \
+  --episodes /path/to/copied-sessions/session_a/episode_000001 \
+             /path/to/copied-sessions/session_a/episode_000002 \
+  --output /path/to/new-probe-review --export-evidence
+```
+
+先看probe-audit.json：身份、输入、前缀和下发来源是否通过；再看候选视频，审核门控是否覆盖空抓和是否误介入容器。随后由Thor侧根据真实关节/夹爪变化、FK末端位移和抓取偏差选择正式范围，不要求客户端另定步长，不以诊断数据冒充非零探索经验。本阶段不训练、不启用collect。
+
+**服务端补齐数据读取后可进入上述probe采集；客户端跨IPC和真机语义覆盖仍须用这两轮确认。** 基础20w身份已核对，没有操作3588，没有启用真机修正。
