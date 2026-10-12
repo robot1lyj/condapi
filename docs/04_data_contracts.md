@@ -2,7 +2,15 @@
 
 ## 本对话 PART 数据审核状态（2026-10-11）
 
-**当前用途为已确认的 PLD 式整段抓取修正，首轮左右臂都覆盖，整轮 C/N 仍作评估。** 学习路线与数据修订顺序唯一归[03](03_training_and_evaluation.md#pld-主线与-recap-后续路线2026-10-11)；本轮已重分类 14 集，候选奖励尚未批准；无 RL 训练。 下列原始审核事实继续有效；旧仅开度、整轮奖励、单步转移和旧9/3提案不自动成为当前训练合同。用户最新指定第一集验证，其余数据用于准备。逐抓取候选需包含原始 episode/epoch/tick、经 `video_indices` 对齐的图像引用及采样时间、闭爪行的 FK 参考位置、同参考下抬升差、持物/空手的视觉证据、连续保持区间和 reason。图像帧号不能直接当控制行号，模型没检测到积木不能直接标空手或 reward=0。
+**当前用途为已确认的 PLD 式整段抓取修正，首轮左右臂都覆盖，整轮 C/N 仍作评估。** 学习路线唯一归[03](03_training_and_evaluation.md#pld-主线与-recap-后续路线2026-10-11)。2026-10-12用户接受审核并授权实验，新replay v2已发布327条奖励，311次尝试构成合法单步行为价值初始化数据；这不代表在线动作/RTC合同已验收。E01验证、E02–E14训练。原始episode/epoch/tick、`video_indices`图像引用、闭爪FK参考、抬升差、持物/空手证据、窗口与排除原因全部保留；图像帧号不是控制行号，没检测到积木不能直接记失败。
+
+### 本次不可变训练数据版本（2026-10-12）
+
+服务器根目录 `/home/wuyan/lyj/pld-grasp/`：`datasets/classifications/` 保留完整v3r3分类及抬升资格侧车；`datasets/replays/pld-offline14-20261012-v2/` 保存奖励、整轮标签、逐次身份、原始图像引用、replay、训练集归一化及后续特征缓存；`datasets/catalog/<版本>.json`绑定来源与SHA，`datasets/index.json`仅作导航。原始录像继续保存在已验证目录 `/home/wuyan/lyj/YAM/YAM_data/derived/rl/parts_rollout14_20261010_v1/raw/`，不覆盖。实验配置、环境清单、日志、逐次预测与全部checkpoint归 `runs/pld-grasp-offline-20261012-v1/`；新数据/奖励创建新版本，不覆盖旧结论。失败样本及16条缺精确终点转移的已知结果也保留，不能只归档成功。
+
+311次含299训练/12验证，31,077条转移含29,842训练/1,235验证；成功127、失败184。奖励只在每次尝试精确核验终点对应转移写1/0，中间0；终点停止bootstrap。以真实dt作 `discount=0.99^dt`，MC校准回报只沿物理连续后缀定义；相机缺帧移除观察转移，不把缺口压紧拼接。原始记录证明保留行的Pi `base_target`等于实际下发动作，行为残差0；关节目标减当前状态、夹爪保持absolute，不擅改物理单位。输入当前三相机、当前/过去状态与动作、当前Pi参考及队列标量，不包含未来结果标签。冻结ResNet18提取每视角512维，三视角共1536维；不复用用于标签调试的DINO/Qwen特征。
+
+本次replay SHA256 `2c3eb47bc7e22a46300c2964855095b227c04dc29c87b03dc15103479cb2c076`；奖励SHA256 `5f1d1a4199d12aed7d58fc63b70cb676064cda3865cc045d91483c7060b7094a`。完整原始成员SHA、builder身份、normalization与frame-jobs归manifest；[纯数组审核](../scripts/pld_rl/audit_replay.py)检查逐次仅一终点、奖励位置、图像行对齐、折扣/MC与训练集归一化。
 
 
 **当前版本为不可变 v3r3 分类基础＋2026-10-12抬升资格侧车：342条闭爪提案保留，327条资格通过（136成功/191失败提案）、15条排除。** v3r3原始136/206/0统计保留溯源，不再作为有效奖励计数。 来源 14 集、9,348 张同步图像、342 段三视角视频；全部视频解码/哈希和 28 个原始 H5 哈希复核通过。旧 273 ID 全部映射，不因相机缺帧补造图像或跨坏帧训练转移。当前行级结果在 `candidates.json/classification.csv`；`assistant-visual-audit.json` 是助手复核证据，不能与用户 `review_label` 混用；全部 `approved_reward=null`，`training_executed=false`。候选奖励仅对整次尝试提出一次 1/0，不给持物每帧重复奖励，不表示颜色放对。完整方法/模型限制与 SHA 归[逐抓取报告](reports/rl/parts-grasp-review14-20261010/README.md#当前资格修正与审核导入2026-10-12)。

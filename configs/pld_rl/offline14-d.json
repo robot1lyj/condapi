@@ -1,0 +1,17 @@
+{
+  "id": "td-success-s0",
+  "seed": 0,
+  "success_only": true,
+  "calql_coefficient": 0.0,
+  "steps": 5000,
+  "batch_size": 256,
+  "learning_rate": 0.0003,
+  "width": 256,
+  "tau": 0.005,
+  "proposal_samples": 10,
+  "proposal_radius_normalized": 0.25,
+  "gradient_clip": 10.0,
+  "log_interval": 25,
+  "eval_interval": 250,
+  "save_interval": 1000
+}

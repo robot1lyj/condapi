@@ -1,0 +1,15 @@
+{
+  "passed": true,
+  "replay_sha256": "2c3eb47bc7e22a46300c2964855095b227c04dc29c87b03dc15103479cb2c076",
+  "attempts": 311,
+  "transitions": 31077,
+  "terminal_events": 311,
+  "positive_rewards": 127,
+  "validation_episodes": [
+    1
+  ],
+  "no_gap_compaction": true,
+  "reward_once_per_attempt": true,
+  "normalization_train_only": true,
+  "scope": "array/provenance audit; raw freshness and physical continuity are checked by the builder"
+}
