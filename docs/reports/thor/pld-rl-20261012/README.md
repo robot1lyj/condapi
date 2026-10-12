@@ -19,6 +19,8 @@
 
 [部署](collect-r2/deployment.json)、[模式与延迟](collect-r2/production-bundle-smoke.json)、[普通RTC](collect-r2/production-rtc-smoke.json)、[客户端校验](collect-r2/client-wire-validation-r2.json)、[校准](collect-r2/calibration.json)、[合同](collect-r2/contract.json)、[初始化](collect-r2/bootstrap-run.json)保留独立身份。41项本地轻量回归通过；Thor离线CPU/runc独立导出v3为38候选/116旧诊断区间、奖励0，未训练，[离线回执](collect-r2/curator-launcher.json)保留原始只读边界。
 
+收尾复验：生产返回包另16例通过原客户端校验器，[生产回执](collect-r2/client-wire-validation-production-r2.json)与候选16例独立保留。最终离线管家固定7cb65ce发布r4，明确禁止参考低点之前的高处画面获得抬升资格；Thor CPU导出38候选/35合格/0假前置抬升，[启动回执](collect-r2/curator-launcher-v4.json)。服务器完整核验1083张JPEG和全部顶层输出SHA，[归档回执](collect-r2/curator-server-v4.json)标记`derived-v4`为当前候选版本、training_ready=false；v3及原件不改写。GPU服务器从Gitea取7cb65ce源码，41项同组CPU协议/数组检查也通过，没有训练循环。资料归`datasets/rollouts/lego-probe-20261012-e01-v1/derived-v4/`、`datasets/catalog/lego-probe-20261012-e01-v4.json`和`runs/collect-bootstrap-20261012-r1/deployment-r2/`。当前在线镜像仍是已验收2612e08，离线管家升级没有重启生产。
+
 当前release为`/home/wuyan-lyj/thor/pi/services/pld-collect-20261012-r2/`，actor与encoder只读复用r1文件。原probe容器`pld-rl-probe-retained-20261012-r1`、r1探索容器`pld-rl-retained-pld-collect-20261012-r2`及旧Pi都已停止保留；镜像、权重、旧日志不删除。r1为本轮中间工程版本，补齐客户端wire字段兼容后以r2为正式试采版本，未在r1执行真机探索。未操作3588，无客户端任务消息。以下15:31条目是首版历史，不代表当前能力。
 
 用户明确要求新增名为`pld-rl`的容器，并允许停止原Pi推理。2026-10-12 15:31 CST完成切换：**`pld-rl` running/healthy，`ws://192.168.250.1:8000`不变，旧`pi05-rtc-infer`已停止并保留**。当前只是`probe_diagnostics_only`，实际动作仍全部来自Pi，没有加载或执行RL actor。

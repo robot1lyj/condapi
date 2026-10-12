@@ -1,0 +1,11 @@
+{
+  "status": "passed",
+  "canonical_derived_version": "derived-v4",
+  "source_revision": "7cb65ce",
+  "candidates": 38,
+  "qualified": 35,
+  "verified_images": 1083,
+  "pre_reference_qualified": 0,
+  "training_ready": false,
+  "manifest_sha256": "345a70c165a6ab20c30d0ebe9144b0e3d9817f09e93d517d64fe92e4bb26e7e2"
+}
