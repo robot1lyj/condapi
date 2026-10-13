@@ -20,7 +20,7 @@ def read_episode_ids(path):
     return sorted(values)
 
 
-def select_episodes(episodes, *, fps, hours, seed):
+def select_episodes(episodes, *, fps, hours, seed, excluded_ids=()):
     if fps <= 0 or hours <= 0:
         raise ValueError("fps and hours must be positive")
     rows = list(episodes)
@@ -29,9 +29,14 @@ def select_episodes(episodes, *, fps, hours, seed):
         raise ValueError("Invalid or duplicate episode indices")
     if any(type(row["length"]) is not int or row["length"] <= 0 for row in rows):
         raise ValueError("Invalid episode lengths")
+    excluded = set(excluded_ids)
+    if not excluded <= set(ids):
+        raise ValueError("Excluded episode IDs missing from source")
     random.Random(seed).shuffle(rows)
     selected, frames = [], 0
     for row in rows:
+        if row["episode_index"] in excluded:
+            continue
         selected.append(row)
         frames += row["length"]
         if frames >= hours * 3600 * fps:

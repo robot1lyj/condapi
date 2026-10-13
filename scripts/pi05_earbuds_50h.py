@@ -50,6 +50,7 @@ def checked_recipe(path):
         fps=30,
         hours=50,
         seed=42,
+        excluded_ids=selection.get("excluded_source_episode_ids", []),
     )
     if rows != [{key: value for key, value in row.items() if key != "episode_index"} for row in expected]:
         raise ValueError("Frozen selection differs from seed42 whole-episode sampling")
@@ -107,6 +108,9 @@ def check_data(recipe, report, selection):
             if split == "train"
             else [json.loads(line) for line in (report / "source-val.jsonl").read_text().splitlines() if line.strip()]
         )
+        if split == "val":
+            excluded_val = set(selection.get("excluded_val_source_episode_ids", []))
+            expected = [row for row in expected if row["source_episode_index"] not in excluded_val]
         actual = manifest["episodes"]
         fields = ("source_episode_index", "source_repo", "source_revision", "length", "task")
         if len(actual) != len(expected) or any(
@@ -202,6 +206,14 @@ def prepare_data(recipe, report, selection, *, resume=False):
             ]
             if split == "train":
                 command += ["--episode-ids", *map(str, read_json(assets / "source-episodes.json"))]
+            elif selection.get("excluded_val_source_episode_ids"):
+                excluded_val = set(selection["excluded_val_source_episode_ids"])
+                val_ids = [
+                    json.loads(line)["source_episode_index"]
+                    for line in (report / "source-val.jsonl").read_text().splitlines()
+                    if line.strip()
+                ]
+                command += ["--episode-ids", *map(str, [value for value in val_ids if value not in excluded_val])]
             if resume:
                 command += ["--resume"]
             subprocess.run(command, env=environment, cwd=ROOT, check=True)

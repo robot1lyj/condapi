@@ -44,13 +44,15 @@ def validate_rows(table, episode):
         raise ValueError("missing_task")
 
 
-def validate_video(path, length, fps):
+def validate_video(path, length, fps, thread_count=None):
     import av
 
     # Decode every frame to detect truncation; run full audits on compute nodes.
     count = 0
     with av.open(str(path)) as container:
         stream = container.streams.video[0]
+        if thread_count is not None:
+            stream.codec_context.thread_count = thread_count
         for frame in container.decode(stream):
             if frame.pts is None or abs(float(frame.pts * frame.time_base) - count / fps) > 1 / fps:
                 raise ValueError("video_timestamp_mismatch")

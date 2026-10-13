@@ -20,6 +20,18 @@ def test_not_enough_data():
         select_episodes([], fps=30, hours=2, seed=42)
 
 
+def test_exclusion_preserves_healthy_members_and_replenishes_duration():
+    rows = [{"episode_index": i, "length": 900} for i in range(20)]
+    before = select_episodes(rows, fps=30, hours=0.05, seed=42)
+    bad = before[0]["episode_index"]
+    after = select_episodes(rows, fps=30, hours=0.05, seed=42, excluded_ids=[bad])
+    healthy = {row["episode_index"] for row in before} - {bad}
+    assert healthy < {row["episode_index"] for row in after}
+    assert bad not in {row["episode_index"] for row in after}
+    assert sum(row["length"] for row in after) >= 30 * 3600 * 0.05
+    assert len(rows) == 20
+
+
 def test_cli_preserves_source_and_refuses_existing_output(tmp_path, monkeypatch):
     source = tmp_path / "train"
     meta = source / "meta"

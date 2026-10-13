@@ -165,9 +165,12 @@ def combine_history(current, history):
 def parse_slurm_status(payload, node_name):
     """Parse the bounded, delimiter-based output from the read-only Slurm poll."""
     text = payload.decode("utf-8", errors="strict")
-    if "__JOBS__\n" not in text or "\n__NODE__\n" not in text:
+    if "__JOBS__\n" not in text:
         raise ValueError("Slurm status response is incomplete")
-    jobs_text, node_text = text.split("__JOBS__\n", 1)[1].split("\n__NODE__\n", 1)
+    body = text.split("__JOBS__\n", 1)[1]
+    if "__NODE__\n" not in body:
+        raise ValueError("Slurm status response is incomplete")
+    jobs_text, node_text = body.split("__NODE__\n", 1)
     jobs = []
     for line in jobs_text.splitlines():
         fields = line.split("|", 5)
@@ -348,7 +351,7 @@ class Dashboard:
         node_arg = shlex.quote(node)
         command = (
             "set -e; printf '__JOBS__\\n'; "
-            "squeue --noheader --user \"$(id -un)\" --name "
+            'squeue --noheader --user "$(id -un)" --name '
             + job_name
             + " --format '%i|%j|%T|%M|%N|%R'; "
             "printf '__NODE__\\n'; "
@@ -388,7 +391,7 @@ class Dashboard:
         """Atomic local replacement. SSH failure retains the last successful snapshot."""
         while not stop.is_set():
             try:
-                sources = [(self.args.remote_metrics, self.args.metrics)] + self.history_remote_metrics
+                sources = [(self.args.remote_metrics, self.args.metrics), *self.history_remote_metrics]
                 source_modified = None
                 for remote_path, local_path in sources:
                     result = subprocess.run(
