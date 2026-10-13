@@ -42,6 +42,7 @@ def main():
     p.add_argument("--contract", type=Path)
     p.add_argument("--normalization", type=Path)
     p.add_argument("--replay", type=Path)
+    p.add_argument("--validation-suite", choices=("grasp-v3", "calibrated"), default="grasp-v3")
     args = p.parse_args()
     if platform.machine() != "aarch64":
         p.error("This launcher executes on Thor only")
@@ -94,7 +95,8 @@ def main():
 
     argv = ["docker", "exec", NAME, "/opt/pld-rl/bin/python", "-u"]
     if args.action == "validate":
-        argv += ["/workspace/scripts/pld_rl/validate_grasp_v3_gpu.py"]
+        script = "calibrated_gpu_checks.py" if args.validation_suite == "calibrated" else "validate_grasp_v3_gpu.py"
+        argv += ["/workspace/scripts/pld_rl/" + script]
     else:
         argv += ["/workspace/scripts/pld_rl/train_sac.py", "--config", inside(args.config),
                  "--contract", inside(args.contract), "--normalization", inside(args.normalization), "--replay", inside(args.replay)]

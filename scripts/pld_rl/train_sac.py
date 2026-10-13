@@ -20,10 +20,18 @@ from vla_platform.metrics import write_metrics
 from yam_pld_rl.block_contract import feature_dim
 from yam_pld_rl.block_contract import fingerprint
 from yam_pld_rl.block_contract import validate_contract
+from yam_pld_rl.calibrated import CalibratedLearner
 from yam_pld_rl.data import sha256
 from yam_pld_rl.data import write_json
 from yam_pld_rl.execution import require_training_runtime
+from yam_pld_rl.learning_metrics import evaluate
 from yam_pld_rl.sac import SacLearner
+
+
+def learner_for(dim, cfg, device="cuda"):
+    if cfg.get("method") in ("calql", "parts_td3bc"):
+        return CalibratedLearner(dim, cfg, device)
+    return SacLearner(dim, cfg, device)
 
 
 def export_bundle(path, learner, contract, normalization, encoder_sha, config, provenance):
@@ -62,7 +70,10 @@ def main():
     rng = np.random.default_rng(cfg["seed"])
     if not args.resume:
         args.output.mkdir(parents=True, exist_ok=False)
-    learner = SacLearner(feature_dim(contract), cfg)
+    calibrated = cfg.get("method") in ("calql", "parts_td3bc")
+    if calibrated and not args.replay:
+        raise ValueError("calibrated methods require verified real replay")
+    learner = learner_for(feature_dim(contract), cfg)
     commit = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
     if subprocess.check_output(["git", "status", "--porcelain"], cwd=ROOT, text=True).strip():
         raise RuntimeError("clean pinned source required")
@@ -80,6 +91,9 @@ def main():
                 raise ValueError("feature encoder/normalization changed")
         with np.load(args.replay / "replay.npz", allow_pickle=False) as data:
             arrays = {k: data[k] for k in data.files}
+        if calibrated and (replay_manifest.get("schema") != "pld_learning_replay_v1"
+                           or not replay_manifest.get("discounted_return_preserved")):
+            raise ValueError("calibrated comparison requires verified learning view")
         train = arrays["train"].astype(bool)
         online = arrays["online"].astype(bool)
         if not np.any(train & online & arrays["realized_nonzero"].astype(bool) & (np.abs(arrays["action"]).max(1) > 1e-6)):
@@ -89,6 +103,9 @@ def main():
             groups[is_online] = [np.flatnonzero(mask & (arrays["attempt"] == a)) for a in np.unique(arrays["attempt"][mask])]
         tensors = {k: torch.as_tensor(arrays[k], device="cuda", dtype=torch.float32)
                    for k in ("x", "nx", "scale", "next_scale", "negative_scale", "next_negative_scale", "action", "reward", "terminal", "discount")}
+        if calibrated:
+            tensors.update({k: torch.as_tensor(arrays[k], device="cuda", dtype=torch.float32)
+                            for k in ("mc_return", "attempt_outcome")})
     identity = {"code_commit": commit, "inputs": inputs, "execution_target": args.execution}
     policy_contract = {"contract": contract, "normalization": stats, "encoder_sha256": sha256(args.encoder), "config": cfg}
     begin = 0
@@ -116,6 +133,20 @@ def main():
            "adaptations": ["YAM joint envelope with native RTC cadence rather than EE action", "frozen ResNet18",
                            "no transplant of incompatible historical critics", "no CalQL pretraining in this version"]}
     write_json(args.output / "run.json", run)
+    if calibrated:
+        successes = [g for g in groups[True] + groups[False] if arrays["attempt_outcome"][g[0]] == 1]
+        all_groups = groups[True] + groups[False]
+        if not successes:
+            raise ValueError("success-prior comparison needs successful training attempts")
+        run.update(phase="fixed real replay comparison; no new environment data",
+                   method=cfg["method"], new_environment_steps=0,
+                   mix="50% successful attempts + 50% all attempts; uniform attempt then decision",
+                   adaptations=["return-preserving collapse of mandatory RTC wait suffix", "7D feasible residual with original radius",
+                                "frozen Pi/ResNet18", "no entropy in Bellman backup", "offline replay; not complete online paper reproduction",
+                                "current-policy + uniform latent proposals for CalQL; MC bound on policy proposals",
+                                "optional recorded-MC critic initialization; success prior is corrected collect, not pure Pi demonstrations",
+                                "TD3BC mean actor; fixed bootstrap collection std; success BC and optional failed-zero anchor"])
+        write_json(args.output / "run.json", run)
 
     def save(step):
         path = args.output / f"checkpoint-{step:06d}.pt"
@@ -142,9 +173,13 @@ def main():
         return [group[i][rng.integers(len(group[i]))] for i in indices]
 
     for step in range(begin + 1, cfg["steps"] + 1):
-        n = cfg["batch_size"] // 2 if groups[False] else 0
-        ids = draw(groups[False], n) if n else []
-        ids += draw(groups[True], cfg["batch_size"] - n)
+        if calibrated:
+            n = cfg["batch_size"] // 2
+            ids = draw(successes, n) + draw(all_groups, cfg["batch_size"]-n)
+        else:
+            n = cfg["batch_size"] // 2 if groups[False] else 0
+            ids = draw(groups[False], n) if n else []
+            ids += draw(groups[True], cfg["batch_size"] - n)
         batch = {k: v[ids] for k, v in tensors.items()}
         log = learner.update(batch, update_actor=step > cfg["critic_warmup_steps"])
         if step % cfg["log_interval"] == 0 or step == cfg["steps"]:
@@ -152,7 +187,14 @@ def main():
                        online_environment_steps=int((arrays["online"] & arrays["train"]).sum()),
                        online_executed_seconds=float(arrays["dt"][arrays["online"] & arrays["train"]].sum()))
             val = np.flatnonzero(~arrays["train"].astype(bool))
-            if len(val):
+            if calibrated:
+                metrics, details = evaluate(learner, tensors, arrays)
+                log.update(metrics, new_environment_steps=0)
+                write_json(args.output / "latest-evaluation.json", {"step": step, "metrics": details,
+                           "robot_success_rate": None, "recorded_returns_are_not_policy_value_ground_truth": True})
+                if step % cfg["save_interval"] == 0 or step == cfg["steps"]:
+                    write_json(args.output / f"evaluation-{step:06d}.json", {"step": step, "metrics": details})
+            elif len(val):
                 with torch.no_grad():
                     b = {k: v[val] for k, v in tensors.items()}
                     q1, q2 = learner.critic(b["x"], b["action"])
