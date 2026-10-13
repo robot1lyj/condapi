@@ -2,8 +2,10 @@
 
 # ruff: noqa: E402, PT009, PT027
 import copy
+import json
 from pathlib import Path
 import sys
+import tempfile
 import unittest
 
 import numpy as np
@@ -327,6 +329,38 @@ class GraspV3Checks(unittest.TestCase):
         self.assertTrue(result["active"])
         self.assertEqual(result["arm"], "right")
         self.assertNotEqual(result["window_id"], result["ended"]["window_id"])
+
+    def test_no_lift_outcome_is_exported_for_review(self):
+        import av  # noqa: PLC0415
+        from curate_recording import export_evidence  # noqa: PLC0415
+
+        _, rows, _, candidates, _ = modern_recording("not_lifted")
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            video = root / "test.mp4"
+            with av.open(str(video), "w") as container:
+                stream = container.add_stream("mpeg4", rate=30)
+                stream.width, stream.height, stream.pix_fmt = 64, 48, "yuv420p"
+                for _ in rows:
+                    frame = av.VideoFrame.from_ndarray(np.zeros((48, 64, 3), np.uint8), format="rgb24")
+                    for packet in stream.encode(frame):
+                        container.mux(packet)
+                for packet in stream.encode():
+                    container.mux(packet)
+            for name in ("left", "right", "top"):
+                (root / f"{name}.mp4").write_bytes(video.read_bytes())
+            for candidate in candidates:
+                for frame in candidate["frames"]:
+                    for name, view in frame["views"].items():
+                        view["source_video"] = str(root / f"{name}.mp4")
+            output = root / "output"
+            output.mkdir()
+            export_evidence(candidates, output)
+            exported = json.loads((output / "outcomes-prepared.json").read_text())
+            self.assertEqual(len(exported), 1)
+            self.assertEqual(exported[0]["proposed_status"], "not_lifted")
+            self.assertFalse(exported[0]["approved"])
+            self.assertTrue((output / exported[0]["montage"]).is_file())
 
 
 if __name__ == "__main__":
