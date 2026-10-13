@@ -187,6 +187,39 @@ def modern_recording(kind="held"):
 
 
 class GraspV3Checks(unittest.TestCase):
+    def test_multiple_windows_bind_each_own_endpoint(self):
+        _, rows, records, candidates, reviews = modern_recording()
+        shift = len(rows)
+        extra_rows = copy.deepcopy(rows)
+        for row in extra_rows:
+            row["tick"] += shift
+        extra_records = copy.deepcopy(records)
+        for record in extra_records:
+            proposal, receipt = record["proposal"], record["receipt"]
+            proposal["start_tick"] += shift
+            proposal["window_id"] += ":second"
+            if "end_tick" in proposal:
+                proposal["end_tick"] += shift
+            receipt["end_tick"] += shift
+        original = next(c for c in candidates if c.get("outcome"))
+        extra = copy.deepcopy(original)
+        extra["candidate_id"] += ":second"
+        extra["close_tick"] += shift
+        extra["outcome"]["window_id"] += ":second"
+        extra["outcome"]["terminal_tick"] += shift
+        for key in ("fresh_rows", "lifted_rows"):
+            extra["outcome"][key] = [i + shift for i in extra["outcome"][key]]
+        for frame in extra["frames"]:
+            frame["row"] += shift
+        review = {**reviews[0], "candidate_id": extra["candidate_id"],
+                  "evidence_rows": [i + shift for i in reviews[0]["evidence_rows"]]}
+        linked, labels, audit = associate_rewards(records + extra_records, [original, extra],
+                                                  [*reviews, review], rows + extra_rows, "train")
+        self.assertFalse(audit)
+        self.assertEqual(len(labels), 2)
+        self.assertEqual(len(linked), len(records) * 2)
+        self.assertEqual(labels[0]["terminal_tick"] + shift, labels[1]["terminal_tick"])
+
     def compile(self, case):
         c, rows, records, candidates, reviews = case
         linked, labels, audit = associate_rewards(records, candidates, reviews, rows, "train")

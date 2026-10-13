@@ -1,4 +1,4 @@
-"""Explicit training locations; no Torch import or workstation fallback."""
+"""Currently selected training locations; no implicit device fallback."""
 
 import os
 from pathlib import Path
@@ -10,7 +10,7 @@ def require_training_runtime(execution, *, cuda_available, capability=None):
         raise RuntimeError("Training requires the explicitly allocated CUDA device")
     if execution == "slurm":
         if not os.environ.get("SLURM_JOB_ID"):
-            raise RuntimeError("Slurm GPU required; workstation training is forbidden")
+            raise RuntimeError("Slurm allocation required for this execution target")
         return {"target": execution, "job": os.environ["SLURM_JOB_ID"]}
     if execution != "thor-offline":
         raise ValueError("unknown training execution target")

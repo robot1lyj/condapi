@@ -1,0 +1,18 @@
+{
+  "windows": 470,
+  "intervals": 3449,
+  "statuses": {
+    "empty": 308,
+    "held": 162
+  },
+  "splits": {
+    "val": 42,
+    "train": 428
+  },
+  "pending": 51,
+  "human_saved": 7,
+  "human_valid": 6,
+  "policy": "qwen_dino_suggestion_v1",
+  "robot_success_rate": null,
+  "detection_accuracy": null
+}

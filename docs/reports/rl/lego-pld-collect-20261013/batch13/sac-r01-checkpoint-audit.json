@@ -1,0 +1,208 @@
+{
+  "checkpoints": [
+    {
+      "step": 250,
+      "actor_updates": 75,
+      "checkpoint_sha256": "18b957d00d2d88e62eca96a3285f8e2137b43ab8cf38cfaf5940f24c01c2dcb9",
+      "bundle_actor_sha256": "6d74b75fde05efb883a8438c9e1bee6dfd218c59d1b1154e8d9cf07ba44e3715",
+      "bundle_equals_checkpoint": true,
+      "finite_parameters_and_outputs": true,
+      "deterministic_u_abs_max": 0.3207715153694153,
+      "deterministic_joint_offset_abs_max_rad": 0.0064154303073883055,
+      "deterministic_gripper_offset_abs_max": 0.0070984214544296265,
+      "splits": {
+        "train": {
+          "transitions": 3126,
+          "attempts": 425,
+          "reward1": 149,
+          "reward0": 276,
+          "terminal_q_rmse": 0.14155019369326793,
+          "constant_0_5_terminal_rmse": 0.5,
+          "arms": {
+            "False": {
+              "attempts": 142,
+              "reward1": 72
+            },
+            "True": {
+              "attempts": 283,
+              "reward1": 77
+            }
+          }
+        },
+        "val": {
+          "transitions": 291,
+          "attempts": 42,
+          "reward1": 11,
+          "reward0": 31,
+          "terminal_q_rmse": 0.3993025926931333,
+          "constant_0_5_terminal_rmse": 0.5,
+          "arms": {
+            "False": {
+              "attempts": 14,
+              "reward1": 7
+            },
+            "True": {
+              "attempts": 28,
+              "reward1": 4
+            }
+          }
+        }
+      }
+    },
+    {
+      "step": 500,
+      "actor_updates": 200,
+      "checkpoint_sha256": "4b82a5835e395ff74b2c22c6c1f2cb1649c5251f5af19fc4ea0ad82b338b45b4",
+      "bundle_actor_sha256": "d4bf8ffdb6c3ee372b7a74b65c25dc5a944934bea594ed0873ec8005dcfcfb6c",
+      "bundle_equals_checkpoint": true,
+      "finite_parameters_and_outputs": true,
+      "deterministic_u_abs_max": 0.7614436745643616,
+      "deterministic_joint_offset_abs_max_rad": 0.015228873491287232,
+      "deterministic_gripper_offset_abs_max": 0.01989228576421738,
+      "splits": {
+        "train": {
+          "transitions": 3126,
+          "attempts": 425,
+          "reward1": 149,
+          "reward0": 276,
+          "terminal_q_rmse": 0.08601242185052965,
+          "constant_0_5_terminal_rmse": 0.5,
+          "arms": {
+            "False": {
+              "attempts": 142,
+              "reward1": 72
+            },
+            "True": {
+              "attempts": 283,
+              "reward1": 77
+            }
+          }
+        },
+        "val": {
+          "transitions": 291,
+          "attempts": 42,
+          "reward1": 11,
+          "reward0": 31,
+          "terminal_q_rmse": 0.31469759075893,
+          "constant_0_5_terminal_rmse": 0.5,
+          "arms": {
+            "False": {
+              "attempts": 14,
+              "reward1": 7
+            },
+            "True": {
+              "attempts": 28,
+              "reward1": 4
+            }
+          }
+        }
+      }
+    },
+    {
+      "step": 750,
+      "actor_updates": 325,
+      "checkpoint_sha256": "b5ea6106b7d08775197d37a7e2cc30219764ef1f7fd20e9b29a65ba94085cd60",
+      "bundle_actor_sha256": "bcb763820155140156132884165450a68210de17510358fecaca5e679f20b2c5",
+      "bundle_equals_checkpoint": true,
+      "finite_parameters_and_outputs": true,
+      "deterministic_u_abs_max": 0.8089871406555176,
+      "deterministic_joint_offset_abs_max_rad": 0.01617974281311035,
+      "deterministic_gripper_offset_abs_max": 0.03398260474205017,
+      "splits": {
+        "train": {
+          "transitions": 3126,
+          "attempts": 425,
+          "reward1": 149,
+          "reward0": 276,
+          "terminal_q_rmse": 0.10013003468016135,
+          "constant_0_5_terminal_rmse": 0.5,
+          "arms": {
+            "False": {
+              "attempts": 142,
+              "reward1": 72
+            },
+            "True": {
+              "attempts": 283,
+              "reward1": 77
+            }
+          }
+        },
+        "val": {
+          "transitions": 291,
+          "attempts": 42,
+          "reward1": 11,
+          "reward0": 31,
+          "terminal_q_rmse": 0.29190424490589134,
+          "constant_0_5_terminal_rmse": 0.5,
+          "arms": {
+            "False": {
+              "attempts": 14,
+              "reward1": 7
+            },
+            "True": {
+              "attempts": 28,
+              "reward1": 4
+            }
+          }
+        }
+      }
+    },
+    {
+      "step": 1000,
+      "actor_updates": 450,
+      "checkpoint_sha256": "c3f5fcd6af01037f57b1e7e338381cef70525e565a23dea8043a480c92db12ec",
+      "bundle_actor_sha256": "8e0eb75c84ba56e71ed0929dd5e74b44d30f7c8577b36e9a9b3f720a27ff3088",
+      "bundle_equals_checkpoint": true,
+      "finite_parameters_and_outputs": true,
+      "deterministic_u_abs_max": 0.9389210939407349,
+      "deterministic_joint_offset_abs_max_rad": 0.018229411840438844,
+      "deterministic_gripper_offset_abs_max": 0.04694605469703675,
+      "splits": {
+        "train": {
+          "transitions": 3126,
+          "attempts": 425,
+          "reward1": 149,
+          "reward0": 276,
+          "terminal_q_rmse": 0.08521235960965255,
+          "constant_0_5_terminal_rmse": 0.5,
+          "arms": {
+            "False": {
+              "attempts": 142,
+              "reward1": 72
+            },
+            "True": {
+              "attempts": 283,
+              "reward1": 77
+            }
+          }
+        },
+        "val": {
+          "transitions": 291,
+          "attempts": 42,
+          "reward1": 11,
+          "reward0": 31,
+          "terminal_q_rmse": 0.30294335351142704,
+          "constant_0_5_terminal_rmse": 0.5,
+          "arms": {
+            "False": {
+              "attempts": 14,
+              "reward1": 7
+            },
+            "True": {
+              "attempts": 28,
+              "reward1": 4
+            }
+          }
+        }
+      }
+    }
+  ],
+  "metrics_rows": 50,
+  "metrics_finite": true,
+  "training_code_commit": "cf79893e324395d3795b018d1fa893b8ca2c601e",
+  "audit_source_sha256": "cd1bdfa6f58fd47be011c709156639b13a2d2aea52e9e2f80bb7d673a4176edb",
+  "detection_accuracy": null,
+  "robot_success_rate": null,
+  "production_deployed": false,
+  "interpretation": "checkpoint consistency and dataset diagnostics only; Q is not evidence of robot improvement"
+}

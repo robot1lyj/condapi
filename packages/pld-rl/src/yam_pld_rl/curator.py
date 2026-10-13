@@ -292,6 +292,7 @@ def associate_rewards(records, candidates, rewards, rows, split):
         counts.update(c["candidate_id"] for c in matches[key])
     output, labels, audit = [], [], []
     for key, window in windows.items():
+        p = window[0]["proposal"]
         try:
             if any(r["proposal"].get("replay_eligible") is False or r["receipt"].get("diagnostic_only") for r in window):
                 raise ValueError("diagnostic probe cannot publish training rewards")

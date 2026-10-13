@@ -4,6 +4,8 @@
 
 ## 本对话 PART 数据审核状态（2026-10-11）
 
+2026-10-13新13集真实collect：原件/执行链审计后，按用户要求采用Qwen＋DINO所有有建议结果（包括弱证据/模型分歧），人工覆盖优先，仅无建议交复核。候选521窗中470窗有建议、51窗无建议；另3窗实际时间不一致在Replay编译时排除，最终467窗3417转移。自动标签与人工来源、置信度、分歧、发布SHA分开保留，检测准确率未知。首集42窗291转移验证，其余425窗3126转移训练；整轮C/N不进入SAC。固定复核服务直接写派生review文件，旧7条选择已迁移、6条满足当前证据合同。数据/标签/Replay及运行归档在Thor `rl-training/datasets/collect13-20261013-v1`；Judge全量输入输出另在`parts-vision/datasets/lego-pld-collect13-20261013-v1`，本地原件仍保留。[本批完整合同与证据](reports/rl/lego-pld-collect-20261013/batch13/README.md)。
+
 **当前用途为已确认的 PLD 式整段抓取修正，首轮左右臂都覆盖，整轮 C/N 仍作评估。** 学习路线唯一归[03](03_training_and_evaluation.md#pld-主线与-recap-后续路线2026-10-11)。2026-10-12用户接受审核并授权实验，新replay v2已发布327条奖励，311次尝试构成合法单步行为价值初始化数据；这不代表在线动作/RTC合同已验收。E01验证、E02–E14训练。原始episode/epoch/tick、`video_indices`图像引用、闭爪FK参考、抬升差、持物/空手证据、窗口与排除原因全部保留；图像帧号不是控制行号，没检测到积木不能直接记失败。
 
 当前[PLD-SAC v2合同](reports/rl/pld-sac-block-v2/README.md)复用原生HIL：完整policy_reply.pld＋原token、逐tick policy_selection来源、实际submitted_action、float64时间/有效位和三视频。客户端不提供attempt_id/arm/elapsed，不强制d+8执行节奏。Replay-Curator在Thor离线优先运行（同入口可在服务器执行），生成正式抓取ID，按实际观测区间核验来源与提交值，关联审核后局部1/0奖励；证据tick与transition终点分开存。窗口缺少唯一物理闭爪、执行取消/断档/HIL/改写或证据只出现在后续Pi补救时排除并留审计。候选/审核/源文件SHA绑定，原件及全部排除项保留；旧14集不是新策略的非零修正经验。

@@ -11,7 +11,7 @@ from yam_pld_rl.execution import require_training_runtime
 
 
 class ExecutionChecks(unittest.TestCase):
-    def test_workstation_not_allowed(self):
+    def test_slurm_requires_allocation(self):
         with patch.dict(os.environ, {}, clear=True), self.assertRaises(RuntimeError):
             require_training_runtime("slurm", cuda_available=True)
 

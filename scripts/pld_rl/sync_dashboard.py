@@ -1,4 +1,4 @@
-"""Mirror four configured runs read-only for the existing VLA dashboard."""
+"""Mirror selected immutable runs read-only for the existing VLA dashboard."""
 
 import argparse
 import base64
@@ -11,7 +11,7 @@ import subprocess
 import time
 
 IDS = ["calql-success-s0", "calql-success-s1", "calql-mixed-s0", "td-success-s0"]
-FILES = ["metrics.jsonl", "run.json", "status.json", "latest-evaluation.json"]
+FILES = ["metrics.jsonl", "run.json", "status.json", "latest-evaluation.json", "complete.json"]
 
 
 def sync(host, root, destination, ids=IDS):

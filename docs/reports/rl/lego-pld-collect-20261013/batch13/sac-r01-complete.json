@@ -1,0 +1,8 @@
+{
+  "steps": 1000,
+  "seconds": 13.424784063128754,
+  "actor_updates": 450,
+  "robot_success_rate": null,
+  "bundle": "bundle-001000",
+  "contract_sha256": "87b1affa6d81e1d0cf6299bf6e827bd260361104338708e67579c874ee65d7ec"
+}

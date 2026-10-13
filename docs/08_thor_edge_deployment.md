@@ -1,6 +1,6 @@
 # 08 · Thor 端侧部署
 
-**2026-10-13 RL职责更新：** 用户明确要求“新建一个rl训练容器，在thor上训练，rl的都在thor上训练”。新增独立`pld-rl-train`离线worker，生产`pld-rl`保持独立；VLA监督微调仍在服务器。训练以显式`--execution thor-offline`启用，限定ARM64/SM110/专用容器环境，不能伪造Slurm或回退本地CPU。原件/编码器/固定源码只读挂载，输出新目录，无网络/控制设备/生产端口；启动更新时拒绝与其他GPU容器并行。环境与数值验收正在执行，正式13集奖励未发布、不宣称已学习。批次与当前状态归[13集报告](reports/rl/lego-pld-collect-20261013/batch13/README.md)。下方早期部署时点保留历史，最新生产镜像归[延迟升级报告](reports/thor/pld-latency-20261013/README.md)。
+**2026-10-13 RL职责更新：** 用户先要求新增Thor训练容器，随后澄清：工作站当前繁忙，本轮RL先用Thor，并非永久禁止本地训练。新增独立`pld-rl-train`离线worker，生产`pld-rl`保持独立；VLA监督微调仍在服务器。训练以显式`--execution thor-offline`启用，限定ARM64/SM110/专用容器环境，不伪造Slurm，也不隐式回退到当前繁忙的本地工作站。原件/编码器/固定源码只读挂载，输出新目录，无网络/控制设备/生产端口；启动更新时拒绝与其他GPU容器并行。环境及合成数值验收已通过；13集真实Replay已完成1000次critic/450次actor更新，run `pld-sac-collect13-20261013-r01`，不自动部署。用户明确当前无需推理，故`pld-rl`停止、`pld-rl-train`仅空闲worker，生产actor未替换。以下早期healthy/MAXN为历史时点，不能当当前在线状态。批次与当前状态归[13集报告](reports/rl/lego-pld-collect-20261013/batch13/README.md)。下方早期部署时点保留历史，最新生产镜像归[延迟升级报告](reports/thor/pld-latency-20261013/README.md)。
 
 **当前PLD部署（2026-10-13 10:40 CST）**：用户确认现场停止执行后，`pld-rl:thor-collect-20261013-r1`接管原`ws://192.168.250.1:8000`，实查healthy/MAXN。源码e21431b，gate v3，合同87b1affa…，actor快照583ae73a…，2287维零更新初始化；Pi20w、七步FP32/TF32 engine及quantile RTC保持。生产48例真实输入＋9例普通RTC通过，含actor P95=223.91ms，原客户端16例校验通过；待用户新两集完成跨IPC真机联调。旧容器`pld-rl-retained-pld-collect-20261013-r1`保留回退。未操作3588。[本次完整证据](reports/thor/pld-rl-20261013/README.md)与[操作方案](reports/rl/pld-sac-block-v2/README.md)为现行owner，下方旧部署保留为历史。
 
