@@ -19,17 +19,22 @@ def main():
     p.add_argument("--expected-actor-phase", choices=("bootstrap_exploration", "candidate_requires_AB"),
                    default="bootstrap_exploration")
     p.add_argument("--expected-snapshot-sha256")
+    p.add_argument("--bundle-manifest", type=Path)
     args = p.parse_args()
     import sys  # noqa: PLC0415
     sys.path.insert(0, str(Path(__file__).resolve().parents[2]/"packages/pld-rl/src"))
     from yam_pld_rl.block_contract import decode  # noqa: PLC0415
+    from yam_pld_rl.block_contract import fingerprint  # noqa: PLC0415
     from yam_pld_rl.block_contract import physical_baseline  # noqa: PLC0415
     from yam_pld_rl.block_contract import wire_plan  # noqa: PLC0415
+    from yam_pld_rl.collector import execution_contract  # noqa: PLC0415
+    from yam_pld_rl.collector import validate_collector_trace  # noqa: PLC0415
 
     if args.output.exists():
         raise FileExistsError(args.output)
     suite = json.loads(args.cases.read_text())
     contract = json.loads((args.cases.parent/"contract.json").read_text())
+    manifest = json.loads(args.bundle_manifest.read_text()) if args.bundle_manifest else {"contract": contract}
     if suite["source_kind"] != "real_yam_recording":
         raise ValueError("real recorded inputs required")
     packer, rows, active_arms, client_samples = msgpack_numpy.Packer(), [], set(), []
@@ -37,6 +42,8 @@ def main():
     with connect(args.url, compression=None, max_size=None) as ws:
         metadata = msgpack_numpy.unpackb(ws.recv())
         identity = metadata["pld"]
+        if identity["contract_sha256"] != fingerprint(manifest["contract"]):
+            raise ValueError("bundle execution contract identity differs")
         if not identity["actor_loaded"] or identity["actor_phase"] != args.expected_actor_phase:
             raise ValueError("actor phase differs from the requested test")
         if args.expected_actor_phase == "candidate_requires_AB" and not args.expected_snapshot_sha256:
@@ -46,6 +53,7 @@ def main():
         epoch = 0
         for repeat in range(3):
             for mode in ("probe", "shadow", "eval", "collect"):
+                contract = execution_contract(manifest, mode)
                 for case in suite["cases"]:
                     epoch += 1
                     obs = read_observation(args.cases.parent/case["sample"])
@@ -65,11 +73,15 @@ def main():
                         raise ValueError(reply)
                     result = msgpack_numpy.unpackb(reply)
                     trace = result["pld"]
+                    if trace.get("execution_contract_sha256", fingerprint(contract)) != fingerprint(contract):
+                        raise ValueError("mode-specific execution contract differs")
                     raw, base = np.asarray(trace["raw_base"]), np.asarray(trace["physical_base"])
                     if not np.array_equal(base, physical_baseline(raw, d, contract)):
                         raise ValueError("wrong SDK physical baseline")
                     expected = base
                     if trace["gate"]["active"]:
+                        if mode == "collect":
+                            validate_collector_trace(trace, manifest)
                         expected = decode(base, trace["action"], trace["arm"], d, contract)
                         active_arms.add(trace["arm"])
                         zero_expected = mode in {"probe", "shadow"} or (

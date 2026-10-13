@@ -1,5 +1,7 @@
 # 08 · Thor 端侧部署
 
+**待升级候选（2026-10-13）：** `pld-wide008-20261013-r1`保留Actor-1权重，collect扩大到±0.08rad；快照`23d4da1a…`。CPU语义与全13集FK复核通过，待GPU/客户端包验收及现场停止确认后切换。生产目前仍是下述父版本。[新候选](reports/rl/lego-pld-collect-20261013/wide008/README.md)。
+
 **2026-10-13当前RL推理：** 用户授权恢复原`pld-rl`，已上线`PARTS-TD3BC-Balanced seed0/3000`学习候选（快照`75674aad…`、镜像`pld-rl:thor-balanced-20261013-r02`），健康检查通过且MAXN，地址`ws://192.168.250.1:8000`。Pi仍200000/7步TF32/quantile trained RTC，关节±0.02rad、夹爪±0.05及前缀10不变。候选与生产各48例学习专家＋9例RTC通过，生产P95约217ms；客户端离线16包校验通过。训练容器停止，旧生产服务保留`pld-rl-retained-pld-balanced-20261013-r02`。首批新跨IPC实录已核查：用户第14集collect、第15集eval均为新快照，实际修正下发分别1116/834 tick且逐tick来源差异0；第15集有192个有效回复、服务P95 215.27ms。动作融合已证实，成功率改善未证实。[新实录](reports/rl/lego-pld-collect-20261013/learned-e14-e15/README.md)。完整身份、镜像、回退与测量归[候选部署](reports/rl/lego-pld-collect-20261013/batch13/deployment/README.md)。本轮RL训练曾在Thor隔离容器执行，当前工作站忙的安排不等于永久资源限制；VLA微调仍在服务器。下方较早部署为历史时点。
 
 **当前PLD部署（2026-10-13 10:40 CST）**：用户确认现场停止执行后，`pld-rl:thor-collect-20261013-r1`接管原`ws://192.168.250.1:8000`，实查healthy/MAXN。源码e21431b，gate v3，合同87b1affa…，actor快照583ae73a…，2287维零更新初始化；Pi20w、七步FP32/TF32 engine及quantile RTC保持。生产48例真实输入＋9例普通RTC通过，含actor P95=223.91ms，原客户端16例校验通过；待用户新两集完成跨IPC真机联调。旧容器`pld-rl-retained-pld-collect-20261013-r1`保留回退。未操作3588。[本次完整证据](reports/thor/pld-rl-20261013/README.md)与[操作方案](reports/rl/pld-sac-block-v2/README.md)为现行owner，下方旧部署保留为历史。

@@ -53,6 +53,7 @@ def smoke(args, name, port, tag):
     run(["docker", "exec", name, "python", "/opt/pld-rl/scripts/thor/smoke_pld_bundle_ws.py",
          "--url", f"ws://192.168.250.1:{port}", "--cases", "/pld-cases/cases.json",
          "--expected-actor-phase", manifest["phase"],
+         "--bundle-manifest", "/pld-bundle/manifest.json",
          "--expected-snapshot-sha256", hashlib.sha256((args.bundle/"manifest.json").read_bytes()).hexdigest(),
          "--output", f"/deployment/{filename}"], capture=False)
     result = json.loads((args.release/filename).read_text())

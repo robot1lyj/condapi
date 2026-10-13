@@ -41,8 +41,8 @@ def modern_contract():
     return c
 
 
-def modern_recording(kind="held"):
-    c, rows, proposals, tokens = modern_contract(), [], [], []
+def modern_recording(kind="held", *, contract_override=None):
+    c, rows, proposals, tokens = contract_override or modern_contract(), [], [], []
     session = InterventionSession(c)
     identity = {"run_id": "synthetic-v3", "episode_id": "ep", "epoch": 0, "mode": "collect"}
     previous = np.zeros(14)

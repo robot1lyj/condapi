@@ -1,6 +1,7 @@
 """Optional Thor postprocessor. Loading it does not enable physical collection."""
 
 import json
+import math
 from pathlib import Path
 import time
 
@@ -24,6 +25,9 @@ from yam_pld_rl.block_contract import physical_baseline
 from yam_pld_rl.block_contract import validate_contract
 from yam_pld_rl.block_contract import window_context
 from yam_pld_rl.block_contract import wire_plan
+from yam_pld_rl.collector import center_latent
+from yam_pld_rl.collector import execution_contract
+from yam_pld_rl.collector import validate_collector
 from yam_pld_rl.data import sha256
 from yam_pld_rl.intervention import InterventionSession
 from yam_pld_rl.kinematics import YamKinematics
@@ -36,6 +40,8 @@ class BlockRuntime:
         self.manifest = json.loads((bundle / "manifest.json").read_text())
         self.contract = self.manifest["contract"]
         validate_contract(self.contract)
+        validate_collector(self.manifest)
+        self.actor_contract = self.manifest.get("actor_contract", self.contract)
         if self.manifest["observation_dim"] != feature_dim(self.contract):
             raise ValueError("bundle feature dimension differs from gate/action contract")
         if self.contract["base_weights_sha256"] != base_weights_sha256:
@@ -70,7 +76,10 @@ class BlockRuntime:
                 "actor_loaded": True, "replay_contract_ready": True, "actor_phase": self.manifest["phase"],
                 "gate_version": self.contract["gate"].get("version", 1),
                 "reward_contract": self.contract.get("reward_contract", "lift_only_legacy"),
-                "gate_owner": "thor", "recording": "native_HIL_with_full_pld_reply"}
+                "gate_owner": "thor", "recording": "native_HIL_with_full_pld_reply",
+                "collector": self.manifest.get("collector"),
+                "collect_joint_radius_rad": self.contract["radius"][0],
+                "eval_joint_radius_rad": self.actor_contract["radius"][0]}
 
     def new_session(self):
         """Share GPU networks, isolate causal gate state per websocket connection."""
@@ -79,7 +88,7 @@ class BlockRuntime:
     @torch.inference_mode()
     def infer(self, session, obs, rtc, request, output):
         start = time.monotonic()
-        c = self.contract
+        c = execution_contract(self.manifest, request.get("mode"))
         if request.get("mode") == "off":
             session.reset()
             return output
@@ -114,7 +123,7 @@ class BlockRuntime:
                  "physical_base": base, "physical_actions": base,
                  "previous_command": previous, "base_z_m": heights, "raw_base": raw_base,
                  "baseline_transform": c.get("baseline_transform"), "actions": wire_plan(base, raw_base, delay),
-                 "wire_actions": wire_plan(base, raw_base, delay),
+                 "wire_actions": wire_plan(base, raw_base, delay), "execution_contract_sha256": fingerprint(c),
                  "replay_eligible": True, "residual_applied": False}
         if not gate["active"]:
             return {**output, "actions": trace["wire_actions"], "pld": trace}
@@ -135,7 +144,30 @@ class BlockRuntime:
         extra = {"negative_scale": negative_scale, "context": window_context(gate, tick, heights[arm], c["action_dt_s"])} if c["gate"].get("version") == 3 else {}
         x = observation_vector(features, state, base, previous, arm, delay, elapsed, scale, self.manifest["normalization"], **extra)
         mode = request["mode"]
-        u, logp = self.actor(torch.from_numpy(x)[None].to(self.device), deterministic=mode == "eval")
+        if self.manifest.get("collector") and mode == "collect":
+            ac = self.actor_contract
+            ap, an = feasible_bounds(base, previous, arm, delay, ac)
+            if gate.get("apply_residual") is False:
+                ap, an = np.zeros(7, np.float32), np.zeros(7, np.float32)
+            ax = observation_vector(features, state, base, previous, arm, delay, elapsed, ap,
+                                    self.manifest["normalization"], negative_scale=an,
+                                    context=window_context(gate, tick, heights[arm], ac["action_dt_s"]))
+            mean_u, _ = self.actor(torch.from_numpy(ax)[None].to(self.device), deterministic=True)
+            mean_u = mean_u[0].cpu().numpy()
+            offset = 0 if arm == "left" else 7
+            physical_center = map_action(mean_u, ap, an) * np.asarray(ac["radius"][offset:offset+7], np.float32)
+            mu = torch.from_numpy(center_latent(physical_center, c["radius"][offset:offset+7], scale, negative_scale)).to(self.device)[None]
+            std = torch.tensor(self.manifest["collector"]["latent_std"], device=self.device)[None]
+            z = mu + std * torch.randn_like(mu)
+            u = torch.tanh(z)
+            logp = (-.5 * (((z-mu)/std).square()+2*std.log()+math.log(2*math.pi))
+                    -2*(math.log(2)-z-torch.nn.functional.softplus(-2*z))).sum(-1)
+            # Visual/state/plan/previous-command fields are shared with x.
+            trace.update(actor_context=ax[2264:], actor_mean_u=mean_u, actor_scale=ap, actor_negative_scale=an,
+                         actor_physical_center=physical_center, collector_latent_center=mu[0].cpu().numpy(),
+                         collector_latent_std=std[0].cpu().numpy())
+        else:
+            u, logp = self.actor(torch.from_numpy(x)[None].to(self.device), deterministic=mode == "eval")
         u = u[0].cpu().numpy()
         action = map_action(u, scale, negative_scale) if mode in {"collect", "eval"} else np.zeros(7, dtype=np.float32)
         actions = decode(base, action, arm, delay, c)

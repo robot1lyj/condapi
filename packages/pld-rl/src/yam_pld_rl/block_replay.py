@@ -16,6 +16,9 @@ from yam_pld_rl.block_contract import physical_baseline
 from yam_pld_rl.block_contract import validate_contract
 from yam_pld_rl.block_contract import window_context
 from yam_pld_rl.block_contract import wire_plan
+from yam_pld_rl.collector import execution_contract
+from yam_pld_rl.collector import validate_collector
+from yam_pld_rl.collector import validate_collector_trace
 
 
 def compile_replay(records, labels, contract, snapshots):
@@ -29,6 +32,7 @@ def compile_replay(records, labels, contract, snapshots):
     cid = fingerprint(contract)
     feature_identity = None
     for manifest in snapshots.values():
+        validate_collector(manifest)
         if manifest["contract"] != contract:
             raise ValueError("mixed contracts in replay")
         identity = (manifest["encoder_sha256"], fingerprint(manifest["normalization"]))
@@ -120,6 +124,8 @@ def compile_replay(records, labels, contract, snapshots):
                 if (p["schema"] != contract["schema"] or p["contract_sha256"] != cid or p["snapshot_sha256"] not in snapshots
                         or p["snapshot_sha256"] != snapshot or p["arm"] != arm or p["mode"] != mode):
                     raise ValueError("attempt changes contract/snapshot/arm/mode")
+                if execution_contract(snapshots[snapshot], mode) != contract:
+                    raise ValueError("execution coordinates differ from requested replay")
                 begin, end = integer(p["start_tick"], "start"), integer(p["end_tick"], "end")
                 delay = integer(p["delay_steps"], "delay")
                 if not 0 < end - begin <= 50:
@@ -211,6 +217,7 @@ def compile_replay(records, labels, contract, snapshots):
                                                    snapshots[snapshot]["normalization"], **extra)
                 if not np.allclose(x, reconstructed, atol=1e-6, rtol=0):
                     raise ValueError("causal observation vector mismatch")
+                validate_collector_trace(p, snapshots[snapshot])
                 if index and not np.allclose(p["previous_command"], attempt[index - 1]["receipt"]["submitted_actions"][-1], atol=1e-6, rtol=0):
                     raise ValueError("command continuity anchor changed")
                 nx = np.zeros_like(x) if terminal else array(attempt[index + 1]["proposal"]["x"], (dim,), "nx")

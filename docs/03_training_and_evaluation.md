@@ -2,6 +2,8 @@
 
 ## PLD 主线与 RECAP 后续路线（2026-10-11）
 
+**当前采集升级候选（2026-10-13）：** 用户授权Actor-1上扩大collect至关节±0.08rad，配合std0.5和残差步进0.03；eval保留原物理策略，权重未再训练。13集2950上下文/188800采样，目标FK中位2.16cm、P95 4.24cm；非实测运动或成功率。首集验收后采到10–15集再训练Actor-2，旧数据保留但须坐标转换后混训。候选实现与检查见[Collect-2](reports/rl/lego-pld-collect-20261013/wide008/README.md)，生产切换待现场停止与GPU验收；下段为当前父Actor-1。
+
 **当前：PLD式整段抓取残差框架，Pi/编码器冻结，左右臂覆盖；因工作站繁忙，本轮RL在Thor独立容器训练。** 13集最终467抓取，原3417转移；R02仅合并强制等待尾段并保持折扣回报，2950决策（首集249验证，其余2701训练）。用户授权自行选择算法，已完成CalQL、MC-CalQL、PARTS-TD3BC及输入平衡对照各seed0/1，共24,000 critic/4,000 actor更新、48份检查点审计。训练循环合计450秒，不是VLA全量训练。CalQL本配方入口价值失真，普通PARTS入口弱；平衡输入后入口AUC约0.73，但仅按左右臂先验已0.705、右臂仍弱，不能宣称已学会有效修正或收敛。选`PARTS-TD3BC-Balanced seed0/3000`作工程试跑候选；主框架仍是Pi＋外挂小专家，不称完整原论文复现。[完整选择与局限](reports/rl/lego-pld-collect-20261013/batch13/round02.md)。
 
 用户随后明确要求恢复推理，`pld-rl`已加载新快照`75674aad…`，本机48例学习专家＋9例RTC及客户端16包通过，healthy/MAXN，P95约217ms；`pld-rl-train`已停止。首轮`eval`＋前缀10先2集，再与同分布纯Pi(`probe`)对照；eval评估不混入训练，后续collect才用于下一轮更新。局部1/0训练，整轮C/N仅评估；自动标签不是人工真值，51个无建议仍保留。新第14集collect/第15集eval已证实非零修正进入实际下发，eval有834个修正tick、最大目标FK差4.69mm；实际成功率改善仍未证实。[执行链证据](reports/rl/lego-pld-collect-20261013/learned-e14-e15/README.md)。eval经验原则上可用于离策略更新，当前隔离评估是管线用途设置，后续应以用途/split区分，不能说只有collect才能训练。[部署与回退](reports/rl/lego-pld-collect-20261013/batch13/deployment/README.md)、[批次原始证据](reports/rl/lego-pld-collect-20261013/batch13/README.md)。

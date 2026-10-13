@@ -1,0 +1,16 @@
+{
+  "status": "passed",
+  "device": "cpu",
+  "snapshot_sha256": "23d4da1ad778586cfcafdb02868eec7e51810d50caed259c4e4a4c5184383efd",
+  "parent_snapshot_sha256": "75674aad5775e4864cce24664abd270e43a2a82b7e64f95811ce952979b2d286",
+  "recorded_cases": 4,
+  "sampled_collect_cases": 12,
+  "eval_wire_and_observation_exact": true,
+  "max_zero_noise_center_error": 9.313225746154785e-10,
+  "collector_trace_valid": true,
+  "prefix_exact": true,
+  "full_encoder_and_actor_used": true,
+  "training": false,
+  "robot_connected": false,
+  "live_Pi_tested": false
+}
