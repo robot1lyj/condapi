@@ -1,0 +1,13 @@
+{
+  "status": "staged_waiting_for_site_idle_and_gpu_acceptance",
+  "source_revision": "be5dd52330dc77c3a70d5f3b08a6f161e4eaa699",
+  "image_id": "sha256:09d2f9dec4c188df20e140cdc48a98b3f485ee00f07feff6aa07fb551bbaeeb0",
+  "bundle_sha256": "23d4da1ad778586cfcafdb02868eec7e51810d50caed259c4e4a4c5184383efd",
+  "source_archive_sha256": "d73235c1f2c0cefda1fc6bedef2e40b7057ef824887713ada02a7ff7c3c9d347",
+  "runtime_cpu_receipt": "runtime-cpu-check-v2.json",
+  "geometry_receipt": "geometry-all13.json",
+  "current_production_image": "sha256:f6dfaba965ec61b4022cc4b26cdda420ac3de4b79ccec42687dcf84f35295bd0",
+  "current_production_running": true,
+  "production_switched": false,
+  "training_started": false
+}

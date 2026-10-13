@@ -33,4 +33,6 @@
 
 CPU合同/抓取/录制回归29项通过。Thor CPU真实RGB＋记录Pi输出4例、collect12次验证完整ResNet18和actor路径，eval输入/动作逐值一致、噪声中心与父动作一致、前缀保持；[CPU检查](runtime-cpu-check.json)。候选待完整Pi＋RL GPU延迟、客户端包验证与生产切换，线上仍是旧Actor-1 collect配置；状态以部署回执为准。
 
+候选镜像`pld-rl:thor-wide008-20261013-r1`已在Thor构建，源码`be5dd52`、镜像ID`09d2f9de…`；最终紧凑trace版本重新完成CPU全路径检查。发布目录`/home/wuyan-lyj/thor/pi/services/pld-wide008-20261013-r1/`保存完整源包、bundle与证据。当前客户端仍连接8000，已询问现场是否停止；答复前不占用推理GPU或切换生产。[构建与现状回执](staging.json)。
+
 确认现场停止后再切换同一`pld-rl`地址，旧容器保留回退。客户端集间重新绑定身份，前缀仍10。首集检查快照、有效修正tick、实际指令差、FK分布、机械臂响应、延迟/取消、两臂触发和奖励覆盖；如果队列覆盖或机构未跟上，先修执行时间/节奏，不能只加radius。通过后补齐10–15集，Qwen＋DINO判奖、无建议交人工，冻结奖励版本再训练Actor-2，与父Actor-1/纯Pi对照。
