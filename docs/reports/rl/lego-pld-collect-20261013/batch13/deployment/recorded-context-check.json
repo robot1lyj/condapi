@@ -1,0 +1,23 @@
+{
+  "status": "passed_recorded_contexts_only",
+  "snapshot_sha256": "75674aad5775e4864cce24664abd270e43a2a82b7e64f95811ce952979b2d286",
+  "script_sha256": "4af3563d09dd5ea9674d02833f87c5f67302d3ea1bb94f0fe084a2691bda1b59",
+  "contexts": 2950,
+  "arms": {
+    "left": 1159,
+    "right": 1791
+  },
+  "full_runtime_bundle_loaded": true,
+  "prefix_and_inactive_arm_exact": true,
+  "max_joint_offset_rad": 0.014356104657053947,
+  "max_gripper_offset": 0.028208984062075615,
+  "target_FK_displacement_m_quantiles": [
+    5.689429259859496e-05,
+    0.001991294265839053,
+    0.00429060227741238,
+    0.00944671134149882
+  ],
+  "closed_loop_robot_tested": false,
+  "live_Pi_inference_or_latency_tested": false,
+  "encoder_used_for_cached_features_recomputed": false
+}

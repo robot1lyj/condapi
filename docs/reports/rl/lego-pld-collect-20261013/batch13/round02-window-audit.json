@@ -1,0 +1,34 @@
+{
+  "counts": {
+    "intervals": 3417,
+    "nonzero_effect": 2950,
+    "first_effect_after_next_observation": 2927,
+    "phase_correcting": 2950,
+    "phase_draining": 467
+  },
+  "attempts": 467,
+  "window_intervals_quantiles": [
+    3.0,
+    7.0,
+    10.0,
+    15.0
+  ],
+  "forced_tail_intervals_quantiles": [
+    1.0,
+    1.0,
+    1.0,
+    1.0
+  ],
+  "forced_tail_seconds_quantiles": [
+    0.2999354740604758,
+    0.3662740758154541,
+    0.3668997809290886,
+    0.40072597889229655
+  ],
+  "first_effect_delay_seconds_quantiles": [
+    0.36666666666666664,
+    0.36666666666666664,
+    0.36666666666666664,
+    0.36666666666666664
+  ]
+}

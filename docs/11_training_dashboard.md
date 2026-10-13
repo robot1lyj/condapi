@@ -6,7 +6,7 @@
 
 同日用户授权继续多论文实验，8766配置新增十组 PLD-IQL / PLD-TD3BC / PLD-ReBRAC，旧八组ID不变，仅统一展示名。新组区分actor实际更新数、动作残差RMS、边界饱和、末步奖励误差与critic自评增益；actor本轮会更新，在线环境步数仍为0。不同算法loss不直接排名，自评gain不显示为成功率。API已复核18/18组、坏行0，新组20,000步/旧组5,000步；使用前仍核对同步状态。细节归[多算法报告](reports/rl/pld-methods14-20261012/README.md)。
 
-PLD-Grasp（PLD-SAC v2协议）继续复用同一指标写入器，整轮C/N只作评估、不参与SAC更新。新[看板配置](../configs/dashboards/pld-sac-block-v2.json)已接入2026-10-13 Thor真实R01：467窗/3417转移、1000 critic/450 actor更新完成，50条有效指标；8766复用原面板，18组历史配置和日志保留。显示双Q、actor、熵温度、实际残差与在线决策块/秒数；不把2315合成测试曲线加入用户18组实验作为训练成绩。原8766配置和18组历史保留；本轮新run按Thor源路径只读镜像到`artifacts/pld-sac-v2-r01`，训练已结束，不从最后一个metrics时间推定仍在训练。
+PLD-Grasp复用原指标写入器与8766面板，当前[配置](../configs/dashboards/pld-collect13-r02.json)含R01历史基线＋R02八组真实对照，原18组配置/日志另存不删。新八组每组3000 critic/500 actor，60条指标、48个保存检查点均已完成；固定数据更新没有新增环境交互。新增入口/全段/末个可控动作的记录回报RMSE与AUC，分左右臂；显示确定性残差RMS、各维边际分位范围外比例、MC阶段、CalQL项和BC项。指标均不是机器人成功率，入口AUC需与仅按左右臂先验0.705比较。镜像`artifacts/pld-collect13-r02`，本轮同步已结束；训练停止且候选另已上线推理，不从metrics新旧推断服务状态。选定候选为PARTS-TD3BC-Balanced seed0/3000，完整结论见[第二轮报告](reports/rl/lego-pld-collect-20261013/batch13/round02.md)。
 
 看板只读本地指标，不依赖模型环境、不上传 W&B、不启动或停止训练。模型环境继续按系列使用 Conda；训练器继续复用 OpenPI 或 LeRobot，新增模型不需要复制看板或训练循环。
 

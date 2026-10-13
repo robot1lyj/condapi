@@ -1,0 +1,43 @@
+{
+  "eligible_windows": 467,
+  "missing_close_or_effect": 0,
+  "closure_is_online_relative_gripper_detector_not_contact_ground_truth": true,
+  "first_effect_to_closure_seconds_quantiles": [
+    -0.03333333333333333,
+    0.6666666666666666,
+    0.7,
+    1.0333333333333334,
+    1.8
+  ],
+  "no_effect_before_detected_closure": 16,
+  "effect_ticks_before_closure_quantiles": [
+    0.0,
+    12.0,
+    12.0,
+    18.0,
+    30.0
+  ],
+  "train_feature_energy": {
+    "visual": {
+      "mean_squared_l2": 3.0,
+      "mean_squared_centered_l2": 0.5327759385108948
+    },
+    "state": {
+      "mean_squared_l2": 15.268693923950195,
+      "mean_squared_centered_l2": 14.799849510192871
+    },
+    "plan": {
+      "mean_squared_l2": 6789.7919921875,
+      "mean_squared_centered_l2": 6660.587890625
+    },
+    "previous_command": {
+      "mean_squared_l2": 15.855093955993652,
+      "mean_squared_centered_l2": 15.481792449951172
+    },
+    "context_and_limits": {
+      "mean_squared_l2": 16.75301170349121,
+      "mean_squared_centered_l2": 0.9169683456420898
+    }
+  },
+  "interpretation": "energy alone does not prove modality use or causality"
+}

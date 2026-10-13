@@ -1,0 +1,9 @@
+{
+  "training_entry_success_rate_by_arm": {
+    "False": 0.5070422535211268,
+    "True": 0.27208480565371024
+  },
+  "validation_entry_arm_prior_auc": 0.7052785923753666,
+  "validation_entry_arm_prior_mc_rmse": 0.4116413530038235,
+  "interpretation": "aggregate AUC must be compared against arm identity baseline, not just 0.5"
+}
