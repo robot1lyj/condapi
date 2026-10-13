@@ -2,7 +2,7 @@
 
 ## 并行 RL 实验的所有权（2026-10-11）
 
-用户明确多方案并行。本分工当前为**PLD式整段抓取残差专家**，实现与当前分工归[PLD-SAC v2](reports/rl/pld-sac-block-v2/README.md)：Thor在线Pi-Base＋PLD-Grasp，离线优先Replay-Curator＋Qwen-DINO Judge；GPU服务器归档/复核并运行SAC-Coach；外部客户端仅复用RTC执行与连续录制。抓取切段、正式编号、奖励不由客户端承担。代码与合成闭环不代表真机启用，学习状态唯一归[03](03_training_and_evaluation.md#pld-主线与-recap-后续路线2026-10-11)。RECAP后置；EXPO-FT属于独立并行路线，本分工不改动其实现或授权。
+用户明确多方案并行。本分工当前为**PLD式整段抓取残差专家**，实现与当前分工归[PLD-SAC v2](reports/rl/pld-sac-block-v2/README.md)：Thor在线Pi-Base＋PLD-Grasp，离线Replay-Curator＋Qwen-DINO Judge；**2026-10-13用户改定RL训练统一放Thor，SAC-Coach使用独立`pld-rl-train`容器，与推理/判奖错开GPU**。GPU服务器保留既有归档与VLA监督微调职责，不为本轮申请训练卡。外部客户端仅复用RTC执行与连续录制，抓取切段、正式编号、奖励不由客户端承担。数值验证不代表真机改善，学习状态唯一归[03](03_training_and_evaluation.md#pld-主线与-recap-后续路线2026-10-11)。RECAP后置；EXPO-FT属于独立并行路线，本分工不改动其算法实现。
 
 ## EXPO-FT 强化学习架构（2026-10-10，设计草案）
 

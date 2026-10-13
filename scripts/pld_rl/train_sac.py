@@ -1,4 +1,4 @@
-"""Allocated-server PLD-Grasp SAC bootstrap/update/export. No physical actuation."""
+"""Explicit Thor/Slurm PLD-Grasp SAC update/export. No physical actuation."""
 
 # ruff: noqa: E402
 
@@ -22,6 +22,7 @@ from yam_pld_rl.block_contract import fingerprint
 from yam_pld_rl.block_contract import validate_contract
 from yam_pld_rl.data import sha256
 from yam_pld_rl.data import write_json
+from yam_pld_rl.execution import require_training_runtime
 from yam_pld_rl.sac import SacLearner
 
 
@@ -45,12 +46,13 @@ def main():
     p.add_argument("--encoder", type=Path, required=True)
     p.add_argument("--replay", type=Path, help="omit for zero-mean bootstrap export only")
     p.add_argument("--output", type=Path, required=True)
+    p.add_argument("--execution", choices=("slurm", "thor-offline"), default="slurm")
     group = p.add_mutually_exclusive_group()
     group.add_argument("--resume", type=Path, help="exact same run/input identity")
     group.add_argument("--initialize-learner", type=Path, help="previous round checkpoint, new replay/output")
     args = p.parse_args()
-    if not os.environ.get("SLURM_JOB_ID") or not torch.cuda.is_available():
-        raise RuntimeError("Slurm GPU required; workstation/login training forbidden")
+    execution = require_training_runtime(args.execution, cuda_available=torch.cuda.is_available(),
+                                         capability=torch.cuda.get_device_capability() if torch.cuda.is_available() else None)
     cfg, contract, stats = [json.loads(path.read_text()) for path in (args.config, args.contract, args.normalization)]
     validate_contract(contract)
     torch.set_num_threads(2)
@@ -87,7 +89,7 @@ def main():
             groups[is_online] = [np.flatnonzero(mask & (arrays["attempt"] == a)) for a in np.unique(arrays["attempt"][mask])]
         tensors = {k: torch.as_tensor(arrays[k], device="cuda", dtype=torch.float32)
                    for k in ("x", "nx", "scale", "next_scale", "negative_scale", "next_negative_scale", "action", "reward", "terminal", "discount")}
-    identity = {"code_commit": commit, "inputs": inputs}
+    identity = {"code_commit": commit, "inputs": inputs, "execution_target": args.execution}
     policy_contract = {"contract": contract, "normalization": stats, "encoder_sha256": sha256(args.encoder), "config": cfg}
     begin = 0
     if args.resume or args.initialize_learner:
@@ -102,7 +104,8 @@ def main():
             rng.bit_generator.state = ckpt["numpy_rng"]
             torch.set_rng_state(ckpt["torch_rng"].cpu())
             torch.cuda.set_rng_state(ckpt["cuda_rng"].cpu())
-    run = {**identity, "producer": "SAC-Coach", "policy_expert": "PLD-Grasp", "policy_contract": policy_contract, "job": os.environ["SLURM_JOB_ID"],
+    run = {**identity, "producer": "SAC-Coach", "policy_expert": "PLD-Grasp", "policy_contract": policy_contract,
+           "job": execution["job"], "execution": execution,
            "hostname": os.uname().nodename, "torch": torch.__version__, "gpu": torch.cuda.get_device_name(),
            "replay": replay_manifest, "pi_updated": False, "robot_success_rate": None,
            "parent_checkpoint": str(args.initialize_learner) if args.initialize_learner else None,

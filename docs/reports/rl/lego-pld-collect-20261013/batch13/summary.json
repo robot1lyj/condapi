@@ -1,0 +1,122 @@
+{
+  "schema": "pld_collect13_audit_v1",
+  "raw_snapshot": "/home/wuyan-lyj/condapi-data/rl/lego-pld-collect13-20261013-v1",
+  "copy_receipt": {
+    "raw_modified": false,
+    "pre_post_source_hashes_equal": true,
+    "local_hashes_match": true,
+    "files": 155,
+    "bytes": 3642773687,
+    "episodes": 13
+  },
+  "rows": 51086,
+  "duration_s": 1703.3107221408281,
+  "episodes": [
+    {
+      "number": 1,
+      "path": "episode_000003",
+      "episode_id": "b05fdb3e4ef1449a89a0fd607819184e",
+      "rows": 4316
+    },
+    {
+      "number": 2,
+      "path": "episode_000004",
+      "episode_id": "f7e5aa6f34b743e0afdda9558b9c54b2",
+      "rows": 3324
+    },
+    {
+      "number": 3,
+      "path": "episode_000005",
+      "episode_id": "911b4f30836646a39e16882e861099ae",
+      "rows": 3175
+    },
+    {
+      "number": 4,
+      "path": "episode_000006",
+      "episode_id": "ff8d2216e77444a9b8dab256aff06dbc",
+      "rows": 7309
+    },
+    {
+      "number": 5,
+      "path": "episode_000007",
+      "episode_id": "a32c0e8f21504b7d830befcf7e18b356",
+      "rows": 4810
+    },
+    {
+      "number": 6,
+      "path": "episode_000008",
+      "episode_id": "ee0df412f4f14281baf0a74220319b31",
+      "rows": 2139
+    },
+    {
+      "number": 7,
+      "path": "episode_000010",
+      "episode_id": "d7bcd934ec7b44bb9640cd6c31672e97",
+      "rows": 3647
+    },
+    {
+      "number": 8,
+      "path": "episode_000011",
+      "episode_id": "12b117c913ed41d19772e7572a47b3b9",
+      "rows": 4647
+    },
+    {
+      "number": 9,
+      "path": "episode_000012",
+      "episode_id": "e281996347c949aca9e51119b5bc25dc",
+      "rows": 2469
+    },
+    {
+      "number": 10,
+      "path": "episode_000013",
+      "episode_id": "d62e95331b9143d4a3c7b006bee851d8",
+      "rows": 3577
+    },
+    {
+      "number": 11,
+      "path": "episode_000014",
+      "episode_id": "e524071bb7c74ba7b603ffcb8e880f16",
+      "rows": 3476
+    },
+    {
+      "number": 12,
+      "path": "episode_000015",
+      "episode_id": "fa848e64d21241dea9cc62740a8c3c27",
+      "rows": 2453
+    },
+    {
+      "number": 13,
+      "path": "episode_000018",
+      "episode_id": "3960e2713a7745a78955822acd3ef70a",
+      "rows": 5744
+    }
+  ],
+  "physical_candidates": 564,
+  "candidates_by_arm": {
+    "left": 189,
+    "right": 375
+  },
+  "online_windows": 534,
+  "awaiting_reward_review": 521,
+  "qualified_lift_endpoint_proposals": 470,
+  "nonlift_or_short_endpoint_review": 51,
+  "ambiguous_association_windows": 10,
+  "execution_rejected_windows": 3,
+  "replies": 4850,
+  "accepted_replies": 4839,
+  "cancelled_requests": 9,
+  "human_rows": 0,
+  "invalid_observation_rows": 0,
+  "submission_mismatches": 0,
+  "missing_action_origins": 0,
+  "correction_rows": 20272,
+  "max_joint_correction_rad": 0.013650358654558659,
+  "max_gripper_correction": 0.035787906497716904,
+  "videos": 105,
+  "decoded_frames": 153258,
+  "reward_labels_published": 0,
+  "training_executed": false,
+  "robot_success_rate": null,
+  "training_target": "thor-offline",
+  "validation_episode_id": "b05fdb3e4ef1449a89a0fd607819184e"
+}

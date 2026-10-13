@@ -104,6 +104,13 @@ def export_evidence(candidates, output):
     write_json(output / "outcomes-prepared.json", outcomes)
 
 
+def append_jsonl(path, values):
+    """Stream one episode at a time instead of retaining full native traces."""
+    with path.open("a") as stream:
+        for value in values:
+            stream.write(json.dumps(value, allow_nan=False) + "\n")
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--episodes", type=Path, nargs="+", required=True)
@@ -125,7 +132,10 @@ def main():
     args.output.mkdir(parents=True, exist_ok=False)
     fk = YamKinematics(ROOT / "third_party/yam-fk-model/yam_linear4310.xml")
     approved = json.loads(args.rewards.read_text()) if args.rewards else []
-    candidates, windows, records, labels, audit, hashes, probe_reports, policy_events = [], [], [], [], [], {}, [], []
+    candidates, labels, audit, hashes, probe_reports = [], [], [], {}, []
+    interval_count, record_count = 0, 0
+    for name in ("windows", "records", "policy-events"):
+        (args.output / f"{name}.jsonl").touch(exist_ok=False)
     episode_ids = set()
     for number, folder in enumerate(folders, 1):
         rows, events, source_hashes = read_episode(folder)
@@ -133,7 +143,7 @@ def main():
         if rows[0]["episode_id"] in episode_ids:
             raise ValueError("duplicate native episode UUID across inputs")
         episode_ids.add(rows[0]["episode_id"])
-        policy_events.extend(events)
+        append_jsonl(args.output / "policy-events.jsonl", events)
         if args.probe_audit:
             probe_reports.append(audit_probe(rows, events, native_manifest))
         hashes.update(source_hashes)
@@ -159,8 +169,10 @@ def main():
         relevant = [r for r in approved if r["candidate_id"] in {q["candidate_id"] for q in c}]
         linked, rewards, association = ([], [], []) if args.probe_audit else associate_rewards(w, c, relevant, rows, split)
         candidates.extend(c)
-        windows.extend(w)
-        records.extend(linked)
+        append_jsonl(args.output / "windows.jsonl", w)
+        append_jsonl(args.output / "records.jsonl", linked)
+        interval_count += len(w)
+        record_count += len(linked)
         labels.extend(rewards)
         audit.append({"episode": str(folder), "split": split, "raw_rows": len(rows), "physical_candidates": len(c),
                       "actual_intervals": len(w), "execution_exclusions": rejected, "association_exclusions": association})
@@ -170,8 +182,6 @@ def main():
         export_evidence(candidates, args.output)
     for name, value in (("candidates", candidates), ("rewards", labels), ("audit", audit)):
         write_json(args.output / f"{name}.json", value)
-    for name, value in (("windows", windows), ("records", records), ("policy-events", policy_events)):
-        (args.output / f"{name}.jsonl").write_text("".join(json.dumps(r, allow_nan=False) + "\n" for r in value))
     if args.probe_audit:
         write_json(args.output / "probe-audit.json", {"status": "passed" if all(r["status"] == "passed" for r in probe_reports) else "failed",
                    "episodes": probe_reports, "training_ready": False, "robot_success_rate": None})
@@ -185,9 +195,9 @@ def main():
                "episodes_in_order": list(map(str, folders)),
                "sources_sha256": hashes, "outputs_sha256": outputs,
                "review_sha256": sha256(args.rewards) if args.rewards else None,
-               "ready_for_replay_compilation": bool(records) and not args.probe_audit,
+               "ready_for_replay_compilation": bool(record_count) and not args.probe_audit,
                "purpose": "probe_diagnostics" if args.probe_audit else "reward_association", "robot_success_rate": None})
-    print(json.dumps({"candidates": len(candidates), "actual_intervals": len(windows), "reviewed_windows": len(labels)}))
+    print(json.dumps({"candidates": len(candidates), "actual_intervals": interval_count, "reviewed_windows": len(labels)}))
     if args.probe_audit and any(r["status"] != "passed" for r in probe_reports):
         raise SystemExit(2)  # Keep evidence, but never report a failed audit as a successful job.
 

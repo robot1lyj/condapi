@@ -1,8 +1,7 @@
-"""Allocated-server numerical checks for v3; synthetic data, no robot results."""
+"""Explicit Thor/Slurm numerical checks for v3; synthetic data only."""
 # ruff: noqa: E402
 import argparse
 import json
-import os
 from pathlib import Path
 import subprocess
 import sys
@@ -19,6 +18,7 @@ from yam_pld_rl.block_replay import compile_replay
 from yam_pld_rl.curator import associate_rewards
 from yam_pld_rl.data import sha256
 from yam_pld_rl.data import write_json
+from yam_pld_rl.execution import require_training_runtime
 from yam_pld_rl.sac import SacLearner
 
 
@@ -26,9 +26,10 @@ def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--output", type=Path, required=True)
     p.add_argument("--encoder", type=Path, required=True)
+    p.add_argument("--execution", choices=("slurm", "thor-offline"), default="slurm")
     args = p.parse_args()
-    if not os.environ.get("SLURM_JOB_ID") or not torch.cuda.is_available():
-        raise RuntimeError("Slurm GPU required, never run on workstation/Thor")
+    execution = require_training_runtime(args.execution, cuda_available=torch.cuda.is_available(),
+                                         capability=torch.cuda.get_device_capability() if torch.cuda.is_available() else None)
     args.output.mkdir(parents=True, exist_ok=False)
     torch.set_num_threads(2)
     torch.manual_seed(918)
@@ -73,13 +74,14 @@ def main():
         write_json(args.output/f"{name}.json", value)
     subprocess.run([sys.executable, str(ROOT/"scripts/pld_rl/train_sac.py"), "--config", str(args.output/"config.json"),
                     "--contract", str(args.output/"contract.json"), "--normalization", str(args.output/"normalization.json"),
-                    "--encoder", str(args.encoder), "--replay", str(replay), "--output", str(args.output/"cli-run")], check=True)
+                    "--encoder", str(args.encoder), "--replay", str(replay), "--output", str(args.output/"cli-run"),
+                    "--execution", args.execution], check=True)
     checkpoint = torch.load(args.output/"cli-run/checkpoint-000040.pt", map_location="cuda", weights_only=True)
     restored = SacLearner(feature_dim(c), cfg)
     restored.load_state_dict(checkpoint["learner"])
     u, _ = restored.actor(b["x"], deterministic=True)
     assert torch.isfinite(u).all()
-    write_json(args.output/"result.json", {"status": "passed_synthetic_only", "job": os.environ["SLURM_JOB_ID"],
+    write_json(args.output/"result.json", {"status": "passed_synthetic_only", "job": execution["job"], "execution": execution,
                "feature_dim": feature_dim(c), "outcome_audits": audits, "forced_noop_actor_updates": 0,
                "cli_critic_updates": restored.updates, "cli_actor_updates": restored.actor_updates,
                "robot_success_rate": None, "production_actor_trained": False})
