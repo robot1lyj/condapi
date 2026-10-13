@@ -1,15 +1,15 @@
 {
   "project": "pld-vla-action-correction",
   "mode": "compose",
-  "text_type": "literature_review_and_exploratory_research_plan",
+  "text_type": "manuscript_draft_and_literature_research",
   "language": "zh",
   "target_reader": "project researchers and prospective paper collaborators",
-  "current_round": 2,
+  "current_round": 3,
   "version": "0.1",
   "updated_at": "2026-10-13",
   "scores": [],
-  "status": "literature_and_experiment_tracking",
-  "priority": "literature-first; hypotheses evolve alongside experiments; novelty not locked",
+  "status": "part_i_rtc_rl_drafted_policy_and_architecture_results_to_follow",
+  "priority": "advantage-first evidence-based writing; RTC/RL interface as supporting first part, not overall novelty claim",
   "reference_records": 25,
   "technical_debts": [
     "Selected-method reading is not full-paper or code-level reproduction audit",
@@ -25,6 +25,9 @@
     "training_or_deployment": false
   },
   "latest_experiment_record": "experiments/20261013-rtc-rl/experiment-log.md",
-  "latest_html": "experiments/20261013-rtc-rl/index.html",
-  "experiment_source_commit": "79e4dc709c653e39e0e9566d0a7f95d82464faae"
+  "latest_html": "drafts/manuscript-v0.1.html",
+  "experiment_source_commit": "79e4dc709c653e39e0e9566d0a7f95d82464faae",
+  "latest_manuscript": "drafts/manuscript-v0.1.md",
+  "latest_writing_audit": "qa_logs/defensive-writing-audit.md",
+  "manuscript_implementation_commit": "22fcebf040509a56e1d41a7474eb6c4e5caa6806"
 }

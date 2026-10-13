@@ -1,0 +1,98 @@
+{
+  "schema": "manuscript_evidence_v1",
+  "date": "2026-10-13",
+  "implementation_commit": "22fcebf040509a56e1d41a7474eb6c4e5caa6806",
+  "deployed_source_commit": "e21431b26f46aa9320ef9f32f26b07a6d08dfbac",
+  "scope": "archived evidence; no new device measurement or training",
+  "positioning": "RTC and real-time VLA RL are prior art; RTC/RL integration is first-part supporting contribution; RL and architecture contributions evolve with evidence",
+  "prior_snapshot": "../experiments/20261013-rtc-rl/evidence.json",
+  "files": [
+    {
+      "path": "packages/pld-rl/src/yam_pld_rl/block_contract.py",
+      "sha256": "40c1deba94d61c2824faf37d73d58e217647a7dd1c00ae2fcb09b86ba22de538",
+      "url": "https://github.com/robot1lyj/condapi/blob/22fcebf040509a56e1d41a7474eb6c4e5caa6806/packages/pld-rl/src/yam_pld_rl/block_contract.py"
+    },
+    {
+      "path": "packages/pld-rl/src/yam_pld_rl/block_replay.py",
+      "sha256": "7bb0a96e3b3db2583d2ee661568e9d5999c7dc5fe5512aa8e1716688d137c6a4",
+      "url": "https://github.com/robot1lyj/condapi/blob/22fcebf040509a56e1d41a7474eb6c4e5caa6806/packages/pld-rl/src/yam_pld_rl/block_replay.py"
+    },
+    {
+      "path": "packages/pld-rl/src/yam_pld_rl/intervention.py",
+      "sha256": "9d6d05e6414f3a8a3765645277adb9af123d080536af302ef27674528eea300b",
+      "url": "https://github.com/robot1lyj/condapi/blob/22fcebf040509a56e1d41a7474eb6c4e5caa6806/packages/pld-rl/src/yam_pld_rl/intervention.py"
+    },
+    {
+      "path": "packages/pld-rl/src/yam_pld_rl/sac.py",
+      "sha256": "72525fd98552dd315d29006015befcf03b35c12901df3752e33e4b6c56cac4ee",
+      "url": "https://github.com/robot1lyj/condapi/blob/22fcebf040509a56e1d41a7474eb6c4e5caa6806/packages/pld-rl/src/yam_pld_rl/sac.py"
+    },
+    {
+      "path": "packages/pld-rl/src/yam_pld_rl/grasp_outcomes.py",
+      "sha256": "98b17cb996458ecec8d1e66d1a52c78a359c0046bfeb9a81a8125264291ed7c3",
+      "url": "https://github.com/robot1lyj/condapi/blob/22fcebf040509a56e1d41a7474eb6c4e5caa6806/packages/pld-rl/src/yam_pld_rl/grasp_outcomes.py"
+    },
+    {
+      "path": "docs/reports/thor/pld-rl-20261013/README.md",
+      "sha256": "2ccd5cdbe13c94ad3aff6111bff25562a0ee1a23ad96dad2786e0fbbb0d9cffa",
+      "url": "https://github.com/robot1lyj/condapi/blob/22fcebf040509a56e1d41a7474eb6c4e5caa6806/docs/reports/thor/pld-rl-20261013/README.md"
+    },
+    {
+      "path": "docs/reports/thor/pld-rl-20261013/production-bundle-smoke.json",
+      "sha256": "82676bbb5cfd12237d55f823c103f6587eeeccaa9a4e850fb826611dc91a9a89",
+      "url": "https://github.com/robot1lyj/condapi/blob/22fcebf040509a56e1d41a7474eb6c4e5caa6806/docs/reports/thor/pld-rl-20261013/production-bundle-smoke.json"
+    },
+    {
+      "path": "docs/reports/thor/pld-rl-20261013/server-validation.json",
+      "sha256": "3032fb8bce0a12fb16bb2f99eff6060ce4abb758b27510d782b7474ba098d904",
+      "url": "https://github.com/robot1lyj/condapi/blob/22fcebf040509a56e1d41a7474eb6c4e5caa6806/docs/reports/thor/pld-rl-20261013/server-validation.json"
+    },
+    {
+      "path": "docs/reports/thor/pld-rl-20261013/draining-forward.json",
+      "sha256": "1cef53ca415e665504321f2b8919a35a124545db62e3864a8a325f5ae6373be7",
+      "url": "https://github.com/robot1lyj/condapi/blob/22fcebf040509a56e1d41a7474eb6c4e5caa6806/docs/reports/thor/pld-rl-20261013/draining-forward.json"
+    },
+    {
+      "path": "docs/reports/thor/pld-rl-20261013/client-wire-validation.json",
+      "sha256": "91e0a65c661ec3528c8aa9f551d6401d9287a4e4a734f2529c1a630f5ffbc4d4",
+      "url": "https://github.com/robot1lyj/condapi/blob/22fcebf040509a56e1d41a7474eb6c4e5caa6806/docs/reports/thor/pld-rl-20261013/client-wire-validation.json"
+    },
+    {
+      "path": "docs/reports/thor/pld-rl-20261013/contract.json",
+      "sha256": "53aa03b5e23a75ec4ac7f4f7c43dd7736cc4201634907d8a89ef11ef6e2380bb",
+      "url": "https://github.com/robot1lyj/condapi/blob/22fcebf040509a56e1d41a7474eb6c4e5caa6806/docs/reports/thor/pld-rl-20261013/contract.json"
+    },
+    {
+      "path": "docs/reports/thor/pld-rl-20261013/deployment.json",
+      "sha256": "04fedb9ceb9e01582102b5b8724cc0ad243dcef5af0f63b77bc104a2b6351fec",
+      "url": "https://github.com/robot1lyj/condapi/blob/22fcebf040509a56e1d41a7474eb6c4e5caa6806/docs/reports/thor/pld-rl-20261013/deployment.json"
+    },
+    {
+      "path": "docs/reports/rl/pld-sac-block-v2/README.md",
+      "sha256": "9c0e526addc148954ef107552690b1c6c807823ba451efead59307639b8e0ae3",
+      "url": "https://github.com/robot1lyj/condapi/blob/22fcebf040509a56e1d41a7474eb6c4e5caa6806/docs/reports/rl/pld-sac-block-v2/README.md"
+    }
+  ],
+  "reported_metrics": {
+    "production_cases": 48,
+    "prefix_exact_passes": 48,
+    "decoder_exact_passes": 48,
+    "active_actor_service_p50_ms": 222.9166979668662,
+    "active_actor_service_p95_ms": 223.91171765048057,
+    "robot_connected": false,
+    "cross_IPC_tested": false,
+    "trained_actor_updates": 0,
+    "synthetic_transitions": 54,
+    "synthetic_critic_updates": 40,
+    "synthetic_actor_updates": 18,
+    "forced_wait_actor_updates": 0,
+    "historical_probe_source_intervals": 116,
+    "historical_probe_source_passes": 116
+  },
+  "missing_results": [
+    "independent reward accuracy",
+    "real residual policy success improvement",
+    "cross-task architectural gains",
+    "expert-off distillation results"
+  ]
+}

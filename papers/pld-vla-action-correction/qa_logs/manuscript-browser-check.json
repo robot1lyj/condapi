@@ -1,0 +1,14 @@
+{
+  "checked_at": "2026-10-13",
+  "scope": "document rendering and interactions; no model or training execution",
+  "errors": [],
+  "stage": "停止新增：已承诺的修正继续完成",
+  "filtered": "2 / 78 处",
+  "horizontalOverflow": false,
+  "headings": 10,
+  "equations": 4,
+  "audits": 78,
+  "diagram": 1,
+  "unresolvedPlaceholders": false,
+  "mobileOverflow": false
+}

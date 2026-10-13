@@ -1,0 +1,298 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VLA 动作修正与强化学习 · 论文初稿</title><style>
+:root{--bg:#f5f4f0;--paper:#fffefb;--ink:#20363c;--muted:#61747a;--line:#dce3de;--green:#197563;--soft:#edf4ef;--blue:#2b5d9a;--gold:#a86429}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:30px}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.85 system-ui,"Noto Sans CJK SC","Microsoft Yahei",sans-serif}
+a{color:var(--green);text-underline-offset:4px}button,input{font:inherit}button{cursor:pointer;background:transparent;color:var(--ink);border:1px solid var(--line);padding:7px 15px;border-radius:6px}button:hover,button[aria-pressed=true]{color:var(--green);border-color:var(--green);background:var(--soft)}
+a:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid var(--green);outline-offset:3px}
+.mast{max-width:1400px;margin:auto;padding:23px 40px;display:flex;justify-content:space-between;font-size:12px;letter-spacing:.1em;border-bottom:1px solid var(--line)}.mast a{text-decoration:none}
+.shell{max-width:1400px;margin:auto;display:grid;grid-template-columns:215px minmax(0,1fr);gap:48px;padding:45px 40px}
+aside{position:sticky;top:30px;align-self:start;max-height:92vh;overflow:auto;font-size:12px}aside strong{display:block;font-size:13px;margin-bottom:15px}aside a{display:block;color:var(--muted);text-decoration:none;padding:7px 0;line-height:1.6}aside .top-link{margin-top:18px;color:var(--green)}
+main{min-width:0;max-width:970px}.eyebrow{font:600 11px/1.5 ui-monospace,monospace;letter-spacing:.16em;color:var(--green)}.hero h1{font:600 clamp(32px,3.8vw,52px)/1.35 system-ui;letter-spacing:-.04em;margin:20px 0}.hero p{max-width:760px;color:var(--muted);font-size:16px}
+.rule{height:3px;background:var(--green);width:56px;margin:30px 0}.roadmap{display:grid;grid-template-columns:repeat(3,1fr);border-block:1px solid var(--line);margin:25px 0 35px}.roadmap>div{padding:18px 12px 18px 0}.roadmap small{display:block;color:var(--muted);font-size:12px}.roadmap b{font-size:14px}.roadmap em{font-style:normal;color:var(--green);margin-right:7px}
+.demo,.paper,.audit{background:var(--paper);border:1px solid var(--line);border-radius:12px;margin:28px 0;padding:30px}.demo h2{font-size:22px;margin:0 0 9px}.demo>p,.demo figcaption{color:var(--muted);font-size:13px}.demo-control{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.demo svg{width:100%;display:block;min-width:580px}.svg-scroll{overflow:auto}
+.step-copy{background:var(--soft);border-radius:8px;min-height:94px;padding:15px 18px;margin-top:14px}.step-copy strong{display:block;color:var(--green);font-size:15px}.step-copy p{margin:4px 0;font-size:13px}
+.paper{padding:35px 42px}.paper>p:first-child{font-size:12px;color:var(--muted)}.paper h2{font-size:25px;margin:50px 0 18px;padding-top:15px;border-top:1px solid var(--line);letter-spacing:-.02em}.paper h3{font-size:18px;margin:30px 0 12px}.paper p{margin:15px 0}.paper strong{font-weight:650}.paper li{margin:6px 0}
+code{font:13px/1.5 ui-monospace,monospace;background:var(--soft);padding:2px 5px;border-radius:4px;overflow-wrap:anywhere}pre{white-space:pre;overflow:auto;padding:17px;background:var(--soft);font:12px/1.65 ui-monospace,monospace;border-radius:7px}pre code{padding:0;background:transparent}
+.table-scroll{overflow:auto;margin:20px 0}table{border-collapse:collapse;width:100%;font-size:12px;line-height:1.7;min-width:590px}td,th{padding:12px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{background:var(--soft);font-weight:650}td:first-child{font-weight:600}
+.math{font-family:Cambria,"Times New Roman",serif;white-space:nowrap;padding-inline:2px}.equation{padding:20px;margin:22px 0;background:#f1f5f6;border-left:3px solid var(--blue);font:18px/1.9 Cambria,"Times New Roman",serif;overflow:auto}.equation>div{min-width:500px}.equation summary{font:11px/1.5 system-ui;color:var(--muted);cursor:pointer;margin-top:10px}.equation pre{font-size:11px}
+.architecture{margin:22px 0}.architecture svg{width:100%;min-width:570px}.architecture{overflow:auto}.architecture figcaption{font-size:12px;color:var(--muted)}.svg-box rect{fill:#edf2f8;stroke:#cbd7e4}.svg-box.green rect{fill:#edf4ef;stroke:#bfd7cc}.svg-title{font:600 19px system-ui;fill:#20363c}.svg-small{font:14px system-ui;fill:#61747a}.svg-label{font:13px system-ui;fill:#197563}
+.audit h2{margin:0;font-size:26px}.audit>p{font-size:14px;color:var(--muted)}.audit-tools{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:20px 0}.audit-tools input{background:white;border:1px solid var(--line);border-radius:6px;padding:9px 12px;flex:1;min-width:180px}.audit-tools span{font-size:12px;color:var(--muted)}
+.audit-card{border-top:1px solid var(--line);padding:22px 0}.audit-meta{display:flex;gap:15px;justify-content:space-between;flex-wrap:wrap;font:11px/1.6 ui-monospace,monospace;color:var(--muted);margin-bottom:10px}.audit-meta span{font-family:system-ui}.before,.after{font-size:14px;padding:10px 14px}.before{color:var(--muted);background:#f6f3ee}.after{color:var(--ink);background:var(--soft);border-left:3px solid var(--green)}.audit-card small{display:block;font-size:10px;letter-spacing:.08em;margin-bottom:3px}.source{font-size:11px}.audit-card[hidden]{display:none}
+.bottom{font-size:12px;color:var(--muted);padding:12px 0 35px}.read-tools{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;margin-bottom:24px}
+@media(max-width:1050px){.shell{grid-template-columns:170px minmax(0,1fr);gap:25px;padding:30px 24px}.paper{padding:25px}.demo,.audit{padding:24px}}
+@media(max-width:760px){.mast{padding:18px 20px}.shell{display:block;padding:24px 16px}aside{position:static;max-height:none;border-bottom:1px solid var(--line);padding-bottom:16px;margin-bottom:25px}aside nav{display:none}aside .top-link{display:inline-block;margin:0 15px 0 0}.hero h1{font-size:32px}.roadmap{grid-template-columns:1fr}.roadmap>div{padding:10px 0}.paper,.demo,.audit{padding:19px}.paper h2{font-size:22px}.paper{font-size:15px}.hero p{font-size:14px}}
+@media print{aside,.mast,.read-tools,.demo-control,.audit-tools{display:none}.shell{display:block;padding:0}.paper{border:0}.hero h1{font-size:30px}.audit{break-before:page}.paper h2{break-after:avoid}.audit-card{break-inside:avoid}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style></head><body>
+<header class="mast"><span>VLA / RESEARCH PAPER</span><a href="../README.md">论文工作区 ↗</a></header>
+<div class="shell"><aside><strong>中文初稿 · v0.1</strong><a class="top-link" href="#rtc-rl">RTC × RL 时序图</a><a class="top-link" href="#manuscript">阅读正文</a><a class="top-link" href="#audit">78 处逐句改写</a><nav><a href="#section-0">摘要</a><a href="#section-1">1. 引言</a><a href="#section-2">2. 相关工作与研究位置</a><a href="#section-3">3. 框架：长程底座与局部学习</a><a href="#section-4">4. 第一部分：RTC 中的残差执行与经验对齐</a><a href="#section-5">5. 第二部分：以执行一致的经验训练局部专家</a><a href="#section-6">6. 结果与实验设计</a><a href="#section-7">7. 讨论</a><a href="#section-8">8. 结论</a><a href="#section-9">参考文献与实验来源</a></nav></aside><main>
+<header class="hero"><span class="eyebrow">LOCAL CORRECTION → LEARNING → GENERALIST</span>
+<h1>面向持续执行 VLA 的<br>局部动作修正与强化学习</h1><div class="rule"></div>
+<p>研究目标：让现场的局部尝试成为可重复的动作能力，并进一步沉淀到 VLA。当前先写扎实 RTC 与残差学习的衔接，后续 RL 与架构实验继续形成论文的核心贡献。</p>
+<div class="roadmap"><div><em>01</em><b>RTC × RL 衔接</b><small>第一部分 · 方法与系统证据</small></div><div><em>02</em><b>局部专家学习</b><small>算法基线 · 策略实验结构</small></div><div><em>03</em><b>架构与能力回灌</b><small>随实验形成贡献 · 保留扩展</small></div></div>
+<div class="read-tools"><a href="manuscript-v0.1.md">完整 Markdown ↓</a><a href="../qa_logs/defensive-writing-audit.md">逐句改写表 ↓</a><a href="../sources/manuscript-evidence-v0.1.json">固定证据索引 ↓</a></div></header>
+<section class="demo" id="rtc-rl"><span class="eyebrow">PART I / EXECUTION INTERFACE</span><h2>停止新增修正之后，队列还在执行</h2>
+<p>RTC 和实时 VLA 强化学习已有先例。这里展示我们的具体衔接：停止生成、排队完成与结果结算各自有明确时刻。以下为教学时序，非实测轨迹。</p>
+<div class="demo-control"><button data-stage="0" aria-pressed="true">① 生成修正</button><button data-stage="1" aria-pressed="false">② 等待尾部</button><button data-stage="2" aria-pressed="false">③ 核验结算</button></div>
+<div class="svg-scroll"><svg id="handoff" viewBox="0 0 850 264" role="img" aria-label="生成修正、等待已承诺尾部和核验结果的时间轴">
+<line x1="135" y1="40" x2="815" y2="40" stroke="#c0ceca"/><g font-size="12" fill="#61747a"><text x="135" y="25">局部入口</text><text x="378" y="25">停止新增</text><text x="591" y="25">队列尾部完成</text><text x="750" y="25">结果结算</text>
+<text x="10" y="93">专家输出</text><text x="10" y="143">实际执行</text><text x="10" y="193">学习记录</text></g>
+<g fill="#2b5d9a"><rect x="135" y="68" width="262" height="36" rx="5"/><rect x="135" y="118" width="474" height="36" rx="5"/></g>
+<g fill="#e9eee9"><rect x="399" y="68" width="416" height="36" rx="5"/><rect x="611" y="118" width="204" height="36" rx="5"/></g>
+<g fill="#197563"><rect x="135" y="168" width="262" height="36" rx="5"/><rect x="399" y="168" width="210" height="36" rx="5"/><rect x="611" y="168" width="204" height="36" rx="5"/></g>
+<g text-anchor="middle" font-size="13" fill="white"><text x="266" y="91">有界残差</text><text x="372" y="141">已有队列＋承诺修正</text><text x="266" y="191">决策转移</text><text x="504" y="191">等待转移</text><text x="713" y="191">终态证据 → 奖励</text></g>
+<g fill="#20363c" font-size="13" text-anchor="middle"><text x="607" y="91">零新增残差</text><text x="713" y="141">Pi 继续执行</text></g>
+<path id="cursor" d="M265 43 V220" stroke="#ac662b" stroke-width="2" stroke-dasharray="4 4"/><text x="135" y="248" font-size="12" fill="#61747a">排队期间继续传播价值；actor 与温度跳过该状态的更新。</text></svg></div>
+<div class="step-copy" aria-live="polite"><strong id="stage-title"></strong><p id="stage-copy"></p></div></section>
+<article class="paper" id="manuscript">
+<p>工作标题 · 中文初稿 v0.1 · 2026-10-13</p>
+<p><strong>写作定位。</strong> 整篇论文围绕 VLA 的局部动作修正与持续学习展开。本版先完成第一部分：RTC 与残差 RL 的执行衔接。RTC 及实时 VLA 强化学习已有先例；本文的小亮点落在具体的执行、交还与学习接口。后续 RL 结果及架构研究将补充论文的核心贡献。方法以实现快照 <code>22fcebf</code> 为依据；部署测量对应其中归档的 <code>e21431b</code> 版本。方括号标记需要实验填入的结果。</p>
+<h2 id="section-0">摘要</h2>
+<p>视觉—语言—动作模型为机器人提供了完整任务的行为先验，局部强化学习则提供了从现场经验中改进动作的途径。将两者接入持续执行系统，需要同时处理动作的执行承诺和学习反馈：新观测到达时，先前生成的修正可能仍在队列中，结果判定也可能晚于停止新增修正的时刻。我们构建一个以冻结 VLA 为底座的局部残差学习框架，在保留 RTC 执行节奏的同时，用有界动作编辑、排队完成后的结果结算和来源核验连接决策与经验。框架分别计算正负方向的可行修正空间，并在强制等待阶段继续传播价值、关闭新增动作与策略熵更新。在已归档的系统核验中，真实零残差 rollout 的 116 个诊断区间均完成动作来源核验；集成 actor 的 Thor 本地录像输入测试中，48 个模式用例均保持已承诺前缀，活动 actor 用例服务时延 P95 为 223.91 ms。上述结果建立了 RTC 与残差学习的执行接口。后续实验将沿固定交互预算下的局部成功、完整任务收益及专家经验回灌三个层次检验框架。</p>
+<h2 id="section-1">1. 引言</h2>
+<p>VLA 把语言目标、视觉场景和机器人动作连接起来，使同一模型能够承担完整操作流程。真实部署进一步提出了一个学习问题：当底座已能完成大部分动作，而失败集中在接触、抓取或交接等局部过程时，如何把现场尝试转化成可重复的动作改进？冻结底座并训练小型专家，提供了利用已有能力、集中交互预算的路径。PLD 将专家学习、部署分布上的数据采集和 VLA 微调组织为一个闭环，为这一方向提供了直接基础。[1]</p>
+<p>持续执行使这个闭环具有明确的时序结构。VLA 生成动作块的同时，控制器继续消费已有队列；下一次观测对应的物理变化，可能来自更早的请求。局部专家停止输出时，已承诺的修正也可能继续执行。因而，动作编辑、控制交还和结果结算需要共同描述一次尝试，才能把现场记录转换成一致的学习样本。</p>
+<p>已有实时 VLA 强化学习将最新观测编辑、延迟观测与前缀条件纳入学习过程。[2] 我们沿这一方向，研究局部专家在 RTC 队列中的完整生命周期：从可编辑后缀生成修正，经过已承诺动作的执行，再以对应结果结束局部经验。本文第一部分将这一过程具体化为三个接口：保留零修正语义的有界动作空间、区分停止生成与排队完成的交还状态机，以及按原生观测区间重建的 replay。</p>
+<p>这一设计的直接价值是让 VLA 的连续执行与局部学习共享同一套动作语义。底座负责长程行为，专家在局部窗口内修正六个关节和夹爪；视觉结果在控制路径之外评定，并沿原始尝试标识返回学习系统。以 YAM 双臂抓取为实例，本版给出方法、实现核验和用于后续策略实验的评价协议。后续研究将进一步确定残差表示、价值学习和专家经验回灌的组合，形成完整论文的贡献链。</p>
+<h2 id="section-2">2. 相关工作与研究位置</h2>
+<p><strong>从行为先验到局部专家。</strong> 残差强化学习把已有控制器与可学习修正组合起来。[3] PLD 用冻结 VLA、残差专家和分布对齐采集支持后续微调；PARTS 将长程任务中的局部子任务组织成自主实践与交还过程。[1,4] 本文采用这条总体路线，并研究持续执行条件下的具体学习接口。</p>
+<p><strong>实时动作编辑与策略表示。</strong> Real-Time EXPO-FT 已将 RTC 前缀与实时编辑结合，是本文时序设计的直接比较对象。[2] RLT 则利用 VLA 表征与参考动作构造小型 RL 策略。[5] 两者分别启发执行接口和专家输入设计。本文当前实现使用冻结视觉编码、底座计划和执行状态；后续表示研究将保持相同的执行与奖励接口，以比较信息表达带来的学习收益。</p>
+<p><strong>局部结果与下游任务。</strong> 局部持物成功为抓取提供清晰的学习反馈，而抓姿也会影响后续运输和放置。Foresight Residual RL 已研究这种下游交接价值。[6] 本文分别评价局部结果和完整任务结果，并将交接质量作为可比较的扩展。PLD 式 SFT 与 RECAP 式后训练提供了不同的经验吸收路径；当前以专家学习为起点，为后续回灌保留数据接口。[1,7]</p>
+<div class="table-scroll"><table>
+<thead>
+<tr>
+<th>研究维度</th>
+<th>直接先例</th>
+<th>本文当前处理</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>冻结底座＋残差专家＋经验回灌</td>
+<td>PLD</td>
+<td>采用总体组织方式，先建设专家学习环节</td>
+</tr>
+<tr>
+<td>局部任务实践与交还</td>
+<td>PARTS</td>
+<td>整段抓取修正；结果结算覆盖排队尾部</td>
+</tr>
+<tr>
+<td>RTC 与实时 RL 编辑</td>
+<td>Real-Time EXPO-FT</td>
+<td>聚焦局部窗口、残差尾部及原生执行来源的衔接</td>
+</tr>
+<tr>
+<td>专家表征</td>
+<td>RLT</td>
+<td>固定视觉与计划输入基线，后续比较表示架构</td>
+</tr>
+<tr>
+<td>交接后的价值</td>
+<td>Foresight Residual RL</td>
+<td>完整任务单独评价，下游塑形作为扩展</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="section-3">3. 框架：长程底座与局部学习</h2>
+<p>冻结 VLA 根据多视角图像、本体状态和任务指令生成参考计划。入口模块读取当前状态与该计划的可编辑后缀，选择局部修正窗口及活动臂。残差策略输出一组七维参数，确定性解码器将其映射成满足命令约束的短时修正。控制器沿原 RTC 调度执行，记录观测、请求身份、计划索引和实际下发命令。</p>
+<p>离线处理将执行记录关联到局部尝试，结合运动学与视觉证据发布结果奖励。Actor–critic 按批次更新，生成带有模型和动作合同版本的专家快照，供后续 rollout 使用。评分与训练分处执行路径之外，结果可以在一次 rollout 完成后统一回填。</p>
+<figure class="architecture"><svg viewBox="0 0 920 386" role="img" aria-label="VLA参考计划、局部残差、RTC执行和奖励学习闭环">
+<defs><marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0 0 L6 3 L0 6" fill="none" stroke="#6f8990" stroke-width="1.2"/></marker></defs>
+<text x="28" y="28" class="svg-label">连续执行</text>
+<g fill="none" stroke="#6f8990" stroke-width="1.6" marker-end="url(#arr)">
+<path d="M266 100 H335"/><path d="M585 100 H650"/><path d="M770 143 V230"/>
+<path d="M650 280 H585"/><path d="M335 280 H266"/><path d="M148 230 V193 H455 V143"/>
+</g>
+<g class="svg-box"><rect x="28" y="55" width="238" height="90" rx="12"/><rect x="335" y="55" width="250" height="90" rx="12"/><rect x="650" y="55" width="238" height="90" rx="12"/></g>
+<g class="svg-box green"><rect x="650" y="232" width="238" height="92" rx="12"/><rect x="335" y="232" width="250" height="92" rx="12"/><rect x="28" y="232" width="238" height="92" rx="12"/></g>
+<g text-anchor="middle"><text x="147" y="91" class="svg-title">冻结 VLA</text><text x="147" y="118" class="svg-small">多视角观测 → 参考计划</text>
+<text x="460" y="91" class="svg-title">局部残差专家</text><text x="460" y="118" class="svg-small">入口 / 方向可行域 / 包络</text>
+<text x="769" y="91" class="svg-title">原 RTC 执行</text><text x="769" y="118" class="svg-small">已承诺前缀 / 实发命令</text>
+<text x="769" y="267" class="svg-title">来源与结果核验</text><text x="769" y="295" class="svg-small">排队完成 → 多帧证据</text>
+<text x="460" y="267" class="svg-title">版本化 Replay</text><text x="460" y="295" class="svg-small">真实区间 / 单次终止奖励</text>
+<text x="147" y="267" class="svg-title">SAC 更新</text><text x="147" y="295" class="svg-small">下一轮专家快照</text></g>
+<text x="28" y="365" class="svg-label">后续研究 → 表征与动作架构 / 下游价值 / 专家经验回灌</text>
+</svg><figcaption>框架示意。图中实线对应当前接口；底部列出后续论文扩展方向。</figcaption></figure>
+<p><strong>图 1. 整体架构。</strong> 上层负责连续执行，下层将实际经验转成局部学习信号。末端回灌为后续研究模块。框架接口可用于不同局部目标；具体入口和结果谓词由任务适配器提供。</p>
+<h2 id="section-4">4. 第一部分：RTC 中的残差执行与经验对齐</h2>
+<h3>4.1 在可编辑后缀内生成修正</h3>
+<p>令第 <span class="math">i</span> 次原生观测对应的参考计划为 <span class="math">Bᵢ ∈ ℝᴴˣᴰ</span>，已承诺前缀长度为 <span class="math">dᵢ</span>。当前实例使用 <span class="math">H=50</span>、<span class="math">D=14</span>，排列为左臂六关节、左夹爪、右臂六关节、右夹爪。每次决策选择一只活动臂，以共享策略修正其七个维度；另一臂沿底座计划执行。</p>
+<p>策略输入 <span class="math">xᵢ</span> 包括三路图像的冻结 ResNet18 特征、本体状态、参考计划、上一实发命令、活动臂、RTC 延迟、窗口阶段和可行幅度。当前输入为 2,287 维。策略在归一化空间产生 <span class="math">uᵢ=tanh  vᵢ ∈ [-1,1]⁷</span>，分别按正负可行比例 <span class="math">sᵢ⁺,sᵢ⁻</span> 映射：</p>
+<div class="equation"><div>aᵢⱼ = uᵢⱼ × { s⁺ᵢⱼ  当 uᵢⱼ ≥ 0；s⁻ᵢⱼ  当 uᵢⱼ &lt; 0 }</div><details><summary>公式 1 · 查看 LaTeX</summary><pre>a_{ij}=u_{ij}\begin{cases}s^+_{ij},&amp;u_{ij}\geq 0,\\s^-_{ij},&amp;u_{ij}&lt;0.\end{cases}
+\tag{1}</pre></details></div>
+<p>令 <span class="math">ρ</span> 为各维物理修正半径、<span class="math">Mᵢ</span> 为活动臂选择矩阵，物理命令计划为</p>
+<div class="equation"><div>Aᵢ[k] = Bᵢ[k] + wᵢ[k] Mᵢ (ρ ⊙ aᵢ)</div><details><summary>公式 2 · 查看 LaTeX</summary><pre>A_i[k]=B_i[k]+w_i[k]M_i(\rho\odot a_i).
+\tag{2}</pre></details></div>
+<p>其中 <span class="math">wᵢ</span> 在前缀和编辑窗口外为零，在 <span class="math">dᵢ</span> 开始的八个 tick 上依次取 <span class="math">[0,1/3,2/3,1,1,2/3,1/3,0]</span>。这使修正渐入渐出，并在边界回到底座计划。八个 tick 描述包络长度；请求与实际消费仍沿原 RTC 调度。</p>
+<p>正负可行比例由计划各位置的关节/夹爪上下限、相邻命令变化及残差增量共同确定。方向分离保留了端点处的有效动作：例如夹爪位于开度上限时，闭合方向依然可以具有非零修正空间。对全部输入，<span class="math">uᵢ=0</span> 对应经过同一 SDK 映射的物理底座计划，因而零修正具有明确的执行参照。</p>
+<p>当前抓取实例的候选半径为关节 <span class="math">0.02 rad</span>、夹爪归一化开度 <span class="math">0.05</span>，再由上述比例收缩。网络前缀逐值保留；物理命令与网络命令通过已声明的 SDK 夹爪映射对应。约束覆盖命令范围与连续性，机器人接触保护继续由原控制系统承担。</p>
+<h3>4.2 把停止生成、排队完成和结果结算分开</h3>
+<p>局部窗口包含 <code>correcting</code> 与 <code>draining</code> 两个在线阶段，并在取得结果证据后完成结算。</p>
+<p>在 <code>correcting</code> 阶段，专家对可编辑后缀提出修正。达到局部退出条件后，系统进入 <code>draining</code>，将新增残差置零，同时保留已经承诺的前缀。机器人继续执行队列。系统记录此前提出的残差包络的最晚可能结束 tick，并在该时刻之后保留至少两个控制 tick 的观测余量，再完成窗口。</p>
+<pre><code class="language-text">时间 →        生成修正          停止新增          残差尾部完成       结果结算
+专家输出      有界残差          零新增残差        零新增残差
+实际执行      旧队列＋新修正    已承诺修正继续    Pi 继续执行
+学习记录      决策转移          等待转移          新鲜结果证据 → 终止奖励
+</code></pre>
+<p><strong>图 2. 控制交还的三个时刻。</strong> 停止生成新修正后，学习窗口覆盖已承诺的残差尾部。等待过程中 Pi 继续运行，无需安排固定一秒的静止保持。队列尾部由在线计划给出保守时刻，实际消费由离线执行记录核验。</p>
+<p>抓取实例以已观测接近过程中的最低 FK 高度为相对参考。首次有效累计抬升达到 5 cm 时停止新增修正；重新张开及预先定义的任务时间预算也可触发退出。在线高度门槛负责时序管理，持物结果由后续视觉证据确认。预计抓取后 2 s 无实际闭合、闭合后 3 s 未退出，是当前实例的预算参数。</p>
+<h3>4.3 按实际观测区间重建经验</h3>
+<p>每条 replay 转移对应相邻原生观测之间的真实区间 <span class="math">[tᵢ,tᵢ₊₁)</span>。处理器逐 tick 核对请求 token、原计划索引和实际下发命令，使跨越新观测继续执行的前缀保持原始来源。参考计划、策略样本、物理解码命令和实际消费记录共同绑定到动作合同。</p>
+<p>这一设计保留延迟动作的学习链条：某次残差在下一观测区间执行时，其效果仍能沿队列状态与后续转移传播回来。critic 的动作输入是式 (1) 的七维残差参数，状态包含参考计划与队列信息；实发命令用于验证该转移的执行语义。每次尝试按连续区间编译，人工接管、取消、记录缺口和未知命令改写按原因记录并隔离。</p>
+<h3>4.4 用可观察的局部结果闭合奖励</h3>
+<p>奖励绑定到一次局部尝试，在最后一个核验区间发放一次；中间区间奖励为零。当前抓取目标定义为抓起并保持住：<code>held</code> 给 1；<code>empty</code>、<code>not_lifted</code>、<code>no_closure</code>、<code>dropped</code> 给 0，并保留具体原因。</p>
+<p>结果类型决定证据要求。<code>held</code> 和 <code>empty</code> 使用队列尾部完成后、满足相对抬升条件的图像；成功审核需要两个不同视频帧，并包括最后可用帧。未抬升和未闭合使用完整实测轨迹、终态新鲜图像及抓取意图复核；掉落使用先持物、后丢失的时序证据。因此，失败监督覆盖了到达抬升门槛之前的失败。数据缺失、设备故障和误入口单独记录，评价同时报告这部分覆盖情况。</p>
+<p>首轮结果由 Qwen 序列判断与 DINO 参考辅助审核，发布后冻结奖励版本。SAM/DINO 的历史抓取区间标注用于证据整理与规则开发。新鲜性依据相机接收记录和视频索引。标签计算或人工审核的返回时刻与物理事件时刻分别保存，训练奖励关联到原尝试终点。</p>
+<h2 id="section-5">5. 第二部分：以执行一致的经验训练局部专家</h2>
+<h3>5.1 当前 SAC 学习接口</h3>
+<p>定义 <span class="math">cᵢ ∈ {0,1}</span> 表示当前状态具有可用的残差控制空间。排队阶段令 <span class="math">sᵢ⁺=sᵢ⁻=0</span>，因此 <span class="math">cᵢ=0</span>。以真实经过时间 <span class="math">Δtᵢ</span> 折扣，当前实例采用每秒折扣 <span class="math">γₛ=0.99</span>。双 critic 的目标写为</p>
+<div class="equation"><div>yᵢ = rᵢ + (1 − dᵢᵗᵉʳᵐ) γₛ^Δtᵢ × [ minⱼ Q̄ⱼ(xᵢ₊₁, a′ᵢ₊₁) − α cᵢ₊₁ log πθ(u′ᵢ₊₁ | xᵢ₊₁) ]</div><details><summary>公式 3 · 查看 LaTeX</summary><pre>y_i=r_i+(1-d_i^{\mathrm{term}})\gamma_s^{\Delta t_i}
+\left[\min_{j=1,2}\bar Q_j(x_{i+1},a&#x27;_{i+1})
+-\alpha c_{i+1}\log\pi_\theta(u&#x27;_{i+1}\mid x_{i+1})\right].
+\tag{3}</pre></details></div>
+<p><span class="math">dᵢᵗᵉʳᵐ</span> 表示局部尝试的已核验终止，与前缀长度 <span class="math">dᵢ</span> 区分。<span class="math">a′ᵢ₊₁</span> 通过同一方向可行映射生成。强制等待时 <span class="math">a&#x27;=0</span>，critic 继续学习等待后的结果，actor 与温度在该状态上跳过更新。可控制状态上的 actor 目标为</p>
+<div class="equation"><div>Lπ = E[xᵢ : cᵢ = 1, uᵢ ∼ πθ] [ α log πθ(uᵢ | xᵢ) − minⱼ Qⱼ(xᵢ, aᵢ) ]</div><details><summary>公式 4 · 查看 LaTeX</summary><pre>\mathcal L_\pi=\mathbb E_{x_i:c_i=1,u_i\sim\pi_\theta}
+\left[\alpha\log\pi_\theta(u_i\mid x_i)-\min_jQ_j(x_i,a_i)\right].
+\tag{4}</pre></details></div>
+<p>这里的熵定义在 tanh 后的策略采样变量 <span class="math">u</span> 上。状态相关的可行映射负责物理动作解码。式 (3)–(4) 采用 SAC 的基础更新，并将实际时间和强制等待状态纳入当前执行接口。[8]</p>
+<h3>5.2 从底座经验到修正经验</h3>
+<p>历史 14 集自主底座数据形成奖励开发集和零残差行为参照。当前审计中，327 个合格标签对应 136 个持物和 191 个空手结果，其中 311 次尝试形成 31,077 条历史转移。E02–E14 的 299 次尝试用于训练诊断，E01 的 12 次尝试用于开发验证；E01 参与了规则开发。新合同的学习数据来自携带完整参考计划、残差样本及执行来源的 rollout。</p>
+<p>专家以零均值初始化，在采集模式进行有界探索，在评价模式使用确定性输出。每轮先核验真实执行与结果，再更新策略。PLD 的价值初始化和混合 replay 为后续数据利用提供比较方向；当前动作块 SAC 基线与历史单 tick 离线诊断分别管理，Cal-QL 初始化作为独立的后续比较因素。[1,9]</p>
+<h3>5.3 后续架构研究的接口</h3>
+<p>后续设计围绕三个可分别检验的问题展开。第一，何种视觉、VLA 或队列表征最有利于判断修正方向？第二，固定残差包络与更灵活的动作表示如何影响交互效率和交还质量？第三，局部结果与下游任务价值如何共同指导专家，使抓取改进转化成完整任务收益？</p>
+<p>每项比较复用相同底座、入口、执行合同及奖励版本，并明确更改的模块。确定有效专家后，再以部署分布上的采集和原生微调研究能力回灌。这样，RTC 接口为算法比较提供稳定基础，后续架构贡献由学习结果与机制实验形成。</p>
+<h2 id="section-6">6. 结果与实验设计</h2>
+<h3>6.1 动作来源与前缀保持</h3>
+<p>在一集真实零残差 probe 中，记录包含 320 个完整回复和 3,347 个底座策略 tick；用于诊断的 116 个区间全部完成来源核验。其间 12 个区间包含已声明的 SDK 夹爪端点转换。以同一物理映射定义底座后，这些区间保留了完整的动作解释。[S1]</p>
+<p>在修订后的集成服务上，48 个真实录像输入的模式用例覆盖左右臂、四种模式及三次重复，全部满足前缀逐值保持和物理解码一致。原客户端校验器另对 16 个真实返回包通过校验。排队状态前向检查同时满足零新增残差、前缀保持和队列完成条件。[S2] 这些测量说明，局部编辑可以沿已有 RTC 协议传递，并保留其执行身份。</p>
+<h3>6.2 推理开销与学习闭环</h3>
+<p>Thor 本地录像输入测试中，活动 actor 用例的服务时延中位数为 222.92 ms，P95 为 223.91 ms。[S2] 测量包括集成推理服务；机器人控制和跨 IPC 网络位于该测量范围之外。该设置用于评价执行接口的服务开销，机械臂端到端时序在 rollout 实验中单独测量。</p>
+<p>五类结果的合成轨迹产生 54 条转移，完成 40 次 critic 更新、18 次 actor 更新及导出重载；强制等待状态的 actor 更新次数为零。[S2] 这组测试验证了结果编译、价值传播和策略更新之间的连接。生产探索包使用另行导出的零更新初始化参数。</p>
+<div class="table-scroll"><table>
+<thead>
+<tr>
+<th>测量对象</th>
+<th>结果</th>
+<th>评价单位与作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>真实零残差执行来源</td>
+<td>116/116 核验通过</td>
+<td>单次 rollout 内的诊断区间；验证来源重建</td>
+</tr>
+<tr>
+<td>集成模式前缀/解码</td>
+<td>48/48 通过</td>
+<td>录像输入调用用例；验证接口一致性</td>
+</tr>
+<tr>
+<td>客户端返回包兼容</td>
+<td>16/16 通过</td>
+<td>返回包；验证原协议接入</td>
+</tr>
+<tr>
+<td>活动 actor 服务时延</td>
+<td>P50 222.92 / P95 223.91 ms</td>
+<td>Thor 本地调用；服务预算</td>
+</tr>
+<tr>
+<td>五类奖励与 SAC 数值链路</td>
+<td>54 转移；40 Q / 18 actor 更新</td>
+<td>合成轨迹；核验学习接口</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>表 1. 第一部分的系统证据。</strong> 前两行来自不同版本的独立核验，分别见 S1、S2；表中计数均为系统检查单位。真实机器人任务表现由下节的整轮实验评价。</p>
+<h3>6.3 每个策略实验承担一个论证职责</h3>
+<p>下表为研究实验设计，尚待执行与填数。各项在查看评价结果前固定指标、比较对象、交互预算和纳入规则。</p>
+<div class="table-scroll"><table>
+<thead>
+<tr>
+<th>实验</th>
+<th>要支撑的论点</th>
+<th>关键对照</th>
+<th>主指标与必要伴随量</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>E1：RTC 衔接</td>
+<td>排队终点与来源对齐提供一致经验</td>
+<td>正确实现的标准实时残差基线；配对日志中的终点/来源消融</td>
+<td>来源可重建率、提前结算率、有效奖励覆盖；另测延迟</td>
+</tr>
+<tr>
+<td>E2：专家学习</td>
+<td>RL 学到了有用的局部修正</td>
+<td>冻结 Pi、匹配幅度的随机修正、训练后确定性专家</td>
+<td>固定交互预算下持物成功、空抓率、学习曲线</td>
+</tr>
+<tr>
+<td>E3：动作表示</td>
+<td>改善来自可学习的动作空间</td>
+<td>仅夹爪、整臂七维；方向分离与对称可行域</td>
+<td>相同预算的局部成功；有效动作空间与限位事件</td>
+</tr>
+<tr>
+<td>E4：完整任务</td>
+<td>局部改进转化成用户目标</td>
+<td>相同底座的 Pi 与专家系统，随机交替初始场景</td>
+<td>每轮正确分拣比例、整轮完成率、单位时间正确放置数；错放与人工接管</td>
+</tr>
+<tr>
+<td>E5：架构与任务迁移</td>
+<td>学習接口支持不同局部目标</td>
+<td>固定接口，改变表征/残差结构；增加插入或关合等异类任务</td>
+<td>每任务预算—效果曲线；新增标注、规则及调参成本</td>
+</tr>
+<tr>
+<td>E6：经验回灌</td>
+<td>专家经验成为 VLA 自身能力</td>
+<td>同量 Pi 成功数据、专家数据、部署分布对齐数据微调</td>
+<td>关闭专家后的目标任务与留出任务结果</td>
+</tr>
+</tbody>
+</table></div>
+<p>E1 的过早终止或错误来源反事实在日志/仿真中诊断；真机采用通过命令约束与协议核验的对照。E2–E4 共用固定奖励开发/评价隔离，整轮初始场景随机交替。奖励器在独立测试集报告正负类 precision/recall、误发成功率和覆盖率。相同 rollout 内的多次抓取按整轮聚类统计，多训练种子分别呈现；重复调用与视频帧按其测量用途报告。</p>
+<p>完整任务指标的分母包含所有预定评价 rollout。学习数据的筛选率、设备中断与人工接管另表记录，避免训练数据过滤改变任务评价对象。吞吐量同时报告正确放置与错误数；成功率、时间和交互预算共同刻画方法的使用条件。</p>
+<h3>6.4 RL 与架构结果的写作位置</h3>
+<p><strong>局部学习结果。</strong> [待填：各方法在固定真实交互预算下的持物成功率、置信区间与学习曲线。依据实际差异写明哪个模块改变了哪类动作。]</p>
+<p><strong>完整任务结果。</strong> [待填：正确分拣比例、完整任务完成率、正确放置吞吐量及错误构成。解释局部结果到整轮结果的传递关系。]</p>
+<p><strong>架构机制结果。</strong> [待填：表示、动作结构或价值目标的主要对照及消融。用实验决定最终保留哪一个架构设计和贡献表述。]</p>
+<p><strong>能力回灌结果。</strong> [待填：expert-off 的目标任务和留出任务评价；完成此实验后加入主摘要与最终结论。]</p>
+<h2 id="section-7">7. 讨论</h2>
+<p>连续执行给局部学习带来的关键变化，是动作生成、动作完成和结果可见具有不同的时间边界。本文第一部分把这些边界显式连接起来：可编辑后缀定义当前选择空间，排队阶段保留先前承诺，原生记录将结果关联到对应的局部经验。这为不同 RL 算法和专家架构提供了可比较的执行基础。</p>
+<p>通用性可以分层验证。执行来源、队列管理和更新接口可在任务之间复用；局部入口和结果证据则表达任务语义。后续跨任务研究将同时衡量策略表现与适配成本，以区分接口复用、少样本适配和零样本迁移。长期能力则通过关闭专家后的 VLA 评价来检验，使专家系统的现场收益与底座自身的能力变化各有对应证据。</p>
+<h2 id="section-8">8. 结论</h2>
+<p>本文建立了持续执行 VLA 与局部残差学习之间的接口：在可编辑动作空间中修正，在已承诺队列完成后结算，并沿真实执行来源形成经验。RTC 与 RL 的衔接构成论文的第一部分，为后续策略学习、架构比较和经验回灌提供一致基础。整篇工作的目标，是把局部尝试积累为可重复的动作能力，并进一步沉淀到 VLA。</p>
+<h2 id="section-9">参考文献与实验来源</h2>
+<ol>
+<li><a href="https://arxiv.org/html/2511.00091v1">Self-Improving Vision-Language-Action Models with Data Generation via Residual RL（PLD）</a>.</li>
+<li><a href="https://arxiv.org/html/2609.18207v1">Reinforcement Learning for Real-Time Vision-Language-Action Policies</a>.</li>
+<li><a href="https://arxiv.org/abs/1812.03201v2">Residual Reinforcement Learning for Robot Control</a>.</li>
+<li><a href="https://arxiv.org/html/2609.21788v2">From Pretraining to Proficiency: Real-World Subtask RL for Long-Horizon Manipulation with Minimal Human Intervention（PARTS）</a>.</li>
+<li><a href="https://arxiv.org/html/2604.23073v2">RL Token: Bootstrapping Online RL with Vision-Language-Action Models</a>.</li>
+<li><a href="https://arxiv.org/html/2607.16506v1">Foresight Residual RL</a>.</li>
+<li><a href="https://arxiv.org/html/2511.14759v1">π*0.6 / RECAP</a>.</li>
+<li><a href="https://arxiv.org/abs/1801.01290v2">Soft Actor-Critic</a>.</li>
+<li><a href="https://arxiv.org/abs/2303.05479v4">Cal-QL</a>.</li>
+</ol>
+<p>S1. <a href="../experiments/20261013-rtc-rl/evidence.json">既有实验快照：固定于 79e4dc7</a>。</p>
+<p>S2. <a href="../sources/manuscript-evidence-v0.1.json">本稿实现与测量索引：固定于 22fcebf</a>，其中部署源码为 e21431b。来源均为归档记录，本写作工作未重跑机器人实验。</p>
+</article>
+<section class="audit" id="audit"><span class="eyebrow">EDITING / CLAIM → EVIDENCE</span><h2>78 处表达，逐处重组</h2><p>范围：原研究稿 30 处、实验记录 24 处、当前 HTML 24 处。保留事实与测量条件，把预防性辩解改为机制、定义和实验职责。历史档案保留原文。</p>
+<div class="audit-tools"><input id="audit-search" type="search" aria-label="搜索原文、改写或修改原因" placeholder="搜索：不能证明 / 奖励 / RTC…"><span id="audit-count">78 / 78 处</span></div><article class="audit-card" data-search="1 P 3 本文保存原研究设想，不锁定创新，也不是当前训练配置。 正文删除；作者信息写“概念稿，版本与现行实现分别标注”。 档案信息移位"><div class="audit-meta">01 / P · L3<span>档案信息移位</span></div><div class="before"><small>原文</small>本文保存原研究设想，不锁定创新，也不是当前训练配置。</div><div class="after"><small>改写 / 安放方式</small>正文删除；作者信息写“概念稿，版本与现行实现分别标注”。</div><a class="source" href="../drafts/research-plan-v0.1.md">查看原材料 ↗</a></article><article class="audit-card" data-search="2 P 9 不是声称严格复现某篇原配方。 框架采用 PLD 的专家—采集—蒸馏组织方式，并借鉴 PARTS 的局部实践。 用方法关系替代预防性辩解"><div class="audit-meta">02 / P · L9<span>用方法关系替代预防性辩解</span></div><div class="before"><small>原文</small>不是声称严格复现某篇原配方。</div><div class="after"><small>改写 / 安放方式</small>框架采用 PLD 的专家—采集—蒸馏组织方式，并借鉴 PARTS 的局部实践。</div><a class="source" href="../drafts/research-plan-v0.1.md">查看原材料 ↗</a></article><article class="audit-card" data-search="3 P 13 不代表项目中已经接通这些服务。 图注标记“研究模块关系图”；正文给出实现快照对应的架构。 图示身份写入图注"><div class="audit-meta">03 / P · L13<span>图示身份写入图注</span></div><div class="before"><small>原文</small>不代表项目中已经接通这些服务。</div><div class="after"><small>改写 / 安放方式</small>图注标记“研究模块关系图”；正文给出实现快照对应的架构。</div><a class="source" href="../drafts/research-plan-v0.1.md">查看原材料 ↗</a></article><article class="audit-card" data-search="4 P 39 不能把事后才知道的成功标签输入当时的入口或 actor。 入口和 actor 使用当前可得观测，奖励器在结果发生后独立评分。 禁令改成因果输入定义"><div class="audit-meta">04 / P · L39<span>禁令改成因果输入定义</span></div><div class="before"><small>原文</small>不能把事后才知道的成功标签输入当时的入口或 actor。</div><div class="after"><small>改写 / 安放方式</small>入口和 actor 使用当前可得观测，奖励器在结果发生后独立评分。</div><a class="source" href="../drafts/research-plan-v0.1.md">查看原材料 ↗</a></article><article class="audit-card" data-search="5 P 49 不宣称天然满足 Markov 性。 以视觉、计划、队列和阶段信息构造部分可观测过程的状态表示。 直接定义建模条件"><div class="audit-meta">05 / P · L49<span>直接定义建模条件</span></div><div class="before"><small>原文</small>不宣称天然满足 Markov 性。</div><div class="after"><small>改写 / 安放方式</small>以视觉、计划、队列和阶段信息构造部分可观测过程的状态表示。</div><a class="source" href="../drafts/research-plan-v0.1.md">查看原材料 ↗</a></article><article class="audit-card" data-search="6 P 58 不规定本轮幅度、频率或 chunk 长度。 本实例采用 50 步参考计划与 8 tick 残差包络，物理幅度列入实现设置。 概念稿更新为具体方法"><div class="audit-meta">06 / P · L58<span>概念稿更新为具体方法</span></div><div class="before"><small>原文</small>不规定本轮幅度、频率或 chunk 长度。</div><div class="after"><small>改写 / 安放方式</small>本实例采用 50 步参考计划与 8 tick 残差包络，物理幅度列入实现设置。</div><a class="source" href="../drafts/research-plan-v0.1.md">查看原材料 ↗</a></article><article class="audit-card" data-search="7 P 58 不能把 YAM 14D 关节合同直接当成原文 7D 末端位姿动作。 YAM 使用 14D 关节/夹爪合同，每次修正活动臂的 7 个维度。 正面说明动作坐标"><div class="audit-meta">07 / P · L58<span>正面说明动作坐标</span></div><div class="before"><small>原文</small>不能把 YAM 14D 关节合同直接当成原文 7D 末端位姿动作。</div><div class="after"><small>改写 / 安放方式</small>YAM 使用 14D 关节/夹爪合同，每次修正活动臂的 7 个维度。</div><a class="source" href="../drafts/research-plan-v0.1.md">查看原材料 ↗</a></article><article class="audit-card" data-search="8 P 60 不能称同时协同修正已解决。 共享专家覆盖左右臂，同一时刻由仲裁器选择一只活动臂。 写清架构范围"><div class="audit-meta">08 / P · L60<span>写清架构范围</span></div><div class="before"><small>原文</small>不能称同时协同修正已解决。</div><div class="after"><small>改写 / 安放方式</small>共享专家覆盖左右臂，同一时刻由仲裁器选择一只活动臂。</div><a class="source" href="../drafts/research-plan-v0.1.md">查看原材料 ↗</a></article><article class="audit-card" data-search="9 P 62 不能把未执行 suffix 当作已发生动作。 Replay 以原生观测区间及逐 tick 实发命令核验经验。 禁令改为执行规则"><div class="audit-meta">09 / P · L62<span>禁令改为执行规则</span></div><div class="before"><small>原文</small>不能把未执行 suffix 当作已发生动作。</div><div class="after"><small>改写 / 安放方式</small>Replay 以原生观测区间及逐 tick 实发命令核验经验。</div><a class="source" href="../drafts/research-plan-v0.1.md">查看原材料 ↗</a></article><article class="audit-card" data-search="10 P 62 这个要求是正确性底线，不自动算创新。 将设计与实时动作编辑先例定位，实验比较具体时序和学习效果。 原创性判断移至相关工作与实验"><div class="audit-meta">10 / P · L62<span>原创性判断移至相关工作与实验</span></div><div class="before"><small>原文</small>这个要求是正确性底线，不自动算创新。</div><div class="after"><small>改写 / 安放方式</small>将设计与实时动作编辑先例定位，实验比较具体时序和学习效果。</div><a class="source" href="../drafts/research-plan-v0.1.md">查看原材料 ↗</a></article><article class="audit-card" data-search="11 P 68 不奖励下降更深、夹得更紧或抬得更高本身 奖励描述“抓起并保持住”的结果，动作方向由策略学习。 突出目标与动作自由度"><div class="audit-meta">11 / P · L68<span>突出目标与动作自由度</span></div><div class="before"><small>原文</small>不奖励下降更深、夹得更紧或抬得更高本身</div><div class="after"><small>改写 / 安放方式</small>奖励描述“抓起并保持住”的结果，动作方向由策略学习。</div><a class="source" href="../drafts/research-plan-v0.1.md">查看原材料 ↗</a></article><article class="audit-card" data-search="12 P 70 仅有 held 奖励可能学到不好放置的抓姿，因此完整任务必须另测。 局部持物与后续正确放置分别评价，检验抓取收益向整轮任务的传递。 风险清单改成实验职责"><div class="audit-meta">12 / P · L70<span>风险清单改成实验职责</span></div><div class="before"><small>原文</small>仅有 held 奖励可能学到不好放置的抓姿，因此完整任务必须另测。</div><div class="after"><small>改写 / 安放方式</small>局部持物与后续正确放置分别评价，检验抓取收益向整轮任务的传递。</div><a class="source" href="../drafts/research-plan-v0.1.md">查看原材料 ↗</a></article><article class="audit-card" data-search="13 P 70 不会把它混进第一基线后再称局部 reward 有效。 下游价值塑形作为独立对照，保持局部奖励基线固定。 写成控制变量"><div class="audit-meta">13 / P · L70<span>写成控制变量</span></div><div class="before"><small>原文</small>不会把它混进第一基线后再称局部 reward 有效。</div><div class="after"><small>改写 / 安放方式</small>下游价值塑形作为独立对照，保持局部奖励基线固定。</div><a class="source" href="../drafts/research-plan-v0.1.md">查看原材料 ↗</a></article><article class="audit-card" data-search="14 P 86 不把整段每一帧都标 每次尝试在核验终点发放一次结果奖励，并沿 TD 转移向前传播。 明确奖励定义"><div class="audit-meta">14 / P · L86<span>明确奖励定义</span></div><div class="before"><small>原文</small>不把整段每一帧都标</div><div class="after"><small>改写 / 安放方式</small>每次尝试在核验终点发放一次结果奖励，并沿 TD 转移向前传播。</div><a class="source" href="../drafts/research-plan-v0.1.md">查看原材料 ↗</a></article><article class="audit-card" data-search="15 P 88 它不是通用成功定义，也不是以后必须执行的固定轨迹。 5 cm 在抓取实例中定义抬升证据资格；其他局部目标使用对应结果谓词。 适用条件集中说明"><div class="audit-meta">15 / P · L88<span>适用条件集中说明</span></div><div class="before"><small>原文</small>它不是通用成功定义，也不是以后必须执行的固定轨迹。</div><div class="after"><small>改写 / 安放方式</small>5 cm 在抓取实例中定义抬升证据资格；其他局部目标使用对应结果谓词。</div><a class="source" href="../drafts/research-plan-v0.1.md">查看原材料 ↗</a></article><article class="audit-card" data-search="16 P 88 不保证消除所有任务语义。 跨任务复用执行与学习接口，入口和结果语义由任务适配器提供。 免责声明改成模块边界"><div class="audit-meta">16 / P · L88<span>免责声明改成模块边界</span></div><div class="before"><small>原文</small>不保证消除所有任务语义。</div><div class="after"><small>改写 / 安放方式</small>跨任务复用执行与学习接口，入口和结果语义由任务适配器提供。</div><a class="source" href="../drafts/research-plan-v0.1.md">查看原材料 ↗</a></article><article class="audit-card" data-search="17 P 90 缺少证据不能自动等于失败。 区分已确认失败与未观测结果，分别用于奖励和覆盖率统计。 保留关键事实"><div class="audit-meta">17 / P · L90<span>保留关键事实</span></div><div class="before"><small>原文</small>缺少证据不能自动等于失败。</div><div class="after"><small>改写 / 安放方式</small>区分已确认失败与未观测结果，分别用于奖励和覆盖率统计。</div><a class="source" href="../drafts/research-plan-v0.1.md">查看原材料 ↗</a></article><article class="audit-card" data-search="18 P 90 不能通过排除难例提高成功率。 完整任务评价保留全部预定 rollout，学习过滤率另行报告。 写成评价分母"><div class="audit-meta">18 / P · L90<span>写成评价分母</span></div><div class="before"><small>原文</small>不能通过排除难例提高成功率。</div><div class="after"><small>改写 / 安放方式</small>完整任务评价保留全部预定 rollout，学习过滤率另行报告。</div><a class="source" href="../drafts/research-plan-v0.1.md">查看原材料 ↗</a></article><article class="audit-card" data-search="19 P 94 不应把 reward 贴给返回时正在进行的下一次抓取。 奖励按尝试 ID 与物理结果时刻回填，计算返回时刻单独记录。 说明绑定机制"><div class="audit-meta">19 / P · L94<span>说明绑定机制</span></div><div class="before"><small>原文</small>不应把 reward 贴给返回时正在进行的下一次抓取。</div><div class="after"><small>改写 / 安放方式</small>奖励按尝试 ID 与物理结果时刻回填，计算返回时刻单独记录。</div><a class="source" href="../drafts/research-plan-v0.1.md">查看原材料 ↗</a></article><article class="audit-card" data-search="20 P 96 不能要求“结果证据必须落在残差控制窗口内”，更不能用时间交集推断因果。 以完成排队后的局部窗口核验结果；后续 Pi 恢复和下游价值分别定义评价终点。 按 v3 更新奖励终点"><div class="audit-meta">20 / P · L96<span>按 v3 更新奖励终点</span></div><div class="before"><small>原文</small>不能要求“结果证据必须落在残差控制窗口内”，更不能用时间交集推断因果。</div><div class="after"><small>改写 / 安放方式</small>以完成排队后的局部窗口核验结果；后续 Pi 恢复和下游价值分别定义评价终点。</div><a class="source" href="../drafts/research-plan-v0.1.md">查看原材料 ↗</a></article><article class="audit-card" data-search="21 P 109 不冒充非可逆限幅后的执行命令密度。 熵定义在 tanh 后的策略变量上，物理动作由状态相关映射解码。 给出数学对象"><div class="audit-meta">21 / P · L109<span>给出数学对象</span></div><div class="before"><small>原文</small>不冒充非可逆限幅后的执行命令密度。</div><div class="after"><small>改写 / 安放方式</small>熵定义在 tanh 后的策略变量上，物理动作由状态相关映射解码。</div><a class="source" href="../drafts/research-plan-v0.1.md">查看原材料 ↗</a></article><article class="audit-card" data-search="22 P 111 不当作新推导。 采用 SAC 与实际经过时间折扣，引用已有动作块和延迟反馈研究。 用引用说明归属"><div class="audit-meta">22 / P · L111<span>用引用说明归属</span></div><div class="before"><small>原文</small>不当作新推导。</div><div class="after"><small>改写 / 安放方式</small>采用 SAC 与实际经过时间折扣，引用已有动作块和延迟反馈研究。</div><a class="source" href="../drafts/research-plan-v0.1.md">查看原材料 ↗</a></article><article class="audit-card" data-search="23 P 113 不能跨 reset 拼转移 每条学习序列保持连续 epoch、观测和实际执行区间。 转为数据条件"><div class="audit-meta">23 / P · L113<span>转为数据条件</span></div><div class="before"><small>原文</small>不能跨 reset 拼转移</div><div class="after"><small>改写 / 安放方式</small>每条学习序列保持连续 epoch、观测和实际执行区间。</div><a class="source" href="../drafts/research-plan-v0.1.md">查看原材料 ↗</a></article><article class="audit-card" data-search="24 P 113 也不能对一个尚未观察结果的后缀擅自补 已核验局部结果产生终止标签；记录中断按缺失原因处理。 保留终止语义"><div class="audit-meta">24 / P · L113<span>保留终止语义</span></div><div class="before"><small>原文</small>也不能对一个尚未观察结果的后缀擅自补</div><div class="after"><small>改写 / 安放方式</small>已核验局部结果产生终止标签；记录中断按缺失原因处理。</div><a class="source" href="../drafts/research-plan-v0.1.md">查看原材料 ↗</a></article><article class="audit-card" data-search="25 P 115 不是“数据少也能推断所有修正”的保证。 将 Cal-QL 作为价值初始化对照，比较相同合同与预算下的效果。 算法评价具体化"><div class="audit-meta">25 / P · L115<span>算法评价具体化</span></div><div class="before"><small>原文</small>不是“数据少也能推断所有修正”的保证。</div><div class="after"><small>改写 / 安放方式</small>将 Cal-QL 作为价值初始化对照，比较相同合同与预算下的效果。</div><a class="source" href="../drafts/research-plan-v0.1.md">查看原材料 ↗</a></article><article class="audit-card" data-search="26 P 125 不能凭零残差数据声称学会纠正 14 集用于奖励开发和行为价值诊断；修正学习使用有执行证据的探索数据。 按数据用途组织"><div class="audit-meta">26 / P · L125<span>按数据用途组织</span></div><div class="before"><small>原文</small>不能凭零残差数据声称学会纠正</div><div class="after"><small>改写 / 安放方式</small>14 集用于奖励开发和行为价值诊断；修正学习使用有执行证据的探索数据。</div><a class="source" href="../drafts/research-plan-v0.1.md">查看原材料 ↗</a></article><article class="audit-card" data-search="27 P 129 不能再叫未见 reward test。 E01 记为开发验证集，独立测试使用规则冻结后采集的数据。 保留真实划分"><div class="audit-meta">27 / P · L129<span>保留真实划分</span></div><div class="before"><small>原文</small>不能再叫未见 reward test。</div><div class="after"><small>改写 / 安放方式</small>E01 记为开发验证集，独立测试使用规则冻结后采集的数据。</div><a class="source" href="../drafts/research-plan-v0.1.md">查看原材料 ↗</a></article><article class="audit-card" data-search="28 P 133 则先接受工程基线，不另造算法。 正文移除研究决策过程；后续算法围绕基线下可重复观察的问题展开。 删除过程口吻"><div class="audit-meta">28 / P · L133<span>删除过程口吻</span></div><div class="before"><small>原文</small>则先接受工程基线，不另造算法。</div><div class="after"><small>改写 / 安放方式</small>正文移除研究决策过程；后续算法围绕基线下可重复观察的问题展开。</div><a class="source" href="../drafts/research-plan-v0.1.md">查看原材料 ↗</a></article><article class="audit-card" data-search="29 P 137 这个区间不是统计置信区间，也不保证包含真实价值 当前正文移除尚未选择的多归属区间方案，原假设与条件保留在研究档案。 候选机制移出主线"><div class="audit-meta">29 / P · L137<span>候选机制移出主线</span></div><div class="before"><small>原文</small>这个区间不是统计置信区间，也不保证包含真实价值</div><div class="after"><small>改写 / 安放方式</small>当前正文移除尚未选择的多归属区间方案，原假设与条件保留在研究档案。</div><a class="source" href="../drafts/research-plan-v0.1.md">查看原材料 ↗</a></article><article class="audit-card" data-search="30 P 143 “专家仍在线时系统更好”和“VLA 离开专家也变好”是不同结果。 分别以 expert-on 和 expert-off 实验检验现场收益与能力回灌。 写成两项证据"><div class="audit-meta">30 / P · L143<span>写成两项证据</span></div><div class="before"><small>原文</small>“专家仍在线时系统更好”和“VLA 离开专家也变好”是不同结果。</div><div class="after"><small>改写 / 安放方式</small>分别以 expert-on 和 expert-off 实验检验现场收益与能力回灌。</div><a class="source" href="../drafts/research-plan-v0.1.md">查看原材料 ↗</a></article><article class="audit-card" data-search="31 L 17 没有重新启动实验或查询实时设备。 来源说明集中写“本页汇总固定提交的归档记录”。 操作身份留在来源区"><div class="audit-meta">31 / L · L17<span>操作身份留在来源区</span></div><div class="before"><small>原文</small>没有重新启动实验或查询实时设备。</div><div class="after"><small>改写 / 安放方式</small>来源说明集中写“本页汇总固定提交的归档记录”。</div><a class="source" href="../experiments/20261013-rtc-rl/experiment-log.md">查看原材料 ↗</a></article><article class="audit-card" data-search="32 L 23 结果标签不等于独立试验数；均为零残差行为 14 集为底座 rollout；分别报告标签、尝试、转移与整轮数量。 单位定义取代告诫"><div class="audit-meta">32 / L · L23<span>单位定义取代告诫</span></div><div class="before"><small>原文</small>结果标签不等于独立试验数；均为零残差行为</div><div class="after"><small>改写 / 安放方式</small>14 集为底座 rollout；分别报告标签、尝试、转移与整轮数量。</div><a class="source" href="../experiments/20261013-rtc-rl/experiment-log.md">查看原材料 ↗</a></article><article class="audit-card" data-search="33 L 24 首轮高估；校准改善数值但未超过简单常数诊断基线 E01 开发诊断中，MC 锚点的入口 RMSE 约 0.628–0.637，训练均值常数为 0.556；设置与曲线列入补充诊断。 保留不利数值，删除过程口吻"><div class="audit-meta">33 / L · L24<span>保留不利数值，删除过程口吻</span></div><div class="before"><small>原文</small>首轮高估；校准改善数值但未超过简单常数诊断基线</div><div class="after"><small>改写 / 安放方式</small>E01 开发诊断中，MC 锚点的入口 RMSE 约 0.628–0.637，训练均值常数为 0.556；设置与曲线列入补充诊断。</div><a class="source" href="../experiments/20261013-rtc-rl/experiment-log.md">查看原材料 ↗</a></article><article class="audit-card" data-search="34 L 25 其他非零偏移未获真实策略验证 离线实验测量参数更新和价值预测；真机收益由独立 rollout 对照评价。 区分实验问题"><div class="audit-meta">34 / L · L25<span>区分实验问题</span></div><div class="before"><small>原文</small>其他非零偏移未获真实策略验证</div><div class="after"><small>改写 / 安放方式</small>离线实验测量参数更新和价值预测；真机收益由独立 rollout 对照评价。</div><a class="source" href="../experiments/20261013-rtc-rl/experiment-log.md">查看原材料 ↗</a></article><article class="audit-card" data-search="35 L 26 数值链路通过，不能报成专家学习成功 合成序列验证 replay 编译、SAC 更新与快照重载。 以已支持主张收尾"><div class="audit-meta">35 / L · L26<span>以已支持主张收尾</span></div><div class="before"><small>原文</small>数值链路通过，不能报成专家学习成功</div><div class="after"><small>改写 / 安放方式</small>合成序列验证 replay 编译、SAC 更新与快照重载。</div><a class="source" href="../experiments/20261013-rtc-rl/experiment-log.md">查看原材料 ↗</a></article><article class="audit-card" data-search="36 L 27 原 Pi 真机运行，零修正；reward 未发布 零残差真机 probe 支持原生执行来源与协议核验。 按实验职责陈述"><div class="audit-meta">36 / L · L27<span>按实验职责陈述</span></div><div class="before"><small>原文</small>原 Pi 真机运行，零修正；reward 未发布</div><div class="after"><small>改写 / 安放方式</small>零残差真机 probe 支持原生执行来源与协议核验。</div><a class="source" href="../experiments/20261013-rtc-rl/experiment-log.md">查看原材料 ↗</a></article><article class="audit-card" data-search="37 L 28 是可探索初始包，没有真实修正梯度更新 生产探索包从零均值、零更新参数启动。 初始化归方法设置"><div class="audit-meta">37 / L · L28<span>初始化归方法设置</span></div><div class="before"><small>原文</small>是可探索初始包，没有真实修正梯度更新</div><div class="after"><small>改写 / 安放方式</small>生产探索包从零均值、零更新参数启动。</div><a class="source" href="../experiments/20261013-rtc-rl/experiment-log.md">查看原材料 ↗</a></article><article class="audit-card" data-search="38 L 29 非跨 IPC 真机测量；独立于旧 probe 客户端耗时 时延范围为 Thor 本地服务；端到端时延另行评价。 范围紧随指标"><div class="audit-meta">38 / L · L29<span>范围紧随指标</span></div><div class="before"><small>原文</small>非跨 IPC 真机测量；独立于旧 probe 客户端耗时</div><div class="after"><small>改写 / 安放方式</small>时延范围为 Thor 本地服务；端到端时延另行评价。</div><a class="source" href="../experiments/20261013-rtc-rl/experiment-log.md">查看原材料 ↗</a></article><article class="audit-card" data-search="39 L 31 不能直接相减来精确估计新增耗时。 新增开销采用同输入、同设备、同条件的配对测量。 给出比较协议"><div class="audit-meta">39 / L · L31<span>给出比较协议</span></div><div class="before"><small>原文</small>不能直接相减来精确估计新增耗时。</div><div class="after"><small>改写 / 安放方式</small>新增开销采用同输入、同设备、同条件的配对测量。</div><a class="source" href="../experiments/20261013-rtc-rl/experiment-log.md">查看原材料 ↗</a></article><article class="audit-card" data-search="40 L 39 低 TD loss 不等于已有可用于优化动作的价值函数 价值诊断同时测量预测误差、排序与后续策略表现。 转成验证层次"><div class="audit-meta">40 / L · L39<span>转成验证层次</span></div><div class="before"><small>原文</small>低 TD loss 不等于已有可用于优化动作的价值函数</div><div class="after"><small>改写 / 安放方式</small>价值诊断同时测量预测误差、排序与后续策略表现。</div><a class="source" href="../experiments/20261013-rtc-rl/experiment-log.md">查看原材料 ↗</a></article><article class="audit-card" data-search="41 L 48 未合并这些实现到论文分支，不修改项目实现。 移出论文正文，工作区范围说明保留。 无论证职责的操作说明移位"><div class="audit-meta">41 / L · L48<span>无论证职责的操作说明移位</span></div><div class="before"><small>原文</small>未合并这些实现到论文分支，不修改项目实现。</div><div class="after"><small>改写 / 安放方式</small>移出论文正文，工作区范围说明保留。</div><a class="source" href="../experiments/20261013-rtc-rl/experiment-log.md">查看原材料 ↗</a></article><article class="audit-card" data-search="42 L 57 它不是客户端每 8 tick 必须再请求一次。 8 tick 定义残差包络长度，RTC 维持原请求调度。 参数语义直接说明"><div class="audit-meta">42 / L · L57<span>参数语义直接说明</span></div><div class="before"><small>原文</small>它不是客户端每 8 tick 必须再请求一次。</div><div class="after"><small>改写 / 安放方式</small>8 tick 定义残差包络长度，RTC 维持原请求调度。</div><a class="source" href="../experiments/20261013-rtc-rl/experiment-log.md">查看原材料 ↗</a></article><article class="audit-card" data-search="43 L 59 不重命名动作、不搬动 transition 边界。 跨区间效果保持原请求身份与原生观测边界。 正面表达来源不变量"><div class="audit-meta">43 / L · L59<span>正面表达来源不变量</span></div><div class="before"><small>原文</small>不重命名动作、不搬动 transition 边界。</div><div class="after"><small>改写 / 安放方式</small>跨区间效果保持原请求身份与原生观测边界。</div><a class="source" href="../experiments/20261013-rtc-rl/experiment-log.md">查看原材料 ↗</a></article><article class="audit-card" data-search="44 L 63 动作来源可被核验，不意味着已经证明某次修正对任务成功的因果贡献。 来源核验支撑执行重建；随机化策略对照评价任务效果。 问题分配给对应实验"><div class="audit-meta">44 / L · L63<span>问题分配给对应实验</span></div><div class="before"><small>原文</small>动作来源可被核验，不意味着已经证明某次修正对任务成功的因果贡献。</div><div class="after"><small>改写 / 安放方式</small>来源核验支撑执行重建；随机化策略对照评价任务效果。</div><a class="source" href="../experiments/20261013-rtc-rl/experiment-log.md">查看原材料 ↗</a></article><article class="audit-card" data-search="45 L 75 不能用 SDK 的裁剪差值冒充学到的动作。 残差相对于同一 SDK 映射后的物理底座计算。 定义正确参照"><div class="audit-meta">45 / L · L75<span>定义正确参照</span></div><div class="before"><small>原文</small>不能用 SDK 的裁剪差值冒充学到的动作。</div><div class="after"><small>改写 / 安放方式</small>残差相对于同一 SDK 映射后的物理底座计算。</div><a class="source" href="../experiments/20261013-rtc-rl/experiment-log.md">查看原材料 ↗</a></article><article class="audit-card" data-search="46 L 75 没有证明接触或碰撞安全。 命令约束覆盖范围与连续性，接触保护由原控制系统承担。 保留技术范围"><div class="audit-meta">46 / L · L75<span>保留技术范围</span></div><div class="before"><small>原文</small>没有证明接触或碰撞安全。</div><div class="after"><small>改写 / 安放方式</small>命令约束覆盖范围与连续性，接触保护由原控制系统承担。</div><a class="source" href="../experiments/20261013-rtc-rl/experiment-log.md">查看原材料 ↗</a></article><article class="audit-card" data-search="47 L 81 这不是 35 次成功，更不是独立泛化验证。 35 表示具备抬升核验画面的候选数；持物结果和独立任务评价另表统计。 标清计数对象"><div class="audit-meta">47 / L · L81<span>标清计数对象</span></div><div class="before"><small>原文</small>这不是 35 次成功，更不是独立泛化验证。</div><div class="after"><small>改写 / 安放方式</small>35 表示具备抬升核验画面的候选数；持物结果和独立任务评价另表统计。</div><a class="source" href="../experiments/20261013-rtc-rl/experiment-log.md">查看原材料 ↗</a></article><article class="audit-card" data-search="48 L 85 当前奖励只接纳窗口内终态证据，交还后 Pi 才完成的补救不记专家成功。 v3 在停止新增修正后保留排队尾部，并在排队完成后的核验区间结算结果。 技术更新，不是美化"><div class="audit-meta">48 / L · L85<span>技术更新，不是美化</span></div><div class="before"><small>原文</small>当前奖励只接纳窗口内终态证据，交还后 Pi 才完成的补救不记专家成功。</div><div class="after"><small>改写 / 安放方式</small>v3 在停止新增修正后保留排队尾部，并在排队完成后的核验区间结算结果。</div><a class="source" href="../experiments/20261013-rtc-rl/experiment-log.md">查看原材料 ↗</a></article><article class="audit-card" data-search="49 L 89 现在的新动作块 SAC 尚未接入同合同 Cal-QL 初始化，不直接迁移旧单 tick critic。 当前动作块专家使用 SAC；同合同 Cal-QL 初始化作为后续对照。 写清现行基线"><div class="audit-meta">49 / L · L89<span>写清现行基线</span></div><div class="before"><small>原文</small>现在的新动作块 SAC 尚未接入同合同 Cal-QL 初始化，不直接迁移旧单 tick critic。</div><div class="after"><small>改写 / 安放方式</small>当前动作块专家使用 SAC；同合同 Cal-QL 初始化作为后续对照。</div><a class="source" href="../experiments/20261013-rtc-rl/experiment-log.md">查看原材料 ↗</a></article><article class="audit-card" data-search="50 L 90 不能沿用原概念稿文字称它直接输入完整实发动作序列。 Q 输入七维缩放残差；状态包含参考计划和队列，实发命令用于执行核验。 修正方法事实"><div class="audit-meta">50 / L · L90<span>修正方法事实</span></div><div class="before"><small>原文</small>不能沿用原概念稿文字称它直接输入完整实发动作序列。</div><div class="after"><small>改写 / 安放方式</small>Q 输入七维缩放残差；状态包含参考计划和队列，实发命令用于执行核验。</div><a class="source" href="../experiments/20261013-rtc-rl/experiment-log.md">查看原材料 ↗</a></article><article class="audit-card" data-search="51 L 91 尚无真实修正的在线学习收益。 结果表区分系统核验与策略学习，策略行保留待填标记。 未完成结果明确占位"><div class="audit-meta">51 / L · L91<span>未完成结果明确占位</span></div><div class="before"><small>原文</small>尚无真实修正的在线学习收益。</div><div class="after"><small>改写 / 安放方式</small>结果表区分系统核验与策略学习，策略行保留待填标记。</div><a class="source" href="../experiments/20261013-rtc-rl/experiment-log.md">查看原材料 ↗</a></article><article class="audit-card" data-search="52 L 92 不是双臂联合残差策略已验收。 左右臂共享专家并接受单活动臂仲裁。 描述当前架构"><div class="audit-meta">52 / L · L92<span>描述当前架构</span></div><div class="before"><small>原文</small>不是双臂联合残差策略已验收。</div><div class="after"><small>改写 / 安放方式</small>左右臂共享专家并接受单活动臂仲裁。</div><a class="source" href="../experiments/20261013-rtc-rl/experiment-log.md">查看原材料 ↗</a></article><article class="audit-card" data-search="53 L 97 均不替代成功率实验。 局部持物、完整任务和 expert-off 三层对照分别支撑对应收益。 明确证据职责"><div class="audit-meta">53 / L · L97<span>明确证据职责</span></div><div class="before"><small>原文</small>均不替代成功率实验。</div><div class="after"><small>改写 / 安放方式</small>局部持物、完整任务和 expert-off 三层对照分别支撑对应收益。</div><a class="source" href="../experiments/20261013-rtc-rl/experiment-log.md">查看原材料 ↗</a></article><article class="audit-card" data-search="54 L 99 先积累这些证据，不预设它们一定构成算法创新。 RTC 与 RL 衔接构成第一部分，后续学习和架构实验形成论文核心贡献。 按用户定位重写"><div class="audit-meta">54 / L · L99<span>按用户定位重写</span></div><div class="before"><small>原文</small>先积累这些证据，不预设它们一定构成算法创新。</div><div class="after"><small>改写 / 安放方式</small>RTC 与 RL 衔接构成第一部分，后续学习和架构实验形成论文核心贡献。</div><a class="source" href="../experiments/20261013-rtc-rl/experiment-log.md">查看原材料 ↗</a></article><article class="audit-card" data-search="55 H 16 03　限幅不能算功劳 03　统一物理基线与修正语义 正面机制标题"><div class="audit-meta">55 / H · L16<span>正面机制标题</span></div><div class="before"><small>原文</small>03　限幅不能算功劳</div><div class="after"><small>改写 / 安放方式</small>03　统一物理基线与修正语义</div><a class="source" href="../experiments/20261013-rtc-rl/index.html">查看原材料 ↗</a></article><article class="audit-card" data-search="56 H 21 数值与数据诊断；尚不能证明动作改善 行为支持与价值预测诊断 按结果作用命名"><div class="audit-meta">56 / H · L21<span>按结果作用命名</span></div><div class="before"><small>原文</small>数值与数据诊断；尚不能证明动作改善</div><div class="after"><small>改写 / 安放方式</small>行为支持与价值预测诊断</div><a class="source" href="../experiments/20261013-rtc-rl/index.html">查看原材料 ↗</a></article><article class="audit-card" data-search="57 H 21 页面不是设备实时监控，也没有把服务 healthy 当成任务成功。 证据截点与测量类型集中列入来源说明。 重复提醒移位"><div class="audit-meta">57 / H · L21<span>重复提醒移位</span></div><div class="before"><small>原文</small>页面不是设备实时监控，也没有把服务 healthy 当成任务成功。</div><div class="after"><small>改写 / 安放方式</small>证据截点与测量类型集中列入来源说明。</div><a class="source" href="../experiments/20261013-rtc-rl/index.html">查看原材料 ↗</a></article><article class="audit-card" data-search="58 H 22 看到 B 时，不能断言 A 没有执行；也不能把随后执行的 A 改名为 B。 观测 B 到达后，A 的已承诺修正继续保持 A 的来源身份。 用时序事实解释机制"><div class="audit-meta">58 / H · L22<span>用时序事实解释机制</span></div><div class="before"><small>原文</small>看到 B 时，不能断言 A 没有执行；也不能把随后执行的 A 改名为 B。</div><div class="after"><small>改写 / 安放方式</small>观测 B 到达后，A 的已承诺修正继续保持 A 的来源身份。</div><a class="source" href="../experiments/20261013-rtc-rl/index.html">查看原材料 ↗</a></article><article class="audit-card" data-search="59 H 27 展示的是执行来源，不是因果效果证明。 图注写“构造时序示例：解释请求身份与实际消费”。 保留图示身份"><div class="audit-meta">59 / H · L27<span>保留图示身份</span></div><div class="before"><small>原文</small>展示的是执行来源，不是因果效果证明。</div><div class="after"><small>改写 / 安放方式</small>图注写“构造时序示例：解释请求身份与实际消费”。</div><a class="source" href="../experiments/20261013-rtc-rl/index.html">查看原材料 ↗</a></article><article class="audit-card" data-search="60 H 28 新回复不是每个位置的新主人。 新计划继承旧前缀的请求身份。 删除绕行比喻"><div class="audit-meta">60 / H · L28<span>删除绕行比喻</span></div><div class="before"><small>原文</small>新回复不是每个位置的新主人。</div><div class="after"><small>改写 / 安放方式</small>新计划继承旧前缀的请求身份。</div><a class="source" href="../experiments/20261013-rtc-rl/index.html">查看原材料 ↗</a></article><article class="audit-card" data-search="61 H 28 计划不是经验 以实际消费构建经验 方法动作标题"><div class="audit-meta">61 / H · L28<span>方法动作标题</span></div><div class="before"><small>原文</small>计划不是经验</div><div class="after"><small>改写 / 安放方式</small>以实际消费构建经验</div><a class="source" href="../experiments/20261013-rtc-rl/index.html">查看原材料 ↗</a></article><article class="audit-card" data-search="62 H 32 Pi 基线自身违规时拒绝，不悄悄裁成另一条轨迹。 底座先通过命令约束检查，再计算残差可行空间。 保留检查顺序"><div class="audit-meta">62 / H · L32<span>保留检查顺序</span></div><div class="before"><small>原文</small>Pi 基线自身违规时拒绝，不悄悄裁成另一条轨迹。</div><div class="after"><small>改写 / 安放方式</small>底座先通过命令约束检查，再计算残差可行空间。</div><a class="source" href="../experiments/20261013-rtc-rl/index.html">查看原材料 ↗</a></article><article class="audit-card" data-search="63 H 32 不把“计划 8 步”当成“执行 8 步” 按真实经过时间形成学习转移 正面方法标题"><div class="audit-meta">63 / H · L32<span>正面方法标题</span></div><div class="before"><small>原文</small>不把“计划 8 步”当成“执行 8 步”</div><div class="after"><small>改写 / 安放方式</small>按真实经过时间形成学习转移</div><a class="source" href="../experiments/20261013-rtc-rl/index.html">查看原材料 ↗</a></article><article class="audit-card" data-search="64 H 32 此范围不是碰撞保证。 命令范围约束与机器人接触保护分别实施。 保护范围集中说明"><div class="audit-meta">64 / H · L32<span>保护范围集中说明</span></div><div class="before"><small>原文</small>此范围不是碰撞保证。</div><div class="after"><small>改写 / 安放方式</small>命令范围约束与机器人接触保护分别实施。</div><a class="source" href="../experiments/20261013-rtc-rl/index.html">查看原材料 ↗</a></article><article class="audit-card" data-search="65 H 33 夹爪限幅，不能算成 RL 学会了修正 在物理命令空间定义零修正 机制标题替代辩解"><div class="audit-meta">65 / H · L33<span>机制标题替代辩解</span></div><div class="before"><small>原文</small>夹爪限幅，不能算成 RL 学会了修正</div><div class="after"><small>改写 / 安放方式</small>在物理命令空间定义零修正</div><a class="source" href="../experiments/20261013-rtc-rl/index.html">查看原材料 ↗</a></article><article class="audit-card" data-search="66 H 33 这 12 个区间不是 12 次抓取失败。 12 表示发生已声明 SDK 转换的诊断区间数。 直接解释计数对象"><div class="audit-meta">66 / H · L33<span>直接解释计数对象</span></div><div class="before"><small>原文</small>这 12 个区间不是 12 次抓取失败。</div><div class="after"><small>改写 / 安放方式</small>12 表示发生已声明 SDK 转换的诊断区间数。</div><a class="source" href="../experiments/20261013-rtc-rl/index.html">查看原材料 ↗</a></article><article class="audit-card" data-search="67 H 34 37 窗口、38 候选、35 个有核验画面的候选是不同分母。 分别报告在线窗口、收拢候选与视觉证据合格候选。 保留统计定义"><div class="audit-meta">67 / H · L34<span>保留统计定义</span></div><div class="before"><small>原文</small>37 窗口、38 候选、35 个有核验画面的候选是不同分母。</div><div class="after"><small>改写 / 安放方式</small>分别报告在线窗口、收拢候选与视觉证据合格候选。</div><a class="source" href="../experiments/20261013-rtc-rl/index.html">查看原材料 ↗</a></article><article class="audit-card" data-search="68 H 34 高度不是成功。当前不把交还后 Pi 才完成的补救记为专家成功；这是阶段性奖励边界，不是普遍因果结论。 高度定义退出与证据资格；v3 在排队结束后，以终态视觉和轨迹证据判奖。 新版窗口取代过期描述"><div class="audit-meta">68 / H · L34<span>新版窗口取代过期描述</span></div><div class="before"><small>原文</small>高度不是成功。当前不把交还后 Pi 才完成的补救记为专家成功；这是阶段性奖励边界，不是普遍因果结论。</div><div class="after"><small>改写 / 安放方式</small>高度定义退出与证据资格；v3 在排队结束后，以终态视觉和轨迹证据判奖。</div><a class="source" href="../experiments/20261013-rtc-rl/index.html">查看原材料 ↗</a></article><article class="audit-card" data-search="69 H 36 E01 仅 12 次验证、2 次失败，并已反复参与调试。 E01 开发验证集包含 12 次尝试，其中 2 次失败。 删弱化副词，保留样本构成"><div class="audit-meta">69 / H · L36<span>删弱化副词，保留样本构成</span></div><div class="before"><small>原文</small>E01 仅 12 次验证、2 次失败，并已反复参与调试。</div><div class="after"><small>改写 / 安放方式</small>E01 开发验证集包含 12 次尝试，其中 2 次失败。</div><a class="source" href="../experiments/20261013-rtc-rl/index.html">查看原材料 ↗</a></article><article class="audit-card" data-search="70 H 36 入口行为 MC RMSE 是诊断量，不是不同算法的真机成功率排行榜。 入口行为 MC RMSE 评价开发集上的价值预测，策略比较使用独立真机结果。 分配指标职责"><div class="audit-meta">70 / H · L36<span>分配指标职责</span></div><div class="before"><small>原文</small>入口行为 MC RMSE 是诊断量，不是不同算法的真机成功率排行榜。</div><div class="after"><small>改写 / 安放方式</small>入口行为 MC RMSE 评价开发集上的价值预测，策略比较使用独立真机结果。</div><a class="source" href="../experiments/20261013-rtc-rl/index.html">查看原材料 ↗</a></article><article class="audit-card" data-search="71 H 36 当前各方法未在此诊断上胜过它们 补充诊断按原值列出全部方法与常数参照，正文不以此建立策略优越性主张。 不把不利结果改成获胜"><div class="audit-meta">71 / H · L36<span>不把不利结果改成获胜</span></div><div class="before"><small>原文</small>当前各方法未在此诊断上胜过它们</div><div class="after"><small>改写 / 安放方式</small>补充诊断按原值列出全部方法与常数参照，正文不以此建立策略优越性主张。</div><a class="source" href="../experiments/20261013-rtc-rl/index.html">查看原材料 ↗</a></article><article class="audit-card" data-search="72 H 36 首轮 Q 高估；MC 锚点改善尺度，但没有证明价值估计已足够指导动作。 MC 锚点改变行为价值预测尺度；保留 RMSE、AUC 与常数参照。 实测现象和推断分开"><div class="audit-meta">72 / H · L36<span>实测现象和推断分开</span></div><div class="before"><small>原文</small>首轮 Q 高估；MC 锚点改善尺度，但没有证明价值估计已足够指导动作。</div><div class="after"><small>改写 / 安放方式</small>MC 锚点改变行为价值预测尺度；保留 RMSE、AUC 与常数参照。</div><a class="source" href="../experiments/20261013-rtc-rl/index.html">查看原材料 ↗</a></article><article class="audit-card" data-search="73 H 36 “没有漂移”不等于学会了新修正。 IQL 在零残差数据上保持零均值，显示其行为支持范围。 陈述观察及解释"><div class="audit-meta">73 / H · L36<span>陈述观察及解释</span></div><div class="before"><small>原文</small>“没有漂移”不等于学会了新修正。</div><div class="after"><small>改写 / 安放方式</small>IQL 在零残差数据上保持零均值，显示其行为支持范围。</div><a class="source" href="../experiments/20261013-rtc-rl/index.html">查看原材料 ↗</a></article><article class="audit-card" data-search="74 H 38 本机录像输入测试还不能代替真机。 本机调用评价服务接口，真机 rollout 评价实际修正及任务结果。 按测量对象陈述"><div class="audit-meta">74 / H · L38<span>按测量对象陈述</span></div><div class="before"><small>原文</small>本机录像输入测试还不能代替真机。</div><div class="after"><small>改写 / 安放方式</small>本机调用评价服务接口，真机 rollout 评价实际修正及任务结果。</div><a class="source" href="../experiments/20261013-rtc-rl/index.html">查看原材料 ↗</a></article><article class="audit-card" data-search="75 H 38 新合同不直接混入旧单 tick critic。 模型快照和 replay 依据动作合同版本配对。 说明版本一致性"><div class="audit-meta">75 / H · L38<span>说明版本一致性</span></div><div class="before"><small>原文</small>新合同不直接混入旧单 tick critic。</div><div class="after"><small>改写 / 安放方式</small>模型快照和 replay 依据动作合同版本配对。</div><a class="source" href="../experiments/20261013-rtc-rl/index.html">查看原材料 ↗</a></article><article class="audit-card" data-search="76 H 37 真实 collect replay 更新和策略收益仍待新数据验证。 已实现接口与待填的策略结果分别标注。 状态归图例和结果表"><div class="audit-meta">76 / H · L37<span>状态归图例和结果表</span></div><div class="before"><small>原文</small>真实 collect replay 更新和策略收益仍待新数据验证。</div><div class="after"><small>改写 / 安放方式</small>已实现接口与待填的策略结果分别标注。</div><a class="source" href="../experiments/20261013-rtc-rl/index.html">查看原材料 ↗</a></article><article class="audit-card" data-search="77 H 38 当前经验可以形成系统与测量问题的研究材料；是否存在算法贡献，继续由文献和实验决定。 RTC 与 RL 衔接先形成第一部分，RL 和架构结果继续丰富主线。 采用用户确认的层次"><div class="audit-meta">77 / H · L38<span>采用用户确认的层次</span></div><div class="before"><small>原文</small>当前经验可以形成系统与测量问题的研究材料；是否存在算法贡献，继续由文献和实验决定。</div><div class="after"><small>改写 / 安放方式</small>RTC 与 RL 衔接先形成第一部分，RL 和架构结果继续丰富主线。</div><a class="source" href="../experiments/20261013-rtc-rl/index.html">查看原材料 ↗</a></article><article class="audit-card" data-search="78 H 39 没有重新执行训练、重跑奖励模型或查询当前设备。 本页汇总固定 Git 提交中的实现和归档测量。 来源一次说清"><div class="audit-meta">78 / H · L39<span>来源一次说清</span></div><div class="before"><small>原文</small>没有重新执行训练、重跑奖励模型或查询当前设备。</div><div class="after"><small>改写 / 安放方式</small>本页汇总固定 Git 提交中的实现和归档测量。</div><a class="source" href="../experiments/20261013-rtc-rl/index.html">查看原材料 ↗</a></article></section>
+<footer class="bottom">独立设计 · 2026-10-13 · 实现快照 22fcebf，归档部署 e21431b。系统核验与策略结果分开呈现。<br><a href="../experiments/20261013-rtc-rl/">原始实验札记</a> · <a href="../literature-review.md">文献调研</a> · <a href="../05_style_guide.md">写作规范</a></footer>
+</main></div><script>
+const stages=[
+["生成修正：只编辑尚未承诺的后缀","局部专家根据当前观测、参考计划和队列状态输出残差；正负方向分别计算可行幅度。",265],
+["停止新增：已承诺的修正继续完成","进入 draining 后，新增残差为零。原 RTC 前缀保持，Pi 继续执行；这段真实等待也进入 replay。",500],
+["完成排队：让结果回到对应尝试","残差尾部完成并留出观测余量后核验结果。终止奖励发放一次，价值沿此前转移传播。",745]
+];
+function stage(i){document.getElementById("stage-title").textContent=stages[i][0];document.getElementById("stage-copy").textContent=stages[i][1];document.getElementById("cursor").setAttribute("d","M"+stages[i][2]+" 43 V220");document.querySelectorAll("[data-stage]").forEach(b=>b.setAttribute("aria-pressed",String(Number(b.dataset.stage)===i)));}
+document.querySelectorAll("[data-stage]").forEach(b=>b.addEventListener("click",()=>stage(Number(b.dataset.stage))));stage(0);
+document.getElementById("audit-search").addEventListener("input",function(){const q=this.value.toLowerCase().trim();let n=0;document.querySelectorAll(".audit-card").forEach(card=>{card.hidden=!card.dataset.search.toLowerCase().includes(q);if(!card.hidden)n++;});document.getElementById("audit-count").textContent=n+" / 78 处";});
+</script></body></html>
