@@ -1,0 +1,552 @@
+[
+  {
+    "episode": "/home/wuyan-lyj/condapi-data/rl/lego-pld-learned-e14-e15-20261013-v1/raw-v2/session_20261013_183443_9a30dd/episode_000001",
+    "split": "train",
+    "raw_rows": 2929,
+    "physical_candidates": 33,
+    "actual_intervals": 221,
+    "execution_exclusions": [
+      {
+        "decision": "e2:r57",
+        "reason": "next observation response canceled/rejected"
+      },
+      {
+        "decision": "e2:r58",
+        "reason": "proposal canceled/rejected"
+      },
+      {
+        "decision": "e2:r103",
+        "reason": "next observation response canceled/rejected"
+      },
+      {
+        "decision": "e2:r104",
+        "reason": "proposal canceled/rejected"
+      }
+    ],
+    "association_exclusions": [
+      {
+        "window": [
+          "2c9b89a592ac45448ecfbb312c3822dc",
+          "7c9a8f0321a54101a7074aa2b05e23bc",
+          2,
+          "e2:s6560845be4d94020954dc67ba6bd2fe8:w1"
+        ],
+        "reason": "'E01-R001-v3'"
+      },
+      {
+        "window": [
+          "2c9b89a592ac45448ecfbb312c3822dc",
+          "7c9a8f0321a54101a7074aa2b05e23bc",
+          2,
+          "e2:s6560845be4d94020954dc67ba6bd2fe8:w2"
+        ],
+        "reason": "'E01-R002-v3'"
+      },
+      {
+        "window": [
+          "2c9b89a592ac45448ecfbb312c3822dc",
+          "7c9a8f0321a54101a7074aa2b05e23bc",
+          2,
+          "e2:s6560845be4d94020954dc67ba6bd2fe8:w3"
+        ],
+        "reason": "'E01-R003-v3'"
+      },
+      {
+        "window": [
+          "2c9b89a592ac45448ecfbb312c3822dc",
+          "7c9a8f0321a54101a7074aa2b05e23bc",
+          2,
+          "e2:s6560845be4d94020954dc67ba6bd2fe8:w4"
+        ],
+        "reason": "'E01-R004-v3'"
+      },
+      {
+        "window": [
+          "2c9b89a592ac45448ecfbb312c3822dc",
+          "7c9a8f0321a54101a7074aa2b05e23bc",
+          2,
+          "e2:s6560845be4d94020954dc67ba6bd2fe8:w5"
+        ],
+        "reason": "'E01-R005-v3'"
+      },
+      {
+        "window": [
+          "2c9b89a592ac45448ecfbb312c3822dc",
+          "7c9a8f0321a54101a7074aa2b05e23bc",
+          2,
+          "e2:s6560845be4d94020954dc67ba6bd2fe8:w6"
+        ],
+        "reason": "'E01-L001-v3'"
+      },
+      {
+        "window": [
+          "2c9b89a592ac45448ecfbb312c3822dc",
+          "7c9a8f0321a54101a7074aa2b05e23bc",
+          2,
+          "e2:s6560845be4d94020954dc67ba6bd2fe8:w7"
+        ],
+        "reason": "window contains rejected execution intervals"
+      },
+      {
+        "window": [
+          "2c9b89a592ac45448ecfbb312c3822dc",
+          "7c9a8f0321a54101a7074aa2b05e23bc",
+          2,
+          "e2:s6560845be4d94020954dc67ba6bd2fe8:w8"
+        ],
+        "reason": "'E01-R007-v3'"
+      },
+      {
+        "window": [
+          "2c9b89a592ac45448ecfbb312c3822dc",
+          "7c9a8f0321a54101a7074aa2b05e23bc",
+          2,
+          "e2:s6560845be4d94020954dc67ba6bd2fe8:w9"
+        ],
+        "reason": "'E01-L002-v3'"
+      },
+      {
+        "window": [
+          "2c9b89a592ac45448ecfbb312c3822dc",
+          "7c9a8f0321a54101a7074aa2b05e23bc",
+          2,
+          "e2:s6560845be4d94020954dc67ba6bd2fe8:w10"
+        ],
+        "reason": "'E01-R008-v3'"
+      },
+      {
+        "window": [
+          "2c9b89a592ac45448ecfbb312c3822dc",
+          "7c9a8f0321a54101a7074aa2b05e23bc",
+          2,
+          "e2:s6560845be4d94020954dc67ba6bd2fe8:w11"
+        ],
+        "reason": "'E01-R009-v3'"
+      },
+      {
+        "window": [
+          "2c9b89a592ac45448ecfbb312c3822dc",
+          "7c9a8f0321a54101a7074aa2b05e23bc",
+          2,
+          "e2:s6560845be4d94020954dc67ba6bd2fe8:w12"
+        ],
+        "reason": "'E01-L003-v3'"
+      },
+      {
+        "window": [
+          "2c9b89a592ac45448ecfbb312c3822dc",
+          "7c9a8f0321a54101a7074aa2b05e23bc",
+          2,
+          "e2:s6560845be4d94020954dc67ba6bd2fe8:w13"
+        ],
+        "reason": "window contains rejected execution intervals"
+      },
+      {
+        "window": [
+          "2c9b89a592ac45448ecfbb312c3822dc",
+          "7c9a8f0321a54101a7074aa2b05e23bc",
+          2,
+          "e2:s6560845be4d94020954dc67ba6bd2fe8:w14"
+        ],
+        "reason": "'E01-L004-v3'"
+      },
+      {
+        "window": [
+          "2c9b89a592ac45448ecfbb312c3822dc",
+          "7c9a8f0321a54101a7074aa2b05e23bc",
+          2,
+          "e2:s6560845be4d94020954dc67ba6bd2fe8:w15"
+        ],
+        "reason": "'E01-R011-v3'"
+      },
+      {
+        "window": [
+          "2c9b89a592ac45448ecfbb312c3822dc",
+          "7c9a8f0321a54101a7074aa2b05e23bc",
+          2,
+          "e2:s6560845be4d94020954dc67ba6bd2fe8:w16"
+        ],
+        "reason": "'E01-R012-v3'"
+      },
+      {
+        "window": [
+          "2c9b89a592ac45448ecfbb312c3822dc",
+          "7c9a8f0321a54101a7074aa2b05e23bc",
+          2,
+          "e2:s6560845be4d94020954dc67ba6bd2fe8:w17"
+        ],
+        "reason": "'E01-R013-v3'"
+      },
+      {
+        "window": [
+          "2c9b89a592ac45448ecfbb312c3822dc",
+          "7c9a8f0321a54101a7074aa2b05e23bc",
+          2,
+          "e2:s6560845be4d94020954dc67ba6bd2fe8:w18"
+        ],
+        "reason": "'E01-L005-v3'"
+      },
+      {
+        "window": [
+          "2c9b89a592ac45448ecfbb312c3822dc",
+          "7c9a8f0321a54101a7074aa2b05e23bc",
+          2,
+          "e2:s6560845be4d94020954dc67ba6bd2fe8:w19"
+        ],
+        "reason": "'E01-R014-v3'"
+      },
+      {
+        "window": [
+          "2c9b89a592ac45448ecfbb312c3822dc",
+          "7c9a8f0321a54101a7074aa2b05e23bc",
+          2,
+          "e2:s6560845be4d94020954dc67ba6bd2fe8:w20"
+        ],
+        "reason": "'E01-L006-v3'"
+      },
+      {
+        "window": [
+          "2c9b89a592ac45448ecfbb312c3822dc",
+          "7c9a8f0321a54101a7074aa2b05e23bc",
+          2,
+          "e2:s6560845be4d94020954dc67ba6bd2fe8:w21"
+        ],
+        "reason": "'E01-R015-v3'"
+      },
+      {
+        "window": [
+          "2c9b89a592ac45448ecfbb312c3822dc",
+          "7c9a8f0321a54101a7074aa2b05e23bc",
+          2,
+          "e2:s6560845be4d94020954dc67ba6bd2fe8:w22"
+        ],
+        "reason": "'E01-L007-v3'"
+      },
+      {
+        "window": [
+          "2c9b89a592ac45448ecfbb312c3822dc",
+          "7c9a8f0321a54101a7074aa2b05e23bc",
+          2,
+          "e2:s6560845be4d94020954dc67ba6bd2fe8:w23"
+        ],
+        "reason": "'E01-R016-v3'"
+      },
+      {
+        "window": [
+          "2c9b89a592ac45448ecfbb312c3822dc",
+          "7c9a8f0321a54101a7074aa2b05e23bc",
+          2,
+          "e2:s6560845be4d94020954dc67ba6bd2fe8:w24"
+        ],
+        "reason": "'E01-L008-v3'"
+      },
+      {
+        "window": [
+          "2c9b89a592ac45448ecfbb312c3822dc",
+          "7c9a8f0321a54101a7074aa2b05e23bc",
+          2,
+          "e2:s6560845be4d94020954dc67ba6bd2fe8:w25"
+        ],
+        "reason": "'E01-R017-v3'"
+      },
+      {
+        "window": [
+          "2c9b89a592ac45448ecfbb312c3822dc",
+          "7c9a8f0321a54101a7074aa2b05e23bc",
+          2,
+          "e2:s6560845be4d94020954dc67ba6bd2fe8:w26"
+        ],
+        "reason": "'E01-L009-v3'"
+      },
+      {
+        "window": [
+          "2c9b89a592ac45448ecfbb312c3822dc",
+          "7c9a8f0321a54101a7074aa2b05e23bc",
+          2,
+          "e2:s6560845be4d94020954dc67ba6bd2fe8:w27"
+        ],
+        "reason": "'E01-L010-v3'"
+      },
+      {
+        "window": [
+          "2c9b89a592ac45448ecfbb312c3822dc",
+          "7c9a8f0321a54101a7074aa2b05e23bc",
+          2,
+          "e2:s6560845be4d94020954dc67ba6bd2fe8:w28"
+        ],
+        "reason": "'E01-R018-v3'"
+      },
+      {
+        "window": [
+          "2c9b89a592ac45448ecfbb312c3822dc",
+          "7c9a8f0321a54101a7074aa2b05e23bc",
+          2,
+          "e2:s6560845be4d94020954dc67ba6bd2fe8:w29"
+        ],
+        "reason": "'E01-R019-v3'"
+      },
+      {
+        "window": [
+          "2c9b89a592ac45448ecfbb312c3822dc",
+          "7c9a8f0321a54101a7074aa2b05e23bc",
+          2,
+          "e2:s6560845be4d94020954dc67ba6bd2fe8:w30"
+        ],
+        "reason": "'E01-R020-v3'"
+      },
+      {
+        "window": [
+          "2c9b89a592ac45448ecfbb312c3822dc",
+          "7c9a8f0321a54101a7074aa2b05e23bc",
+          2,
+          "e2:s6560845be4d94020954dc67ba6bd2fe8:w31"
+        ],
+        "reason": "'E01-L011-v3'"
+      },
+      {
+        "window": [
+          "2c9b89a592ac45448ecfbb312c3822dc",
+          "7c9a8f0321a54101a7074aa2b05e23bc",
+          2,
+          "e2:s6560845be4d94020954dc67ba6bd2fe8:w32"
+        ],
+        "reason": "'E01-R021-v3'"
+      },
+      {
+        "window": [
+          "2c9b89a592ac45448ecfbb312c3822dc",
+          "7c9a8f0321a54101a7074aa2b05e23bc",
+          2,
+          "e2:s6560845be4d94020954dc67ba6bd2fe8:w33"
+        ],
+        "reason": "'E01-L012-v3'"
+      }
+    ]
+  },
+  {
+    "episode": "/home/wuyan-lyj/condapi-data/rl/lego-pld-learned-e14-e15-20261013-v1/raw-v2/session_20261013_183443_9a30dd/episode_000002",
+    "split": "train",
+    "raw_rows": 2054,
+    "physical_candidates": 25,
+    "actual_intervals": 163,
+    "execution_exclusions": [],
+    "association_exclusions": [
+      {
+        "window": [
+          "fbb73e80aaed4897aa3a9dde36994d77",
+          "198a2de60c764042a8c2824c6a5167c1",
+          11,
+          "e11:s13829416b00047f5a848a3917d0e1bcd:w1"
+        ],
+        "reason": "'E02-R001-v3'"
+      },
+      {
+        "window": [
+          "fbb73e80aaed4897aa3a9dde36994d77",
+          "198a2de60c764042a8c2824c6a5167c1",
+          11,
+          "e11:s13829416b00047f5a848a3917d0e1bcd:w2"
+        ],
+        "reason": "'E02-R002-v3'"
+      },
+      {
+        "window": [
+          "fbb73e80aaed4897aa3a9dde36994d77",
+          "198a2de60c764042a8c2824c6a5167c1",
+          11,
+          "e11:s13829416b00047f5a848a3917d0e1bcd:w3"
+        ],
+        "reason": "'E02-R003-v3'"
+      },
+      {
+        "window": [
+          "fbb73e80aaed4897aa3a9dde36994d77",
+          "198a2de60c764042a8c2824c6a5167c1",
+          11,
+          "e11:s13829416b00047f5a848a3917d0e1bcd:w4"
+        ],
+        "reason": "'E02-L001-v3'"
+      },
+      {
+        "window": [
+          "fbb73e80aaed4897aa3a9dde36994d77",
+          "198a2de60c764042a8c2824c6a5167c1",
+          11,
+          "e11:s13829416b00047f5a848a3917d0e1bcd:w5"
+        ],
+        "reason": "'E02-R004-v3'"
+      },
+      {
+        "window": [
+          "fbb73e80aaed4897aa3a9dde36994d77",
+          "198a2de60c764042a8c2824c6a5167c1",
+          11,
+          "e11:s13829416b00047f5a848a3917d0e1bcd:w6"
+        ],
+        "reason": "'E02-R005-v3'"
+      },
+      {
+        "window": [
+          "fbb73e80aaed4897aa3a9dde36994d77",
+          "198a2de60c764042a8c2824c6a5167c1",
+          11,
+          "e11:s13829416b00047f5a848a3917d0e1bcd:w7"
+        ],
+        "reason": "'E02-R006-v3'"
+      },
+      {
+        "window": [
+          "fbb73e80aaed4897aa3a9dde36994d77",
+          "198a2de60c764042a8c2824c6a5167c1",
+          11,
+          "e11:s13829416b00047f5a848a3917d0e1bcd:w8"
+        ],
+        "reason": "'E02-R007-v3'"
+      },
+      {
+        "window": [
+          "fbb73e80aaed4897aa3a9dde36994d77",
+          "198a2de60c764042a8c2824c6a5167c1",
+          11,
+          "e11:s13829416b00047f5a848a3917d0e1bcd:w9"
+        ],
+        "reason": "'E02-R008-v3'"
+      },
+      {
+        "window": [
+          "fbb73e80aaed4897aa3a9dde36994d77",
+          "198a2de60c764042a8c2824c6a5167c1",
+          11,
+          "e11:s13829416b00047f5a848a3917d0e1bcd:w10"
+        ],
+        "reason": "'E02-L002-v3'"
+      },
+      {
+        "window": [
+          "fbb73e80aaed4897aa3a9dde36994d77",
+          "198a2de60c764042a8c2824c6a5167c1",
+          11,
+          "e11:s13829416b00047f5a848a3917d0e1bcd:w11"
+        ],
+        "reason": "'E02-R009-v3'"
+      },
+      {
+        "window": [
+          "fbb73e80aaed4897aa3a9dde36994d77",
+          "198a2de60c764042a8c2824c6a5167c1",
+          11,
+          "e11:s13829416b00047f5a848a3917d0e1bcd:w12"
+        ],
+        "reason": "'E02-L003-v3'"
+      },
+      {
+        "window": [
+          "fbb73e80aaed4897aa3a9dde36994d77",
+          "198a2de60c764042a8c2824c6a5167c1",
+          11,
+          "e11:s13829416b00047f5a848a3917d0e1bcd:w13"
+        ],
+        "reason": "'E02-R010-v3'"
+      },
+      {
+        "window": [
+          "fbb73e80aaed4897aa3a9dde36994d77",
+          "198a2de60c764042a8c2824c6a5167c1",
+          11,
+          "e11:s13829416b00047f5a848a3917d0e1bcd:w14"
+        ],
+        "reason": "'E02-L004-v3'"
+      },
+      {
+        "window": [
+          "fbb73e80aaed4897aa3a9dde36994d77",
+          "198a2de60c764042a8c2824c6a5167c1",
+          11,
+          "e11:s13829416b00047f5a848a3917d0e1bcd:w15"
+        ],
+        "reason": "'E02-R011-v3'"
+      },
+      {
+        "window": [
+          "fbb73e80aaed4897aa3a9dde36994d77",
+          "198a2de60c764042a8c2824c6a5167c1",
+          11,
+          "e11:s13829416b00047f5a848a3917d0e1bcd:w16"
+        ],
+        "reason": "'E02-L005-v3'"
+      },
+      {
+        "window": [
+          "fbb73e80aaed4897aa3a9dde36994d77",
+          "198a2de60c764042a8c2824c6a5167c1",
+          11,
+          "e11:s13829416b00047f5a848a3917d0e1bcd:w17"
+        ],
+        "reason": "'E02-L006-v3'"
+      },
+      {
+        "window": [
+          "fbb73e80aaed4897aa3a9dde36994d77",
+          "198a2de60c764042a8c2824c6a5167c1",
+          11,
+          "e11:s13829416b00047f5a848a3917d0e1bcd:w18"
+        ],
+        "reason": "'E02-R012-v3'"
+      },
+      {
+        "window": [
+          "fbb73e80aaed4897aa3a9dde36994d77",
+          "198a2de60c764042a8c2824c6a5167c1",
+          11,
+          "e11:s13829416b00047f5a848a3917d0e1bcd:w19"
+        ],
+        "reason": "'E02-L007-v3'"
+      },
+      {
+        "window": [
+          "fbb73e80aaed4897aa3a9dde36994d77",
+          "198a2de60c764042a8c2824c6a5167c1",
+          11,
+          "e11:s13829416b00047f5a848a3917d0e1bcd:w20"
+        ],
+        "reason": "'E02-R013-v3'"
+      },
+      {
+        "window": [
+          "fbb73e80aaed4897aa3a9dde36994d77",
+          "198a2de60c764042a8c2824c6a5167c1",
+          11,
+          "e11:s13829416b00047f5a848a3917d0e1bcd:w21"
+        ],
+        "reason": "'E02-L008-v3'"
+      },
+      {
+        "window": [
+          "fbb73e80aaed4897aa3a9dde36994d77",
+          "198a2de60c764042a8c2824c6a5167c1",
+          11,
+          "e11:s13829416b00047f5a848a3917d0e1bcd:w22"
+        ],
+        "reason": "'E02-R015-v3'"
+      },
+      {
+        "window": [
+          "fbb73e80aaed4897aa3a9dde36994d77",
+          "198a2de60c764042a8c2824c6a5167c1",
+          11,
+          "e11:s13829416b00047f5a848a3917d0e1bcd:w23"
+        ],
+        "reason": "'E02-L009-v3'"
+      },
+      {
+        "window": [
+          "fbb73e80aaed4897aa3a9dde36994d77",
+          "198a2de60c764042a8c2824c6a5167c1",
+          11,
+          "e11:s13829416b00047f5a848a3917d0e1bcd:w24"
+        ],
+        "reason": "'E02-R016-v3'"
+      }
+    ]
+  }
+]

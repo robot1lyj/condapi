@@ -1,0 +1,432 @@
+{
+  "episodes": [
+    {
+      "number": 1,
+      "episode_path": "episode_000001",
+      "episode_id": "7c9a8f0321a54101a7074aa2b05e23bc",
+      "rows": 2929,
+      "duration_s": 97.64175250497647,
+      "manifest_pld": {
+        "schema": "pld_sac_block_v2",
+        "mode": "collect",
+        "run_id": "2c9b89a592ac45448ecfbb312c3822dc",
+        "contract_sha256": "87b1affa6d81e1d0cf6299bf6e827bd260361104338708e67579c874ee65d7ec",
+        "snapshot_sha256": "75674aad5775e4864cce24664abd270e43a2a82b7e64f95811ce952979b2d286"
+      },
+      "mode_counts": {
+        "collect": 278
+      },
+      "contract_sha256": [
+        "87b1affa6d81e1d0cf6299bf6e827bd260361104338708e67579c874ee65d7ec"
+      ],
+      "snapshot_sha256": [
+        "75674aad5775e4864cce24664abd270e43a2a82b7e64f95811ce952979b2d286"
+      ],
+      "delay_steps": {
+        "9": 278
+      },
+      "human_rows": 0,
+      "invalid_observation_rows": 0,
+      "invalid_submission_rows": 0,
+      "source_counts": {
+        "hold": 9,
+        "policy": 2920
+      },
+      "replies": 278,
+      "accepted_replies": 275,
+      "discarded_replies": [
+        {
+          "token": {
+            "epoch": 2,
+            "request_id": 58,
+            "observation_id": 970,
+            "created_at": 1328620.259949762,
+            "observed_at": 1328620.228957825,
+            "queue_size_at_request": null,
+            "observation_policy_tick": 969,
+            "rtc_delay_steps": 9
+          },
+          "error": null,
+          "slack": -1
+        },
+        {
+          "token": {
+            "epoch": 2,
+            "request_id": 104,
+            "observation_id": 1449,
+            "created_at": 1328636.300165136,
+            "observed_at": 1328636.272675043,
+            "queue_size_at_request": null,
+            "observation_policy_tick": 1449,
+            "rtc_delay_steps": 9
+          },
+          "error": null,
+          "slack": -1
+        },
+        {
+          "token": {
+            "epoch": 2,
+            "request_id": 278,
+            "observation_id": 3294,
+            "created_at": 1328697.832874767,
+            "observed_at": 1328697.802175216,
+            "queue_size_at_request": null,
+            "observation_policy_tick": 3295,
+            "rtc_delay_steps": 9
+          },
+          "error": null,
+          "slack": 0
+        }
+      ],
+      "cancelled_requests": [
+        [
+          2,
+          "278"
+        ]
+      ],
+      "server_ms": {
+        "p50": 213.34163646679372,
+        "p95": 215.32791716745123,
+        "p99": 216.16129201138392,
+        "max": 220.43059300631285
+      },
+      "worker_ms": {
+        "p50": 248.62656253390014,
+        "p95": 257.60807283222675,
+        "p99": 264.2828458477743,
+        "max": 268.07259395718575
+      },
+      "tracking": {
+        "left": {
+          "p50_error_rad": [
+            0.005124783670758359,
+            0.020608627976613003,
+            0.016748270544045207,
+            0.020767351844000692,
+            0.017238065389182294,
+            0.02167095322245488
+          ],
+          "p95_error_rad": [
+            0.05489163700526622,
+            0.10605375033537712,
+            0.1423992498230495,
+            0.07874041369510737,
+            0.06342785415708077,
+            0.11519421179849754
+          ],
+          "measured_range_rad": [
+            1.1585412375066753,
+            2.356755931944763,
+            2.3079270618753345,
+            1.901274128328371,
+            0.5340657663843729,
+            1.1444266422522311
+          ],
+          "target_range_rad": [
+            1.162534856973003,
+            2.367713912548717,
+            2.324538118384155,
+            2.122578537226473,
+            0.6141589889793867,
+            1.1609026388675638
+          ],
+          "error_over_0_3rad_runs": [
+            [],
+            [],
+            [],
+            [
+              {
+                "start_row": 2817,
+                "end_row": 2839,
+                "start_s": 93.9414795958437,
+                "end_s": 94.6773312529549,
+                "duration_s": 0.7358516571111977
+              }
+            ],
+            [],
+            []
+          ],
+          "note": "Dynamic tracking error is not itself a hardware-fault diagnosis."
+        },
+        "right": {
+          "p50_error_rad": [
+            0.014648309136399362,
+            0.03896041736930078,
+            0.032237899921538804,
+            0.026425737276078776,
+            0.02728586186456583,
+            0.02735344828838515
+          ],
+          "p95_error_rad": [
+            0.10280773959383413,
+            0.12576017792774263,
+            0.1399185067205035,
+            0.07111847448462356,
+            0.07773730510105684,
+            0.12397017557022423
+          ],
+          "measured_range_rad": [
+            1.37750820172427,
+            2.284275577935455,
+            2.098496986343175,
+            1.6590371557183197,
+            0.4669260700389106,
+            0.7484550240329586
+          ],
+          "target_range_rad": [
+            1.381785017680616,
+            2.2948457177206585,
+            2.119703549124936,
+            1.7688179646549556,
+            0.7308454589909421,
+            0.8092034926987313
+          ],
+          "error_over_0_3rad_runs": [
+            [],
+            [],
+            [],
+            [
+              {
+                "start_row": 2806,
+                "end_row": 2825,
+                "start_s": 93.5748113039881,
+                "end_s": 94.20827530301176,
+                "duration_s": 0.633463999023661
+              }
+            ],
+            [],
+            []
+          ],
+          "note": "Dynamic tracking error is not itself a hardware-fault diagnosis."
+        }
+      },
+      "missing_action_origins": [],
+      "submission_mismatches": [],
+      "correction_rows": 1116,
+      "correction_rows_by_arm": {
+        "right": 648,
+        "left": 468
+      },
+      "max_joint_correction_rad": 0.013595497235655785,
+      "max_gripper_correction": 0.030708584934473038,
+      "max_direct_fk_correction_m": 0.008979435814366714,
+      "training_executed": false,
+      "reward_labels_published": 0,
+      "robot_success_rate": null
+    },
+    {
+      "number": 2,
+      "episode_path": "episode_000002",
+      "episode_id": "198a2de60c764042a8c2824c6a5167c1",
+      "rows": 2054,
+      "duration_s": 68.45189750590362,
+      "manifest_pld": {
+        "schema": "pld_sac_block_v2",
+        "mode": "eval",
+        "run_id": "fbb73e80aaed4897aa3a9dde36994d77",
+        "contract_sha256": "87b1affa6d81e1d0cf6299bf6e827bd260361104338708e67579c874ee65d7ec",
+        "snapshot_sha256": "75674aad5775e4864cce24664abd270e43a2a82b7e64f95811ce952979b2d286"
+      },
+      "mode_counts": {
+        "eval": 194
+      },
+      "contract_sha256": [
+        "87b1affa6d81e1d0cf6299bf6e827bd260361104338708e67579c874ee65d7ec"
+      ],
+      "snapshot_sha256": [
+        "75674aad5775e4864cce24664abd270e43a2a82b7e64f95811ce952979b2d286"
+      ],
+      "delay_steps": {
+        "9": 194
+      },
+      "human_rows": 0,
+      "invalid_observation_rows": 0,
+      "invalid_submission_rows": 0,
+      "source_counts": {
+        "hold": 9,
+        "policy": 2045
+      },
+      "replies": 194,
+      "accepted_replies": 192,
+      "discarded_replies": [
+        {
+          "token": {
+            "epoch": 11,
+            "request_id": 459,
+            "observation_id": 6918,
+            "created_at": 1328818.72255992,
+            "observed_at": 1328818.70170088,
+            "queue_size_at_request": null,
+            "observation_policy_tick": 6921,
+            "rtc_delay_steps": 9
+          },
+          "error": null,
+          "slack": -1
+        },
+        {
+          "token": {
+            "epoch": 11,
+            "request_id": 472,
+            "observation_id": 7055,
+            "created_at": 1328823.284417527,
+            "observed_at": 1328823.256715923,
+            "queue_size_at_request": null,
+            "observation_policy_tick": 7058,
+            "rtc_delay_steps": 9
+          },
+          "error": null,
+          "slack": 0
+        }
+      ],
+      "cancelled_requests": [],
+      "server_ms": {
+        "p50": 213.33550103008747,
+        "p95": 215.27058510109782,
+        "p99": 217.99767235061154,
+        "max": 219.07899901270866
+      },
+      "worker_ms": {
+        "p50": 248.17082192748785,
+        "p95": 255.80337858991697,
+        "p99": 260.6159694865346,
+        "max": 263.4099810384214
+      },
+      "tracking": {
+        "left": {
+          "p50_error_rad": [
+            0.005477298283780074,
+            0.01905286888750113,
+            0.01738412801850231,
+            0.0267863445988632,
+            0.01877376537723008,
+            0.02179269924102989
+          ],
+          "p95_error_rad": [
+            0.05294300108775646,
+            0.1001407148481638,
+            0.1245227448658186,
+            0.07784698820385519,
+            0.0645509233026668,
+            0.11956428272796692
+          ],
+          "measured_range_rad": [
+            1.0955977721828027,
+            1.4408331425955598,
+            1.9481956206607158,
+            1.7910276951247432,
+            0.4798962386511043,
+            1.2321660181582352
+          ],
+          "target_range_rad": [
+            1.1015673534778978,
+            1.4591923949193712,
+            1.9732431145075944,
+            1.8411465208338078,
+            0.5268260200149621,
+            1.296118379268019
+          ],
+          "error_over_0_3rad_runs": [
+            [],
+            [],
+            [],
+            [
+              {
+                "start_row": 33,
+                "end_row": 49,
+                "start_s": 1.10050014895387,
+                "end_s": 1.633961956948042,
+                "duration_s": 0.533461807994172
+              },
+              {
+                "start_row": 1928,
+                "end_row": 1945,
+                "start_s": 64.28509496990591,
+                "end_s": 64.85179956885986,
+                "duration_s": 0.5667045989539474
+              }
+            ],
+            [],
+            []
+          ],
+          "note": "Dynamic tracking error is not itself a hardware-fault diagnosis."
+        },
+        "right": {
+          "p50_error_rad": [
+            0.011769284803159086,
+            0.034910359356641774,
+            0.029336523013583027,
+            0.025016995261563646,
+            0.02329092961223611,
+            0.030061415395814417
+          ],
+          "p95_error_rad": [
+            0.08659991133821528,
+            0.11810556150784803,
+            0.14457793056042562,
+            0.09616692752842408,
+            0.08574460978409837,
+            0.13100433210640222
+          ],
+          "measured_range_rad": [
+            1.2138551918821996,
+            1.3714045929655914,
+            1.8631265735866318,
+            1.7765316243228852,
+            0.3238727397573804,
+            1.0063324940871325
+          ],
+          "target_range_rad": [
+            1.2251643470230784,
+            1.3857031381028266,
+            1.8872744312463556,
+            1.9369804211671213,
+            0.4217769041073841,
+            1.0541279863502262
+          ],
+          "error_over_0_3rad_runs": [
+            [],
+            [],
+            [],
+            [
+              {
+                "start_row": 30,
+                "end_row": 50,
+                "start_s": 1.0003685608971864,
+                "end_s": 1.6672097479458898,
+                "duration_s": 0.6668411870487034
+              },
+              {
+                "start_row": 1924,
+                "end_row": 1951,
+                "start_s": 64.1518194838427,
+                "end_s": 65.05176091496833,
+                "duration_s": 0.899941431125626
+              }
+            ],
+            [],
+            []
+          ],
+          "note": "Dynamic tracking error is not itself a hardware-fault diagnosis."
+        }
+      },
+      "missing_action_origins": [],
+      "submission_mismatches": [],
+      "correction_rows": 834,
+      "correction_rows_by_arm": {
+        "right": 468,
+        "left": 366
+      },
+      "max_joint_correction_rad": 0.01058882288634777,
+      "max_gripper_correction": 0.019249413162469864,
+      "max_direct_fk_correction_m": 0.00469249874772486,
+      "training_executed": false,
+      "reward_labels_published": 0,
+      "robot_success_rate": null
+    }
+  ],
+  "total_rows": 4983,
+  "total_duration_s": 166.09365001088008,
+  "training_executed": false,
+  "reward_labels_published": 0,
+  "robot_success_rate": null
+}

@@ -1,0 +1,9 @@
+{
+  "raw_modified": false,
+  "pre_post_source_hashes_equal": true,
+  "local_hashes_match": true,
+  "scope": "immutable episode files + verified complete-line event prefix",
+  "event_prefix_bytes": 136536450,
+  "source_event_bytes_after": 136536450,
+  "episodes": 2
+}
