@@ -48,8 +48,12 @@ def create(args, source, name, port):
 def smoke(args, name, port, tag):
     ready(name, f"http://192.168.250.1:{port}")
     filename = f"{tag}-bundle-smoke.json"
+    import hashlib  # noqa: PLC0415
+    manifest = json.loads((args.bundle/"manifest.json").read_text())
     run(["docker", "exec", name, "python", "/opt/pld-rl/scripts/thor/smoke_pld_bundle_ws.py",
          "--url", f"ws://192.168.250.1:{port}", "--cases", "/pld-cases/cases.json",
+         "--expected-actor-phase", manifest["phase"],
+         "--expected-snapshot-sha256", hashlib.sha256((args.bundle/"manifest.json").read_bytes()).hexdigest(),
          "--output", f"/deployment/{filename}"], capture=False)
     result = json.loads((args.release/filename).read_text())
     if result["status"] != "passed":
@@ -79,7 +83,10 @@ def main():
         write(args.release/"source-container.json", {"id": source["Id"], "image": source["Image"],
               "command": source["Config"]["Cmd"], "mounts": source["HostConfig"]["Binds"]})
         create(args, source, candidate, 8001)
-        run(["docker", "start", candidate])
+        if "NV Power Mode: MAXN" in run(["nvpmodel", "-q"]):
+            run(["docker", "start", candidate])
+        else:
+            power_service(args, candidate, "thor-"+args.release.name+"-preflight-maxn")
         try:
             filename, result = smoke(args, candidate, 8001, "preflight")
         finally:
@@ -104,11 +111,14 @@ def main():
         power = run(["nvpmodel", "-q"])
         if "NV Power Mode: MAXN" not in power:
             raise ValueError("production MAXN is not held")
-        write(args.release/"deployment.json", {"status": "online_bootstrap_collect_ready",
+        manifest = json.loads((args.bundle/"manifest.json").read_text())
+        learned = manifest["phase"] == "candidate_requires_AB"
+        write(args.release/"deployment.json", {"status": "online_learned_candidate_requires_AB" if learned else "online_bootstrap_collect_ready",
               "observed_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),  # noqa: UP017 -- host Python 3.10 compatible
               "image_id": image_id, "container_id": inspect("pld-rl")["Id"], "metadata": result["metadata"],
               "report": filename, "power": power, "retained_container": retained,
-              "robot_rollout_of_new_actor": False, "cross_IPC_new_actor_tested": False, "training_updates": 0})
+              "robot_rollout_of_new_actor": False, "cross_IPC_new_actor_tested": False,
+              "training_updates": manifest["provenance"].get("actor_updates", 0)})
     except Exception:
         run(["docker", "stop", "pld-rl"])
         run(["docker", "rename", "pld-rl", "pld-rl-failed-" + args.release.name])

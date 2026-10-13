@@ -180,3 +180,4 @@ artifacts/training_dashboard/
 # Read-only local mirrors of server PLD method experiments.
 /artifacts/pld-methods*/
 /artifacts/pld-sac*/
+/artifacts/pld-collect*/

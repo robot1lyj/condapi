@@ -16,6 +16,9 @@ def main():
     p.add_argument("--cases", type=Path, required=True)
     p.add_argument("--output", type=Path, required=True)
     p.add_argument("--max-p95-ms", type=float, default=266.0)
+    p.add_argument("--expected-actor-phase", choices=("bootstrap_exploration", "candidate_requires_AB"),
+                   default="bootstrap_exploration")
+    p.add_argument("--expected-snapshot-sha256")
     args = p.parse_args()
     import sys  # noqa: PLC0415
     sys.path.insert(0, str(Path(__file__).resolve().parents[2]/"packages/pld-rl/src"))
@@ -30,11 +33,16 @@ def main():
     if suite["source_kind"] != "real_yam_recording":
         raise ValueError("real recorded inputs required")
     packer, rows, active_arms, client_samples = msgpack_numpy.Packer(), [], set(), []
+    learned_eval_nonzero = 0
     with connect(args.url, compression=None, max_size=None) as ws:
         metadata = msgpack_numpy.unpackb(ws.recv())
         identity = metadata["pld"]
-        if not identity["actor_loaded"] or identity["actor_phase"] != "bootstrap_exploration":
-            raise ValueError("zero-mean bootstrap bundle required")
+        if not identity["actor_loaded"] or identity["actor_phase"] != args.expected_actor_phase:
+            raise ValueError("actor phase differs from the requested test")
+        if args.expected_actor_phase == "candidate_requires_AB" and not args.expected_snapshot_sha256:
+            raise ValueError("learned actor test requires a pinned snapshot")
+        if args.expected_snapshot_sha256 and identity["snapshot_sha256"] != args.expected_snapshot_sha256:
+            raise ValueError("actor snapshot differs")
         epoch = 0
         for repeat in range(3):
             for mode in ("probe", "shadow", "eval", "collect"):
@@ -64,8 +72,12 @@ def main():
                     if trace["gate"]["active"]:
                         expected = decode(base, trace["action"], trace["arm"], d, contract)
                         active_arms.add(trace["arm"])
-                        if mode != "collect" and np.any(trace["action"]):
+                        zero_expected = mode in {"probe", "shadow"} or (
+                            mode == "eval" and args.expected_actor_phase == "bootstrap_exploration")
+                        if zero_expected and np.any(trace["action"]):
                             raise ValueError("bootstrap zero mode changed physical commands")
+                        if mode == "eval" and np.any(trace["action"]):
+                            learned_eval_nonzero += 1
                         if mode == "collect" and not np.any(trace["action"]):
                             raise ValueError("collect has no stochastic residual")
                     wire = wire_plan(expected, raw, d)
@@ -82,12 +94,15 @@ def main():
     timed = [r["infer_ms"] for r in rows if r["repeat"] > 0 and r["active"]]
     if active_arms != {"left", "right"} or not timed:
         raise ValueError("real-input suite did not exercise both arms")
+    if args.expected_actor_phase == "candidate_requires_AB" and learned_eval_nonzero == 0:
+        raise ValueError("learned eval actor never applied a correction")
     p95 = float(np.percentile(timed, 95))
     status = "passed" if p95 < args.max_p95_ms else "failed_latency"
     report = {"status": status, "metadata": metadata, "cases": rows, "active_arms": sorted(active_arms),
               "active_server_p50_ms": float(np.median(timed)), "active_server_p95_ms": p95,
               "max_p95_ms": args.max_p95_ms, "robot_connected": False, "cross_IPC_tested": False,
-              "training": False, "zero_mean_actor_is_not_an_improved_expert": True}
+              "training": False, "actor_phase_tested": args.expected_actor_phase,
+              "learned_eval_nonzero_cases": learned_eval_nonzero, "robot_improvement_verified": False}
     args.output.write_text(json.dumps(report, indent=2)+"\n")
     args.output.with_suffix(".wire.json").write_text(json.dumps(client_samples,
         default=lambda value: value.tolist() if hasattr(value, "tolist") else value)+"\n")
