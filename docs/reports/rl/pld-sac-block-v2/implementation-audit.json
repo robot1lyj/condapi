@@ -1,0 +1,189 @@
+{
+  "date": "2026-10-13",
+  "audited_source_commit": "79e4dc709c653e39e0e9566d0a7f95d82464faae",
+  "contract_sha256": "97bf9c4b4b5173477a9c3bf01e6f1ab4656b47d6757d919237daeec7278d6601",
+  "method": "NumPy-only reproductions plus read-only stored probe replay; no training or robot actuation",
+  "live_service_readonly_check": {
+    "container": "pld-rl",
+    "image": "pld-rl:thor-collect-20261012-r2",
+    "status": "running",
+    "health": "healthy",
+    "service_modified": false
+  },
+  "array_protocol_tests": {
+    "passed": 41,
+    "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=scripts/pld_rl /home/wuyan-lyj/YAM/yam-abc-reproduce/.venv/bin/python -m unittest block_contract_test probe_contract_test curator_checks intervention_checks native_recording_checks"
+  },
+  "rapid_lift_then_stationary": [
+    {
+      "tick": 0,
+      "gripper": 0.9,
+      "height_m": 0.02,
+      "active": true,
+      "ended": null,
+      "close_z_m": null,
+      "rise_count": 0
+    },
+    {
+      "tick": 10,
+      "gripper": 0.5,
+      "height_m": 0.02,
+      "active": true,
+      "ended": null,
+      "close_z_m": 0.02,
+      "rise_count": 0
+    },
+    {
+      "tick": 20,
+      "gripper": 0.5,
+      "height_m": 0.1,
+      "active": true,
+      "ended": null,
+      "close_z_m": 0.02,
+      "rise_count": 1
+    },
+    {
+      "tick": 30,
+      "gripper": 0.5,
+      "height_m": 0.1,
+      "active": true,
+      "ended": null,
+      "close_z_m": 0.02,
+      "rise_count": 0
+    },
+    {
+      "tick": 40,
+      "gripper": 0.5,
+      "height_m": 0.1,
+      "active": true,
+      "ended": null,
+      "close_z_m": 0.02,
+      "rise_count": 0
+    }
+  ],
+  "queued_residual_after_handoff": {
+    "delay_steps": 9,
+    "next_observation_interval_ticks": 10,
+    "handoff_tick": 10,
+    "current_reward_terminal_tick": 10,
+    "prefix_joint_delta": [
+      0.0033333334140479565,
+      0.006666666828095913,
+      0.009999999776482582,
+      0.009999999776482582,
+      0.006666666828095913,
+      0.0033333334140479565,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "nonzero_ticks_after_handoff": [
+      10,
+      11,
+      12,
+      13,
+      14,
+      15
+    ],
+    "queue_tail_seconds": 0.2
+  },
+  "endpoint_feasible_scale": {
+    "0.02": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      0.0
+    ],
+    "0.98": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      0.0
+    ]
+  },
+  "recorded_image_production_forward": {
+    "path": "/home/wuyan-lyj/condapi-data/rl/pld-collect-20261012-r1/production-r2.wire.json",
+    "sha256": "201892453bcf69d51f8430abdb465aa6930b1c643c6f755bfca4981d537b6eb3",
+    "collect_scales": [
+      {
+        "mode": "collect",
+        "tick": 88408,
+        "scale": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      {
+        "mode": "collect",
+        "tick": 88917,
+        "scale": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      {
+        "mode": "collect",
+        "tick": 90902,
+        "scale": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          0.0
+        ]
+      },
+      {
+        "mode": "collect",
+        "tick": 90997,
+        "scale": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    ],
+    "physical_execution": false
+  },
+  "probe_counterfactual_replay_checked_during_audit": {
+    "raw_dataset": "/home/wuyan-lyj/condapi-data/rl/lego-pld-probe-20261012-e01-v1",
+    "traces": 320,
+    "active_decisions": 225,
+    "active_decisions_left": 40,
+    "active_decisions_right": 185,
+    "gripper_scale_zero": 0,
+    "gripper_scale_below_half": 1,
+    "windows": 37,
+    "handoff_reason_counts": {
+      "lift_guard": 34,
+      "reopened": 3
+    },
+    "windows_with_lift_evidence_before_handoff": 34,
+    "windows_without_lift_evidence_before_handoff": 2,
+    "windows_without_unique_closure_match": 1,
+    "robot_success_rate": null,
+    "actual_collect_replay": false
+  },
+  "verdict": "Fix lift termination and RTC terminal timing before resuming collect readiness; also address one-sided action support and censored task failures."
+}
