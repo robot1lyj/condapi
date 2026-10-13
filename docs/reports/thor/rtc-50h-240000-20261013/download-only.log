@@ -1,0 +1,20 @@
+assets/yam/norm_stats.json: OK
+params/_METADATA: OK
+params/_sharding: OK
+params/array_metadatas/process_0: OK
+params/d/0fb6c24b524fb3b51b525e773c8f7514: OK
+params/manifest.ocdbt: OK
+params/ocdbt.process_0/d/33f942bed3465550792eedaa261cf616: OK
+params/ocdbt.process_0/d/650dddd3548367600bfb73c85022954e: OK
+params/ocdbt.process_0/d/73a63ce3d0482df0142dc4c08b792488: OK
+params/ocdbt.process_0/d/8fa6321f95899753bc6826b25d05f283: OK
+params/ocdbt.process_0/d/a4623a04b69f680a0f96e6c833887e1d: OK
+params/ocdbt.process_0/d/afac3e1e1c529f0e12b2faf4e184ebfc: OK
+params/ocdbt.process_0/d/c609f106e56636098cb30127fc20c098: OK
+params/ocdbt.process_0/d/f0f74c5021ec9411746479b8b9e04723: OK
+params/ocdbt.process_0/d/f349adf649b838637a2e78f0ca1c173b: OK
+params/ocdbt.process_0/manifest.ocdbt: OK
+_CHECKPOINT_METADATA: OK
+training_contract.json: OK
+2026-10-13T15:34:48+08:00
+DOWNLOADED_ONLY_50H_240000_WAIT_FOR_USER_AUTHORIZATION
