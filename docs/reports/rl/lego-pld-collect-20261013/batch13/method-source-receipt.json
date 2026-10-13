@@ -1,0 +1,76 @@
+{
+  "date": "2026-10-13",
+  "our_baseline_commit": "c5b277eabcb8a092a27b972875dfe187ebede2a8",
+  "repositories": [
+    {
+      "name": "hil-serl",
+      "commit": "c32939bccb65f3b8c43a9f9add3d322d4ab0264a",
+      "repository": "https://github.com/rail-berkeley/hil-serl.git",
+      "read_files": {
+        "examples/train_rlpd.py": "4b4c211ce5f8805626333357b1e94189a5b60bf9087ac963b5e40d7fca5a6ffb",
+        "serl_launcher/serl_launcher/utils/launcher.py": "d342d1b0ea01409e703913d78de11fbe77bf646b222203d70118b2ded2075211",
+        "serl_launcher/serl_launcher/agents/continuous/sac.py": "11ef6e9f312d0d39272e93f40a1ae28b6ae5e52bc332424327f0a47617e967f8"
+      },
+      "executed": false
+    },
+    {
+      "name": "Cal-QL",
+      "commit": "ac6eafec22e8d60836573e1f488c7f626ce8a77e",
+      "repository": "https://github.com/nakamotoo/Cal-QL.git",
+      "read_files": {
+        "JaxCQL/conservative_sac.py": "d52f152ebb7706521af28fa30787d3e57fd9bc29ea0cfd61c106d1293cd28fba",
+        "JaxCQL/conservative_sac_main.py": "0562eb56baba513c3c163ac0399eaf59758aa7b49d1c9621943cba8cb086019b"
+      },
+      "executed": false
+    },
+    {
+      "name": "rlpd",
+      "commit": "c90fd4baf28c9c9ef40a81460a2e395092844f88",
+      "repository": "https://github.com/ikostrikov/rlpd.git",
+      "read_files": {
+        "train_finetuning.py": "2b823153be70a93c3b2061f82cd2868313e01ba2619331666ddd22bc705258a4",
+        "rlpd/agents/sac/sac_learner.py": "a4b3bd6f00c0c526d1c936f3481df797b71f6872f887baedaedf95add2c5b7cb"
+      },
+      "executed": false
+    },
+    {
+      "name": "wsrl",
+      "commit": "ad4dc1248a138bc15d6e053f2d1dba1b8cfbaca2",
+      "repository": "https://github.com/zhouzypaul/wsrl.git",
+      "read_files": {
+        "finetune.py": "44878d65edca80a82795c922f310a59fccac255e02f4ddacb9ab3debe4811873"
+      },
+      "executed": false
+    },
+    {
+      "name": "dsrl_pi0",
+      "commit": "7f48937d4553e95244cd81c79236a3256df80597",
+      "repository": "https://github.com/nakamotoo/dsrl_pi0.git",
+      "read_files": {
+        "examples/train_utils_real.py": "58e5a02bd8a1acc8d6d7631b35edfe8a6ebabd178f7d9f0d2480ee515c8ad65d",
+        "jaxrl2/agents/pixel_sac/critic_updater.py": "b8f093602ca6340baf2552b3532032d57a9ff537d6fd270bde4aec95249dbe18"
+      },
+      "executed": false
+    },
+    {
+      "name": "TD3_BC",
+      "commit": "8791ad7d7656cb8396f1b3ac8c37f170b2a2dd5f",
+      "repository": "https://github.com/sfujim/TD3_BC.git",
+      "read_files": {
+        "TD3_BC.py": "2d4d5c20f21cd90ca27982864ad589f6960b1d84f0f14bed80ca1db6f2beab45"
+      },
+      "executed": false
+    }
+  ],
+  "papers": {
+    "PLD": "https://arxiv.org/html/2511.00091v1",
+    "RLT": "https://arxiv.org/html/2604.23073v2",
+    "PARTS": "https://arxiv.org/html/2609.21788v2"
+  },
+  "official_code_not_located": [
+    "PLD",
+    "RLT",
+    "PARTS"
+  ],
+  "training_source_commit": "cf79893e324395d3795b018d1fa893b8ca2c601e"
+}

@@ -1,0 +1,203 @@
+{
+  "source": "value-action-audit-v1.json",
+  "forward_only": true,
+  "causal_action_improvement_proven": false,
+  "checkpoints": [
+    {
+      "step": 250,
+      "splits": {
+        "train": {
+          "entries": 425,
+          "positive": 149,
+          "entry_logged_q_outcome_auc": 0.5965373018188892,
+          "logged_q_mean": -0.8052259087562561,
+          "logged_q_std": 0.25931626558303833,
+          "actor_predicted_gain_mean": 0.003376585431396961,
+          "actor_predicted_gain_positive_fraction": 0.88,
+          "random_change_q_abs_mean": 0.0023929185699671507,
+          "arms": {
+            "left": {
+              "entries": 142,
+              "positive": 72,
+              "entry_logged_q_outcome_auc": 0.4922619047619048
+            },
+            "right": {
+              "entries": 283,
+              "positive": 77,
+              "entry_logged_q_outcome_auc": 0.49760433741016263
+            }
+          }
+        },
+        "val": {
+          "entries": 42,
+          "positive": 11,
+          "entry_logged_q_outcome_auc": 0.6011730205278593,
+          "logged_q_mean": -0.8490174412727356,
+          "logged_q_std": 0.24578647315502167,
+          "actor_predicted_gain_mean": 0.0026159421540796757,
+          "actor_predicted_gain_positive_fraction": 0.7857142857142857,
+          "random_change_q_abs_mean": 0.0018019250128418207,
+          "arms": {
+            "left": {
+              "entries": 14,
+              "positive": 7,
+              "entry_logged_q_outcome_auc": 0.42857142857142855
+            },
+            "right": {
+              "entries": 28,
+              "positive": 4,
+              "entry_logged_q_outcome_auc": 0.4270833333333333
+            }
+          }
+        }
+      }
+    },
+    {
+      "step": 500,
+      "splits": {
+        "train": {
+          "entries": 425,
+          "positive": 149,
+          "entry_logged_q_outcome_auc": 0.48232175858379533,
+          "logged_q_mean": -0.6707327961921692,
+          "logged_q_std": 0.2495460957288742,
+          "actor_predicted_gain_mean": 0.006145487539470196,
+          "actor_predicted_gain_positive_fraction": 0.8870588235294118,
+          "random_change_q_abs_mean": 0.0031114614102989435,
+          "arms": {
+            "left": {
+              "entries": 142,
+              "positive": 72,
+              "entry_logged_q_outcome_auc": 0.3732142857142857
+            },
+            "right": {
+              "entries": 283,
+              "positive": 77,
+              "entry_logged_q_outcome_auc": 0.41104526541419745
+            }
+          }
+        },
+        "val": {
+          "entries": 42,
+          "positive": 11,
+          "entry_logged_q_outcome_auc": 0.6275659824046921,
+          "logged_q_mean": -0.6620107293128967,
+          "logged_q_std": 0.24450749158859253,
+          "actor_predicted_gain_mean": 0.004352495539933443,
+          "actor_predicted_gain_positive_fraction": 0.8571428571428571,
+          "random_change_q_abs_mean": 0.0022207205183804035,
+          "arms": {
+            "left": {
+              "entries": 14,
+              "positive": 7,
+              "entry_logged_q_outcome_auc": 0.4897959183673469
+            },
+            "right": {
+              "entries": 28,
+              "positive": 4,
+              "entry_logged_q_outcome_auc": 0.5104166666666666
+            }
+          }
+        }
+      }
+    },
+    {
+      "step": 750,
+      "splits": {
+        "train": {
+          "entries": 425,
+          "positive": 149,
+          "entry_logged_q_outcome_auc": 0.4141863631942418,
+          "logged_q_mean": -0.4632593095302582,
+          "logged_q_std": 0.24191080033779144,
+          "actor_predicted_gain_mean": 0.008862943388521671,
+          "actor_predicted_gain_positive_fraction": 0.9129411764705883,
+          "random_change_q_abs_mean": 0.00366773153655231,
+          "arms": {
+            "left": {
+              "entries": 142,
+              "positive": 72,
+              "entry_logged_q_outcome_auc": 0.4365079365079365
+            },
+            "right": {
+              "entries": 283,
+              "positive": 77,
+              "entry_logged_q_outcome_auc": 0.3680494263018535
+            }
+          }
+        },
+        "val": {
+          "entries": 42,
+          "positive": 11,
+          "entry_logged_q_outcome_auc": 0.6158357771260997,
+          "logged_q_mean": -0.41788116097450256,
+          "logged_q_std": 0.241209477186203,
+          "actor_predicted_gain_mean": 0.007282779552042484,
+          "actor_predicted_gain_positive_fraction": 0.9761904761904762,
+          "random_change_q_abs_mean": 0.003456916892901063,
+          "arms": {
+            "left": {
+              "entries": 14,
+              "positive": 7,
+              "entry_logged_q_outcome_auc": 0.7142857142857143
+            },
+            "right": {
+              "entries": 28,
+              "positive": 4,
+              "entry_logged_q_outcome_auc": 0.5625
+            }
+          }
+        }
+      }
+    },
+    {
+      "step": 1000,
+      "splits": {
+        "train": {
+          "entries": 425,
+          "positive": 149,
+          "entry_logged_q_outcome_auc": 0.45635152222546443,
+          "logged_q_mean": -0.20712463557720184,
+          "logged_q_std": 0.23190441727638245,
+          "actor_predicted_gain_mean": 0.012343397364020348,
+          "actor_predicted_gain_positive_fraction": 0.908235294117647,
+          "random_change_q_abs_mean": 0.00455678952857852,
+          "arms": {
+            "left": {
+              "entries": 142,
+              "positive": 72,
+              "entry_logged_q_outcome_auc": 0.5208333333333334
+            },
+            "right": {
+              "entries": 283,
+              "positive": 77,
+              "entry_logged_q_outcome_auc": 0.4262388097339554
+            }
+          }
+        },
+        "val": {
+          "entries": 42,
+          "positive": 11,
+          "entry_logged_q_outcome_auc": 0.6099706744868035,
+          "logged_q_mean": -0.1596231758594513,
+          "logged_q_std": 0.22450119256973267,
+          "actor_predicted_gain_mean": 0.011811502277851105,
+          "actor_predicted_gain_positive_fraction": 0.8809523809523809,
+          "random_change_q_abs_mean": 0.00540253147482872,
+          "arms": {
+            "left": {
+              "entries": 14,
+              "positive": 7,
+              "entry_logged_q_outcome_auc": 0.8367346938775511
+            },
+            "right": {
+              "entries": 28,
+              "positive": 4,
+              "entry_logged_q_outcome_auc": 0.5625
+            }
+          }
+        }
+      }
+    }
+  ]
+}
