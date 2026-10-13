@@ -1,0 +1,16 @@
+{
+  "status": "passed",
+  "client_source": "5eff0c46e1a9a6550ec2cb5a81be8e50d14e9c6e",
+  "client_modified": false,
+  "results": {
+    "preflight": {
+      "responses": 16,
+      "sha256": "ffed33630ca9bc480cda5119ca3fe290a99839660990b413adc91b9db1d0f49e"
+    },
+    "production": {
+      "responses": 16,
+      "sha256": "26526d4bd909738ea75192ace8cf4b106611b7d7f897d344870d09e479bce9a0"
+    }
+  },
+  "physical_robot_execution": false
+}

@@ -1,0 +1,52 @@
+{
+  "status": "passed_synthetic_only",
+  "job": "2325",
+  "feature_dim": 2287,
+  "outcome_audits": [
+    {
+      "outcome": "held",
+      "accepted_attempts": 1,
+      "transitions": 6,
+      "excluded": [],
+      "reward_location": "last verified native observation interval of a server-associated window",
+      "reward_sum": 1.0
+    },
+    {
+      "outcome": "empty",
+      "accepted_attempts": 1,
+      "transitions": 6,
+      "excluded": [],
+      "reward_location": "last verified native observation interval of a server-associated window",
+      "reward_sum": 0.0
+    },
+    {
+      "outcome": "not_lifted",
+      "accepted_attempts": 1,
+      "transitions": 22,
+      "excluded": [],
+      "reward_location": "last verified native observation interval of a server-associated window",
+      "reward_sum": 0.0
+    },
+    {
+      "outcome": "no_closure",
+      "accepted_attempts": 1,
+      "transitions": 14,
+      "excluded": [],
+      "reward_location": "last verified native observation interval of a server-associated window",
+      "reward_sum": 0.0
+    },
+    {
+      "outcome": "dropped",
+      "accepted_attempts": 1,
+      "transitions": 6,
+      "excluded": [],
+      "reward_location": "last verified native observation interval of a server-associated window",
+      "reward_sum": 0.0
+    }
+  ],
+  "forced_noop_actor_updates": 0,
+  "cli_critic_updates": 40,
+  "cli_actor_updates": 18,
+  "robot_success_rate": null,
+  "production_actor_trained": false
+}

@@ -1,5 +1,7 @@
 # 04 · 数据合同
 
+**2026-10-13新增抓取结果合同：** wire schema继续`pld_sac_block_v2`，gate v3使用`signed_feasible_v1`＋`drained_grasp_v1`；新增negative_scale及排队阶段字段，模型特征2287维，旧2275维合同不混训。停止新增修正与实际队列结束分开，排队阶段保留零动作transition，末尾才结算。held=1，empty/not_lifted/no_closure/dropped=0；未抬起/未闭爪不要求5cm，但需要完整实测轨迹、新鲜终态图像和意图审核。故障/HIL/缺失不强填0。无实际闭合使用独立W候选，不伪造物理闭合。源数据不改写，审核SHA仍绑定精确候选；首批新集待用户录制。[字段与处理入口](reports/rl/pld-sac-block-v2/README.md)、[运行证据](reports/thor/pld-rl-20261013/README.md)。
+
 ## 本对话 PART 数据审核状态（2026-10-11）
 
 **当前用途为已确认的 PLD 式整段抓取修正，首轮左右臂都覆盖，整轮 C/N 仍作评估。** 学习路线唯一归[03](03_training_and_evaluation.md#pld-主线与-recap-后续路线2026-10-11)。2026-10-12用户接受审核并授权实验，新replay v2已发布327条奖励，311次尝试构成合法单步行为价值初始化数据；这不代表在线动作/RTC合同已验收。E01验证、E02–E14训练。原始episode/epoch/tick、`video_indices`图像引用、闭爪FK参考、抬升差、持物/空手证据、窗口与排除原因全部保留；图像帧号不是控制行号，没检测到积木不能直接记失败。

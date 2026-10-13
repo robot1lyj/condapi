@@ -2,9 +2,9 @@
 
 ## PLD 主线与 RECAP 后续路线（2026-10-11）
 
-**用户已确认：先完成PLD式整段抓取修正，首轮左右臂都启用；RECAP路线后置。** 当前方案为[PLD-SAC v2职责与接口](reports/rl/pld-sac-block-v2/README.md)：Thor在线运行Pi-Base与PLD-Grasp；Thor离线运行Replay-Curator与Qwen-DINO Judge；GPU服务器归档并运行SAC-Coach。客户端复用原RTC和连续HIL，不切段、不编号、不判奖。当前`pld-rl`已安装零均值探索actor、开放五模式，可开始两集collect；尚无真实修正数据或提升证据。旧诊断probe不直接进入SAC；bootstrap不是已训练专家。v1及旧离线诊断保留，不能沿用不兼容回执或把漂移当改进。
+**用户已确认：先完成PLD式整段抓取修正，首轮左右臂都启用；RECAP路线后置。** Thor在线Pi-Base＋PLD-Grasp，Thor离线数据管家/视觉裁判，GPU服务器训练归档，客户端保留原RTC连续HIL。2026-10-13 gate v3修复版已上线：0次更新的2287维初始化包，等待新两集collect（第一集验证）审核后才做实际SAC训练。52项CPU检查和Slurm2325五类合成结果更新/导出通过；合成权重未部署。训练仍为局部抓取1/0，整轮C/N只评估。[现行方案](reports/rl/pld-sac-block-v2/README.md)及[上线证据](reports/thor/pld-rl-20261013/README.md)持有当前事实。
 
-2026-10-12 19:55当前：用户确认停止推理后，Thor已升级collect-r2，零均值bootstrap actor已加载，五模式开放；Slurm2321只导出checkpoint0，没有梯度更新，不称训练有效。左右48例真实输入模式测试、普通RTC9例与原客户端校验器16例通过，含actor生产推理P95=224.21ms；41项轻量回归通过。下一步重新连接后录两集collect做跨IPC/真机联调，第一集预留验证；先审核实际非零修正与奖励，再扩至约60次有效尝试/每臂≥20，之后才做真实SAC更新。Pi冻结、整轮C/N仅评估。[当前操作](reports/rl/pld-sac-block-v2/README.md#当前先采两轮collect以下probe步骤保留为历史)与[部署回执](reports/thor/pld-rl-20261012/collect-r2/deployment.json)为当前事实。
+历史（2026-10-12 19:55，已由10-13修复版替代）：用户确认停止推理后，Thor已升级collect-r2，零均值bootstrap actor已加载，五模式开放；Slurm2321只导出checkpoint0，没有梯度更新，不称训练有效。左右48例真实输入模式测试、普通RTC9例与原客户端校验器16例通过，含actor生产推理P95=224.21ms；41项轻量回归通过。下一步重新连接后录两集collect做跨IPC/真机联调，第一集预留验证；先审核实际非零修正与奖励，再扩至约60次有效尝试/每臂≥20，之后才做真实SAC更新。Pi冻结、整轮C/N仅评估。[当前操作](reports/rl/pld-sac-block-v2/README.md#当前首轮collect采集方案)与[部署回执](reports/thor/pld-rl-20261012/collect-r2/deployment.json)为当前事实。
 
 首集320回复/116诊断区间及视频通过。原“20次”是legacy候选数量，合并了部分重抓；新相对切段38收拢候选（左6/右32），35有抬升资格，1个框边动作由现场高度校准过滤。新在线回放37窗口（左6/右31），0跨两次新版闭合；36唯一关联、1个左臂因仲裁晚进入暂不发奖，不当作成功率。用户授权后已修复在线开合、抬升退出与SDK物理基线；首两集边界为关节±0.02rad/夹爪±0.05，FK最大采样位移2.255cm，不是碰撞保证或最终最优范围。原件、旧IDs、失败部署/处理尝试与全部版本保留。[首集审核](reports/rl/lego-pld-probe-20261012-e01/README.md)和[v2方案](reports/rl/pld-sac-block-v2/README.md)持有证据。
 

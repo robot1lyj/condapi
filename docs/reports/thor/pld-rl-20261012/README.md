@@ -1,5 +1,7 @@
 # pld-rl 推理容器上线（2026-10-12）
 
+**已由2026-10-13修复版替代：** 本页保留当时上线证据；当前服务、奖励终点及两集采集方式见[现行部署](../pld-rl-20261013/README.md)。
+
 ## collect-r2 当前上线（19:55 CST）
 
 用户批准修正门控并确认客户端已停推理后，`pld-rl:thor-collect-20261012-r2`已在原8000地址healthy/MAXN，五模式开放。可录两集collect，初始actor为**零均值有界探索**，尚无真机改善证据；`replay_contract_ready=true`只表示正式记录合同已装好，不代表已有训练数据。Pi仍为原50h/200000七步trained RTC，权重/engine/norm均未更换。

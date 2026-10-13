@@ -1,0 +1,7 @@
+{
+  "status": "passed",
+  "source_id": "da64ef10fbf3d2cc93fef082576148b580e4e790f4c8c5b04b0cfed3cafb6f7d",
+  "image_id": "sha256:5b072a86671680654d4b9d03d4bb5d0102b191b8a20719debc8aa1d12719f8cf",
+  "snapshot_sha256": "583ae73a422912ea6e5e0e495127d40d5b6d5dbc6ad6ec8af0dac7f322d31144",
+  "report": "preflight-bundle-smoke.json"
+}

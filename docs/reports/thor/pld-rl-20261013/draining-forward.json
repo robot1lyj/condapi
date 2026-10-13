@@ -1,0 +1,11 @@
+{
+  "status": "passed",
+  "synthetic_gate_state": true,
+  "recorded_image_input": true,
+  "feature_dim": 2287,
+  "forced_residual_zero": true,
+  "prefix_unchanged": true,
+  "queue_tail_settled": true,
+  "training": false,
+  "robot_execution": false
+}

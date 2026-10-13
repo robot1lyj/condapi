@@ -1,0 +1,18 @@
+{
+  "status": "passed",
+  "source_revision": "e21431b26f46aa9320ef9f32f26b07a6d08dfbac",
+  "command": [
+    "/home/wuyan-lyj/YAM/yam-abc-reproduce/.venv/bin/python",
+    "-m",
+    "unittest",
+    "block_contract_test",
+    "probe_contract_test",
+    "curator_checks",
+    "intervention_checks",
+    "native_recording_checks",
+    "grasp_v3_checks"
+  ],
+  "seconds": 1.1720025209942833,
+  "output": "....................................................\n----------------------------------------------------------------------\nRan 52 tests in 0.977s\n\nOK\n",
+  "training": false
+}
