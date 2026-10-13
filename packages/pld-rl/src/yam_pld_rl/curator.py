@@ -14,6 +14,7 @@ import numpy as np
 from yam_pld_rl.block_contract import fingerprint
 from yam_pld_rl.grasp_events import physical_events
 from yam_pld_rl.grasp_events import relative_physical_events
+from yam_pld_rl.grasp_outcomes import reviewed_outcome
 
 
 def physical_candidates(rows, fk, episode_number=1, *, segmentation="relative_v3"):
@@ -220,6 +221,7 @@ def reconstruct_intervals(rows, events=(), *, diagnostics=False, action_limits=N
                        "observation_ref": obs_ref, "next_observation_ref": next_ref,
                        "raw_refs": [r["raw_ref"] for r in selected],
                        "window_end": ended.get("window_id") == p["window_id"], "window_end_reason": ended.get("reason"),
+                       "window_end_metadata": copy.deepcopy(ended),
                        "diagnostic_only": p.get("replay_eligible") is False or (bool(limited_ticks) and diagnostics),
                        "known_sdk_limited_ticks": limited_ticks,
                        "reply_refs": replies[(epoch, str(p["request_id"]))]["refs"]}
@@ -298,7 +300,7 @@ def associate_rewards(records, candidates, rewards, rows, split):
             last = window[-1]
             if not last["receipt"]["window_end"]:
                 raise ValueError("missing Thor window handoff observation")
-            if last["receipt"]["window_end_reason"] not in {"lift_guard", "reopened", "timeout"}:
+            if last["receipt"]["window_end_reason"] not in {"lift_guard", "reopened", "timeout", "closed_timeout", "forecast_timeout"}:
                 raise ValueError("window truncated by observation gap or invalid handoff")
             match = matches[key]
             if len(match) != 1 or counts[match[0]["candidate_id"]] != 1:
@@ -307,12 +309,17 @@ def associate_rewards(records, candidates, rewards, rows, split):
             reward = reviewed[c["candidate_id"]]
             if reward.get("candidate_sha256") != c.get("candidate_sha256") or not c.get("candidate_sha256"):
                 raise ValueError("review evidence release changed")
-            if reward.get("approved") is not True or reward.get("status") not in {"held", "empty"} or not reward.get("reviewer"):
+            if reward.get("approved") is not True or not reward.get("reviewer"):
                 raise ValueError("binary visual outcome not reviewed/published")
             end = last["receipt"]["end_tick"]
             evidence = reward["evidence_rows"]
-            lifted = set(c["lift_rows"])
-            if not evidence or any(i not in lifted or rows[i]["tick"] > end for i in evidence):
+            modern = last["receipt"].get("window_end_metadata", {}).get("gate_version") == 3
+            proof = reviewed_outcome(c, reward) if modern else None
+            if modern:
+                if proof["terminal_tick"] != end or proof["window_id"] != p["window_id"]:
+                    raise ValueError("outcome does not belong to this drained window")
+            elif (reward["status"] not in {"held", "empty"} or not evidence
+                  or any(i not in set(c["lift_rows"]) or rows[i]["tick"] > end for i in evidence)):
                 raise ValueError("visual outcome lacks fresh 5cm evidence inside expert window")
             outcome = max(rows[i]["tick"] for i in evidence)
             attempt_id = c["candidate_id"]  # assigned here, never sent by client
@@ -323,6 +330,8 @@ def associate_rewards(records, candidates, rewards, rows, split):
                            "reviewer": reward["reviewer"], "evidence": [rows[i]["raw_ref"] for i in evidence],
                            "lift_m": min(next(f["lift_from_closure_m"] for f in c["frames"] if f["row"] == i) for i in evidence),
                            "held_after_lift": reward["status"] == "held", "view_valid": True, "split": split})
+            if modern:
+                labels[-1]["outcome_proof"] = proof
         except (ValueError, KeyError, TypeError, IndexError, StopIteration) as exc:
             audit.append({"window": key, "reason": str(exc)})
     return output, labels, audit

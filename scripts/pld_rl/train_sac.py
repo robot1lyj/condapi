@@ -17,7 +17,7 @@ import torch
 ROOT = Path(__file__).resolve().parents[2]
 sys.path[:0] = [str(ROOT / "packages/pld-rl/src"), str(ROOT / "packages/vla-platform/src")]
 from vla_platform.metrics import write_metrics
-from yam_pld_rl.block_contract import FEATURE_DIM
+from yam_pld_rl.block_contract import feature_dim
 from yam_pld_rl.block_contract import fingerprint
 from yam_pld_rl.block_contract import validate_contract
 from yam_pld_rl.data import sha256
@@ -31,7 +31,7 @@ def export_bundle(path, learner, contract, normalization, encoder_sha, config, p
     torch.save({k: v.cpu() for k, v in learner.actor.state_dict().items()}, path / "actor.pt")
     write_json(path / "manifest.json", {"schema": "pld_sac_bundle_v2", "contract": contract,
                "normalization": normalization, "encoder_sha256": encoder_sha, "config": config,
-               "observation_dim": FEATURE_DIM, "actor_sha256": sha256(path / "actor.pt"),
+               "observation_dim": feature_dim(contract), "actor_sha256": sha256(path / "actor.pt"),
                "provenance": provenance, "robot_validated": False,
                "phase": "bootstrap_exploration" if learner.actor_updates == 0 else "candidate_requires_AB",
                "entropy_semantics": "tanh latent u; critic action is state-feasible normalized physical offset"})
@@ -60,7 +60,7 @@ def main():
     rng = np.random.default_rng(cfg["seed"])
     if not args.resume:
         args.output.mkdir(parents=True, exist_ok=False)
-    learner = SacLearner(FEATURE_DIM, cfg)
+    learner = SacLearner(feature_dim(contract), cfg)
     commit = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
     if subprocess.check_output(["git", "status", "--porcelain"], cwd=ROOT, text=True).strip():
         raise RuntimeError("clean pinned source required")
@@ -86,7 +86,7 @@ def main():
             mask = train & (online == is_online)
             groups[is_online] = [np.flatnonzero(mask & (arrays["attempt"] == a)) for a in np.unique(arrays["attempt"][mask])]
         tensors = {k: torch.as_tensor(arrays[k], device="cuda", dtype=torch.float32)
-                   for k in ("x", "nx", "scale", "next_scale", "action", "reward", "terminal", "discount")}
+                   for k in ("x", "nx", "scale", "next_scale", "negative_scale", "next_negative_scale", "action", "reward", "terminal", "discount")}
     identity = {"code_commit": commit, "inputs": inputs}
     policy_contract = {"contract": contract, "normalization": stats, "encoder_sha256": sha256(args.encoder), "config": cfg}
     begin = 0

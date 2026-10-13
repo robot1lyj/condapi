@@ -15,10 +15,13 @@ from yam_pld_rl.block_contract import integer
 LEGACY_GATE = {"open": 0.65, "closed": 0.62, "drop": 0.18,
                "lookahead_steps": 30, "lift_m": 0.05, "lift_observations": 2,
                "max_observation_gap_s": 0.5}
-DEFAULT_GATE = {"version": 2, "close_level": 0.8, "forecast_drop": 0.12,
+V2_GATE = {"version": 2, "close_level": 0.8, "forecast_drop": 0.12,
                 "close_drop": 0.10, "strong_close_drop": 0.18, "reopen_delta": 0.12,
                 "lookahead_steps": 30, "lift_m": 0.05, "lift_observations": 2,
                 "lift_rise_m": 0.003, "max_observation_gap_s": 0.5}
+DEFAULT_GATE = {k: v for k, v in V2_GATE.items() if k not in {"lift_rise_m", "lift_observations"}}
+DEFAULT_GATE.update(version=3, forecast_timeout_s=2.0, closed_timeout_s=3.0,
+                    settle_observation_ticks=2)
 
 
 class InterventionSession:
@@ -46,6 +49,7 @@ class InterventionSession:
         if self.last_tick is not None and tick <= self.last_tick:
             raise ValueError("nonmonotonic observation tick; reset epoch on reconnect/restart")
         cfg, dt = self.contract["gate"], self.contract["action_dt_s"]
+        modern = cfg.get("version") == 3
         state = array(state, (14,), "gate state")
         base = array(base, (50, 14), "gate Pi plan")
         if not all(np.isfinite(heights[arm]) for arm in ("left", "right")):
@@ -64,7 +68,15 @@ class InterventionSession:
             tracker["minimum"] = min(tracker["minimum"], g)
             if not tracker["armed"] and g - tracker["minimum"] >= cfg["reopen_delta"]:
                 tracker["armed"] = True
-        if self.active:
+        if modern and self.active and self.active.get("phase") == "draining":
+            a = self.active
+            if tick >= a["drain_until_tick"] + cfg["settle_observation_ticks"]:
+                ended = {k: a[k] for k in ("window_id", "arm", "close_tick", "close_z", "stop_tick", "drain_until_tick")}
+                ended.update(reason=a["stop_reason"], completed_tick=tick, gate_version=3)
+                g = float(state[6 if a["arm"] == "left" else 13])
+                self.arms[a["arm"]] = {"armed": g-a["minimum"] >= cfg["reopen_delta"], "minimum": a["minimum"]}
+                self.active = None
+        elif self.active:
             a = self.active
             g = float(state[6 if a["arm"] == "left" else 13])
             a["peak"] = max(a["peak"], g)
@@ -84,22 +96,35 @@ class InterventionSession:
             reason = None
             if (tick - a["start_tick"]) * dt >= self.contract["max_attempt_seconds"]:
                 reason = "timeout"
+            elif modern and a["close_tick"] is None and (tick-a["start_tick"])*dt >= cfg["forecast_timeout_s"]:
+                reason = "forecast_timeout"
             elif a["close_tick"] is not None:
                 if g - a["minimum"] >= cfg["reopen_delta"]:
                     reason = "reopened"
                 else:
-                    rising = heights[a["arm"]] - a["last_z"] >= cfg["lift_rise_m"]
-                    a["lift_count"] = a["lift_count"] + 1 if rising else 0
                     lifted = heights[a["arm"]] - a["close_z"] >= cfg["lift_m"]
-                    if lifted and a["lift_count"] >= cfg["lift_observations"]:
+                    confirmed = lifted if modern else heights[a["arm"]] - a["last_z"] >= cfg["lift_rise_m"]
+                    a["lift_count"] = a["lift_count"] + 1 if confirmed else 0
+                    # At the first valid lift, stop *new* corrections. The
+                    # draining state and post-tail visual outcome provide the
+                    # subsequent confirmation without extending actuation.
+                    if lifted and (modern or a["lift_count"] >= cfg["lift_observations"]):
                         reason = "lift_guard"
+                    elif modern and (tick-a["close_tick"])*dt >= cfg["closed_timeout_s"]:
+                        reason = "closed_timeout"
             a["last_z"] = heights[a["arm"]]
             if reason:
-                ended = {"window_id": a["window_id"], "reason": reason, "arm": a["arm"]}
-                self.arms[a["arm"]] = {"armed": False, "minimum": a["minimum"]}
-                self.active = None
+                if modern:
+                    # Keep the window for queue/observation transitions, but
+                    # produce no new residual during this mandatory tail.
+                    a.update(phase="draining", stop_tick=tick, stop_reason=reason,
+                             drain_until_tick=max(tick, a.get("pending_until_tick", tick)))
+                else:
+                    ended = {"window_id": a["window_id"], "reason": reason, "arm": a["arm"]}
+                    self.arms[a["arm"]] = {"armed": False, "minimum": a["minimum"]}
+                    self.active = None
         forecasts = []
-        if self.active is None and ended is None:
+        if self.active is None and (ended is None or (modern and ended.get("gate_version") == 3)):
             for arm, index in (("left", 6), ("right", 13)):
                 if not self.arms[arm]["armed"]:
                     continue
@@ -120,15 +145,30 @@ class InterventionSession:
                 g = float(state[6 if arm == "left" else 13])
                 self.active = {"window_id": f"e{epoch}:s{self.session_id}:w{self.serial}", "arm": arm,
                                "start_tick": tick, "peak": g, "minimum": g, "minimum_z": heights[arm],
-                               "last_z": heights[arm],
+                               "last_z": heights[arm], "phase": "correcting",
                                "close_z": None, "close_tick": None, "lift_count": 0, "forecast_close_in": close_in}
                 self.arms[arm]["armed"] = False
         result = {"active": self.active is not None, "ended": ended,
-                  "forecasts": [{"arm": arm, "close_in_steps": n} for n, arm in forecasts], "gate_version": 2}
+                  "forecasts": [{"arm": arm, "close_in_steps": n} for n, arm in forecasts], "gate_version": cfg["version"]}
         if self.active:
             result.update({k: self.active[k] for k in ("window_id", "arm", "start_tick", "close_tick", "close_z")})
             result["elapsed_seconds"] = (tick - self.active["start_tick"]) * dt
+            if modern:
+                result.update(phase=self.active["phase"], apply_residual=self.active["phase"] == "correcting")
+                for key in ("stop_tick", "stop_reason", "drain_until_tick"):
+                    if key in self.active:
+                        result[key] = self.active[key]
         return result
+
+    def note_proposal(self, tick, delay):
+        """Conservative last possible residual tick, even for zero/probe output.
+
+        Previously sent proposals may remain in the RTC prefix. Only the
+        recorder can later prove which commands were actually consumed.
+        """
+        if self.contract["gate"].get("version") == 3 and self.active and self.active["phase"] == "correcting":
+            end = tick + delay + self.contract["block_steps"] - 1
+            self.active["pending_until_tick"] = max(end, self.active.get("pending_until_tick", end))
 
     def _legacy_select(self, request, rtc, state, base, heights):
         identity = tuple(request[k] for k in ("run_id", "episode_id", "epoch", "mode"))

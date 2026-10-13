@@ -13,6 +13,18 @@ HORIZON = 50
 FEATURE_DIM = 1536 + 14 + 50 * 14 + 14 + 2 + 2 + 7
 
 
+def feature_dim(contract):
+    return FEATURE_DIM + (12 if contract["gate"].get("version") == 3 else 0)
+
+
+def window_context(gate, tick, height, dt):
+    closed = gate.get("close_tick") is not None
+    return np.asarray([gate.get("apply_residual") is True, closed,
+                       height-gate["close_z"] if closed else 0.,
+                       (tick-gate["close_tick"])*dt if closed else 0.,
+                       max(0, gate.get("drain_until_tick", tick)-tick)*dt], dtype=np.float32)
+
+
 def fingerprint(value):
     return hashlib.sha256(json.dumps(value, sort_keys=True, allow_nan=False).encode()).hexdigest()
 
@@ -37,9 +49,14 @@ def validate_contract(c):
         raise ValueError("physical limits evidence, task and base identity required")
     from yam_pld_rl.intervention import DEFAULT_GATE  # noqa: PLC0415 -- gate imports the array contract
     from yam_pld_rl.intervention import LEGACY_GATE  # noqa: PLC0415 -- gate imports the array contract
+    from yam_pld_rl.intervention import V2_GATE  # noqa: PLC0415
 
-    if c.get("gate") not in (DEFAULT_GATE, LEGACY_GATE) or c.get("fk_model_sha256") != MODEL_SHA256:
+    if c.get("gate") not in (DEFAULT_GATE, V2_GATE, LEGACY_GATE) or c.get("fk_model_sha256") != MODEL_SHA256:
         raise ValueError("explicit pinned Thor gate and FK geometry required")
+    if c.get("action_mapping") not in (None, "signed_feasible_v1"):
+        raise ValueError("unsupported action mapping")
+    if c["gate"].get("version") == 3 and c.get("reward_contract") != "drained_grasp_v1":
+        raise ValueError("gate v3 requires drained outcome contract")
     if c.get("baseline_transform") not in (None, "sdk_gripper_endpoints_v1"):
         raise ValueError("unsupported physical baseline transform")
     k = integer(c["block_steps"], "block_steps", 4)
@@ -128,6 +145,41 @@ def feasible_scale(base, previous_command, arm, delay, c):
     return np.clip(bound / np.asarray(c["radius"])[axes], 0, 1).astype(np.float32)
 
 
+def feasible_bounds(base, previous_command, arm, delay, c):
+    """Positive/negative magnitudes; zero always means the physical Pi plan."""
+    symmetric = feasible_scale(base, previous_command, arm, delay, c)
+    if c.get("action_mapping") != "signed_feasible_v1":
+        return symmetric, symmetric.copy()
+    base = array(base, (50, 14), "base")
+    axes = slice(0, 7) if arm == "left" else slice(7, 14)
+    radius = np.asarray(c["radius"], dtype=np.float32)[axes]
+    positive, negative = radius.copy(), radius.copy()
+    lo, hi, step = (np.asarray(c[k], dtype=np.float32)[axes] for k in ("lower", "upper", "max_target_step"))
+    w = envelope_weights(delay, c)
+    end = delay + c["block_steps"]
+    anchor = base[delay-1] if delay else array(previous_command, (14,), "previous")
+    differences = np.diff(np.vstack((anchor, base[delay:end+1])), axis=0)[:, axes]
+    for i, row in enumerate(range(delay, end+1)):
+        wi = w[row]
+        if wi > 0:
+            positive = np.minimum(positive, (hi-base[row, axes])/wi)
+            negative = np.minimum(negative, (base[row, axes]-lo)/wi)
+        dw = wi - (w[row-1] if row else 0)
+        if dw:
+            signed_diff = np.sign(dw)*differences[i]
+            positive = np.minimum(positive, (step-signed_diff)/abs(dw))
+            negative = np.minimum(negative, (step+signed_diff)/abs(dw))
+            if "max_residual_step" in c:
+                cap = np.asarray(c["max_residual_step"])[axes]/abs(dw)
+                positive, negative = np.minimum(positive, cap), np.minimum(negative, cap)
+    return tuple(np.clip(v/radius, 0, 1).astype(np.float32) for v in (positive, negative))
+
+
+def map_action(u, positive, negative):
+    u = array(u, (7,), "latent action")
+    return u * np.where(u < 0, negative, positive)
+
+
 def decode(base, scaled_action, arm, delay, c):
     a = array(scaled_action, (7,), "scaled_action")
     if np.any(np.abs(a) > 1.000001):
@@ -147,7 +199,8 @@ def decode(base, scaled_action, arm, delay, c):
     return out
 
 
-def observation_vector(features, state, base, previous_command, arm, delay, elapsed, scale, stats):
+def observation_vector(features, state, base, previous_command, arm, delay, elapsed, scale, stats,
+                       *, negative_scale=None, context=None):
     f = array(features, (1536,), "visual features")
     state = array(state, (14,), "state")
     base = array(base, (50, 14), "base")
@@ -156,8 +209,11 @@ def observation_vector(features, state, base, previous_command, arm, delay, elap
     am, ast = np.asarray(stats["action_mean"]), np.asarray(stats["action_std"])
     if not np.isfinite(elapsed) or elapsed < 0 or np.any(ss <= 0) or np.any(ast <= 0):
         raise ValueError("invalid normalization or causal elapsed time")
+    extra = []
+    if negative_scale is not None or context is not None:
+        extra = [*array(negative_scale, (7,), "negative scale"), *array(context, (5,), "window context")]
     x = np.concatenate((
         f, (state - sm) / ss, ((action_coordinates(base, state) - am) / ast).ravel(),
-        (previous_command - sm) / ss, [arm == "left", arm == "right", delay / 50, elapsed / 30], scale,
+        (previous_command - sm) / ss, [arm == "left", arm == "right", delay / 50, elapsed / 30], extra, scale,
     )).astype(np.float32)
-    return array(x, (FEATURE_DIM,), "observation vector")
+    return array(x, (FEATURE_DIM+len(extra),), "observation vector")

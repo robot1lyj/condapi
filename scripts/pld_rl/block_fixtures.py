@@ -7,12 +7,12 @@ from yam_pld_rl.block_contract import decode
 from yam_pld_rl.block_contract import feasible_scale
 from yam_pld_rl.block_contract import fingerprint
 from yam_pld_rl.block_contract import observation_vector
-from yam_pld_rl.intervention import DEFAULT_GATE
+from yam_pld_rl.intervention import V2_GATE
 from yam_pld_rl.kinematics import MODEL_SHA256
 
 
 def contract():
-    return {"schema": SCHEMA, "gate": DEFAULT_GATE.copy(), "fk_model_sha256": MODEL_SHA256, "joint_unit": "radian", "gripper_unit": "0_closed_1_open",
+    return {"schema": SCHEMA, "gate": V2_GATE.copy(), "fk_model_sha256": MODEL_SHA256, "joint_unit": "radian", "gripper_unit": "0_closed_1_open",
             "task": "synthetic fixture; not a robot task", "base_weights_sha256": "fixture-only",
             "limits_evidence": "synthetic; NEVER use on hardware", "lower": [-2.] * 14, "upper": [2.] * 14,
             "radius": [0.01] * 14, "max_target_step": [0.2] * 14, "block_steps": 8,

@@ -58,8 +58,12 @@ class SacLearner:
         live = b["terminal"] == 0
         if live.any():
             u, logp = self.actor(b["nx"][live])
-            q1, q2 = self.target(b["nx"][live], b["next_scale"][live] * u)
-            value[live] = torch.minimum(q1, q2) - self.log_alpha.exp() * logp
+            positive = b["next_scale"][live]
+            negative = b.get("next_negative_scale", b["next_scale"])[live]
+            action = u * torch.where(u < 0, negative, positive)
+            q1, q2 = self.target(b["nx"][live], action)
+            control = (positive + negative).abs().sum(-1) > 0
+            value[live] = torch.minimum(q1, q2) - self.log_alpha.exp() * logp * control
         return b["reward"] + b["discount"] * value
 
     def _step(self, loss, parameters, optimizer):
@@ -83,11 +87,13 @@ class SacLearner:
         log = {"loss": float(qloss.detach()), "grad_norm": grad,
                "train/q_abs_max": float(torch.maximum(q1.abs(), q2.abs()).max().detach()),
                "train/q_disagreement": float((q1 - q2).abs().mean().detach())}
-        if update_actor and self.updates % self.cfg["critic_actor_ratio"] == 0:
+        control = (b["scale"] + b.get("negative_scale", b["scale"])).abs().sum(-1) > 0
+        if update_actor and self.updates % self.cfg["critic_actor_ratio"] == 0 and control.any():
             self.critic.requires_grad_(requires_grad=False)
-            u, logp = self.actor(b["x"])
-            a = b["scale"] * u
-            p1, p2 = self.critic(b["x"], a)
+            x = b["x"][control]
+            u, logp = self.actor(x)
+            a = u * torch.where(u < 0, b.get("negative_scale", b["scale"])[control], b["scale"][control])
+            p1, p2 = self.critic(x, a)
             aloss = (self.log_alpha.exp().detach() * logp - torch.minimum(p1, p2)).mean()
             self._step(aloss, self.actor.parameters(), self.aopt)
             self.critic.requires_grad_(requires_grad=True)

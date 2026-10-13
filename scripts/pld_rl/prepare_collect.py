@@ -11,7 +11,7 @@ import numpy as np
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "packages/pld-rl/src"))
-from yam_pld_rl.block_contract import feasible_scale
+from yam_pld_rl.block_contract import feasible_bounds
 from yam_pld_rl.block_contract import fingerprint
 from yam_pld_rl.block_contract import physical_baseline
 from yam_pld_rl.block_contract import validate_contract
@@ -46,6 +46,7 @@ def main():
     fk = YamKinematics(ROOT / "third_party/yam-fk-model/yam_linear4310.xml")
     c = json.loads((ROOT / "configs/pld_rl/sac-contract-v2.template.json").read_text())
     c.update(gate=DEFAULT_GATE.copy(), base_weights_sha256=args.base_weights_sha256,
+             action_mapping="signed_feasible_v1", reward_contract="drained_grasp_v1",
              baseline_transform="sdk_gripper_endpoints_v1", fk_model_sha256=MODEL_SHA256,
              lower=manifest["action_limits"]["lower"], upper=manifest["action_limits"]["upper"],
              radius=[.02]*6+[.05]+[.02]*6+[.05], max_residual_step=[.008]*6+[.02]+[.008]*6+[.02],
@@ -73,7 +74,8 @@ def main():
             windows.setdefault(result["window_id"], {"arm": result["arm"], "start": result["start_tick"],
                                                      "end": rows[-1]["tick"]+1, "reason": None})
             try:
-                feasible_scale(base, trace["previous_command"], result["arm"], trace["delay_steps"], c)
+                feasible_bounds(base, trace["previous_command"], result["arm"], trace["delay_steps"], c)
+                gate.note_proposal(trace["start_tick"], trace["delay_steps"])
             except ValueError as exc:
                 rejected.append({"tick": trace["start_tick"], "reason": str(exc)})
         ended = result["ended"]

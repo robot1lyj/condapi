@@ -101,7 +101,7 @@ class InterventionChecks(unittest.TestCase):
     def test_legacy_contract_preserves_original_absolute_threshold(self):
         self.contract["gate"] = LEGACY_GATE.copy()
         self.assertFalse(self.step(.64, .05, future=.3)["active"])
-        self.assertEqual(DEFAULT_GATE["version"], 2)
+        self.assertEqual(DEFAULT_GATE["version"], 3)
 
     def test_relative_segmentation_separates_retries_below_065(self):
         g = np.r_[np.full(5, .9), np.linspace(.9, .2, 10), np.full(10, .2),

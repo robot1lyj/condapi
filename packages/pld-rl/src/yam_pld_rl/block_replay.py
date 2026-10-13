@@ -4,15 +4,17 @@ from collections import defaultdict
 
 import numpy as np
 
-from yam_pld_rl.block_contract import FEATURE_DIM
 from yam_pld_rl.block_contract import array
 from yam_pld_rl.block_contract import decode
-from yam_pld_rl.block_contract import feasible_scale
+from yam_pld_rl.block_contract import feasible_bounds
+from yam_pld_rl.block_contract import feature_dim
 from yam_pld_rl.block_contract import fingerprint
 from yam_pld_rl.block_contract import integer
+from yam_pld_rl.block_contract import map_action
 from yam_pld_rl.block_contract import observation_vector
 from yam_pld_rl.block_contract import physical_baseline
 from yam_pld_rl.block_contract import validate_contract
+from yam_pld_rl.block_contract import window_context
 from yam_pld_rl.block_contract import wire_plan
 
 
@@ -63,9 +65,12 @@ def compile_replay(records, labels, contract, snapshots):
     for key, attempt in groups.items():
         try:
             label = label_map[key]
-            if label["status"] not in {"held", "empty"} or not label.get("reviewer") or not label.get("evidence"):
+            modern = contract.get("reward_contract") == "drained_grasp_v1"
+            statuses = {"held", "empty", "not_lifted", "no_closure", "dropped"} if modern else {"held", "empty"}
+            if label["status"] not in statuses or not label.get("reviewer") or not label.get("evidence"):
                 raise ValueError("not a reviewed binary outcome with evidence")
-            if (not np.isfinite(label["lift_m"]) or label["lift_m"] < 0.05 or label.get("view_valid") is not True):
+            needs_lift = label["status"] in {"held", "empty"}
+            if (not np.isfinite(label["lift_m"]) or (needs_lift and label["lift_m"] < 0.05) or label.get("view_valid") is not True):
                 raise ValueError("missing lift/visual evidence; absence of segmentation is not empty")
             if label["status"] == "held" and label.get("held_after_lift") is not True:
                 raise ValueError("success must be retained after lifting")
@@ -73,6 +78,32 @@ def compile_replay(records, labels, contract, snapshots):
                 raise ValueError("contradictory or missing empty outcome evidence")
             attempt.sort(key=lambda r: r["proposal"]["start_tick"])
             last = attempt[-1]["proposal"]
+            if modern:
+                proof = label["outcome_proof"]
+                end_info = attempt[-1]["receipt"]["window_end_metadata"]
+                stop, settle = proof["stop_tick"], proof["drain_until_tick"]
+                if (proof["schema"] != "drained_grasp_v1" or proof["terminal_tick"] != last["end_tick"]
+                        or proof["status"] != label["status"] or not proof["kinematic_complete"]
+                        or proof["window_id"] != last["window_id"]
+                        or end_info.get("gate_version") != 3 or end_info["stop_tick"] != stop
+                        or end_info["drain_until_tick"] != settle
+                        or last["end_tick"] < settle + contract["gate"]["settle_observation_ticks"]):
+                    raise ValueError("unverified drained reward endpoint")
+                correcting = [r["proposal"] for r in attempt if r["proposal"]["gate"].get("phase") == "correcting"]
+                if not correcting or settle < max(p["start_tick"]+p["delay_steps"]+contract["block_steps"]-1 for p in correcting):
+                    raise ValueError("reward precedes pending correction tail")
+                if last["gate"].get("phase") != "draining" or any(
+                    r["proposal"]["start_tick"] >= stop and r["proposal"]["gate"].get("apply_residual") is not False for r in attempt
+                ):
+                    raise ValueError("new correction generated after stop")
+                if label["status"] == "not_lifted" and (not proof["close_confirmed"] or proof["max_lift_m"] >= .05
+                        or not proof["grasp_intent_confirmed"] or proof["reason"] not in {"reopened", "closed_timeout", "timeout"}):
+                    raise ValueError("invalid no-lift goal failure")
+                if label["status"] == "no_closure" and (proof["close_confirmed"] or proof["reason"] != "forecast_timeout"
+                        or not proof["grasp_intent_confirmed"]):
+                    raise ValueError("invalid no-closure goal failure")
+                if label["status"] == "dropped" and not proof["held_then_lost_confirmed"]:
+                    raise ValueError("unreviewed dropped outcome")
             if last["decision_id"] != label["final_decision_id"] or last["end_tick"] != label["terminal_tick"]:
                 raise ValueError("reward endpoint differs from actual transition")
             if not attempt[0]["proposal"]["start_tick"] <= label["close_tick"] <= label["outcome_tick"] <= last["end_tick"]:
@@ -125,15 +156,22 @@ def compile_replay(records, labels, contract, snapshots):
                 if abs(dt - n * contract["action_dt_s"]) > max(0.05, n * contract["action_dt_s"] * 0.15):
                     raise ValueError("actual time inconsistent with policy ticks")
                 base = p.get("physical_base", p["base"])
-                scale = feasible_scale(base, p["previous_command"], arm, delay, contract)
+                scale, negative_scale = feasible_bounds(base, p["previous_command"], arm, delay, contract)
+                draining = p.get("gate", {}).get("apply_residual") is False
+                if draining:
+                    if contract["gate"].get("version") != 3 or p["gate"].get("phase") != "draining":
+                        raise ValueError("unknown forced no-op phase")
+                    scale, negative_scale = np.zeros(7, dtype=np.float32), np.zeros(7, dtype=np.float32)
                 if contract.get("baseline_transform"):
                     baseline = physical_baseline(p["raw_base"], delay, contract)
                     if not np.array_equal(baseline, np.asarray(base)):
                         raise ValueError("physical Pi baseline differs from declared SDK transform")
                 if not np.allclose(scale, array(p["scale"], (7,), "scale"), atol=1e-6, rtol=0):
                     raise ValueError("feasible scale differs")
+                if not np.allclose(negative_scale, array(p.get("negative_scale", p["scale"]), (7,), "negative scale"), atol=1e-6, rtol=0):
+                    raise ValueError("negative feasible scale differs")
                 u, action = array(p["sample_u"], (7,), "u"), array(p["action"], (7,), "action")
-                expected_a = np.zeros(7) if mode == "probe" else scale * u
+                expected_a = np.zeros(7) if mode == "probe" else map_action(u, scale, negative_scale)
                 if np.any(np.abs(u) > 1.000001) or not np.allclose(action, expected_a, atol=1e-6, rtol=0):
                     raise ValueError("wrong actor action")
                 predicted = decode(base, action, arm, delay, contract)
@@ -163,18 +201,23 @@ def compile_replay(records, labels, contract, snapshots):
                 if occupied[slot].intersection(claims[-1][1]):
                     raise ValueError("overlap with another attempt")
                 terminal = index == len(attempt) - 1
-                x = array(p["x"], (FEATURE_DIM,), "x")
+                dim = feature_dim(contract)
+                x = array(p["x"], (dim,), "x")
                 if not np.array_equal(x[-7:], scale):
                     raise ValueError("scale is not bound to policy observation")
+                extra = {"negative_scale": negative_scale, "context": window_context(p["gate"], begin, p["base_z_m"][arm], contract["action_dt_s"])} if modern else {}
                 reconstructed = observation_vector(x[:1536], p["state"], base, p["previous_command"],
                                                    arm, delay, p["elapsed_seconds"], scale,
-                                                   snapshots[snapshot]["normalization"])
+                                                   snapshots[snapshot]["normalization"], **extra)
                 if not np.allclose(x, reconstructed, atol=1e-6, rtol=0):
                     raise ValueError("causal observation vector mismatch")
                 if index and not np.allclose(p["previous_command"], attempt[index - 1]["receipt"]["submitted_actions"][-1], atol=1e-6, rtol=0):
                     raise ValueError("command continuity anchor changed")
-                nx = np.zeros_like(x) if terminal else array(attempt[index + 1]["proposal"]["x"], (FEATURE_DIM,), "nx")
+                nx = np.zeros_like(x) if terminal else array(attempt[index + 1]["proposal"]["x"], (dim,), "nx")
+                next_p = None if terminal else attempt[index+1]["proposal"]
+                next_negative = np.zeros(7) if terminal else array(next_p.get("negative_scale", next_p["scale"]), (7,), "next negative scale")
                 local.append({"x": x, "nx": nx, "scale": scale, "next_scale": nx[-7:], "action": action,
+                              "negative_scale": negative_scale, "next_negative_scale": next_negative,
                               "reward": float(terminal and label["status"] == "held"), "terminal": float(terminal),
                               "discount": contract["discount_per_second"] ** dt, "dt": dt,
                               "online": mode == "collect", "realized_nonzero": realized, "train": label["split"] == "train",

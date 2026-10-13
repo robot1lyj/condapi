@@ -14,12 +14,15 @@ from torchvision.models import resnet18
 from yam_pld_rl.block_contract import SCHEMA
 from yam_pld_rl.block_contract import array
 from yam_pld_rl.block_contract import decode
-from yam_pld_rl.block_contract import feasible_scale
+from yam_pld_rl.block_contract import feasible_bounds
+from yam_pld_rl.block_contract import feature_dim
 from yam_pld_rl.block_contract import fingerprint
 from yam_pld_rl.block_contract import integer
+from yam_pld_rl.block_contract import map_action
 from yam_pld_rl.block_contract import observation_vector
 from yam_pld_rl.block_contract import physical_baseline
 from yam_pld_rl.block_contract import validate_contract
+from yam_pld_rl.block_contract import window_context
 from yam_pld_rl.block_contract import wire_plan
 from yam_pld_rl.data import sha256
 from yam_pld_rl.intervention import InterventionSession
@@ -33,6 +36,8 @@ class BlockRuntime:
         self.manifest = json.loads((bundle / "manifest.json").read_text())
         self.contract = self.manifest["contract"]
         validate_contract(self.contract)
+        if self.manifest["observation_dim"] != feature_dim(self.contract):
+            raise ValueError("bundle feature dimension differs from gate/action contract")
         if self.contract["base_weights_sha256"] != base_weights_sha256:
             raise ValueError("PLD/Pi checkpoint mismatch")
         if sha256(bundle / "actor.pt") != self.manifest["actor_sha256"]:
@@ -63,6 +68,8 @@ class BlockRuntime:
                 "contract_sha256": fingerprint(self.contract), "modes": ["off", "shadow", "probe", "collect", "eval"],
                 "block_steps": self.contract["block_steps"], "segmentation_owner": "thor_offline_or_server",
                 "actor_loaded": True, "replay_contract_ready": True, "actor_phase": self.manifest["phase"],
+                "gate_version": self.contract["gate"].get("version", 1),
+                "reward_contract": self.contract.get("reward_contract", "lift_only_legacy"),
                 "gate_owner": "thor", "recording": "native_HIL_with_full_pld_reply"}
 
     def new_session(self):
@@ -112,7 +119,9 @@ class BlockRuntime:
         if not gate["active"]:
             return {**output, "actions": trace["wire_actions"], "pld": trace}
         arm, elapsed = gate["arm"], gate["elapsed_seconds"]
-        scale = feasible_scale(base, previous, arm, delay, c)
+        scale, negative_scale = feasible_bounds(base, previous, arm, delay, c)
+        if gate.get("apply_residual") is False:
+            scale, negative_scale = np.zeros(7, dtype=np.float32), np.zeros(7, dtype=np.float32)
         images = []
         for view in ("top_rgb", "left_rgb", "right_rgb"):
             rgb = np.asarray(obs[f"observation.images.{view}"])
@@ -123,19 +132,21 @@ class BlockRuntime:
             images.append(self.transform(Image.fromarray(rgb)))
         features = self.encoder(torch.stack(images).to(self.device))
         features = torch.nn.functional.normalize(features, dim=-1).flatten().cpu().numpy()
-        x = observation_vector(features, state, base, previous, arm, delay, elapsed, scale, self.manifest["normalization"])
+        extra = {"negative_scale": negative_scale, "context": window_context(gate, tick, heights[arm], c["action_dt_s"])} if c["gate"].get("version") == 3 else {}
+        x = observation_vector(features, state, base, previous, arm, delay, elapsed, scale, self.manifest["normalization"], **extra)
         mode = request["mode"]
         u, logp = self.actor(torch.from_numpy(x)[None].to(self.device), deterministic=mode == "eval")
         u = u[0].cpu().numpy()
-        action = scale * u if mode in {"collect", "eval"} else np.zeros(7, dtype=np.float32)
+        action = map_action(u, scale, negative_scale) if mode in {"collect", "eval"} else np.zeros(7, dtype=np.float32)
         actions = decode(base, action, arm, delay, c)
         wire = wire_plan(actions, raw_base, delay)
         trace.update(arm=arm, window_id=gate["window_id"], elapsed_seconds=elapsed,
-                     envelope_end_tick=tick + delay + c["block_steps"], x=x, scale=scale, sample_u=u,
+                     envelope_end_tick=tick + delay + c["block_steps"], x=x, scale=scale, negative_scale=negative_scale, sample_u=u,
                      action=action, log_prob_u=float(logp[0]), actions=wire, physical_actions=actions,
                      wire_actions=wire,
                      residual_applied=bool(np.any(action)),
                      encoder_ms_included_total_ms=(time.monotonic() - start) * 1000)
+        session.note_proposal(tick, delay)
         return {**output, "actions": wire, "pld": trace}
 
 

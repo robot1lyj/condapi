@@ -21,6 +21,7 @@ from yam_pld_rl.curator import physical_candidates
 from yam_pld_rl.curator import reconstruct_intervals
 from yam_pld_rl.data import sha256
 from yam_pld_rl.data import write_json
+from yam_pld_rl.grasp_outcomes import attach_outcomes
 from yam_pld_rl.kinematics import YamKinematics
 from yam_pld_rl.native_recording import read_episode
 from yam_pld_rl.probe_audit import audit_probe
@@ -87,6 +88,20 @@ def export_evidence(candidates, output):
             if any(f["lift_from_closure_m"] >= .05 for f in frames):
                 prepared.append({**c, "frames": frames})
     write_json(output / "candidates-prepared.json", prepared)
+    outcomes = []
+    for c in candidates:
+        proof = c.get("outcome")
+        if not proof:
+            continue
+        suggestion = None
+        if proof["kinematic_complete"] and proof["fresh_rows"]:
+            if not proof["close_confirmed"] and proof["reason"] == "forecast_timeout":
+                suggestion = "no_closure"
+            elif proof["close_confirmed"] and proof["max_lift_m"] < .05 and proof["reason"] in {"reopened", "closed_timeout", "timeout"}:
+                suggestion = "not_lifted"
+        outcomes.append({**c, "proposed_status": suggestion, "approved": False,
+                         "review_required": "confirm grasp intent for kinematic failures; inspect held/empty/dropped visually"})
+    write_json(output / "outcomes-prepared.json", outcomes)
 
 
 def main():
@@ -125,6 +140,7 @@ def main():
         c = physical_candidates(rows, fk, number, segmentation=args.segmentation)
         w, rejected = reconstruct_intervals(rows, events, diagnostics=args.probe_audit,
                                             action_limits=native_manifest.get("action_limits"))
+        attach_outcomes(c, w, rows, fk, number)
         groups = defaultdict(list)
         for interval in w:
             groups[interval["proposal"]["window_id"]].append(interval)
@@ -164,6 +180,7 @@ def main():
                "producer_files_sha256": {name: sha256(ROOT / name) for name in (
                    "scripts/pld_rl/curate_recording.py", "packages/pld-rl/src/yam_pld_rl/native_recording.py",
                    "packages/pld-rl/src/yam_pld_rl/probe_audit.py", "packages/pld-rl/src/yam_pld_rl/curator.py",
+                   "packages/pld-rl/src/yam_pld_rl/grasp_outcomes.py",
                    "packages/pld-rl/src/yam_pld_rl/grasp_events.py", "packages/pld-rl/src/yam_pld_rl/kinematics.py")},
                "episodes_in_order": list(map(str, folders)),
                "sources_sha256": hashes, "outputs_sha256": outputs,
