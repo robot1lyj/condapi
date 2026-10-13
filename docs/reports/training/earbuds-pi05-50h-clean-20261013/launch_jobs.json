@@ -1,0 +1,19 @@
+{
+  "submitted_at": "2026-10-13T05:13:02.335845+00:00",
+  "code_dir": "/home/wuyan/lyj/YAM/code-snapshots/earbuds50h-clean-v2-20261013",
+  "code_commit": "b1446eefdf8c3cd347689bb41cc77fa6af251aaa",
+  "audit_job": 2326,
+  "prepare_job": "2327",
+  "train_job": "2328",
+  "stop_step": 200000,
+  "decay_steps": 338000,
+  "excluded_source_episode_ids": [
+    35033
+  ],
+  "added_source_episode_ids": [
+    60778
+  ],
+  "frames": 5403161,
+  "hours": 50.02926851851852,
+  "authorization": "User authorized start at200000 and subsequent whole-episode exclusion without repair"
+}

@@ -15,7 +15,7 @@ python3 scripts/training_dashboard.py --metrics /absolute/run/metrics.jsonl --mo
 
 2026-10-13按用户要求，活动的 `training_dashboard.service` 已从XR-1切换到耳机Pi0.5 run `earbuds_pi05_rtc_base_50h_20261012`；独立缓存为 `artifacts/training_dashboard/pi05_earbuds_50h_20261012/metrics.jsonl`，专属metadata为 `configs/dashboards/pi05-earbuds-metadata.json`，可复现服务模板为 `scripts/training_dashboard_earbuds.service`。面板本次阶段/总体目标均显示200000，LR decay仍为338000，仅作为学习率参数展示。旧XR-1/乐高缓存保留，不拼接到耳机曲线。源端未产生真实metrics时步号/loss保持空白。
 
-首次数据准备2322因source35033左腕视频少一帧失败，依赖训练2323被取消；用户已授权异常整集排除并补足50h。清洗期间服务临时轮询 `earbuds-audit-50h`，后续转换/训练阶段更新为对应作业名；metadata里的文字状态须带观察时间，不能当成实时进展。清洗方案和当前作业归[耳机训练记录](reports/training/earbuds-pi05-50h-20261012/README.md)。服务每10秒镜像指标、每30秒只读查询Slurm；不会启动、停止或修改训练。2026-10-13修复空作业列表分隔符解析，已有idle测试与完整看板测试通过，空队列显示无活动作业，不再误报Slurm查询失败。
+首次数据准备2322因source35033左腕视频少一帧失败，依赖训练2323被取消；用户已授权异常整集排除并补足50h。清洗/转换时曾临时轮询对应作业名，当前正式轮询 `pi05-earbuds-50h`，已显示2328的真实step/loss和RUNNING状态；metadata里的文字状态须带观察时间，不能当成实时进展。清洗方案和当前作业归[耳机训练记录](reports/training/earbuds-pi05-50h-20261012/README.md)。服务每10秒镜像指标、每30秒只读查询Slurm；不会启动、停止或修改训练。2026-10-13修复空作业列表分隔符解析，已有idle测试与完整看板测试通过，空队列显示无活动作业，不再误报Slurm查询失败。
 
 旧Pi服务模板 `scripts/training_dashboard.service` 保留历史乐高338k设置；它不是当前活动override。活动服务通过 `systemctl --user cat training_dashboard.service` 核查。切换前的XR-1 override备份在 `artifacts/training_dashboard/pi05_earbuds_50h_20261012/previous-xr1-override.conf`。
 

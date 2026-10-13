@@ -1,0 +1,77 @@
+{
+  "observed_at": "2026-10-13T05:38:33.916736+00:00",
+  "code_commit": "b1446eefdf8c3cd347689bb41cc77fa6af251aaa",
+  "training_job": 2328,
+  "slurm": "2328|RUNNING|6:51|gpu001",
+  "prepare_job": 2327,
+  "prepare_accounting": "2327|COMPLETED|0:0|2026-10-13T13:13:02|2026-10-13T13:31:42\n2327.batch|COMPLETED|0:0|2026-10-13T13:13:02|2026-10-13T13:31:42\n2327.extern|COMPLETED|0:0|2026-10-13T13:13:02|2026-10-13T13:31:42",
+  "config": {
+    "name": "pi05_yam",
+    "exp_name": "earbuds_pi05_rtc_base_50h_20261012",
+    "num_train_steps": 200000,
+    "batch_size": 32,
+    "fsdp_devices": 4,
+    "save_interval": 1000,
+    "keep_period": 5000,
+    "lr_schedule": {
+      "warmup_steps": 1000,
+      "peak_lr": 1e-05,
+      "decay_steps": 338000,
+      "decay_lr": 1e-06
+    }
+  },
+  "dataset": "/home/wuyan/lyj/YAM/YAM_data/processed/earbuds_lerobot_50h_clean_v2_20261013/train",
+  "rtc_training_max_delay": 10,
+  "norm_sha256": "109af6930ddfdf9e0c04995809cd5e056037b42bbeeb54399ec1b4871ddb3cce",
+  "norm_frames": 5403161,
+  "loader_equivalence_samples": 12,
+  "first_metrics": [
+    {
+      "gpu_memory_gib": 9.396584272384644,
+      "grad_norm": 0.9940871000289917,
+      "learning_rate": 9.989889804273844e-09,
+      "loss": 0.05304044485092163,
+      "param_norm": 1802.3863525390625,
+      "step": 1,
+      "time": 1791869795.189999
+    },
+    {
+      "gpu_memory_gib": 9.399938344955444,
+      "grad_norm": 0.9698473215103149,
+      "learning_rate": 1.0988969734171405e-07,
+      "loss": 0.0596623532474041,
+      "param_norm": 1802.3865966796875,
+      "samples_per_second": 14.067333474350715,
+      "step": 11,
+      "step_seconds": 2.2747736846038604,
+      "time": 1791869817.9383037
+    },
+    {
+      "gpu_memory_gib": 9.3965904712677,
+      "grad_norm": 1.0377368927001953,
+      "learning_rate": 2.0978950487915426e-07,
+      "loss": 0.0638049766421318,
+      "param_norm": 1802.3865966796875,
+      "samples_per_second": 14.085821719351975,
+      "step": 21,
+      "step_seconds": 2.2717879466013984,
+      "time": 1791869840.6617439
+    }
+  ],
+  "latest_metric": {
+    "gpu_memory_gib": 9.401060581207275,
+    "grad_norm": 0.5745669603347778,
+    "learning_rate": 5.094907464808784e-07,
+    "loss": 0.04787224531173706,
+    "param_norm": 1802.3865966796875,
+    "samples_per_second": 14.092238193611616,
+    "step": 51,
+    "step_seconds": 2.270753556699492,
+    "time": 1791869910.0846846
+  },
+  "all_logged_metrics_finite": true,
+  "gpu_csv": "index, name, memory.total [MiB], memory.used [MiB], temperature.gpu, utilization.gpu [%]\n0, NVIDIA GeForce RTX 4090, 24564 MiB, 22832 MiB, 54, 100 %\n1, NVIDIA GeForce RTX 4090, 24564 MiB, 22832 MiB, 55, 100 %\n2, NVIDIA GeForce RTX 4090, 24564 MiB, 22832 MiB, 50, 100 %\n3, NVIDIA GeForce RTX 4090, 24564 MiB, 22828 MiB, 53, 100 %\n",
+  "metrics_path": "/home/wuyan/lyj/YAM/training-runs/pi05_yam/earbuds_pi05_rtc_base_50h_20261012/metrics/metrics.jsonl",
+  "first_scheduled_checkpoint_step": 1000,
+  "completed_checkpoints": []
+}
