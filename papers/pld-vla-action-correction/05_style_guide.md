@@ -7,4 +7,5 @@
 - 方法名称统一到 `01_research_canon.md` 术语表，不另造方法缩写。
 - 成功指标总写清分母：有效局部候选、所有实际尝试、完整 rollout 三者分开。
 - 图注明确“拟议架构”与“历史数据审计”；未来实验图只列规划，不填模拟结果。
+- 用户于 2026-10-13 明确偏好：论文 HTML 与技术图由本对话独立设计，不使用 Archify；用同一视觉风格结合交互演示与固定实验来源。
 - 技能使用：researchwrite 的事实/证据/论证底稿、nature-academic-search 的原始来源核查、nature-writing 的算法论文论证顺序、nature-statistics 的独立单位与统计边界。

@@ -1,0 +1,81 @@
+{
+  "status": "pass",
+  "artifact_sha256": "f60abb944d0dd36fee881350f16ab3dfa83761d535896db2e7c3cdc222573c48",
+  "artifact_bytes": 62326,
+  "checks": [
+    {
+      "check": "18 runs and 28 commits",
+      "pass": true
+    },
+    {
+      "check": "timeline slider tick110",
+      "pass": true
+    },
+    {
+      "check": "delayed original source",
+      "pass": true
+    },
+    {
+      "check": "delay slider",
+      "pass": true
+    },
+    {
+      "check": "SDK contrast",
+      "pass": true
+    },
+    {
+      "check": "8 critic-only runs",
+      "pass": true
+    },
+    {
+      "check": "10 actor-critic runs",
+      "pass": true
+    },
+    {
+      "check": "pipeline focus",
+      "pass": true
+    },
+    {
+      "check": "dark theme",
+      "pass": true
+    },
+    {
+      "check": "self-contained custom diagrams",
+      "pass": true
+    }
+  ],
+  "viewports": [
+    {
+      "width": 1440,
+      "height": 900,
+      "scrollWidth": 1440,
+      "noHorizontalOverflow": true
+    },
+    {
+      "width": 1600,
+      "height": 1000,
+      "scrollWidth": 1600,
+      "noHorizontalOverflow": true
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "scrollWidth": 1920,
+      "noHorizontalOverflow": true
+    },
+    {
+      "width": 2048,
+      "height": 1320,
+      "scrollWidth": 2048,
+      "noHorizontalOverflow": true
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "scrollWidth": 390,
+      "noHorizontalOverflow": true
+    }
+  ],
+  "pageErrors": [],
+  "scope": "Own HTML/CSS/inline SVG/JS; scrolling report; desktop and mobile width checks; no Archify artifacts."
+}

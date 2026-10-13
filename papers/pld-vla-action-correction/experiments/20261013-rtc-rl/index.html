@@ -1,0 +1,675 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PLD 实验札记 · RTC 中的动作、来源与奖励</title>
+<style>
+:root{color-scheme:light;--bg:#f4f5f8;--panel:#fff;--ink:#182332;--muted:#5d6b7b;--line:#dbe1e8;--blue:#325bd4;--blue-soft:#edf1ff;--amber:#ad5905;--amber-soft:#fff2df;--green:#087b67;--green-soft:#e8f5f0;--purple:#7350a4;--old:#69788a;--shadow:0 10px 36px #14213208}
+body.dark{color-scheme:dark;--bg:#111923;--panel:#1a2633;--ink:#e7edf6;--muted:#aebbd0;--line:#334559;--blue:#91aaff;--blue-soft:#253656;--amber:#f5b65d;--amber-soft:#403220;--green:#69d0b4;--green-soft:#193c34;--purple:#c1a0ee;--old:#a0acba;--shadow:none}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:34px}body{margin:0;font:15px/1.7 system-ui,-apple-system,"Noto Sans CJK SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--ink)}a{color:var(--blue);text-underline-offset:3px}button,input,select{font:inherit}button,select{cursor:pointer;border:1px solid var(--line);border-radius:8px;padding:8px 13px;background:var(--panel);color:var(--ink)}button:hover{border-color:var(--blue)}button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(--blue);outline-offset:3px}button.primary{background:var(--blue);color:var(--panel);border-color:var(--blue)}button[aria-pressed=true]{border-color:var(--blue);background:var(--blue-soft);color:var(--blue)}code{font:12px/1.5 ui-monospace,monospace;overflow-wrap:anywhere}.layout{max-width:1480px;margin:auto;display:grid;grid-template-columns:192px minmax(0,1fr);gap:36px;padding:32px}.rail{position:sticky;top:30px;align-self:start}.brand{font-weight:800;font-size:20px;letter-spacing:.03em}.brand small{display:block;font-size:11px;color:var(--muted);letter-spacing:.1em;margin:3px 0 28px}.rail a{display:block;text-decoration:none;color:var(--muted);padding:9px 0;font-size:14px}.rail a:hover{color:var(--blue)}.rail footer{font-size:12px;margin-top:28px;color:var(--muted)}main{min-width:0}.eyebrow{font-size:12px;letter-spacing:.1em;color:var(--blue);font-weight:700;text-transform:uppercase}.hero{padding:12px 0 26px}.hero h1{font-size:clamp(30px,3vw,43px);letter-spacing:-.04em;line-height:1.25;margin:16px 0 20px;max-width:820px}.hero p{font-size:16px;max-width:890px;color:var(--muted)}.badge{display:inline-block;border:1px solid var(--line);background:var(--panel);padding:3px 10px;border-radius:20px;font-size:12px;margin:4px 6px 4px 0}.pill{font-size:12px;font-weight:650;padding:4px 9px;border-radius:6px;background:var(--green-soft);color:var(--green);white-space:nowrap}.pill.pending{background:var(--amber-soft);color:var(--amber)}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:20px 0 34px}.stat{border-top:3px solid var(--blue);background:var(--panel);padding:17px 18px;border-radius:8px;box-shadow:var(--shadow)}.stat strong{font-size:35px;line-height:1.3;display:block;font-variant-numeric:tabular-nums}.stat span{display:block;font-size:13px;color:var(--muted)}section{margin:0 0 36px;scroll-margin-top:24px}.section-head{display:flex;justify-content:space-between;align-items:center;gap:20px;margin-bottom:16px}h2{font-size:24px;letter-spacing:-.03em;margin:0}h3{font-size:17px;margin:0 0 8px}p{margin:10px 0 16px}.muted,.caption{color:var(--muted)}.caption{font-size:12px}.panel{padding:24px;background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow)}.notice{padding:13px 16px;border-left:3px solid var(--amber);background:var(--amber-soft);border-radius:6px;margin:15px 0;color:var(--ink)}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.keycard{padding:20px;background:var(--panel);border:1px solid var(--line);border-radius:10px}.keycard .num{color:var(--blue);font:700 12px ui-monospace,monospace;display:block;margin-bottom:10px}.controls{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin:14px 0}.controls label{display:flex;align-items:center;gap:10px;font-size:14px}.controls input[type=range]{accent-color:var(--blue);width:180px}.demo-svg{display:block;width:100%;height:auto;color:var(--ink)}.demo-svg text{font-family:system-ui,"Noto Sans CJK SC",sans-serif;fill:currentColor}.legend{display:flex;flex-wrap:wrap;gap:16px;font-size:12px;color:var(--muted);margin:8px 0}.legend i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:6px}.step-copy{min-height:94px;padding:16px 20px;background:var(--blue-soft);border-radius:9px}.step-copy strong{display:block;font-size:17px;margin-bottom:6px}.step-copy p{margin:0;font-size:14px}.step-buttons{display:flex;flex-wrap:wrap;gap:8px}.flow{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}.flow .item{background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:16px}.flow strong{font:600 28px ui-monospace,monospace;display:block}.metric-result{padding:15px;background:var(--green-soft);color:var(--green);border-radius:9px;margin-top:18px}.metric-result.bad{background:var(--amber-soft);color:var(--amber)}table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;vertical-align:top;padding:11px 10px;border-bottom:1px solid var(--line)}th{color:var(--muted);font-weight:650;background:var(--bg)}td:first-child{font-weight:600}.tablewrap{overflow:auto}td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}.table-note{font-size:12px;color:var(--muted);margin-top:12px}.timeline{position:relative;margin:10px 0}.milestone{display:grid;grid-template-columns:90px 1fr;gap:20px;position:relative;padding:0 0 24px}.milestone::before{content:"";position:absolute;left:82px;top:10px;bottom:0;width:1px;background:var(--line)}.milestone::after{content:"";position:absolute;left:78px;top:9px;width:9px;height:9px;background:var(--blue);border:2px solid var(--panel);border-radius:50%}.milestone time{font-size:12px;color:var(--muted)}.milestone p{font-size:14px;margin:4px 0 8px}.commit-link{font:12px ui-monospace,monospace;margin-right:8px}.scope{font-size:12px;color:var(--muted)}details{border-top:1px solid var(--line);padding-top:14px;margin-top:16px}summary{cursor:pointer;font-weight:650}.source-list{padding-left:20px;font-size:13px}.source-list li{padding:5px 0;overflow-wrap:anywhere}iframe{width:100%;height:800px;border:1px solid var(--line);border-radius:12px;background:#f8fafc}.foot{padding:10px 0 35px;color:var(--muted);font-size:12px}.divider{height:1px;background:var(--line);margin:24px 0}.big-note{font-size:19px;line-height:1.6}.subtle{font-size:13px;color:var(--muted)}.row-tools{display:flex;gap:10px;align-items:center}.result-small{font:600 19px ui-monospace,monospace}.diagram-link{font-size:13px;white-space:nowrap}.bars{display:flex;gap:7px;margin-top:15px}.bars>div{flex:1;height:5px;background:var(--green);border-radius:5px}.bars>div.wait{background:var(--line)}
+@media(max-width:1100px){.layout{grid-template-columns:150px minmax(0,1fr);gap:22px;padding:24px}.stats{grid-template-columns:repeat(2,1fr)}.grid3{grid-template-columns:1fr}.grid2{grid-template-columns:1fr}iframe{height:700px}}
+@media(max-width:700px){.layout{display:block;padding:18px}.rail{position:static;border-bottom:1px solid var(--line);margin-bottom:22px;padding-bottom:16px}.brand small{margin:0}.rail nav{display:flex;flex-wrap:wrap;gap:0 14px;margin-top:10px}.rail footer{display:none}.hero h1{font-size:31px}.panel{padding:17px}.stat strong{font-size:29px}.section-head{align-items:flex-start;flex-wrap:wrap}.flow{grid-template-columns:1fr}.milestone{grid-template-columns:62px 1fr;gap:16px}.milestone::before{left:64px}.milestone::after{left:60px}.demo-svg{min-width:580px}.svgwrap{overflow:auto}iframe{height:650px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style>
+</head>
+<body><div class="layout">
+<aside class="rail"><div class="brand">PLD / Research<small>实验与方法工作札记</small></div><nav><a href="#overview">概览　实验走到哪了</a><a href="#rtc">01　RTC 时间轴</a><a href="#envelope">02　修正如何叠加</a><a href="#mapping">03　限幅不能算功劳</a><a href="#reward">04　奖励如何回来</a><a href="#commits">05　提交与发现</a><a href="#results">06　离线实验结果</a><a href="#pipeline">07　技术流程图</a><a href="#next">08　还要验证什么</a></nav><footer>记录日 · 2026-10-13<br>证据截点 · <code>79e4dc7</code><br><br><button id="theme">切换深色</button><br><a href="../../README.md">返回论文工作区 ↗</a></footer></aside>
+<main>
+<header class="hero"><div class="eyebrow">Research notebook / 01</div><h1>让 RL 的修正，<br>在 RTC 的正确时刻生效。</h1><p>机器人持续执行，Pi 还在计算，新的请求已经发出。这里记录最近的实验与实现：哪些动作还能改、修正究竟何时执行，以及离线奖励怎样找到它对应的尝试。</p><span class="badge">Pi0.5 冻结 · 单臂 7D 修正 · 双臂覆盖</span><span class="badge">交互图均为教学示意</span><span class="badge">提交与数值来自固定 Git 证据</span></header>
+<section id="overview"><div class="section-head"><h2>实验已经开始，证据分层看</h2><span class="pill">离线与链路验收已开展</span></div>
+<div class="stats"><div class="stat"><strong>18</strong><span>已完成离线诊断 run</span></div><div class="stat"><strong>311</strong><span>合法 replay 尝试 / 14 集</span></div><div class="stat"><strong>116</strong><span>真实 probe 来源核验区间</span></div><div class="stat"><strong>0</strong><span>探索 bootstrap 梯度更新</span></div></div>
+<div class="panel"><div class="tablewrap"><table><thead><tr><th>阶段</th><th>已记录的进展</th><th>证据能说明什么</th></tr></thead><tbody><tr><td>离线学习</td><td>8 组价值初始化＋10 组 IQL / TD3+BC / ReBRAC</td><td>数值与数据诊断；尚不能证明动作改善</td></tr><tr><td>SAC 决策块链路</td><td>合成数据编译、更新、恢复和导出通过</td><td>训练程序能运行，标签仍是合成 oracle</td></tr><tr><td>真实零修正 probe</td><td>320 回复，3347 个策略 tick 来源通过</td><td>能对齐真实动作；本集没有 RL 修正</td></tr><tr><td>探索包 collect-r2</td><td>已归档安装与模式测试；含 actor 服务 P95 224.21 ms</td><td>录像输入本机测试，不含跨 IPC 真机闭环</td></tr><tr><td>真实修正收益</td><td><span class="pill pending">待新 rollout 与对照</span></td><td>截至该证据截点，尚无成功率提升结论</td></tr></tbody></table></div><p class="table-note">记录日为 10 月 13 日；最近可核查提交截至 10 月 12 日 20:23。页面不是设备实时监控，也没有把服务 healthy 当成任务成功。</p></div></section>
+<section id="rtc"><div class="section-head"><h2>01 / 为什么“下一帧”不等于“新动作”</h2><span class="pill pending">可点击演示 · 非实测轨迹</span></div><div class="panel"><p>请求 A 在 tick 100 发出，前 6 tick 已承诺给旧计划。tick 104 又有了观测 B，但 A 的修正到 tick 107 才开始非零执行。<b>看到 B 时，不能断言 A 没有执行；也不能把随后执行的 A 改名为 B。</b></p>
+<div class="step-buttons" id="steps"><button data-step="0">① 请求 A</button><button data-step="1">② 观测 B</button><button data-step="2">③ A 开始生效</button><button data-step="3">④ 原来源仍是 A</button><button data-step="4">⑤ B 接管</button></div>
+<div class="svgwrap"><svg class="demo-svg" id="rtc-svg" viewBox="0 0 1000 310" role="img" aria-label="RTC 请求与实际动作来源时间轴"></svg></div>
+<div class="legend"><span><i style="background:#7d8b9b"></i>旧计划 P</span><span><i style="background:#4466db"></i>请求 A</span><span><i style="background:#189b81"></i>请求 B</span><span><i style="background:#f7b550"></i>A 的计划包络</span></div>
+<div class="controls"><label>时间游标 <input type="range" id="playhead" min="0" max="4" step="1" value="2"><output id="playhead-value">tick 107</output></label><label><input type="checkbox" id="wrong-credit">对比：把区间内动作一律归给最新请求</label></div><div class="step-copy" id="step-copy" aria-live="polite"></div>
+<p class="caption">教学参数：A 的 delay=6，B 在 tick 104 观测且 delay=8；区间 [100,104)、[104,112)。展示的是执行来源，不是因果效果证明。实际 delay 与观测间隔来自每次原生录制。</p>
+<div class="grid3"><div class="keycard"><span class="num">保留承诺</span><h3>前缀不重写</h3><p class="subtle">新计划包含旧承诺，并保留旧请求 token。新回复不是每个位置的新主人。</p></div><div class="keycard"><span class="num">核验执行</span><h3>计划不是经验</h3><p class="subtle">逐 tick 用 request、model_index、submitted_action 验证哪条命令真正下发。</p></div><div class="keycard"><span class="num">保留延迟</span><h3>跨区间追溯</h3><p class="subtle"><code>actor_effects_before_handoff</code> 查找交还前的实际非零效果，原 transition 边界不搬动。</p></div></div>
+</div></section>
+<section id="envelope"><div class="section-head"><h2>02 / 8 tick 是一个平滑包络</h2><span class="pill">原 RTC 请求节奏保留</span></div><div class="panel"><p>actor 生成一组 7D 修正，乘上当前可行幅度，再由 <code>[0, ⅓, ⅔, 1, 1, ⅔, ⅓, 0]</code> 渐入渐出。包络放在 delay 之后；其余计划继续由 Pi 提供。</p>
+<div class="controls"><label>已承诺前缀 d <input id="delay" type="range" min="0" max="10" step="1" value="6"><output id="delay-value">6</output></label><label>示意关节修正 <input id="amplitude" type="range" min="-20" max="20" step="1" value="15"><output id="amplitude-value">+0.015 rad</output></label></div>
+<div class="svgwrap"><svg class="demo-svg" id="envelope-svg" viewBox="0 0 1000 285" role="img" aria-label="50步计划中已承诺前缀和8步残差包络"></svg></div><div class="grid2"><div><h3>先算可行幅度，再生成动作</h3><p class="subtle">考虑关节/夹爪上下限、前后目标变化和残差增量约束。Pi 基线自身违规时拒绝，不悄悄裁成另一条轨迹。</p></div><div><h3>不把“计划 8 步”当成“执行 8 步”</h3><p class="subtle">下一观测可能提前或延后。replay 以真实相邻观测区间重建，折扣采用 <code>0.99^Δt（秒）</code>。</p></div></div><p class="caption">当前探索合同：关节上限 ±0.02 rad，夹爪 ±0.05；图仅展示一个关节并假定可行比例为 1。实际幅度通常还受 scale 限制。此范围不是碰撞保证。</p></div></section>
+<section id="mapping"><div class="section-head"><h2>03 / 夹爪限幅，不能算成 RL 学会了修正</h2></div><div class="panel"><p>真实 probe 中，SDK 把部分夹爪命令裁到 0.98。初版把 raw Pi 与实发命令不同的 12 个区间排除。后来按声明的端点映射核验，116 个区间都能解释；这 12 个区间不是 12 次抓取失败。</p><div class="flow"><div class="item"><span class="subtle">原 Pi 命令 · 教学数值</span><strong>1.00</strong><span class="subtle">raw_base</span></div><div class="item"><span class="subtle">SDK 映射后的 Pi 基线</span><strong>0.98</strong><span class="subtle">physical_base</span></div><div class="item"><span class="subtle">实际下发 · 零修正</span><strong>0.98</strong><span class="subtle">submitted_action</span></div></div><div class="controls"><label><input id="physical" type="checkbox" checked>与经过同一 SDK 映射的物理基线比较</label></div><div id="mapping-result" class="metric-result" aria-live="polite"></div><p class="caption">正式响应分别保留 raw、wire 和 physical 字段；已知端点转换单独记账，未知动作改写仍拒绝。RTC 网络前缀仍逐值保留。</p></div></section>
+<section id="reward"><div class="section-head"><h2>04 / 抓取结束后，再让奖励回到正确窗口</h2></div><div class="grid2"><div class="panel"><span class="eyebrow">窗口修订</span><h3>固定阈值会漏掉重新张开</h3><p>首集原始 30 Hz 轨迹出现 0.65046 的张开峰值，但推理观测只看到 0.64750。旧阈值 0.65 没被触发。宽积木还导致“已夹住却未满足 closed≤0.62”，一个窗口跨到下一次抓取。</p><p>新版使用相对开合、Pi 未承诺后缀预测和任务高度范围，重放得到 37 个窗口、0 个跨两次新版闭合。36 个唯一关联，另 1 个因仲裁晚进入暂不发奖。</p><span class="caption">这是同一集调试回放；37 窗口、38 候选、35 个有核验画面的候选是不同分母。</span></div><div class="panel"><span class="eyebrow">结果归属</span><h3>先看抬升发生的时序，再判断是否持物</h3><p>接近动作也可能高于后来出现的最低点，因此“高度差≥5cm”单独不足够。最新离线核验只允许参考低点之后的画面作为抬升证据。</p><p>视觉证据与窗口唯一关联后，持物给 1、明确空手给 0；中间 transition 为 0，末个核验区间终止 bootstrap。审核按钮时间不用来对齐动作。</p><span class="caption">高度不是成功。当前不把交还后 Pi 才完成的补救记为专家成功；这是阶段性奖励边界，不是普遍因果结论。</span></div></div></section>
+<section id="commits"><div class="section-head"><h2>05 / 最近提交：从离线诊断走到可采集的闭环</h2><span class="badge">28 个 RL 分支提交</span></div><div class="panel"><div class="timeline" id="milestones"></div><details><summary>展开全部 28 个提交及原始差异链接</summary><div class="tablewrap"><table><thead><tr><th>提交时间（CST）</th><th>提交</th><th>内容</th></tr></thead><tbody id="commits-body"></tbody></table></div></details></div></section>
+<section id="results"><div class="section-head"><h2>06 / 已完成的离线实验，留下了哪些信息</h2><select id="run-filter" aria-label="筛选实验"><option value="all">全部 18 组</option><option value="critic-only">8 组价值初始化</option><option value="offline actor-critic">10 组离线策略对照</option></select></div><div class="panel"><div class="notice">这些数据全部来自零残差行为。E01 仅 12 次验证、2 次失败，并已反复参与调试。入口行为 MC RMSE 是诊断量，不是不同算法的真机成功率排行榜。</div><div class="tablewrap"><table><thead><tr><th>Run / 设置</th><th class="num">更新</th><th class="num">入口 RMSE</th><th class="num">入口 AUC</th><th class="num">残差 RMS</th></tr></thead><tbody id="runs-body"></tbody></table></div><p class="table-note">训练均值常数的该项 RMSE 为 0.556，常数 1 为 0.410。当前各方法未在此诊断上胜过它们；策略 Q 与行为 MC 目标不完全相同，不能据此单独判断在线算法优劣。</p><div class="grid3"><div><h3>Cal-QL 适配需诊断</h3><p class="subtle">首轮 Q 高估；MC 锚点改善尺度，但没有证明价值估计已足够指导动作。</p></div><div><h3>IQL 均值保持零</h3><p class="subtle">符合零残差数据的行为支持；“没有漂移”不等于学会了新修正。</p></div><div><h3>非零偏移需真实结果</h3><p class="subtle">TD3+BC 的 actor 漂移、ReBRAC 的惩罚敏感性，为后续真实探索提供诊断。</p></div></div></div></section>
+<section id="pipeline"><div class="section-head"><h2>07 / 从执行到学习，三条线接起来</h2><span class="pill">点击切换阅读重点</span></div><div class="panel"><div class="step-buttons" id="lane-buttons"><button data-lane="all" aria-pressed="true">完整闭环</button><button data-lane="online">在线动作</button><button data-lane="offline">离线结果</button><button data-lane="learning">下一轮学习</button></div><div class="svgwrap"><svg class="demo-svg" id="pipeline-svg" viewBox="0 0 1000 610" role="img" aria-label="RTC在线动作、离线结果与下一轮SAC学习三层流程"></svg></div><div class="step-copy" id="lane-copy" aria-live="polite"><strong>执行不停，评分与更新按批次进行</strong><p>Thor 在线运行 Pi 与小专家。原生记录进入离线切段与视觉审核，发布有版本的奖励后，GPU 服务器学习。下一轮才加载新 actor。</p></div></div><p class="caption">图展示已实现的接口路径；真实 collect replay 更新和策略收益仍待新数据验证。所有节点、连线与交互均为本页独立设计。</p></section>
+<section id="next"><div class="section-head"><h2>08 / 下一轮需要补上的论文证据</h2><span class="pill pending">作为待验证问题记录</span></div><div class="panel"><div class="grid3"><div><span class="eyebrow">执行</span><h3>真实非零修正是否生效</h3><p>用 collect 录制核对命令来源、包络、实际幅度及跨区间效果；本机录像输入测试还不能代替真机。</p></div><div><span class="eyebrow">学习</span><h3>奖励是否支持稳定更新</h3><p>冻结判定版本，审核有效尝试，确认左右臂与正负结果覆盖；新合同不直接混入旧单 tick critic。</p></div><div><span class="eyebrow">效果</span><h3>改进是否反映到任务</h3><p>Pi 与确定性专家交替对照，分开报告空抓、持住、耗时、错放及整轮 C/N；继续保留失败证据。</p></div></div><div class="bars" aria-label="离线诊断、链路、probe完成，真实修正和收益待验"><div></div><div></div><div></div><div class="wait"></div><div class="wait"></div></div><p class="subtle">当前经验可以形成系统与测量问题的研究材料；是否存在算法贡献，继续由文献和实验决定。</p></div></section>
+<section id="sources"><div class="section-head"><h2>证据与复核入口</h2><button id="download">下载证据索引 JSON</button></div><div class="panel"><p>本页只读固定提交的文件并汇总，没有重新执行训练、重跑奖励模型或查询当前设备。原始日志继续由项目报告持有，以下链接固定到同一提交。</p><details><summary>21 个源码与报告来源（SHA 可在 JSON 中核验）</summary><ol class="source-list" id="source-list"></ol></details><p><a href="experiment-log.md">标准实验记录</a> · <a href="evidence.json">机器可读证据与指标</a> · <a href="../../literature-review.md">文献机制对照</a></p></div></section>
+<footer class="foot">PLD 论文工作区 · 记录 2026-10-13 · 固定证据 <code id="source-commit"></code>。演示数值与实验结果已分开标明。</footer>
+</main></div>
+<script>
+const DATA={
+  "schema": "paper_experiment_snapshot_v1",
+  "recorded_at": "2026-10-13",
+  "evidence_cutoff_commit": "79e4dc709c653e39e0e9566d0a7f95d82464faae",
+  "evidence_date": "2026-10-12",
+  "scope": "read-only git evidence; no live device query, training or control",
+  "commits": [
+    {
+      "sha": "d1399dbb9ae8df4a63c037ae7e25d7d264220d4b",
+      "date": "2026-10-12T09:57:46+08:00",
+      "title": "修复抓取抬升核验资格并绘制实际判定流程",
+      "url": "https://github.com/robot1lyj/condapi/commit/d1399dbb9ae8df4a63c037ae7e25d7d264220d4b"
+    },
+    {
+      "sha": "84d5f811f1a0f6af6d42870281650530c7f502f7",
+      "date": "2026-10-12T10:31:33+08:00",
+      "title": "补充一页方法说明与Qwen和DINO真实执行示意",
+      "url": "https://github.com/robot1lyj/condapi/commit/84d5f811f1a0f6af6d42870281650530c7f502f7"
+    },
+    {
+      "sha": "149abbab352f2edfd11a68d3b3ff02e91c8c4dc0",
+      "date": "2026-10-12T11:32:54+08:00",
+      "title": "实现PLD离线价值初始化与四组实验归档看板",
+      "url": "https://github.com/robot1lyj/condapi/commit/149abbab352f2edfd11a68d3b3ff02e91c8c4dc0"
+    },
+    {
+      "sha": "a953020c6cf6b4d40417691c490c297fb5e0bc76",
+      "date": "2026-10-12T11:45:48+08:00",
+      "title": "保留首轮失败证据并增加MC回报校准对照",
+      "url": "https://github.com/robot1lyj/condapi/commit/a953020c6cf6b4d40417691c490c297fb5e0bc76"
+    },
+    {
+      "sha": "534fef2e8d3d73ea7cf136c9aef2cbeab8d2cca6",
+      "date": "2026-10-12T11:54:45+08:00",
+      "title": "归档八组初始化结果并明确价值评估尚未验收",
+      "url": "https://github.com/robot1lyj/condapi/commit/534fef2e8d3d73ea7cf136c9aef2cbeab8d2cca6"
+    },
+    {
+      "sha": "8346e4f1600da3efe852a20e973b8e84f1cafbd2",
+      "date": "2026-10-12T12:17:39+08:00",
+      "title": "新增PLD的IQL、TD3BC与ReBRAC离线对照及统一命名",
+      "url": "https://github.com/robot1lyj/condapi/commit/8346e4f1600da3efe852a20e973b8e84f1cafbd2"
+    },
+    {
+      "sha": "bef94d6f5e9613f69c6c2569f092794370978668",
+      "date": "2026-10-12T12:22:37+08:00",
+      "title": "补充ReBRAC低惩罚对照并支持分批运行",
+      "url": "https://github.com/robot1lyj/condapi/commit/bef94d6f5e9613f69c6c2569f092794370978668"
+    },
+    {
+      "sha": "87738e9940e22e80e793ec58aca7196c1160d5eb",
+      "date": "2026-10-12T12:27:39+08:00",
+      "title": "归档PLD十组算法对照结果、预测复核及部署限制",
+      "url": "https://github.com/robot1lyj/condapi/commit/87738e9940e22e80e793ec58aca7196c1160d5eb"
+    },
+    {
+      "sha": "a1f3abdc392923faf0674d596eb585b040c883a4",
+      "date": "2026-10-12T12:53:53+08:00",
+      "title": "实现PLD残差SAC动作块训练与推理回流协议",
+      "url": "https://github.com/robot1lyj/condapi/commit/a1f3abdc392923faf0674d596eb585b040c883a4"
+    },
+    {
+      "sha": "63cf0306aade2e64bfb865d9a6e21361e89be809",
+      "date": "2026-10-12T13:00:30+08:00",
+      "title": "补齐PLD闭环验收记录与首轮采集操作说明",
+      "url": "https://github.com/robot1lyj/condapi/commit/63cf0306aade2e64bfb865d9a6e21361e89be809"
+    },
+    {
+      "sha": "1c8f4c23dd3ee30bff94723cb036f65b58a8dc28",
+      "date": "2026-10-12T13:04:25+08:00",
+      "title": "验收Thor残差推理并收紧抓取回执奖励归属",
+      "url": "https://github.com/robot1lyj/condapi/commit/1c8f4c23dd3ee30bff94723cb036f65b58a8dc28"
+    },
+    {
+      "sha": "a6fd0a1d8a5e978c78c69f99b2fb7049c1858095",
+      "date": "2026-10-12T13:51:42+08:00",
+      "title": "重划PLD专家职责并复用原生录制重建修正回放",
+      "url": "https://github.com/robot1lyj/condapi/commit/a6fd0a1d8a5e978c78c69f99b2fb7049c1858095"
+    },
+    {
+      "sha": "e2b60f17cf5e583e1940b38e166b7c1955229fc4",
+      "date": "2026-10-12T14:01:32+08:00",
+      "title": "绑定视觉审核来源并隔离窗口后的Pi补救证据",
+      "url": "https://github.com/robot1lyj/condapi/commit/e2b60f17cf5e583e1940b38e166b7c1955229fc4"
+    },
+    {
+      "sha": "85d5552b5447328a5540fe4ca9358520860aee9f",
+      "date": "2026-10-12T14:09:32+08:00",
+      "title": "归档PLD闭环的服务器与Thor隔离验收证据",
+      "url": "https://github.com/robot1lyj/condapi/commit/85d5552b5447328a5540fe4ca9358520860aee9f"
+    },
+    {
+      "sha": "581aa1a36e2b87e0d560ac7c891e872c91756ded",
+      "date": "2026-10-12T14:55:03+08:00",
+      "title": "统一PLD-Grasp命名并明确局部奖励与客户端改造范围",
+      "url": "https://github.com/robot1lyj/condapi/commit/581aa1a36e2b87e0d560ac7c891e872c91756ded"
+    },
+    {
+      "sha": "7804a55e287703efe15ff83d448c747e9e59cca7",
+      "date": "2026-10-12T15:22:50+08:00",
+      "title": "新增pld-rl推理容器与无修正probe联调入口",
+      "url": "https://github.com/robot1lyj/condapi/commit/7804a55e287703efe15ff83d448c747e9e59cca7"
+    },
+    {
+      "sha": "bb127b43e19ab0c2f077944e950049443d8f468a",
+      "date": "2026-10-12T15:28:12+08:00",
+      "title": "修正Thor电源会话交接并记录部署控制器指纹",
+      "url": "https://github.com/robot1lyj/condapi/commit/bb127b43e19ab0c2f077944e950049443d8f468a"
+    },
+    {
+      "sha": "1a2dee1950b736e4c277f4ca8cae8a63474827c8",
+      "date": "2026-10-12T15:40:06+08:00",
+      "title": "记录pld-rl上线状态及真实RTC与probe验收",
+      "url": "https://github.com/robot1lyj/condapi/commit/1a2dee1950b736e4c277f4ca8cae8a63474827c8"
+    },
+    {
+      "sha": "bfa58595afcde615066750c831431ce0c8b60205",
+      "date": "2026-10-12T16:22:21+08:00",
+      "title": "补齐原生录像事件关联与零修正probe离线验收",
+      "url": "https://github.com/robot1lyj/condapi/commit/bfa58595afcde615066750c831431ce0c8b60205"
+    },
+    {
+      "sha": "2d77f19812e14ca377f4e6974665f5de233301a4",
+      "date": "2026-10-12T16:27:54+08:00",
+      "title": "记录Thor原生probe数据链路验收与两轮采集步骤",
+      "url": "https://github.com/robot1lyj/condapi/commit/2d77f19812e14ca377f4e6974665f5de233301a4"
+    },
+    {
+      "sha": "fea5baa90141d74f711c9e97d5758f882881d397",
+      "date": "2026-10-12T18:30:17+08:00",
+      "title": "审核首集真实probe并正确归因夹爪端点限幅",
+      "url": "https://github.com/robot1lyj/condapi/commit/fea5baa90141d74f711c9e97d5758f882881d397"
+    },
+    {
+      "sha": "52830b4eefbccc29e3cf8ad526ad723f448f27ab",
+      "date": "2026-10-12T18:35:15+08:00",
+      "title": "归档首集probe三端核验和门控问题证据",
+      "url": "https://github.com/robot1lyj/condapi/commit/52830b4eefbccc29e3cf8ad526ad723f448f27ab"
+    },
+    {
+      "sha": "e4e1a7b3a9994e9724ee55052f47247aea16c84f",
+      "date": "2026-10-12T19:37:38+08:00",
+      "title": "修正抓取介入窗口并准备真实残差探索合同",
+      "url": "https://github.com/robot1lyj/condapi/commit/e4e1a7b3a9994e9724ee55052f47247aea16c84f"
+    },
+    {
+      "sha": "5bb54ce3381a706c1f1377960e58f68de923a74b",
+      "date": "2026-10-12T19:42:50+08:00",
+      "title": "新增带回退的PLD探索包分阶段部署入口",
+      "url": "https://github.com/robot1lyj/condapi/commit/5bb54ce3381a706c1f1377960e58f68de923a74b"
+    },
+    {
+      "sha": "1170d92f4c58f947155f9ed144c4c79c363479f5",
+      "date": "2026-10-12T19:51:02+08:00",
+      "title": "保持客户端动作校验兼容并分离物理训练字段",
+      "url": "https://github.com/robot1lyj/condapi/commit/1170d92f4c58f947155f9ed144c4c79c363479f5"
+    },
+    {
+      "sha": "2612e08f8c2668e665ca07ba00dcf5b5bcc318af",
+      "date": "2026-10-12T19:51:49+08:00",
+      "title": "支持探索包修订版本的无损升级回退",
+      "url": "https://github.com/robot1lyj/condapi/commit/2612e08f8c2668e665ca07ba00dcf5b5bcc318af"
+    },
+    {
+      "sha": "7cb65ce178a0c865b56fdd5692edf52913a7e8b3",
+      "date": "2026-10-12T20:12:08+08:00",
+      "title": "归档PLD探索上线证据并排除接近阶段的假抬升",
+      "url": "https://github.com/robot1lyj/condapi/commit/7cb65ce178a0c865b56fdd5692edf52913a7e8b3"
+    },
+    {
+      "sha": "79e4dc709c653e39e0e9566d0a7f95d82464faae",
+      "date": "2026-10-12T20:23:23+08:00",
+      "title": "补齐最终离线抬升核验与服务器归档回执",
+      "url": "https://github.com/robot1lyj/condapi/commit/79e4dc709c653e39e0e9566d0a7f95d82464faae"
+    }
+  ],
+  "runs": [
+    {
+      "id": "calql-mixed-s0",
+      "family": "价值初始化",
+      "phase": "critic-only",
+      "steps": 5000,
+      "seconds": 22.3583512440091,
+      "entry_rmse": 18.531299592514678,
+      "entry_auc": 0.05,
+      "actor_rms": 0,
+      "source": "docs/reports/rl/pld-offline14-20261012/results-v1.json"
+    },
+    {
+      "id": "calql-success-s0",
+      "family": "价值初始化",
+      "phase": "critic-only",
+      "steps": 5000,
+      "seconds": 22.507916080998257,
+      "entry_rmse": 9.654199178158228,
+      "entry_auc": 0.9,
+      "actor_rms": 0,
+      "source": "docs/reports/rl/pld-offline14-20261012/results-v1.json"
+    },
+    {
+      "id": "calql-success-s1",
+      "family": "价值初始化",
+      "phase": "critic-only",
+      "steps": 5000,
+      "seconds": 22.489724867977202,
+      "entry_rmse": 6.511994990587912,
+      "entry_auc": 0.6,
+      "actor_rms": 0,
+      "source": "docs/reports/rl/pld-offline14-20261012/results-v1.json"
+    },
+    {
+      "id": "td-success-s0",
+      "family": "价值初始化",
+      "phase": "critic-only",
+      "steps": 5000,
+      "seconds": 15.382597183983307,
+      "entry_rmse": 1.1616822560650508,
+      "entry_auc": 0.45,
+      "actor_rms": 0,
+      "source": "docs/reports/rl/pld-offline14-20261012/results-v1.json"
+    },
+    {
+      "id": "mc-calql-mixed-s0",
+      "family": "价值初始化",
+      "phase": "critic-only",
+      "steps": 5000,
+      "seconds": 26.579876139003318,
+      "entry_rmse": 0.6340902203199958,
+      "entry_auc": 0.4,
+      "actor_rms": 0,
+      "source": "docs/reports/rl/pld-offline14-20261012/results-v2.json"
+    },
+    {
+      "id": "mc-calql-mixed-s1",
+      "family": "价值初始化",
+      "phase": "critic-only",
+      "steps": 5000,
+      "seconds": 26.4523068050039,
+      "entry_rmse": 0.6284248740516307,
+      "entry_auc": 0.65,
+      "actor_rms": 0,
+      "source": "docs/reports/rl/pld-offline14-20261012/results-v2.json"
+    },
+    {
+      "id": "mc-td-mixed-s0",
+      "family": "价值初始化",
+      "phase": "critic-only",
+      "steps": 5000,
+      "seconds": 17.985461268981453,
+      "entry_rmse": 0.6366587973719338,
+      "entry_auc": 0.4,
+      "actor_rms": 0,
+      "source": "docs/reports/rl/pld-offline14-20261012/results-v2.json"
+    },
+    {
+      "id": "td-mixed-s0",
+      "family": "价值初始化",
+      "phase": "critic-only",
+      "steps": 5000,
+      "seconds": 16.611305436003022,
+      "entry_rmse": 1.2423609110211447,
+      "entry_auc": 0.35,
+      "actor_rms": 0,
+      "source": "docs/reports/rl/pld-offline14-20261012/results-v2.json"
+    },
+    {
+      "id": "pld-iql-e09-s0",
+      "family": "IQL",
+      "phase": "offline actor-critic",
+      "steps": 20000,
+      "seconds": 112.32308879494667,
+      "entry_rmse": 0.6736768593373493,
+      "entry_auc": 0.5,
+      "actor_rms": 0.0,
+      "source": "docs/reports/rl/pld-methods14-20261012/results-v1.json"
+    },
+    {
+      "id": "pld-iql-e09-s1",
+      "family": "IQL",
+      "phase": "offline actor-critic",
+      "steps": 20000,
+      "seconds": 107.44935600803001,
+      "entry_rmse": 0.6849341262945581,
+      "entry_auc": 0.45,
+      "actor_rms": 0.0,
+      "source": "docs/reports/rl/pld-methods14-20261012/results-v1.json"
+    },
+    {
+      "id": "pld-iql-s0",
+      "family": "IQL",
+      "phase": "offline actor-critic",
+      "steps": 20000,
+      "seconds": 108.05542528704973,
+      "entry_rmse": 0.8350101194711518,
+      "entry_auc": 0.5,
+      "actor_rms": 0.0,
+      "source": "docs/reports/rl/pld-methods14-20261012/results-v1.json"
+    },
+    {
+      "id": "pld-iql-s1",
+      "family": "IQL",
+      "phase": "offline actor-critic",
+      "steps": 20000,
+      "seconds": 107.69482828502078,
+      "entry_rmse": 0.8020479385155453,
+      "entry_auc": 0.45,
+      "actor_rms": 0.0,
+      "source": "docs/reports/rl/pld-methods14-20261012/results-v1.json"
+    },
+    {
+      "id": "pld-rebrac-s0",
+      "family": "REBRAC",
+      "phase": "offline actor-critic",
+      "steps": 20000,
+      "seconds": 92.11405311600538,
+      "entry_rmse": 15.535456115348964,
+      "entry_auc": 0.5,
+      "actor_rms": 0.0036246315576136112,
+      "source": "docs/reports/rl/pld-methods14-20261012/results-v1.json"
+    },
+    {
+      "id": "pld-rebrac-s1",
+      "family": "REBRAC",
+      "phase": "offline actor-critic",
+      "steps": 20000,
+      "seconds": 95.92155212600483,
+      "entry_rmse": 15.890197050329371,
+      "entry_auc": 0.85,
+      "actor_rms": 0.003910555969923735,
+      "source": "docs/reports/rl/pld-methods14-20261012/results-v1.json"
+    },
+    {
+      "id": "pld-td3bc-s0",
+      "family": "TD3BC",
+      "phase": "offline actor-critic",
+      "steps": 20000,
+      "seconds": 74.4560828480171,
+      "entry_rmse": 0.8596334527855127,
+      "entry_auc": 0.1,
+      "actor_rms": 0.20528720319271088,
+      "source": "docs/reports/rl/pld-methods14-20261012/results-v1.json"
+    },
+    {
+      "id": "pld-td3bc-s1",
+      "family": "TD3BC",
+      "phase": "offline actor-critic",
+      "steps": 20000,
+      "seconds": 72.0650419750018,
+      "entry_rmse": 0.7362857723941705,
+      "entry_auc": 0.1,
+      "actor_rms": 0.17727026343345642,
+      "source": "docs/reports/rl/pld-methods14-20261012/results-v1.json"
+    },
+    {
+      "id": "pld-rebrac-c0p01-s0",
+      "family": "REBRAC",
+      "phase": "offline actor-critic",
+      "steps": 20000,
+      "seconds": 87.30851460900158,
+      "entry_rmse": 1.6713314716491168,
+      "entry_auc": 0.45,
+      "actor_rms": 0.015906095504760742,
+      "source": "docs/reports/rl/pld-methods14-20261012/results-v2.json"
+    },
+    {
+      "id": "pld-rebrac-c0p01-s1",
+      "family": "REBRAC",
+      "phase": "offline actor-critic",
+      "steps": 20000,
+      "seconds": 87.52177073096391,
+      "entry_rmse": 1.5117635031432788,
+      "entry_auc": 0.7,
+      "actor_rms": 0.011511704884469509,
+      "source": "docs/reports/rl/pld-methods14-20261012/results-v2.json"
+    }
+  ],
+  "sources": [
+    {
+      "path": "docs/reports/rl/pld-offline14-20261012/README.md",
+      "commit": "79e4dc709c653e39e0e9566d0a7f95d82464faae",
+      "sha256": "a24fa3aa1012016a8e053be3de49e355f2816f87fc29bb8eb1518d2db6fe0597",
+      "url": "https://github.com/robot1lyj/condapi/blob/79e4dc709c653e39e0e9566d0a7f95d82464faae/docs/reports/rl/pld-offline14-20261012/README.md"
+    },
+    {
+      "path": "docs/reports/rl/pld-offline14-20261012/results-v1.json",
+      "commit": "79e4dc709c653e39e0e9566d0a7f95d82464faae",
+      "sha256": "c6d797ffb6e90f7661cdfc854b4a4463ff3b302286ccd96171d621ec091b3afc",
+      "url": "https://github.com/robot1lyj/condapi/blob/79e4dc709c653e39e0e9566d0a7f95d82464faae/docs/reports/rl/pld-offline14-20261012/results-v1.json"
+    },
+    {
+      "path": "docs/reports/rl/pld-offline14-20261012/results-v2.json",
+      "commit": "79e4dc709c653e39e0e9566d0a7f95d82464faae",
+      "sha256": "531e86dbcaab96d3921ddd63ae2da0891ccab6c6006816c2fc18eafe9cd10653",
+      "url": "https://github.com/robot1lyj/condapi/blob/79e4dc709c653e39e0e9566d0a7f95d82464faae/docs/reports/rl/pld-offline14-20261012/results-v2.json"
+    },
+    {
+      "path": "docs/reports/rl/pld-methods14-20261012/README.md",
+      "commit": "79e4dc709c653e39e0e9566d0a7f95d82464faae",
+      "sha256": "be66ed88a508fec6874b7cfb89776d65739aaa3a69d83d22f6b0e1ad7d8bde19",
+      "url": "https://github.com/robot1lyj/condapi/blob/79e4dc709c653e39e0e9566d0a7f95d82464faae/docs/reports/rl/pld-methods14-20261012/README.md"
+    },
+    {
+      "path": "docs/reports/rl/pld-methods14-20261012/results-v1.json",
+      "commit": "79e4dc709c653e39e0e9566d0a7f95d82464faae",
+      "sha256": "ac75714351632ccb86375a7084f2f3e901bb847d298db922ac8f6e26cf16d1b7",
+      "url": "https://github.com/robot1lyj/condapi/blob/79e4dc709c653e39e0e9566d0a7f95d82464faae/docs/reports/rl/pld-methods14-20261012/results-v1.json"
+    },
+    {
+      "path": "docs/reports/rl/pld-methods14-20261012/results-v2.json",
+      "commit": "79e4dc709c653e39e0e9566d0a7f95d82464faae",
+      "sha256": "5e97032125bcf2c49a40be486a2f254770e477329ccaaf7d0d2207042c238409",
+      "url": "https://github.com/robot1lyj/condapi/blob/79e4dc709c653e39e0e9566d0a7f95d82464faae/docs/reports/rl/pld-methods14-20261012/results-v2.json"
+    },
+    {
+      "path": "docs/reports/rl/pld-sac-block-v2/README.md",
+      "commit": "79e4dc709c653e39e0e9566d0a7f95d82464faae",
+      "sha256": "c7724ccb2aa55d67f7779dc375e0f9fdf022e36e10cb494f8d2b1c6f7c75a6a8",
+      "url": "https://github.com/robot1lyj/condapi/blob/79e4dc709c653e39e0e9566d0a7f95d82464faae/docs/reports/rl/pld-sac-block-v2/README.md"
+    },
+    {
+      "path": "docs/reports/rl/pld-sac-block-v2/server-validation.json",
+      "commit": "79e4dc709c653e39e0e9566d0a7f95d82464faae",
+      "sha256": "7307509f54771f9ff8186003379f3bdf3ef8adb927a20428142041c069c02231",
+      "url": "https://github.com/robot1lyj/condapi/blob/79e4dc709c653e39e0e9566d0a7f95d82464faae/docs/reports/rl/pld-sac-block-v2/server-validation.json"
+    },
+    {
+      "path": "docs/reports/rl/lego-pld-probe-20261012-e01/README.md",
+      "commit": "79e4dc709c653e39e0e9566d0a7f95d82464faae",
+      "sha256": "fa8b9b2bb4a797a378d4ed0a2a275a25cb8e0c16c45d7ef4cdf5efe6261a3b59",
+      "url": "https://github.com/robot1lyj/condapi/blob/79e4dc709c653e39e0e9566d0a7f95d82464faae/docs/reports/rl/lego-pld-probe-20261012-e01/README.md"
+    },
+    {
+      "path": "docs/reports/rl/lego-pld-probe-20261012-e01/summary.json",
+      "commit": "79e4dc709c653e39e0e9566d0a7f95d82464faae",
+      "sha256": "8d808bd240dcf28b611b4078a2a6201194efcc34ed96f1bd2d87229ade0beabe",
+      "url": "https://github.com/robot1lyj/condapi/blob/79e4dc709c653e39e0e9566d0a7f95d82464faae/docs/reports/rl/lego-pld-probe-20261012-e01/summary.json"
+    },
+    {
+      "path": "docs/reports/rl/lego-pld-probe-20261012-e01/missed-rearm-analysis.json",
+      "commit": "79e4dc709c653e39e0e9566d0a7f95d82464faae",
+      "sha256": "daf6407b04feeec9543cc40628f940ba1a030e3563772c49a79ce30fe833a903",
+      "url": "https://github.com/robot1lyj/condapi/blob/79e4dc709c653e39e0e9566d0a7f95d82464faae/docs/reports/rl/lego-pld-probe-20261012-e01/missed-rearm-analysis.json"
+    },
+    {
+      "path": "docs/reports/thor/pld-rl-20261012/collect-r2/calibration.json",
+      "commit": "79e4dc709c653e39e0e9566d0a7f95d82464faae",
+      "sha256": "eb5156bacb84d880d3374b3cc53d29b36b599fa46d34058fe62cb03cecd5f996",
+      "url": "https://github.com/robot1lyj/condapi/blob/79e4dc709c653e39e0e9566d0a7f95d82464faae/docs/reports/thor/pld-rl-20261012/collect-r2/calibration.json"
+    },
+    {
+      "path": "docs/reports/thor/pld-rl-20261012/collect-r2/deployment.json",
+      "commit": "79e4dc709c653e39e0e9566d0a7f95d82464faae",
+      "sha256": "89a5f3ed8456ffeb081840fcb94ca3c51c7da8d7202731fb5c3850902a356091",
+      "url": "https://github.com/robot1lyj/condapi/blob/79e4dc709c653e39e0e9566d0a7f95d82464faae/docs/reports/thor/pld-rl-20261012/collect-r2/deployment.json"
+    },
+    {
+      "path": "docs/reports/thor/pld-rl-20261012/collect-r2/production-bundle-smoke.json",
+      "commit": "79e4dc709c653e39e0e9566d0a7f95d82464faae",
+      "sha256": "cbbad98c2ea8c47a6f1db341abba790b91d69c586b4847f9cfa885ed73643fc6",
+      "url": "https://github.com/robot1lyj/condapi/blob/79e4dc709c653e39e0e9566d0a7f95d82464faae/docs/reports/thor/pld-rl-20261012/collect-r2/production-bundle-smoke.json"
+    },
+    {
+      "path": "docs/reports/thor/pld-rl-20261012/collect-r2/contract.json",
+      "commit": "79e4dc709c653e39e0e9566d0a7f95d82464faae",
+      "sha256": "4720c6befefc1ef3dee851b96e5a1aee839d8fa9df9bb25434e51771ba2e7253",
+      "url": "https://github.com/robot1lyj/condapi/blob/79e4dc709c653e39e0e9566d0a7f95d82464faae/docs/reports/thor/pld-rl-20261012/collect-r2/contract.json"
+    },
+    {
+      "path": "packages/pld-rl/src/yam_pld_rl/block_contract.py",
+      "commit": "79e4dc709c653e39e0e9566d0a7f95d82464faae",
+      "sha256": "6f9e6f22749eebc4c992ae98c0e782d628ea93513110c99e291825b18dffca01",
+      "url": "https://github.com/robot1lyj/condapi/blob/79e4dc709c653e39e0e9566d0a7f95d82464faae/packages/pld-rl/src/yam_pld_rl/block_contract.py"
+    },
+    {
+      "path": "packages/pld-rl/src/yam_pld_rl/runtime.py",
+      "commit": "79e4dc709c653e39e0e9566d0a7f95d82464faae",
+      "sha256": "0b25530aca0113ebfb2c9549822de36e5108653353c09d1f3efda12d48929156",
+      "url": "https://github.com/robot1lyj/condapi/blob/79e4dc709c653e39e0e9566d0a7f95d82464faae/packages/pld-rl/src/yam_pld_rl/runtime.py"
+    },
+    {
+      "path": "packages/pld-rl/src/yam_pld_rl/curator.py",
+      "commit": "79e4dc709c653e39e0e9566d0a7f95d82464faae",
+      "sha256": "12745790a9f58de3da80d17c9c71c47c8fb4a81080c0f30eb0651c535a0b06e9",
+      "url": "https://github.com/robot1lyj/condapi/blob/79e4dc709c653e39e0e9566d0a7f95d82464faae/packages/pld-rl/src/yam_pld_rl/curator.py"
+    },
+    {
+      "path": "packages/pld-rl/src/yam_pld_rl/block_replay.py",
+      "commit": "79e4dc709c653e39e0e9566d0a7f95d82464faae",
+      "sha256": "cadbc9772a22398d87f828f6570ebd0401c0855364292ed8fddf6bbf2b160b58",
+      "url": "https://github.com/robot1lyj/condapi/blob/79e4dc709c653e39e0e9566d0a7f95d82464faae/packages/pld-rl/src/yam_pld_rl/block_replay.py"
+    },
+    {
+      "path": "packages/pld-rl/src/yam_pld_rl/sac.py",
+      "commit": "79e4dc709c653e39e0e9566d0a7f95d82464faae",
+      "sha256": "eadd98e1bca51975aaaa8d84ed7349f4830529785563d66a31f96a20b9c538e1",
+      "url": "https://github.com/robot1lyj/condapi/blob/79e4dc709c653e39e0e9566d0a7f95d82464faae/packages/pld-rl/src/yam_pld_rl/sac.py"
+    },
+    {
+      "path": "packages/pld-rl/src/yam_pld_rl/intervention.py",
+      "commit": "79e4dc709c653e39e0e9566d0a7f95d82464faae",
+      "sha256": "16fcbe81640b36dc6a2b597676404aa8ccfbd3cd6cd821a5e6128290d5c3966a",
+      "url": "https://github.com/robot1lyj/condapi/blob/79e4dc709c653e39e0e9566d0a7f95d82464faae/packages/pld-rl/src/yam_pld_rl/intervention.py"
+    }
+  ],
+  "calibration": {
+    "schema": "pld_collect_calibration_v1",
+    "legacy_candidates_sha256": "ec3589782934af87eb4b9bb766407c1049e2d096bfc2c4b8c011a8ab5b3f15a7",
+    "legacy_replay_mismatches": 0,
+    "legacy_candidate_coverage": 20,
+    "legacy_candidates": 20,
+    "relative_candidates": 38,
+    "relative_candidate_arms": {
+      "left": 6,
+      "right": 32
+    },
+    "qualified_relative_candidates": 35,
+    "online_windows": 37,
+    "online_window_arms": {
+      "right": 31,
+      "left": 6
+    },
+    "multiple_relative_closures": [],
+    "boundary_rejections": [],
+    "sampled_fk_corner_max_m": 0.022551121968793275,
+    "contract_sha256": "97bf9c4b4b5173477a9c3bf01e6f1ab4656b47d6757d919237daeec7278d6601",
+    "script_sha256": "a881ef3778881626b11307072220a0f150089a19860aa1274b83449645e706bb",
+    "training": false,
+    "robot_execution": false,
+    "success_rate": null
+  },
+  "deployment": {
+    "status": "online_bootstrap_collect_ready",
+    "observed_at": "2026-10-12T11:55:26.616610+00:00",
+    "robot_rollout_of_new_actor": false,
+    "cross_IPC_new_actor_tested": false,
+    "training_updates": 0
+  },
+  "latency": {
+    "active_server_p50_ms": 222.8627420263365,
+    "active_server_p95_ms": 224.2108309874311,
+    "robot_connected": false,
+    "cross_IPC_tested": false
+  },
+  "data_counts": {
+    "episodes": 14,
+    "reward_proposals": 327,
+    "replay_attempts": 311,
+    "transitions": 31077,
+    "train_attempts": 299,
+    "val_attempts": 12,
+    "val_failures": 2
+  },
+  "probe": {
+    "task": "乐高分拣-pld-rl",
+    "task_id": "bc9a8957-7195-4e56-99e7-dd57811842c9",
+    "session": "session_20261012_180423_471f9a",
+    "episode": "episode_000001",
+    "episode_id": "3923343be14e481f9ba9cb34788198c1",
+    "source_root": "/home/wuyan-lyj/condapi-data/rl/lego-pld-probe-20261012-e01-v1/raw",
+    "mode": "probe",
+    "intervals": 116,
+    "source_verified_intervals": 116,
+    "sdk_limited_intervals": 12,
+    "native_files": 11,
+    "raw_bytes": 154960923,
+    "raw_archive_sha256": "4e86b5ed252802de0e37e15339cf2a47ce3d077fab2a4aaaaa55cdace7c105cc",
+    "training": false,
+    "reward_records": 0,
+    "robot_success_rate": null,
+    "formal_radius_selected": false,
+    "inference_changed": false,
+    "evidence_sha256": {
+      "clamp-analysis.json": "ed755eb0d7a9c937e12ab07058e457408b20103dbf0c849be4969b16144e4687",
+      "detail-review.json": "600ac0e59b7fc8a275b33861821e5ecb23c00e82f25399c1714c75df758f2052",
+      "probe-audit.json": "0aa46ee9c084c740f6aa105c0af7909c05d14c7072db01fb29eb7f32fb73015a",
+      "gate-debug.json": "f4521e71b32ba3e48f74f2ea61ecd051f00b04f0d0c31832f3cdc379d6c8e2c2",
+      "copy-receipt.json": "179633c03e14e10b756fe59778d78fe456e0fe769f6972a2b6e31452f869d416",
+      "missed-rearm-analysis.json": "daf6407b04feeec9543cc40628f940ba1a030e3563772c49a79ce30fe833a903"
+    }
+  }
+}
+;
+const NS='http://www.w3.org/2000/svg';
+function svgEl(tag,attrs,text){const e=document.createElementNS(NS,tag);Object.entries(attrs).forEach(([k,v])=>e.setAttribute(k,v));if(text!==undefined)e.textContent=text;return e}
+function add(svg,tag,attrs,text){const e=svgEl(tag,attrs,text);svg.append(e);return e}
+function text(svg,x,y,value,size=13,extra={}){return add(svg,'text',{x,y,'font-size':size,...extra},value)}
+const colors={P:'#7d8b9b',A:'#4466db',B:'#189b81',future:'#f7b550'};
+let step=2;
+const narratives=[
+['A 已生成，前缀仍属旧计划','tick 100：A 的前 6 tick 是已承诺动作。残差包络从 106 开始，但包络首点为 0，首个非零修正在 107。'],
+['新的观测来了，A 还未产生非零修正','tick 104：区间 [100,104) 结束。这里没有看到 A 的非零修正，是排队时序造成的；不能据此删除整次 A 的经验。'],
+['A 在 B 的观测区间开始真正执行','tick 107：B 已经观测过，但其前缀仍包含原队列。正在执行的非零修正来源是 A 的 model_index=7。'],
+['跨过观测边界，也要保留动作来源','tick 110：A 的 model_index=10 仍在执行。Curator 沿 token 找到 A，记录交还前效果；不把它改名成 B，也不挪动 transition 边界。'],
+['B 从自己的可编辑后缀接管','tick 112：B 的新后缀开始。A 原来计划的后续位置未必被执行，只能依赖实际提交命令来判断。']];
+function drawRTC(){const svg=document.getElementById('rtc-svg');svg.replaceChildren();const x0=174,w=47,times=[100,104,107,110,112],now=times[step];text(svg,0,23,'同一物理时间轴 / 30 Hz',13);for(let i=0;i<16;i++)text(svg,x0+i*w+20,49,String(100+i),11,{'text-anchor':'middle'});
+const rows=[{label:'A 计划（观测 100）',y:74,owner:i=>i<6?'P':'A'}, {label:'B 的承诺与计划',y:137,owner:i=>i<4?null:i<6?'P':i<12?'A':'B'}, {label:'实际执行来源',y:200,owner:i=>i<6?'P':i<12?'A':'B'}];
+rows.forEach((row,ri)=>{text(svg,0,row.y+23,row.label,12);for(let i=0;i<16;i++){const own=row.owner(i);if(!own)continue;const future=ri===2&&100+i>now;add(svg,'rect',{x:x0+i*w,y:row.y,width:w-4,height:36,rx:5,fill:colors[own],opacity:future?.25:1});text(svg,x0+i*w+(w-4)/2,row.y+24,own,13,{'text-anchor':'middle',style:'fill:white;font-weight:700',opacity:future?.7:1});if(ri===0&&i>=6&&i<14)add(svg,'rect',{x:x0+i*w+5,y:row.y+31,width:w-14,height:3,fill:colors.future,rx:1})}});
+const marker=x0+(now-100)*w;add(svg,'line',{x1:marker,y1:56,x2:marker,y2:246,stroke:'#dd7b21','stroke-width':2,'stroke-dasharray':'5 4'});text(svg,marker+6,267,'当前 tick '+now,12,{style:'fill:#ad5905;font-weight:700'});text(svg,x0,298,'[100,104) 第一区间',12);text(svg,x0+4*w,298,'[104,112) 第二区间：含 A 的延迟修正',12);
+document.getElementById('playhead').value=step;document.getElementById('playhead-value').textContent='tick '+now;const wrong=document.getElementById('wrong-credit').checked;const n=narratives[step];let warning=wrong&&step>=2&&step<=3?'<p style="margin-top:8px;color:var(--amber)"><b>错误做法：</b>因为最新观测叫 B，就把 A 的实际修正记成 B。动作来源与训练动作将不一致。</p>':'';document.getElementById('step-copy').innerHTML='<strong>'+n[0]+'</strong><p>'+n[1]+'</p>'+warning;document.querySelectorAll('[data-step]').forEach(b=>b.setAttribute('aria-pressed',Number(b.dataset.step)===step));}
+document.querySelectorAll('[data-step]').forEach(b=>b.onclick=()=>{step=Number(b.dataset.step);drawRTC()});document.getElementById('wrong-credit').onchange=drawRTC;document.getElementById('playhead').oninput=e=>{step=Number(e.target.value);drawRTC()};
+function drawEnvelope(){const d=Number(document.getElementById('delay').value),a=Number(document.getElementById('amplitude').value)/1000;document.getElementById('delay-value').textContent=d;document.getElementById('amplitude-value').textContent=(a>=0?'+':'')+a.toFixed(3)+' rad';const svg=document.getElementById('envelope-svg');svg.replaceChildren();const x0=62,w=17.8,y0=187,ys=3000,weights=[0,1/3,2/3,1,1,2/3,1/3,0];text(svg,x0,22,'50 tick 参考计划：灰色前缀不可编辑，蓝色区间为 8 tick 包络',13);for(let i=0;i<50;i++){add(svg,'rect',{x:x0+i*w,y:46,width:w-2,height:26,rx:3,fill:i<d?colors.P:i<d+8?colors.A:'#aeb9c9',opacity:i<d+8?1:.35});if(i%5===0)text(svg,x0+i*w,91,String(i),11)}text(svg,x0,124,'示意：单关节残差（rad）',12);add(svg,'line',{x1:x0,y1:y0,x2:960,y2:y0,stroke:'#93a3b8','stroke-width':1});let path='';for(let i=0;i<50;i++){const val=(i>=d&&i<d+8?weights[i-d]:0)*a;path+=(i?'L':'M')+(x0+i*w+7)+','+(y0-val*ys)}add(svg,'path',{d:path,fill:'none',stroke:colors.A,'stroke-width':3});for(let i=0;i<8;i++){const v=weights[i]*a;add(svg,'circle',{cx:x0+(d+i)*w+7,cy:y0-v*ys,r:3,fill:colors.A})}text(svg,x0,273,'已承诺 '+d+' tick · 包络位置 ['+d+','+(d+8)+') · 首尾残差回到 0',13);}
+document.getElementById('delay').oninput=drawEnvelope;document.getElementById('amplitude').oninput=drawEnvelope;
+function mapping(){const good=document.getElementById('physical').checked,e=document.getElementById('mapping-result');e.className='metric-result'+(good?'':' bad');e.innerHTML=good?'<b>正确记账：0.98 − 0.98 = 0。</b> 这是 Pi 原行为经 SDK 映射后的结果，没有 RL 功劳。':'<b>错误记账：0.98 − 1.00 = −0.02。</b> 把 SDK 保护误记成“专家收紧了夹爪”，会污染学习数据。'}document.getElementById('physical').onchange=mapping;
+const milestones=[
+{time:'11:32—12:27',title:'18 组离线对照：先保留失败，再改变问题',body:'价值初始化出现 Q 高估；MC 校准改善尺度但未超过常数基线。IQL 在零残差上保持零均值；TD3+BC / ReBRAC 的偏移尚无真实动作收益。',ids:['149abba','a953020','8346e4f','87738e9'],scope:'已运行的离线实验，验证集仅 E01。'},
+{time:'12:53—14:09',title:'SAC 从单 tick 诊断走向原生 RTC 决策区间',body:'建立残差 SAC、恢复/导出；v2 复用原生 HIL，按真实相邻观测重建转移，把编号、切段、奖励关联放到离线管家。',ids:['a1f3abd','a6fd0a1','e2b60f1','85d5552'],scope:'服务器与 Thor 合成/前向验收；不是任务学习结果。'},
+{time:'15:22—16:27',title:'probe 先检查数据链路',body:'独立 pld-rl 服务上线零修正路径，关联原生 UUID、request/reply、取消事件、视频和实际动作。诊断 probe 不冒充正式 SAC 数据。',ids:['7804a55','1a2dee1','bfa5859','2d77f19'],scope:'在线零修正服务＋离线采集协议。'},
+{time:'18:30—18:35',title:'首集真机揭示两类问题',body:'SDK 端点限幅可以解释 12 个区间差异；绝对开合阈值在稀疏推理观测中漏触发，宽积木使窗口跨两次抓取。',ids:['fea5baa','52830b4'],scope:'116 个区间来源核验；原集保持不变。'},
+{time:'19:37',title:'修正门控与延迟执行归属',body:'相对开合＋未承诺后缀预测；加入可行幅度和残差变化 guard。沿原 token 找到下一观测区间才执行的 actor 效果。',ids:['e4e1a7b'],scope:'代码与同一集回放修订；待新 collect 真机验证。'},
+{time:'19:42—19:51',title:'raw / wire / physical 分工与可回退探索包',body:'保留原客户端校验和 RTC 前缀，物理基线另存供 residual/replay 使用；部署分阶段检查，失败可回退。',ids:['5bb54ce','1170d92','2612e08'],scope:'首次 r1 兼容问题及 r2 修订均保留。'},
+{time:'20:12—20:23',title:'归档上线测试，去掉接近阶段“假抬升”',body:'bootstrap 仅 checkpoint0、零梯度更新；48 模式例、9 RTC 例、16 客户端校验例通过。离线核验限定在参考低点之后。',ids:['7cb65ce','79e4dc7'],scope:'可开始小批探索采集；暂无真实专家提升。'}];
+const commitFor=id=>DATA.commits.find(c=>c.sha.startsWith(id));document.getElementById('milestones').innerHTML=milestones.map(m=>'<article class="milestone"><time>'+m.time+'</time><div><h3>'+m.title+'</h3><p>'+m.body+'</p>'+m.ids.map(id=>{const c=commitFor(id);return'<a class="commit-link" target="_blank" rel="noopener" href="'+c.url+'">'+id+' ↗</a>'}).join('')+'<div class="scope">'+m.scope+'</div></div></article>').join('');
+document.getElementById('commits-body').innerHTML=DATA.commits.map(c=>'<tr><td>'+c.date.slice(11,19)+'</td><td><a class="commit-link" target="_blank" rel="noopener" href="'+c.url+'">'+c.sha.slice(0,7)+'</a></td><td>'+c.title+'</td></tr>').join('');
+function drawRuns(){const filter=document.getElementById('run-filter').value;document.getElementById('runs-body').innerHTML=DATA.runs.filter(r=>filter==='all'||r.phase===filter).map(r=>'<tr><td><code>'+r.id+'</code></td><td class="num">'+r.steps.toLocaleString()+'</td><td class="num">'+r.entry_rmse.toFixed(3)+'</td><td class="num">'+(r.entry_auc===null?'—':r.entry_auc.toFixed(2))+'</td><td class="num">'+r.actor_rms.toFixed(4)+'</td></tr>').join('')}document.getElementById('run-filter').onchange=drawRuns;
+document.getElementById('source-list').innerHTML=DATA.sources.map(s=>'<li><a target="_blank" rel="noopener" href="'+s.url+'">'+s.path+'</a><br><span class="caption">SHA256 '+s.sha256+'</span></li>').join('');document.getElementById('source-commit').textContent=DATA.evidence_cutoff_commit;
+document.getElementById('download').onclick=()=>{const url=URL.createObjectURL(new Blob([JSON.stringify(DATA,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='pld-rtc-experiment-evidence-20261013.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};
+document.getElementById('theme').onclick=()=>{document.body.classList.toggle('dark');document.getElementById('theme').textContent=document.body.classList.contains('dark')?'切换浅色':'切换深色'};
+function drawPipeline(lane='all'){
+ const svg=document.getElementById('pipeline-svg');svg.replaceChildren();
+ const defs=add(svg,'defs',{});for(const [id,color]of Object.entries({online:colors.A,offline:'#189b81',learning:'#ad750e'})){const m=svgEl('marker',{id:'arrow-'+id,viewBox:'0 0 10 10',refX:9,refY:5,markerWidth:7,markerHeight:7,orient:'auto'});m.append(svgEl('path',{d:'M 0 0 L 10 5 L 0 10 z',fill:color}));defs.append(m)}
+ const lanes=[{id:'online',y:30,label:'01 / ONLINE · 机器人持续执行',color:colors.A},{id:'offline',y:224,label:'02 / OFFLINE · 还原这次尝试发生了什么',color:'#189b81'},{id:'learning',y:418,label:'03 / NEXT ROUND · 从经验更新小专家',color:'#ad750e'}];
+ const nodes=[{lane:'online',x:40,y:76,title:'观测 ＋ 承诺前缀',body:'原生 token · 上一实发命令',foot:'当前与过去信息'},{lane:'online',x:362,y:76,title:'Pi 计划 ＋ PLD 修正',body:'保留前缀 · 单臂 7D 包络',foot:'Thor 同进程'},{lane:'online',x:684,y:76,title:'原 RTC 执行',body:'按队列消费 · SDK 物理映射',foot:'实际下发才算执行'},{lane:'offline',x:684,y:270,title:'连续 HIL ＋ 完整 trace',body:'request / model_index / 视频',foot:'记录原身份，不换来源'},{lane:'offline',x:362,y:270,title:'Replay-Curator',body:'重建区间 · 核对延迟效果',foot:'在线窗口 ↔ 物理尝试'},{lane:'offline',x:40,y:270,title:'视觉裁判 ＋ 抽检',body:'合格证据 · 持物 / 空手',foot:'采集时间与审核时间分开'},{lane:'learning',x:40,y:464,title:'带版本的 Replay',body:'局部末端 1/0 · 真实 Δt',foot:'原件与排除项保留'},{lane:'learning',x:362,y:464,title:'SAC-Coach',body:'actor / 双 Q / 温度',foot:'GPU 服务器更新'},{lane:'learning',x:684,y:464,title:'下一轮 actor 包',body:'快照身份 · 验收 · 可回退',foot:'真实非零数据更新待开展'}];
+ function focus(id){return lane==='all'||lane===id?1:.25}
+ for(const row of lanes){add(svg,'rect',{x:20,y:row.y+23,width:942,height:145,rx:12,fill:row.color,opacity:(lane==='all'||lane===row.id)?0.045:0.02});text(svg,32,row.y+10,row.label,12,{'font-weight':650,opacity:focus(row.id),style:'fill:'+row.color})}
+ const edges=[['online','M 300 124 L 356 124'],['online','M 622 124 L 678 124'],['offline','M 814 178 L 814 264'],['offline','M 678 318 L 628 318'],['offline','M 356 318 L 306 318'],['learning','M 170 372 L 170 458'],['learning','M 300 512 L 356 512'],['learning','M 622 512 L 678 512']];
+ edges.forEach(([id,d])=>add(svg,'path',{d,fill:'none',stroke:lanes.find(r=>r.id===id).color,'stroke-width':2.2,'marker-end':'url(#arrow-'+id+')',opacity:focus(id)}));
+ for(const n of nodes){const color=lanes.find(r=>r.id===n.lane).color,op=focus(n.lane);add(svg,'rect',{x:n.x,y:n.y,width:260,height:102,rx:10,fill:'var(--panel)',stroke:'var(--line)',opacity:op});add(svg,'rect',{x:n.x,y:n.y+18,width:3,height:28,rx:2,fill:color,opacity:op});text(svg,n.x+18,n.y+31,n.title,16,{'font-weight':700,opacity:op});text(svg,n.x+18,n.y+57,n.body,12,{opacity:op});text(svg,n.x+18,n.y+83,n.foot,11,{opacity:op,style:'fill:var(--muted)'})}
+ text(svg,40,596,'下一轮加载后，重新进入上方在线路径；学习期间 Pi 基座保持冻结。',12,{style:'fill:var(--muted)'});
+ const notes={all:['执行不停，评分与更新按批次进行','Thor 在线运行 Pi 与小专家。原生记录进入离线切段与视觉审核，发布有版本的奖励后，GPU 服务器学习。下一轮才加载新 actor。'],online:['先保护已经承诺的动作，再修正未来后缀','当前 actor 不在 30 Hz 下独立观察世界；它随现有推理请求计算。8 tick 是平滑修正包络，客户端仍沿原 RTC 队列执行。'],offline:['评分看物理尝试，归属看原生动作来源','按真实录像和轨迹切段，核对哪次请求的哪一行实际执行。Qwen/DINO 不参与在线控制，审核时刻不会变成动作终点。'],learning:['记录“已经能训练”，也记录“还没证明有效”','合成 SAC 更新、恢复和导出已通过；18 组历史离线诊断有实测结果。当前探索包只导出 checkpoint0，真实修正数据带来的策略收益还要验证。']};
+ document.getElementById('lane-copy').innerHTML='<strong>'+notes[lane][0]+'</strong><p>'+notes[lane][1]+'</p>';document.querySelectorAll('[data-lane]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.lane===lane));}
+document.querySelectorAll('[data-lane]').forEach(b=>b.onclick=()=>drawPipeline(b.dataset.lane));
+drawRTC();drawEnvelope();mapping();drawRuns();drawPipeline();
+</script></body></html>

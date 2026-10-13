@@ -1,0 +1,581 @@
+{
+  "schema": "paper_experiment_snapshot_v1",
+  "recorded_at": "2026-10-13",
+  "evidence_cutoff_commit": "79e4dc709c653e39e0e9566d0a7f95d82464faae",
+  "evidence_date": "2026-10-12",
+  "scope": "read-only git evidence; no live device query, training or control",
+  "commits": [
+    {
+      "sha": "d1399dbb9ae8df4a63c037ae7e25d7d264220d4b",
+      "date": "2026-10-12T09:57:46+08:00",
+      "title": "修复抓取抬升核验资格并绘制实际判定流程",
+      "url": "https://github.com/robot1lyj/condapi/commit/d1399dbb9ae8df4a63c037ae7e25d7d264220d4b"
+    },
+    {
+      "sha": "84d5f811f1a0f6af6d42870281650530c7f502f7",
+      "date": "2026-10-12T10:31:33+08:00",
+      "title": "补充一页方法说明与Qwen和DINO真实执行示意",
+      "url": "https://github.com/robot1lyj/condapi/commit/84d5f811f1a0f6af6d42870281650530c7f502f7"
+    },
+    {
+      "sha": "149abbab352f2edfd11a68d3b3ff02e91c8c4dc0",
+      "date": "2026-10-12T11:32:54+08:00",
+      "title": "实现PLD离线价值初始化与四组实验归档看板",
+      "url": "https://github.com/robot1lyj/condapi/commit/149abbab352f2edfd11a68d3b3ff02e91c8c4dc0"
+    },
+    {
+      "sha": "a953020c6cf6b4d40417691c490c297fb5e0bc76",
+      "date": "2026-10-12T11:45:48+08:00",
+      "title": "保留首轮失败证据并增加MC回报校准对照",
+      "url": "https://github.com/robot1lyj/condapi/commit/a953020c6cf6b4d40417691c490c297fb5e0bc76"
+    },
+    {
+      "sha": "534fef2e8d3d73ea7cf136c9aef2cbeab8d2cca6",
+      "date": "2026-10-12T11:54:45+08:00",
+      "title": "归档八组初始化结果并明确价值评估尚未验收",
+      "url": "https://github.com/robot1lyj/condapi/commit/534fef2e8d3d73ea7cf136c9aef2cbeab8d2cca6"
+    },
+    {
+      "sha": "8346e4f1600da3efe852a20e973b8e84f1cafbd2",
+      "date": "2026-10-12T12:17:39+08:00",
+      "title": "新增PLD的IQL、TD3BC与ReBRAC离线对照及统一命名",
+      "url": "https://github.com/robot1lyj/condapi/commit/8346e4f1600da3efe852a20e973b8e84f1cafbd2"
+    },
+    {
+      "sha": "bef94d6f5e9613f69c6c2569f092794370978668",
+      "date": "2026-10-12T12:22:37+08:00",
+      "title": "补充ReBRAC低惩罚对照并支持分批运行",
+      "url": "https://github.com/robot1lyj/condapi/commit/bef94d6f5e9613f69c6c2569f092794370978668"
+    },
+    {
+      "sha": "87738e9940e22e80e793ec58aca7196c1160d5eb",
+      "date": "2026-10-12T12:27:39+08:00",
+      "title": "归档PLD十组算法对照结果、预测复核及部署限制",
+      "url": "https://github.com/robot1lyj/condapi/commit/87738e9940e22e80e793ec58aca7196c1160d5eb"
+    },
+    {
+      "sha": "a1f3abdc392923faf0674d596eb585b040c883a4",
+      "date": "2026-10-12T12:53:53+08:00",
+      "title": "实现PLD残差SAC动作块训练与推理回流协议",
+      "url": "https://github.com/robot1lyj/condapi/commit/a1f3abdc392923faf0674d596eb585b040c883a4"
+    },
+    {
+      "sha": "63cf0306aade2e64bfb865d9a6e21361e89be809",
+      "date": "2026-10-12T13:00:30+08:00",
+      "title": "补齐PLD闭环验收记录与首轮采集操作说明",
+      "url": "https://github.com/robot1lyj/condapi/commit/63cf0306aade2e64bfb865d9a6e21361e89be809"
+    },
+    {
+      "sha": "1c8f4c23dd3ee30bff94723cb036f65b58a8dc28",
+      "date": "2026-10-12T13:04:25+08:00",
+      "title": "验收Thor残差推理并收紧抓取回执奖励归属",
+      "url": "https://github.com/robot1lyj/condapi/commit/1c8f4c23dd3ee30bff94723cb036f65b58a8dc28"
+    },
+    {
+      "sha": "a6fd0a1d8a5e978c78c69f99b2fb7049c1858095",
+      "date": "2026-10-12T13:51:42+08:00",
+      "title": "重划PLD专家职责并复用原生录制重建修正回放",
+      "url": "https://github.com/robot1lyj/condapi/commit/a6fd0a1d8a5e978c78c69f99b2fb7049c1858095"
+    },
+    {
+      "sha": "e2b60f17cf5e583e1940b38e166b7c1955229fc4",
+      "date": "2026-10-12T14:01:32+08:00",
+      "title": "绑定视觉审核来源并隔离窗口后的Pi补救证据",
+      "url": "https://github.com/robot1lyj/condapi/commit/e2b60f17cf5e583e1940b38e166b7c1955229fc4"
+    },
+    {
+      "sha": "85d5552b5447328a5540fe4ca9358520860aee9f",
+      "date": "2026-10-12T14:09:32+08:00",
+      "title": "归档PLD闭环的服务器与Thor隔离验收证据",
+      "url": "https://github.com/robot1lyj/condapi/commit/85d5552b5447328a5540fe4ca9358520860aee9f"
+    },
+    {
+      "sha": "581aa1a36e2b87e0d560ac7c891e872c91756ded",
+      "date": "2026-10-12T14:55:03+08:00",
+      "title": "统一PLD-Grasp命名并明确局部奖励与客户端改造范围",
+      "url": "https://github.com/robot1lyj/condapi/commit/581aa1a36e2b87e0d560ac7c891e872c91756ded"
+    },
+    {
+      "sha": "7804a55e287703efe15ff83d448c747e9e59cca7",
+      "date": "2026-10-12T15:22:50+08:00",
+      "title": "新增pld-rl推理容器与无修正probe联调入口",
+      "url": "https://github.com/robot1lyj/condapi/commit/7804a55e287703efe15ff83d448c747e9e59cca7"
+    },
+    {
+      "sha": "bb127b43e19ab0c2f077944e950049443d8f468a",
+      "date": "2026-10-12T15:28:12+08:00",
+      "title": "修正Thor电源会话交接并记录部署控制器指纹",
+      "url": "https://github.com/robot1lyj/condapi/commit/bb127b43e19ab0c2f077944e950049443d8f468a"
+    },
+    {
+      "sha": "1a2dee1950b736e4c277f4ca8cae8a63474827c8",
+      "date": "2026-10-12T15:40:06+08:00",
+      "title": "记录pld-rl上线状态及真实RTC与probe验收",
+      "url": "https://github.com/robot1lyj/condapi/commit/1a2dee1950b736e4c277f4ca8cae8a63474827c8"
+    },
+    {
+      "sha": "bfa58595afcde615066750c831431ce0c8b60205",
+      "date": "2026-10-12T16:22:21+08:00",
+      "title": "补齐原生录像事件关联与零修正probe离线验收",
+      "url": "https://github.com/robot1lyj/condapi/commit/bfa58595afcde615066750c831431ce0c8b60205"
+    },
+    {
+      "sha": "2d77f19812e14ca377f4e6974665f5de233301a4",
+      "date": "2026-10-12T16:27:54+08:00",
+      "title": "记录Thor原生probe数据链路验收与两轮采集步骤",
+      "url": "https://github.com/robot1lyj/condapi/commit/2d77f19812e14ca377f4e6974665f5de233301a4"
+    },
+    {
+      "sha": "fea5baa90141d74f711c9e97d5758f882881d397",
+      "date": "2026-10-12T18:30:17+08:00",
+      "title": "审核首集真实probe并正确归因夹爪端点限幅",
+      "url": "https://github.com/robot1lyj/condapi/commit/fea5baa90141d74f711c9e97d5758f882881d397"
+    },
+    {
+      "sha": "52830b4eefbccc29e3cf8ad526ad723f448f27ab",
+      "date": "2026-10-12T18:35:15+08:00",
+      "title": "归档首集probe三端核验和门控问题证据",
+      "url": "https://github.com/robot1lyj/condapi/commit/52830b4eefbccc29e3cf8ad526ad723f448f27ab"
+    },
+    {
+      "sha": "e4e1a7b3a9994e9724ee55052f47247aea16c84f",
+      "date": "2026-10-12T19:37:38+08:00",
+      "title": "修正抓取介入窗口并准备真实残差探索合同",
+      "url": "https://github.com/robot1lyj/condapi/commit/e4e1a7b3a9994e9724ee55052f47247aea16c84f"
+    },
+    {
+      "sha": "5bb54ce3381a706c1f1377960e58f68de923a74b",
+      "date": "2026-10-12T19:42:50+08:00",
+      "title": "新增带回退的PLD探索包分阶段部署入口",
+      "url": "https://github.com/robot1lyj/condapi/commit/5bb54ce3381a706c1f1377960e58f68de923a74b"
+    },
+    {
+      "sha": "1170d92f4c58f947155f9ed144c4c79c363479f5",
+      "date": "2026-10-12T19:51:02+08:00",
+      "title": "保持客户端动作校验兼容并分离物理训练字段",
+      "url": "https://github.com/robot1lyj/condapi/commit/1170d92f4c58f947155f9ed144c4c79c363479f5"
+    },
+    {
+      "sha": "2612e08f8c2668e665ca07ba00dcf5b5bcc318af",
+      "date": "2026-10-12T19:51:49+08:00",
+      "title": "支持探索包修订版本的无损升级回退",
+      "url": "https://github.com/robot1lyj/condapi/commit/2612e08f8c2668e665ca07ba00dcf5b5bcc318af"
+    },
+    {
+      "sha": "7cb65ce178a0c865b56fdd5692edf52913a7e8b3",
+      "date": "2026-10-12T20:12:08+08:00",
+      "title": "归档PLD探索上线证据并排除接近阶段的假抬升",
+      "url": "https://github.com/robot1lyj/condapi/commit/7cb65ce178a0c865b56fdd5692edf52913a7e8b3"
+    },
+    {
+      "sha": "79e4dc709c653e39e0e9566d0a7f95d82464faae",
+      "date": "2026-10-12T20:23:23+08:00",
+      "title": "补齐最终离线抬升核验与服务器归档回执",
+      "url": "https://github.com/robot1lyj/condapi/commit/79e4dc709c653e39e0e9566d0a7f95d82464faae"
+    }
+  ],
+  "runs": [
+    {
+      "id": "calql-mixed-s0",
+      "family": "价值初始化",
+      "phase": "critic-only",
+      "steps": 5000,
+      "seconds": 22.3583512440091,
+      "entry_rmse": 18.531299592514678,
+      "entry_auc": 0.05,
+      "actor_rms": 0,
+      "source": "docs/reports/rl/pld-offline14-20261012/results-v1.json"
+    },
+    {
+      "id": "calql-success-s0",
+      "family": "价值初始化",
+      "phase": "critic-only",
+      "steps": 5000,
+      "seconds": 22.507916080998257,
+      "entry_rmse": 9.654199178158228,
+      "entry_auc": 0.9,
+      "actor_rms": 0,
+      "source": "docs/reports/rl/pld-offline14-20261012/results-v1.json"
+    },
+    {
+      "id": "calql-success-s1",
+      "family": "价值初始化",
+      "phase": "critic-only",
+      "steps": 5000,
+      "seconds": 22.489724867977202,
+      "entry_rmse": 6.511994990587912,
+      "entry_auc": 0.6,
+      "actor_rms": 0,
+      "source": "docs/reports/rl/pld-offline14-20261012/results-v1.json"
+    },
+    {
+      "id": "td-success-s0",
+      "family": "价值初始化",
+      "phase": "critic-only",
+      "steps": 5000,
+      "seconds": 15.382597183983307,
+      "entry_rmse": 1.1616822560650508,
+      "entry_auc": 0.45,
+      "actor_rms": 0,
+      "source": "docs/reports/rl/pld-offline14-20261012/results-v1.json"
+    },
+    {
+      "id": "mc-calql-mixed-s0",
+      "family": "价值初始化",
+      "phase": "critic-only",
+      "steps": 5000,
+      "seconds": 26.579876139003318,
+      "entry_rmse": 0.6340902203199958,
+      "entry_auc": 0.4,
+      "actor_rms": 0,
+      "source": "docs/reports/rl/pld-offline14-20261012/results-v2.json"
+    },
+    {
+      "id": "mc-calql-mixed-s1",
+      "family": "价值初始化",
+      "phase": "critic-only",
+      "steps": 5000,
+      "seconds": 26.4523068050039,
+      "entry_rmse": 0.6284248740516307,
+      "entry_auc": 0.65,
+      "actor_rms": 0,
+      "source": "docs/reports/rl/pld-offline14-20261012/results-v2.json"
+    },
+    {
+      "id": "mc-td-mixed-s0",
+      "family": "价值初始化",
+      "phase": "critic-only",
+      "steps": 5000,
+      "seconds": 17.985461268981453,
+      "entry_rmse": 0.6366587973719338,
+      "entry_auc": 0.4,
+      "actor_rms": 0,
+      "source": "docs/reports/rl/pld-offline14-20261012/results-v2.json"
+    },
+    {
+      "id": "td-mixed-s0",
+      "family": "价值初始化",
+      "phase": "critic-only",
+      "steps": 5000,
+      "seconds": 16.611305436003022,
+      "entry_rmse": 1.2423609110211447,
+      "entry_auc": 0.35,
+      "actor_rms": 0,
+      "source": "docs/reports/rl/pld-offline14-20261012/results-v2.json"
+    },
+    {
+      "id": "pld-iql-e09-s0",
+      "family": "IQL",
+      "phase": "offline actor-critic",
+      "steps": 20000,
+      "seconds": 112.32308879494667,
+      "entry_rmse": 0.6736768593373493,
+      "entry_auc": 0.5,
+      "actor_rms": 0.0,
+      "source": "docs/reports/rl/pld-methods14-20261012/results-v1.json"
+    },
+    {
+      "id": "pld-iql-e09-s1",
+      "family": "IQL",
+      "phase": "offline actor-critic",
+      "steps": 20000,
+      "seconds": 107.44935600803001,
+      "entry_rmse": 0.6849341262945581,
+      "entry_auc": 0.45,
+      "actor_rms": 0.0,
+      "source": "docs/reports/rl/pld-methods14-20261012/results-v1.json"
+    },
+    {
+      "id": "pld-iql-s0",
+      "family": "IQL",
+      "phase": "offline actor-critic",
+      "steps": 20000,
+      "seconds": 108.05542528704973,
+      "entry_rmse": 0.8350101194711518,
+      "entry_auc": 0.5,
+      "actor_rms": 0.0,
+      "source": "docs/reports/rl/pld-methods14-20261012/results-v1.json"
+    },
+    {
+      "id": "pld-iql-s1",
+      "family": "IQL",
+      "phase": "offline actor-critic",
+      "steps": 20000,
+      "seconds": 107.69482828502078,
+      "entry_rmse": 0.8020479385155453,
+      "entry_auc": 0.45,
+      "actor_rms": 0.0,
+      "source": "docs/reports/rl/pld-methods14-20261012/results-v1.json"
+    },
+    {
+      "id": "pld-rebrac-s0",
+      "family": "REBRAC",
+      "phase": "offline actor-critic",
+      "steps": 20000,
+      "seconds": 92.11405311600538,
+      "entry_rmse": 15.535456115348964,
+      "entry_auc": 0.5,
+      "actor_rms": 0.0036246315576136112,
+      "source": "docs/reports/rl/pld-methods14-20261012/results-v1.json"
+    },
+    {
+      "id": "pld-rebrac-s1",
+      "family": "REBRAC",
+      "phase": "offline actor-critic",
+      "steps": 20000,
+      "seconds": 95.92155212600483,
+      "entry_rmse": 15.890197050329371,
+      "entry_auc": 0.85,
+      "actor_rms": 0.003910555969923735,
+      "source": "docs/reports/rl/pld-methods14-20261012/results-v1.json"
+    },
+    {
+      "id": "pld-td3bc-s0",
+      "family": "TD3BC",
+      "phase": "offline actor-critic",
+      "steps": 20000,
+      "seconds": 74.4560828480171,
+      "entry_rmse": 0.8596334527855127,
+      "entry_auc": 0.1,
+      "actor_rms": 0.20528720319271088,
+      "source": "docs/reports/rl/pld-methods14-20261012/results-v1.json"
+    },
+    {
+      "id": "pld-td3bc-s1",
+      "family": "TD3BC",
+      "phase": "offline actor-critic",
+      "steps": 20000,
+      "seconds": 72.0650419750018,
+      "entry_rmse": 0.7362857723941705,
+      "entry_auc": 0.1,
+      "actor_rms": 0.17727026343345642,
+      "source": "docs/reports/rl/pld-methods14-20261012/results-v1.json"
+    },
+    {
+      "id": "pld-rebrac-c0p01-s0",
+      "family": "REBRAC",
+      "phase": "offline actor-critic",
+      "steps": 20000,
+      "seconds": 87.30851460900158,
+      "entry_rmse": 1.6713314716491168,
+      "entry_auc": 0.45,
+      "actor_rms": 0.015906095504760742,
+      "source": "docs/reports/rl/pld-methods14-20261012/results-v2.json"
+    },
+    {
+      "id": "pld-rebrac-c0p01-s1",
+      "family": "REBRAC",
+      "phase": "offline actor-critic",
+      "steps": 20000,
+      "seconds": 87.52177073096391,
+      "entry_rmse": 1.5117635031432788,
+      "entry_auc": 0.7,
+      "actor_rms": 0.011511704884469509,
+      "source": "docs/reports/rl/pld-methods14-20261012/results-v2.json"
+    }
+  ],
+  "sources": [
+    {
+      "path": "docs/reports/rl/pld-offline14-20261012/README.md",
+      "commit": "79e4dc709c653e39e0e9566d0a7f95d82464faae",
+      "sha256": "a24fa3aa1012016a8e053be3de49e355f2816f87fc29bb8eb1518d2db6fe0597",
+      "url": "https://github.com/robot1lyj/condapi/blob/79e4dc709c653e39e0e9566d0a7f95d82464faae/docs/reports/rl/pld-offline14-20261012/README.md"
+    },
+    {
+      "path": "docs/reports/rl/pld-offline14-20261012/results-v1.json",
+      "commit": "79e4dc709c653e39e0e9566d0a7f95d82464faae",
+      "sha256": "c6d797ffb6e90f7661cdfc854b4a4463ff3b302286ccd96171d621ec091b3afc",
+      "url": "https://github.com/robot1lyj/condapi/blob/79e4dc709c653e39e0e9566d0a7f95d82464faae/docs/reports/rl/pld-offline14-20261012/results-v1.json"
+    },
+    {
+      "path": "docs/reports/rl/pld-offline14-20261012/results-v2.json",
+      "commit": "79e4dc709c653e39e0e9566d0a7f95d82464faae",
+      "sha256": "531e86dbcaab96d3921ddd63ae2da0891ccab6c6006816c2fc18eafe9cd10653",
+      "url": "https://github.com/robot1lyj/condapi/blob/79e4dc709c653e39e0e9566d0a7f95d82464faae/docs/reports/rl/pld-offline14-20261012/results-v2.json"
+    },
+    {
+      "path": "docs/reports/rl/pld-methods14-20261012/README.md",
+      "commit": "79e4dc709c653e39e0e9566d0a7f95d82464faae",
+      "sha256": "be66ed88a508fec6874b7cfb89776d65739aaa3a69d83d22f6b0e1ad7d8bde19",
+      "url": "https://github.com/robot1lyj/condapi/blob/79e4dc709c653e39e0e9566d0a7f95d82464faae/docs/reports/rl/pld-methods14-20261012/README.md"
+    },
+    {
+      "path": "docs/reports/rl/pld-methods14-20261012/results-v1.json",
+      "commit": "79e4dc709c653e39e0e9566d0a7f95d82464faae",
+      "sha256": "ac75714351632ccb86375a7084f2f3e901bb847d298db922ac8f6e26cf16d1b7",
+      "url": "https://github.com/robot1lyj/condapi/blob/79e4dc709c653e39e0e9566d0a7f95d82464faae/docs/reports/rl/pld-methods14-20261012/results-v1.json"
+    },
+    {
+      "path": "docs/reports/rl/pld-methods14-20261012/results-v2.json",
+      "commit": "79e4dc709c653e39e0e9566d0a7f95d82464faae",
+      "sha256": "5e97032125bcf2c49a40be486a2f254770e477329ccaaf7d0d2207042c238409",
+      "url": "https://github.com/robot1lyj/condapi/blob/79e4dc709c653e39e0e9566d0a7f95d82464faae/docs/reports/rl/pld-methods14-20261012/results-v2.json"
+    },
+    {
+      "path": "docs/reports/rl/pld-sac-block-v2/README.md",
+      "commit": "79e4dc709c653e39e0e9566d0a7f95d82464faae",
+      "sha256": "c7724ccb2aa55d67f7779dc375e0f9fdf022e36e10cb494f8d2b1c6f7c75a6a8",
+      "url": "https://github.com/robot1lyj/condapi/blob/79e4dc709c653e39e0e9566d0a7f95d82464faae/docs/reports/rl/pld-sac-block-v2/README.md"
+    },
+    {
+      "path": "docs/reports/rl/pld-sac-block-v2/server-validation.json",
+      "commit": "79e4dc709c653e39e0e9566d0a7f95d82464faae",
+      "sha256": "7307509f54771f9ff8186003379f3bdf3ef8adb927a20428142041c069c02231",
+      "url": "https://github.com/robot1lyj/condapi/blob/79e4dc709c653e39e0e9566d0a7f95d82464faae/docs/reports/rl/pld-sac-block-v2/server-validation.json"
+    },
+    {
+      "path": "docs/reports/rl/lego-pld-probe-20261012-e01/README.md",
+      "commit": "79e4dc709c653e39e0e9566d0a7f95d82464faae",
+      "sha256": "fa8b9b2bb4a797a378d4ed0a2a275a25cb8e0c16c45d7ef4cdf5efe6261a3b59",
+      "url": "https://github.com/robot1lyj/condapi/blob/79e4dc709c653e39e0e9566d0a7f95d82464faae/docs/reports/rl/lego-pld-probe-20261012-e01/README.md"
+    },
+    {
+      "path": "docs/reports/rl/lego-pld-probe-20261012-e01/summary.json",
+      "commit": "79e4dc709c653e39e0e9566d0a7f95d82464faae",
+      "sha256": "8d808bd240dcf28b611b4078a2a6201194efcc34ed96f1bd2d87229ade0beabe",
+      "url": "https://github.com/robot1lyj/condapi/blob/79e4dc709c653e39e0e9566d0a7f95d82464faae/docs/reports/rl/lego-pld-probe-20261012-e01/summary.json"
+    },
+    {
+      "path": "docs/reports/rl/lego-pld-probe-20261012-e01/missed-rearm-analysis.json",
+      "commit": "79e4dc709c653e39e0e9566d0a7f95d82464faae",
+      "sha256": "daf6407b04feeec9543cc40628f940ba1a030e3563772c49a79ce30fe833a903",
+      "url": "https://github.com/robot1lyj/condapi/blob/79e4dc709c653e39e0e9566d0a7f95d82464faae/docs/reports/rl/lego-pld-probe-20261012-e01/missed-rearm-analysis.json"
+    },
+    {
+      "path": "docs/reports/thor/pld-rl-20261012/collect-r2/calibration.json",
+      "commit": "79e4dc709c653e39e0e9566d0a7f95d82464faae",
+      "sha256": "eb5156bacb84d880d3374b3cc53d29b36b599fa46d34058fe62cb03cecd5f996",
+      "url": "https://github.com/robot1lyj/condapi/blob/79e4dc709c653e39e0e9566d0a7f95d82464faae/docs/reports/thor/pld-rl-20261012/collect-r2/calibration.json"
+    },
+    {
+      "path": "docs/reports/thor/pld-rl-20261012/collect-r2/deployment.json",
+      "commit": "79e4dc709c653e39e0e9566d0a7f95d82464faae",
+      "sha256": "89a5f3ed8456ffeb081840fcb94ca3c51c7da8d7202731fb5c3850902a356091",
+      "url": "https://github.com/robot1lyj/condapi/blob/79e4dc709c653e39e0e9566d0a7f95d82464faae/docs/reports/thor/pld-rl-20261012/collect-r2/deployment.json"
+    },
+    {
+      "path": "docs/reports/thor/pld-rl-20261012/collect-r2/production-bundle-smoke.json",
+      "commit": "79e4dc709c653e39e0e9566d0a7f95d82464faae",
+      "sha256": "cbbad98c2ea8c47a6f1db341abba790b91d69c586b4847f9cfa885ed73643fc6",
+      "url": "https://github.com/robot1lyj/condapi/blob/79e4dc709c653e39e0e9566d0a7f95d82464faae/docs/reports/thor/pld-rl-20261012/collect-r2/production-bundle-smoke.json"
+    },
+    {
+      "path": "docs/reports/thor/pld-rl-20261012/collect-r2/contract.json",
+      "commit": "79e4dc709c653e39e0e9566d0a7f95d82464faae",
+      "sha256": "4720c6befefc1ef3dee851b96e5a1aee839d8fa9df9bb25434e51771ba2e7253",
+      "url": "https://github.com/robot1lyj/condapi/blob/79e4dc709c653e39e0e9566d0a7f95d82464faae/docs/reports/thor/pld-rl-20261012/collect-r2/contract.json"
+    },
+    {
+      "path": "packages/pld-rl/src/yam_pld_rl/block_contract.py",
+      "commit": "79e4dc709c653e39e0e9566d0a7f95d82464faae",
+      "sha256": "6f9e6f22749eebc4c992ae98c0e782d628ea93513110c99e291825b18dffca01",
+      "url": "https://github.com/robot1lyj/condapi/blob/79e4dc709c653e39e0e9566d0a7f95d82464faae/packages/pld-rl/src/yam_pld_rl/block_contract.py"
+    },
+    {
+      "path": "packages/pld-rl/src/yam_pld_rl/runtime.py",
+      "commit": "79e4dc709c653e39e0e9566d0a7f95d82464faae",
+      "sha256": "0b25530aca0113ebfb2c9549822de36e5108653353c09d1f3efda12d48929156",
+      "url": "https://github.com/robot1lyj/condapi/blob/79e4dc709c653e39e0e9566d0a7f95d82464faae/packages/pld-rl/src/yam_pld_rl/runtime.py"
+    },
+    {
+      "path": "packages/pld-rl/src/yam_pld_rl/curator.py",
+      "commit": "79e4dc709c653e39e0e9566d0a7f95d82464faae",
+      "sha256": "12745790a9f58de3da80d17c9c71c47c8fb4a81080c0f30eb0651c535a0b06e9",
+      "url": "https://github.com/robot1lyj/condapi/blob/79e4dc709c653e39e0e9566d0a7f95d82464faae/packages/pld-rl/src/yam_pld_rl/curator.py"
+    },
+    {
+      "path": "packages/pld-rl/src/yam_pld_rl/block_replay.py",
+      "commit": "79e4dc709c653e39e0e9566d0a7f95d82464faae",
+      "sha256": "cadbc9772a22398d87f828f6570ebd0401c0855364292ed8fddf6bbf2b160b58",
+      "url": "https://github.com/robot1lyj/condapi/blob/79e4dc709c653e39e0e9566d0a7f95d82464faae/packages/pld-rl/src/yam_pld_rl/block_replay.py"
+    },
+    {
+      "path": "packages/pld-rl/src/yam_pld_rl/sac.py",
+      "commit": "79e4dc709c653e39e0e9566d0a7f95d82464faae",
+      "sha256": "eadd98e1bca51975aaaa8d84ed7349f4830529785563d66a31f96a20b9c538e1",
+      "url": "https://github.com/robot1lyj/condapi/blob/79e4dc709c653e39e0e9566d0a7f95d82464faae/packages/pld-rl/src/yam_pld_rl/sac.py"
+    },
+    {
+      "path": "packages/pld-rl/src/yam_pld_rl/intervention.py",
+      "commit": "79e4dc709c653e39e0e9566d0a7f95d82464faae",
+      "sha256": "16fcbe81640b36dc6a2b597676404aa8ccfbd3cd6cd821a5e6128290d5c3966a",
+      "url": "https://github.com/robot1lyj/condapi/blob/79e4dc709c653e39e0e9566d0a7f95d82464faae/packages/pld-rl/src/yam_pld_rl/intervention.py"
+    }
+  ],
+  "calibration": {
+    "schema": "pld_collect_calibration_v1",
+    "legacy_candidates_sha256": "ec3589782934af87eb4b9bb766407c1049e2d096bfc2c4b8c011a8ab5b3f15a7",
+    "legacy_replay_mismatches": 0,
+    "legacy_candidate_coverage": 20,
+    "legacy_candidates": 20,
+    "relative_candidates": 38,
+    "relative_candidate_arms": {
+      "left": 6,
+      "right": 32
+    },
+    "qualified_relative_candidates": 35,
+    "online_windows": 37,
+    "online_window_arms": {
+      "right": 31,
+      "left": 6
+    },
+    "multiple_relative_closures": [],
+    "boundary_rejections": [],
+    "sampled_fk_corner_max_m": 0.022551121968793275,
+    "contract_sha256": "97bf9c4b4b5173477a9c3bf01e6f1ab4656b47d6757d919237daeec7278d6601",
+    "script_sha256": "a881ef3778881626b11307072220a0f150089a19860aa1274b83449645e706bb",
+    "training": false,
+    "robot_execution": false,
+    "success_rate": null
+  },
+  "deployment": {
+    "status": "online_bootstrap_collect_ready",
+    "observed_at": "2026-10-12T11:55:26.616610+00:00",
+    "robot_rollout_of_new_actor": false,
+    "cross_IPC_new_actor_tested": false,
+    "training_updates": 0
+  },
+  "latency": {
+    "active_server_p50_ms": 222.8627420263365,
+    "active_server_p95_ms": 224.2108309874311,
+    "robot_connected": false,
+    "cross_IPC_tested": false
+  },
+  "data_counts": {
+    "episodes": 14,
+    "reward_proposals": 327,
+    "replay_attempts": 311,
+    "transitions": 31077,
+    "train_attempts": 299,
+    "val_attempts": 12,
+    "val_failures": 2
+  },
+  "probe": {
+    "task": "乐高分拣-pld-rl",
+    "task_id": "bc9a8957-7195-4e56-99e7-dd57811842c9",
+    "session": "session_20261012_180423_471f9a",
+    "episode": "episode_000001",
+    "episode_id": "3923343be14e481f9ba9cb34788198c1",
+    "source_root": "/home/wuyan-lyj/condapi-data/rl/lego-pld-probe-20261012-e01-v1/raw",
+    "mode": "probe",
+    "intervals": 116,
+    "source_verified_intervals": 116,
+    "sdk_limited_intervals": 12,
+    "native_files": 11,
+    "raw_bytes": 154960923,
+    "raw_archive_sha256": "4e86b5ed252802de0e37e15339cf2a47ce3d077fab2a4aaaaa55cdace7c105cc",
+    "training": false,
+    "reward_records": 0,
+    "robot_success_rate": null,
+    "formal_radius_selected": false,
+    "inference_changed": false,
+    "evidence_sha256": {
+      "clamp-analysis.json": "ed755eb0d7a9c937e12ab07058e457408b20103dbf0c849be4969b16144e4687",
+      "detail-review.json": "600ac0e59b7fc8a275b33861821e5ecb23c00e82f25399c1714c75df758f2052",
+      "probe-audit.json": "0aa46ee9c084c740f6aa105c0af7909c05d14c7072db01fb29eb7f32fb73015a",
+      "gate-debug.json": "f4521e71b32ba3e48f74f2ea61ecd051f00b04f0d0c31832f3cdc379d6c8e2c2",
+      "copy-receipt.json": "179633c03e14e10b756fe59778d78fe456e0fe769f6972a2b6e31452f869d416",
+      "missed-rearm-analysis.json": "daf6407b04feeec9543cc40628f940ba1a030e3563772c49a79ce30fe833a903"
+    }
+  }
+}

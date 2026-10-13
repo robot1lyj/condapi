@@ -1,0 +1,20 @@
+{
+  "status": "passed",
+  "artifact_sha256": "f60abb944d0dd36fee881350f16ab3dfa83761d535896db2e7c3cdc222573c48",
+  "reviewer": "assistant visual inspection",
+  "checked_images": [
+    "report.overview.light.png",
+    "report.rtc.light.png",
+    "report.pipeline.light.png",
+    "report.envelope.dark.png"
+  ],
+  "observations": [
+    "Independent visual style throughout; no generated diagram iframe",
+    "Source ownership and delayed effects shown separately",
+    "Headers, arrows, controls and labels legible in inspected images",
+    "Teaching diagrams labelled separately from recorded experiment evidence"
+  ],
+  "source_sha_checks": 21,
+  "local_markdown_links": "passed",
+  "browser_report": "report-browser-check.json"
+}

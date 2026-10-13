@@ -4,11 +4,11 @@
   "text_type": "literature_review_and_exploratory_research_plan",
   "language": "zh",
   "target_reader": "project researchers and prospective paper collaborators",
-  "current_round": 1,
+  "current_round": 2,
   "version": "0.1",
-  "updated_at": "2026-10-12",
+  "updated_at": "2026-10-13",
   "scores": [],
-  "status": "exploratory_literature_draft",
+  "status": "literature_and_experiment_tracking",
   "priority": "literature-first; hypotheses evolve alongside experiments; novelty not locked",
   "reference_records": 25,
   "technical_debts": [
@@ -16,12 +16,15 @@
     "Independent reward-model test data and truth labels are not yet available",
     "Pi-only trajectories lack nonzero residual behavioral support",
     "Candidate innovation and cross-task benefits remain unverified",
-    "No RL training, deployment or distillation results for this proposed framework"
+    "18 offline diagnostic runs and synthetic SAC validation recorded; real nonzero-residual policy improvement and distillation remain unverified"
   ],
   "scope": {
     "paper_research_only": true,
     "project_code_changes": false,
     "dataset_reprocessing": false,
     "training_or_deployment": false
-  }
+  },
+  "latest_experiment_record": "experiments/20261013-rtc-rl/experiment-log.md",
+  "latest_html": "experiments/20261013-rtc-rl/index.html",
+  "experiment_source_commit": "79e4dc709c653e39e0e9566d0a7f95d82464faae"
 }
