@@ -1,6 +1,6 @@
 # 耳机装配 Pi0.5 50h 配置准备（2026-10-12）
 
-当前授权（2026-10-13）：用户明确要求开始训练，第一阶段累计目标 **200,000步**，允许直接使用服务器。已将 first_stop_step 改为200000，保留原338000步学习率衰减计划；本阶段到200000停止，不自动推进到338000。数据准备及启动正在执行，实际作业、就绪状态与首步证据见后续运行记录。2026-10-12完成的配置与选集准备保留如下。
+当前授权（2026-10-13）：用户明确要求开始训练，第一阶段累计目标 **200,000步**，允许直接使用服务器。已将 first_stop_step 改为200000，保留原338000步学习率衰减计划；本阶段到200000停止，不自动推进到338000。已提交数据准备2322和依赖其成功的训练2323；当前准备作业运行、训练等待依赖，尚未验证首个optimizer step。实际作业与证据见下方运行状态。2026-10-12完成的配置与选集准备保留如下。
 
 ## 配方
 
@@ -30,7 +30,7 @@
 - 选中 train 视频约51.924 GB，val约0.587 GB；独立拷贝另需至少这些空间以及Parquet/元数据/norm空间。观察时共享home余量约5.0T，开工前仍须复核。
 - 夹爪 action 均在[0,1]；state少量高于1（最大1.0001812），保留原值，不裁剪。单位依据归 [contract.json](contract.json)：发布者弧度/夹爪0闭1开和固定port顺序，raw到port单位继承仍是文档加数值支持的推断，未宣称独立标定。
 - `source-train.jsonl`、`source-val.jsonl` 保留来源manifest原始字节；[selection.json](selection.json)保留选集与来源哈希。[source-episodes.json](source-episodes.json)是原train源ID；[episodes.json](episodes.json)是新转换目录的连续ID 0..1383，二者不可互换。
-- **尚无已发布的耳机LeRobot转换目录及耳机专属norm。** 不能复用乐高norm或把 `RECIPE_READY_DATA_UNVERIFIED` 当成训练数据READY。新数据版本将独立copy视频、检查SHA256、全帧解码、审核低维列、验收真实LeRobot loader；随后用所选train全部帧计算H50/delta统计，并验证真实loader等价。val不进入统计。
+- **10月12日准备时尚无已发布的耳机LeRobot转换目录及耳机专属norm；10月13日已开始转换，当前val已发布，train/norm仍在准备。** 不能复用乐高norm或把 `RECIPE_READY_DATA_UNVERIFIED` 当成训练数据READY。新数据版本将独立copy视频、检查SHA256、全帧解码、审核低维列、验收真实LeRobot loader；随后用所选train全部帧计算H50/delta统计，并验证真实loader等价。val不进入统计。
 
 源目录：`/home/wuyan/lyj/YAM/YAM_data/ABC-130k-two-tasks/earbuds_charging_case`。
 新转换目录：`/home/wuyan/lyj/YAM/YAM_data/processed/earbuds_lerobot_50h_v1_20261012/{train,val}`。
@@ -71,6 +71,16 @@ sbatch "$EARBUDS_CODE_DIR/scripts/train_pi05_earbuds_50h.sbatch" --resume --stop
 
 正式训练复用 `scripts/train_lego_full.py` 和OpenPI训练器；新增显式 `--dataset` 参数必须同时给出初始化权重、选集、专属norm，验证norm的数据路径及转换manifest/info哈希；未给该参数时乐高旧默认保持原行为。首轮错误退出且没有完整checkpoint时保留现场、诊断后新建run，不删除合同绕过保护。没有自动续训、自动提交后继作业、Thor部署或客户端任务消息。
 
+## 2026-10-13运行状态
+
+用户已授权首次训练到累计200000步，直接使用服务器。服务器从Gitea经临时SSH反向转发获取固定commit `d3abbd58114e257befa56218531395b9953b7eef`，独立checkout为 `/home/wuyan/lyj/YAM/code-snapshots/earbuds50h-20261013`。未修改已有模型环境、其他作业或原始数据。
+
+- CPU数据准备作业 **2322** 在 `gpu001` 运行；已发布全部17条val，train的1384条按原冻结选集进行独立copy、逐帧验收和转换，之后计算专属norm。
+- 四卡训练作业 **2323** 已明确提交，依赖 `afterok:2322`，设置 `--kill-on-invalid-dep=yes`；若数据准备失败不会启动训练。当前为 `PENDING (Dependency)`，不是已进入模型优化。
+- 2323使用global32/FSDP4，命令明确 `--stop-step 200000`；LR decay保持338000，首阶段约1.1847等效轮。单作业限6天；未提交训练到338000的后续作业。若超时或失败，先核对实际退出原因和完整checkpoint，再按同一合同恢复到累计200000，不并行重开同run。
+- 服务器计算节点24项轻量配置/防误启测试通过，没有训练循环或模型前反向。GPU遥测在CPU-only作业内受设备隔离未读到卡，不能写成GPU验证通过；实际CUDA/首步/保存须在训练作业开始后核验。
+- 作业ID、来源commit、授权、日志路径和观察状态见 [启动回执](launch_jobs_20261013.json)。状态为时间点证据，后续须重新查询 `squeue -j 2322,2323`、`sacct` 和日志。数据日志 `control/earbuds_pi05_rtc_base_50h_20261012/data-2322.log`；训练wrapper日志 `slurm-2323.log`，原生训练输出 `train.log`。
+
 ## 验证
 
-轻量配置/防误启测试24项通过；覆盖乐高旧默认、耳机dataset/norm错配、源metadata变化、任务资产绑定、累计停止步数、固定LR、无Slurm拒绝训练、数据未准备拒绝训练，以及recipe-only不执行子进程。Ruff、两份sbatch的Bash语法和 `git diff --check` 通过。未执行转换或真实GPU训练验证；这些完成前本页仅表示配置准备就绪。
+轻量配置/防误启测试24项通过；覆盖乐高旧默认、耳机dataset/norm错配、源metadata变化、任务资产绑定、累计停止步数、固定LR、无Slurm拒绝训练、数据未准备拒绝训练，以及recipe-only不执行子进程。Ruff、两份sbatch的Bash语法和 `git diff --check` 通过。10月13日转换已启动、服务器配置测试通过；真实GPU训练首步与保存尚待训练作业启动后验证。

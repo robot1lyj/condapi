@@ -1,0 +1,30 @@
+{
+  "submitted_at": "2026-10-13T02:10:36.544018+00:00",
+  "authorization": "2026-10-13 user requested start, first stage 200000 steps, server resources allowed",
+  "code_dir": "/home/wuyan/lyj/YAM/code-snapshots/earbuds50h-20261013",
+  "code_commit": "d3abbd58114e257befa56218531395b9953b7eef",
+  "prepare_job": "2322",
+  "train_job": "2323",
+  "dependency": "afterok:2322",
+  "stop_step": 200000,
+  "decay_steps": 338000,
+  "automatic_extension_past_stop": false,
+  "observed_at": "2026-10-13T02:13:23.680153+00:00",
+  "prepare_state": "RUNNING",
+  "train_state": "PENDING (Dependency)",
+  "node": "gpu001",
+  "server_config_tests": {
+    "passed": 24,
+    "training_loop_executed": false
+  },
+  "latest_observed_data_progress": {
+    "val_published_episodes": 17,
+    "train_verified_episodes": 3,
+    "train_total_episodes": 1384
+  },
+  "data_log": "/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_20261012/data-2322.log",
+  "train_slurm_log": "/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_20261012/slurm-2323.log",
+  "train_log": "/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_20261012/train.log",
+  "first_optimizer_step_verified": false,
+  "note": "Point-in-time status. Query Slurm and logs for current state. Training is explicitly submitted afterok:2322 and stops at 200000; no job for 338000 has been submitted."
+}
