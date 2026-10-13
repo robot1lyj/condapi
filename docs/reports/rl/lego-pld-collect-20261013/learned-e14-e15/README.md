@@ -26,3 +26,5 @@ CPU切段共58个物理候选（第14集33、第15集25）、384个原生区间�
 原件、派生候选和图片：`/home/wuyan-lyj/condapi-data/rl/lego-pld-learned-e14-e15-20261013-v1/`。`raw-v2`为通过完整episode＋事件前缀核查的输入，`raw-session.tar`保留首次失败副本；`batch-audit-v1`保留全部定量及首末现场画面，`curator-v1`保留逐次图像和排除原因。审计仅做CPU数据检查，没有中断Thor生产推理。
 
 [第14集详细执行链](E01.json)、[第15集详细执行链](E02.json)、[复制回执](copy-receipt.json)、[切段检查](curator-audit.json)。
+
+Thor只读原件备份已核验：`/home/wuyan-lyj/thor/rl-training/datasets/learned-e14-e15-20261013-v1/`，18个episode文件及事件前缀共19项SHA/字节数一致；[回执](thor-copy-verified.json)。该复制不启动训练，生产推理保持在线。
