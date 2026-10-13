@@ -23,6 +23,7 @@ from yam_pld_rl.curator import associate_rewards
 from yam_pld_rl.data import sha256
 from yam_pld_rl.data import write_json
 from yam_pld_rl.execution import require_training_runtime
+from yam_pld_rl.feature_balance import FeatureBalance
 from yam_pld_rl.learning_metrics import evaluate
 from yam_pld_rl.learning_view import learning_view
 from yam_pld_rl.sac import SquashedActor
@@ -39,6 +40,9 @@ def main():
     args.output.mkdir(parents=True, exist_ok=False)
     torch.set_num_threads(2)
     torch.manual_seed(813)
+    balance = FeatureBalance(2287, [1., 2., 3., 4., 5.]).cuda()
+    example = torch.ones(2, 2287, device="cuda")
+    torch.testing.assert_close(balance(example)[:, 1550:2250], example[:, 1550:2250]/3)
     # MC lower bound must suppress gradients only for below-bound policy proposals.
     pq = torch.tensor([[-.2, .8]], device="cuda", requires_grad=True)
     rq = torch.zeros_like(pq, requires_grad=True)
@@ -73,8 +77,13 @@ def main():
     write_json(args.output/"contract.json", c)
     write_json(args.output/"normalization.json", stats())
     results = []
-    for method in ("calql", "parts_td3bc"):
+    for variant in ("calql", "parts_td3bc", "parts-balanced"):
+        method = "parts_td3bc" if variant == "parts-balanced" else variant
         cfg = json.loads((ROOT/f"configs/pld_rl/collect13-r02/{method}-s0.json").read_text())
+        if variant == "parts-balanced":
+            cfg["feature_group_rms"] = [1., 2., 3., 4., 5.]
+            cfg["feature_balance_source"] = {"replay_sha256": sha256(replay/"replay.npz"),
+                                             "training_rows": int(arrays["train"].sum())}
         cfg.update(steps=40, mc_warmup_steps=4, critic_warmup_steps=8, log_interval=10, save_interval=20)
         learner = CalibratedLearner(feature_dim(c), cfg)
         terminal = b["terminal"] == 1
@@ -102,20 +111,20 @@ def main():
         restored = CalibratedLearner(feature_dim(c), cfg)
         restored.load_state_dict(learner.state_dict())
         torch.testing.assert_close(restored.actor(b["x"], deterministic=True)[0], u, rtol=0, atol=0)
-        bundle = args.output/(method+"-bundle")
+        bundle = args.output/(variant+"-bundle")
         export_bundle(bundle, learner, c, stats(), sha256(args.encoder), cfg, {"synthetic": True})
         runtime_actor = SquashedActor(feature_dim(c), cfg).cuda()
         runtime_actor.load_state_dict(torch.load(bundle/"actor.pt", weights_only=True, map_location="cuda"))
         torch.testing.assert_close(runtime_actor(b["x"], deterministic=True)[0], u, rtol=0, atol=0)
-        cfgpath = args.output/(method+".json")
+        cfgpath = args.output/(variant+".json")
         write_json(cfgpath, cfg)
         subprocess.run([sys.executable, str(ROOT/"scripts/pld_rl/train_sac.py"), "--config", str(cfgpath),
                         "--contract", str(args.output/"contract.json"), "--normalization", str(args.output/"normalization.json"),
-                        "--encoder", str(args.encoder), "--replay", str(replay), "--output", str(args.output/(method+"-cli")),
+                        "--encoder", str(args.encoder), "--replay", str(replay), "--output", str(args.output/(variant+"-cli")),
                         "--execution", args.execution], check=True)
-        complete = json.loads((args.output/(method+"-cli/complete.json")).read_text())
+        complete = json.loads((args.output/(variant+"-cli/complete.json")).read_text())
         assert complete["actor_updates"] == 16
-        results.append({"method": method, "status": "passed_synthetic_only", "actor_updates": 16})
+        results.append({"method": variant, "status": "passed_synthetic_only", "actor_updates": 16})
     write_json(args.output/"result.json", {"checks": results, "robot_success_rate": None, "production_modified": False})
     print((args.output/"result.json").read_text())
 

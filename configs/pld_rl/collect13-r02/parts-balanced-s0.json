@@ -1,0 +1,41 @@
+{
+  "id": "parts-td3bc-balanced-collect13-r02-s0",
+  "seed": 0,
+  "width": 256,
+  "depth": 3,
+  "critic_layer_norm": true,
+  "learning_rate": 0.0003,
+  "batch_size": 256,
+  "steps": 3000,
+  "critic_warmup_steps": 2000,
+  "critic_actor_ratio": 2,
+  "gradient_clip": 1.0,
+  "tau": 0.005,
+  "initial_std": 0.2,
+  "max_std": 0.5,
+  "initial_alpha": 0.01,
+  "target_entropy": -3.5,
+  "log_interval": 50,
+  "save_interval": 500,
+  "cql_samples": 10,
+  "cql_weight": 0,
+  "target_noise": 0.2,
+  "noise_clip": 0.5,
+  "td3_bc_alpha": 0.1,
+  "failure_zero_weight": 0.1,
+  "backup_entropy": false,
+  "method": "parts_td3bc",
+  "mc_warmup_steps": 1000,
+  "feature_group_rms": [
+    1.7320508075688772,
+    3.9075176165885925,
+    82.40019412712266,
+    3.981845546476364,
+    4.093044307540685
+  ],
+  "feature_balance_source": {
+    "replay_sha256": "a4d922d0ccb5f716754d155c4c3e0e65c569092dfed99f085f6d20ced3561ab6",
+    "training_rows": 2701,
+    "validation_used": false
+  }
+}

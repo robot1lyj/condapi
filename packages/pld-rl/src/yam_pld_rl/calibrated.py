@@ -10,6 +10,7 @@ import math
 import torch
 from torch.nn import functional
 
+from yam_pld_rl.feature_balance import BalancedQ
 from yam_pld_rl.sac import SacLearner
 
 
@@ -34,6 +35,10 @@ class CalibratedLearner(SacLearner):
         super().__init__(dim, cfg, device)
         if cfg["method"] not in ("calql", "parts_td3bc"):
             raise ValueError("unknown calibrated method")
+        if "feature_group_rms" in cfg:
+            # Wrap the same Q weights; do not change paired-seed initialization.
+            self.critic = BalancedQ(self.critic, dim, cfg["feature_group_rms"]).to(device)
+            self.target = copy.deepcopy(self.critic).requires_grad_(requires_grad=False)
         self.actor_target = copy.deepcopy(self.actor).requires_grad_(requires_grad=False)
         if cfg["method"] == "parts_td3bc":
             # The deployed network remains runtime-compatible; only its mean is

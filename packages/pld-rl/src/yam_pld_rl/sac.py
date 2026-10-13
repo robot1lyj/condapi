@@ -12,6 +12,7 @@ import torch
 from torch import nn
 from torch.nn import functional
 
+from yam_pld_rl.feature_balance import FeatureBalance
 from yam_pld_rl.offline_methods import QPair
 from yam_pld_rl.offline_methods import mlp
 
@@ -27,9 +28,10 @@ class SquashedActor(nn.Module):
         nn.init.zeros_(self.std.weight)
         nn.init.constant_(self.std.bias, math.log(cfg["initial_std"]))
         self.max_log_std = math.log(cfg["max_std"])
+        self.input_balance = FeatureBalance(dim, cfg["feature_group_rms"]) if "feature_group_rms" in cfg else nn.Identity()
 
     def forward(self, x, *, deterministic=False):
-        h = self.body(x)
+        h = self.body(self.input_balance(x))
         mean, log_std = self.mean(h), self.std(h).clamp(-5, self.max_log_std)
         z = mean if deterministic else mean + log_std.exp() * torch.randn_like(mean)
         u = torch.tanh(z)

@@ -94,6 +94,11 @@ def main():
         if calibrated and (replay_manifest.get("schema") != "pld_learning_replay_v1"
                            or not replay_manifest.get("discounted_return_preserved")):
             raise ValueError("calibrated comparison requires verified learning view")
+        if "feature_group_rms" in cfg:
+            provenance = cfg["feature_balance_source"]
+            if (provenance["replay_sha256"] != replay_manifest["replay_sha256"]
+                    or provenance["training_rows"] != int(arrays["train"].sum())):
+                raise ValueError("feature balance statistics belong to another replay/split")
         train = arrays["train"].astype(bool)
         online = arrays["online"].astype(bool)
         if not np.any(train & online & arrays["realized_nonzero"].astype(bool) & (np.abs(arrays["action"]).max(1) > 1e-6)):
@@ -146,6 +151,8 @@ def main():
                                 "current-policy + uniform latent proposals for CalQL; MC bound on policy proposals",
                                 "optional recorded-MC critic initialization; success prior is corrected collect, not pure Pi demonstrations",
                                 "TD3BC mean actor; fixed bootstrap collection std; success BC and optional failed-zero anchor"])
+        if "feature_group_rms" in cfg:
+            run["adaptations"].append("fixed train-only RMS balance of five observation groups; original state and bounds preserved")
         write_json(args.output / "run.json", run)
 
     def save(step):
