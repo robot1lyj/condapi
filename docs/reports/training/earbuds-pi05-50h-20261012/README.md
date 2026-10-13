@@ -1,6 +1,6 @@
 # 耳机装配 Pi0.5 50h 配置准备（2026-10-12）
 
-状态：**本地配置与冻结选集已完成，未提交数据转换作业或训练作业，未启动训练。** 用户要求先准备 Pi0.5、沿用乐高子集方案、50h，准备后报告，不自动开始。本次是首次任务 SFT 准备，不是 DAgger 轮次；不把 DAgger 每轮审批要求套到此任务。
+当前授权（2026-10-13）：用户明确要求开始训练，第一阶段累计目标 **200,000步**，允许直接使用服务器。已将 first_stop_step 改为200000，保留原338000步学习率衰减计划；本阶段到200000停止，不自动推进到338000。数据准备及启动正在执行，实际作业、就绪状态与首步证据见后续运行记录。2026-10-12完成的配置与选集准备保留如下。
 
 ## 配方
 
@@ -15,7 +15,7 @@
 | RTC | training-time RTC，最大延迟10（d=0..10）；旧普通训练/推理路径保留，默认延迟0仍关闭RTC |
 | 资源 | global batch32、4卡FSDP、64 CPU、480G、单次6天；不代表已获得空闲资源 |
 | 优化器 / LR | Adam eps1e-6、EMA关闭、seed42；peak1e-5、末端1e-6、warmup1000、cosine decay固定338000 |
-| 训练预算 | ceil(5,402,194×2/32)=337,638步；总338,000，约2.00215轮；首段累计170,000，第二段累计338,000 |
+| 训练预算 | ceil(5,402,194×2/32)=337,638步；总338,000，约2.00215轮；本次累计200,000；338,000仅保留为原总预算，不自动进入后续阶段 |
 | 保存 | 每1,000步保存，长期保留每5,000步及最新；续训保持相同代码/数据/norm/优化器/LR合同 |
 
 “50h”按单条轨迹的30fps时长计量，三路相机不重复计时；等效轮数按训练帧起点计算，不乘H50。约一轮/两轮是训练预算，不是任务成功率承诺。已有乐高步时不是耳机实测工期。
@@ -38,7 +38,7 @@
 新run：`/home/wuyan/lyj/YAM/training-runs/pi05_yam/earbuds_pi05_rtc_base_50h_20261012`。
 控制目录：`/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_20261012`。
 
-## 手动执行边界（本次均未执行）
+## 执行入口与授权边界
 
 本地仅执行标准库配方检查和轻量配置测试，没有训练循环或模型前反向：
 
@@ -46,7 +46,7 @@
 python3 scripts/pi05_earbuds_50h.py check --recipe-only
 ```
 
-服务器代码仅从Gitea取得不可变checkout；本次没有同步服务器代码或修改环境。下列变量由操作方设置为实际Gitea checkout及其完整commit，不使用占位路径启动。CPU转换/全视频审计也只在计算节点执行；prepare-data没有训练调用或后继作业提交：
+服务器代码仅从Gitea取得不可变checkout；开训前按当前授权同步固定代码，不更改现有模型环境。下列变量由操作方设置为实际Gitea checkout及其完整commit，不使用占位路径启动。CPU转换/全视频审计也只在计算节点执行；prepare-data没有训练调用或后继作业提交：
 
 ```bash
 export EARBUDS_CODE_DIR=/absolute/path/to/immutable/gitea-checkout
@@ -61,12 +61,12 @@ sbatch "$EARBUDS_CODE_DIR/scripts/prepare_pi05_earbuds_50h.sbatch"
   "$EARBUDS_CODE_DIR/scripts/pi05_earbuds_50h.py" check
 ```
 
-**下列训练命令须等用户明确要求开始后再使用，本次未提交。** 启动脚本要求Slurm、固定代码commit、干净的相关源码、独立已验收数据与norm；数据准备不调用训练脚本。普通 `check` 不写文件也不构造模型。
+**2026-10-13用户已授权首次训练到200000；以下首次命令用于本次执行。** 启动脚本要求Slurm、固定代码commit、干净的相关源码、独立已验收数据与norm；数据准备不调用训练脚本。普通 `check` 不写文件也不构造模型。
 
 ```bash
-sbatch "$EARBUDS_CODE_DIR/scripts/train_pi05_earbuds_50h.sbatch" --stop-step 170000
-# 旧作业已退出且有完整checkpoint后，第二段累计到338000：
-sbatch "$EARBUDS_CODE_DIR/scripts/train_pi05_earbuds_50h.sbatch" --resume --stop-step 338000
+sbatch "$EARBUDS_CODE_DIR/scripts/train_pi05_earbuds_50h.sbatch" --stop-step 200000
+# 同一已授权阶段中断，核对旧作业已退出且checkpoint完整后恢复到累计200000：
+sbatch "$EARBUDS_CODE_DIR/scripts/train_pi05_earbuds_50h.sbatch" --resume --stop-step 200000
 ```
 
 正式训练复用 `scripts/train_lego_full.py` 和OpenPI训练器；新增显式 `--dataset` 参数必须同时给出初始化权重、选集、专属norm，验证norm的数据路径及转换manifest/info哈希；未给该参数时乐高旧默认保持原行为。首轮错误退出且没有完整checkpoint时保留现场、诊断后新建run，不删除合同绕过保护。没有自动续训、自动提交后继作业、Thor部署或客户端任务消息。

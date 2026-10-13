@@ -19,7 +19,7 @@
     "decay_lr": 1e-06,
     "warmup_steps": 1000,
     "decay_steps": 338000,
-    "first_stop_step": 170000,
+    "first_stop_step": 200000,
     "total_steps": 338000,
     "save_interval": 1000,
     "keep_period": 5000,

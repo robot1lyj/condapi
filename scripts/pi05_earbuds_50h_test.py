@@ -18,7 +18,9 @@ def test_frozen_selection_uses_only_train_and_separate_id_namespaces():
 def test_training_command_keeps_task_assets_and_lr_across_stops(monkeypatch):
     monkeypatch.setenv("LEGO_PEAK_LR", "999")
     recipe, _, _ = entry.checked_recipe(entry.DEFAULT_RECIPE)
-    first, environment = entry.train_command(recipe, 170000)
+    assert recipe["training"]["first_stop_step"] == 200000
+    first, environment = entry.train_command(recipe, recipe["training"]["first_stop_step"])
+    assert first[first.index("--steps") + 1] == "200000"
     resumed, resumed_environment = entry.train_command(recipe, 338000, resume=True)
     assert first[first.index("--dataset") + 1] == recipe["dataset_root"] + "/train"
     assert first[first.index("--assets-dir") + 1] == recipe["assets_root"] + "/norm"
