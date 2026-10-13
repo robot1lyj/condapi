@@ -1,0 +1,27 @@
+{
+  "state_action_names": [
+    "left_j1",
+    "left_j2",
+    "left_j3",
+    "left_j4",
+    "left_j5",
+    "left_j6",
+    "left_gripper",
+    "right_j1",
+    "right_j2",
+    "right_j3",
+    "right_j4",
+    "right_j5",
+    "right_j6",
+    "right_gripper"
+  ],
+  "joint_unit": "radian",
+  "gripper_unit": "normalized_0_closed_1_open",
+  "action_mode": "absolute",
+  "evidence": "ABC-130k publisher documents radians and gripper 0=closed,1=open; pinned LeRobot port schema confirms left6,left_gripper,right6,right_gripper. Applying raw-source units to this port is a documented-semantic inference, supported by earbuds source train episode28 and val episode522 numeric samples (2026-10-10); not independent raw-to-port matching or robot calibration. Conversion preserves source values without rescaling. Full selected numeric/video audit remains required.",
+  "sources": [
+    "https://huggingface.co/datasets/XDOF/ABC-130k/blob/59b064c/README.md",
+    "https://huggingface.co/datasets/lerobot/abc_130k_v3_train/blob/68651e4929d9fb00f798937b2d62617cab5c771d/README.md"
+  ],
+  "verification_scope": "publisher semantics plus fixed port schema and numeric consistency; raw-to-port units inferred; no deployment calibration"
+}

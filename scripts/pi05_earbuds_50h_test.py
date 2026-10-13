@@ -7,11 +7,13 @@ import pytest
 
 def test_frozen_selection_uses_only_train_and_separate_id_namespaces():
     recipe, report, selection = entry.checked_recipe(entry.DEFAULT_RECIPE)
-    assert len(selection["selected_episodes"]) == 1384
-    assert selection["frames"] == 5402194
+    assert selection["frames"] >= 50 * 3600 * 30
     assert all(row["source_repo"] == "lerobot/abc_130k_v3_train" for row in selection["selected_episodes"])
-    assert entry.read_json(report / "episodes.json") == list(range(1384))
-    assert entry.read_json(report / "source-episodes.json") != list(range(1384))
+    assert entry.read_json(report / "episodes.json") == list(range(len(selection["selected_episodes"])))
+    assert not set(entry.read_json(report / "source-episodes.json")) & set(
+        selection.get("excluded_source_episode_ids", [])
+    )
+    assert entry.read_json(report / "source-episodes.json") != entry.read_json(report / "episodes.json")
     assert recipe["automatic_training_start"] is False
 
 

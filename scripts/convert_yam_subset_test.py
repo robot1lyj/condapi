@@ -16,10 +16,12 @@ import pytest
 
 from openpi.training import config as training_config
 from openpi.training import data_loader
+from scripts import convert_yam_subset as module
 from scripts.convert_yam_subset import CAMERA_KEYS
 from scripts.convert_yam_subset import JOINT_NAMES
 from scripts.convert_yam_subset import convert
 from scripts.convert_yam_subset import digest
+from scripts.prepare_yam_clean_subset import audit_episode
 from scripts.repair_yam_video import repair
 from scripts.yam_conversion_resume import conversion_lock
 
@@ -312,3 +314,37 @@ def test_source_video_recovery_preserves_backup_and_resumes(subset, contract, tm
     assert len(LeRobotDataset("local/repaired", root=output, video_backend="pyav")) == 3
     with pytest.raises(ValueError, match="unpublished"):
         repair(*args)
+
+
+def test_copy_reuses_full_audit_but_rejects_changed_source(subset, contract, tmp_path, monkeypatch):
+    for path in subset.rglob("*"):
+        if path.is_file():
+            os.utime(path, (time.time() - 600, time.time() - 600))
+    manifest = subset / "manifests/train.jsonl"
+    episode = json.loads(manifest.read_text())
+    record = audit_episode((str(subset), "train", episode))
+    assert record["status"] == "passed"
+    report_dir = tmp_path / "audit"
+    report_dir.mkdir()
+    audit_path = report_dir / "audit.jsonl"
+    audit_path.write_text(json.dumps(record) + "\n")
+    (report_dir / "selection.json").write_text(
+        json.dumps(
+            {
+                "source_root": str(subset),
+                "source_manifest_sha256": {"train": digest(manifest)},
+            }
+        )
+    )
+
+    def duplicate_decode(*args, **kwargs):
+        pytest.fail("Verified byte-identical copy should reuse the completed full-source decode")
+
+    monkeypatch.setattr(module, "validate_video", duplicate_decode)
+    output = convert(subset, tmp_path / "published", "train", contract, video_mode="copy", audit_report=audit_path)
+    provenance = json.loads((output / "conversion_manifest.json").read_text())
+    assert provenance["video_audit"]["report_sha256"] == digest(audit_path)
+    video = subset / "train/videos/top/episode-000095.mp4"
+    os.utime(video, (time.time() - 500, time.time() - 500))
+    with pytest.raises(ValueError, match="Source changed since full video audit"):
+        convert(subset, tmp_path / "changed", "train", contract, video_mode="copy", audit_report=audit_path)

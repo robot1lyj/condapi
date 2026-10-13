@@ -1,0 +1,21 @@
+{
+  "observed_at": "2026-10-13T12:50:28+08:00",
+  "prepare_job": 2322,
+  "prepare_state": "FAILED",
+  "exit_code": "1:0",
+  "start": "2026-10-13T10:10:37+08:00",
+  "end": "2026-10-13T10:38:45+08:00",
+  "dependent_train_job": 2323,
+  "train_state": "CANCELLED",
+  "optimizer_started": false,
+  "source_episode_index": 35033,
+  "split": "train",
+  "camera": "left_wrist",
+  "expected_frames": 3465,
+  "decoded_frames": 3464,
+  "raw_relative_path": "train/videos/left_wrist/episode-035033.mp4",
+  "source_and_copy_sha256": "8c21d530126290e6c59cc48bffe83ca5b759023e8bc0bc81400973c9482055ed",
+  "decoder_message": "Sample size 3199971767 is too large",
+  "user_decision": "异常的数据直接剔除，不需要修复",
+  "action": "exclude whole episode; preserve raw and prior incomplete conversion; audit remaining candidates and replenish >=50h"
+}

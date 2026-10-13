@@ -2,9 +2,9 @@
   "schema_version": 1,
   "run_name": "earbuds_pi05_rtc_base_50h_20261012",
   "source_root": "/home/wuyan/lyj/YAM/YAM_data/ABC-130k-two-tasks/earbuds_charging_case",
-  "dataset_root": "/home/wuyan/lyj/YAM/YAM_data/processed/earbuds_lerobot_50h_v1_20261012",
-  "assets_root": "/home/wuyan/lyj/YAM/training-assets/earbuds_rtc_50h_20261012",
-  "report": "docs/reports/training/earbuds-pi05-50h-20261012",
+  "dataset_root": "/home/wuyan/lyj/YAM/YAM_data/processed/earbuds_lerobot_50h_clean_v2_20261013",
+  "assets_root": "/home/wuyan/lyj/YAM/training-assets/earbuds_rtc_50h_clean_20261013",
+  "report": "docs/reports/training/earbuds-pi05-50h-clean-20261013",
   "python": "/home/wuyan/.conda/envs/condapi-yam/bin/python",
   "init_params": "/home/wuyan/.cache/openpi/openpi-assets/checkpoints/pi05_base/params",
   "task": "insert the wireless bluetooth earbuds into the charging case",
@@ -27,5 +27,6 @@
     "ema_decay": null,
     "adam_eps": 1e-06
   },
-  "automatic_training_start": false
+  "automatic_training_start": false,
+  "video_audit": "audit.jsonl"
 }

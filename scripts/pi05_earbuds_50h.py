@@ -39,6 +39,16 @@ def checked_recipe(path):
         raise ValueError("Converted IDs must follow the converter's new contiguous namespace")
     if selection["source_root"] != recipe["source_root"]:
         raise ValueError("Selection source differs from recipe")
+    if selection.get("excluded_source_episode_ids") or selection.get("excluded_val_source_episode_ids"):
+        exclusions = read_json(report / "excluded.json")
+        for split, field in (("train", "excluded_source_episode_ids"), ("val", "excluded_val_source_episode_ids")):
+            documented = sorted(
+                row["source_episode_index"]
+                for row in exclusions
+                if row["split"] == split and row["status"] == "excluded" and row["errors"]
+            )
+            if documented != selection.get(field, []):
+                raise ValueError("Excluded episodes require matching audit evidence")
     for split in ("train", "val"):
         if sha256(report / f"source-{split}.jsonl") != selection["source_manifest_sha256"][split]:
             raise ValueError(f"Frozen {split} manifest changed")
@@ -103,6 +113,12 @@ def check_data(recipe, report, selection):
             raise ValueError("Conversion physical contract changed")
         if manifest["source_manifest_sha256"] != selection["source_manifest_sha256"][split]:
             raise ValueError("Conversion source changed")
+        if recipe.get("video_audit"):
+            proof = manifest.get("video_audit", {})
+            if proof.get("report_sha256") != sha256(report / recipe["video_audit"]) or proof.get(
+                "selection_sha256"
+            ) != sha256(report / "selection.json"):
+                raise ValueError("Conversion does not bind the frozen full-video audit")
         expected = (
             selection["selected_episodes"]
             if split == "train"
@@ -216,6 +232,8 @@ def prepare_data(recipe, report, selection, *, resume=False):
                 command += ["--episode-ids", *map(str, [value for value in val_ids if value not in excluded_val])]
             if resume:
                 command += ["--resume"]
+            if recipe.get("video_audit"):
+                command += ["--audit-report", str(report / recipe["video_audit"])]
             subprocess.run(command, env=environment, cwd=ROOT, check=True)
         norm_dir = assets / "norm/yam"
         if not (norm_dir / "norm_stats.json").exists():

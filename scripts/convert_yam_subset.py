@@ -83,7 +83,49 @@ def source_paths(root, split, episode):
     return data, videos
 
 
-def convert(root, output, split, contract, episode_ids=None, min_age=300, video_mode="reencode", *, resume=False):
+def checked_video_audit(report_path, root, split, episodes, snapshots, manifest_hash):
+    """Reuse this project's full-source audit only while every source identity is unchanged."""
+    report_path = Path(report_path)
+    selection_path = report_path.parent / "selection.json"
+    selection = json.loads(selection_path.read_text())
+    if selection["source_root"] != str(root) or selection["source_manifest_sha256"][split] != manifest_hash:
+        raise ValueError("Video audit belongs to a different source or manifest")
+    records = {}
+    for line in report_path.read_text().splitlines():
+        record = json.loads(line)
+        key = (record["split"], record["source_episode_index"])
+        if key in records:
+            raise ValueError("Duplicate episode in video audit")
+        records[key] = record
+    for episode in episodes:
+        record = records.get((split, episode["source_episode_index"]))
+        if record is None or record["status"] != "passed" or record["errors"]:
+            raise ValueError("Selected episode lacks a passing full video audit")
+        if record["length"] != episode["length"]:
+            raise ValueError("Video audit frame count changed")
+        data, videos = source_paths(root, split, episode)
+        for source in (data, *videos.values()):
+            if record["source_signatures"].get(str(source.relative_to(root))) != list(snapshots[source]):
+                raise ValueError(f"Source changed since full video audit: {source}")
+    return {
+        "report_sha256": digest(report_path),
+        "selection_sha256": digest(selection_path),
+        "verification": "full source decode; unchanged source size/mtime; copied bytes verified by SHA256",
+    }
+
+
+def convert(
+    root,
+    output,
+    split,
+    contract,
+    episode_ids=None,
+    min_age=300,
+    video_mode="reencode",
+    *,
+    resume=False,
+    audit_report=None,
+):
     root, output = Path(root).resolve(), Path(output).resolve()
     work = output.with_name(output.name + ".incomplete")
     if split not in ("train", "val") or min_age < 0 or video_mode not in ("copy", "reencode"):
@@ -91,6 +133,8 @@ def convert(root, output, split, contract, episode_ids=None, min_age=300, video_
     validate_contract(contract)
     if resume and video_mode != "copy":
         raise ValueError("Resume requires copy video mode")
+    if audit_report is not None and video_mode != "copy":
+        raise ValueError("Pre-audited sources require byte-identical copy mode")
     if output == root or root in output.parents or output in root.parents:
         raise ValueError("Output must be separate from the source tree")
     if (output.exists() or work.exists()) and not resume:
@@ -122,6 +166,11 @@ def convert(root, output, split, contract, episode_ids=None, min_age=300, video_
             if stat[0] == 0 or time.time() - stat[1] / 1e9 < min_age:
                 raise ValueError(f"Pending upload: {path}")
             snapshots[path] = stat
+    video_audit = (
+        None
+        if audit_report is None
+        else checked_video_audit(audit_report, root, split, episodes, snapshots, manifest_hash)
+    )
     # Copy mode hashes each video while copying, avoiding a full extra source scan.
     hashes = {
         str(path.relative_to(root)): digest(path) for path in snapshots if video_mode != "copy" or path.suffix != ".mp4"
@@ -156,6 +205,7 @@ def convert(root, output, split, contract, episode_ids=None, min_age=300, video_
                 hashes,
                 manifest_hash,
                 resume=resume,
+                video_audit=video_audit,
             )
     writer = LeRobotDataset.create(
         repo_id=f"local/{output.name}",
@@ -262,6 +312,7 @@ def convert_copied_videos(
     manifest_hash,
     *,
     resume=False,
+    video_audit=None,
 ):
     """Independent byte-identical video copies, using the official v3 metadata API.
 
@@ -280,6 +331,8 @@ def convert_copied_videos(
         "source_signatures": {str(p.relative_to(root)): list(s) for p, s in snapshots.items()},
         "parquet_sha256": dict(hashes),
     }
+    if video_audit is not None:
+        identity["video_audit"] = video_audit
     receipts = initialize_checkpoint(work, identity, resume)
     source_repairs = json.loads((work / "resume_identity.json").read_text()).get("source_repairs", [])
     # Never reopen an interrupted Parquet metadata writer. Rebuild metadata from
@@ -304,6 +357,8 @@ def convert_copied_videos(
     }
     if source_repairs:
         provenance["source_repairs"] = source_repairs
+    if video_audit is not None:
+        provenance["video_audit"] = video_audit
     try:
         cached_path, table = None, None
         for new_id, episode in enumerate(episodes):
@@ -351,7 +406,8 @@ def convert_copied_videos(
                     hashes[str(source.relative_to(root))] = hashed.hexdigest()
                     if signature(source) != snapshots[source] or digest(target) != hashed.hexdigest():
                         raise ValueError(f"Source changed or copy checksum mismatch: {source}")
-                    validate_video(target, length, fps)
+                    if video_audit is None:
+                        validate_video(target, length, fps)
                     atomic_json(
                         receipt_path, {"source_signature": list(snapshots[source]), "sha256": hashed.hexdigest()}
                     )
@@ -518,6 +574,7 @@ def main():
     parser.add_argument("--min-age", type=float, default=300)
     parser.add_argument("--video-mode", choices=("copy", "reencode"), default="reencode")
     parser.add_argument("--resume", action="store_true", help="Verify and reuse copy-mode checkpoints")
+    parser.add_argument("--audit-report", type=Path, help="Completed prepare_yam_clean_subset.py full-source audit")
     args = vars(parser.parse_args())
     args["contract"] = json.loads(args["contract"].read_text())
     print(convert(**args))

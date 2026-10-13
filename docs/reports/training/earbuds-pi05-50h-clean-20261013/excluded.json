@@ -1,0 +1,33 @@
+[
+  {
+    "split": "train",
+    "source_episode_index": 35033,
+    "length": 3465,
+    "status": "excluded",
+    "errors": [
+      {
+        "file": "train/videos/left_wrist/episode-035033.mp4",
+        "error": "video_frame_count:3464!=3465",
+        "sha256": "8c21d530126290e6c59cc48bffe83ca5b759023e8bc0bc81400973c9482055ed"
+      }
+    ],
+    "source_signatures": {
+      "train/data/source-file-277.parquet": [
+        851220,
+        1788428240000000000
+      ],
+      "train/videos/top/episode-035033.mp4": [
+        14262992,
+        1788501242000000000
+      ],
+      "train/videos/left_wrist/episode-035033.mp4": [
+        11243011,
+        1788501281000000000
+      ],
+      "train/videos/right_wrist/episode-035033.mp4": [
+        10298952,
+        1788501230000000000
+      ]
+    }
+  }
+]
