@@ -1,0 +1,33 @@
+{
+  "status": "passed",
+  "recorded_requests": 740,
+  "active_float32_contexts_exact": 489,
+  "max_fk_difference_m": 0.0,
+  "gate_decisions_equal": true,
+  "scalar_fk": {
+    "p50_ms": 6.648337512160651,
+    "p95_ms": 6.873843987705186,
+    "max_ms": 8.6998560000211
+  },
+  "batch_fk": {
+    "p50_ms": 0.19947500550188124,
+    "p95_ms": 0.23258951696334407,
+    "max_ms": 1.649195997742936
+  },
+  "codec_bytes": 2765214,
+  "codec_exact_wire_bytes": true,
+  "codec_original": {
+    "p50_ms": 0.16069650882855058,
+    "p95_ms": 0.3054495129617861,
+    "max_ms": 1.4173950185067952
+  },
+  "codec_buffer": {
+    "p50_ms": 0.10840648610610515,
+    "p95_ms": 0.2223760588094592,
+    "max_ms": 0.427386024966836
+  },
+  "neural_forward": false,
+  "robot_io": false,
+  "training": false,
+  "cross_IPC_latency_verified": false
+}

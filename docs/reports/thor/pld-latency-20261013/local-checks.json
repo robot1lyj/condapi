@@ -1,0 +1,13 @@
+{
+  "status": "passed",
+  "test_counts": {
+    "FK_equivalence": 4,
+    "grasp_v3": 11,
+    "intervention": 10,
+    "websocket_and_codec": 47
+  },
+  "total": 72,
+  "ruff": "passed",
+  "training": false,
+  "neural_forward_local": false
+}

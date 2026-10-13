@@ -1,0 +1,40 @@
+{
+  "raw_base": {
+    "shape": [
+      48,
+      50,
+      14
+    ],
+    "array_equal": true,
+    "max_abs_difference": 0.0
+  },
+  "actions": {
+    "shape": [
+      48,
+      50,
+      14
+    ],
+    "array_equal": true,
+    "max_abs_difference": 0.0
+  },
+  "x": {
+    "shape": [
+      48,
+      2287
+    ],
+    "array_equal": true,
+    "max_abs_difference": 0.0
+  },
+  "sample_u": {
+    "shape": [
+      48,
+      7
+    ],
+    "array_equal": true,
+    "max_abs_difference": 0.0
+  },
+  "status": "passed",
+  "fixed_noise": true,
+  "fixed_actor_rng": true,
+  "robot_io": false
+}

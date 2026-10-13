@@ -2,7 +2,7 @@
 
 ## 本对话 PART 推进边界（2026-10-11）
 
-**2026-10-13当前：PLD-Grasp gate v3修复版在原8000地址healthy/MAXN，可开始两集collect受控试采；尚无该actor跨IPC真机改善证据。** 抬升达到门槛后停止新增修正，保留RTC队列并经draining阶段后才结束窗口/判奖；Pi持续执行，不增加停住1秒。正负方向可行域与失败结果合同已更新，客户端只需重新连接取新握手，原schema与录制协议保持。[接口与两集步骤](reports/rl/pld-sac-block-v2/README.md)、[部署回执](reports/thor/pld-rl-20261013/README.md)。
+**2026-10-13当前：十步前缀实录通过后，用户授权暂停验收升级；优化版`pld-rl:thor-latency-20261013-r1`在原8000地址healthy/MAXN，生产Pi＋PLD P95=214.14ms。** 同权重/actor/合同与RTC语义，48组相同输入/随机数输出逐值一致，旧容器保留。客户端重新连接，collect＋前缀10可继续20集采集；最新升级前实录292有效回复/0迟到、左右跟随恢复、37窗口待判奖。优化版新跨IPC时延待下一录制，未训练、未操作3588。[上线证据](reports/thor/pld-latency-20261013/README.md)、[实录审核](reports/rl/lego-pld-collect-20261013/README.md)、[接口](reports/rl/pld-sac-block-v2/README.md)。
 
 新接口 `pld_sac_block_v2` 的[模式、字段与分工](reports/rl/pld-sac-block-v2/README.md)替代v1客户端切段/固定执行块要求：Thor连接独立门控选择窗口和活动臂，客户端只复制原token身份与上个实际命令、按原RTC执行并完整保存pld响应。8tick是修正包络长度，不是客户端推理周期；原前缀数值及历史来源保持。数据管家与视觉裁判优先Thor离线处理，训练仍在GPU服务器。`--pld-bundle/--pld-encoder`是可选入口，不传保持Pi；当前正式合同/探索包与原客户端字段校验通过，五模式开放，新actor跨IPC与真机边界在首两集试采核验。
 

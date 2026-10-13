@@ -1,0 +1,31 @@
+{
+  "request_anchor_age_ms": {
+    "p50": 25.343715446069837,
+    "p95": 33.01323106279597,
+    "max": 38.53131318464875
+  },
+  "anchor_minus_mapped_tick_ms": {
+    "p50": 8.008567499928176,
+    "p95": 13.87802220415324,
+    "max": 19.539525965228677
+  },
+  "worker_excluding_timed_transport_ms": {
+    "p50": 12.824178556911647,
+    "p95": 17.14032219024375,
+    "max": 24.062016047537327
+  },
+  "wait_excluding_server_ms": {
+    "p50": 5.352191627025604,
+    "p95": 8.471033885143697,
+    "max": 12.441682163625956
+  },
+  "request_context_keys": [
+    "previous_command_tick",
+    "previous_command_submitted_at",
+    "observation_reference_time",
+    "committed_actions",
+    "sync",
+    "prefix_sources"
+  ],
+  "raw_payload_bytes": 2766436
+}

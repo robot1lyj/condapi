@@ -1,0 +1,12 @@
+{
+  "host": "local workstation, not RK3588",
+  "samples": 1172,
+  "requests": 293,
+  "p50_ms": 0.01881597563624382,
+  "p95_ms": 0.02392848982708529,
+  "max_ms": 0.22921798517927527,
+  "function": "PLD validate_reply only; excludes RTC wrapper, IPC, packing and worker scheduling",
+  "real_recording": "208c1c6d539648bea68188f880d2b0cd",
+  "source": "/home/wuyan-lyj/YAM/yam-abc-reproduce/yam_abc_reproduce/hil/pld.py",
+  "training": false
+}

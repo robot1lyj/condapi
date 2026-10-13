@@ -1,0 +1,129 @@
+{
+  "joint": "left6",
+  "recorded_measured_range_rad": [
+    -0.014686808575566701,
+    0.0005722133211261138
+  ],
+  "recorded_target_range_rad": [
+    -1.1620460844249534,
+    0.03871968106219437
+  ],
+  "unique_measured_values": 20,
+  "measured_top_values": [
+    [
+      -0.0005722133211296665,
+      2166
+    ],
+    [
+      -0.0032425421530444254,
+      1266
+    ],
+    [
+      -0.014305333028152845,
+      876
+    ],
+    [
+      -0.014686808575566701,
+      221
+    ],
+    [
+      -0.007438773174639479,
+      92
+    ],
+    [
+      -0.007820248722053336,
+      57
+    ],
+    [
+      -0.000953688868543523,
+      37
+    ],
+    [
+      -0.0036240177004653873,
+      18
+    ],
+    [
+      -0.002861066605630569,
+      18
+    ],
+    [
+      -0.002479591058209607,
+      14
+    ],
+    [
+      0.0005722133211261138,
+      9
+    ],
+    [
+      0.0001907377737087046,
+      8
+    ]
+  ],
+  "max_error": {
+    "row": 1218,
+    "time_s": 40.63105895393528,
+    "measured_rad": -0.007438773174639479,
+    "observation_rad": -0.007438773174639479,
+    "submitted_rad": -1.1620460844249534,
+    "pi_physical_baseline_rad": -1.1620460844249534,
+    "direct_rl_delta_rad": 0.0,
+    "gate": {
+      "active": true,
+      "ended": null,
+      "forecasts": [],
+      "gate_version": 3,
+      "window_id": "e5:s9d390f87e2de4efca6f36e0978855650:w12",
+      "arm": "left",
+      "start_tick": 2035,
+      "close_tick": null,
+      "close_z": null,
+      "elapsed_seconds": 0.7,
+      "phase": "correcting",
+      "apply_residual": true
+    },
+    "request_id": 115,
+    "model_index": 17,
+    "sdk_state_ages_s": [
+      0.00411677360534668,
+      0.0011942386627197266,
+      0.0008807182312011719,
+      0.0035507678985595703
+    ],
+    "constraint_mask": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    "policy_write_trace": null
+  },
+  "same_value_adjacent_ratio": 0.9762450510523025,
+  "per_joint_measured_range_rad": [
+    1.389715419241627,
+    2.519264515144579,
+    2.4784466315709164,
+    1.796368352788587,
+    0.4589150835431468,
+    0.015259021896692815,
+    0.8167542929714191,
+    1.3622491798275735,
+    2.3460746166170754,
+    2.1671625848783087,
+    1.6750591287098509,
+    0.44975967040512366,
+    1.2523842221713561,
+    0.7832394578963265
+  ],
+  "operator_confirmation": "not intentionally locked; user requested inspection",
+  "joint_specific_can_feedback_available": false
+}
