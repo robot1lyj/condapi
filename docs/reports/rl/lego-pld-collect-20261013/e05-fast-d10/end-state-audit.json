@@ -12,6 +12,35 @@
       }
     }
   ],
-  "global_result_independently_verified": false,
-  "global_result_review_pending": true
+  "global_result_independently_verified": true,
+  "global_result_review_pending": false,
+  "verification_scope": "manual review of recorded end state; not an automated classifier accuracy claim",
+  "original_label_confirmed_wrong_by_operator": true,
+  "corrected_evaluation": {
+    "C": 9,
+    "N": 10,
+    "completion_fraction": 0.9,
+    "purpose": "evaluation_only",
+    "method": "manual_video_review_after_operator_correction",
+    "operator_statement": "10/10填错了，按录像末尾复核",
+    "initial_color_counts": {
+      "red": 4,
+      "yellow": 4,
+      "blue": 2
+    },
+    "remaining_unsorted": {
+      "blue": 1
+    },
+    "raw_evaluation_event_unchanged": true,
+    "raw_policy_events_sha256": "06cff54d18aeb60b50a57dd8f60f2f6db9d74d0ba9f915f85367e9478af69720",
+    "evidence": {
+      "initial_top": "global-review-start.jpg",
+      "last_top": "global-review-end.jpg",
+      "last_right_wrist": "global-review-end-right.jpg",
+      "last_row": 4315,
+      "episode_id": "b05fdb3e4ef1449a89a0fd607819184e"
+    },
+    "reward_labels_published": 0,
+    "used_for_SAC": false
+  }
 }
