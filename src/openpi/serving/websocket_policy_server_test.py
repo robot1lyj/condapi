@@ -151,6 +151,13 @@ def test_pld_transport_applies_only_explicit_mode_and_recovers_rejection():
     assert np.all(socket.results[4]["actions"] == 2)
     assert socket.results[4]["pld"]["fixture"]
     assert policy.calls == 3
+    for result in socket.results[3:]:
+        timing = result["server_timing"]
+        assert timing["request_decode_ms"] >= 0
+        assert timing["base_infer_ms"] >= 0
+        assert timing["pld_postprocess_ms"] >= 0
+        assert timing["infer_ms"] >= timing["base_infer_ms"] + timing["pld_postprocess_ms"]
+    assert socket.results[3]["server_timing"]["pld_postprocess_ms"] == 0
 
 
 def test_pld_gate_sessions_are_isolated_and_reset_when_off():

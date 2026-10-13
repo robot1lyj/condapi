@@ -68,11 +68,36 @@ class YamKinematics:
         return {arm: float(self.position(np.asarray(state)[offset:offset + 6])[2])
                 for arm, offset in (("left", 0), ("right", 7))}
 
+    def positions(self, joints):
+        """Evaluate independent poses together, retaining the pinned float64 FK.
+
+        This is geometry only: batching doesn't interpolate or alter any target.
+        The scalar implementation remains the reference for offline validation.
+        """
+        joints = np.asarray(joints, dtype=np.float64)
+        if joints.ndim != 2 or joints.shape[1] != 6 or not np.isfinite(joints).all():
+            raise ValueError("batched FK requires finite (N,6) radian joints")
+        out = np.broadcast_to(np.eye(4), (len(joints), 4, 4)).copy()
+        i = 0
+        for fixed, axis in self.chain:
+            out = out @ fixed
+            if axis is not None:
+                x, y, z = axis / np.linalg.norm(axis)
+                cross = np.array([[0, -z, y], [z, 0, -x], [-y, x, 0]])
+                angle = joints[:, i, None, None]
+                moving = np.broadcast_to(np.eye(4), out.shape).copy()
+                moving[:, :3, :3] = (np.eye(3) + np.sin(angle) * cross
+                                     + (1 - np.cos(angle)) * (cross @ cross))
+                out = out @ moving
+                i += 1
+        return (out @ self.site)[:, :3, 3]
+
     def gate_heights(self, state, base, contract):
-        result = self.heights(state)
-        if contract.get("grasp_z_range_m"):
-            result["planned_z_m"] = {
-                arm: [float(self.position(row[offset:offset + 6])[2]) for row in base]
-                for arm, offset in (("left", 0), ("right", 7))
-            }
-        return result
+        if not contract.get("grasp_z_range_m"):
+            return self.heights(state)
+        state, base = np.asarray(state), np.asarray(base)
+        count = len(base)
+        poses = np.vstack((state[:6], state[7:13], base[:, :6], base[:, 7:13]))
+        z = self.positions(poses)[:, 2]
+        return {"left": float(z[0]), "right": float(z[1]),
+                "planned_z_m": {"left": z[2:2 + count].tolist(), "right": z[2 + count:].tolist()}}

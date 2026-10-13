@@ -1,8 +1,29 @@
+import msgpack
 import numpy as np
 import pytest
 import tree
 
 from openpi_client import msgpack_numpy
+
+
+@pytest.mark.parametrize("array", [
+    np.arange(24, dtype=np.uint8).reshape(2, 4, 3),
+    np.arange(24, dtype=np.float64).reshape(4, 6)[:, ::2],
+    np.asfortranarray(np.arange(24, dtype=np.float32).reshape(4, 6)),
+    np.array([1, -2], dtype=">i4"),
+    np.array(3.5, dtype=np.float64),
+    np.empty((0, 3), dtype=np.uint8),
+])
+def test_buffer_fast_path_preserves_exact_wire_bytes(array):
+    def original(obj):
+        if isinstance(obj, np.ndarray):
+            return {b"__ndarray__": True, b"data": obj.tobytes(), b"dtype": obj.dtype.str, b"shape": obj.shape}
+        return msgpack_numpy.pack_array(obj)
+
+    expected = msgpack.packb({"array": array}, default=original)
+    actual = msgpack_numpy.packb({"array": array})
+    assert actual == expected
+    np.testing.assert_array_equal(msgpack_numpy.unpackb(actual)["array"], array)
 
 
 def _check(expected, actual):

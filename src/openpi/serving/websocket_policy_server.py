@@ -72,7 +72,10 @@ class WebsocketPolicyServer:
         while True:
             try:
                 start_time = time.monotonic()
-                payload = msgpack_numpy.unpackb(await websocket.recv())
+                wire_payload = await websocket.recv()
+                decode_start = time.monotonic()
+                payload = msgpack_numpy.unpackb(wire_payload)
+                decode_ms = (time.monotonic() - decode_start) * 1000
                 obs, rtc_payload = _split_payload(payload)
                 pld_request = _pld_payload(payload, enabled=self._pld_runtime is not None)
                 if self._rtc_mode == "only" and rtc_payload is None:
@@ -88,18 +91,25 @@ class WebsocketPolicyServer:
                         raise RequestError(f"PLD request rejected: {exc}") from exc
                 infer_time = time.monotonic()
                 action, rtc_used, rtc_warnings, rtc_error = self._infer(obs, rtc_payload)
+                base_finished = time.monotonic()
+                pld_ms = 0.0
                 if pld_request is not None and pld_request.get("mode") != "off":
                     try:
                         action = pld_session(obs, rtc_payload, pld_request, action)
                     except (ValueError, KeyError, TypeError) as exc:
                         raise RequestError(f"PLD request rejected: {exc}") from exc
+                    pld_ms = (time.monotonic() - base_finished) * 1000
                 elif hasattr(pld_session, "reset"):
                     pld_session.reset()
+                base_ms = (base_finished - infer_time) * 1000
                 infer_time = time.monotonic() - infer_time
 
                 action["server_timing"] = {
                     "infer_ms": infer_time * 1000,
                     "rtc_used": rtc_used,
+                    "request_decode_ms": decode_ms,
+                    "base_infer_ms": base_ms,
+                    "pld_postprocess_ms": pld_ms,
                 }
                 if rtc_warnings:
                     action["server_timing"]["rtc_warnings"] = rtc_warnings

@@ -25,7 +25,10 @@ def pack_array(obj):
     if isinstance(obj, np.ndarray):
         return {
             b"__ndarray__": True,
-            b"data": obj.tobytes(),
+            # msgpack copies this buffer into its output. Avoid an additional
+            # full RGB .tobytes() allocation for the common contiguous case.
+            # Strided arrays keep the original C-order serialization semantics.
+            b"data": memoryview(obj).cast("B") if obj.flags.c_contiguous and obj.size else obj.tobytes(),
             b"dtype": obj.dtype.str,
             b"shape": obj.shape,
         }

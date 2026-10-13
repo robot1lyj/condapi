@@ -9,6 +9,7 @@ COPY packages/pld-rl/src /opt/pld-rl/packages/pld-rl/src
 COPY scripts/thor /opt/pld-rl/scripts/thor
 COPY third_party/yam-fk-model/yam_linear4310.xml /opt/pld-rl/third_party/yam-fk-model/yam_linear4310.xml
 COPY src/openpi/serving/websocket_policy_server.py /usr/local/lib/python3.12/dist-packages/openpi/serving/websocket_policy_server.py
+COPY packages/openpi-client/src/openpi_client/msgpack_numpy.py /usr/local/lib/python3.12/dist-packages/openpi_client/msgpack_numpy.py
 ENV OPENPI_DATA_HOME=/cache JAX_PLATFORMS=cpu HF_HUB_OFFLINE=1 WANDB_MODE=disabled
 WORKDIR /app
 ENTRYPOINT ["python", "/opt/pld-rl/scripts/thor/serve_pi05_rtc_trt.py"]
