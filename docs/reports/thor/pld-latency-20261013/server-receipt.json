@@ -1,0 +1,9 @@
+{
+  "status": "passed",
+  "path": "/home/wuyan/lyj/pld-grasp/runs/latency-20261013-r1/evidence",
+  "files_verified": 21,
+  "training": false,
+  "actor_updates": 0,
+  "raw_robot_episodes_included": false,
+  "code_commit": "22fcebf040509a56e1d41a7474eb6c4e5caa6806"
+}

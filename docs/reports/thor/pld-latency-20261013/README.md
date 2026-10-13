@@ -47,3 +47,5 @@ MAXN现场实查已开启，Thor直连网口enP2p1s0为2500Mbps/full。最新九
 [客户端延迟改造建议](client-latency-handoff.md)提供精确计时位置、单次编码/bytes进程通道的候选方向与验收边界。按项目约定先供用户审核，没有自动发送或修改客户端。当前数据不支持“把13ms校验关掉就省13ms”；应先测Pipe、准备和校验各自耗时，保持30Hz时间对齐和每包动态检查。
 
 工作站完整原始回执、固定噪声输出和分析脚本：`/home/wuyan-lyj/condapi-data/rl/pld-latency-20261013-r1/`。Thor CPU/完整A/B及源代码：`/home/wuyan-lyj/thor/pld-grasp/checks/latency-20261013-r1/`；服务release：`/home/wuyan-lyj/thor/pi/services/pld-latency-20261013-r1/`。原推理权重和所有旧容器/失败证据保留。
+
+服务器论文归档：`/home/wuyan/lyj/pld-grasp/runs/latency-20261013-r1/evidence/`，固定噪声全输出、完整返回包及报告共21个成员逐项SHA核验通过，[回执](server-receipt.json)。只归档实验结果，服务器没有从GitHub取代码，没有训练；原始机器人视频仍保留在IPC及上述工作站只读副本，未声称本次归档包含视频。
