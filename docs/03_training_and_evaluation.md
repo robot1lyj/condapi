@@ -2,7 +2,7 @@
 
 ## PLD 主线与 RECAP 后续路线（2026-10-11）
 
-**用户已确认：先完成PLD式整段抓取修正，首轮左右臂都启用；RECAP路线后置。** 2026-10-13设备排查后，新十步前缀collect（3085行）左右跟随恢复，292有效回复/0迟到，38窗口中37个可继续判奖；允许受控采20集，整轮人工9/10只评估，不作为局部训练标签。随后用户确认暂停并授权性能升级：源码22fcebf优化FK/打包，上线健康/MAXN，生产Pi＋PLD P95=214.14ms；同输入同随机数48组最终动作/actor输入逐值一致。仍为同20w Pi和0次RL更新actor，奖励未发布，不称已改善成功率。客户端重连用collect＋前缀10，批次原件完整保留，故障集不冒充健康验证集。[实录核查](reports/rl/lego-pld-collect-20261013/README.md)、[性能升级](reports/thor/pld-latency-20261013/README.md)、[现行方案](reports/rl/pld-sac-block-v2/README.md)。
+**用户已确认：先完成PLD式整段抓取修正，首轮左右臂都启用；RECAP路线后置。** 2026-10-13性能升级后的新跨IPCcollect（4316行）时序与来源核验通过：409有效回复/0迟到、左右均有修正，47/50窗口可继续判奖。当前可用collect＋前缀10批量采20集，动作未结束的收尾及2个关联歧义窗口暂不入库。原始视频/侧车与逐tick证据保留；最新整轮10/10事件在停录16.19秒后，末尾蓝色积木结果待澄清，本阶段C/N只评估。Pi/actor/探索范围保持，仍0次RL更新，局部奖励未发布，不称成功率改善。[最新实录](reports/rl/lego-pld-collect-20261013/e05-fast-d10/README.md)、[性能升级](reports/thor/pld-latency-20261013/README.md)、[现行方案](reports/rl/pld-sac-block-v2/README.md)。
 
 历史（2026-10-12 19:55，已由10-13修复版替代）：用户确认停止推理后，Thor已升级collect-r2，零均值bootstrap actor已加载，五模式开放；Slurm2321只导出checkpoint0，没有梯度更新，不称训练有效。左右48例真实输入模式测试、普通RTC9例与原客户端校验器16例通过，含actor生产推理P95=224.21ms；41项轻量回归通过。下一步重新连接后录两集collect做跨IPC/真机联调，第一集预留验证；先审核实际非零修正与奖励，再扩至约60次有效尝试/每臂≥20，之后才做真实SAC更新。Pi冻结、整轮C/N仅评估。[当前操作](reports/rl/pld-sac-block-v2/README.md#当前首轮collect采集方案)与[部署回执](reports/thor/pld-rl-20261012/collect-r2/deployment.json)为当前事实。
 

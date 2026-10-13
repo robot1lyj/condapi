@@ -1,0 +1,17 @@
+{
+  "recorded_device_tracking_fault_rows": [],
+  "last_control_phase": "policy",
+  "evaluation_events": [
+    {
+      "time": 1309242.610926318,
+      "seconds_after_last_recorded_row": 16.193313383031636,
+      "evaluation": {
+        "C": 10,
+        "N": 10,
+        "purpose": "evaluation_only"
+      }
+    }
+  ],
+  "global_result_independently_verified": false,
+  "global_result_review_pending": true
+}

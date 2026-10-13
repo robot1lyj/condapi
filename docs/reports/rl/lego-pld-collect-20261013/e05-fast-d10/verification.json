@@ -1,0 +1,116 @@
+{
+  "rows": 4316,
+  "duration_s": 143.93508349196054,
+  "left6_range_rad": {
+    "measured": [
+      -1.2457084000915497,
+      -0.02651255054550994
+    ],
+    "target": [
+      -1.2744270750493913,
+      -0.02282231994987438
+    ]
+  },
+  "per_joint_max_run_over_0_3rad_seconds": {
+    "left": [
+      0,
+      0,
+      0.10096190497279167,
+      0.5959397819824517,
+      0,
+      0
+    ],
+    "right": [
+      0,
+      0,
+      0,
+      1.8666595318354666,
+      0,
+      0
+    ]
+  },
+  "online_windows": 50,
+  "windows_by_arm": {
+    "right": 35,
+    "left": 15
+  },
+  "interval_status": {
+    "executed": 342,
+    "rejected": 2
+  },
+  "association": {
+    "awaiting_reward_review": 47,
+    "online window does not uniquely match one physical closure": 2,
+    "window contains rejected execution intervals": 1
+  },
+  "pending_windows_by_arm": {
+    "right": 33,
+    "left": 14
+  },
+  "physical_candidates": 54,
+  "lift_eligible_candidates": 49,
+  "window_end_reasons": {
+    "lift_guard": 44,
+    "reopened": 5,
+    "null": 1
+  },
+  "training": false,
+  "reward_labels_published": 0,
+  "videos": [
+    {
+      "video": "/home/wuyan-lyj/condapi-data/rl/lego-pld-collect-20261013-e05-fast-d10-v1/raw/session_20261013_122649_fbc88d/episode_000003/segment_000000/top.mp4",
+      "frames": 1800,
+      "pts_monotonic": true,
+      "indices_in_range": true
+    },
+    {
+      "video": "/home/wuyan-lyj/condapi-data/rl/lego-pld-collect-20261013-e05-fast-d10-v1/raw/session_20261013_122649_fbc88d/episode_000003/segment_000000/left.mp4",
+      "frames": 1800,
+      "pts_monotonic": true,
+      "indices_in_range": true
+    },
+    {
+      "video": "/home/wuyan-lyj/condapi-data/rl/lego-pld-collect-20261013-e05-fast-d10-v1/raw/session_20261013_122649_fbc88d/episode_000003/segment_000000/right.mp4",
+      "frames": 1800,
+      "pts_monotonic": true,
+      "indices_in_range": true
+    },
+    {
+      "video": "/home/wuyan-lyj/condapi-data/rl/lego-pld-collect-20261013-e05-fast-d10-v1/raw/session_20261013_122649_fbc88d/episode_000003/segment_000001/top.mp4",
+      "frames": 1800,
+      "pts_monotonic": true,
+      "indices_in_range": true
+    },
+    {
+      "video": "/home/wuyan-lyj/condapi-data/rl/lego-pld-collect-20261013-e05-fast-d10-v1/raw/session_20261013_122649_fbc88d/episode_000003/segment_000001/left.mp4",
+      "frames": 1800,
+      "pts_monotonic": true,
+      "indices_in_range": true
+    },
+    {
+      "video": "/home/wuyan-lyj/condapi-data/rl/lego-pld-collect-20261013-e05-fast-d10-v1/raw/session_20261013_122649_fbc88d/episode_000003/segment_000001/right.mp4",
+      "frames": 1800,
+      "pts_monotonic": true,
+      "indices_in_range": true
+    },
+    {
+      "video": "/home/wuyan-lyj/condapi-data/rl/lego-pld-collect-20261013-e05-fast-d10-v1/raw/session_20261013_122649_fbc88d/episode_000003/segment_000002/top.mp4",
+      "frames": 716,
+      "pts_monotonic": true,
+      "indices_in_range": true
+    },
+    {
+      "video": "/home/wuyan-lyj/condapi-data/rl/lego-pld-collect-20261013-e05-fast-d10-v1/raw/session_20261013_122649_fbc88d/episode_000003/segment_000002/left.mp4",
+      "frames": 716,
+      "pts_monotonic": true,
+      "indices_in_range": true
+    },
+    {
+      "video": "/home/wuyan-lyj/condapi-data/rl/lego-pld-collect-20261013-e05-fast-d10-v1/raw/session_20261013_122649_fbc88d/episode_000003/segment_000002/right.mp4",
+      "frames": 716,
+      "pts_monotonic": true,
+      "indices_in_range": true
+    }
+  ],
+  "total_decoded_frames": 12948
+}

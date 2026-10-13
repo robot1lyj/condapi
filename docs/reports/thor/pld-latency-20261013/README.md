@@ -1,6 +1,6 @@
 # PLD 推理延迟优化与十步前缀验收（2026-10-13）
 
-**已上线：2026-10-13 13:01 CST**，`pld-rl:thor-latency-20261013-r1`在原`ws://192.168.250.1:8000`实查running/healthy/MAXN；生产48例包含actor的P50/P95为213.44/214.14ms，另9例RTC与原客户端16回复校验通过。旧容器`pld-rl-retained-pld-latency-20261013-r1`停止保留。客户端重连，继续collect＋前缀10采20集；本版本尚无新跨IPC录制，不能把Thor本地耗时代替端到端。
+**已上线：2026-10-13 13:01 CST**，`pld-rl:thor-latency-20261013-r1`在原`ws://192.168.250.1:8000`实查running/healthy/MAXN；生产48例包含actor的P50/P95为213.44/214.14ms，另9例RTC与原客户端16回复校验通过。旧容器`pld-rl-retained-pld-latency-20261013-r1`停止保留。客户端重连，继续collect＋前缀10采20集；优化后新跨IPC实录已通过：409有效回复/0迟到，现场worker P95=257.91ms、服务端P95=214.23ms；47窗口待判奖。详见[跨IPC审核](../../rl/lego-pld-collect-20261013/e05-fast-d10/README.md)，纯服务耗时与端到端指标继续分别报告。
 
 用户已明确“现场已暂停，现在验收升级”。本轮复用原20w Pi、相同ResNet18和零更新actor、正负可行域、门控阈值、半径、RTC七步去噪以及FP32/TF32精度；没有训练、替换权重、修改3588或改变奖励。执行技能为`thor-checkpoint-deploy`，此次是用户明确授权的服务性能升级，不是新checkpoint转换。
 
