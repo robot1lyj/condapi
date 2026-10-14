@@ -1,0 +1,82 @@
+{
+  "physical_closure_candidates": 36,
+  "physical_candidates_by_arm": {
+    "left": 12,
+    "right": 24
+  },
+  "online_closed_windows": 29,
+  "execution_rejections": 0,
+  "unique_closure_outcomes": 24,
+  "unique_outcomes_by_arm": {
+    "left": 9,
+    "right": 15
+  },
+  "latest_fresh_lift_multi_frame_candidates": 16,
+  "latest_lift_by_arm": {
+    "left": 5,
+    "right": 11
+  },
+  "ambiguous_multiple_closure_windows": [
+    {
+      "window_id": "e6:sffef625936534b778c7560e143daf3e3:w1",
+      "arm": "right",
+      "candidate_ids": [
+        "E01-R001-v3",
+        "E01-R002-v3"
+      ],
+      "closed_candidates": 2,
+      "status": "not_a_single_attempt_reward_yet"
+    },
+    {
+      "window_id": "e6:sffef625936534b778c7560e143daf3e3:w2",
+      "arm": "right",
+      "candidate_ids": [
+        "E01-R003-v3",
+        "E01-R004-v3"
+      ],
+      "closed_candidates": 2,
+      "status": "not_a_single_attempt_reward_yet"
+    },
+    {
+      "window_id": "e6:sffef625936534b778c7560e143daf3e3:w4",
+      "arm": "right",
+      "candidate_ids": [
+        "E01-R006-v3",
+        "E01-R007-v3"
+      ],
+      "closed_candidates": 2,
+      "status": "not_a_single_attempt_reward_yet"
+    },
+    {
+      "window_id": "e6:sffef625936534b778c7560e143daf3e3:w7",
+      "arm": "left",
+      "candidate_ids": [
+        "E01-L002-v3",
+        "E01-L003-v3"
+      ],
+      "closed_candidates": 2,
+      "status": "not_a_single_attempt_reward_yet"
+    },
+    {
+      "window_id": "e6:sffef625936534b778c7560e143daf3e3:w9",
+      "arm": "right",
+      "candidate_ids": [
+        "E01-R009-v3",
+        "E01-R010-v3"
+      ],
+      "closed_candidates": 2,
+      "status": "not_a_single_attempt_reward_yet"
+    }
+  ],
+  "published_rewards": 0,
+  "label_status": "visual_reward_assignment_pending; no height-is-success labels",
+  "collection_recommendation": {
+    "additional_episodes_first_stage": 9,
+    "new_version_episodes_total_first_stage": 10,
+    "provisional_effective_label_target": 150,
+    "provisional_min_each_arm": 50,
+    "contingent_additional_episodes": 5,
+    "retain_successes_and_failures": true,
+    "guaranteed_convergence": false
+  }
+}

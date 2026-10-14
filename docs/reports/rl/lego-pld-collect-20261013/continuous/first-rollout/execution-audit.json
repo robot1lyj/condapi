@@ -1,0 +1,235 @@
+{
+  "number": 1,
+  "episode_path": "episode_000001",
+  "episode_id": "d57d0541a3814a71a6e9028c8e7682c2",
+  "rows": 3393,
+  "duration_s": 113.08816799405031,
+  "manifest_pld": {
+    "schema": "pld_sac_block_v2",
+    "mode": "collect",
+    "run_id": "5c902a3ebf3743458c17366a78d82555",
+    "contract_sha256": "959db331948a9acd7c59f45bae64cc6298bcb04c879e30ea414ef5de465bba9e",
+    "snapshot_sha256": "7013be463f735521a17cc13af2196906092244f22cf64a02cad1225384e55857"
+  },
+  "mode_counts": {
+    "collect": 322
+  },
+  "contract_sha256": [
+    "959db331948a9acd7c59f45bae64cc6298bcb04c879e30ea414ef5de465bba9e"
+  ],
+  "snapshot_sha256": [
+    "7013be463f735521a17cc13af2196906092244f22cf64a02cad1225384e55857"
+  ],
+  "delay_steps": {
+    "10": 322
+  },
+  "human_rows": 0,
+  "invalid_observation_rows": 0,
+  "invalid_submission_rows": 0,
+  "source_counts": {
+    "hold": 10,
+    "policy": 3383
+  },
+  "replies": 322,
+  "accepted_replies": 321,
+  "discarded_replies": [
+    {
+      "token": {
+        "epoch": 6,
+        "request_id": 322,
+        "observation_id": 3861,
+        "created_at": 1388269.341484196,
+        "observed_at": 1388269.314560904,
+        "queue_size_at_request": null,
+        "observation_policy_tick": 3862,
+        "rtc_delay_steps": 10
+      },
+      "error": null,
+      "slack": 1
+    }
+  ],
+  "cancelled_requests": [
+    [
+      6,
+      "322"
+    ]
+  ],
+  "server_ms": {
+    "p50": 215.86220746394247,
+    "p95": 217.78435156447813,
+    "p99": 219.04550346545875,
+    "max": 226.51967592537403
+  },
+  "worker_ms": {
+    "p50": 250.57985191233456,
+    "p95": 261.4200324402191,
+    "p99": 268.5262415208854,
+    "max": 269.6394599042833
+  },
+  "tracking": {
+    "left": {
+      "p50_error_rad": [
+        0.003679257999269714,
+        0.008953176321589762,
+        0.009849726497097921,
+        0.019807737360362898,
+        0.017173356004072438,
+        0.016836583320005483
+      ],
+      "p95_error_rad": [
+        0.039070279959948995,
+        0.10121067581059037,
+        0.12466983809685152,
+        0.0683616129679426,
+        0.06632070432478587,
+        0.07498013903786636
+      ],
+      "measured_range_rad": [
+        1.0898756389715452,
+        2.398718242160678,
+        2.2613870450904106,
+        1.8116273746852816,
+        0.4962996871900529,
+        1.1596856641489275
+      ],
+      "target_range_rad": [
+        1.0947237305403643,
+        2.4106372287556264,
+        2.27607762536851,
+        1.9452426103570208,
+        0.5904228740892843,
+        1.2127347988408697
+      ],
+      "error_over_0_3rad_runs": [
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "note": "Dynamic tracking error is not itself a hardware-fault diagnosis."
+    },
+    "right": {
+      "p50_error_rad": [
+        0.006570857398476182,
+        0.01921501363197886,
+        0.01503223843585566,
+        0.023279933671887854,
+        0.027013665955025856,
+        0.01898979624343905
+      ],
+      "p95_error_rad": [
+        0.07649433186188768,
+        0.12566411074931194,
+        0.16025707184342414,
+        0.08381661497221815,
+        0.08688201260674679,
+        0.07881139220995023
+      ],
+      "measured_range_rad": [
+        1.5312428473334858,
+        2.507057297627222,
+        2.5337605859464407,
+        1.7841611352712263,
+        0.5401693751430532,
+        0.9868772411688393
+      ],
+      "target_range_rad": [
+        1.5392892140465806,
+        2.518606283686502,
+        2.550342370952888,
+        1.9689148551345514,
+        0.7681639880548572,
+        1.0839466400532831
+      ],
+      "error_over_0_3rad_runs": [
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "note": "Dynamic tracking error is not itself a hardware-fault diagnosis."
+    }
+  },
+  "missing_action_origins": [],
+  "submission_mismatches": [],
+  "correction_rows": 1367,
+  "correction_rows_by_arm": {
+    "right": 688,
+    "left": 679
+  },
+  "max_joint_correction_rad": 0.07151874866681518,
+  "max_gripper_correction": 0.02531000396941363,
+  "max_direct_fk_correction_m": 0.05130490583964072,
+  "videos": [
+    {
+      "path": "episode_000001/segment_000000/top.mp4",
+      "frames": 1800,
+      "pts_monotonic": true,
+      "indices_in_range": true
+    },
+    {
+      "path": "episode_000001/segment_000000/left.mp4",
+      "frames": 1800,
+      "pts_monotonic": true,
+      "indices_in_range": true
+    },
+    {
+      "path": "episode_000001/segment_000000/right.mp4",
+      "frames": 1800,
+      "pts_monotonic": true,
+      "indices_in_range": true
+    },
+    {
+      "path": "episode_000001/segment_000001/top.mp4",
+      "frames": 1593,
+      "pts_monotonic": true,
+      "indices_in_range": true
+    },
+    {
+      "path": "episode_000001/segment_000001/left.mp4",
+      "frames": 1593,
+      "pts_monotonic": true,
+      "indices_in_range": true
+    },
+    {
+      "path": "episode_000001/segment_000001/right.mp4",
+      "frames": 1593,
+      "pts_monotonic": true,
+      "indices_in_range": true
+    }
+  ],
+  "raw_evaluation_events": [
+    {
+      "event": "evaluation",
+      "episode_id": "d57d0541a3814a71a6e9028c8e7682c2",
+      "time": 1388273.305302659,
+      "details": {
+        "evaluation": {
+          "C": 9,
+          "N": 10,
+          "purpose": "evaluation_only"
+        }
+      },
+      "audit_ref": "/home/wuyan-lyj/condapi-data/rl/pld-continuous-first-20261014-v1/raw-v2/session_20261014_110716_0aa69a/policy_events.jsonl#line=646"
+    }
+  ],
+  "sources_sha256": {
+    "/home/wuyan-lyj/condapi-data/rl/pld-continuous-first-20261014-v1/raw-v2/session_20261014_110716_0aa69a/episode_000001/manifest.json": "f3aa74f74aaeabdfea8acb699f0d153b6816b210bd73a3f4e0618ce636adc514",
+    "/home/wuyan-lyj/condapi-data/rl/pld-continuous-first-20261014-v1/raw-v2/session_20261014_110716_0aa69a/episode_000001/segment_000000/samples.h5": "ba8a0c663ad2dd21514cc547aa21250e7f518c71a892f2847ff9f3c73721ea08",
+    "/home/wuyan-lyj/condapi-data/rl/pld-continuous-first-20261014-v1/raw-v2/session_20261014_110716_0aa69a/episode_000001/segment_000001/samples.h5": "47e7e4c16bad007a50b23bfadd3e5038ef520778067f19cd1f682035be484793",
+    "/home/wuyan-lyj/condapi-data/rl/pld-continuous-first-20261014-v1/raw-v2/session_20261014_110716_0aa69a/policy_events.jsonl": "3f554c8572b5c3ffcb74ff676fba610d6ce3bfbd487e9570a4d959b59f7ef901",
+    "/home/wuyan-lyj/condapi-data/rl/pld-continuous-first-20261014-v1/raw-v2/session_20261014_110716_0aa69a/episode_000001/segment_000000/left.mp4": "0b185c31df3b17dcc7c90e211436644ec26a35ce2b5f11320cdd5f9a394c4536",
+    "/home/wuyan-lyj/condapi-data/rl/pld-continuous-first-20261014-v1/raw-v2/session_20261014_110716_0aa69a/episode_000001/segment_000000/right.mp4": "438e0f3867bf894f6006317b2e1adca399d13d73dd6b72ba2a533e9017fc9bff",
+    "/home/wuyan-lyj/condapi-data/rl/pld-continuous-first-20261014-v1/raw-v2/session_20261014_110716_0aa69a/episode_000001/segment_000000/top.mp4": "f03c7e1dd4e0651259b6bca21ea95a053f3f706a700ee7fd10ccd946d89305bd",
+    "/home/wuyan-lyj/condapi-data/rl/pld-continuous-first-20261014-v1/raw-v2/session_20261014_110716_0aa69a/episode_000001/segment_000001/left.mp4": "ef075fdf1a3afaf4f226bcd640b3225ed66ecd1ba4ef473c102cd0f2347ddb92",
+    "/home/wuyan-lyj/condapi-data/rl/pld-continuous-first-20261014-v1/raw-v2/session_20261014_110716_0aa69a/episode_000001/segment_000001/right.mp4": "080f386c32ff6327bb06b02a0e2e1e8d9518f39557c0fe3dddc5b8b2ff0aabf9",
+    "/home/wuyan-lyj/condapi-data/rl/pld-continuous-first-20261014-v1/raw-v2/session_20261014_110716_0aa69a/episode_000001/segment_000001/top.mp4": "4ab06f4236d53692c11d1a301919313c8086afa3e150f1a301dbe425d3794b1b"
+  },
+  "training_executed": false,
+  "reward_labels_published": 0,
+  "robot_success_rate": null
+}

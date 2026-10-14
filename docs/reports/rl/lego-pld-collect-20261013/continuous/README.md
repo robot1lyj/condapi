@@ -50,4 +50,4 @@ Thor CPU 对冻结 actor 做前向，无训练。源为原13集奖励发布 reco
 
 完整源包、日志、bundle-r3和返回包保留在Thor `/home/wuyan-lyj/thor/pi/services/pld-continuous-20261014-r1/`，本地证据在 `/home/wuyan-lyj/condapi-data/rl/pld-continuous-20261014-r1/`。旧生产停止保留为 `pld-rl-retained-pld-continuous-20261014-r1`；回退须停止现场执行、交还MAXN会话并绑定旧身份，不能在一集内混换。旧版本有本次已知脉冲问题，回退不代表适合继续批量采集。
 
-客户端重连原地址，重新应用collect绑定7013be46…，前缀保持10。先录一集，核对动作连续性、真实修正来源、抓取/放置边界及奖励终点，再继续10–15集采集。没有重新训练actor，也没有开启自动判奖/训练后台。
+首集已完成实录核查：29个非零修正窗、24个可唯一关联闭爪，提交/解码/范围通过；5个重复收拢窗口待离线整理。继续同版collect/前缀10，先再录9集凑10，按有效判奖量决定是否补到15。没有重新训练actor，也没有开启自动判奖/训练后台。[首集证据与预算](first-rollout/README.md)。
