@@ -51,13 +51,15 @@ def planning_context(base, previous, state, gate, arm, delay, c):
     bad = np.flatnonzero(~flags[delay:end])
     if len(bad):
         end = delay+int(bad[0])
+    short_closing = (closed and 5 <= end-delay < 9
+                     and end-delay >= c["trajectory"].get("short_closing_min_steps", 9))
     bias, weight = np.zeros((50, 7)), np.zeros(50)
     reason = None
     if gate.get("apply_residual") is False:
         reason = "draining"
     elif not in_workspace(measured, arm, c):
         reason = "current_pose_outside_grasp_workspace"
-    elif end-delay < 9:
+    elif end-delay < 9 and not short_closing:
         reason = "insufficient_grasp_only_horizon"
     if reason is None:
         n = end-delay
@@ -85,6 +87,11 @@ def planning_context(base, previous, state, gate, arm, delay, c):
     context = {"kind": KIND, "delay_steps": delay, "end_index": end if reason is None else delay, "reason": reason,
                "lift_guard_start_index": close, "lift_ceiling_m": lift_ceiling,
                "bias": bias.tolist(), "weight": weight.tolist()}
+    if short_closing and reason is None:
+        # Restore the committed joint bridge, but let no NEW joint target
+        # compete with the closing fingers in this short remaining interval.
+        # The original lift/release endpoint and all motion guards still apply.
+        context.update(action_mask=[0., 0., 0., 0., 0., 0., 1.], closing_only=True)
     if reason is None and not _bounds(b, previous, arm, c, context)[2]:
         context.update(reason="baseline_bridge_exceeds_motion_guards", bias=np.zeros((50, 7)).tolist(),
                        weight=np.zeros(50).tolist(), end_index=delay)
@@ -97,6 +104,9 @@ def _bounds(base, previous, arm, c, context):
     bias, w = np.asarray(context["bias"]), np.asarray(context["weight"])
     radius = np.asarray(c["radius"])[off:off+7]
     coeff = w[:, None]*radius
+    mask = array(context["action_mask"], (7,), "action mask") if "action_mask" in context else None
+    if mask is not None:
+        coeff *= mask
     low, high = np.full(7, -1.), np.ones(7)
     ok = True
     def restrict(a, coef, lo, hi):
@@ -132,7 +142,13 @@ def _bounds(base, previous, arm, c, context):
         acceleration = np.asarray(c["trajectory"]["max_target_second_difference"])[off:off+7]
         restrict(np.diff(b+bias, n=2, axis=0)[check_acc], np.diff(coeff, n=2, axis=0)[check_acc], -acceleration, acceleration)
     ok = ok and bool(np.all(low<=1e-7) and np.all(high>=-1e-7))
-    return np.clip(high, 0, 1).astype(np.float32), np.clip(-low, 0, 1).astype(np.float32), ok
+    positive, negative = np.clip(high, 0, 1).astype(np.float32), np.clip(-low, 0, 1).astype(np.float32)
+    if mask is not None:
+        positive *= mask
+        negative *= mask
+    if context.get("closing_only"):
+        positive[:] = 0
+    return positive, negative, ok
 
 
 def feasible_trajectory_bounds(base, previous, arm, c, context):
@@ -157,6 +173,10 @@ def trajectory_decode(base, action, arm, c, context):
     off = 0 if arm == "left" else 7
     bias, w = np.asarray(context["bias"]), np.asarray(context["weight"])
     offset = a*np.asarray(c["radius"])[off:off+7]
+    if "action_mask" in context:
+        offset *= array(context["action_mask"], (7,), "action mask")
+    if context.get("closing_only"):
+        offset = np.minimum(offset, 0)
     affected = (np.abs(bias).sum(1)+np.abs(w))>1e-12
     for factor in (1., .75, .5, .25, 0.):
         residual = bias+w[:, None]*offset*factor

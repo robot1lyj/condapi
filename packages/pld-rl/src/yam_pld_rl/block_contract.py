@@ -74,6 +74,8 @@ def validate_contract(c):
         raise ValueError("explicit bounded attempt duration required")
     if trajectory:
         t = c["trajectory"]
+        if "short_closing_min_steps" in t and not 5 <= integer(t["short_closing_min_steps"], "short closing minimum", 5) <= 8:
+            raise ValueError("short closing requires 5 to 8 editable ticks")
         if (t["kind"] != "prefix_trajectory_v1" or not 3 <= t["ramp_steps"] <= 14
                 or not 0 < t["noise_tau_s"] <= 1 or not 0 <= t["approach_z_margin_m"] <= .2
                 or not 0 <= t["bridge_velocity_gain"] <= 1

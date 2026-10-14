@@ -1,0 +1,128 @@
+{
+  "families": [
+    "SAC",
+    "Cal-QL/SAC",
+    "IQL",
+    "TD3+BC",
+    "ReBRAC"
+  ],
+  "algorithm_families": 5,
+  "completed_runs_including_seeds_ablation_and_critic_only": 33,
+  "actor_updated_runs_including_BC_controls": 25,
+  "critic_only_runs": 8,
+  "latest_contract_compared_recipes": [
+    "TD3BC",
+    "TD3BC-NoFailureAnchor",
+    "SuccessBC-withFailureAnchor"
+  ],
+  "latest_contract_run_count": 6,
+  "architecture_variants_trained": [
+    "frozen ResNet18 features + MLP actor/critic, widths/depths/LayerNorm/feature balance varied"
+  ],
+  "not_trained": [
+    "AWAC",
+    "RLT token policy",
+    "temporal Transformer actor",
+    "diffusion or flow actor",
+    "end-to-end RL of Pi weights"
+  ],
+  "all_runs_are_not_comparable_as_one_leaderboard": true,
+  "sources": [
+    {
+      "phase": "critic_initialization",
+      "count": 4,
+      "actor_updated": false,
+      "run_ids": [
+        "calql-mixed-s0",
+        "calql-success-s0",
+        "calql-success-s1",
+        "td-success-s0"
+      ],
+      "source": "docs/reports/rl/pld-offline14-20261012/results-v1.json",
+      "source_sha256": "c6d797ffb6e90f7661cdfc854b4a4463ff3b302286ccd96171d621ec091b3afc"
+    },
+    {
+      "phase": "critic_initialization",
+      "count": 4,
+      "actor_updated": false,
+      "run_ids": [
+        "mc-calql-mixed-s0",
+        "mc-calql-mixed-s1",
+        "mc-td-mixed-s0",
+        "td-mixed-s0"
+      ],
+      "source": "docs/reports/rl/pld-offline14-20261012/results-v2.json",
+      "source_sha256": "531e86dbcaab96d3921ddd63ae2da0891ccab6c6006816c2fc18eafe9cd10653"
+    },
+    {
+      "phase": "zero_residual14_methods",
+      "count": 8,
+      "actor_updated": true,
+      "run_ids": [
+        "pld-iql-e09-s0",
+        "pld-iql-e09-s1",
+        "pld-iql-s0",
+        "pld-iql-s1",
+        "pld-rebrac-s0",
+        "pld-rebrac-s1",
+        "pld-td3bc-s0",
+        "pld-td3bc-s1"
+      ],
+      "source": "docs/reports/rl/pld-methods14-20261012/results-v1.json",
+      "source_sha256": "ac75714351632ccb86375a7084f2f3e901bb847d298db922ac8f6e26cf16d1b7"
+    },
+    {
+      "phase": "zero_residual14_methods",
+      "count": 2,
+      "actor_updated": true,
+      "run_ids": [
+        "pld-rebrac-c0p01-s0",
+        "pld-rebrac-c0p01-s1"
+      ],
+      "source": "docs/reports/rl/pld-methods14-20261012/results-v2.json",
+      "source_sha256": "5e97032125bcf2c49a40be486a2f254770e477329ccaaf7d0d2207042c238409"
+    },
+    {
+      "phase": "collect13_round02",
+      "count": 8,
+      "actor_updated": true,
+      "run_ids": [
+        "parts-td3bc-balanced-collect13-r02-s0",
+        "parts-td3bc-balanced-collect13-r02-s1",
+        "parts-td3bc-rtc-collect13-r02-s0",
+        "parts-td3bc-rtc-collect13-r02-s1",
+        "pld-calql-rtc-collect13-r02-s0",
+        "pld-calql-rtc-collect13-r02-s1",
+        "pld-mc-calql-rtc-collect13-r02-s0",
+        "pld-mc-calql-rtc-collect13-r02-s1"
+      ],
+      "source": "docs/reports/rl/lego-pld-collect-20261013/batch13/round02-results.json",
+      "source_sha256": "03ebdac45f8c78e24dad9ab44c0edb4104e4ff2e6e83304a1f94b6306f87f46d"
+    },
+    {
+      "phase": "continuous10_round03",
+      "count": 6,
+      "actor_updated": true,
+      "run_ids": [
+        "parts-ct-td3bc-r03-s0",
+        "parts-ct-noanchor-r03-s0",
+        "bc-ct-success-r03-s0",
+        "parts-ct-td3bc-r03-s1",
+        "parts-ct-noanchor-r03-s1",
+        "bc-ct-success-r03-s1"
+      ],
+      "source": "docs/reports/rl/lego-pld-collect-20261013/continuous/batch10/round03-results.json",
+      "source_sha256": "4ace80f644dd9979becdea1edda7aa4542a7b0f4af940308443d8175548960fc"
+    },
+    {
+      "phase": "collect13_sac_round01",
+      "count": 1,
+      "actor_updated": true,
+      "run_ids": [
+        "pld-sac-collect13-20261013-r01"
+      ],
+      "source": "docs/reports/rl/lego-pld-collect-20261013/batch13/sac-r01-complete.json",
+      "source_sha256": "da52edb3577053aa584a9f0db519c8431aace044abab923073c5019ddb6b3f0a"
+    }
+  ]
+}

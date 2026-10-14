@@ -1,0 +1,14 @@
+{
+  "train_entry_count": 228,
+  "val_entry_count": 17,
+  "train_mean_return": 0.37852679896141506,
+  "val_mean_return": 0.2879641256339993,
+  "constant_train_mean_rmse": 0.45522832282765324,
+  "constant_zero_rmse": 0.5309939413556652,
+  "by_arm_train_mean": {
+    "0": 0.4580262894934416,
+    "1": 0.33798732365700423
+  },
+  "arm_only_baseline_rmse": 0.44952685895167055,
+  "policy_value_is_not_behavior_MC_return": true
+}

@@ -1,0 +1,1714 @@
+{
+  "schema": "pld_short_closing_authority_audit_v1",
+  "old_decoder_verified": 182,
+  "maximum_recorded_context_float_reconstruction_error": 1.7763568394002505e-15,
+  "correcting_requests": 155,
+  "old_reasons": {
+    "null": 105,
+    "insufficient_grasp_only_horizon": 49,
+    "baseline_bridge_exceeds_motion_guards": 1
+  },
+  "new_reasons": {
+    "null": 110,
+    "insufficient_grasp_only_horizon": 44,
+    "baseline_bridge_exceeds_motion_guards": 1
+  },
+  "short_closing_admitted_requests": 5,
+  "short_closing_windows": 5,
+  "closing_authority_requests": 5,
+  "maximum_closing_vs_same_bridge": -0.0321302056312561,
+  "old_contract_sha256": "959db331948a9acd7c59f45bae64cc6298bcb04c879e30ea414ef5de465bba9e",
+  "candidate_contract_sha256": "84b7a3854b16718e0a39dff69720f648b8ca5d59572f3ac6ad87b8097ff03b73",
+  "not_a_policy_rollout": true,
+  "actor_loaded": false,
+  "training": false,
+  "deployed": false,
+  "sources_sha256": {
+    "/home/wuyan-lyj/condapi-data/rl/lego-pld-actor2-eval-e11-20261014-v1/raw-v2/session_20261014_110716_0aa69a/episode_000011/manifest.json": "f5f806370b56c6120bb0901b039ddf536f9e5e3ba9a00b7f66e82c8e2189f727",
+    "/home/wuyan-lyj/condapi-data/rl/lego-pld-actor2-eval-e11-20261014-v1/raw-v2/session_20261014_110716_0aa69a/episode_000011/segment_000000/samples.h5": "3280390d54a1519c12bc68821057af21f885a643d11a970c053d2ed00e329a7a",
+    "/home/wuyan-lyj/condapi-data/rl/lego-pld-actor2-eval-e11-20261014-v1/raw-v2/session_20261014_110716_0aa69a/episode_000011/segment_000001/samples.h5": "39297fe804b4a418caee5972bb893f99f9d59fa935c07dfbb1c7be837b0b22ac",
+    "/home/wuyan-lyj/condapi-data/rl/lego-pld-actor2-eval-e11-20261014-v1/raw-v2/session_20261014_110716_0aa69a/policy_events.jsonl": "95bb359e0eafe125a9622a1401f297296ed7d9dc565f63c9a408d25d7ab841d5",
+    "/home/wuyan-lyj/condapi-data/rl/lego-pld-actor2-eval-e11-20261014-v1/raw-v2/session_20261014_110716_0aa69a/episode_000011/segment_000000/left.mp4": "16e55cb462ddcd521e7a34085f013288f640247067bd0dd46323bd03b93362d8",
+    "/home/wuyan-lyj/condapi-data/rl/lego-pld-actor2-eval-e11-20261014-v1/raw-v2/session_20261014_110716_0aa69a/episode_000011/segment_000000/right.mp4": "74600a375b3ae7212f9e0d61d6413727e174983da9ef4ad04487e61ee97cde46",
+    "/home/wuyan-lyj/condapi-data/rl/lego-pld-actor2-eval-e11-20261014-v1/raw-v2/session_20261014_110716_0aa69a/episode_000011/segment_000000/top.mp4": "3d13ee66bfc49111e33cf48051f66c7c40f9af3fbb5f350923379132cf63ff9e",
+    "/home/wuyan-lyj/condapi-data/rl/lego-pld-actor2-eval-e11-20261014-v1/raw-v2/session_20261014_110716_0aa69a/episode_000011/segment_000001/left.mp4": "5947797cb6fa8a90e76e47b9bbd6f3d52bfab0fe2f17da5d77552fd5fd60fcb5",
+    "/home/wuyan-lyj/condapi-data/rl/lego-pld-actor2-eval-e11-20261014-v1/raw-v2/session_20261014_110716_0aa69a/episode_000011/segment_000001/right.mp4": "9728d47198dc8d90ed5624d1864c324f4b4e21ef845cb44718517a920f234472",
+    "/home/wuyan-lyj/condapi-data/rl/lego-pld-actor2-eval-e11-20261014-v1/raw-v2/session_20261014_110716_0aa69a/episode_000011/segment_000001/top.mp4": "715a6b3494d96ed5be1fa6fda759fa389ddde53c8e8380c2d2f34d602617d17f"
+  },
+  "manifest_sha256": "f668170b8c59bd799318f20bdf338a5349dfdc31295058dff21ae3eeac88a24c",
+  "results": [
+    {
+      "decision_id": "e889:r3387",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w1",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3388",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w1",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3389",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w1",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3390",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w1",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3391",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w1",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": "insufficient_grasp_only_horizon",
+      "new_reason": "insufficient_grasp_only_horizon",
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3392",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w1",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": "insufficient_grasp_only_horizon",
+      "new_reason": "insufficient_grasp_only_horizon",
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3393",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w1",
+      "arm": "right",
+      "phase": "draining",
+      "old_reason": "draining",
+      "new_reason": "draining",
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3397",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w2",
+      "arm": "left",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3398",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w2",
+      "arm": "left",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3399",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w2",
+      "arm": "left",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3400",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w2",
+      "arm": "left",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3401",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w2",
+      "arm": "left",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3402",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w2",
+      "arm": "left",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3403",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w2",
+      "arm": "left",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3404",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w2",
+      "arm": "left",
+      "phase": "correcting",
+      "old_reason": "insufficient_grasp_only_horizon",
+      "new_reason": null,
+      "short_closing_admitted": true,
+      "editable_ticks": 7,
+      "maximum_closing_vs_same_bridge": -0.02542532980442047,
+      "new_actor_joint_target_contribution": 0.0,
+      "projection": {
+        "factor": 1.0,
+        "reason": "inside_grasp_workspace"
+      }
+    },
+    {
+      "decision_id": "e889:r3405",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w2",
+      "arm": "left",
+      "phase": "correcting",
+      "old_reason": "insufficient_grasp_only_horizon",
+      "new_reason": "insufficient_grasp_only_horizon",
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3406",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w2",
+      "arm": "left",
+      "phase": "draining",
+      "old_reason": "draining",
+      "new_reason": "draining",
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3409",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w3",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3410",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w3",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3411",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w3",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3412",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w3",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3413",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w3",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": "insufficient_grasp_only_horizon",
+      "new_reason": "insufficient_grasp_only_horizon",
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3414",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w3",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": "insufficient_grasp_only_horizon",
+      "new_reason": "insufficient_grasp_only_horizon",
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3415",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w3",
+      "arm": "right",
+      "phase": "draining",
+      "old_reason": "draining",
+      "new_reason": "draining",
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3421",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w4",
+      "arm": "left",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3422",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w4",
+      "arm": "left",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3423",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w4",
+      "arm": "left",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3424",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w4",
+      "arm": "left",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3425",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w4",
+      "arm": "left",
+      "phase": "correcting",
+      "old_reason": "insufficient_grasp_only_horizon",
+      "new_reason": null,
+      "short_closing_admitted": true,
+      "editable_ticks": 8,
+      "maximum_closing_vs_same_bridge": -0.019316036999225628,
+      "new_actor_joint_target_contribution": 0.0,
+      "projection": {
+        "factor": 1.0,
+        "reason": "inside_grasp_workspace"
+      }
+    },
+    {
+      "decision_id": "e889:r3426",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w4",
+      "arm": "left",
+      "phase": "correcting",
+      "old_reason": "insufficient_grasp_only_horizon",
+      "new_reason": "insufficient_grasp_only_horizon",
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3427",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w4",
+      "arm": "left",
+      "phase": "correcting",
+      "old_reason": "insufficient_grasp_only_horizon",
+      "new_reason": "insufficient_grasp_only_horizon",
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3428",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w4",
+      "arm": "left",
+      "phase": "draining",
+      "old_reason": "draining",
+      "new_reason": "draining",
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3429",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w5",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3430",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w5",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3431",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w5",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3432",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w5",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": "insufficient_grasp_only_horizon",
+      "new_reason": "insufficient_grasp_only_horizon",
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3433",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w5",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": "insufficient_grasp_only_horizon",
+      "new_reason": "insufficient_grasp_only_horizon",
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3434",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w5",
+      "arm": "right",
+      "phase": "draining",
+      "old_reason": "draining",
+      "new_reason": "draining",
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3437",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w6",
+      "arm": "left",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3438",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w6",
+      "arm": "left",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3439",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w6",
+      "arm": "left",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3440",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w6",
+      "arm": "left",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3441",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w6",
+      "arm": "left",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3442",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w6",
+      "arm": "left",
+      "phase": "correcting",
+      "old_reason": "insufficient_grasp_only_horizon",
+      "new_reason": "insufficient_grasp_only_horizon",
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3443",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w6",
+      "arm": "left",
+      "phase": "correcting",
+      "old_reason": "insufficient_grasp_only_horizon",
+      "new_reason": "insufficient_grasp_only_horizon",
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3444",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w6",
+      "arm": "left",
+      "phase": "draining",
+      "old_reason": "draining",
+      "new_reason": "draining",
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3446",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w7",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3447",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w7",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3448",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w7",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3449",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w7",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": "insufficient_grasp_only_horizon",
+      "new_reason": "insufficient_grasp_only_horizon",
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3450",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w7",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": "insufficient_grasp_only_horizon",
+      "new_reason": "insufficient_grasp_only_horizon",
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3451",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w7",
+      "arm": "right",
+      "phase": "draining",
+      "old_reason": "draining",
+      "new_reason": "draining",
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3454",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w8",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3455",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w8",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3456",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w8",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3457",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w8",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": "insufficient_grasp_only_horizon",
+      "new_reason": "insufficient_grasp_only_horizon",
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3458",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w8",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": "insufficient_grasp_only_horizon",
+      "new_reason": "insufficient_grasp_only_horizon",
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3459",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w8",
+      "arm": "right",
+      "phase": "draining",
+      "old_reason": "draining",
+      "new_reason": "draining",
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3468",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w9",
+      "arm": "left",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3469",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w9",
+      "arm": "left",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3470",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w9",
+      "arm": "left",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3471",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w9",
+      "arm": "left",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3472",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w9",
+      "arm": "left",
+      "phase": "correcting",
+      "old_reason": "insufficient_grasp_only_horizon",
+      "new_reason": "insufficient_grasp_only_horizon",
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3473",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w9",
+      "arm": "left",
+      "phase": "correcting",
+      "old_reason": "insufficient_grasp_only_horizon",
+      "new_reason": "insufficient_grasp_only_horizon",
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3474",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w9",
+      "arm": "left",
+      "phase": "draining",
+      "old_reason": "draining",
+      "new_reason": "draining",
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3479",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w10",
+      "arm": "left",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3480",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w10",
+      "arm": "left",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3481",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w10",
+      "arm": "left",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3482",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w10",
+      "arm": "left",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3483",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w10",
+      "arm": "left",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3484",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w10",
+      "arm": "left",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3485",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w10",
+      "arm": "left",
+      "phase": "correcting",
+      "old_reason": "insufficient_grasp_only_horizon",
+      "new_reason": "insufficient_grasp_only_horizon",
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3486",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w10",
+      "arm": "left",
+      "phase": "correcting",
+      "old_reason": "insufficient_grasp_only_horizon",
+      "new_reason": "insufficient_grasp_only_horizon",
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3487",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w10",
+      "arm": "left",
+      "phase": "draining",
+      "old_reason": "draining",
+      "new_reason": "draining",
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3488",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w11",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3489",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w11",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3490",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w11",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3491",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w11",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": "insufficient_grasp_only_horizon",
+      "new_reason": "insufficient_grasp_only_horizon",
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3492",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w11",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3493",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w11",
+      "arm": "right",
+      "phase": "draining",
+      "old_reason": "draining",
+      "new_reason": "draining",
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3494",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w11",
+      "arm": "right",
+      "phase": "draining",
+      "old_reason": "draining",
+      "new_reason": "draining",
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3499",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w12",
+      "arm": "left",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3500",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w12",
+      "arm": "left",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3501",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w12",
+      "arm": "left",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3502",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w12",
+      "arm": "left",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3503",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w12",
+      "arm": "left",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3504",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w12",
+      "arm": "left",
+      "phase": "correcting",
+      "old_reason": "insufficient_grasp_only_horizon",
+      "new_reason": "insufficient_grasp_only_horizon",
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3505",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w12",
+      "arm": "left",
+      "phase": "correcting",
+      "old_reason": "insufficient_grasp_only_horizon",
+      "new_reason": "insufficient_grasp_only_horizon",
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3506",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w12",
+      "arm": "left",
+      "phase": "draining",
+      "old_reason": "draining",
+      "new_reason": "draining",
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3507",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w13",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3508",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w13",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3509",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w13",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3510",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w13",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3511",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w13",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3512",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w13",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3513",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w13",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": "insufficient_grasp_only_horizon",
+      "new_reason": "insufficient_grasp_only_horizon",
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3514",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w13",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": "insufficient_grasp_only_horizon",
+      "new_reason": "insufficient_grasp_only_horizon",
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3515",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w13",
+      "arm": "right",
+      "phase": "draining",
+      "old_reason": "draining",
+      "new_reason": "draining",
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3517",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w14",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3518",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w14",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3519",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w14",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3520",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w14",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3521",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w14",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3522",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w14",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": "insufficient_grasp_only_horizon",
+      "new_reason": "insufficient_grasp_only_horizon",
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3523",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w14",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": "insufficient_grasp_only_horizon",
+      "new_reason": "insufficient_grasp_only_horizon",
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3524",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w14",
+      "arm": "right",
+      "phase": "draining",
+      "old_reason": "draining",
+      "new_reason": "draining",
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3525",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w15",
+      "arm": "left",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3526",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w15",
+      "arm": "left",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3527",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w15",
+      "arm": "left",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3528",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w15",
+      "arm": "left",
+      "phase": "correcting",
+      "old_reason": "insufficient_grasp_only_horizon",
+      "new_reason": "insufficient_grasp_only_horizon",
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3529",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w15",
+      "arm": "left",
+      "phase": "correcting",
+      "old_reason": "insufficient_grasp_only_horizon",
+      "new_reason": "insufficient_grasp_only_horizon",
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3530",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w15",
+      "arm": "left",
+      "phase": "draining",
+      "old_reason": "draining",
+      "new_reason": "draining",
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3531",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w16",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3532",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w16",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3533",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w16",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3534",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w16",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3535",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w16",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3536",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w16",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3537",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w16",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": "insufficient_grasp_only_horizon",
+      "new_reason": "insufficient_grasp_only_horizon",
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3538",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w16",
+      "arm": "right",
+      "phase": "draining",
+      "old_reason": "draining",
+      "new_reason": "draining",
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3544",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w17",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3545",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w17",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3546",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w17",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": "insufficient_grasp_only_horizon",
+      "new_reason": "insufficient_grasp_only_horizon",
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3547",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w17",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": "insufficient_grasp_only_horizon",
+      "new_reason": "insufficient_grasp_only_horizon",
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3548",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w17",
+      "arm": "right",
+      "phase": "draining",
+      "old_reason": "draining",
+      "new_reason": "draining",
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3551",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w18",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3552",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w18",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3553",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w18",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3554",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w18",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": "insufficient_grasp_only_horizon",
+      "new_reason": "insufficient_grasp_only_horizon",
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3555",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w18",
+      "arm": "right",
+      "phase": "draining",
+      "old_reason": "draining",
+      "new_reason": "draining",
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3559",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w19",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3560",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w19",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3561",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w19",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3562",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w19",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3563",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w19",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": "insufficient_grasp_only_horizon",
+      "new_reason": "insufficient_grasp_only_horizon",
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3564",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w19",
+      "arm": "right",
+      "phase": "draining",
+      "old_reason": "draining",
+      "new_reason": "draining",
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3568",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w20",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": "baseline_bridge_exceeds_motion_guards",
+      "new_reason": "baseline_bridge_exceeds_motion_guards",
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3569",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w20",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3570",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w20",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3571",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w20",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3572",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w20",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3573",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w20",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": "insufficient_grasp_only_horizon",
+      "new_reason": "insufficient_grasp_only_horizon",
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3574",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w20",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": "insufficient_grasp_only_horizon",
+      "new_reason": "insufficient_grasp_only_horizon",
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3575",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w20",
+      "arm": "right",
+      "phase": "draining",
+      "old_reason": "draining",
+      "new_reason": "draining",
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3579",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w21",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3580",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w21",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3581",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w21",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3582",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w21",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": "insufficient_grasp_only_horizon",
+      "new_reason": "insufficient_grasp_only_horizon",
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3583",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w21",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": "insufficient_grasp_only_horizon",
+      "new_reason": "insufficient_grasp_only_horizon",
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3584",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w21",
+      "arm": "right",
+      "phase": "draining",
+      "old_reason": "draining",
+      "new_reason": "draining",
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3588",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w22",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3589",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w22",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3590",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w22",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3591",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w22",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": "insufficient_grasp_only_horizon",
+      "new_reason": null,
+      "short_closing_admitted": true,
+      "editable_ticks": 8,
+      "maximum_closing_vs_same_bridge": -0.0321302056312561,
+      "new_actor_joint_target_contribution": 0.0,
+      "projection": {
+        "factor": 1.0,
+        "reason": "inside_grasp_workspace"
+      }
+    },
+    {
+      "decision_id": "e889:r3592",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w22",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": "insufficient_grasp_only_horizon",
+      "new_reason": "insufficient_grasp_only_horizon",
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3593",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w22",
+      "arm": "right",
+      "phase": "draining",
+      "old_reason": "draining",
+      "new_reason": "draining",
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3597",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w23",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3598",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w23",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3599",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w23",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3600",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w23",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": "insufficient_grasp_only_horizon",
+      "new_reason": "insufficient_grasp_only_horizon",
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3601",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w23",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": "insufficient_grasp_only_horizon",
+      "new_reason": "insufficient_grasp_only_horizon",
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3602",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w23",
+      "arm": "right",
+      "phase": "draining",
+      "old_reason": "draining",
+      "new_reason": "draining",
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3604",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w24",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3605",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w24",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3606",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w24",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3607",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w24",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": "insufficient_grasp_only_horizon",
+      "new_reason": null,
+      "short_closing_admitted": true,
+      "editable_ticks": 6,
+      "maximum_closing_vs_same_bridge": -0.015254896879196178,
+      "new_actor_joint_target_contribution": 0.0,
+      "projection": {
+        "factor": 1.0,
+        "reason": "inside_grasp_workspace"
+      }
+    },
+    {
+      "decision_id": "e889:r3608",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w24",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": "insufficient_grasp_only_horizon",
+      "new_reason": "insufficient_grasp_only_horizon",
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3609",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w24",
+      "arm": "right",
+      "phase": "draining",
+      "old_reason": "draining",
+      "new_reason": "draining",
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3612",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w25",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3613",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w25",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3614",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w25",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3615",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w25",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3616",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w25",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3617",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w25",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": "insufficient_grasp_only_horizon",
+      "new_reason": null,
+      "short_closing_admitted": true,
+      "editable_ticks": 8,
+      "maximum_closing_vs_same_bridge": -0.028584766387939442,
+      "new_actor_joint_target_contribution": 0.0,
+      "projection": {
+        "factor": 1.0,
+        "reason": "inside_grasp_workspace"
+      }
+    },
+    {
+      "decision_id": "e889:r3618",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w25",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": "insufficient_grasp_only_horizon",
+      "new_reason": "insufficient_grasp_only_horizon",
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3619",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w25",
+      "arm": "right",
+      "phase": "draining",
+      "old_reason": "draining",
+      "new_reason": "draining",
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3622",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w26",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3623",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w26",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3624",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w26",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": null,
+      "new_reason": null,
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3625",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w26",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": "insufficient_grasp_only_horizon",
+      "new_reason": "insufficient_grasp_only_horizon",
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3626",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w26",
+      "arm": "right",
+      "phase": "correcting",
+      "old_reason": "insufficient_grasp_only_horizon",
+      "new_reason": "insufficient_grasp_only_horizon",
+      "short_closing_admitted": false
+    },
+    {
+      "decision_id": "e889:r3627",
+      "window_id": "e889:sf9acf9173990426a990923ce39e417f4:w26",
+      "arm": "right",
+      "phase": "draining",
+      "old_reason": "draining",
+      "new_reason": "draining",
+      "short_closing_admitted": false
+    }
+  ]
+}

@@ -18,6 +18,7 @@ from yam_pld_rl.block_contract import feasible_bounds
 from yam_pld_rl.block_contract import fingerprint
 from yam_pld_rl.block_contract import map_action
 from yam_pld_rl.block_contract import observation_vector
+from yam_pld_rl.block_contract import validate_contract
 from yam_pld_rl.block_contract import window_context
 from yam_pld_rl.block_replay import compile_replay
 from yam_pld_rl.collector import smooth_manifest
@@ -45,6 +46,55 @@ def manifest():
 
 
 class TrajectoryChecks(unittest.TestCase):
+    @patch("yam_pld_rl.trajectory.model_fk", return_value=SimpleFK())
+    def test_short_closing_is_opt_in_and_does_not_edit_joints_or_transport(self, _fk):
+        c = manifest()["contract"]
+        b = np.zeros((50, 14))
+        b[:, [6, 13]] = 0.5
+        b[:, 0] = np.clip((np.arange(50)-12)*0.01, 0, 0.08)
+        gate = {"apply_residual": True, "close_tick": 0, "close_z": 0.0}
+        old = planning_context(b, b[0], b[0], gate, "left", 10, c)
+        self.assertEqual(old["reason"], "insufficient_grasp_only_horizon")
+        c["trajectory"]["short_closing_min_steps"] = 5
+        validate_contract(c)
+        new = planning_context(b, b[0], b[0], gate, "left", 10, c)
+        self.assertIsNone(new["reason"])
+        self.assertEqual(new["end_index"], 17)
+        pos, neg = feasible_bounds(b, b[0], "left", 10, c, context=new)
+        np.testing.assert_array_equal(pos, np.zeros(7))
+        np.testing.assert_array_equal(neg[:6], np.zeros(6))
+        self.assertGreater(neg[6], 0)
+        out = decode(b, map_action(-np.ones(7), pos, neg), "left", 10, c, context=new)
+        self.assertLess(out[13, 6], b[13, 6])
+        np.testing.assert_array_equal(out[:, :6], b[:, :6])
+        np.testing.assert_array_equal(out[:, 7:], b[:, 7:])
+        np.testing.assert_array_equal(out[:10], b[:10])
+        np.testing.assert_array_equal(out[17:], b[17:])
+        self.assertLessEqual(abs(np.diff(out-b, axis=0)).max(), 0.02+1e-7)
+        self.assertLessEqual(abs(np.diff(out-b, n=2, axis=0)[:, 6]).max(), 0.01+1e-7)
+        jump = b.copy()
+        jump[:, 0] = 0
+        jump[17:, 0] = 0.06
+        guarded = planning_context(jump, jump[0], jump[0], gate, "left", 10, c)
+        self.assertEqual(guarded["reason"], "baseline_bridge_exceeds_motion_guards")
+
+    @patch("yam_pld_rl.trajectory.model_fk", return_value=SimpleFK())
+    def test_short_closing_needs_confirmed_close_and_at_least_five_ticks(self, _fk):
+        c = manifest()["contract"]
+        c["trajectory"]["short_closing_min_steps"] = 5
+        b = np.zeros((50, 14))
+        b[:, [6, 13]] = 0.5
+        for closed, end in ((False, 17), (True, 14)):
+            x = b.copy()
+            x[end:, 0] = 0.06 if closed else 0.3
+            gate = {"apply_residual": True, "close_tick": 0 if closed else None, "close_z": 0.0}
+            ctx = planning_context(x, x[0], x[0], gate, "left", 10, c)
+            self.assertEqual(ctx["reason"], "insufficient_grasp_only_horizon")
+        for value in (True, 4, 9):
+            c["trajectory"]["short_closing_min_steps"] = value
+            with self.assertRaises(ValueError):
+                validate_contract(c)
+
     def test_noise_stationary_and_can_reverse(self):
         noise = CorrelatedNoise()
         first = noise.advance("a", 0, 1 / 30, 0.5, np.full(7, -1.0))
