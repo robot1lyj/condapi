@@ -40,10 +40,28 @@ class CalibratedLearner(SacLearner):
             self.critic = BalancedQ(self.critic, dim, cfg["feature_group_rms"]).to(device)
             self.target = copy.deepcopy(self.critic).requires_grad_(requires_grad=False)
         self.actor_target = copy.deepcopy(self.actor).requires_grad_(requires_grad=False)
+        self.actor_prior_updates = 0
         if cfg["method"] == "parts_td3bc":
             # The deployed network remains runtime-compatible; only its mean is
             # optimized. Online collection std is held at the recorded bootstrap.
             self.actor.std.requires_grad_(requires_grad=False)
+
+    def align_actor_prior(self, b):
+        """Fit recorded parent suggestions in NEW coordinates, train split only.
+
+        Keeps behavioral knowledge through a coordinate/decoder change without
+        transplanting an incompatible old critic or multiplying old offsets.
+        """
+        control = (b["scale"] + b["negative_scale"]).sum(-1) > 0
+        if not control.any():
+            return 0.
+        u, _ = self.actor(b["x"][control], deterministic=True)
+        a = feasible(u, b["scale"][control], b["negative_scale"][control])
+        loss = functional.mse_loss(a, b["prior_action"][control])
+        self._step(loss, self.actor.parameters(), self.aopt)
+        self.actor_prior_updates += 1
+        self.actor_target.load_state_dict(self.actor.state_dict())
+        return float(loss.detach())
 
     @torch.no_grad()
     def backup(self, b):
@@ -131,8 +149,10 @@ class CalibratedLearner(SacLearner):
         return log
 
     def state_dict(self):
-        return {**super().state_dict(), "actor_target": self.actor_target.state_dict()}
+        return {**super().state_dict(), "actor_target": self.actor_target.state_dict(),
+                "actor_prior_updates": self.actor_prior_updates}
 
     def load_state_dict(self, state):
         super().load_state_dict(state)
         self.actor_target.load_state_dict(state["actor_target"])
+        self.actor_prior_updates = state.get("actor_prior_updates", 0)

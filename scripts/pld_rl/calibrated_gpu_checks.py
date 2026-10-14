@@ -86,6 +86,13 @@ def main():
                                              "training_rows": int(arrays["train"].sum())}
         cfg.update(steps=40, mc_warmup_steps=4, critic_warmup_steps=8, log_interval=10, save_interval=20)
         learner = CalibratedLearner(feature_dim(c), cfg)
+        frozen_q = {k: v.clone() for k, v in learner.critic.state_dict().items()}
+        learner.align_actor_prior({**b, "prior_action": b["action"]})
+        assert learner.actor_prior_updates == 1
+        assert learner.actor_updates == 0
+        assert all(torch.equal(frozen_q[k], v) for k, v in learner.critic.state_dict().items())
+        for key, value in learner.actor.state_dict().items():
+            torch.testing.assert_close(value, learner.actor_target.state_dict()[key], rtol=0, atol=0)
         terminal = b["terminal"] == 1
         torch.testing.assert_close(learner.backup(b)[terminal], b["reward"][terminal])
         original = {k: v.clone() for k, v in learner.actor.state_dict().items()}

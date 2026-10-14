@@ -31,6 +31,22 @@ def automatic_reward(candidate, judged):
     proof = candidate.get("outcome")
     if not proof or not proof["kinematic_complete"] or not proof["fresh_rows"]:
         return None, "missing_complete_endpoint"
+    status = (judged or {}).get("suggested_status")
+    if status in {"not_lifted", "no_closure", "dropped"}:
+        if judged.get("intent_evidence_candidate_sha256") != candidate["candidate_sha256"]:
+            return None, "intent_evidence_identity_mismatch"
+        review = {"candidate_id": candidate["candidate_id"], "candidate_sha256": candidate["candidate_sha256"],
+                  "status": status, "approved": True, "reviewer": POLICY,
+                  "evidence_rows": proof["fresh_rows"][-1:], "label_source": "automatic_model_intent_with_kinematics",
+                  "human_reviewed": False, "grasp_intent_confirmed": judged.get("grasp_intent_confirmed") is True,
+                  "held_then_lost_confirmed": judged.get("held_then_lost_confirmed") is True,
+                  "model_confidence": judged.get("confidence"), "model_audit_flags": judged.get("audit_flags", []),
+                  "qwen_suggestion": status, "intent_evidence_sha256": judged.get("intent_evidence_sha256")}
+        try:
+            reviewed_outcome(candidate, review)
+        except (ValueError, KeyError, IndexError) as exc:
+            return None, "unsupported_goal_failure: " + str(exc)
+        return review, "automatic_model_intent_with_kinematics"
     if not judged or judged.get("suggested_label") not in ("success", "failure"):
         return None, "no_model_suggestion"
     outcome = judged["suggested_label"]

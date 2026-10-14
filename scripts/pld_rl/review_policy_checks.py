@@ -21,6 +21,23 @@ def fixture():
 
 
 class ReviewPolicyChecks(unittest.TestCase):
+    def test_goal_failure_needs_model_intent_and_matching_physics(self):
+        candidate, _ = fixture()
+        judged = {"suggested_status": "not_lifted", "grasp_intent_confirmed": True,
+                  "confidence": "low", "intent_evidence_sha256": "1"*64,
+                  "intent_evidence_candidate_sha256": candidate["candidate_sha256"]}
+        # The original held/lifted proof contradicts this proposed failure.
+        self.assertIsNone(automatic_reward(candidate, judged)[0])
+        candidate["outcome"].update(reason="closed_timeout", max_lift_m=.02)
+        review, _ = automatic_reward(candidate, judged)
+        self.assertEqual(review["status"], "not_lifted")
+        self.assertFalse(review["human_reviewed"])
+        judged["grasp_intent_confirmed"] = False
+        self.assertIsNone(automatic_reward(candidate, judged)[0])
+        judged["grasp_intent_confirmed"] = True
+        judged["intent_evidence_candidate_sha256"] = "wrong"
+        self.assertIsNone(automatic_reward(candidate, judged)[0])
+
     def test_weak_disagreeing_suggestion_is_used_with_provenance(self):
         candidate, judged = fixture()
         reward, _ = automatic_reward(candidate, judged)

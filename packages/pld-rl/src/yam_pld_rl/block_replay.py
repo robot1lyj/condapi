@@ -252,6 +252,11 @@ def compile_replay(records, labels, contract, snapshots):
                               "online": mode == "collect", "realized_nonzero": realized, "train": label["split"] == "train",
                               "arm": arm == "right", "attempt": "/".join(key), "episode": "/".join(key[:2]),
                               "decision": p["decision_id"]})
+                if contract.get("trajectory"):
+                    off = 0 if arm == "left" else 7
+                    # Only for actor coordinate initialization. This is NOT
+                    # the executed action and never enters the critic target.
+                    local[-1]["prior_action"] = array(p["actor_physical_center"], (7,), "prior center") / np.asarray(contract["radius"][off:off+7])
                 previous_end, previous_time = end, times[-1]
             if mode == "collect" and not any(row["realized_nonzero"] for row in local):
                 raise ValueError("collect window has no verified nonzero executed correction")

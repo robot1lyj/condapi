@@ -43,7 +43,7 @@ def export_bundle(path, learner, contract, normalization, encoder_sha, config, p
                "normalization": normalization, "encoder_sha256": encoder_sha, "config": config,
                "observation_dim": feature_dim(contract), "actor_sha256": sha256(path / "actor.pt"),
                "provenance": provenance, "robot_validated": False,
-               "phase": "bootstrap_exploration" if learner.actor_updates == 0 else "candidate_requires_AB",
+               "phase": "candidate_requires_AB" if learner.actor_updates or provenance.get("actor_prior_updates", 0) else "bootstrap_exploration",
                "entropy_semantics": "tanh latent u; critic action is state-feasible normalized physical offset"}
     if contract.get("trajectory"):
         manifest["entropy_semantics"] = "tanh latent target; critic action precedes deterministic recorded trajectory/geometry decoding"
@@ -68,6 +68,8 @@ def main():
                                          capability=torch.cuda.get_device_capability() if torch.cuda.is_available() else None)
     cfg, contract, stats = [json.loads(path.read_text()) for path in (args.config, args.contract, args.normalization)]
     validate_contract(contract)
+    if not 0 <= cfg.get("actor_prior_steps", 0) <= cfg["critic_warmup_steps"]:
+        raise ValueError("coordinate alignment must finish before RL actor updates")
     torch.set_num_threads(2)
     torch.manual_seed(cfg["seed"])
     torch.backends.cuda.matmul.allow_tf32 = False
@@ -116,6 +118,10 @@ def main():
         if calibrated:
             tensors.update({k: torch.as_tensor(arrays[k], device="cuda", dtype=torch.float32)
                             for k in ("mc_return", "attempt_outcome")})
+        if cfg.get("actor_prior_steps", 0):
+            if not calibrated or not contract.get("trajectory"):
+                raise ValueError("coordinate initialization requires the calibrated trajectory learner")
+            tensors["prior_action"] = torch.as_tensor(arrays["prior_action"], device="cuda", dtype=torch.float32)
     identity = {"code_commit": commit, "inputs": inputs, "execution_target": args.execution}
     policy_contract = {"contract": contract, "normalization": stats, "encoder_sha256": sha256(args.encoder), "config": cfg}
     begin = 0
@@ -170,7 +176,8 @@ def main():
                     "torch_rng": torch.get_rng_state(), "cuda_rng": torch.cuda.get_rng_state()}, tmp)
         tmp.replace(path)
         export_bundle(args.output / f"bundle-{step:06d}", learner, contract, stats, sha256(args.encoder), cfg,
-                      {**identity, "checkpoint_sha256": sha256(path), "actor_updates": learner.actor_updates})
+                      {**identity, "checkpoint_sha256": sha256(path), "actor_updates": learner.actor_updates,
+                       "actor_prior_updates": getattr(learner, "actor_prior_updates", 0)})
 
     started = time.monotonic()
     if tensors is None:
@@ -194,6 +201,9 @@ def main():
             ids += draw(groups[True], cfg["batch_size"] - n)
         batch = {k: v[ids] for k, v in tensors.items()}
         log = learner.update(batch, update_actor=step > cfg["critic_warmup_steps"])
+        if step <= cfg.get("actor_prior_steps", 0):
+            log["train/actor_prior_alignment_loss"] = learner.align_actor_prior(batch)
+        log["actor_prior_updates"] = getattr(learner, "actor_prior_updates", 0)
         if step % cfg["log_interval"] == 0 or step == cfg["steps"]:
             log.update(elapsed_seconds=time.monotonic() - started, learning_rate=cfg["learning_rate"],
                        online_environment_steps=int((arrays["online"] & arrays["train"]).sum()),
@@ -220,6 +230,7 @@ def main():
             save(step)
     write_json(args.output / "complete.json", {"steps": cfg["steps"], "seconds": time.monotonic() - started,
                "actor_updates": learner.actor_updates, "robot_success_rate": None,
+               "actor_prior_updates": getattr(learner, "actor_prior_updates", 0),
                "bundle": f"bundle-{cfg['steps']:06d}", "contract_sha256": fingerprint(contract)})
 
 

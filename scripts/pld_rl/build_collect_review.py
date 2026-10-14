@@ -77,7 +77,7 @@ def main():
         cards.append({"candidate_id": cid, "candidate_sha256": c["candidate_sha256"], "episode_id": c["episode_id"],
                       "arm": c["arm"], "outcome": proof, "images": images, "montage": args.curator + "/" + c["montage"],
                       "automatic": bool(automatic), "pending_reason": reason,
-                      "suggested": {"success": "held", "failure": "empty"}.get(result.get("suggested_label")),
+                      "suggested": result.get("suggested_status") or {"success": "held", "failure": "empty"}.get(result.get("suggested_label")),
                       "confidence": result.get("confidence"), "reason": " ".join(result.get("reasons", [])),
                       "flags": result.get("audit_flags", [])})
     identity = hashlib.sha256(candidates_path.read_bytes()).hexdigest()

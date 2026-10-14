@@ -77,7 +77,7 @@ def main():
                 proposal = approvals[reward["attempt_id"]]
                 reward["label_provenance"] = {k: proposal[k] for k in (
                     "candidate_sha256", "label_source", "human_reviewed", "model_confidence", "model_audit_flags",
-                    "qwen_suggestion", "dino_suggestion", "note") if k in proposal}
+                    "qwen_suggestion", "dino_suggestion", "intent_evidence_sha256", "note") if k in proposal}
             for record in linked:
                 target.write(json.dumps(record, ensure_ascii=False, allow_nan=False) + "\n")
             count += len(linked)
