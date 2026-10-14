@@ -45,3 +45,26 @@ def test_launch_needs_server_slurm(monkeypatch):
     recipe, report, data = entry.checked_recipe(entry.DEFAULT_RECIPE)
     with pytest.raises(RuntimeError, match="Slurm"):
         entry.launch(recipe, report, data)
+
+
+def test_10k_replacement_has_independent_run_and_matching_decay():
+    old, _, _ = entry.checked_recipe(entry.DEFAULT_RECIPE)
+    new, _, _ = entry.checked_recipe(entry.RECIPE_10K)
+    command, _ = entry.train_command(new)
+    assert new["run_name"] != old["run_name"]
+    assert new["control_root"] != old["control_root"]
+    assert new["selection_sha256"] == old["selection_sha256"]
+    assert new["parent_checkpoint"] == old["parent_checkpoint"]
+    assert command[command.index("--steps") + 1] == "10000"
+    assert command[command.index("--decay-steps") + 1] == "10000"
+    assert command[command.index("--warmup-steps") + 1] == "200"
+    assert "--resume" not in command
+
+
+def test_10k_cannot_keep_5k_decay(monkeypatch):
+    original = entry.read_json
+    altered = copy.deepcopy(original(entry.RECIPE_10K))
+    altered["training"]["decay_steps"] = 5000
+    monkeypatch.setattr(entry, "read_json", lambda path: altered if path == entry.RECIPE_10K else original(path))
+    with pytest.raises(ValueError, match="explicitly confirmed"):
+        entry.checked_recipe(entry.RECIPE_10K)

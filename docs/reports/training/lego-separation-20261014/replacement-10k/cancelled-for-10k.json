@@ -1,0 +1,21 @@
+{
+  "schema": "lego_separation_superseded_v1",
+  "observed_at_utc": "2026-10-14T10:52:04.905962+00:00",
+  "job_id": 2344,
+  "reason": "user confirmed replacement by independent 10000-step run initialized from original 240000 weights",
+  "last_logged_metric": {
+    "gpu_memory_gib": 9.396591663360596,
+    "grad_norm": 0.13230077922344208,
+    "learning_rate": 2.977394160552649e-06,
+    "loss": 0.014816013164818287,
+    "param_norm": 1804.2470703125,
+    "samples_per_second": 14.05755749185258,
+    "step": 481,
+    "step_seconds": 2.2763556199963206,
+    "time": 1791975120.933818
+  },
+  "committed_checkpoints": [],
+  "original_run_preserved": true,
+  "new_run": "lego_pi05_rtc_separation_r1_10k_20261014",
+  "old_steps_count_toward_new_budget": false
+}

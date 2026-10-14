@@ -14,6 +14,7 @@ import subprocess
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_RECIPE = ROOT / "configs/native/pi05-lego-separation-r1.json"
+RECIPE_10K = ROOT / "configs/native/pi05-lego-separation-r1-10k.json"
 
 
 def sha256(path):
@@ -51,18 +52,23 @@ def checked_recipe(path):
         raise ValueError("Dataset source or split changed")
     if any(stats["frames"] != 278516 for stats in dataset["pool_stats"].values()):
         raise ValueError("Approved 50/50 frame mixture changed")
+    approved_budgets = {"recipe-draft.md v1": 5000, "recipe-v2-10k": 10000}
+    version = recipe["approval"]["recipe_version"]
+    if version not in approved_budgets:
+        raise ValueError("Unknown confirmed recipe version")
+    budget = approved_budgets[version]
     expected = {
         "config": "pi05_yam",
         "batch_size": 32,
         "fsdp_devices": 4,
         "num_workers": 2,
-        "total_steps": 5000,
+        "total_steps": budget,
         "horizon": 50,
         "rtc_training_max_delay": 10,
         "peak_lr": 3e-6,
         "decay_lr": 3e-7,
         "warmup_steps": 200,
-        "decay_steps": 5000,
+        "decay_steps": budget,
         "save_interval": 1000,
         "keep_period": 1000,
         "seed": 42,
@@ -74,7 +80,7 @@ def checked_recipe(path):
         or recipe["automatic_training_start"] is not False
         or recipe["approval"]["training_authorized"] is not True
     ):
-        raise ValueError("Recipe differs from explicitly confirmed v1")
+        raise ValueError("Recipe differs from explicitly confirmed version")
     return recipe, report, dataset
 
 

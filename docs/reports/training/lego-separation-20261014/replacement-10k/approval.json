@@ -1,0 +1,20 @@
+{
+  "schema": "dagger_recipe_approval_v2",
+  "date": "2026-10-14",
+  "recipe_version": "recipe-v2-10k",
+  "source": "direct human confirmation of the preceding full recipe table",
+  "user_text": "好的，取消刚刚的训练，换成这个",
+  "native_recipe": "configs/native/pi05-lego-separation-r1-10k.json",
+  "native_recipe_sha256": "5fa537e8ffe328b4d46badd02cce25a8fb5ac2750bfe89bfdede2ded473157a2",
+  "superseded_job": 2344,
+  "superseded_last_logged_step": 481,
+  "superseded_complete_checkpoints": [],
+  "new_run": "lego_pi05_rtc_separation_r1_10k_20261014",
+  "initialization": "original 240000 weights, new optimizer and schedule",
+  "new_run_budget": 10000,
+  "decay_steps": 10000,
+  "old_steps_count_toward_new_budget": false,
+  "selection_changed": false,
+  "norm_changed": false,
+  "training_authorized": true
+}
