@@ -94,7 +94,9 @@ class InterventionSession:
             if a["close_tick"] is not None:
                 a["close_z"] = a["minimum_z"]
             reason = None
-            if (tick - a["start_tick"]) * dt >= self.contract["max_attempt_seconds"]:
+            if self.contract.get("trajectory") and not self._in_workspace(heights["measured_xyz"][a["arm"]], a["arm"]):
+                reason = "left_grasp_workspace"
+            elif (tick - a["start_tick"]) * dt >= self.contract["max_attempt_seconds"]:
                 reason = "timeout"
             elif modern and a["close_tick"] is None and (tick-a["start_tick"])*dt >= cfg["forecast_timeout_s"]:
                 reason = "forecast_timeout"
@@ -117,8 +119,14 @@ class InterventionSession:
                 if modern:
                     # Keep the window for queue/observation transitions, but
                     # produce no new residual during this mandatory tail.
+                    pending = a.get("pending_until_tick", tick)
+                    if self.contract.get("trajectory"):
+                        # This reply adds no correction after its immutable
+                        # prefix. Uncommitted old tails are superseded. Replay
+                        # must prove this reply was accepted before rewarding.
+                        pending = min(pending, tick+delay-1)
                     a.update(phase="draining", stop_tick=tick, stop_reason=reason,
-                             drain_until_tick=max(tick, a.get("pending_until_tick", tick)))
+                             drain_until_tick=max(tick, pending))
                 else:
                     ended = {"window_id": a["window_id"], "reason": reason, "arm": a["arm"]}
                     self.arms[a["arm"]] = {"armed": False, "minimum": a["minimum"]}
@@ -127,6 +135,11 @@ class InterventionSession:
         if self.active is None and (ended is None or (modern and ended.get("gate_version") == 3)):
             for arm, index in (("left", 6), ("right", 13)):
                 if not self.arms[arm]["armed"]:
+                    continue
+                if self.contract.get("trajectory") and (
+                    not self._in_workspace(heights["measured_xyz"][arm], arm)
+                    or not self._in_workspace(heights["planned_xyz"][arm][delay], arm)
+                ):
                     continue
                 # Committed RTC prefix is past policy ownership. Only the
                 # current Pi proposal's future editable suffix can trigger.
@@ -160,14 +173,18 @@ class InterventionSession:
                         result[key] = self.active[key]
         return result
 
-    def note_proposal(self, tick, delay):
+    def _in_workspace(self, xyz, arm):
+        from yam_pld_rl.trajectory import in_workspace  # noqa: PLC0415
+        return bool(in_workspace(xyz, arm, self.contract))
+
+    def note_proposal(self, tick, delay, *, end_index=None):
         """Conservative last possible residual tick, even for zero/probe output.
 
         Previously sent proposals may remain in the RTC prefix. Only the
         recorder can later prove which commands were actually consumed.
         """
         if self.contract["gate"].get("version") == 3 and self.active and self.active["phase"] == "correcting":
-            end = tick + delay + self.contract["block_steps"] - 1
+            end = tick + (delay + self.contract["block_steps"] if end_index is None else end_index) - 1
             self.active["pending_until_tick"] = max(end, self.active.get("pending_until_tick", end))
 
     def _legacy_select(self, request, rtc, state, base, heights):

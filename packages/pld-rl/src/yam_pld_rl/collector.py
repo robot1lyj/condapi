@@ -20,15 +20,17 @@ def validate_collector(manifest):
         if "actor_contract" in manifest:
             raise ValueError("actor coordinates require an explicit collector")
         return
-    if profile.get("kind") != "physical_center_tanh_v1":
+    smooth = profile.get("kind") == "coherent_trajectory_v1"
+    if profile.get("kind") not in {"physical_center_tanh_v1", "coherent_trajectory_v1"}:
         raise ValueError("unknown collector")
     target, actor = manifest["contract"], manifest["actor_contract"]
     validate_contract(target)
     validate_contract(actor)
-    if target["gate"].get("version") != 3 or target.get("action_mapping") != "signed_feasible_v1":
+    if target["gate"].get("version") != 3 or target.get("action_mapping") != ("signed_trajectory_v1" if smooth else "signed_feasible_v1"):
         raise ValueError("collector requires the drained signed action contract")
     for key in set(target) | set(actor):
-        if key not in {"radius", "max_residual_step", "status"} and target.get(key) != actor.get(key):
+        allowed = {"radius", "max_residual_step", "status"} | ({"trajectory", "block_steps", "action_mapping"} if smooth else set())
+        if key not in allowed and target.get(key) != actor.get(key):
             raise ValueError("collector cannot change gate, time or hardware limits")
     for key in ("radius", "max_residual_step"):
         if np.any(np.asarray(target[key]) < np.asarray(actor[key])):
@@ -36,7 +38,15 @@ def validate_collector(manifest):
     std = array(profile["latent_std"], (7,), "collector std")
     if np.any(std <= 0) or np.any(std > 1):
         raise ValueError("invalid latent standard deviation")
-    if profile.get("eval_preserves_parent_physical_policy") is not True:
+    if smooth:
+        evaluation = manifest["eval_contract"]
+        validate_contract(evaluation)
+        if evaluation["radius"] != actor["radius"]:
+            raise ValueError("eval must preserve the parent target scale")
+        for key in set(target) | set(evaluation):
+            if key not in {"radius", "max_residual_step", "status"} and target.get(key) != evaluation.get(key):
+                raise ValueError("eval trajectory and scope must match collect")
+    elif profile.get("eval_preserves_parent_physical_policy") is not True:
         raise ValueError("collector must preserve parent eval")
     parent = profile.get("parent_snapshot_sha256", "")
     if len(parent) != 64 or any(c not in "0123456789abcdef" for c in parent):
@@ -44,7 +54,10 @@ def validate_collector(manifest):
 
 
 def execution_contract(manifest, mode):
-    # Eval/probe/shadow preserve the parent path. Only collect expands support.
+    # Only collect expands support. Continuous eval uses the same new decoder
+    # and scope guards, while probe/shadow preserve the parent path.
+    if mode == "eval" and manifest.get("eval_contract"):
+        return manifest["eval_contract"]
     return manifest.get("actor_contract", manifest["contract"]) if mode != "collect" else manifest["contract"]
 
 
@@ -78,13 +91,35 @@ def expanded_manifest(parent, *, parent_snapshot):
     return out
 
 
+def smooth_manifest(parent, *, parent_snapshot):
+    out = expanded_manifest(parent, parent_snapshot=parent_snapshot)
+    c = out["contract"]
+    c.update(action_mapping="signed_trajectory_v1", block_steps=36,
+             max_residual_step=[.015]*6+[.02]+[.015]*6+[.02],
+             trajectory={"kind": "prefix_trajectory_v1", "ramp_steps": 12, "noise_tau_s": .5, "bridge_velocity_gain": .25,
+                         "max_residual_second_difference": [.006]*6+[.01]+[.006]*6+[.01],
+                         "max_target_second_difference": [.02]*6+[.10]+[.02]*6+[.10],
+                         "forward_x_max_m": {"left": .40, "right": .40}, "approach_z_margin_m": .12},
+             status="continuous collect candidate; target radius .08; trajectory and workspace verification required")
+    out["eval_contract"] = copy.deepcopy(c)
+    for key in ("radius", "max_residual_step"):
+        out["eval_contract"][key] = copy.deepcopy(parent["contract"][key])
+    out["collector"].update(kind="coherent_trajectory_v1", eval_preserves_parent_physical_policy=False,
+                            eval_preserves_parent_target_scale=True,
+                            density_semantics="conditional Gaussian innovation then tanh; before deterministic trajectory/geometry decoding")
+    validate_collector(out)
+    return out
+
+
 def validate_collector_trace(p, manifest):
     """Check physical coordinates and parent observation; no network execution."""
     if not manifest.get("collector"):
         return
-    if p["mode"] != "collect" or p.get("execution_contract_sha256") != fingerprint(manifest["contract"]):
+    smooth = manifest["collector"]["kind"] == "coherent_trajectory_v1"
+    c = execution_contract(manifest, p["mode"])
+    if p["mode"] not in ({"collect", "eval"} if smooth else {"collect"}) or p.get("execution_contract_sha256") != fingerprint(c):
         raise ValueError("expanded replay requires collect execution coordinates")
-    ac, c = manifest["actor_contract"], manifest["contract"]
+    ac = manifest["actor_contract"]
     base, arm, d = p.get("physical_base", p["base"]), p["arm"], p["delay_steps"]
     ap, an = feasible_bounds(base, p["previous_command"], arm, d, ac)
     if p["gate"].get("apply_residual") is False:
@@ -97,6 +132,9 @@ def validate_collector_trace(p, manifest):
         raise ValueError("invalid parent action")
     offset = 0 if arm == "left" else 7
     center = map_action(mean_u, ap, an) * np.asarray(ac["radius"][offset:offset+7], np.float32)
+    if smooth:
+        radius = np.asarray(c["radius"][offset:offset+7])
+        center = np.clip(center, -radius*np.asarray(p["negative_scale"]), radius*np.asarray(p["scale"]))
     latent = center_latent(center, c["radius"][offset:offset+7], p["scale"], p["negative_scale"])
     for key, value, shape in (("actor_context", ax[2264:], (feature_dim(ac)-2264,)), ("actor_scale", ap, (7,)),
                               ("actor_negative_scale", an, (7,)), ("actor_physical_center", center, (7,)),
@@ -104,3 +142,11 @@ def validate_collector_trace(p, manifest):
                               ("collector_latent_std", manifest["collector"]["latent_std"], (7,))):
         if not np.allclose(array(p[key], shape, key), value, atol=1e-6, rtol=0):
             raise ValueError(f"collector provenance mismatch: {key}")
+    if smooth and p["gate"].get("apply_residual"):
+        noise = p["collector_noise"]
+        expected = latent + np.asarray(manifest["collector"]["latent_std"])*np.asarray(noise["value"])
+        if not np.allclose(np.tanh(expected), p["sample_u"], atol=1e-6, rtol=0):
+            raise ValueError("correlated sample mismatch")
+        rho = noise["rho"]
+        if not 0 <= rho < 1 or not np.allclose(noise["value"], rho*np.asarray(noise["previous"])+np.sqrt(1-rho*rho)*np.asarray(noise["innovation"]), atol=1e-6, rtol=0):
+            raise ValueError("correlated noise transition mismatch")

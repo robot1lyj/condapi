@@ -80,9 +80,9 @@ def main():
                         raise ValueError("wrong SDK physical baseline")
                     expected = base
                     if trace["gate"]["active"]:
-                        if mode == "collect":
+                        if mode == "collect" or contract.get("trajectory"):
                             validate_collector_trace(trace, manifest)
-                        expected = decode(base, trace["action"], trace["arm"], d, contract)
+                        expected = decode(base, trace["action"], trace["arm"], d, contract, context=trace.get("trajectory_context"))
                         active_arms.add(trace["arm"])
                         zero_expected = mode in {"probe", "shadow"} or (
                             mode == "eval" and args.expected_actor_phase == "bootstrap_exploration")
@@ -90,7 +90,7 @@ def main():
                             raise ValueError("bootstrap zero mode changed physical commands")
                         if mode == "eval" and np.any(trace["action"]):
                             learned_eval_nonzero += 1
-                        if mode == "collect" and not np.any(trace["action"]):
+                        if mode == "collect" and not np.any(trace["action"]) and not trace.get("trajectory_context", {}).get("reason"):
                             raise ValueError("collect has no stochastic residual")
                     wire = wire_plan(expected, raw, d)
                     if (not np.array_equal(result["actions"], wire) or not np.array_equal(wire[:d], prefix)

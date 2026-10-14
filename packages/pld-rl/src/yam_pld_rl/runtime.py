@@ -32,6 +32,9 @@ from yam_pld_rl.data import sha256
 from yam_pld_rl.intervention import InterventionSession
 from yam_pld_rl.kinematics import YamKinematics
 from yam_pld_rl.sac import SquashedActor
+from yam_pld_rl.trajectory import CorrelatedNoise
+from yam_pld_rl.trajectory import planning_context
+from yam_pld_rl.trajectory import trajectory_decode
 
 
 class BlockRuntime:
@@ -89,6 +92,8 @@ class BlockRuntime:
     def infer(self, session, obs, rtc, request, output):
         start = time.monotonic()
         c = execution_contract(self.manifest, request.get("mode"))
+        smooth = ((self.manifest.get("collector") or {}).get("kind") == "coherent_trajectory_v1"
+                  and request.get("mode") in {"collect", "eval"})
         if request.get("mode") == "off":
             session.reset()
             return output
@@ -128,7 +133,8 @@ class BlockRuntime:
         if not gate["active"]:
             return {**output, "actions": trace["wire_actions"], "pld": trace}
         arm, elapsed = gate["arm"], gate["elapsed_seconds"]
-        scale, negative_scale = feasible_bounds(base, previous, arm, delay, c)
+        context = planning_context(base, previous, state, gate, arm, delay, c) if smooth else None
+        scale, negative_scale = feasible_bounds(base, previous, arm, delay, c, context=context)
         if gate.get("apply_residual") is False:
             scale, negative_scale = np.zeros(7, dtype=np.float32), np.zeros(7, dtype=np.float32)
         images = []
@@ -144,7 +150,7 @@ class BlockRuntime:
         extra = {"negative_scale": negative_scale, "context": window_context(gate, tick, heights[arm], c["action_dt_s"])} if c["gate"].get("version") == 3 else {}
         x = observation_vector(features, state, base, previous, arm, delay, elapsed, scale, self.manifest["normalization"], **extra)
         mode = request["mode"]
-        if self.manifest.get("collector") and mode == "collect":
+        if self.manifest.get("collector") and (mode == "collect" or smooth):
             ac = self.actor_contract
             ap, an = feasible_bounds(base, previous, arm, delay, ac)
             if gate.get("apply_residual") is False:
@@ -156,12 +162,28 @@ class BlockRuntime:
             mean_u = mean_u[0].cpu().numpy()
             offset = 0 if arm == "left" else 7
             physical_center = map_action(mean_u, ap, an) * np.asarray(ac["radius"][offset:offset+7], np.float32)
+            if smooth:
+                radius = np.asarray(c["radius"][offset:offset+7])
+                physical_center = np.clip(physical_center, -radius*negative_scale, radius*scale)
             mu = torch.from_numpy(center_latent(physical_center, c["radius"][offset:offset+7], scale, negative_scale)).to(self.device)[None]
             std = torch.tensor(self.manifest["collector"]["latent_std"], device=self.device)[None]
-            z = mu + std * torch.randn_like(mu)
+            if smooth:
+                noise = {"rho": 0., "previous": np.zeros(7), "innovation": np.zeros(7), "value": np.zeros(7)}
+                if mode == "collect" and gate.get("apply_residual"):
+                    innovation = torch.randn(7, device=self.device).cpu().numpy()
+                    noise = session.noise.advance(gate["window_id"], tick, c["action_dt_s"], c["trajectory"]["noise_tau_s"], innovation)
+                z = mu + std * torch.as_tensor(noise["value"], device=self.device, dtype=mu.dtype)[None]
+                conditional_mu = mu + std * noise["rho"] * torch.as_tensor(noise["previous"], device=self.device, dtype=mu.dtype)[None]
+                conditional_std = std * math.sqrt(1-noise["rho"]**2)
+                trace.update(collector_noise=noise, trajectory_context=context)
+            else:
+                z = mu + std * torch.randn_like(mu)
+                conditional_mu, conditional_std = mu, std
             u = torch.tanh(z)
-            logp = (-.5 * (((z-mu)/std).square()+2*std.log()+math.log(2*math.pi))
+            logp = (-.5 * (((z-conditional_mu)/conditional_std).square()+2*conditional_std.log()+math.log(2*math.pi))
                     -2*(math.log(2)-z-torch.nn.functional.softplus(-2*z))).sum(-1)
+            if smooth and (mode == "eval" or not gate.get("apply_residual")):
+                logp = torch.zeros_like(logp)
             # Visual/state/plan/previous-command fields are shared with x.
             trace.update(actor_context=ax[2264:], actor_mean_u=mean_u, actor_scale=ap, actor_negative_scale=an,
                          actor_physical_center=physical_center, collector_latent_center=mu[0].cpu().numpy(),
@@ -170,15 +192,22 @@ class BlockRuntime:
             u, logp = self.actor(torch.from_numpy(x)[None].to(self.device), deterministic=mode == "eval")
         u = u[0].cpu().numpy()
         action = map_action(u, scale, negative_scale) if mode in {"collect", "eval"} else np.zeros(7, dtype=np.float32)
-        actions = decode(base, action, arm, delay, c)
+        if smooth:
+            actions, projection = trajectory_decode(base, action, arm, c, context)
+            trace["trajectory_projection"] = projection
+            if mode == "collect" and (context["reason"] or projection["factor"] == 0):
+                session.noise = CorrelatedNoise()
+                trace["collector_noise_reset_after"] = context["reason"] or projection["reason"]
+        else:
+            actions = decode(base, action, arm, delay, c)
         wire = wire_plan(actions, raw_base, delay)
         trace.update(arm=arm, window_id=gate["window_id"], elapsed_seconds=elapsed,
-                     envelope_end_tick=tick + delay + c["block_steps"], x=x, scale=scale, negative_scale=negative_scale, sample_u=u,
+                     envelope_end_tick=tick + (context["end_index"] if smooth else delay + c["block_steps"]), x=x, scale=scale, negative_scale=negative_scale, sample_u=u,
                      action=action, log_prob_u=float(logp[0]), actions=wire, physical_actions=actions,
                      wire_actions=wire,
-                     residual_applied=bool(np.any(action)),
+                     residual_applied=bool(np.any(actions != base)),
                      encoder_ms_included_total_ms=(time.monotonic() - start) * 1000)
-        session.note_proposal(tick, delay)
+        session.note_proposal(tick, delay, end_index=context["end_index"] if smooth else None)
         return {**output, "actions": wire, "pld": trace}
 
 
@@ -186,9 +215,22 @@ class RuntimeSession:
     def __init__(self, runtime):
         self.runtime = runtime
         self.gate = InterventionSession(runtime.contract)
+        self.mode = None
+        self.noise = CorrelatedNoise()
 
     def reset(self):
         self.gate.reset()
+        self.noise = CorrelatedNoise()
+
+    def select(self, *args):
+        return self.gate.select(*args)
+
+    def note_proposal(self, *args, **kwargs):
+        return self.gate.note_proposal(*args, **kwargs)
 
     def __call__(self, obs, rtc, request, output):
-        return self.runtime.infer(self.gate, obs, rtc, request, output)
+        if request.get("mode") != self.mode:
+            self.mode = request.get("mode")
+            self.gate = InterventionSession(execution_contract(self.runtime.manifest, self.mode))
+            self.noise = CorrelatedNoise()
+        return self.runtime.infer(self, obs, rtc, request, output)

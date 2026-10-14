@@ -29,6 +29,7 @@ from yam_pld_rl.curator import reconstruct_intervals
 from yam_pld_rl.grasp_outcomes import attach_outcomes
 from yam_pld_rl.intervention import DEFAULT_GATE
 from yam_pld_rl.intervention import InterventionSession
+from yam_pld_rl.trajectory import planning_context
 
 
 def modern_contract():
@@ -65,7 +66,10 @@ def modern_recording(kind="held", *, contract_override=None):
                 {"observation_policy_tick": tick, "delay_steps": delay},
                 state,
                 base,
-                {"left": state[0], "right": 0.0},
+                {"left": state[0], "right": 0.0,
+                 "measured_xyz": {"left": [.2, 0., state[0]], "right": [.2, 0., 0.]},
+                 "planned_xyz": {"left": [[.2, 0., q[0]] for q in base], "right": [[.2, 0., q[7]] for q in base]},
+                 "planned_z_m": {"left": base[:, 0], "right": base[:, 7]}},
             )
             p = {
                 **identity,
@@ -86,7 +90,8 @@ def modern_recording(kind="held", *, contract_override=None):
                 "replay_eligible": True,
             }
             if gate["active"]:
-                pos, neg = feasible_bounds(base, previous, gate["arm"], delay, c)
+                context = planning_context(base, previous, state, gate, gate["arm"], delay, c) if c.get("trajectory") else None
+                pos, neg = feasible_bounds(base, previous, gate["arm"], delay, c, context=context)
                 if not gate["apply_residual"]:
                     pos, neg = np.zeros(7, np.float32), np.zeros(7, np.float32)
                 u = np.full(7, 0.2, np.float32)
@@ -112,9 +117,11 @@ def modern_recording(kind="held", *, contract_override=None):
                         negative_scale=neg,
                         context=window_context(gate, tick, state[0], 1 / 30),
                     ).tolist(),
-                    actions=decode(base, a, gate["arm"], delay, c).tolist(),
+                    actions=decode(base, a, gate["arm"], delay, c, context=context).tolist(),
                 )
-                session.note_proposal(tick, delay)
+                if context:
+                    p["trajectory_context"] = context
+                session.note_proposal(tick, delay, end_index=context["end_index"] if context else None)
             token = {
                 "epoch": 0,
                 "request_id": p["request_id"],

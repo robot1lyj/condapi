@@ -53,14 +53,15 @@ def validate_contract(c):
 
     if c.get("gate") not in (DEFAULT_GATE, V2_GATE, LEGACY_GATE) or c.get("fk_model_sha256") != MODEL_SHA256:
         raise ValueError("explicit pinned Thor gate and FK geometry required")
-    if c.get("action_mapping") not in (None, "signed_feasible_v1"):
+    if c.get("action_mapping") not in (None, "signed_feasible_v1", "signed_trajectory_v1"):
         raise ValueError("unsupported action mapping")
     if c["gate"].get("version") == 3 and c.get("reward_contract") != "drained_grasp_v1":
         raise ValueError("gate v3 requires drained outcome contract")
     if c.get("baseline_transform") not in (None, "sdk_gripper_endpoints_v1"):
         raise ValueError("unsupported physical baseline transform")
     k = integer(c["block_steps"], "block_steps", 4)
-    if k > 20 or c["action_dt_s"] != 1 / 30 or not 0 < c["discount_per_second"] <= 1:
+    trajectory = c.get("action_mapping") == "signed_trajectory_v1"
+    if k > (36 if trajectory else 20) or c["action_dt_s"] != 1 / 30 or not 0 < c["discount_per_second"] <= 1:
         raise ValueError("invalid block/time contract")
     lo, hi = array(c["lower"], (14,), "lower"), array(c["upper"], (14,), "upper")
     radius = array(c["radius"], (14,), "radius")
@@ -71,6 +72,15 @@ def validate_contract(c):
         raise ValueError("invalid residual increment guard")
     if not 0 < c["max_attempt_seconds"] <= 30:
         raise ValueError("explicit bounded attempt duration required")
+    if trajectory:
+        t = c["trajectory"]
+        if (t["kind"] != "prefix_trajectory_v1" or not 3 <= t["ramp_steps"] <= 14
+                or not 0 < t["noise_tau_s"] <= 1 or not 0 <= t["approach_z_margin_m"] <= .2
+                or not 0 <= t["bridge_velocity_gain"] <= 1
+                or np.any(array(t["max_residual_second_difference"], (14,), "residual acceleration") <= 0)
+                or np.any(array(t["max_target_second_difference"], (14,), "target acceleration") <= 0)
+                or not all(0 < t["forward_x_max_m"][a] < 1 for a in ("left", "right"))):
+            raise ValueError("invalid prefix trajectory contract")
     if c.get("grasp_z_range_m"):
         if not c.get("grasp_scope_evidence"):
             raise ValueError("scene scope calibration evidence required")
@@ -145,8 +155,13 @@ def feasible_scale(base, previous_command, arm, delay, c):
     return np.clip(bound / np.asarray(c["radius"])[axes], 0, 1).astype(np.float32)
 
 
-def feasible_bounds(base, previous_command, arm, delay, c):
+def feasible_bounds(base, previous_command, arm, delay, c, *, context=None):
     """Positive/negative magnitudes; zero always means the physical Pi plan."""
+    if c.get("action_mapping") == "signed_trajectory_v1":
+        from yam_pld_rl.trajectory import feasible_trajectory_bounds  # noqa: PLC0415
+        if context is None:
+            raise ValueError("trajectory planning context required")
+        return feasible_trajectory_bounds(base, previous_command, arm, c, context)
     symmetric = feasible_scale(base, previous_command, arm, delay, c)
     if c.get("action_mapping") != "signed_feasible_v1":
         return symmetric, symmetric.copy()
@@ -180,11 +195,16 @@ def map_action(u, positive, negative):
     return u * np.where(u < 0, negative, positive)
 
 
-def decode(base, scaled_action, arm, delay, c):
+def decode(base, scaled_action, arm, delay, c, *, context=None):
     a = array(scaled_action, (7,), "scaled_action")
     if np.any(np.abs(a) > 1.000001):
         raise ValueError("residual outside support")
     array(base, (50, 14), "base")
+    if c.get("action_mapping") == "signed_trajectory_v1":
+        from yam_pld_rl.trajectory import trajectory_decode  # noqa: PLC0415
+        if context is None:
+            raise ValueError("trajectory planning context required")
+        return trajectory_decode(base, a, arm, c, context)[0]
     out = np.asarray(base).copy()
     if out.dtype.kind != "f":
         raise ValueError("physical actions must have floating dtype")

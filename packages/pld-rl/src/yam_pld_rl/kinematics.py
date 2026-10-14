@@ -98,6 +98,11 @@ class YamKinematics:
         state, base = np.asarray(state), np.asarray(base)
         count = len(base)
         poses = np.vstack((state[:6], state[7:13], base[:, :6], base[:, 7:13]))
-        z = self.positions(poses)[:, 2]
-        return {"left": float(z[0]), "right": float(z[1]),
-                "planned_z_m": {"left": z[2:2 + count].tolist(), "right": z[2 + count:].tolist()}}
+        xyz = self.positions(poses)
+        z = xyz[:, 2]
+        result = {"left": float(z[0]), "right": float(z[1]),
+                  "planned_z_m": {"left": z[2:2 + count].tolist(), "right": z[2 + count:].tolist()}}
+        if contract.get("trajectory"):
+            result.update(measured_xyz={"left": xyz[0].tolist(), "right": xyz[1].tolist()},
+                          planned_xyz={"left": xyz[2:2+count].tolist(), "right": xyz[2+count:].tolist()})
+        return result

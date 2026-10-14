@@ -19,6 +19,7 @@ from yam_pld_rl.block_contract import wire_plan
 from yam_pld_rl.collector import execution_contract
 from yam_pld_rl.collector import validate_collector
 from yam_pld_rl.collector import validate_collector_trace
+from yam_pld_rl.trajectory import planning_context
 
 
 def compile_replay(records, labels, contract, snapshots):
@@ -94,7 +95,16 @@ def compile_replay(records, labels, contract, snapshots):
                         or last["end_tick"] < settle + contract["gate"]["settle_observation_ticks"]):
                     raise ValueError("unverified drained reward endpoint")
                 correcting = [r["proposal"] for r in attempt if r["proposal"]["gate"].get("phase") == "correcting"]
-                if not correcting or settle < max(p["start_tick"]+p["delay_steps"]+contract["block_steps"]-1 for p in correcting):
+                if not correcting:
+                    raise ValueError("no correction phase")
+                latest_pending = max(p["start_tick"]+(p["trajectory_context"]["end_index"]
+                    if contract.get("trajectory") else p["delay_steps"]+contract["block_steps"])-1 for p in correcting)
+                if contract.get("trajectory"):
+                    stop_proposal = next((r["proposal"] for r in attempt if r["proposal"]["start_tick"] == stop), None)
+                    if stop_proposal is None:
+                        raise ValueError("missing accepted stop proposal")
+                    latest_pending = min(latest_pending, stop+stop_proposal["delay_steps"]-1)
+                if settle < latest_pending:
                     raise ValueError("reward precedes pending correction tail")
                 if last["gate"].get("phase") != "draining" or any(
                     r["proposal"]["start_tick"] >= stop and r["proposal"]["gate"].get("apply_residual") is not False for r in attempt
@@ -162,7 +172,17 @@ def compile_replay(records, labels, contract, snapshots):
                 if abs(dt - n * contract["action_dt_s"]) > max(0.05, n * contract["action_dt_s"] * 0.15):
                     raise ValueError("actual time inconsistent with policy ticks")
                 base = p.get("physical_base", p["base"])
-                scale, negative_scale = feasible_bounds(base, p["previous_command"], arm, delay, contract)
+                context = None
+                if contract.get("trajectory"):
+                    context = planning_context(base, p["previous_command"], p["state"], p["gate"], arm, delay, contract)
+                    recorded_context = p["trajectory_context"]
+                    for field in ("kind", "reason", "end_index", "delay_steps", "lift_guard_start_index", "lift_ceiling_m"):
+                        if context[field] != recorded_context[field]:
+                            raise ValueError("trajectory context metadata differs")
+                    for field in ("bias", "weight"):
+                        if not np.allclose(context[field], recorded_context[field], atol=1e-7, rtol=0):
+                            raise ValueError("trajectory context differs")
+                scale, negative_scale = feasible_bounds(base, p["previous_command"], arm, delay, contract, context=context)
                 draining = p.get("gate", {}).get("apply_residual") is False
                 if draining:
                     if contract["gate"].get("version") != 3 or p["gate"].get("phase") != "draining":
@@ -180,7 +200,7 @@ def compile_replay(records, labels, contract, snapshots):
                 expected_a = np.zeros(7) if mode == "probe" else map_action(u, scale, negative_scale)
                 if np.any(np.abs(u) > 1.000001) or not np.allclose(action, expected_a, atol=1e-6, rtol=0):
                     raise ValueError("wrong actor action")
-                predicted = decode(base, action, arm, delay, contract)
+                predicted = decode(base, action, arm, delay, contract, context=context)
                 if not np.allclose(predicted, array(p.get("physical_actions", p["actions"]), (50, 14), "proposal actions"), atol=1e-6, rtol=0):
                     raise ValueError("proposal decoder mismatch")
                 if contract.get("baseline_transform") and not np.array_equal(
@@ -201,6 +221,8 @@ def compile_replay(records, labels, contract, snapshots):
                                 or not np.allclose(effect["submitted_action"], predicted[k], atol=1e-6, rtol=0)
                                 or not np.any(np.abs(predicted[k] - np.asarray(base)[k]) > 1e-6)):
                             raise ValueError("invalid delayed native actor effect proof")
+                        if modern and contract.get("trajectory") and effect_tick > settle:
+                            raise ValueError("correction after the verified committed tail")
                         realized = True
                 slot = (*key[:2], epoch)
                 claims.append((slot, set(range(begin, end))))
