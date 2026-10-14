@@ -19,6 +19,7 @@ from yam_pld_rl.block_contract import observation_vector
 from yam_pld_rl.block_contract import window_context
 from yam_pld_rl.block_replay import compile_replay
 from yam_pld_rl.collector import center_latent
+from yam_pld_rl.collector import closing_collect_manifest
 from yam_pld_rl.collector import execution_contract
 from yam_pld_rl.collector import expanded_manifest
 from yam_pld_rl.collector import native_trajectory_manifest
@@ -35,6 +36,25 @@ def parent():
 
 
 class CollectorChecks(unittest.TestCase):
+    def test_closing_collector_preserves_parent_eval_and_weights(self):
+        behavior = smooth_manifest(parent(), parent_snapshot="1"*64)
+        learned = native_trajectory_manifest({"contract": behavior["contract"], "actor_sha256": "learned",
+                                              "provenance": {"actor_updates": 500}}, behavior_snapshot="2"*64)
+        saved = copy.deepcopy(learned)
+        out = closing_collect_manifest(learned, parent_snapshot="3"*64)
+        self.assertEqual(learned, saved)
+        self.assertEqual(out["eval_contract"], learned["eval_contract"])
+        self.assertEqual(out["actor_contract"], learned["actor_contract"])
+        self.assertEqual(out["actor_sha256"], learned["actor_sha256"])
+        self.assertEqual(out["contract"]["negative_radius"][6], .20)
+        self.assertEqual(out["contract"]["positive_radius"][6], .05)
+        self.assertEqual(out["contract"]["radius"][0], .08)
+        self.assertFalse(out["collector"]["native_actor_coordinates"])
+        broken = copy.deepcopy(out)
+        broken["contract"]["negative_radius"][6] = .04
+        with self.assertRaises(ValueError):
+            validate_collector(broken)
+
     def test_new_actor_uses_its_trained_trajectory_coordinates(self):
         behavior = smooth_manifest(parent(), parent_snapshot="1"*64)
         learned = {"contract": behavior["contract"], "actor_sha256": "new-learned-weights"}

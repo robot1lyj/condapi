@@ -45,7 +45,10 @@ def main():
     arms = set()
     packets = []
     native = m.get("collector", {}).get("native_actor_coordinates") is True
-    for mode in (("collect", "eval", "probe", "shadow") if native else ("collect", "eval")):
+    diagnostics = bool(m.get("actor_contract", {}).get("trajectory"))
+    reference = BlockRuntime(args.parent, args.encoder, base_weights_sha256=parent["contract"]["base_weights_sha256"],
+                             device=args.device) if m["collector"].get("eval_preserves_parent_physical_policy") else None
+    for mode in (("collect", "eval", "probe", "shadow") if diagnostics else ("collect", "eval")):
         for case in cases:
             original = next(r for r in wires if r["request"]["episode_id"] == case["sample"])
             obs = read_observation(args.cases.parent / case["sample"])
@@ -55,6 +58,9 @@ def main():
             request = {**original["request"], **runtime.metadata, "mode": mode}
             torch.manual_seed(809)
             result = runtime.new_session()(obs, rtc, request, {"actions": base})
+            if mode == "eval" and reference is not None:
+                before = reference.new_session()(obs, rtc, {**request, **reference.metadata}, {"actions": base})
+                np.testing.assert_array_equal(result["actions"], before["actions"])
             trace = result["pld"]
             nonzero = False
             if mode in {"probe", "shadow"}:

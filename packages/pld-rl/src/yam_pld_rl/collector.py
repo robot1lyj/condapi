@@ -29,12 +29,15 @@ def validate_collector(manifest):
     if target["gate"].get("version") != 3 or target.get("action_mapping") != ("signed_trajectory_v1" if smooth else "signed_feasible_v1"):
         raise ValueError("collector requires the drained signed action contract")
     for key in set(target) | set(actor):
-        allowed = {"radius", "max_residual_step", "status"} | ({"trajectory", "block_steps", "action_mapping"} if smooth else set())
+        allowed = {"radius", "max_residual_step", "status", "positive_radius", "negative_radius"} | ({"trajectory", "block_steps", "action_mapping"} if smooth else set())
         if key not in allowed and target.get(key) != actor.get(key):
             raise ValueError("collector cannot change gate, time or hardware limits")
     for key in ("radius", "max_residual_step"):
         if np.any(np.asarray(target[key]) < np.asarray(actor[key])):
             raise ValueError("collector must contain the parent action support")
+    for key in ("positive_radius", "negative_radius"):
+        if np.any(np.asarray(target.get(key, target["radius"])) < np.asarray(actor.get(key, actor["radius"]))):
+            raise ValueError("collector directional budget must contain parent support")
     std = array(profile["latent_std"], (7,), "collector std")
     if np.any(std <= 0) or np.any(std > 1):
         raise ValueError("invalid latent standard deviation")
@@ -44,8 +47,11 @@ def validate_collector(manifest):
         if evaluation["radius"] != actor["radius"]:
             raise ValueError("eval must preserve the parent target scale")
         for key in set(target) | set(evaluation):
-            if key not in {"radius", "max_residual_step", "status"} and target.get(key) != evaluation.get(key):
+            if key not in {"radius", "max_residual_step", "status", "positive_radius", "negative_radius"} and target.get(key) != evaluation.get(key):
                 raise ValueError("eval trajectory and scope must match collect")
+        for key in ("positive_radius", "negative_radius"):
+            if evaluation.get(key, evaluation["radius"]) != actor.get(key, actor["radius"]):
+                raise ValueError("eval must preserve parent directional budget")
     elif profile.get("eval_preserves_parent_physical_policy") is not True:
         raise ValueError("collector must preserve parent eval")
     parent = profile.get("parent_snapshot_sha256", "")
@@ -132,6 +138,31 @@ def native_trajectory_manifest(manifest, *, behavior_snapshot):
     return out
 
 
+def closing_collect_manifest(parent, *, parent_snapshot):
+    """Candidate exploration; keep the learned parent's eval and coordinates.
+
+    Changes the COLLECT actuator budget, not the learned actor weights. It must
+    get new real outcomes before an actor trained in these coordinates exists.
+    """
+    if parent.get("collector", {}).get("native_actor_coordinates") is not True:
+        raise ValueError("closing collector requires an explicit native learned parent")
+    out = copy.deepcopy(parent)
+    c = out["contract"]
+    c["positive_radius"] = list(c["radius"])
+    c["negative_radius"] = list(c["radius"])
+    for axis in (6, 13):
+        c["radius"][axis] = 0.20
+        c["negative_radius"][axis] = 0.20
+        c["max_residual_step"][axis] = 0.04
+    c["status"] = "closing collection candidate; unchanged joints, opening cap, RTC and placement scope"
+    out["collector"].update(native_actor_coordinates=False, parent_snapshot_sha256=parent_snapshot,
+                            latent_std=[.5]*6+[.7], eval_preserves_parent_physical_policy=True)
+    out["provenance"].update(collector_changes_actor_weights=False, collector_parent_snapshot_sha256=parent_snapshot)
+    out["robot_validated"] = False
+    validate_collector(out)
+    return out
+
+
 def validate_collector_trace(p, manifest):
     """Check physical coordinates and parent observation; no network execution."""
     if not manifest.get("collector"):
@@ -142,8 +173,19 @@ def validate_collector_trace(p, manifest):
         raise ValueError("expanded replay requires collect execution coordinates")
     ac = manifest["actor_contract"]
     base, arm, d = p.get("physical_base", p["base"]), p["arm"], p["delay_steps"]
+    actor_trajectory = p.get("trajectory_context") if ac.get("trajectory") else None
+    if ac.get("trajectory") and ac != c:
+        from yam_pld_rl.trajectory import planning_context  # noqa: PLC0415
+        actor_trajectory = planning_context(base, p["previous_command"], p["state"], p["gate"], arm, d, ac)
+        recorded = p["actor_trajectory_context"]
+        if actor_trajectory.keys() != recorded.keys():
+            raise ValueError("actor trajectory fields differ")
+        for key, value in actor_trajectory.items():
+            same = np.allclose(value, recorded[key], atol=1e-6, rtol=0) if isinstance(value, (list, float)) else value == recorded[key]
+            if not same:
+                raise ValueError(f"actor trajectory differs: {key}")
     ap, an = feasible_bounds(base, p["previous_command"], arm, d, ac,
-                             context=p.get("trajectory_context") if ac.get("trajectory") else None)
+                             context=actor_trajectory)
     if p["gate"].get("apply_residual") is False:
         ap, an = np.zeros(7, np.float32), np.zeros(7, np.float32)
     ax = observation_vector(np.asarray(p["x"])[:1536], p["state"], base, p["previous_command"],

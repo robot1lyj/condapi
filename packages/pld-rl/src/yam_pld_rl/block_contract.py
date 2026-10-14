@@ -68,6 +68,14 @@ def validate_contract(c):
     step = array(c["max_target_step"], (14,), "max_target_step")
     if np.any(lo >= hi) or np.any(radius <= 0) or np.any(step <= 0):
         raise ValueError("invalid limits/radius/step")
+    directional = ("positive_radius" in c, "negative_radius" in c)
+    if any(directional):
+        if not trajectory or not all(directional):
+            raise ValueError("directional budgets require both caps and the trajectory decoder")
+        for key in ("positive_radius", "negative_radius"):
+            cap = array(c[key], (14,), key)
+            if np.any(cap <= 0) or np.any(cap > radius+1e-7):
+                raise ValueError("directional cap outside coordinate radius")
     if "max_residual_step" in c and np.any(array(c["max_residual_step"], (14,), "max_residual_step") <= 0):
         raise ValueError("invalid residual increment guard")
     if not 0 < c["max_attempt_seconds"] <= 30:

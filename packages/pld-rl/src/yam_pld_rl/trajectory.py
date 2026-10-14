@@ -117,7 +117,9 @@ def _bounds(base, previous, arm, c, context):
         lower, upper = (lo-a)/denom, (hi-a)/denom
         low = np.maximum(low, np.where(nz, np.minimum(lower, upper), -np.inf).max(0))
         high = np.minimum(high, np.where(nz, np.maximum(lower, upper), np.inf).min(0))
-    restrict(bias, coeff, -radius, radius)
+    positive_cap = np.asarray(c.get("positive_radius", c["radius"]))[off:off+7]
+    negative_cap = np.asarray(c.get("negative_radius", c["radius"]))[off:off+7]
+    restrict(bias, coeff, -negative_cap, positive_cap)
     restrict(b+bias, coeff, np.asarray(c["lower"])[off:off+7], np.asarray(c["upper"])[off:off+7])
     velocity = np.asarray(c["max_residual_step"])[off:off+7]
     acceleration = np.asarray(c["trajectory"]["max_residual_second_difference"])[off:off+7]

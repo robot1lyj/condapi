@@ -7,6 +7,7 @@ import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]/"packages/pld-rl/src"))
 from yam_pld_rl.block_contract import fingerprint
+from yam_pld_rl.collector import closing_collect_manifest
 from yam_pld_rl.collector import expanded_manifest
 from yam_pld_rl.collector import smooth_manifest
 from yam_pld_rl.data import sha256
@@ -16,12 +17,12 @@ def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--parent", type=Path, required=True)
     p.add_argument("--output", type=Path, required=True)
-    p.add_argument("--profile", choices=("expanded", "continuous"), default="expanded")
+    p.add_argument("--profile", choices=("expanded", "continuous", "closing"), default="expanded")
     args = p.parse_args()
     parent = json.loads((args.parent/"manifest.json").read_text())
     if sha256(args.parent/"actor.pt") != parent["actor_sha256"]:
         raise ValueError("parent weights differ from manifest")
-    builder = smooth_manifest if args.profile == "continuous" else expanded_manifest
+    builder = {"continuous": smooth_manifest, "expanded": expanded_manifest, "closing": closing_collect_manifest}[args.profile]
     manifest = builder(parent, parent_snapshot=sha256(args.parent/"manifest.json"))
     args.output.mkdir(parents=True, exist_ok=False)
     for name in ("actor.pt", "fk.xml"):

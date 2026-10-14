@@ -21,6 +21,8 @@ from yam_pld_rl.block_contract import observation_vector
 from yam_pld_rl.block_contract import validate_contract
 from yam_pld_rl.block_contract import window_context
 from yam_pld_rl.block_replay import compile_replay
+from yam_pld_rl.collector import closing_collect_manifest
+from yam_pld_rl.collector import native_trajectory_manifest
 from yam_pld_rl.collector import smooth_manifest
 from yam_pld_rl.curator import associate_rewards
 from yam_pld_rl.intervention import InterventionSession
@@ -46,6 +48,38 @@ def manifest():
 
 
 class TrajectoryChecks(unittest.TestCase):
+    @patch("yam_pld_rl.trajectory.model_fk", return_value=SimpleFK())
+    def test_directional_closing_budget_and_separate_parent_bridge(self, _fk):
+        learned = native_trajectory_manifest({"contract": manifest()["contract"], "provenance": {}},
+                                             behavior_snapshot="1"*64)
+        new = closing_collect_manifest(learned, parent_snapshot="2"*64)
+        c, ac = new["contract"], new["actor_contract"]
+        base = np.zeros((50, 14))
+        base[:, [6, 13]] = .5
+        gate = {"apply_residual": True, "close_tick": None}
+        ctx = planning_context(base, base[0], base[0], gate, "left", 10, c)
+        pos, neg = feasible_bounds(base, base[0], "left", 10, c, context=ctx)
+        for direction, cap in ((-1, .20), (1, .05)):
+            u = np.zeros(7)
+            u[6] = direction
+            out = decode(base, map_action(u, pos, neg), "left", 10, c, context=ctx)
+            self.assertAlmostEqual(abs(out[:, 6]-base[:, 6]).max(), cap, places=6)
+            self.assertLessEqual(abs(np.diff(out-base, axis=0)).max(), .04+1e-7)
+            self.assertLessEqual(abs(np.diff(out-base, n=2, axis=0)[:, 6]).max(), .01+1e-7)
+            np.testing.assert_array_equal(out[:10], base[:10])
+            np.testing.assert_array_equal(out[:, 7:], base[:, 7:])
+        # An already committed .20 closing prefix is outside the old actor's
+        # .05 bridge support. Its own context must collapse, never throw while
+        # the wider collector can still restore that prefix continuously.
+        base[:10, 6] = .3
+        ctx = planning_context(base, base[0], base[0], gate, "left", 10, c)
+        actor_ctx = planning_context(base, base[0], base[0], gate, "left", 10, ac)
+        self.assertIsNone(ctx["reason"])
+        self.assertEqual(actor_ctx["reason"], "baseline_bridge_exceeds_motion_guards")
+        ap, an = feasible_bounds(base, base[0], "left", 10, ac, context=actor_ctx)
+        np.testing.assert_array_equal(ap, np.zeros(7))
+        np.testing.assert_array_equal(an, np.zeros(7))
+
     @patch("yam_pld_rl.trajectory.model_fk", return_value=SimpleFK())
     def test_short_closing_is_opt_in_and_does_not_edit_joints_or_transport(self, _fk):
         c = manifest()["contract"]
