@@ -1,0 +1,198 @@
+{
+  "number": 1,
+  "episode_path": "episode_000002",
+  "episode_id": "4ad07fa47cfd4b1e901979a141683264",
+  "rows": 372,
+  "duration_s": 12.366670863004401,
+  "manifest_pld": {
+    "schema": "pld_sac_block_v2",
+    "mode": "collect",
+    "run_id": "927f32133a944f76bef8ae2897fde978",
+    "contract_sha256": "9b2a4ab59b7810bdbd3148b07ceb43880034910d937c046dbf39085f773c87fe",
+    "snapshot_sha256": "23d4da1ad778586cfcafdb02868eec7e51810d50caed259c4e4a4c5184383efd"
+  },
+  "mode_counts": {
+    "collect": 36
+  },
+  "contract_sha256": [
+    "9b2a4ab59b7810bdbd3148b07ceb43880034910d937c046dbf39085f773c87fe"
+  ],
+  "snapshot_sha256": [
+    "23d4da1ad778586cfcafdb02868eec7e51810d50caed259c4e4a4c5184383efd"
+  ],
+  "delay_steps": {
+    "10": 36
+  },
+  "human_rows": 0,
+  "invalid_observation_rows": 0,
+  "invalid_submission_rows": 0,
+  "source_counts": {
+    "hold": 10,
+    "policy": 362
+  },
+  "replies": 36,
+  "accepted_replies": 35,
+  "discarded_replies": [
+    {
+      "token": {
+        "epoch": 1694,
+        "request_id": 903,
+        "observation_id": 1642300,
+        "created_at": 1383331.740748542,
+        "observed_at": 1383331.711398616,
+        "queue_size_at_request": null,
+        "observation_policy_tick": 1642309,
+        "rtc_delay_steps": 10
+      },
+      "error": null,
+      "slack": 1
+    }
+  ],
+  "cancelled_requests": [
+    [
+      1694,
+      "903"
+    ]
+  ],
+  "server_ms": {
+    "p50": 204.88746848423034,
+    "p95": 215.24379012407735,
+    "p99": 215.54077366599813,
+    "max": 215.5759441666305
+  },
+  "worker_ms": {
+    "p50": 242.48956760857254,
+    "p95": 255.81369310384616,
+    "p99": 256.8974142894149,
+    "max": 256.96835783310235
+  },
+  "tracking": {
+    "left": {
+      "p50_error_rad": [
+        0.0029631007941305354,
+        0.0051519747822222905,
+        0.006786116749204374,
+        0.010702078913722601,
+        0.012734042557906278,
+        0.010116286066408298
+      ],
+      "p95_error_rad": [
+        0.03203238155481005,
+        0.05600303778068721,
+        0.0933653926059122,
+        0.15107282385216786,
+        0.06108756229763273,
+        0.030830002794446396
+      ],
+      "measured_range_rad": [
+        0.6092164492256025,
+        1.1764705882352935,
+        0.9697108415350577,
+        0.6992446784161146,
+        0.258258945601586,
+        0.23498893720912406
+      ],
+      "target_range_rad": [
+        0.6124836742963374,
+        1.1935132191595026,
+        0.9825551647339292,
+        0.73096009217911,
+        0.42290455536207283,
+        0.25685800640416756
+      ],
+      "error_over_0_3rad_runs": [
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "note": "Dynamic tracking error is not itself a hardware-fault diagnosis."
+    },
+    "right": {
+      "p50_error_rad": [
+        0.03375332519292018,
+        0.054316753486266744,
+        0.04304764491610369,
+        0.0349642010761505,
+        0.04424200073899681,
+        0.040847815606778304
+      ],
+      "p95_error_rad": [
+        0.09321654007322791,
+        0.1594467475084699,
+        0.17682111555561253,
+        0.21098210022080144,
+        0.19988462237208837,
+        0.19046785086053908
+      ],
+      "measured_range_rad": [
+        1.1547264820325012,
+        2.8583962767986577,
+        2.5738155184252687,
+        0.7705806057831701,
+        0.21210040436407596,
+        0.8293278400854511
+      ],
+      "target_range_rad": [
+        1.1686924401378724,
+        2.923576113468956,
+        2.567882642269341,
+        0.8244222097553413,
+        0.361886109234515,
+        0.8597049633826236
+      ],
+      "error_over_0_3rad_runs": [
+        [],
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "note": "Dynamic tracking error is not itself a hardware-fault diagnosis."
+    }
+  },
+  "missing_action_origins": [],
+  "submission_mismatches": [],
+  "correction_rows": 78,
+  "correction_rows_by_arm": {
+    "right": 78
+  },
+  "max_joint_correction_rad": 0.06761821359395981,
+  "max_gripper_correction": 0.01859647035598755,
+  "max_direct_fk_correction_m": 0.03823584868605455,
+  "videos": [
+    {
+      "path": "episode_000002/segment_000000/top.mp4",
+      "frames": 372,
+      "pts_monotonic": true,
+      "indices_in_range": true
+    },
+    {
+      "path": "episode_000002/segment_000000/left.mp4",
+      "frames": 372,
+      "pts_monotonic": true,
+      "indices_in_range": true
+    },
+    {
+      "path": "episode_000002/segment_000000/right.mp4",
+      "frames": 372,
+      "pts_monotonic": true,
+      "indices_in_range": true
+    }
+  ],
+  "raw_evaluation_events": [],
+  "sources_sha256": {
+    "/home/wuyan-lyj/condapi-data/rl/pld-wide008-first-20261014-v1/raw-v2/session_20261014_094616_aed76c/episode_000002/manifest.json": "d3ce2899e2b0f538470dc9b41968a2789a854fccc981e0e0a89bde641df0047a",
+    "/home/wuyan-lyj/condapi-data/rl/pld-wide008-first-20261014-v1/raw-v2/session_20261014_094616_aed76c/episode_000002/segment_000000/samples.h5": "93cca914b2f61d52f34a0faf70c313627b0e4b5fc7f65aa05259df8c17dacffd",
+    "/home/wuyan-lyj/condapi-data/rl/pld-wide008-first-20261014-v1/raw-v2/session_20261014_094616_aed76c/policy_events.jsonl": "23f4d94ff57d6fc4d973df5c609639c4c8694792472ab8bf0994d44f75a14c36",
+    "/home/wuyan-lyj/condapi-data/rl/pld-wide008-first-20261014-v1/raw-v2/session_20261014_094616_aed76c/episode_000002/segment_000000/left.mp4": "91f9bec6103d67981121b7c064356ef62e7cba5207238485f49aea3790cc0818",
+    "/home/wuyan-lyj/condapi-data/rl/pld-wide008-first-20261014-v1/raw-v2/session_20261014_094616_aed76c/episode_000002/segment_000000/right.mp4": "b4f436c88f2be37f0888014288fe5f7abbe142d9360e2f11ddb562f3c5cda467",
+    "/home/wuyan-lyj/condapi-data/rl/pld-wide008-first-20261014-v1/raw-v2/session_20261014_094616_aed76c/episode_000002/segment_000000/top.mp4": "f0f30d22c02f6a91db555c67f000b196ea7d8b50878f21b5ba78a7afaf6a7ee8"
+  },
+  "training_executed": false,
+  "reward_labels_published": 0,
+  "robot_success_rate": null
+}

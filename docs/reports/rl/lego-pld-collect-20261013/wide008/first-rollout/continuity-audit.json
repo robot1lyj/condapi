@@ -1,0 +1,235 @@
+{
+  "episode_id": "4ad07fa47cfd4b1e901979a141683264",
+  "duration_s": 12.366670863004401,
+  "correcting_blocks": 13,
+  "windows": [
+    {
+      "window": "e1694:s9af239bd149d4a5c8579d2b38b307cf8:w1",
+      "first_command_s": 1.733404610073194,
+      "last_command_s": 3.766964428126812,
+      "correcting_blocks": 6,
+      "direct_corrected_ticks": 36,
+      "ticks": 61
+    },
+    {
+      "window": "e1694:s9af239bd149d4a5c8579d2b38b307cf8:w2",
+      "first_command_s": 5.167190299136564,
+      "last_command_s": 7.600037622032687,
+      "correcting_blocks": 7,
+      "direct_corrected_ticks": 42,
+      "ticks": 73
+    }
+  ],
+  "sample_refresh_s_quantiles": [
+    0.3333333333333333,
+    0.3333333333333333,
+    0.36666666666666664
+  ],
+  "adjacent_pairs": 11,
+  "pairs_with_sign_flip": 11,
+  "max_peak_change": {
+    "from_request": 875,
+    "to_request": 876,
+    "period_s": 0.3333333333333333,
+    "max_joint_peak_change_rad": 0.10966404914855957,
+    "meaningful_joint_sign_flips": 5
+  },
+  "joint_peak_rms_rad": 0.03323072143693731,
+  "actor_center_rms_rad": 0.0025089684698014095,
+  "pulses": [
+    {
+      "start_s": 1.7666671350598335,
+      "end_s": 1.9333338311407715,
+      "nonzero_ticks": 6,
+      "request_id": 872,
+      "peak_fk_mm": 38.23584868605455
+    },
+    {
+      "start_s": 2.1000145270954818,
+      "end_s": 2.2667211811058223,
+      "nonzero_ticks": 6,
+      "request_id": 873,
+      "peak_fk_mm": 11.688684628067854
+    },
+    {
+      "start_s": 2.4334966680034995,
+      "end_s": 2.6000210370402783,
+      "nonzero_ticks": 6,
+      "request_id": 874,
+      "peak_fk_mm": 15.762682680694223
+    },
+    {
+      "start_s": 2.7669015221763402,
+      "end_s": 2.933341310126707,
+      "nonzero_ticks": 6,
+      "request_id": 875,
+      "peak_fk_mm": 31.919334841904103
+    },
+    {
+      "start_s": 3.1002101281192154,
+      "end_s": 3.2666904570069164,
+      "nonzero_ticks": 6,
+      "request_id": 876,
+      "peak_fk_mm": 21.289160037393206
+    },
+    {
+      "start_s": 3.466871384996921,
+      "end_s": 3.6334552550688386,
+      "nonzero_ticks": 6,
+      "request_id": 877,
+      "peak_fk_mm": 16.354622837602644
+    },
+    {
+      "start_s": 5.200551405083388,
+      "end_s": 5.367187486030161,
+      "nonzero_ticks": 6,
+      "request_id": 882,
+      "peak_fk_mm": 20.27999168861762
+    },
+    {
+      "start_s": 5.533340872032568,
+      "end_s": 5.70066701900214,
+      "nonzero_ticks": 6,
+      "request_id": 883,
+      "peak_fk_mm": 11.640391818920673
+    },
+    {
+      "start_s": 5.900655166013166,
+      "end_s": 6.067357454216108,
+      "nonzero_ticks": 6,
+      "request_id": 884,
+      "peak_fk_mm": 7.940766583844672
+    },
+    {
+      "start_s": 6.23407053318806,
+      "end_s": 6.400002261158079,
+      "nonzero_ticks": 6,
+      "request_id": 885,
+      "peak_fk_mm": 9.566409291141344
+    },
+    {
+      "start_s": 6.567708150018007,
+      "end_s": 6.734201612183824,
+      "nonzero_ticks": 6,
+      "request_id": 886,
+      "peak_fk_mm": 12.795298740618296
+    },
+    {
+      "start_s": 6.900895736180246,
+      "end_s": 7.067218579119071,
+      "nonzero_ticks": 6,
+      "request_id": 887,
+      "peak_fk_mm": 26.618737215892683
+    },
+    {
+      "start_s": 7.26748176314868,
+      "end_s": 7.433335620211437,
+      "nonzero_ticks": 6,
+      "request_id": 888,
+      "peak_fk_mm": 10.874969792041922
+    }
+  ],
+  "mean_delta_zero_ticks_between_pulses": 4.277011516842652,
+  "signals": {
+    "actual": {
+      "velocity_rms_rad_s": 0.4959830953353033,
+      "max_step_rad": 0.07128067607511324,
+      "acceleration_rms_rad_s2": 5.065543946645015,
+      "max_abs_second_difference_rad": 0.03072206466837024
+    },
+    "recorded_pi_reference": {
+      "velocity_rms_rad_s": 0.4726805151002834,
+      "max_step_rad": 0.07128067607511324,
+      "acceleration_rms_rad_s2": 3.321252819598463,
+      "max_abs_second_difference_rad": 0.022570961699129533
+    },
+    "residual_only": {
+      "velocity_rms_rad_s": 0.15446619901413977,
+      "max_step_rad": 0.022539405152201653,
+      "acceleration_rms_rad_s2": 3.7888850527897673,
+      "max_abs_second_difference_rad": 0.022539405152201653
+    }
+  },
+  "pairs": [
+    {
+      "from_request": 872,
+      "to_request": 873,
+      "period_s": 0.3333333333333333,
+      "max_joint_peak_change_rad": 0.06347829937934875,
+      "meaningful_joint_sign_flips": 3
+    },
+    {
+      "from_request": 873,
+      "to_request": 874,
+      "period_s": 0.3333333333333333,
+      "max_joint_peak_change_rad": 0.06269323110580444,
+      "meaningful_joint_sign_flips": 3
+    },
+    {
+      "from_request": 874,
+      "to_request": 875,
+      "period_s": 0.3333333333333333,
+      "max_joint_peak_change_rad": 0.045168199539184564,
+      "meaningful_joint_sign_flips": 3
+    },
+    {
+      "from_request": 875,
+      "to_request": 876,
+      "period_s": 0.3333333333333333,
+      "max_joint_peak_change_rad": 0.10966404914855957,
+      "meaningful_joint_sign_flips": 5
+    },
+    {
+      "from_request": 876,
+      "to_request": 877,
+      "period_s": 0.36666666666666664,
+      "max_joint_peak_change_rad": 0.09362192630767822,
+      "meaningful_joint_sign_flips": 6
+    },
+    {
+      "from_request": 882,
+      "to_request": 883,
+      "period_s": 0.3333333333333333,
+      "max_joint_peak_change_rad": 0.06129969477653503,
+      "meaningful_joint_sign_flips": 2
+    },
+    {
+      "from_request": 883,
+      "to_request": 884,
+      "period_s": 0.36666666666666664,
+      "max_joint_peak_change_rad": 0.06939182996749879,
+      "meaningful_joint_sign_flips": 2
+    },
+    {
+      "from_request": 884,
+      "to_request": 885,
+      "period_s": 0.3333333333333333,
+      "max_joint_peak_change_rad": 0.046939700841903687,
+      "meaningful_joint_sign_flips": 3
+    },
+    {
+      "from_request": 885,
+      "to_request": 886,
+      "period_s": 0.3333333333333333,
+      "max_joint_peak_change_rad": 0.07138551950454712,
+      "meaningful_joint_sign_flips": 2
+    },
+    {
+      "from_request": 886,
+      "to_request": 887,
+      "period_s": 0.3333333333333333,
+      "max_joint_peak_change_rad": 0.08599680662155151,
+      "meaningful_joint_sign_flips": 2
+    },
+    {
+      "from_request": 887,
+      "to_request": 888,
+      "period_s": 0.36666666666666664,
+      "max_joint_peak_change_rad": 0.08887366771697998,
+      "meaningful_joint_sign_flips": 2
+    }
+  ],
+  "policy_origin_and_decoder_exact": true,
+  "independent_counterfactual_pi_trajectory": false,
+  "hardware_fault_excluded_from_diagnosis_by_user": true
+}
