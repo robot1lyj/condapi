@@ -1,14 +1,14 @@
 # 03 · 训练与评估
 
-## 乐高拆开专项与回放首轮训练（2026-10-14）
+## 乐高拆开专项与回放首轮训练（2026-10-14，10000步v2）
 
-用户已明确确认[配方v1](reports/training/lego-separation-20261014/recipe-draft.md)，并授权使用服务器、暂停耳机释放4卡；[确认记录](reports/training/lego-separation-20261014/approval.json)绑定原草案SHA。正式配置为[pi05-lego-separation-r1.json](../configs/native/pi05-lego-separation-r1.json)。专项100集＋原50h回放100集各278,516帧，均匀帧采样期望50/50；数据和单位边界归04，冻结清单/审核归[报告](reports/training/lego-separation-20261014/README.md)。这轮使用筛出的旧示范，不冒充现场DAgger介入标签。
+用户明确确认将首轮目标改为10000，并取消旧短试跑、从同一个原50h 240000权重重新开独立run。2344已取消，最后记录481步，无完整新检查点；旧日志和目录保留，旧步数不计入新预算。[v2确认与取消回执](reports/training/lego-separation-20261014/replacement-10k/README.md)绑定正式[10000步配置](../configs/native/pi05-lego-separation-r1-10k.json)。专项100集＋原50h回放100集各278,516帧，原生帧采样期望50/50，数据与norm均未变，合同归04；旧5000步v1配置和启动证据保留为历史。
 
-固定240000权重初始化新run、新优化器与日程，原生Pi全量RTC、global32/FSDP4/H50/d=0..10、LR3e-6→3e-7/warmup200/cosine5000、继承原norm、每1000保存并保留本轮所有千步点，新增5000后停止。源码经Gitea获取并固定于`8e71227f2ccb13f2253ef0296d2228fb2f6a3eaa`，独立checkout为`/home/wuyan/lyj/YAM/code-snapshots/lego-separation-r1-20261014`；入口wrapper仅校验并调用原生`train_lego_full.py`。
+v2从240000重新初始化参数、新优化器和日程，Pi全量RTC、global32/FSDP4/H50/d=0..10、LR3e-6→3e-7/warmup200/cosine10000、继承原norm、每1000保存并保留本轮所有千步点；新增10000后停止，10小时Slurm上限，不自动延长。固定Gitea源码`0c5b08b2ad927fc847983769d4f2c1f8667d78aa`，checkout为`/home/wuyan/lyj/YAM/code-snapshots/lego-separation-r1-10k-20261014`，wrapper仍只调用原生`train_lego_full.py`。
 
-Slurm **2344** 已在gpu001的4张RTX4090正式更新。18:35+08启动核验已到新增step51，loss0.022120、grad_norm0.227784、param_norm1804.246338均有限，早期约2.274秒/步；首个检查点在1000，目前尚无本轮完整保存。启动前原600段视频/200集数值文件SHA重新核对，240000的51个原生FP32数组非有限数0，全部200集真实loader首/中/尾与H50边界800样本通过；实际resolved config确认分位数norm、14D delta mask及RTC日程均为确认值。[启动回执](reports/training/lego-separation-20261014/startup-verified.json)与[原生配置](reports/training/lego-separation-20261014/initial_config.json)固定观察，不替代后续实时检查。
+Slurm **2345** 已在gpu001分配4张RTX4090。v2启动预检已重新通过200集数值/600视频文件SHA、240000原生51个FP32数组非有限0、全部200集的800个真实loader样本；实际原生配置确认`num_train_steps=10000`与`decay_steps=10000`、parent为240000、resume=false。18:59+08已核验新增step31，loss0.020847、grad_norm0.244779、param_norm1804.246338均有限，早期约2.273秒/步；首个完整新检查点仍待1000。[v2启动证据](reports/training/lego-separation-20261014/replacement-10k/startup-verified.json)固定该观察，实际状态使用前复核。
 
-run：`/home/wuyan/lyj/YAM/training-runs/pi05_yam/lego_pi05_rtc_separation_r1_20261014`，metrics在其`metrics/metrics.jsonl`；control为同根`control/lego_pi05_rtc_separation_r1_20261014`，含`train.log`、`slurm-2344.log`、启动指纹与预检。用户已暂停的耳机2333进程实测为Tl，核对完整34000的params/train_state后释放原allocation，原件保留、不自动恢复。没有操作Thor/3588或发送客户端任务；[监控交接段落](reports/training/lego-separation-20261014/monitor-handoff.txt)供用户转发，不代表已向其他agent发消息。
+run：`/home/wuyan/lyj/YAM/training-runs/pi05_yam/lego_pi05_rtc_separation_r1_10k_20261014`，metrics为其`metrics/metrics.jsonl`；control为同根`control/lego_pi05_rtc_separation_r1_10k_20261014`，含`train.log`、`slurm-2345.log`、指纹与预检。耳机2333保留完整34000、不自动恢复；未操作Thor/3588或发送客户端/其他agent消息。实时状态使用前重新查询。
 
 ## 耳机装配 Pi0.5 50h 首次SFT（2026-10-13）
 

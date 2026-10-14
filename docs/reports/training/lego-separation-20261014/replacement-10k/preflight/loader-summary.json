@@ -1,0 +1,32 @@
+{
+  "label": "selection_all",
+  "hostname": "gpu001.hlink.local",
+  "python": "3.12.12 | packaged by conda-forge | (main, Oct 13 2025, 14:34:15) [GCC 14.3.0]",
+  "dataset": "/home/wuyan/lyj/YAM/YAM_data/processed/lego_lerobot_v1_20260907/train",
+  "dataset_info_sha256": "ba88887ff84544eb130708cdf8c0ce965b53f099fdad07286a57f41883211851",
+  "conversion_manifest_sha256": "9844c0b86b93fd40adf251275d770899ba413800d2a0cba11d4e9bdae40544dc",
+  "selection": "/home/wuyan/lyj/YAM/data-reviews/lego-separation-20261014/dataset-bimanual100-replay100-v1/episodes.json",
+  "selection_sha256": "66ec018805e357691fd27738f1d49e5f7d3182823acc2d80ed5f2ecff86ee4f3",
+  "norm_dir": "/home/wuyan/lyj/YAM/training-runs/pi05_yam/lego_pi05_rtc_base_50h_20260921/240000/assets/yam",
+  "norm_sha256": "fd0d9cb2db3ce475c1175c7f21a3a0dd3aa7f59d36edc680e7044cd11b9f1edf",
+  "total_dataset_episodes": 4458,
+  "total_dataset_frames": 10374181,
+  "probe_episodes": 200,
+  "probe_frames": 557032,
+  "probe_windows": 800,
+  "samples_ok": 800,
+  "samples_failed": 0,
+  "failure_counts": {},
+  "tail_checks": 400,
+  "elapsed_seconds": 55.30686796607915,
+  "pipeline": [
+    "LeRobotDataset(video_backend=pyav, delta_timestamps action H50)",
+    "YamInputs(PI05, 14D, three RGB views)",
+    "DeltaActions(mask=(6,-1,6,-1))",
+    "Normalize(quantile stats)",
+    "InjectDefaultPrompt",
+    "ResizeImages(224,224)",
+    "TokenizePrompt(PaliGemma, discrete PI05 state)",
+    "PadStatesAndActions(32)"
+  ]
+}

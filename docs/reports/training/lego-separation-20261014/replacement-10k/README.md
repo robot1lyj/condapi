@@ -15,3 +15,5 @@
 | 预算/停止 | 每池期望160000个帧起点，约0.574轮；10000结束不自动延长，NaN/Inf/数据或保存错误停止排查 |
 
 正式配置为[pi05-lego-separation-r1-10k.json](../../../../../configs/native/pi05-lego-separation-r1-10k.json)，审批归[approval.json](approval.json)。原5000步配置与提交代码保留供追溯。
+
+启动已验收：Slurm2345在gpu001/4×RTX4090运行，18:59+08新增step31指标有限、早期2.273秒/步；源文件SHA重核、240000原生权重有限性和800个真实loader样本再次通过。实际原生配置确认total_steps/decay_steps均10000、resume=false、parent240000。[启动回执](startup-verified.json)、[原生配置](initial_config.json)、[恢复合同](training_contract.json)和[当前监控交接](../monitor-handoff.txt)可审查；14项轻量回归通过。首检查点1000尚未产生，后续不自动改配方或部署。
