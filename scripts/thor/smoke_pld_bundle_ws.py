@@ -80,9 +80,12 @@ def main():
                         raise ValueError("wrong SDK physical baseline")
                     expected = base
                     if trace["gate"]["active"]:
-                        if mode == "collect" or contract.get("trajectory"):
+                        if mode in {"collect", "eval"} and (mode == "collect" or contract.get("trajectory")):
                             validate_collector_trace(trace, manifest)
-                        expected = decode(base, trace["action"], trace["arm"], d, contract, context=trace.get("trajectory_context"))
+                        if mode in {"collect", "eval"}:
+                            expected = decode(base, trace["action"], trace["arm"], d, contract, context=trace.get("trajectory_context"))
+                        elif contract.get("trajectory") and trace.get("replay_eligible") is not False:
+                            raise ValueError("native trajectory diagnostic must not be compiled as correction replay")
                         active_arms.add(trace["arm"])
                         zero_expected = mode in {"probe", "shadow"} or (
                             mode == "eval" and args.expected_actor_phase == "bootstrap_exploration")
