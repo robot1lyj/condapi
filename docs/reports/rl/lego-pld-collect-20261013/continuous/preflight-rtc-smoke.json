@@ -1,0 +1,205 @@
+{
+  "status": "passed",
+  "observed_at": "2026-10-14T03:04:32.045844+00:00",
+  "url": "ws://192.168.250.1:8001",
+  "handshake_ms": 2.6857389602810144,
+  "metadata": {
+    "robot": "YAM",
+    "hardware_family": "YAM-ABC-compatible",
+    "num_arms": 2,
+    "robot_action_dim": 14,
+    "model_action_dim": 32,
+    "action_horizon": 50,
+    "action_layout": "[left 6 joints, left gripper, right 6 joints, right gripper]",
+    "image_keys": [
+      "observation.images.top_rgb",
+      "observation.images.left_rgb",
+      "observation.images.right_rgb"
+    ],
+    "config": "pi05_yam",
+    "backend": "tensorrt_cuda_graph",
+    "rtc_mode": "trained",
+    "rtc_prefix_norm": "quantile",
+    "rtc_joint_step_guard_rad_per_tick": 0.2,
+    "rtc_semantics": "clean aligned committed prefix at flow time zero; postfix denoised; no guidance/fallback",
+    "rtc_max_delay_steps": 10,
+    "checkpoint_weights_sha256": "298714be810f5e7e822bcac55c5efe55789f1c96c0ac4ed0a1caa86f2670e42a",
+    "norm_stats_sha256": "fd0d9cb2db3ce475c1175c7f21a3a0dd3aa7f59d36edc680e7044cd11b9f1edf",
+    "engine_sha256": "15ae4a5ceb57b6b6d8743c721cbe43178ab29c714be95cfbf1b9b893574ba71c",
+    "compute_dtype": "float32",
+    "precision_mode": "fp32_weights_tf32_compute",
+    "denoising_steps": 7,
+    "action_dt_s": 0.03333333333333333,
+    "action_dim": 14,
+    "action_mode": "absolute physical target after checkpoint inverse transforms",
+    "joint_unit": "radian (dataset contract; hardware calibration not claimed)",
+    "gripper_unit": "continuous; nominal 0 closed, 1 open; outputs not clipped",
+    "target_tick_semantics": "30Hz policy tick; observation_policy_tick == target_start_tick == committed_start_tick",
+    "action_0_relative_to_observation_policy_tick": 0,
+    "camera_exposure_to_policy_tick_offset_s": null,
+    "inference_profile": "pld-rl",
+    "pld": {
+      "schema": "pld_sac_block_v2",
+      "expert": "PLD-Grasp",
+      "snapshot_sha256": "7013be463f735521a17cc13af2196906092244f22cf64a02cad1225384e55857",
+      "contract_sha256": "959db331948a9acd7c59f45bae64cc6298bcb04c879e30ea414ef5de465bba9e",
+      "modes": [
+        "off",
+        "shadow",
+        "probe",
+        "collect",
+        "eval"
+      ],
+      "block_steps": 36,
+      "segmentation_owner": "thor_offline_or_server",
+      "actor_loaded": true,
+      "replay_contract_ready": true,
+      "actor_phase": "candidate_requires_AB",
+      "gate_version": 3,
+      "reward_contract": "drained_grasp_v1",
+      "gate_owner": "thor",
+      "recording": "native_HIL_with_full_pld_reply",
+      "collector": {
+        "kind": "coherent_trajectory_v1",
+        "latent_std": [
+          0.5,
+          0.5,
+          0.5,
+          0.5,
+          0.5,
+          0.5,
+          0.2
+        ],
+        "parent_snapshot_sha256": "75674aad5775e4864cce24664abd270e43a2a82b7e64f95811ce952979b2d286",
+        "eval_preserves_parent_physical_policy": false,
+        "density_semantics": "conditional Gaussian innovation then tanh; before deterministic trajectory/geometry decoding",
+        "eval_preserves_parent_target_scale": true
+      },
+      "collect_joint_radius_rad": 0.08,
+      "eval_joint_radius_rad": 0.02
+    }
+  },
+  "cases": [
+    {
+      "sample": "episode-000095-early.npz",
+      "delay_steps": 0,
+      "output_shape": [
+        50,
+        14
+      ],
+      "prefix_exact": true,
+      "output_finite": true,
+      "max_new_joint_step_rad": 0.12148836873434676,
+      "server_infer_ms": 200.6386120337993,
+      "roundtrip_ms": 201.77455502562225
+    },
+    {
+      "sample": "episode-000095-middle.npz",
+      "delay_steps": 1,
+      "output_shape": [
+        50,
+        14
+      ],
+      "prefix_exact": true,
+      "output_finite": true,
+      "max_new_joint_step_rad": 0.007382027259853374,
+      "server_infer_ms": 201.23321213759482,
+      "roundtrip_ms": 202.03671185299754
+    },
+    {
+      "sample": "episode-000095-late.npz",
+      "delay_steps": 10,
+      "output_shape": [
+        50,
+        14
+      ],
+      "prefix_exact": true,
+      "output_finite": true,
+      "max_new_joint_step_rad": 0.04011937508992358,
+      "server_infer_ms": 199.92247805930674,
+      "roundtrip_ms": 200.87146293371916
+    },
+    {
+      "sample": "episode-000096-early.npz",
+      "delay_steps": 0,
+      "output_shape": [
+        50,
+        14
+      ],
+      "prefix_exact": true,
+      "output_finite": true,
+      "max_new_joint_step_rad": 0.045585129489172926,
+      "server_infer_ms": 199.22132208012044,
+      "roundtrip_ms": 200.04815491847694
+    },
+    {
+      "sample": "episode-000096-middle.npz",
+      "delay_steps": 1,
+      "output_shape": [
+        50,
+        14
+      ],
+      "prefix_exact": true,
+      "output_finite": true,
+      "max_new_joint_step_rad": 0.04808913017982297,
+      "server_infer_ms": 199.83677798882127,
+      "roundtrip_ms": 201.27823809161782
+    },
+    {
+      "sample": "episode-000096-late.npz",
+      "delay_steps": 10,
+      "output_shape": [
+        50,
+        14
+      ],
+      "prefix_exact": true,
+      "output_finite": true,
+      "max_new_joint_step_rad": 0.07421458208762521,
+      "server_infer_ms": 199.07735707238317,
+      "roundtrip_ms": 199.97916696593165
+    },
+    {
+      "sample": "episode-000097-early.npz",
+      "delay_steps": 0,
+      "output_shape": [
+        50,
+        14
+      ],
+      "prefix_exact": true,
+      "output_finite": true,
+      "max_new_joint_step_rad": 0.09529139325937086,
+      "server_infer_ms": 198.63475509919226,
+      "roundtrip_ms": 199.35094797983766
+    },
+    {
+      "sample": "episode-000097-middle.npz",
+      "delay_steps": 1,
+      "output_shape": [
+        50,
+        14
+      ],
+      "prefix_exact": true,
+      "output_finite": true,
+      "max_new_joint_step_rad": 0.05545567473332036,
+      "server_infer_ms": 198.38978513143957,
+      "roundtrip_ms": 199.10499709658325
+    },
+    {
+      "sample": "episode-000097-late.npz",
+      "delay_steps": 10,
+      "output_shape": [
+        50,
+        14
+      ],
+      "prefix_exact": true,
+      "output_finite": true,
+      "max_new_joint_step_rad": 0.06122309020989003,
+      "server_infer_ms": 198.30005895346403,
+      "roundtrip_ms": 199.05921490862966
+    }
+  ],
+  "server_infer_p50_ms": 199.22132208012044,
+  "server_infer_p95_ms": 200.9953720960766,
+  "roundtrip_p50_ms": 200.04815491847694,
+  "roundtrip_p95_ms": 201.93184912204742
+}

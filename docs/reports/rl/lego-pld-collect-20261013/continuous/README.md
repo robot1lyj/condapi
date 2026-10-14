@@ -4,7 +4,7 @@
 
 修复第二轮首条录像中每个请求独立换方向、8 步三角脉冲反复归零造成的跳动。Actor-1 权重保持不变；这是采集策略和动作解码器升级，不是重新训练，也不代表抓取成功率已经提高。
 
-候选 `pld-continuous-20261014-r1`，最终 bundle `bundle-r3`。快照 `7013be463f735521a17cc13af2196906092244f22cf64a02cad1225384e55857`，collect 合同 `959db331948a9acd7c59f45bae64cc6298bcb04c879e30ea414ef5de465bba9e`，actor `8cd1a5a09c2082e3df0476a937ce3af812e1295e8dcf353ffd66bfc54f5af8d3`。前两个候选 bundle 及检查结果保留，不用于部署。
+已上线 `pld-continuous-20261014-r1`，最终 bundle `bundle-r3`。快照 `7013be463f735521a17cc13af2196906092244f22cf64a02cad1225384e55857`，collect 合同 `959db331948a9acd7c59f45bae64cc6298bcb04c879e30ea414ef5de465bba9e`，actor `8cd1a5a09c2082e3df0476a937ce3af812e1295e8dcf353ffd66bfc54f5af8d3`。前两个候选 bundle 及检查结果保留，不用于部署。
 
 ## 实际算法
 
@@ -30,4 +30,24 @@
 
 ## 验收
 
-已通过 48 项轻量回归，含新轨迹、噪声反向、作用范围、录制至 Replay、原有合同和 FK；未运行本地训练。最终 Thor GPU、延迟和服务切换结果在实际执行后补充。闭环运动是否自然仍需新版本现场录像验证。
+已通过 48 项轻量回归，含新轨迹、噪声反向、作用范围、录制至 Replay、原有合同和 FK；未运行本地训练。Thor 最终 GPU 与切换也已通过，结果见下。闭环运动是否自然仍需新版本现场录像验证。
+
+
+### 最终几何检查
+
+Thor CPU 对冻结 actor 做前向，无训练。源为原13集奖励发布 records，共2,978个可控上下文（含原3个时序不合格窗口的28个上下文，仅用于几何，不恢复其训练资格）。1,865个满足新解码范围，每处16个样本；959处剩余抓取窗口太短、148处当前姿态在工作区外、6处前缀衔接不满足运动限制。不是将全部原数据都当作新可执行修正。
+
+29,840个几何样本中，28,755个无需缩小、1,037个缩小、48个返回Pi；均通过偏移范围、前缀和退出后零修正检查。合格上下文中的全候选峰值FK差中位17.45mm/P95 36.96mm；前10个可编辑tick的峰值中位16.26mm/P95 34.01mm，76.36%样本达到1cm。本次全候选最大64.63mm，不是5cm硬上限，也不是末端实测移动。这里只是独立记录上下文的几何采样，不能当作新策略连续真机轨迹或成功率。[完整分布](geometry-all13-r3.json)。
+
+### GPU、接口和上线
+
+- 独立 GPU：4个真实观测 × collect/eval，共8例；左右均有非零修正，父actor同输入输出保持，前缀/非活动臂逐值保持，新解码与trace重建通过。[GPU回执](runtime-gpu-r3.json)。
+- 候选/正式各48例Pi＋RL与9例普通RTC通过；正式含专家推理 P50/P95 为216.63/219.18ms。原版P95为216.16ms，这不是严格配对性能实验，但未出现明显延迟退化。[生产Pi＋RL](production-bundle-smoke.json)、[RTC](production-rtc-smoke.json)。
+- 只读复用YAM现有校验器：GPU8包、候选16包、正式16包通过，客户端未修改。[生产协议回执](client-production.json)。这些是本机协议检查，不冒充真实3588执行。
+- 用户本轮明确确认停止后切换；正式容器healthy，MAXN unit active。[授权](site-idle-confirmation.json)、[部署回执](deployment.json)。
+
+镜像 `pld-rl:thor-continuous-20261014-r1`，ID `sha256:2b93046aac08666f1b7e70c9d3e6fd62261c50cd1d9f73108bfe6d0aa2c35713`，部署源码 `3f00cc13c38f2abfa0a91bdcbf99ca8eb2cff21b`。Pi20w/7步FP32权重与TF32计算/quantile RTC不变。端口仍为 `ws://192.168.250.1:8000`，MAXN单元 `thor-pld-continuous-20261014-r1-maxn.service`。
+
+完整源包、日志、bundle-r3和返回包保留在Thor `/home/wuyan-lyj/thor/pi/services/pld-continuous-20261014-r1/`，本地证据在 `/home/wuyan-lyj/condapi-data/rl/pld-continuous-20261014-r1/`。旧生产停止保留为 `pld-rl-retained-pld-continuous-20261014-r1`；回退须停止现场执行、交还MAXN会话并绑定旧身份，不能在一集内混换。旧版本有本次已知脉冲问题，回退不代表适合继续批量采集。
+
+客户端重连原地址，重新应用collect绑定7013be46…，前缀保持10。先录一集，核对动作连续性、真实修正来源、抓取/放置边界及奖励终点，再继续10–15集采集。没有重新训练actor，也没有开启自动判奖/训练后台。

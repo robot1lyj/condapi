@@ -1,0 +1,7 @@
+{
+  "observed_at": "2026-10-14T03:05:42.028112+00:00",
+  "source": "human response in this thread to call_c60598ac8c1543ac9f59bec5bad8f441",
+  "question": "连续探索候选已完成代码和 CPU 验证。现场现在是否已停止机械臂执行，可以暂停旧推理，完成 GPU 验收并切换？当前客户端仍有连接，需要确认以免中断现场动作。",
+  "answer": "已停止，可以验收并切换",
+  "scope": "Thor candidate GPU validation and production replacement; no client/control changes"
+}
