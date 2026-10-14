@@ -1,0 +1,6 @@
+{
+  "user_confirmed": "已停止执行，可以验收并切换",
+  "observed_at": "2026-10-14T01:42:07.543424+00:00",
+  "production_container_id": "fe52d8d21da6b2f84bac1e157e586dcf4f25cdfc1af4b3e3d1c8b7d0823ba9f8",
+  "production_image": "sha256:f6dfaba965ec61b4022cc4b26cdda420ac3de4b79ccec42687dcf84f35295bd0"
+}

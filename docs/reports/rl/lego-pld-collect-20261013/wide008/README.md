@@ -31,8 +31,8 @@
 
 ## 验收与采集
 
-CPU合同/抓取/录制回归29项通过。Thor CPU真实RGB＋记录Pi输出4例、collect12次验证完整ResNet18和actor路径，eval输入/动作逐值一致、噪声中心与父动作一致、前缀保持；[CPU检查](runtime-cpu-check.json)。候选待完整Pi＋RL GPU延迟、客户端包验证与生产切换，线上仍是旧Actor-1 collect配置；状态以部署回执为准。
+2026-10-14用户确认现场已停止，已切换原`pld-rl`、地址`ws://192.168.250.1:8000`，healthy/MAXN。候选与生产各48例真实输入Pi＋RL及9例普通RTC通过；生产P50/P95为214.97/216.16ms，客户端只读校验16包通过。GPU对照4例真实RGB＋Pi输出、12次collect，确认eval动作和输入逐值不变、采集中心/前缀/trace正确；没有启动训练。新跨IPC真机rollout仍待用户首集。[生产回执](deployment.json)、[Pi＋RL](production-bundle-smoke.json)、[RTC](production-rtc-smoke.json)、[客户端协议](client-production.json)、[GPU中心对照](runtime-gpu-check.json)。此前CPU合同/抓取/录制回归29项及完整推理检查通过。
 
-候选镜像`pld-rl:thor-wide008-20261013-r1`已在Thor构建，源码`be5dd52`、镜像ID`09d2f9de…`；最终紧凑trace版本重新完成CPU全路径检查。发布目录`/home/wuyan-lyj/thor/pi/services/pld-wide008-20261013-r1/`保存完整源包、bundle与证据。当前客户端仍连接8000，已询问现场是否停止；答复前不占用推理GPU或切换生产。[构建与现状回执](staging.json)。
+生产镜像`pld-rl:thor-wide008-20261013-r1`，源码`be5dd52`、镜像ID`09d2f9de…`；发布目录`/home/wuyan-lyj/thor/pi/services/pld-wide008-20261013-r1/`保存源包、bundle和完整返回包/日志，工作站另存`/home/wuyan-lyj/condapi-data/rl/pld-wide008-20261013-r1/deployment/`。父版本已停止并保留为`pld-rl-retained-pld-wide008-20261013-r1`。回退需现场停机并转交MAXN会话；不在任务中途更换身份。未修改3588或向客户端agent发任务。[部署前历史回执](staging.json)与[用户停止确认](site-idle-confirmation.json)保留。
 
-确认现场停止后再切换同一`pld-rl`地址，旧容器保留回退。客户端集间重新绑定身份，前缀仍10。首集检查快照、有效修正tick、实际指令差、FK分布、机械臂响应、延迟/取消、两臂触发和奖励覆盖；如果队列覆盖或机构未跟上，先修执行时间/节奏，不能只加radius。通过后补齐10–15集，Qwen＋DINO判奖、无建议交人工，冻结奖励版本再训练Actor-2，与父Actor-1/纯Pi对照。
+客户端现在重连同一地址，重新应用`collect`绑定新快照`23d4da1a…`与合同`9b2a4ab5…`，前缀仍10；eval保持父Actor-1，不是本轮扩大探索模式。首集检查快照、有效修正tick、实际指令差、FK分布、机械臂响应、延迟/取消、两臂触发和奖励覆盖；如果队列覆盖或机构未跟上，先修执行时间/节奏，不能只加radius。通过后补齐10–15集，Qwen＋DINO判奖、无建议交人工，冻结奖励版本再训练Actor-2，与父Actor-1/纯Pi对照。

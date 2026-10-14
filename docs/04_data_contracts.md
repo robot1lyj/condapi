@@ -1,6 +1,6 @@
 # 04 · 数据合同
 
-**扩大collect候选：** 根合同`9b2a4ab5…`与父模型合同分开保存，actor权重不变。新trace绑定执行合同、旧actor输入context/物理建议、新采样中心和std；编译器核验坐标、解码与实际动作。新collect与旧13集不能直接拼归一化action；probe/eval维持父坐标。原件和奖励不覆盖，后续混训先做物理坐标迁移。[字段与数值](reports/rl/lego-pld-collect-20261013/wide008/README.md)。
+**扩大collect已上线（2026-10-14）：** 根合同`9b2a4ab5…`与父模型合同分开保存，actor权重不变。新trace绑定执行合同、旧actor输入context/物理建议、新采样中心和std；编译器核验坐标、解码与实际动作。新collect与旧13集不能直接拼归一化action；probe/eval维持父坐标。原件和奖励不覆盖，后续混训先做物理坐标迁移。[字段与数值](reports/rl/lego-pld-collect-20261013/wide008/README.md)。
 
 **2026-10-13新增抓取结果合同：** wire schema继续`pld_sac_block_v2`，gate v3使用`signed_feasible_v1`＋`drained_grasp_v1`；新增negative_scale及排队阶段字段，模型特征2287维，旧2275维合同不混训。停止新增修正与实际队列结束分开，排队阶段保留零动作transition，末尾才结算。held=1，empty/not_lifted/no_closure/dropped=0；未抬起/未闭爪不要求5cm，但需要完整实测轨迹、新鲜终态图像和意图审核。故障/HIL/缺失不强填0。无实际闭合使用独立W候选，不伪造物理闭合。源数据不改写，审核SHA仍绑定精确候选；首批新集待用户录制。[字段与处理入口](reports/rl/pld-sac-block-v2/README.md)、[运行证据](reports/thor/pld-rl-20261013/README.md)。
 
