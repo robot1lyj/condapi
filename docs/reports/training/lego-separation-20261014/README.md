@@ -1,6 +1,6 @@
 # 乐高拆开专项与分拣回放数据准备
 
-2026-10-14最终范围：现用50h之外选100集，原50h之内选100集，保留完整episode；状态 **DATA_AUDITED_RECIPE_PENDING**。原始数据、既有50h选择、验证集、下载任务和训练均未改动。
+2026-10-14最终范围：现用50h之外选100集，原50h之内选100集，保留完整episode；数据发布回执保留准备时的 **DATA_AUDITED_RECIPE_PENDING**；用户随后已明确确认并授权开训，当前启动验收为 **Slurm2344 / step51**（18:35+08快照）。原始数据、既有50h选择、验证集、下载任务和训练均未改动。
 
 | 池 | 集数 | 帧数@30fps | 小时 | 完整H50窗口 | 原生帧采样期望 |
 |---|---:|---:|---:|---:|---:|
@@ -13,7 +13,7 @@
 - [200集原生episode清单](bimanual100-replay100/episodes.json)、[专项100集](bimanual100-replay100/specialist-episodes.json)、[回放100集](bimanual100-replay100/replay-episodes.json)。ID属于本地发布的LeRobot train，不是上游source ID。
 - [逐集来源与事件](bimanual100-replay100/dataset.json)、[发布身份](bimanual100-replay100/release.json)、[审核汇总](bimanual100-replay100/audit-summary.json)、[逐集审核](bimanual100-replay100/audit.jsonl)、[抽帧审阅范围](bimanual100-replay100/visual-review.json)。
 - [全量双臂扫描摘要](bimanual100-replay100/scan-summary.json)。最初单臂方案的30集试选留在`pilot-30/`，不属于最终200集合同。
-- [待确认训练配方](recipe-draft.md)是文字草案，不是可执行配置或已获准作业。
+- [原始配方草案](recipe-draft.md)保持原字节；[本轮明确确认](approval.json)已绑定其SHA，[正式配置](../../../../configs/native/pi05-lego-separation-r1.json)已按原样生成。
 
 服务器子集目录：`/home/wuyan/lyj/YAM/data-reviews/lego-separation-20261014/dataset-bimanual100-replay100-v1/`。实际数值/视频仍只读引用`/home/wuyan/lyj/YAM/YAM_data/processed/lego_lerobot_v1_20260907/train`，不是复制出另一套LeRobot数据。现有原生trainer支持按`episodes.json`加载这个版本的完整episode。
 
@@ -39,4 +39,4 @@
 
 数据Slurm：2337单臂初筛，2338/2339初步预览，2340双臂复扫，2341双臂预览，2342初次审核（为并行提速主动取消、保留已过记录），2343复用已过SHA并完成全部审核。没有申请GPU，也没有进入训练循环。8项规则与回放选择测试通过，修改范围静态检查通过。
 
-100＋100、按帧期望1:1适合作为首轮专项/回放候选，但100集旧数据只覆盖原50h的一部分，不保证保留能力。先以固定240000为对照，分别比较普通分拣与卡住拆开；如普通分拣回退，后续再讨论扩大旧池，不能在本轮训练中途静默改数据或比例。具体训练配方先确认，GPU由用户协调，未启动训练或切换推理服务。
+100＋100、按帧期望1:1适合作为首轮专项/回放候选，但100集旧数据只覆盖原50h的一部分，不保证保留能力。先以固定240000为对照，分别比较普通分拣与卡住拆开；如普通分拣回退，后续再讨论扩大旧池，不能在本轮训练中途静默改数据或比例。用户已经确认本轮配方并释放耳机4卡；Slurm2344在gpu001运行，详情见[启动回执](startup-verified.json)与[监控交接](monitor-handoff.txt)。51个原生FP32参数数组全部有限，800个真实loader样本通过，原数据SHA复核及原生resolved config通过。12项本任务轻量回归通过。本轮不自动切换推理服务。

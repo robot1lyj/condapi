@@ -6,7 +6,7 @@
 
 回放从原50h的2,337集按seed42、episode ID十区段各选10集，并在区段内交换以平衡时长。专项与回放各100集、278,516帧、2.578852h，互不重叠，200集共557,032帧；原生按帧均匀采样的期望比例正好50/50，不保证每batch各一半。完整H50窗口各273,616，属于统计，不代表已改loader去掉原生尾部padding。保留完整episode、原14D值、原任务prompt与原train/val；没有导出或伪造HIL介入标签。
 
-CPU审核已对全部200集有限14D state/action、帧号/30fps时间戳、600段三路视频共1,671,096帧解码及SHA通过；100个专项集的30fps全量FK都仍有双臂横置事件。发布状态为`DATA_AUDITED_RECIPE_PENDING`，源支持的子集清单在服务器`/home/wuyan/lyj/YAM/data-reviews/lego-separation-20261014/dataset-bimanual100-replay100-v1/`，没有复制或覆盖原视频。清单、逐集审核、身份与预览归[专项数据报告](reports/training/lego-separation-20261014/README.md)。训练配方待本轮明确确认，状态归03。
+CPU审核已对全部200集有限14D state/action、帧号/30fps时间戳、600段三路视频共1,671,096帧解码及SHA通过；100个专项集的30fps全量FK都仍有双臂横置事件。发布状态为`DATA_AUDITED_RECIPE_PENDING`，源支持的子集清单在服务器`/home/wuyan/lyj/YAM/data-reviews/lego-separation-20261014/dataset-bimanual100-replay100-v1/`，没有复制或覆盖原视频。清单、逐集审核、身份与预览归[专项数据报告](reports/training/lego-separation-20261014/README.md)。该数据回执保留准备时状态；本轮配方随后已明确确认，Slurm2344启动前又复核文件SHA及全部200集的800个真实loader样本，训练状态归03。
 
 ## 耳机50h清洗选集（2026-10-13）
 

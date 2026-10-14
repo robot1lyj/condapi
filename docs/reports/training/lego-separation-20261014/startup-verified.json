@@ -1,0 +1,71 @@
+{
+  "schema": "yam_lego_separation_r1_startup_v1",
+  "observed_at_utc": "2026-10-14T10:35:35.287176+00:00",
+  "job_id": 2344,
+  "job_state": "2344 RUNNING gpu001",
+  "node": "gpu001",
+  "gpu": "4x RTX4090 24GB",
+  "run_directory": "/home/wuyan/lyj/YAM/training-runs/pi05_yam/lego_pi05_rtc_separation_r1_20261014",
+  "control_directory": "/home/wuyan/lyj/YAM/training-runs/control/lego_pi05_rtc_separation_r1_20261014",
+  "source_checkout": "/home/wuyan/lyj/YAM/code-snapshots/lego-separation-r1-20261014",
+  "code_commit": "8e71227f2ccb13f2253ef0296d2228fb2f6a3eaa",
+  "recipe": "configs/native/pi05-lego-separation-r1.json",
+  "parent_step": 240000,
+  "total_new_steps": 5000,
+  "parent_nonfinite_elements": 0,
+  "native_parent_tensor_count": 51,
+  "native_parent_dtypes": [
+    "float32"
+  ],
+  "native_loader_samples_passed": 800,
+  "native_loader_samples_failed": 0,
+  "data_source_hashes_rechecked": true,
+  "resolved_config_verified": true,
+  "metrics_verified": [
+    {
+      "gpu_memory_gib": 9.401062250137329,
+      "grad_norm": 0.24477897584438324,
+      "learning_rate": 4.6268655751191545e-07,
+      "loss": 0.02084699459373951,
+      "param_norm": 1804.246337890625,
+      "samples_per_second": 14.076216872933042,
+      "step": 31,
+      "step_seconds": 2.2733380913967265,
+      "time": 1791974085.4905672
+    },
+    {
+      "gpu_memory_gib": 9.396619081497192,
+      "grad_norm": 0.2295048087835312,
+      "learning_rate": 6.119403224147391e-07,
+      "loss": 0.019606156274676323,
+      "param_norm": 1804.246337890625,
+      "samples_per_second": 14.070692414801233,
+      "step": 41,
+      "step_seconds": 2.274230653094128,
+      "time": 1791974108.2392862
+    },
+    {
+      "gpu_memory_gib": 9.401060581207275,
+      "grad_norm": 0.22778360545635223,
+      "learning_rate": 7.611940873175627e-07,
+      "loss": 0.022120008245110512,
+      "param_norm": 1804.246337890625,
+      "samples_per_second": 14.07484257141637,
+      "step": 51,
+      "step_seconds": 2.2735600656014867,
+      "time": 1791974132.2464502
+    }
+  ],
+  "latest_verified_step": 51,
+  "first_planned_checkpoint": 1000,
+  "complete_new_checkpoint_observed": false,
+  "initial_config_sha256": "a2abe8f41117c178b281e921f52693c01b83834e964612a3217e85c3ea83a7cd",
+  "training_contract_sha256": "bb04f87178eca0523737e097e696a873f637cce7432245ea6d3e1efaebe5e7b8",
+  "earbuds_pause": {
+    "job_id": 2333,
+    "preserved_committed_checkpoint": 34000,
+    "process_observed_stopped_before_release": true,
+    "automatic_resume": false
+  },
+  "thor_or_client_changed": false
+}
