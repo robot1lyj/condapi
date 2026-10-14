@@ -1,0 +1,19 @@
+{
+  "schema": "dagger_recipe_approval_v1",
+  "date": "2026-10-14",
+  "recipe_version": "recipe-draft.md v1",
+  "recipe_draft_sha256": "7398031322a51cfd30def3744e57f0991548dc44769665227ae7d15491179fda",
+  "native_recipe": "configs/native/pi05-lego-separation-r1.json",
+  "native_recipe_sha256": "76685e58318439280d7df56ab25cec62c5f8c050aa6b1286ceafaa29e27360f6",
+  "source": "direct human messages in this chat",
+  "user_confirmation": "好的，你开始训练把，我认可这个配方",
+  "execution_authorized": true,
+  "resource_authorization": [
+    "暂停耳机训练2333，保留完整检查点后启动本轮",
+    "我已经暂停耳机训练了，你直接来开始用把"
+  ],
+  "earbuds_preserved_checkpoint": 34000,
+  "earbuds_process_observed_state": "Tl (stopped)",
+  "earbuds_allocation_release": "2333 cancelled after committed 34000 params/train_state verified",
+  "client_agent_messages_sent": false
+}

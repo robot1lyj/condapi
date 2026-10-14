@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "run_name": "lego_pi05_rtc_separation_r1_20261014",
+  "report": "docs/reports/training/lego-separation-20261014",
+  "dataset_root": "/home/wuyan/lyj/YAM/YAM_data/processed/lego_lerobot_v1_20260907/train",
+  "selection_root": "/home/wuyan/lyj/YAM/data-reviews/lego-separation-20261014/dataset-bimanual100-replay100-v1",
+  "selection_sha256": "66ec018805e357691fd27738f1d49e5f7d3182823acc2d80ed5f2ecff86ee4f3",
+  "parent_checkpoint": "/home/wuyan/lyj/YAM/training-runs/pi05_yam/lego_pi05_rtc_base_50h_20260921/240000",
+  "parent_metadata_sha256": "2912d15ba42fe0d742b5ac46e88804dacce69644369b4cf9b7405cf7d8fe7247",
+  "parent_norm_sha256": "fd0d9cb2db3ce475c1175c7f21a3a0dd3aa7f59d36edc680e7044cd11b9f1edf",
+  "python": "/home/wuyan/.conda/envs/condapi-yam/bin/python",
+  "control_root": "/home/wuyan/lyj/YAM/training-runs/control/lego_pi05_rtc_separation_r1_20261014",
+  "training": {
+    "config": "pi05_yam",
+    "batch_size": 32,
+    "fsdp_devices": 4,
+    "num_workers": 2,
+    "total_steps": 5000,
+    "horizon": 50,
+    "rtc_training_max_delay": 10,
+    "peak_lr": 3e-6,
+    "decay_lr": 3e-7,
+    "warmup_steps": 200,
+    "decay_steps": 5000,
+    "save_interval": 1000,
+    "keep_period": 1000,
+    "seed": 42,
+    "ema_decay": null,
+    "adam_eps": 1e-6
+  },
+  "approval": {
+    "recipe_version": "recipe-draft.md v1",
+    "date": "2026-10-14",
+    "source": "user message in this chat",
+    "user_text": "好的，你开始训练把，我认可这个配方",
+    "training_authorized": true
+  },
+  "automatic_training_start": false
+}
