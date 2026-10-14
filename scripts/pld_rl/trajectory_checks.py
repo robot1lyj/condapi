@@ -140,6 +140,8 @@ class TrajectoryChecks(unittest.TestCase):
     @patch("yam_pld_rl.trajectory.model_fk", return_value=SimpleFK())
     def test_native_replay_reconstructs_new_decoder(self, _fk):
         m = manifest()
+        for key in ("contract", "actor_contract", "eval_contract"):
+            m[key]["baseline_transform"] = "sdk_gripper_endpoints_v1"
         c, rows, records, candidates, reviews = modern_recording(contract_override=m["contract"])
         linked, labels, errors = associate_rewards(records, candidates, reviews, rows, "train")
         self.assertFalse(errors)
@@ -164,6 +166,10 @@ class TrajectoryChecks(unittest.TestCase):
             )
             eta = np.arctanh(np.asarray(p["sample_u"])) / np.asarray(m["collector"]["latent_std"])
             p.update(
+                raw_base=copy.deepcopy(p["base"]),
+                physical_base=copy.deepcopy(p["base"]),
+                physical_actions=copy.deepcopy(p["actions"]),
+                wire_actions=copy.deepcopy(p["actions"]),
                 execution_contract_sha256=fingerprint(c),
                 actor_context=ax[2264:],
                 actor_mean_u=np.zeros(7),
@@ -177,6 +183,17 @@ class TrajectoryChecks(unittest.TestCase):
         data, audit = compile_replay(linked, labels, c, {"fixture": m})
         self.assertFalse(audit["excluded"])
         self.assertEqual(data["reward"].sum(), 1)
+        # Floating reconstruction can differ by one ULP, but the recorded wire
+        # and physical targets are identical. Preserve exact prefix checking.
+        rounded = copy.deepcopy(linked)
+        pp = next(r["proposal"] for r in rounded if r["proposal"]["delay_steps"] > 0)
+        d = pp["delay_steps"]
+        for key in ("actions", "physical_actions", "wire_actions"):
+            pp[key][d][1] = float(np.nextafter(np.float64(pp[key][d][1]), np.inf))
+        self.assertFalse(compile_replay(rounded, labels, c, {"fixture": m})[1]["excluded"])
+        pp["wire_actions"][0][0] += 1e-6
+        with self.assertRaisesRegex(ValueError, "wire plan changed"):
+            compile_replay(rounded, labels, c, {"fixture": m})
         corrupted = copy.deepcopy(linked)
         corrupted[0]["proposal"]["trajectory_context"]["end_index"] += 1
         with self.assertRaisesRegex(ValueError, "trajectory context"):

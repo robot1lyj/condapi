@@ -204,7 +204,12 @@ def compile_replay(records, labels, contract, snapshots):
                 if not np.allclose(predicted, array(p.get("physical_actions", p["actions"]), (50, 14), "proposal actions"), atol=1e-6, rtol=0):
                     raise ValueError("proposal decoder mismatch")
                 if contract.get("baseline_transform") and not np.array_equal(
-                    wire_plan(predicted, p["raw_base"], delay), np.asarray(p["wire_actions"])
+                    # Decoder reconstruction is checked above with its numeric
+                    # tolerance. Exact wire identity compares RECORDED values:
+                    # a 1-ULP reconstructed bias must not reject a real action.
+                    # Raw RTC prefix and recorded physical suffix remain exact.
+                    wire_plan(np.asarray(p.get("physical_actions", p["actions"])), p["raw_base"], delay),
+                    np.asarray(p["wire_actions"])
                 ):
                     raise ValueError("wire plan changed native RTC prefix or physical suffix")
                 actual = array(r["submitted_actions"], (n, 14), "actually submitted targets")
