@@ -108,10 +108,11 @@ def main():
             np.testing.assert_array_equal(q[:, 7-off:14-off], b[:, 7-off:14-off])
             editable = (np.abs(np.asarray(ctx["bias"])).sum(1)+np.abs(ctx["weight"]))>1e-12
             check_step = editable | np.r_[False, editable[:-1]]
-            if np.any(abs(np.diff(np.vstack((previous, q)), axis=0)[check_step]) > np.asarray(c["max_target_step"])+2e-7):
+            active = slice(off, off+7)
+            if np.any(abs(np.diff(np.vstack((previous, q)), axis=0)[check_step, active]) > np.asarray(c["max_target_step"])[active]+2e-7):
                 raise ValueError("target step violated")
             check_acc = editable[2:] | editable[1:-1] | editable[:-2]
-            if np.any(abs(np.diff(q, n=2, axis=0)[check_acc]) > np.asarray(c["trajectory"]["max_target_second_difference"])+2e-7):
+            if np.any(abs(np.diff(q, n=2, axis=0)[check_acc, active]) > np.asarray(c["trajectory"]["max_target_second_difference"])[active]+2e-7):
                 raise ValueError("target second difference violated")
             dist = np.linalg.norm(xyz - xyz0, axis=-1) * 1000
             stats.append(
