@@ -21,6 +21,8 @@ from yam_pld_rl.block_replay import compile_replay
 from yam_pld_rl.collector import center_latent
 from yam_pld_rl.collector import execution_contract
 from yam_pld_rl.collector import expanded_manifest
+from yam_pld_rl.collector import native_trajectory_manifest
+from yam_pld_rl.collector import smooth_manifest
 from yam_pld_rl.collector import validate_collector
 from yam_pld_rl.curator import associate_rewards
 
@@ -33,6 +35,16 @@ def parent():
 
 
 class CollectorChecks(unittest.TestCase):
+    def test_new_actor_uses_its_trained_trajectory_coordinates(self):
+        behavior = smooth_manifest(parent(), parent_snapshot="1"*64)
+        learned = {"contract": behavior["contract"], "actor_sha256": "new-learned-weights"}
+        out = native_trajectory_manifest(learned, behavior_snapshot="2"*64)
+        self.assertEqual(out["actor_contract"], behavior["contract"])
+        self.assertEqual(execution_contract(out, "eval")["radius"][0], .08)
+        self.assertEqual(out["contract"]["action_mapping"], "signed_trajectory_v1")
+        self.assertEqual(behavior["actor_contract"]["radius"][0], .02)
+        self.assertNotIn("collector", learned)
+
     def test_eval_unchanged_and_mutation_isolated(self):
         old = parent()
         saved = copy.deepcopy(old)

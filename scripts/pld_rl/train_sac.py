@@ -21,6 +21,7 @@ from yam_pld_rl.block_contract import feature_dim
 from yam_pld_rl.block_contract import fingerprint
 from yam_pld_rl.block_contract import validate_contract
 from yam_pld_rl.calibrated import CalibratedLearner
+from yam_pld_rl.collector import native_trajectory_manifest
 from yam_pld_rl.data import sha256
 from yam_pld_rl.data import write_json
 from yam_pld_rl.execution import require_training_runtime
@@ -38,12 +39,16 @@ def export_bundle(path, learner, contract, normalization, encoder_sha, config, p
     path.mkdir(exist_ok=False)
     shutil.copyfile(ROOT / "third_party/yam-fk-model/yam_linear4310.xml", path / "fk.xml")
     torch.save({k: v.cpu() for k, v in learner.actor.state_dict().items()}, path / "actor.pt")
-    write_json(path / "manifest.json", {"schema": "pld_sac_bundle_v2", "contract": contract,
+    manifest = {"schema": "pld_sac_bundle_v2", "contract": contract,
                "normalization": normalization, "encoder_sha256": encoder_sha, "config": config,
                "observation_dim": feature_dim(contract), "actor_sha256": sha256(path / "actor.pt"),
                "provenance": provenance, "robot_validated": False,
                "phase": "bootstrap_exploration" if learner.actor_updates == 0 else "candidate_requires_AB",
-               "entropy_semantics": "tanh latent u; critic action is state-feasible normalized physical offset"})
+               "entropy_semantics": "tanh latent u; critic action is state-feasible normalized physical offset"}
+    if contract.get("trajectory"):
+        manifest["entropy_semantics"] = "tanh latent target; critic action precedes deterministic recorded trajectory/geometry decoding"
+        manifest = native_trajectory_manifest(manifest, behavior_snapshot=config["behavior_snapshot_sha256"])
+    write_json(path / "manifest.json", manifest)
 
 
 def main():

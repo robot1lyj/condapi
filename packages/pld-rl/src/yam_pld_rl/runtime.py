@@ -152,7 +152,8 @@ class BlockRuntime:
         mode = request["mode"]
         if self.manifest.get("collector") and (mode == "collect" or smooth):
             ac = self.actor_contract
-            ap, an = feasible_bounds(base, previous, arm, delay, ac)
+            ap, an = feasible_bounds(base, previous, arm, delay, ac,
+                                     context=context if ac.get("trajectory") else None)
             if gate.get("apply_residual") is False:
                 ap, an = np.zeros(7, np.float32), np.zeros(7, np.float32)
             ax = observation_vector(features, state, base, previous, arm, delay, elapsed, ap,

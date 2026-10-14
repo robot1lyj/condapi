@@ -111,6 +111,27 @@ def smooth_manifest(parent, *, parent_snapshot):
     return out
 
 
+def native_trajectory_manifest(manifest, *, behavior_snapshot):
+    """Export a newly learned trajectory actor in its OWN action coordinates.
+
+    Actor-1's .02 contract is only for decoding Actor-1 behavior. A new actor
+    trained on trajectory targets must never be routed through that old scale.
+    """
+    out = copy.deepcopy(manifest)
+    if not out["contract"].get("trajectory"):
+        raise ValueError("native trajectory export requires a trajectory contract")
+    out["actor_contract"] = copy.deepcopy(out["contract"])
+    out["eval_contract"] = copy.deepcopy(out["contract"])
+    out["collector"] = {"kind": "coherent_trajectory_v1", "native_actor_coordinates": True,
+                        "parent_snapshot_sha256": behavior_snapshot,
+                        "latent_std": [.5]*6+[.2],
+                        "eval_preserves_parent_physical_policy": False,
+                        "eval_preserves_parent_target_scale": True,
+                        "density_semantics": "conditional Gaussian innovation then tanh; before deterministic trajectory/geometry decoding"}
+    validate_collector(out)
+    return out
+
+
 def validate_collector_trace(p, manifest):
     """Check physical coordinates and parent observation; no network execution."""
     if not manifest.get("collector"):
@@ -121,7 +142,8 @@ def validate_collector_trace(p, manifest):
         raise ValueError("expanded replay requires collect execution coordinates")
     ac = manifest["actor_contract"]
     base, arm, d = p.get("physical_base", p["base"]), p["arm"], p["delay_steps"]
-    ap, an = feasible_bounds(base, p["previous_command"], arm, d, ac)
+    ap, an = feasible_bounds(base, p["previous_command"], arm, d, ac,
+                             context=p.get("trajectory_context") if ac.get("trajectory") else None)
     if p["gate"].get("apply_residual") is False:
         ap, an = np.zeros(7, np.float32), np.zeros(7, np.float32)
     ax = observation_vector(np.asarray(p["x"])[:1536], p["state"], base, p["previous_command"],
