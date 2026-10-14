@@ -2,7 +2,7 @@
 
 ## 定位与启动
 
-**当前8766（2026-10-14）：** 复用同一VLA看板，配置[pld-continuous10-r03.json](../configs/dashboards/pld-continuous10-r03.json)展示连续探索10集的TD3BC/NoAnchor/BC各两seed，六组3000 critic/500 RL或BC actor/200坐标对齐更新均已完成，36份检查点审计通过。指标镜像在`artifacts/pld-continuous10-r03`；旧13集及18算法曲线原件保留。入口AUC基于17次开发验证，不是成功率，Q自评增益也不能代替真机改善。复核复用固定模板`http://127.0.0.1:8768/review.html`：仅62份无可用建议交用户，252份有建议直接发布；训练所用reward-release-v1已冻结，后续复核生成新奖励版本。服务状态以部署回执单独核对，不能从曲线停止推断推理未启动。[训练结果与上线身份](reports/rl/lego-pld-collect-20261013/continuous/batch10/README.md)。
+**当前8766（2026-10-14，R04完成）：** 继续复用VLA看板，[pld-continuous10-r04.json](../configs/dashboards/pld-continuous10-r04.json)展示固定10集/0.08合同下TD3BC、SAC、IQL、BC各两seed。八组3000 critic/500 actor/200坐标对齐更新完成，48份checkpoint审计通过；API八组均3000步、无无效行，镜像`artifacts/pld-continuous10-r04`。R03六组及旧13集/18算法缓存保留。IQL入口AUC0.85/0.867仅来自E01的17次开发验证，不是机器人成功率；SAC的Q包含熵，不能用记录奖励MC误差与其他算法直接排名。自评gain和动作范围外比例也不当成功率。训练已结束，推理状态另查08；[配方、重复性与结果](reports/rl/lego-pld-collect-20261013/continuous/batch10/round04/README.md)。复核继续用固定模板`http://127.0.0.1:8768/review.html`，只有无可用建议交用户；reward-release-v1已冻结。
 
 2026-10-12新增PLD两轮八组初始化诊断，复用同一看板与 `vla_platform.metrics.write_metrics`，配置[pld-offline14-20261012.json](../configs/dashboards/pld-offline14-20261012.json)，本地端口8766；原VLA端口8765不改。`scripts/pld_rl/sync_dashboard.py`每10秒只读镜像metrics、身份、状态与最新验证结果，第二轮用 `--ids`指定四个新run并保存独立本地cache；错误保留旧缓存并记sync-state。API已验到八组、5000步、无无效行，使用前仍核对源mtime。主要观察TD/MC误差、入口AUC、Q分歧、梯度和吞吐；AUC只有12次验证/2次失败，绝不是机器人成功率。原始曲线、各次预测和checkpoint保存在服务器，页面平滑不改变原值。
 

@@ -223,7 +223,14 @@ class TrajectoryChecks(unittest.TestCase):
 
     @patch("yam_pld_rl.trajectory.model_fk", return_value=SimpleFK())
     def test_native_replay_reconstructs_new_decoder(self, _fk):
-        m = manifest()
+        self._check_recorded_replay(manifest())
+
+    @patch("yam_pld_rl.trajectory.model_fk", return_value=SimpleFK())
+    def test_closing_collector_reaches_recorded_reward_replay(self, _fk):
+        learned = native_trajectory_manifest(manifest(), behavior_snapshot="1"*64)
+        self._check_recorded_replay(closing_collect_manifest(learned, parent_snapshot="2"*64))
+
+    def _check_recorded_replay(self, m):
         for key in ("contract", "actor_contract", "eval_contract"):
             m[key]["baseline_transform"] = "sdk_gripper_endpoints_v1"
         c, rows, records, candidates, reviews = modern_recording(contract_override=m["contract"])
@@ -232,7 +239,11 @@ class TrajectoryChecks(unittest.TestCase):
         ac = m["actor_contract"]
         for row in linked:
             p = row["proposal"]
-            ap, an = feasible_bounds(p["base"], p["previous_command"], p["arm"], p["delay_steps"], ac)
+            actx = planning_context(p["base"], p["previous_command"], p["state"], p["gate"],
+                                    p["arm"], p["delay_steps"], ac) if ac.get("trajectory") else None
+            if actx is not None and ac != c:
+                p["actor_trajectory_context"] = actx
+            ap, an = feasible_bounds(p["base"], p["previous_command"], p["arm"], p["delay_steps"], ac, context=actx)
             if not p["gate"]["apply_residual"]:
                 ap, an = np.zeros(7), np.zeros(7)
             ax = observation_vector(

@@ -2,7 +2,9 @@
 
 ## PLD 主线与 RECAP 后续路线（2026-10-11）
 
-**当前上线版本（2026-10-14）：** Actor-2 / `PARTS-CT-TD3BC seed0/3000` 已替换 Actor-1，快照f668170b…；新actor按连续轨迹原生坐标训练，eval/collect关节目标上限均±0.08rad、夹爪±0.05，collect另加相关噪声。10集连续探索已完成：245次可训练尝试、882个学习决策（228次/825决策训练，17次/57决策开发验证）；左右82/163，满足本轮预算，无需先补采。TD3BC、NoAnchor、BC对照各两seed共18,000 critic、3,000 RL/BC actor及1,200坐标对齐更新，36检查点审计通过；纯训练循环合计202.09秒，判奖/数据处理另计。TD3BC验证入口AUC0.70/0.65，BC对照0.80/0.783，不能声称RL优于BC或现场收敛。选择有约束TD3BC作工程试跑，同时保留BC；NoAnchor的范围外动作更多，不优先上线。生产48例Pi＋专家、9例RTC、客户端16包通过，healthy/MAXN，P95 219.33ms。下一步原地址重连后eval/前缀10先1–2集，再同分布Pi/BC对照。固定10块先比较C/N，再在完整完成轮次比较抓取次数/耗时；整轮C/N仍不进入本轮学习。[本轮数据、算法、结果与部署](reports/rl/lego-pld-collect-20261013/continuous/batch10/README.md)。第11集eval已取得真实下发证据：1101非零修正tick，关节/夹爪修正确实执行；发现49/155个correcting请求因不足9步提前返回Pi，闭合阶段控制窗口和夹爪幅度需下一版优化，当前线上未改。[现场核查](reports/rl/lego-pld-collect-20261013/continuous/batch10/eval-e11.md)。下面保留训练父Actor-1的证据。
+**当前上线（2026-10-14）：** 20w Pi＋Actor-2 Closing-Collect r05，快照6b8a5670…，`pld-rl` healthy/MAXN，Pi7步/quantile RTC/前缀10。actor权重不变，eval逐值保持旧Actor-2；collect关节±0.08rad，夹爪额外闭合0.20/额外张开0.05，相关噪声夹爪std0.7，速度/空间/前缀/放置退出保护不变。863个记录可控上下文×16抽样通过，额外闭合≥0.10占11.28%；这是控制余量，不是成功率。40项CPU录制/Replay检查、独立GPU16例、候选/生产各48例Pi＋专家/9例RTC与生产客户端16包通过，生产P95 218.32ms。用户明确本轮固定20w；暂停前发现的纯24w服务保留停止，旧Actor-2容器也保留。下一步先2集collect核对新范围真实效果与奖励终点，再决定约10集；不先批量同配置20集。[候选、实测余量、身份与回退](reports/rl/lego-pld-collect-20261013/continuous/batch10/closing-collect-r05/README.md)。
+
+**同合同算法实验：** 原10集245尝试/882学习决策，E01仅开发验证17尝试/57决策，其余9集训练。R04在Thor完成TD3BC/SAC/IQL/BC各两seed，48个checkpoint审计通过；IQL离线诊断更有希望，但尚未真机对照，生产没有自动换成IQL。C/N仍仅评估，局部持住1/有证据失败0用于训练。R03与第11集实录归[批次报告](reports/rl/lego-pld-collect-20261013/continuous/batch10/README.md)，R04归[同条件结果](reports/rl/lego-pld-collect-20261013/continuous/batch10/round04/README.md)。
 
 **父Actor-1训练记录：PLD式整段抓取残差框架，Pi/编码器冻结，左右臂覆盖；该轮RL在Thor独立容器训练。** 13集最终467抓取，原3417转移；R02仅合并强制等待尾段并保持折扣回报，2950决策（首集249验证，其余2701训练）。用户授权自行选择算法，已完成CalQL、MC-CalQL、PARTS-TD3BC及输入平衡对照各seed0/1，共24,000 critic/4,000 actor更新、48份检查点审计。训练循环合计450秒，不是VLA全量训练。CalQL本配方入口价值失真，普通PARTS入口弱；平衡输入后入口AUC约0.73，但仅按左右臂先验已0.705、右臂仍弱，不能宣称已学会有效修正或收敛。选`PARTS-TD3BC-Balanced seed0/3000`作工程试跑候选；主框架仍是Pi＋外挂小专家，不称完整原论文复现。[完整选择与局限](reports/rl/lego-pld-collect-20261013/batch13/round02.md)。
 
@@ -16,7 +18,9 @@
 
 ### 2026-10-14 后续操作
 
-用户暂使用Thor，本轮只做本地CPU静态/数据验证，生产f668170b…保持。五类算法共33组历史运行（含8组只训critic），当前0.08合同真正比较仅TD3BC/NoAnchor/BC六组；这些不是统一算法排行榜。成功BC拟合条件残差，但会纳入成功中的偶然探索，失败零锚定也可能抑制纠错。当前TD3BC全验证AUC约0.51、行为回报诊断未胜常数，不宣称满足需求或优于BC。短闭合默认关闭候选已实现，37项CPU回归及182个记录上下文通过，但仅补到49个短窗口中的5个，不能称问题已解决或上线就绪。下一步先审计更早闭合控制余量与独立夹爪探索；不先索取同合同20集。新合同/资源就绪后，同条件比较TD3BC、SAC、IQL和BC，再决定真实collect预算；不在工作站训练。[实现、实验清单、基线与下一轮设计](reports/rl/lego-pld-collect-20261013/continuous/batch10/algorithm-audit.md)。
+用户已结束使用Thor并授权暂停Pi进行RL实验；随后明确下一批仍固定20w Pi，24w纯Pi服务保留。R04在同一冻结10集/0.08合同/奖励/split/网络预算下完成TD3BC、SAC、IQL、BC各两seed，共24,000 critic/4,000 actor/1,600行为中心坐标对齐更新，48份checkpoint审计通过，循环273.33秒。TD3BC/BC四组最终actor SHA与整份验证结果完全复现R03。IQL入口AUC0.85/0.867、记录回报RMSE0.426/0.394，值得真机对照，但E01只有17次开发验证；SAC约10%动作超训练边际分位，暂不优先上线，其soft Q不能按MC误差跨算法排名。旧33组运行清单保留时点，不能当统一排行榜。[R04完整配方与证据](reports/rl/lego-pld-collect-20261013/continuous/batch10/round04/README.md)。
+
+闭合优化单独进行：保留已验收Actor-2行为中心与原eval，不直接倍增eval动作；collect候选关节仍±0.08rad，夹爪额外闭合预算0.20、额外张开0.05，夹爪残差每tick增量0.04，相关噪声夹爪latent std0.7。速度、二阶差分、物理限位、抓取空间和RTC前缀继续限制实际输出，不能把预算当已下发幅度。默认关闭的短闭合补丁只补5/49请求，本候选不启用它；主要在现有更早的长窗口探索。记录上下文/GPU/协议/上线验收已通过，见本节当前上线；新范围的有效性仍需新真机结果，不先补同配置20集。
 
 ### 摘要、假设与两条路线
 

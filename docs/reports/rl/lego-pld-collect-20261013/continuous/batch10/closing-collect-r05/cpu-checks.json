@@ -1,0 +1,36 @@
+{
+  "status": "passed",
+  "training": false,
+  "checks": [
+    {
+      "script": "block_contract_test.py",
+      "returncode": 0,
+      "stdout": "",
+      "stderr": "..........\n----------------------------------------------------------------------\nRan 10 tests in 0.292s\n\nOK\n"
+    },
+    {
+      "script": "collector_checks.py",
+      "returncode": 0,
+      "stdout": "",
+      "stderr": ".....\n----------------------------------------------------------------------\nRan 5 tests in 0.144s\n\nOK\n"
+    },
+    {
+      "script": "grasp_v3_checks.py",
+      "returncode": 0,
+      "stdout": "",
+      "stderr": "............\n----------------------------------------------------------------------\nRan 12 tests in 0.590s\n\nOK\n"
+    },
+    {
+      "script": "trajectory_checks.py",
+      "returncode": 0,
+      "stdout": "",
+      "stderr": ".........\n----------------------------------------------------------------------\nRan 9 tests in 0.168s\n\nOK\n"
+    },
+    {
+      "script": "native_recording_checks.py",
+      "returncode": 0,
+      "stdout": "",
+      "stderr": "....\n----------------------------------------------------------------------\nRan 4 tests in 0.060s\n\nOK\n"
+    }
+  ]
+}

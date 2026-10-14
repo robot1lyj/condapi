@@ -1,0 +1,31 @@
+{
+  "action": "train",
+  "container": "pld-rl-train",
+  "image": "sha256:325ef815f1ae6b153c04425ff96d55595c2d17a86ee29b56cbe5752201780afd",
+  "argv": [
+    "docker",
+    "exec",
+    "pld-rl-train",
+    "/opt/pld-rl/bin/python",
+    "-u",
+    "/workspace/scripts/pld_rl/train_sac.py",
+    "--config",
+    "/workspace/configs/pld_rl/continuous10-r04/pld-ct-bc-r04-s0.json",
+    "--contract",
+    "/datasets/continuous10-20261014-v1/training-input-v1/contract.json",
+    "--normalization",
+    "/datasets/continuous10-20261014-v1/training-input-v1/normalization.json",
+    "--replay",
+    "/datasets/continuous10-20261014-v1/learning-replay-r03-v2",
+    "--execution",
+    "thor-offline",
+    "--encoder",
+    "/encoder/resnet18.pth",
+    "--output",
+    "/runs/pld-ct-bc-r04-s0"
+  ],
+  "returncode": 0,
+  "source_commit": "229bc2f72b2b2f54ac15bb2803384d885ca061ff",
+  "hardware_io": false,
+  "production_weights_modified": false
+}

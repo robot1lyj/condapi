@@ -1,0 +1,20 @@
+{
+  "observed_at": "2026-10-14T10:24:09.608343+00:00",
+  "status": "reconnected_verified",
+  "Thor_wifi": "10.18.10.8",
+  "IPC_wifi": "10.18.10.9",
+  "Thor_direct": "192.168.250.1",
+  "IPC_direct": "192.168.250.2",
+  "IPC_to_Thor_TCP8000": true,
+  "Thor_real_model_cases": 48,
+  "Pi_checkpoint_steps": 200000,
+  "active_arms": [
+    "left",
+    "right"
+  ],
+  "P95_ms": 218.6963571002707,
+  "container_id": "cd3829c70673ac354365fd959693caad6015287ceb78e16e14e0f74f431e98ff",
+  "container_restarted_during_recovery": false,
+  "mechanical_arm_executed": false,
+  "next_action": "two collect episodes, prefix10; inspect before expanding"
+}

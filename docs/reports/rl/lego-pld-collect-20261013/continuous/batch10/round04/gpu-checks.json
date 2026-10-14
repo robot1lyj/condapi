@@ -1,0 +1,31 @@
+{
+  "checks": [
+    {
+      "method": "calql",
+      "status": "passed_synthetic_only",
+      "actor_updates": 16
+    },
+    {
+      "method": "parts_td3bc",
+      "status": "passed_synthetic_only",
+      "actor_updates": 16
+    },
+    {
+      "method": "parts-balanced",
+      "status": "passed_synthetic_only",
+      "actor_updates": 16
+    },
+    {
+      "method": "sac",
+      "status": "passed_synthetic_only",
+      "actor_updates": 16
+    },
+    {
+      "method": "iql",
+      "status": "passed_synthetic_only",
+      "actor_updates": 16
+    }
+  ],
+  "robot_success_rate": null,
+  "production_modified": false
+}

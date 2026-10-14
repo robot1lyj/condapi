@@ -1,0 +1,33 @@
+{
+  "status": "passed",
+  "comparisons": [
+    {
+      "old": "parts-ct-td3bc-r03-s0",
+      "new": "pld-ct-td3bc-r04-s0",
+      "actor_sha256": "bffec6f3f29e10ab529acaae3794c134076b34e6a092bf291cbe6c7c3cb09b76",
+      "actor_identical": true,
+      "evaluation_identical": true
+    },
+    {
+      "old": "parts-ct-td3bc-r03-s1",
+      "new": "pld-ct-td3bc-r04-s1",
+      "actor_sha256": "643099d234b895023ab2be4f14cdd775103dd391b3500a5475a3cf9252356227",
+      "actor_identical": true,
+      "evaluation_identical": true
+    },
+    {
+      "old": "bc-ct-success-r03-s0",
+      "new": "pld-ct-bc-r04-s0",
+      "actor_sha256": "2c51e45552dc3947895e060e78bb2d92edf45ea555e1dcfe1365b3ca8d17a723",
+      "actor_identical": true,
+      "evaluation_identical": true
+    },
+    {
+      "old": "bc-ct-success-r03-s1",
+      "new": "pld-ct-bc-r04-s1",
+      "actor_sha256": "8b473db7c2f5d21b67cd2c944ad49543283df3839a0937fc1fdd169445d8a4b4",
+      "actor_identical": true,
+      "evaluation_identical": true
+    }
+  ]
+}

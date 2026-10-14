@@ -1,0 +1,40 @@
+{
+  "observed_at": "2026-10-14T07:43:54.143974+00:00",
+  "authorization": "User confirmed Thor usage ended and authorized pausing current Pi inference for RL experiments.",
+  "name": "/pi05-rtc-infer",
+  "container_id": "d80c40497577a3028a4ca7bc16fd49c861c0c3893937df62f291e5887b5ef523",
+  "image_id": "sha256:a6227665c32d1c7b2b7ca01a2d1a29e18d64bf764e5914db6eb06db5419a8e56",
+  "command": [
+    "/bench/serve_pi05_rtc_trt.py",
+    "--engine",
+    "/artifacts/rtc-50h-240000-trt-tf32-cache80-7step-20261014-r1",
+    "--checkpoint",
+    "/ckpt",
+    "--norm",
+    "/ckpt/assets/yam/norm_stats.json",
+    "--warmup-sample",
+    "/cases/episode-000095-early.npz",
+    "--warmup-rtc",
+    "/bench/rtc_warmup_d0.json",
+    "--host",
+    "192.168.250.1",
+    "--port",
+    "8000",
+    "--allow-validated-tf32-7step",
+    "--validation",
+    "/artifacts/rtc-50h-240000-trt-tf32-cache80-7step-20261014-r1/validation.json",
+    "--jax-reference",
+    "/artifacts/rtc-50h-240000-jax-quantile-7step-20261014-r1"
+  ],
+  "binds": [
+    "/home/wuyan-lyj/thor/pi/probes/rtc-50h-240000-20261014-r1:/bench:ro",
+    "/home/wuyan-lyj/thor/pi/artifacts:/artifacts:ro",
+    "/home/wuyan-lyj/thor/pi/checkpoints/lego-pi05-rtc-base-50h-20260921/240000-pytorch-fp32-r1:/ckpt:ro",
+    "/home/wuyan-lyj/thor/pi/test-data/pi05-rtc-50h-240000-replay-20261014-r1:/cases:ro",
+    "/home/wuyan-lyj/thor/pi/cache:/cache"
+  ],
+  "network_mode": "host",
+  "state": "running",
+  "prior_PLD_container_already_stopped": true,
+  "automatic_checkpoint_change": false
+}

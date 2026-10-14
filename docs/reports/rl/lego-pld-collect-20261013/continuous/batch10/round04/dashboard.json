@@ -1,0 +1,62 @@
+{
+  "status": "passed",
+  "port": 8766,
+  "runs": [
+    {
+      "id": "pld-ct-bc-r04-s0",
+      "rows": 60,
+      "step": 3000,
+      "invalid_lines": 0,
+      "actor_updates": 500
+    },
+    {
+      "id": "pld-ct-bc-r04-s1",
+      "rows": 60,
+      "step": 3000,
+      "invalid_lines": 0,
+      "actor_updates": 500
+    },
+    {
+      "id": "pld-ct-iql-r04-s0",
+      "rows": 60,
+      "step": 3000,
+      "invalid_lines": 0,
+      "actor_updates": 500
+    },
+    {
+      "id": "pld-ct-iql-r04-s1",
+      "rows": 60,
+      "step": 3000,
+      "invalid_lines": 0,
+      "actor_updates": 500
+    },
+    {
+      "id": "pld-ct-sac-r04-s0",
+      "rows": 60,
+      "step": 3000,
+      "invalid_lines": 0,
+      "actor_updates": 500
+    },
+    {
+      "id": "pld-ct-sac-r04-s1",
+      "rows": 60,
+      "step": 3000,
+      "invalid_lines": 0,
+      "actor_updates": 500
+    },
+    {
+      "id": "pld-ct-td3bc-r04-s0",
+      "rows": 60,
+      "step": 3000,
+      "invalid_lines": 0,
+      "actor_updates": 500
+    },
+    {
+      "id": "pld-ct-td3bc-r04-s1",
+      "rows": 60,
+      "step": 3000,
+      "invalid_lines": 0,
+      "actor_updates": 500
+    }
+  ]
+}
