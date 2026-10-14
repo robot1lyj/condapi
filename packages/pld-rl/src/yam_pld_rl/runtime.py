@@ -93,7 +93,9 @@ class BlockRuntime:
         start = time.monotonic()
         c = execution_contract(self.manifest, request.get("mode"))
         smooth = ((self.manifest.get("collector") or {}).get("kind") == "coherent_trajectory_v1"
-                  and request.get("mode") in {"collect", "eval"})
+                  and (request.get("mode") in {"collect", "eval"}
+                       or (c.get("trajectory") and request.get("mode") in {"probe", "shadow"})))
+        diagnostic_zero = bool(smooth and request.get("mode") in {"probe", "shadow"})
         if request.get("mode") == "off":
             session.reset()
             return output
@@ -129,7 +131,7 @@ class BlockRuntime:
                  "previous_command": previous, "base_z_m": heights, "raw_base": raw_base,
                  "baseline_transform": c.get("baseline_transform"), "actions": wire_plan(base, raw_base, delay),
                  "wire_actions": wire_plan(base, raw_base, delay), "execution_contract_sha256": fingerprint(c),
-                 "replay_eligible": True, "residual_applied": False}
+                 "replay_eligible": not diagnostic_zero, "residual_applied": False}
         if not gate["active"]:
             return {**output, "actions": trace["wire_actions"], "pld": trace}
         arm, elapsed = gate["arm"], gate["elapsed_seconds"]
@@ -183,7 +185,7 @@ class BlockRuntime:
             u = torch.tanh(z)
             logp = (-.5 * (((z-conditional_mu)/conditional_std).square()+2*conditional_std.log()+math.log(2*math.pi))
                     -2*(math.log(2)-z-torch.nn.functional.softplus(-2*z))).sum(-1)
-            if smooth and (mode == "eval" or not gate.get("apply_residual")):
+            if smooth and (mode != "collect" or not gate.get("apply_residual")):
                 logp = torch.zeros_like(logp)
             # Visual/state/plan/previous-command fields are shared with x.
             trace.update(actor_context=ax[2264:], actor_mean_u=mean_u, actor_scale=ap, actor_negative_scale=an,
@@ -194,7 +196,12 @@ class BlockRuntime:
         u = u[0].cpu().numpy()
         action = map_action(u, scale, negative_scale) if mode in {"collect", "eval"} else np.zeros(7, dtype=np.float32)
         if smooth:
-            actions, projection = trajectory_decode(base, action, arm, c, context)
+            if diagnostic_zero:
+                # Zero target through a prefix bridge can still move. Probe
+                # and shadow must bypass the bridge and execute exact Pi.
+                actions, projection = base.copy(), {"factor": 0., "reason": "diagnostic_zero_residual"}
+            else:
+                actions, projection = trajectory_decode(base, action, arm, c, context)
             trace["trajectory_projection"] = projection
             if mode == "collect" and (context["reason"] or projection["factor"] == 0):
                 session.noise = CorrelatedNoise()
@@ -203,12 +210,12 @@ class BlockRuntime:
             actions = decode(base, action, arm, delay, c)
         wire = wire_plan(actions, raw_base, delay)
         trace.update(arm=arm, window_id=gate["window_id"], elapsed_seconds=elapsed,
-                     envelope_end_tick=tick + (context["end_index"] if smooth else delay + c["block_steps"]), x=x, scale=scale, negative_scale=negative_scale, sample_u=u,
+                     envelope_end_tick=tick + (delay if diagnostic_zero else context["end_index"] if smooth else delay + c["block_steps"]), x=x, scale=scale, negative_scale=negative_scale, sample_u=u,
                      action=action, log_prob_u=float(logp[0]), actions=wire, physical_actions=actions,
                      wire_actions=wire,
                      residual_applied=bool(np.any(actions != base)),
                      encoder_ms_included_total_ms=(time.monotonic() - start) * 1000)
-        session.note_proposal(tick, delay, end_index=context["end_index"] if smooth else None)
+        session.note_proposal(tick, delay, end_index=delay if diagnostic_zero else context["end_index"] if smooth else None)
         return {**output, "actions": wire, "pld": trace}
 
 

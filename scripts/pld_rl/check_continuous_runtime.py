@@ -44,7 +44,8 @@ def main():
     rows = []
     arms = set()
     packets = []
-    for mode in ("collect", "eval"):
+    native = m.get("collector", {}).get("native_actor_coordinates") is True
+    for mode in (("collect", "eval", "probe", "shadow") if native else ("collect", "eval")):
         for case in cases:
             original = next(r for r in wires if r["request"]["episode_id"] == case["sample"])
             obs = read_observation(args.cases.parent / case["sample"])
@@ -56,7 +57,11 @@ def main():
             result = runtime.new_session()(obs, rtc, request, {"actions": base})
             trace = result["pld"]
             nonzero = False
-            if trace["gate"]["active"]:
+            if mode in {"probe", "shadow"}:
+                np.testing.assert_array_equal(result["actions"], trace["base"])
+                assert trace["residual_applied"] is False
+                assert trace["replay_eligible"] is False
+            elif trace["gate"]["active"]:
                 validate_collector_trace(trace, m)
                 x = np.r_[np.asarray(trace["x"])[:2264], trace["actor_context"]].astype(np.float32)
                 with torch.inference_mode():
@@ -94,7 +99,8 @@ def main():
         "status": "passed" if arms == {"left", "right"} else "insufficient_recorded_coverage",
         "device": args.device,
         "snapshot_sha256": runtime.snapshot,
-        "actor_weights_unchanged": True,
+        "actor_weights_equal_reference": True,
+        "comparison": "saved native actor vs runtime" if native else "parent actor preserved in expanded collector",
         "parent_actor_same_input_mean_exact": True,
         "prefix_and_inactive_arm_exact": True,
         "new_decoder_and_trace_verified": True,
