@@ -1,0 +1,35 @@
+Read-only diagnostic observations from Thor, 2026-10-14 15:18 CST.
+Source: systemctl status/show and journalctl for the units below.
+
+thor-rtc-50h240000-deploy-20261014.service:
+Original deployment exited 1 at 15:14:54 after the candidate smoke passed.
+Its frozen ready() returns failure immediately if State.Running is false.
+start_online() invokes asynchronous systemd-run immediately before ready().
+The deployment log shows old candidate logs immediately after that invocation,
+followed by rollback, without a new online-smoke result.
+
+thor-pi-maxn-50h240000-20261014.service:
+Started at 15:14:54, entered MAXN and started pi05-rtc-infer at 15:14:55.
+At the 15:18 inspection it was still active, watching the reusable name
+pi05-rtc-infer, which rollback had already assigned to the 200000 container.
+
+thor-pi-maxn-50h200000-restored-240000-20261014.service:
+15:14:55 Traceback in maxn_session.py, line 91:
+    fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+BlockingIOError: [Errno 11] Resource temporarily unavailable
+Main process exited status=1/FAILURE.
+
+Recovery uses a separate frozen script, waits for old owner inactive AND 120W,
+waits for asynchronous startup instead of treating not-yet-running as failure,
+and binds the new watcher to immutable Docker ID, not the service name.
+See promote-recovery-receipt.txt and 50h240000-final-online-smoke.json.
+
+Final read-only observation, 2026-10-14T15:22:29+08:00:
+thor-pi-maxn-50h240000-final-20261014.service ActiveState=active ExecMainStatus=0
+pi05-rtc-infer Running=true ID=d80c40497577a3028a4ca7bc16fd49c861c0c3893937df62f291e5887b5ef523
+pi05-rtc-50h200000-preserved-20261014 Running=false
+pi05-rtc-50h230000-preserved-20261010 Running=false
+pld-rl Running=false
+nvidia-smi: graphics 1575 MHz, temperature 39 C
+nvpmodel: MAXN, mode 0
+http://192.168.250.1:8000/healthz: OK

@@ -1,0 +1,27 @@
+assets/yam/norm_stats.json: OK
+params/_METADATA: OK
+params/_sharding: OK
+params/array_metadatas/process_0: OK
+params/d/0fb6c24b524fb3b51b525e773c8f7514: OK
+params/manifest.ocdbt: OK
+params/ocdbt.process_0/d/33f942bed3465550792eedaa261cf616: OK
+params/ocdbt.process_0/d/650dddd3548367600bfb73c85022954e: OK
+params/ocdbt.process_0/d/73a63ce3d0482df0142dc4c08b792488: OK
+params/ocdbt.process_0/d/8fa6321f95899753bc6826b25d05f283: OK
+params/ocdbt.process_0/d/a4623a04b69f680a0f96e6c833887e1d: OK
+params/ocdbt.process_0/d/afac3e1e1c529f0e12b2faf4e184ebfc: OK
+params/ocdbt.process_0/d/c609f106e56636098cb30127fc20c098: OK
+params/ocdbt.process_0/d/f0f74c5021ec9411746479b8b9e04723: OK
+params/ocdbt.process_0/d/f349adf649b838637a2e78f0ca1c173b: OK
+params/ocdbt.process_0/manifest.ocdbt: OK
+_CHECKPOINT_METADATA: OK
+training_contract.json: OK
+{"name": "PaliGemma/llm/embedder/input_embedding", "shape": [257152, 2048], "dtype": "float32", "elements": 526647296, "nan": 0, "inf": 0}
+NONFINITE_ELEMENTS 0
+W1014 06:55:33.045000 116 torch/utils/_pytree.py:630] <enum 'KernelPreference'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+Converting PI0 checkpoint from /checkpoints/240000 to /checkpoints/240000-pytorch-fp32-r1
+Model config: Pi0Config(action_dim=32, action_horizon=50, max_token_len=200, dtype='float32', paligemma_variant='gemma_2b', action_expert_variant='gemma_300m', pi05=True, discrete_state_input=True, rtc_training_max_delay=0)
+Model conversion completed successfully!
+Model saved to /checkpoints/240000-pytorch-fp32-r1
+2026-10-14T14:57:40+08:00
+PREPARED_50H_240000_20261014
