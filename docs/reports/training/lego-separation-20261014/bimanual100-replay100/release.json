@@ -1,0 +1,39 @@
+{
+  "schema": "yam_lego_specialist_replay_release_v1",
+  "status": "DATA_AUDITED_RECIPE_PENDING",
+  "dataset_manifest": "/home/wuyan/lyj/YAM/data-reviews/lego-separation-20261014/dataset-bimanual100-replay100-v1/dataset.json",
+  "dataset_manifest_sha256": "121b67ae9462d52cf1089d8b502167d2a7f17311eb0a812ccff5c4b06f7ac450",
+  "episode_lists": {
+    "replay-episodes.json": "3f055d36f00026b6b6b183f07dcb6611514e9455ac8a4b1dff7b83765110135b",
+    "episodes.json": "66ec018805e357691fd27738f1d49e5f7d3182823acc2d80ed5f2ecff86ee4f3",
+    "specialist-episodes.json": "51742b74bccbdbd091c2c5ec23c5ee6233a77d30ab769aef0cb88e969ea26740"
+  },
+  "audit_summary": "/home/wuyan/lyj/YAM/data-reviews/lego-separation-20261014/audit-parallel-v2/audit-summary.json",
+  "audit_summary_sha256": "da35158301b9b76901f21009cd8bbb3f2ec1f003a445d58c8f87f7d8a475f0a2",
+  "audit_jsonl": "/home/wuyan/lyj/YAM/data-reviews/lego-separation-20261014/audit-parallel-v2/audit.jsonl",
+  "audit_jsonl_sha256": "2372209519e35daf6048e2ce07365dce80a9ad99aeb355e1c98e5ba13bb89308",
+  "pool_stats": {
+    "specialist": {
+      "episodes": 100,
+      "frames": 278516,
+      "full_h50_windows": 273616,
+      "hours": 2.578851851851852,
+      "uniform_frame_sampler_probability": 0.5
+    },
+    "replay": {
+      "episodes": 100,
+      "frames": 278516,
+      "full_h50_windows": 273616,
+      "hours": 2.578851851851852,
+      "uniform_frame_sampler_probability": 0.5
+    }
+  },
+  "source_values_modified": false,
+  "separation_success_labels_verified": false,
+  "parent_checkpoint": "/home/wuyan/lyj/YAM/training-runs/pi05_yam/lego_pi05_rtc_base_50h_20260921/240000",
+  "parent_norm_sha256": "fd0d9cb2db3ce475c1175c7f21a3a0dd3aa7f59d36edc680e7044cd11b9f1edf",
+  "parent_norm_equals_original_50h_values": true,
+  "training_config_generated": false,
+  "training_started": false,
+  "source_backed_selection_not_duplicate_video_export": true
+}

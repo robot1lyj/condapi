@@ -1,0 +1,34 @@
+{
+  "schema": "yam_lego_specialist_replay_audit_v2",
+  "status": "passed",
+  "created_at_utc": "2026-10-14T09:41:31.314019+00:00",
+  "episodes": 200,
+  "specialist_episodes_full_rate_pose_passed": 100,
+  "numeric_frames": 557032,
+  "video_episode_ranges": 600,
+  "decoded_frames": 1671096,
+  "pool_stats": {
+    "specialist": {
+      "episodes": 100,
+      "frames": 278516,
+      "full_h50_windows": 273616,
+      "hours": 2.578851851851852,
+      "uniform_frame_sampler_probability": 0.5
+    },
+    "replay": {
+      "episodes": 100,
+      "frames": 278516,
+      "full_h50_windows": 273616,
+      "hours": 2.578851851851852,
+      "uniform_frame_sampler_probability": 0.5
+    }
+  },
+  "dataset_manifest_sha256": "121b67ae9462d52cf1089d8b502167d2a7f17311eb0a812ccff5c4b06f7ac450",
+  "audit_jsonl_sha256": "2372209519e35daf6048e2ce07365dce80a9ad99aeb355e1c98e5ba13bb89308",
+  "script_sha256": "55558d5a53d0417c4db2f2f0bd9e58c64dc62a5ecafb493b4fb483898833e1f8",
+  "reused_completed_audit": "/home/wuyan/lyj/YAM/data-reviews/lego-separation-20261014/dataset-bimanual100-replay100-v1/audit.jsonl",
+  "reused_completed_audit_sha256": "be40e09f126d65d8bd7a709eeb0c995ea122dacf11e0686d3711365d3e81380c",
+  "elapsed_s": 62.68762305402197,
+  "separation_success_verified": false,
+  "independent_robot_units_and_capture_timing_verified": false
+}

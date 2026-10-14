@@ -1,0 +1,65 @@
+{
+  "schema": "yam_lego_separation_candidates_v1",
+  "observed_at_utc": "2026-10-14T09:32:12.081162+00:00",
+  "source": "/home/wuyan/lyj/YAM/YAM_data/processed/lego_lerobot_v1_20260907/train",
+  "excluded_selection": "/home/wuyan/lyj/YAM/training-assets/lego_rtc_50h_20260921/episodes.json",
+  "input_identities": {
+    "/home/wuyan/lyj/YAM/YAM_data/processed/lego_lerobot_v1_20260907/train/meta/info.json": "ba88887ff84544eb130708cdf8c0ce965b53f099fdad07286a57f41883211851",
+    "/home/wuyan/lyj/YAM/YAM_data/processed/lego_lerobot_v1_20260907/train/conversion_manifest.json": "9844c0b86b93fd40adf251275d770899ba413800d2a0cba11d4e9bdae40544dc",
+    "/home/wuyan/lyj/YAM/training-assets/lego_rtc_50h_20260921/episodes.json": "05bebc664d627a7ca4279314df1f61de67397c8943dc6b45223a2bb6893bcd8f",
+    "/home/wuyan/lyj/YAM/YAM_data/processed/lego_lerobot_v1_20260907/train/meta/episodes/chunk-000/file-000.parquet": "3ab324297349705a54f2f1e75d34f827abd0e12e1444d153259e40ebda1df560"
+  },
+  "script_sha256": "dcb993baebac220319f3f463e9cbdd7d7bf9d032c11b4234113a9e16ed09a919",
+  "fk_model": "/home/wuyan/lyj/xiaomi-robotics-1/source/condapi-xr1-data/third_party/yam-fk-model/yam_linear4310.xml",
+  "fk_model_sha256": "a7362a0d3e7bffd822b2ba9992c1fb4b00862eb86277a4f11326018680d9dcc3",
+  "source_contract": {
+    "action_mode": "absolute",
+    "evidence": "XDOF ABC-130k publisher documents joint positions/actions in radians and gripper aperture 0=closed,1=open. Pinned LeRobot train revision 68651e4929d9fb00f798937b2d62617cab5c771d documents left6,left_gripper,right6,right_gripper. Applying raw-source units to the LeRobot port is an inference corroborated by inspected train episode95 and val episode421 state/action ranges; not an independent raw-to-port numerical comparison or robot calibration. Conversion preserves source values without rescaling.",
+    "gripper_unit": "normalized_0_closed_1_open",
+    "joint_unit": "radian",
+    "sources": [
+      "https://huggingface.co/datasets/XDOF/ABC-130k/blob/59b064c/README.md",
+      "https://huggingface.co/datasets/lerobot/abc_130k_v3_train/blob/68651e4929d9fb00f798937b2d62617cab5c771d/README.md"
+    ],
+    "state_action_names": [
+      "left_j1",
+      "left_j2",
+      "left_j3",
+      "left_j4",
+      "left_j5",
+      "left_j6",
+      "left_gripper",
+      "right_j1",
+      "right_j2",
+      "right_j3",
+      "right_j4",
+      "right_j5",
+      "right_j6",
+      "right_gripper"
+    ],
+    "verification_scope": "documented raw semantics plus pinned port schema and numeric consistency; raw-to-port unit preservation inferred; deployment calibration unverified"
+  },
+  "pose_frame": "each_arm_base; nominal +Z up; grasp_site +Z toward fingertips",
+  "independent_robot_calibration": false,
+  "stride": 3,
+  "sampling_hz": 10.0,
+  "bimanual_required": true,
+  "rules": {
+    "horizontal_tolerance_deg": 20,
+    "prior_downward_max_deg": 45,
+    "lookback_s": 4,
+    "minimum_horizontal_s": 0.2,
+    "minimum_nominal_grasp_rise_m": 0.025,
+    "minimum_tilt_change_deg": 25,
+    "minimum_bimanual_horizontal_s": 0.3
+  },
+  "pool_episodes": 2121,
+  "pool_frames": 4973496,
+  "pool_hours": 46.05088888888889,
+  "candidate_episodes": 1109,
+  "candidate_events": 3711,
+  "video_decode_audit": "not_performed_by_pose_scan",
+  "semantic_review": "pending",
+  "training_ready": false,
+  "elapsed_s": 60.81630498601589
+}

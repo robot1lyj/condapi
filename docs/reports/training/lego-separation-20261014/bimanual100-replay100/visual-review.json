@@ -1,0 +1,1902 @@
+[
+  {
+    "episode_index": 4315,
+    "source_episode_index": 125294,
+    "rank": 1,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      897,
+      927,
+      1077,
+      1227,
+      1281,
+      1284,
+      1340,
+      1371
+    ],
+    "sheet": "001-episode-4315.jpg"
+  },
+  {
+    "episode_index": 1083,
+    "source_episode_index": 30816,
+    "rank": 2,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      2085,
+      2115,
+      2139,
+      2163,
+      2226,
+      2229,
+      2294,
+      2325
+    ],
+    "sheet": "002-episode-1083.jpg"
+  },
+  {
+    "episode_index": 3105,
+    "source_episode_index": 90454,
+    "rank": 3,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      2079,
+      2109,
+      2115,
+      2121,
+      2151,
+      2154,
+      2186,
+      2217
+    ],
+    "sheet": "003-episode-3105.jpg"
+  },
+  {
+    "episode_index": 3108,
+    "source_episode_index": 90539,
+    "rank": 4,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      927,
+      957,
+      963,
+      969,
+      1026,
+      1029,
+      1088,
+      1119
+    ],
+    "sheet": "004-episode-3108.jpg"
+  },
+  {
+    "episode_index": 389,
+    "source_episode_index": 11524,
+    "rank": 5,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      840,
+      870,
+      874,
+      879,
+      915,
+      918,
+      956,
+      987
+    ],
+    "sheet": "005-episode-0389.jpg"
+  },
+  {
+    "episode_index": 1029,
+    "source_episode_index": 29054,
+    "rank": 6,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      771,
+      801,
+      810,
+      819,
+      852,
+      855,
+      890,
+      921
+    ],
+    "sheet": "006-episode-1029.jpg"
+  },
+  {
+    "episode_index": 4350,
+    "source_episode_index": 126302,
+    "rank": 7,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      786,
+      816,
+      922,
+      1029,
+      1083,
+      1086,
+      1142,
+      1173
+    ],
+    "sheet": "007-episode-4350.jpg"
+  },
+  {
+    "episode_index": 3635,
+    "source_episode_index": 105657,
+    "rank": 8,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      369,
+      399,
+      414,
+      429,
+      489,
+      490,
+      551,
+      582
+    ],
+    "sheet": "008-episode-3635.jpg"
+  },
+  {
+    "episode_index": 2355,
+    "source_episode_index": 68869,
+    "rank": 9,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      63,
+      93,
+      97,
+      102,
+      165,
+      166,
+      230,
+      261
+    ],
+    "sheet": "009-episode-2355.jpg"
+  },
+  {
+    "episode_index": 3705,
+    "source_episode_index": 107675,
+    "rank": 10,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      1104,
+      1134,
+      1162,
+      1191,
+      1218,
+      1221,
+      1250,
+      1281
+    ],
+    "sheet": "010-episode-3705.jpg"
+  },
+  {
+    "episode_index": 1847,
+    "source_episode_index": 54024,
+    "rank": 11,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      2652,
+      2682,
+      2689,
+      2697,
+      2748,
+      2749,
+      2801,
+      2832
+    ],
+    "sheet": "011-episode-1847.jpg"
+  },
+  {
+    "episode_index": 641,
+    "source_episode_index": 17839,
+    "rank": 12,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      2673,
+      2703,
+      2709,
+      2715,
+      2754,
+      2755,
+      2795,
+      2826
+    ],
+    "sheet": "012-episode-0641.jpg"
+  },
+  {
+    "episode_index": 4120,
+    "source_episode_index": 119757,
+    "rank": 13,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      258,
+      288,
+      295,
+      303,
+      342,
+      345,
+      386,
+      417
+    ],
+    "sheet": "013-episode-4120.jpg"
+  },
+  {
+    "episode_index": 3274,
+    "source_episode_index": 95099,
+    "rank": 14,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      198,
+      228,
+      237,
+      246,
+      288,
+      291,
+      335,
+      366
+    ],
+    "sheet": "014-episode-3274.jpg"
+  },
+  {
+    "episode_index": 2552,
+    "source_episode_index": 74412,
+    "rank": 15,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      48,
+      78,
+      85,
+      93,
+      135,
+      138,
+      182,
+      213
+    ],
+    "sheet": "015-episode-2552.jpg"
+  },
+  {
+    "episode_index": 2063,
+    "source_episode_index": 60302,
+    "rank": 16,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      1704,
+      1734,
+      1848,
+      1962,
+      2067,
+      2070,
+      2177,
+      2208
+    ],
+    "sheet": "016-episode-2063.jpg"
+  },
+  {
+    "episode_index": 326,
+    "source_episode_index": 9875,
+    "rank": 17,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      450,
+      480,
+      582,
+      684,
+      723,
+      726,
+      767,
+      798
+    ],
+    "sheet": "017-episode-0326.jpg"
+  },
+  {
+    "episode_index": 696,
+    "source_episode_index": 19225,
+    "rank": 18,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      45,
+      75,
+      82,
+      90,
+      141,
+      144,
+      197,
+      228
+    ],
+    "sheet": "018-episode-0696.jpg"
+  },
+  {
+    "episode_index": 2098,
+    "source_episode_index": 61310,
+    "rank": 19,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      882,
+      912,
+      919,
+      927,
+      1080,
+      1083,
+      1238,
+      1269
+    ],
+    "sheet": "019-episode-2098.jpg"
+  },
+  {
+    "episode_index": 529,
+    "source_episode_index": 15065,
+    "rank": 20,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      1545,
+      1575,
+      1630,
+      1686,
+      1722,
+      1723,
+      1760,
+      1791
+    ],
+    "sheet": "020-episode-0529.jpg"
+  },
+  {
+    "episode_index": 3097,
+    "source_episode_index": 90056,
+    "rank": 21,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      1362,
+      1392,
+      1398,
+      1404,
+      1455,
+      1458,
+      1511,
+      1542
+    ],
+    "sheet": "021-episode-3097.jpg"
+  },
+  {
+    "episode_index": 2787,
+    "source_episode_index": 81286,
+    "rank": 22,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      873,
+      903,
+      928,
+      954,
+      1044,
+      1047,
+      1139,
+      1170
+    ],
+    "sheet": "022-episode-2787.jpg"
+  },
+  {
+    "episode_index": 3456,
+    "source_episode_index": 100609,
+    "rank": 23,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      93,
+      123,
+      208,
+      294,
+      309,
+      310,
+      326,
+      357
+    ],
+    "sheet": "023-episode-3456.jpg"
+  },
+  {
+    "episode_index": 2871,
+    "source_episode_index": 83499,
+    "rank": 24,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      2085,
+      2115,
+      2122,
+      2130,
+      2208,
+      2211,
+      2291,
+      2322
+    ],
+    "sheet": "024-episode-2871.jpg"
+  },
+  {
+    "episode_index": 3517,
+    "source_episode_index": 102145,
+    "rank": 25,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      705,
+      735,
+      742,
+      750,
+      795,
+      798,
+      845,
+      876
+    ],
+    "sheet": "025-episode-3517.jpg"
+  },
+  {
+    "episode_index": 455,
+    "source_episode_index": 13176,
+    "rank": 26,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      1326,
+      1356,
+      1363,
+      1371,
+      1449,
+      1450,
+      1529,
+      1560
+    ],
+    "sheet": "026-episode-0455.jpg"
+  },
+  {
+    "episode_index": 4199,
+    "source_episode_index": 121790,
+    "rank": 27,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      4698,
+      4728,
+      4737,
+      4746,
+      4791,
+      4792,
+      4838,
+      4869
+    ],
+    "sheet": "027-episode-4199.jpg"
+  },
+  {
+    "episode_index": 2723,
+    "source_episode_index": 79432,
+    "rank": 28,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      1779,
+      1809,
+      2068,
+      2328,
+      2334,
+      2337,
+      2345,
+      2376
+    ],
+    "sheet": "028-episode-2723.jpg"
+  },
+  {
+    "episode_index": 4123,
+    "source_episode_index": 119763,
+    "rank": 29,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      1659,
+      1689,
+      1713,
+      1737,
+      1749,
+      1752,
+      1766,
+      1797
+    ],
+    "sheet": "029-episode-4123.jpg"
+  },
+  {
+    "episode_index": 4074,
+    "source_episode_index": 118255,
+    "rank": 30,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      303,
+      333,
+      394,
+      456,
+      489,
+      490,
+      524,
+      555
+    ],
+    "sheet": "030-episode-4074.jpg"
+  },
+  {
+    "episode_index": 2145,
+    "source_episode_index": 62821,
+    "rank": 31,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      153,
+      183,
+      189,
+      195,
+      240,
+      241,
+      287,
+      318
+    ],
+    "sheet": "031-episode-2145.jpg"
+  },
+  {
+    "episode_index": 714,
+    "source_episode_index": 19727,
+    "rank": 32,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      132,
+      162,
+      165,
+      168,
+      213,
+      214,
+      260,
+      291
+    ],
+    "sheet": "032-episode-0714.jpg"
+  },
+  {
+    "episode_index": 1086,
+    "source_episode_index": 30941,
+    "rank": 33,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      1560,
+      1590,
+      1638,
+      1686,
+      1716,
+      1717,
+      1748,
+      1779
+    ],
+    "sheet": "033-episode-1086.jpg"
+  },
+  {
+    "episode_index": 738,
+    "source_episode_index": 20235,
+    "rank": 34,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      1899,
+      1929,
+      1941,
+      1953,
+      1977,
+      1978,
+      2003,
+      2034
+    ],
+    "sheet": "034-episode-0738.jpg"
+  },
+  {
+    "episode_index": 1796,
+    "source_episode_index": 52739,
+    "rank": 35,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      603,
+      633,
+      640,
+      648,
+      702,
+      703,
+      758,
+      789
+    ],
+    "sheet": "035-episode-1796.jpg"
+  },
+  {
+    "episode_index": 673,
+    "source_episode_index": 18597,
+    "rank": 36,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      489,
+      519,
+      607,
+      696,
+      726,
+      727,
+      758,
+      789
+    ],
+    "sheet": "036-episode-0673.jpg"
+  },
+  {
+    "episode_index": 1732,
+    "source_episode_index": 50739,
+    "rank": 37,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      6834,
+      6864,
+      6903,
+      6942,
+      6945,
+      6946,
+      6950,
+      6981
+    ],
+    "sheet": "037-episode-1732.jpg"
+  },
+  {
+    "episode_index": 3608,
+    "source_episode_index": 104662,
+    "rank": 38,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      528,
+      558,
+      738,
+      918,
+      930,
+      933,
+      947,
+      978
+    ],
+    "sheet": "038-episode-3608.jpg"
+  },
+  {
+    "episode_index": 1503,
+    "source_episode_index": 44172,
+    "rank": 39,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      1665,
+      1695,
+      1701,
+      1707,
+      1788,
+      1791,
+      1874,
+      1905
+    ],
+    "sheet": "039-episode-1503.jpg"
+  },
+  {
+    "episode_index": 1738,
+    "source_episode_index": 50807,
+    "rank": 40,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      711,
+      741,
+      747,
+      753,
+      798,
+      799,
+      845,
+      876
+    ],
+    "sheet": "040-episode-1738.jpg"
+  },
+  {
+    "episode_index": 1816,
+    "source_episode_index": 53032,
+    "rank": 41,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      1503,
+      1533,
+      1591,
+      1650,
+      1683,
+      1686,
+      1721,
+      1752
+    ],
+    "sheet": "041-episode-1816.jpg"
+  },
+  {
+    "episode_index": 4444,
+    "source_episode_index": 128842,
+    "rank": 42,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      1125,
+      1155,
+      1161,
+      1167,
+      1215,
+      1216,
+      1265,
+      1296
+    ],
+    "sheet": "042-episode-4444.jpg"
+  },
+  {
+    "episode_index": 2299,
+    "source_episode_index": 67079,
+    "rank": 43,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      735,
+      765,
+      823,
+      882,
+      957,
+      958,
+      1034,
+      1065
+    ],
+    "sheet": "043-episode-2299.jpg"
+  },
+  {
+    "episode_index": 3451,
+    "source_episode_index": 100576,
+    "rank": 44,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      705,
+      735,
+      765,
+      795,
+      798,
+      801,
+      806,
+      837
+    ],
+    "sheet": "044-episode-3451.jpg"
+  },
+  {
+    "episode_index": 4151,
+    "source_episode_index": 120757,
+    "rank": 45,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      789,
+      819,
+      837,
+      855,
+      885,
+      888,
+      920,
+      951
+    ],
+    "sheet": "045-episode-4151.jpg"
+  },
+  {
+    "episode_index": 4145,
+    "source_episode_index": 120272,
+    "rank": 46,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      210,
+      240,
+      312,
+      384,
+      393,
+      396,
+      407,
+      438
+    ],
+    "sheet": "046-episode-4145.jpg"
+  },
+  {
+    "episode_index": 3664,
+    "source_episode_index": 106655,
+    "rank": 47,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      1719,
+      1749,
+      1951,
+      2154,
+      2223,
+      2224,
+      2294,
+      2325
+    ],
+    "sheet": "047-episode-3664.jpg"
+  },
+  {
+    "episode_index": 519,
+    "source_episode_index": 14813,
+    "rank": 48,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      60,
+      90,
+      97,
+      105,
+      156,
+      159,
+      212,
+      243
+    ],
+    "sheet": "048-episode-0519.jpg"
+  },
+  {
+    "episode_index": 976,
+    "source_episode_index": 27415,
+    "rank": 49,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      2208,
+      2238,
+      2305,
+      2373,
+      2418,
+      2421,
+      2468,
+      2499
+    ],
+    "sheet": "049-episode-0976.jpg"
+  },
+  {
+    "episode_index": 3934,
+    "source_episode_index": 114223,
+    "rank": 50,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      1518,
+      1548,
+      1552,
+      1557,
+      1602,
+      1603,
+      1649,
+      1680
+    ],
+    "sheet": "050-episode-3934.jpg"
+  },
+  {
+    "episode_index": 3114,
+    "source_episode_index": 90551,
+    "rank": 51,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      2922,
+      2952,
+      2974,
+      2997,
+      3006,
+      3009,
+      3020,
+      3051
+    ],
+    "sheet": "051-episode-3114.jpg"
+  },
+  {
+    "episode_index": 2965,
+    "source_episode_index": 86390,
+    "rank": 52,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      2166,
+      2196,
+      2283,
+      2370,
+      2412,
+      2415,
+      2459,
+      2490
+    ],
+    "sheet": "052-episode-2965.jpg"
+  },
+  {
+    "episode_index": 518,
+    "source_episode_index": 14691,
+    "rank": 53,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      744,
+      774,
+      778,
+      783,
+      795,
+      798,
+      812,
+      843
+    ],
+    "sheet": "053-episode-0518.jpg"
+  },
+  {
+    "episode_index": 1406,
+    "source_episode_index": 41021,
+    "rank": 54,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      954,
+      984,
+      1087,
+      1191,
+      1236,
+      1239,
+      1286,
+      1317
+    ],
+    "sheet": "054-episode-1406.jpg"
+  },
+  {
+    "episode_index": 3263,
+    "source_episode_index": 95071,
+    "rank": 55,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      186,
+      216,
+      466,
+      717,
+      720,
+      721,
+      725,
+      756
+    ],
+    "sheet": "055-episode-3263.jpg"
+  },
+  {
+    "episode_index": 1255,
+    "source_episode_index": 36234,
+    "rank": 56,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      48,
+      78,
+      84,
+      90,
+      156,
+      159,
+      227,
+      258
+    ],
+    "sheet": "056-episode-1255.jpg"
+  },
+  {
+    "episode_index": 3836,
+    "source_episode_index": 111687,
+    "rank": 57,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      789,
+      819,
+      913,
+      1008,
+      1071,
+      1074,
+      1139,
+      1170
+    ],
+    "sheet": "057-episode-3836.jpg"
+  },
+  {
+    "episode_index": 1509,
+    "source_episode_index": 44188,
+    "rank": 58,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      552,
+      582,
+      634,
+      687,
+      690,
+      693,
+      698,
+      729
+    ],
+    "sheet": "058-episode-1509.jpg"
+  },
+  {
+    "episode_index": 1572,
+    "source_episode_index": 46186,
+    "rank": 59,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      1257,
+      1287,
+      1374,
+      1461,
+      1503,
+      1504,
+      1547,
+      1578
+    ],
+    "sheet": "059-episode-1572.jpg"
+  },
+  {
+    "episode_index": 3563,
+    "source_episode_index": 103637,
+    "rank": 60,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      1086,
+      1116,
+      1254,
+      1392,
+      1416,
+      1419,
+      1445,
+      1476
+    ],
+    "sheet": "060-episode-3563.jpg"
+  },
+  {
+    "episode_index": 3833,
+    "source_episode_index": 111210,
+    "rank": 61,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      1929,
+      1959,
+      2017,
+      2076,
+      2079,
+      2082,
+      2087,
+      2118
+    ],
+    "sheet": "061-episode-3833.jpg"
+  },
+  {
+    "episode_index": 2525,
+    "source_episode_index": 73426,
+    "rank": 62,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      948,
+      978,
+      987,
+      996,
+      1044,
+      1045,
+      1094,
+      1125
+    ],
+    "sheet": "062-episode-2525.jpg"
+  },
+  {
+    "episode_index": 2959,
+    "source_episode_index": 86028,
+    "rank": 63,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      2766,
+      2796,
+      2805,
+      2814,
+      2898,
+      2899,
+      2984,
+      3015
+    ],
+    "sheet": "063-episode-2959.jpg"
+  },
+  {
+    "episode_index": 612,
+    "source_episode_index": 17084,
+    "rank": 64,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      1083,
+      1113,
+      1119,
+      1125,
+      1158,
+      1159,
+      1193,
+      1224
+    ],
+    "sheet": "064-episode-0612.jpg"
+  },
+  {
+    "episode_index": 1779,
+    "source_episode_index": 52000,
+    "rank": 65,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      555,
+      585,
+      591,
+      597,
+      636,
+      637,
+      677,
+      708
+    ],
+    "sheet": "065-episode-1779.jpg"
+  },
+  {
+    "episode_index": 3385,
+    "source_episode_index": 98579,
+    "rank": 66,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      534,
+      564,
+      612,
+      660,
+      708,
+      711,
+      761,
+      792
+    ],
+    "sheet": "066-episode-3385.jpg"
+  },
+  {
+    "episode_index": 3798,
+    "source_episode_index": 110202,
+    "rank": 67,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      2322,
+      2352,
+      2418,
+      2484,
+      2526,
+      2529,
+      2573,
+      2604
+    ],
+    "sheet": "067-episode-3798.jpg"
+  },
+  {
+    "episode_index": 80,
+    "source_episode_index": 2635,
+    "rank": 68,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      972,
+      1002,
+      1008,
+      1014,
+      1128,
+      1129,
+      1244,
+      1275
+    ],
+    "sheet": "068-episode-0080.jpg"
+  },
+  {
+    "episode_index": 3826,
+    "source_episode_index": 111192,
+    "rank": 69,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      2919,
+      2949,
+      3015,
+      3081,
+      3102,
+      3103,
+      3125,
+      3156
+    ],
+    "sheet": "069-episode-3826.jpg"
+  },
+  {
+    "episode_index": 1725,
+    "source_episode_index": 50721,
+    "rank": 70,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      39,
+      69,
+      76,
+      84,
+      222,
+      223,
+      362,
+      393
+    ],
+    "sheet": "070-episode-1725.jpg"
+  },
+  {
+    "episode_index": 4116,
+    "source_episode_index": 119749,
+    "rank": 71,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      1809,
+      1839,
+      1897,
+      1956,
+      1962,
+      1963,
+      1970,
+      2001
+    ],
+    "sheet": "071-episode-4116.jpg"
+  },
+  {
+    "episode_index": 1762,
+    "source_episode_index": 51733,
+    "rank": 72,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      831,
+      861,
+      1002,
+      1143,
+      1314,
+      1315,
+      1487,
+      1518
+    ],
+    "sheet": "072-episode-1762.jpg"
+  },
+  {
+    "episode_index": 53,
+    "source_episode_index": 1747,
+    "rank": 73,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      267,
+      297,
+      318,
+      339,
+      342,
+      345,
+      350,
+      381
+    ],
+    "sheet": "073-episode-0053.jpg"
+  },
+  {
+    "episode_index": 1726,
+    "source_episode_index": 50723,
+    "rank": 74,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      1377,
+      1407,
+      1420,
+      1434,
+      1473,
+      1476,
+      1517,
+      1548
+    ],
+    "sheet": "074-episode-1726.jpg"
+  },
+  {
+    "episode_index": 1100,
+    "source_episode_index": 31321,
+    "rank": 75,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      1326,
+      1356,
+      1413,
+      1470,
+      1476,
+      1479,
+      1487,
+      1518
+    ],
+    "sheet": "075-episode-1100.jpg"
+  },
+  {
+    "episode_index": 777,
+    "source_episode_index": 21242,
+    "rank": 76,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      57,
+      87,
+      111,
+      135,
+      231,
+      234,
+      332,
+      363
+    ],
+    "sheet": "076-episode-0777.jpg"
+  },
+  {
+    "episode_index": 3221,
+    "source_episode_index": 93579,
+    "rank": 77,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      138,
+      168,
+      225,
+      282,
+      288,
+      289,
+      296,
+      327
+    ],
+    "sheet": "077-episode-3221.jpg"
+  },
+  {
+    "episode_index": 2739,
+    "source_episode_index": 79954,
+    "rank": 78,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      693,
+      723,
+      736,
+      750,
+      867,
+      868,
+      986,
+      1017
+    ],
+    "sheet": "078-episode-2739.jpg"
+  },
+  {
+    "episode_index": 4403,
+    "source_episode_index": 127822,
+    "rank": 79,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      2394,
+      2424,
+      2452,
+      2481,
+      2493,
+      2494,
+      2507,
+      2538
+    ],
+    "sheet": "079-episode-4403.jpg"
+  },
+  {
+    "episode_index": 2486,
+    "source_episode_index": 72406,
+    "rank": 80,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      675,
+      705,
+      726,
+      747,
+      762,
+      765,
+      782,
+      813
+    ],
+    "sheet": "080-episode-2486.jpg"
+  },
+  {
+    "episode_index": 2602,
+    "source_episode_index": 75931,
+    "rank": 81,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      594,
+      624,
+      646,
+      669,
+      684,
+      687,
+      704,
+      735
+    ],
+    "sheet": "081-episode-2602.jpg"
+  },
+  {
+    "episode_index": 3537,
+    "source_episode_index": 102645,
+    "rank": 82,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      933,
+      963,
+      969,
+      975,
+      1071,
+      1074,
+      1172,
+      1203
+    ],
+    "sheet": "082-episode-3537.jpg"
+  },
+  {
+    "episode_index": 2611,
+    "source_episode_index": 76199,
+    "rank": 83,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      1065,
+      1095,
+      1104,
+      1113,
+      1173,
+      1174,
+      1235,
+      1266
+    ],
+    "sheet": "083-episode-2611.jpg"
+  },
+  {
+    "episode_index": 3004,
+    "source_episode_index": 87517,
+    "rank": 84,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      24,
+      54,
+      69,
+      84,
+      165,
+      166,
+      248,
+      279
+    ],
+    "sheet": "084-episode-3004.jpg"
+  },
+  {
+    "episode_index": 3099,
+    "source_episode_index": 90060,
+    "rank": 85,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      1419,
+      1449,
+      1482,
+      1515,
+      1629,
+      1632,
+      1748,
+      1779
+    ],
+    "sheet": "085-episode-3099.jpg"
+  },
+  {
+    "episode_index": 2585,
+    "source_episode_index": 75384,
+    "rank": 86,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      1959,
+      1989,
+      2158,
+      2328,
+      2337,
+      2340,
+      2351,
+      2382
+    ],
+    "sheet": "086-episode-2585.jpg"
+  },
+  {
+    "episode_index": 4358,
+    "source_episode_index": 126324,
+    "rank": 87,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      1011,
+      1041,
+      1081,
+      1122,
+      1125,
+      1126,
+      1130,
+      1161
+    ],
+    "sheet": "087-episode-4358.jpg"
+  },
+  {
+    "episode_index": 4323,
+    "source_episode_index": 125316,
+    "rank": 88,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      1683,
+      1713,
+      1723,
+      1734,
+      1776,
+      1777,
+      1820,
+      1851
+    ],
+    "sheet": "088-episode-4323.jpg"
+  },
+  {
+    "episode_index": 84,
+    "source_episode_index": 2762,
+    "rank": 89,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      1014,
+      1044,
+      1051,
+      1059,
+      1098,
+      1101,
+      1142,
+      1173
+    ],
+    "sheet": "089-episode-0084.jpg"
+  },
+  {
+    "episode_index": 1048,
+    "source_episode_index": 29683,
+    "rank": 90,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      153,
+      183,
+      259,
+      336,
+      339,
+      342,
+      347,
+      378
+    ],
+    "sheet": "090-episode-1048.jpg"
+  },
+  {
+    "episode_index": 3249,
+    "source_episode_index": 94572,
+    "rank": 91,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      582,
+      612,
+      616,
+      621,
+      669,
+      670,
+      719,
+      750
+    ],
+    "sheet": "091-episode-3249.jpg"
+  },
+  {
+    "episode_index": 2278,
+    "source_episode_index": 66364,
+    "rank": 92,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      204,
+      234,
+      292,
+      351,
+      357,
+      360,
+      368,
+      399
+    ],
+    "sheet": "092-episode-2278.jpg"
+  },
+  {
+    "episode_index": 2747,
+    "source_episode_index": 79976,
+    "rank": 93,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      1701,
+      1731,
+      1783,
+      1836,
+      1872,
+      1873,
+      1910,
+      1941
+    ],
+    "sheet": "093-episode-2747.jpg"
+  },
+  {
+    "episode_index": 2903,
+    "source_episode_index": 84501,
+    "rank": 94,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      525,
+      555,
+      690,
+      825,
+      876,
+      879,
+      932,
+      963
+    ],
+    "sheet": "094-episode-2903.jpg"
+  },
+  {
+    "episode_index": 3078,
+    "source_episode_index": 89541,
+    "rank": 95,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      51,
+      81,
+      112,
+      144,
+      345,
+      348,
+      551,
+      582
+    ],
+    "sheet": "095-episode-3078.jpg"
+  },
+  {
+    "episode_index": 3825,
+    "source_episode_index": 111188,
+    "rank": 96,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      426,
+      456,
+      460,
+      465,
+      534,
+      537,
+      608,
+      639
+    ],
+    "sheet": "096-episode-3825.jpg"
+  },
+  {
+    "episode_index": 1323,
+    "source_episode_index": 38376,
+    "rank": 97,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      1572,
+      1602,
+      1612,
+      1623,
+      1656,
+      1659,
+      1694,
+      1725
+    ],
+    "sheet": "097-episode-1323.jpg"
+  },
+  {
+    "episode_index": 2850,
+    "source_episode_index": 82994,
+    "rank": 98,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      612,
+      642,
+      649,
+      657,
+      705,
+      708,
+      758,
+      789
+    ],
+    "sheet": "098-episode-2850.jpg"
+  },
+  {
+    "episode_index": 1280,
+    "source_episode_index": 36991,
+    "rank": 99,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      1380,
+      1410,
+      1414,
+      1419,
+      1461,
+      1464,
+      1508,
+      1539
+    ],
+    "sheet": "099-episode-1280.jpg"
+  },
+  {
+    "episode_index": 161,
+    "source_episode_index": 5176,
+    "rank": 100,
+    "review": "agent viewed both-wrist before/mid/end overview; complete three-view contact sheet retained",
+    "semantic_label": "pose-based assembly-manipulation candidate",
+    "separation_success": null,
+    "frames": [
+      393,
+      423,
+      471,
+      519,
+      639,
+      640,
+      761,
+      792
+    ],
+    "sheet": "100-episode-0161.jpg"
+  }
+]
