@@ -42,6 +42,9 @@ def main():
         learner.load_state_dict(state["learner"])
         assert all(torch.isfinite(v).all() for m in (learner.actor, learner.critic, learner.target)
                    for v in m.state_dict().values())
+        if cfg.get("method") == "iql":
+            assert all(torch.isfinite(v).all() for v in learner.value.state_dict().values())
+            assert torch.isfinite(learner.iql_log_std).all()
         bundle = args.run/f"bundle-{step:06d}"
         manifest = json.loads((bundle/"manifest.json").read_text())
         assert manifest["provenance"]["checkpoint_sha256"] == sha256(path)

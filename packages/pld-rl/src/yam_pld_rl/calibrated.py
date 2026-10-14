@@ -1,4 +1,4 @@
-"""Bounded RTC adaptations of Cal-QL SAC and PARTS-style TD3+successful BC.
+"""Bounded RTC adaptations of Cal-QL, SAC, IQL and successful TD3+BC.
 
 These are explicit project variants, not exact paper reproductions. Conservative
 density corrections and smoothing live in u-space; Q always sees feasible a.
@@ -8,9 +8,13 @@ import copy
 import math
 
 import torch
+from torch import nn
 from torch.nn import functional
 
 from yam_pld_rl.feature_balance import BalancedQ
+from yam_pld_rl.feature_balance import FeatureBalance
+from yam_pld_rl.offline_methods import expectile_loss
+from yam_pld_rl.offline_methods import mlp
 from yam_pld_rl.sac import SacLearner
 
 
@@ -33,7 +37,7 @@ def calibrated_gap(random_q, policy_q, data_q, logp, mc_return):
 class CalibratedLearner(SacLearner):
     def __init__(self, dim, cfg, device="cuda"):
         super().__init__(dim, cfg, device)
-        if cfg["method"] not in ("calql", "parts_td3bc"):
+        if cfg["method"] not in ("calql", "parts_td3bc", "sac", "iql"):
             raise ValueError("unknown calibrated method")
         if "feature_group_rms" in cfg:
             # Wrap the same Q weights; do not change paired-seed initialization.
@@ -41,10 +45,23 @@ class CalibratedLearner(SacLearner):
             self.target = copy.deepcopy(self.critic).requires_grad_(requires_grad=False)
         self.actor_target = copy.deepcopy(self.actor).requires_grad_(requires_grad=False)
         self.actor_prior_updates = 0
-        if cfg["method"] == "parts_td3bc":
+        if cfg["method"] == "sac" and cfg.get("backup_entropy") is not True:
+            raise ValueError("SAC comparison requires explicit soft-Q backup")
+        if cfg["method"] in ("parts_td3bc", "iql"):
             # The deployed network remains runtime-compatible; only its mean is
             # optimized. Online collection std is held at the recorded bootstrap.
             self.actor.std.requires_grad_(requires_grad=False)
+        if cfg["method"] == "iql":
+            if not 0.5 < cfg["iql_expectile"] < 1 or cfg["iql_temperature"] <= 0:
+                raise ValueError("invalid IQL expectile/temperature")
+            balance = FeatureBalance(dim, cfg["feature_group_rms"]) if "feature_group_rms" in cfg else nn.Identity()
+            self.value = nn.Sequential(balance, mlp(dim, 1, cfg["width"], cfg["depth"], layer_norm=True)).to(device)
+            self.vopt = torch.optim.Adam(self.value.parameters(), lr=cfg["learning_rate"])
+            # Official IQL uses a bounded mean and an unsquashed Normal. Here
+            # the mean is state-feasible a; its state-independent std is only
+            # for the offline likelihood. Runtime collection is kept explicit.
+            self.iql_log_std = nn.Parameter(torch.full((7,), math.log(cfg["initial_std"]), device=device))
+            self.aopt = torch.optim.Adam([*self.actor.parameters(), self.iql_log_std], lr=cfg["learning_rate"])
 
     def align_actor_prior(self, b):
         """Fit recorded parent suggestions in NEW coordinates, train split only.
@@ -69,16 +86,22 @@ class CalibratedLearner(SacLearner):
         live = b["terminal"] == 0
         if live.any():
             x = b["nx"][live]
+            if self.cfg["method"] == "iql":
+                value[live] = self.value(x).squeeze(-1)
+                return b["reward"] + b["discount"] * value
             if self.cfg["method"] == "parts_td3bc":
                 u, _ = self.actor_target(x, deterministic=True)
                 noise = torch.randn_like(u) * self.cfg["target_noise"]
                 u = (u + noise.clamp(-self.cfg["noise_clip"], self.cfg["noise_clip"])).clamp(-1, 1)
             else:
-                u, _ = self.actor(x)
+                u, logp = self.actor(x)
             a = feasible(u, b["next_scale"][live], b["next_negative_scale"][live])
             q1, q2 = self.target(x, a)
             value[live] = torch.minimum(q1, q2)
-        # No entropy in backup: Q is on the original local-reward scale.
+            if self.cfg["method"] == "sac":
+                control = (b["next_scale"][live]+b["next_negative_scale"][live]).sum(-1) > 0
+                value[live] -= self.log_alpha.exp()*logp*control
+        # SAC alone uses soft Q; CalQL/TD3BC remain on reward-return scale.
         return b["reward"] + b["discount"] * value
 
     def conservative(self, b, q1, q2):
@@ -100,6 +123,13 @@ class CalibratedLearner(SacLearner):
 
     def update(self, b, *, update_actor=True):
         mc_phase = self.updates < self.cfg["mc_warmup_steps"]
+        value_log = {}
+        if self.cfg["method"] == "iql":
+            with torch.no_grad():
+                tq = torch.minimum(*self.target(b["x"], b["action"]))
+            vl = expectile_loss(tq-self.value(b["x"]).squeeze(-1), self.cfg["iql_expectile"]).mean()
+            vg = self._step(vl, self.value.parameters(), self.vopt)
+            value_log = {"train/value_loss": float(vl.detach()), "train/value_grad_norm": vg}
         target = b["mc_return"] if mc_phase else self.backup(b)
         q1, q2 = self.critic(b["x"], b["action"])
         td = functional.mse_loss(q1, target) + functional.mse_loss(q2, target)
@@ -111,14 +141,25 @@ class CalibratedLearner(SacLearner):
                "train/cql_gap": float(cql.detach()), "grad_norm": grad,
                "train/q_abs_max": float(torch.maximum(q1.abs(), q2.abs()).max().detach()),
                "train/q_disagreement": float((q1-q2).abs().mean().detach()),
-               "phase/mc_initialization": int(mc_phase)}
+               "phase/mc_initialization": int(mc_phase), **value_log}
         control = (b["scale"] + b["negative_scale"]).sum(-1) > 0
         if update_actor and not mc_phase and self.updates % self.cfg["critic_actor_ratio"] == 0 and control.any():
             self.critic.requires_grad_(requires_grad=False)
-            u, logp = self.actor(b["x"][control], deterministic=self.cfg["method"] == "parts_td3bc")
+            u, logp = self.actor(b["x"][control], deterministic=self.cfg["method"] in ("parts_td3bc", "iql"))
             a = feasible(u, b["scale"][control], b["negative_scale"][control])
             p1, p2 = self.critic(b["x"][control], a)
-            if self.cfg["method"] == "parts_td3bc":
+            if self.cfg["method"] == "iql":
+                with torch.no_grad():
+                    q = torch.minimum(*self.target(b["x"][control], b["action"][control]))
+                    advantage = q-self.value(b["x"][control]).squeeze(-1)
+                    weights = (self.cfg["iql_temperature"]*advantage).clamp(max=math.log(100)).exp()
+                distribution = torch.distributions.Normal(a, self.iql_log_std.clamp(-5, 2).exp())
+                axes = (b["scale"][control]+b["negative_scale"][control]) > 0
+                likelihood = (distribution.log_prob(b["action"][control])*axes).sum(-1)
+                aloss = -(weights*likelihood).mean()
+                log.update({"train/advantage": float(advantage.mean()),
+                            "train/advantage_weight": float(weights.mean())})
+            elif self.cfg["method"] == "parts_td3bc":
                 success = b["attempt_outcome"][control] == 1
                 failure = ~success
                 bc = functional.mse_loss(a[success], b["action"][control][success]) if success.any() else a.sum()*0
@@ -129,9 +170,10 @@ class CalibratedLearner(SacLearner):
                             "train/q_actor_coefficient": float(coefficient)})
             else:
                 aloss = (self.log_alpha.exp().detach()*logp-torch.minimum(p1, p2)).mean()
-            self._step(aloss, self.actor.parameters(), self.aopt)
+            parameters = [*self.actor.parameters(), self.iql_log_std] if self.cfg["method"] == "iql" else self.actor.parameters()
+            self._step(aloss, parameters, self.aopt)
             self.critic.requires_grad_(requires_grad=True)
-            if self.cfg["method"] == "calql":
+            if self.cfg["method"] in ("calql", "sac"):
                 tloss = -(self.log_alpha * (logp.detach()+self.cfg["target_entropy"])).mean()
                 self._step(tloss, [self.log_alpha], self.topt)
                 with torch.no_grad():
@@ -149,10 +191,17 @@ class CalibratedLearner(SacLearner):
         return log
 
     def state_dict(self):
+        extra = {"value": self.value.state_dict(), "vopt": self.vopt.state_dict(),
+                 "iql_log_std": self.iql_log_std.detach().clone()} if self.cfg["method"] == "iql" else {}
         return {**super().state_dict(), "actor_target": self.actor_target.state_dict(),
-                "actor_prior_updates": self.actor_prior_updates}
+                "actor_prior_updates": self.actor_prior_updates, **extra}
 
     def load_state_dict(self, state):
         super().load_state_dict(state)
         self.actor_target.load_state_dict(state["actor_target"])
         self.actor_prior_updates = state.get("actor_prior_updates", 0)
+        if self.cfg["method"] == "iql":
+            self.value.load_state_dict(state["value"])
+            self.vopt.load_state_dict(state["vopt"])
+            with torch.no_grad():
+                self.iql_log_std.copy_(state["iql_log_std"])

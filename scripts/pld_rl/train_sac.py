@@ -30,7 +30,7 @@ from yam_pld_rl.sac import SacLearner
 
 
 def learner_for(dim, cfg, device="cuda"):
-    if cfg.get("method") in ("calql", "parts_td3bc"):
+    if cfg.get("method") in ("calql", "parts_td3bc", "sac", "iql"):
         return CalibratedLearner(dim, cfg, device)
     return SacLearner(dim, cfg, device)
 
@@ -77,7 +77,7 @@ def main():
     rng = np.random.default_rng(cfg["seed"])
     if not args.resume:
         args.output.mkdir(parents=True, exist_ok=False)
-    calibrated = cfg.get("method") in ("calql", "parts_td3bc")
+    calibrated = cfg.get("method") in ("calql", "parts_td3bc", "sac", "iql")
     if calibrated and not args.replay:
         raise ValueError("calibrated methods require verified real replay")
     learner = learner_for(feature_dim(contract), cfg)
@@ -158,10 +158,13 @@ def main():
                    method=cfg["method"], new_environment_steps=0,
                    mix="50% successful attempts + 50% all attempts; uniform attempt then decision",
                    adaptations=["return-preserving collapse of mandatory RTC wait suffix", "7D feasible residual with original radius",
-                                "frozen Pi/ResNet18", "no entropy in Bellman backup", "offline replay; not complete online paper reproduction",
+                                "frozen Pi/ResNet18", "soft-Q backup for SAC; reward-return backup for other methods", "offline replay; not complete online paper reproduction",
                                 "current-policy + uniform latent proposals for CalQL; MC bound on policy proposals",
                                 "optional recorded-MC critic initialization; success prior is corrected collect, not pure Pi demonstrations",
                                 "TD3BC mean actor; fixed bootstrap collection std; success BC and optional failed-zero anchor"])
+        run["q_semantics"] = "soft_return_includes_entropy" if cfg["method"] == "sac" else "reward_return"
+        if cfg["method"] == "iql":
+            run["adaptations"].append("IQL V-expectile; advantage-weighted Normal likelihood on feasible a, collapsed axes masked; mean-only runtime")
         if "feature_group_rms" in cfg:
             run["adaptations"].append("fixed train-only RMS balance of five observation groups; original state and bounds preserved")
         write_json(args.output / "run.json", run)

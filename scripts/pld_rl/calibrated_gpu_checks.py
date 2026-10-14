@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 import subprocess
 import sys
+from unittest.mock import patch
 
 import numpy as np
 import torch
@@ -77,10 +78,12 @@ def main():
     write_json(args.output/"contract.json", c)
     write_json(args.output/"normalization.json", stats())
     results = []
-    for variant in ("calql", "parts_td3bc", "parts-balanced"):
+    for variant in ("calql", "parts_td3bc", "parts-balanced", "sac", "iql"):
         method = "parts_td3bc" if variant == "parts-balanced" else variant
-        cfg = json.loads((ROOT/f"configs/pld_rl/collect13-r02/{method}-s0.json").read_text())
-        if variant == "parts-balanced":
+        base_method = "parts_td3bc" if method in ("sac", "iql") else method
+        cfg = json.loads((ROOT/f"configs/pld_rl/collect13-r02/{base_method}-s0.json").read_text())
+        cfg.update(method=method, backup_entropy=method == "sac", iql_expectile=0.7, iql_temperature=3.)
+        if variant in ("parts-balanced", "sac", "iql"):
             cfg["feature_group_rms"] = [1., 2., 3., 4., 5.]
             cfg["feature_balance_source"] = {"replay_sha256": sha256(replay/"replay.npz"),
                                              "training_rows": int(arrays["train"].sum())}
@@ -95,6 +98,24 @@ def main():
             torch.testing.assert_close(value, learner.actor_target.state_dict()[key], rtol=0, atol=0)
         terminal = b["terminal"] == 1
         torch.testing.assert_close(learner.backup(b)[terminal], b["reward"][terminal])
+        if method == "iql":
+            # In-sample IQL backup must never query a proposed actor action.
+            with patch.object(learner.actor, "forward", side_effect=AssertionError("IQL queried actor in backup")):
+                target = learner.backup(b)
+            live = ~terminal
+            expected = b["reward"][live]+b["discount"][live]*learner.value(b["nx"][live]).squeeze(-1)
+            torch.testing.assert_close(target[live], expected)
+        if method == "sac":
+            torch.manual_seed(291)
+            target = learner.backup(b)
+            torch.manual_seed(291)
+            live = ~terminal
+            u, logp = learner.actor(b["nx"][live])
+            a = feasible(u, b["next_scale"][live], b["next_negative_scale"][live])
+            q = torch.minimum(*learner.target(b["nx"][live], a))
+            active = (b["next_scale"][live]+b["next_negative_scale"][live]).sum(-1) > 0
+            expected = b["reward"][live]+b["discount"][live]*(q-learner.log_alpha.exp()*logp*active)
+            torch.testing.assert_close(target[live], expected)
         original = {k: v.clone() for k, v in learner.actor.state_dict().items()}
         for _ in range(4):
             learner.update(b, update_actor=False)
@@ -118,6 +139,9 @@ def main():
         restored = CalibratedLearner(feature_dim(c), cfg)
         restored.load_state_dict(learner.state_dict())
         torch.testing.assert_close(restored.actor(b["x"], deterministic=True)[0], u, rtol=0, atol=0)
+        if method == "iql":
+            torch.testing.assert_close(restored.value(b["x"]), learner.value(b["x"]), rtol=0, atol=0)
+            torch.testing.assert_close(restored.iql_log_std, learner.iql_log_std, rtol=0, atol=0)
         bundle = args.output/(variant+"-bundle")
         export_bundle(bundle, learner, c, stats(), sha256(args.encoder), cfg, {"synthetic": True})
         runtime_actor = SquashedActor(feature_dim(c), cfg).cuda()
