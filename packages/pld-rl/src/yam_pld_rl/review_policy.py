@@ -92,6 +92,13 @@ def merge_rewards(candidates, judged, states):
         if proposed:
             automatic.append(cid)
         state = states.get(cid, {})
+        model = judged.get(cid, {})
+        if (not state.get("status") and model.get("model_non_grasp") is True
+                and model.get("intent_evidence_candidate_sha256") == candidate["candidate_sha256"]):
+            excluded.append({"candidate_id": cid, "reason": "automatic visual non-grasp intent",
+                             "label_source": "automatic_model_intent", "human_reviewed": False,
+                             "intent_evidence_sha256": model.get("intent_evidence_sha256")})
+            continue
         if state.get("status") == "exclude":
             excluded.append({"candidate_id": cid, "reason": state.get("note") or "explicit user exclusion"})
             continue

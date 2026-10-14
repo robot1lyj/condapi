@@ -52,6 +52,17 @@ class ReviewPolicyChecks(unittest.TestCase):
         self.assertFalse(merged["rewards"])
         self.assertEqual(len(merged["pending"]), 1)
 
+    def test_non_grasp_suggestion_excludes_without_faking_human_review(self):
+        c, _ = fixture()
+        judged = {c["candidate_id"]: {"model_non_grasp": True,
+                  "intent_evidence_candidate_sha256": c["candidate_sha256"], "intent_evidence_sha256": "1"*64}}
+        merged = merge_rewards([c], judged, {})
+        self.assertFalse(merged["pending"])
+        self.assertFalse(merged["rewards"])
+        self.assertFalse(merged["excluded"][0]["human_reviewed"])
+        override = merge_rewards([c], judged, {c["candidate_id"]: {"status": "held"}})
+        self.assertEqual(override["rewards"][0]["status"], "held")
+
     def test_missing_latest_evidence_does_not_become_success(self):
         candidate, judged = fixture()
         candidate["outcome"]["lifted_rows"] = candidate["outcome"]["lifted_rows"][:-1]

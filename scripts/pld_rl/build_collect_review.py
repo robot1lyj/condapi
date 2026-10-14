@@ -74,10 +74,13 @@ def main():
                                    f"{view} row={f['row']} t={f['since_close_s']:+.2f}s dz={100*f['lift_from_closure_m']:.1f}cm"})
         result = judged.get(cid, {})
         automatic, reason = automatic_reward(c, result)
+        model_excluded = (result.get("model_non_grasp") is True
+                          and result.get("intent_evidence_candidate_sha256") == c["candidate_sha256"])
         cards.append({"candidate_id": cid, "candidate_sha256": c["candidate_sha256"], "episode_id": c["episode_id"],
                       "arm": c["arm"], "outcome": proof, "images": images, "montage": args.curator + "/" + c["montage"],
-                      "automatic": bool(automatic), "pending_reason": reason,
-                      "suggested": result.get("suggested_status") or {"success": "held", "failure": "empty"}.get(result.get("suggested_label")),
+                      "automatic": bool(automatic) or model_excluded, "automatic_excluded": model_excluded,
+                      "pending_reason": reason,
+                      "suggested": "exclude" if model_excluded else result.get("suggested_status") or {"success": "held", "failure": "empty"}.get(result.get("suggested_label")),
                       "confidence": result.get("confidence"), "reason": " ".join(result.get("reasons", [])),
                       "flags": result.get("audit_flags", [])})
     identity = hashlib.sha256(candidates_path.read_bytes()).hexdigest()
