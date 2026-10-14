@@ -1,10 +1,12 @@
-# Actor-1 / Collect-3：连续探索
+# Actor-1 / Collect-3：连续探索（历史父版本）
+
+当前已上线Actor-2，连续探索10集已判奖、训练并验收；本页保留Actor-1采集策略的原始证据。[当前结果、接口与回退](batch10/README.md)。
 
 ## 目的与边界
 
 修复第二轮首条录像中每个请求独立换方向、8 步三角脉冲反复归零造成的跳动。Actor-1 权重保持不变；这是采集策略和动作解码器升级，不是重新训练，也不代表抓取成功率已经提高。
 
-已上线 `pld-continuous-20261014-r1`，最终 bundle `bundle-r3`。快照 `7013be463f735521a17cc13af2196906092244f22cf64a02cad1225384e55857`，collect 合同 `959db331948a9acd7c59f45bae64cc6298bcb04c879e30ea414ef5de465bba9e`，actor `8cd1a5a09c2082e3df0476a937ce3af812e1295e8dcf353ffd66bfc54f5af8d3`。前两个候选 bundle 及检查结果保留，不用于部署。
+当时上线 `pld-continuous-20261014-r1`，最终 bundle `bundle-r3`。快照 `7013be463f735521a17cc13af2196906092244f22cf64a02cad1225384e55857`，collect 合同 `959db331948a9acd7c59f45bae64cc6298bcb04c879e30ea414ef5de465bba9e`，actor `8cd1a5a09c2082e3df0476a937ce3af812e1295e8dcf353ffd66bfc54f5af8d3`。前两个候选 bundle 及检查结果保留，不用于部署。
 
 ## 实际算法
 
@@ -50,4 +52,4 @@ Thor CPU 对冻结 actor 做前向，无训练。源为原13集奖励发布 reco
 
 完整源包、日志、bundle-r3和返回包保留在Thor `/home/wuyan-lyj/thor/pi/services/pld-continuous-20261014-r1/`，本地证据在 `/home/wuyan-lyj/condapi-data/rl/pld-continuous-20261014-r1/`。旧生产停止保留为 `pld-rl-retained-pld-continuous-20261014-r1`；回退须停止现场执行、交还MAXN会话并绑定旧身份，不能在一集内混换。旧版本有本次已知脉冲问题，回退不代表适合继续批量采集。
 
-首集已完成实录核查：29个非零修正窗、24个可唯一关联闭爪，提交/解码/范围通过；5个重复收拢窗口待离线整理。继续同版collect/前缀10，先再录9集凑10，按有效判奖量决定是否补到15。没有重新训练actor，也没有开启自动判奖/训练后台。[首集证据与预算](first-rollout/README.md)。
+首集已完成实录核查：29个非零修正窗、24个可唯一关联闭爪，提交/解码/范围通过；5个重复收拢窗口待离线整理。这是当时提出的采集预算；目前10集已完成、Actor-2已训练上线，状态转见本页顶部。[首集证据与预算](first-rollout/README.md)。

@@ -2,11 +2,13 @@
 
 ## 定位与启动
 
+**当前8766（2026-10-14）：** 复用同一VLA看板，配置[pld-continuous10-r03.json](../configs/dashboards/pld-continuous10-r03.json)展示连续探索10集的TD3BC/NoAnchor/BC各两seed，六组3000 critic/500 RL或BC actor/200坐标对齐更新均已完成，36份检查点审计通过。指标镜像在`artifacts/pld-continuous10-r03`；旧13集及18算法曲线原件保留。入口AUC基于17次开发验证，不是成功率，Q自评增益也不能代替真机改善。复核复用固定模板`http://127.0.0.1:8768/review.html`：仅62份无可用建议交用户，252份有建议直接发布；训练所用reward-release-v1已冻结，后续复核生成新奖励版本。服务状态以部署回执单独核对，不能从曲线停止推断推理未启动。[训练结果与上线身份](reports/rl/lego-pld-collect-20261013/continuous/batch10/README.md)。
+
 2026-10-12新增PLD两轮八组初始化诊断，复用同一看板与 `vla_platform.metrics.write_metrics`，配置[pld-offline14-20261012.json](../configs/dashboards/pld-offline14-20261012.json)，本地端口8766；原VLA端口8765不改。`scripts/pld_rl/sync_dashboard.py`每10秒只读镜像metrics、身份、状态与最新验证结果，第二轮用 `--ids`指定四个新run并保存独立本地cache；错误保留旧缓存并记sync-state。API已验到八组、5000步、无无效行，使用前仍核对源mtime。主要观察TD/MC误差、入口AUC、Q分歧、梯度和吞吐；AUC只有12次验证/2次失败，绝不是机器人成功率。原始曲线、各次预测和checkpoint保存在服务器，页面平滑不改变原值。
 
 同日用户授权继续多论文实验，8766配置新增十组 PLD-IQL / PLD-TD3BC / PLD-ReBRAC，旧八组ID不变，仅统一展示名。新组区分actor实际更新数、动作残差RMS、边界饱和、末步奖励误差与critic自评增益；actor本轮会更新，在线环境步数仍为0。不同算法loss不直接排名，自评gain不显示为成功率。API已复核18/18组、坏行0，新组20,000步/旧组5,000步；使用前仍核对同步状态。细节归[多算法报告](reports/rl/pld-methods14-20261012/README.md)。
 
-PLD-Grasp复用原指标写入器与8766面板，当前[配置](../configs/dashboards/pld-collect13-r02.json)含R01历史基线＋R02八组真实对照，原18组配置/日志另存不删。新八组每组3000 critic/500 actor，60条指标、48个保存检查点均已完成；固定数据更新没有新增环境交互。新增入口/全段/末个可控动作的记录回报RMSE与AUC，分左右臂；显示确定性残差RMS、各维边际分位范围外比例、MC阶段、CalQL项和BC项。指标均不是机器人成功率，入口AUC需与仅按左右臂先验0.705比较。镜像`artifacts/pld-collect13-r02`，本轮同步已结束；训练停止且候选另已上线推理，不从metrics新旧推断服务状态。选定候选为PARTS-TD3BC-Balanced seed0/3000，完整结论见[第二轮报告](reports/rl/lego-pld-collect-20261013/batch13/round02.md)。
+父Actor-1历史：PLD-Grasp复用原指标写入器与8766面板，[配置](../configs/dashboards/pld-collect13-r02.json)含R01历史基线＋R02八组真实对照，原18组配置/日志另存不删。新八组每组3000 critic/500 actor，60条指标、48个保存检查点均已完成；固定数据更新没有新增环境交互。新增入口/全段/末个可控动作的记录回报RMSE与AUC，分左右臂；显示确定性残差RMS、各维边际分位范围外比例、MC阶段、CalQL项和BC项。指标均不是机器人成功率，入口AUC需与仅按左右臂先验0.705比较。镜像`artifacts/pld-collect13-r02`，本轮同步已结束；训练停止且候选另已上线推理，不从metrics新旧推断服务状态。选定候选为PARTS-TD3BC-Balanced seed0/3000，完整结论见[第二轮报告](reports/rl/lego-pld-collect-20261013/batch13/round02.md)。
 
 看板只读本地指标，不依赖模型环境、不上传 W&B、不启动或停止训练。模型环境继续按系列使用 Conda；训练器继续复用 OpenPI 或 LeRobot，新增模型不需要复制看板或训练循环。
 

@@ -1,0 +1,130 @@
+{
+  "status": "passed",
+  "device": "cuda",
+  "snapshot_sha256": "f668170b8c59bd799318f20bdf338a5349dfdc31295058dff21ae3eeac88a24c",
+  "actor_weights_equal_reference": true,
+  "comparison": "saved native actor vs runtime",
+  "parent_actor_same_input_mean_exact": true,
+  "prefix_and_inactive_arm_exact": true,
+  "new_decoder_and_trace_verified": true,
+  "arms": [
+    "left",
+    "right"
+  ],
+  "cases": [
+    {
+      "mode": "collect",
+      "sample": "obs-0.npz",
+      "active": true,
+      "nonzero": true,
+      "context_reason": null
+    },
+    {
+      "mode": "collect",
+      "sample": "obs-1.npz",
+      "active": true,
+      "nonzero": true,
+      "context_reason": null
+    },
+    {
+      "mode": "collect",
+      "sample": "obs-2.npz",
+      "active": true,
+      "nonzero": true,
+      "context_reason": null
+    },
+    {
+      "mode": "collect",
+      "sample": "obs-3.npz",
+      "active": true,
+      "nonzero": true,
+      "context_reason": null
+    },
+    {
+      "mode": "eval",
+      "sample": "obs-0.npz",
+      "active": true,
+      "nonzero": true,
+      "context_reason": null
+    },
+    {
+      "mode": "eval",
+      "sample": "obs-1.npz",
+      "active": true,
+      "nonzero": true,
+      "context_reason": null
+    },
+    {
+      "mode": "eval",
+      "sample": "obs-2.npz",
+      "active": true,
+      "nonzero": true,
+      "context_reason": null
+    },
+    {
+      "mode": "eval",
+      "sample": "obs-3.npz",
+      "active": true,
+      "nonzero": true,
+      "context_reason": null
+    },
+    {
+      "mode": "probe",
+      "sample": "obs-0.npz",
+      "active": true,
+      "nonzero": false,
+      "context_reason": null
+    },
+    {
+      "mode": "probe",
+      "sample": "obs-1.npz",
+      "active": true,
+      "nonzero": false,
+      "context_reason": null
+    },
+    {
+      "mode": "probe",
+      "sample": "obs-2.npz",
+      "active": true,
+      "nonzero": false,
+      "context_reason": null
+    },
+    {
+      "mode": "probe",
+      "sample": "obs-3.npz",
+      "active": true,
+      "nonzero": false,
+      "context_reason": null
+    },
+    {
+      "mode": "shadow",
+      "sample": "obs-0.npz",
+      "active": true,
+      "nonzero": false,
+      "context_reason": null
+    },
+    {
+      "mode": "shadow",
+      "sample": "obs-1.npz",
+      "active": true,
+      "nonzero": false,
+      "context_reason": null
+    },
+    {
+      "mode": "shadow",
+      "sample": "obs-2.npz",
+      "active": true,
+      "nonzero": false,
+      "context_reason": null
+    },
+    {
+      "mode": "shadow",
+      "sample": "obs-3.npz",
+      "active": true,
+      "nonzero": false,
+      "context_reason": null
+    }
+  ],
+  "training": false,
+  "robot_connected": false
+}

@@ -1,6 +1,6 @@
 # 04 · 数据合同
 
-**连续collect已上线（2026-10-14）：** 快照7013be46…、根合同959db331…，`signed_trajectory_v1` 将7D归一化目标解码为连续轨迹。trace 追加可重建的轨迹context、几何投影及相关噪声，Replay核验实际命令和已接受退出回复的承诺尾段。actor权重和特征维数不变，旧actor坐标单独保留；collect为±0.08rad，eval保留±0.02rad目标尺度但也用新解码器，probe/shadow走父合同。新旧动作映射不能直接混训，后续训练需显式适配；原件与旧奖励不覆盖。[当前合同与证据](reports/rl/lego-pld-collect-20261013/continuous/README.md)。
+**当前Actor-2合同（2026-10-14）：** 快照f668170b…、根合同959db331…，`native_actor_coordinates=true`；actor/eval/collect均按同一`signed_trajectory_v1`连续轨迹坐标和±0.08rad/夹爪±0.05目标尺度解码，collect另加相关噪声。probe/shadow明确旁路轨迹桥接，逐值返回Pi原动作、`replay_eligible=false`；避免零目标仍因前缀桥接造成修正。新10集原件、242份Qwen＋DINO主提案、10份有证据未抬升失败、252份发布奖励及62份无建议候选全部保留；Replay-v2接受245次尝试/1635区间，7份标签因无实际非零修正不入库；学习视图882决策保持逐尝试折扣回报。录制物理命令与wire精确比对，独立浮点重建采用既有1e-6容差，不因约1e-16舍入误差错拒合法数据；失败v1原件不覆盖。第一集仅开发验证，其余9集训练；新旧动作映射不直接混训，Actor-1行为中心只用于新坐标初始化，不作为critic执行动作。当前manifest的`eval_preserves_parent_target_scale`为沿用的说明字段，不能据此解释为保持Actor-1的0.02尺度；实际以actor/eval合同及radius字段为准。[当前数据、回执与限制](reports/rl/lego-pld-collect-20261013/continuous/batch10/README.md)。
 
 **2026-10-13新增抓取结果合同：** wire schema继续`pld_sac_block_v2`，gate v3使用`signed_feasible_v1`＋`drained_grasp_v1`；新增negative_scale及排队阶段字段，模型特征2287维，旧2275维合同不混训。停止新增修正与实际队列结束分开，排队阶段保留零动作transition，末尾才结算。held=1，empty/not_lifted/no_closure/dropped=0；未抬起/未闭爪不要求5cm，但需要完整实测轨迹、新鲜终态图像和意图审核。故障/HIL/缺失不强填0。无实际闭合使用独立W候选，不伪造物理闭合。源数据不改写，审核SHA仍绑定精确候选；首批新集待用户录制。[字段与处理入口](reports/rl/pld-sac-block-v2/README.md)、[运行证据](reports/thor/pld-rl-20261013/README.md)。
 

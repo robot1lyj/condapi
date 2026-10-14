@@ -1,0 +1,142 @@
+[
+  {
+    "candidate_id": "E02-R004-v3",
+    "candidate_sha256": "a3739c8b8d5df35162886369fc394ceee3d2a1491b49ddf52146ab6542389df2",
+    "count_as_attempt": false,
+    "reviewer": "assistant_visual_audit",
+    "reason": "container/transport interaction beyond tabletop grasp region",
+    "evidence": "montages/E02-R004-v3.jpg",
+    "evidence_sha256": "26435de28bdd29ab8b5b13f174401e5d341b83ea3f6473cc7e69a3e88d025c49",
+    "used_as_RL_reward": false
+  },
+  {
+    "candidate_id": "E04-L002-v3",
+    "candidate_sha256": "92d2f5045fc8fb09ee9aebb00a1db0e3599cdc86d97ac4a255408cd53437a0ad",
+    "count_as_attempt": false,
+    "reviewer": "assistant_visual_audit",
+    "reason": "container/transport interaction beyond tabletop grasp region",
+    "evidence": "montages/E04-L002-v3.jpg",
+    "evidence_sha256": "d0f9f0536369897393592e56aa3d7a524c0a29ebbd1eb4225641ef1ae66aec9d",
+    "used_as_RL_reward": false
+  },
+  {
+    "candidate_id": "E04-L008-v3",
+    "candidate_sha256": "06bca3a99736b0c0ec7d6ab1a424ee8f7d95406b4b1bf12f7c697d3ca3440a14",
+    "count_as_attempt": false,
+    "reviewer": "assistant_visual_audit",
+    "reason": "container/transport interaction beyond tabletop grasp region",
+    "evidence": "montages/E04-L008-v3.jpg",
+    "evidence_sha256": "95ca3a3ba8d3eac22afee46d5ecc3c2a52144909b123529d4bed140630288ed7",
+    "used_as_RL_reward": false
+  },
+  {
+    "candidate_id": "E04-R003-v3",
+    "candidate_sha256": "35624ee4383e274f424cf9c4a388be394e9c2c72f97211f730dfaa70c3e7e1dc",
+    "count_as_attempt": false,
+    "reviewer": "assistant_visual_audit",
+    "reason": "container/transport interaction beyond tabletop grasp region",
+    "evidence": "montages/E04-R003-v3.jpg",
+    "evidence_sha256": "d9bc20b21217d3cc362978ce5a20c06d803690d116abfbb6dff67ba35fa08733",
+    "used_as_RL_reward": false
+  },
+  {
+    "candidate_id": "E04-R004-v3",
+    "candidate_sha256": "f178efab49f993bffd30fc413e5fad97222eeb8027627542c418f5302d095aef",
+    "count_as_attempt": false,
+    "reviewer": "assistant_visual_audit",
+    "reason": "container/transport interaction beyond tabletop grasp region",
+    "evidence": "montages/E04-R004-v3.jpg",
+    "evidence_sha256": "49074342aa1d6d0466851f70bbf164300c017ac04db1419a0c56e170d62c9939",
+    "used_as_RL_reward": false
+  },
+  {
+    "candidate_id": "E04-R005-v3",
+    "candidate_sha256": "fa41978104bdda3dc6c4b94731685a4905373f8d1ed85be1e1d215e54c3b2630",
+    "count_as_attempt": false,
+    "reviewer": "assistant_visual_audit",
+    "reason": "container/transport interaction beyond tabletop grasp region",
+    "evidence": "montages/E04-R005-v3.jpg",
+    "evidence_sha256": "69eb9e3a02f6f11a05024c6cc3be06a614515ec8a9584b34479462b316a9c2af",
+    "used_as_RL_reward": false
+  },
+  {
+    "candidate_id": "E04-R007-v3",
+    "candidate_sha256": "ef4acf68666b9e5ffe7fc6cf4c04f1fadf05b385287b0f36a0a63b67c98f4ef7",
+    "count_as_attempt": false,
+    "reviewer": "assistant_visual_audit",
+    "reason": "container/transport interaction beyond tabletop grasp region",
+    "evidence": "montages/E04-R007-v3.jpg",
+    "evidence_sha256": "234341c924688d009b7e17ec10401a943e984efc9c5cf2dc2a8165ec5f045ea7",
+    "used_as_RL_reward": false
+  },
+  {
+    "candidate_id": "E04-R011-v3",
+    "candidate_sha256": "23c5ca27c0754e2744781c15614bb6d68d239c00d68289a9c649ec30b3051a77",
+    "count_as_attempt": false,
+    "reviewer": "assistant_visual_audit",
+    "reason": "container/transport interaction beyond tabletop grasp region",
+    "evidence": "montages/E04-R011-v3.jpg",
+    "evidence_sha256": "312e47d6341a9ad9327f4de9c610efca58bc73b73fa0cc1712be2ba0a0715a4c",
+    "used_as_RL_reward": false
+  },
+  {
+    "candidate_id": "E04-R022-v3",
+    "candidate_sha256": "55746f7adb976c27b994ec14dfe7b19f3f176a53898cb63b164c0438be127220",
+    "count_as_attempt": true,
+    "reviewer": "assistant_visual_audit",
+    "reason": "real recovery grasp of yellow brick beyond specialist workspace",
+    "evidence": "montages/E04-R022-v3.jpg",
+    "evidence_sha256": "cf96725a77666905e7132767e150c371419ecc4421eb1284c5b83b81735a2cbe",
+    "used_as_RL_reward": false
+  },
+  {
+    "candidate_id": "E07-L002-v3",
+    "candidate_sha256": "680461d547c7ccf14d50b0b1f158f2cfbecdad9830650828dcebd84c2a1c973f",
+    "count_as_attempt": false,
+    "reviewer": "assistant_visual_audit",
+    "reason": "container/transport interaction beyond tabletop grasp region",
+    "evidence": "montages/E07-L002-v3.jpg",
+    "evidence_sha256": "b6bc43866adb0964fb81b68772bb3a9e40b84e6633393df398a523bd32bec0e3",
+    "used_as_RL_reward": false
+  },
+  {
+    "candidate_id": "E07-R005-v3",
+    "candidate_sha256": "099e38ba136b7427a63ee8102df0c357cfbcac95c4628e9f23f7dc507a379a26",
+    "count_as_attempt": false,
+    "reviewer": "assistant_visual_audit",
+    "reason": "container/transport interaction beyond tabletop grasp region",
+    "evidence": "montages/E07-R005-v3.jpg",
+    "evidence_sha256": "4ce363e7c88d8752dcd250a7b26767645c5a95f917a3b3f5ac15aef3ab2ee599",
+    "used_as_RL_reward": false
+  },
+  {
+    "candidate_id": "E07-R011-v3",
+    "candidate_sha256": "33937c820411895e9f0abe526b6ff9a0de0814514fc5bd9b5e2c4460372998a1",
+    "count_as_attempt": false,
+    "reviewer": "assistant_visual_audit",
+    "reason": "container/transport interaction beyond tabletop grasp region",
+    "evidence": "montages/E07-R011-v3.jpg",
+    "evidence_sha256": "d1d0dcc321e5bfc7a07a3ffc872aacbdbdeb1ec99c8b762594fc60092f0e4344",
+    "used_as_RL_reward": false
+  },
+  {
+    "candidate_id": "E08-R005-v3",
+    "candidate_sha256": "d5c9fdcec33dcba100e6f2cabbd92666892e612bb816a98d496e7a7316f67559",
+    "count_as_attempt": false,
+    "reviewer": "assistant_visual_audit",
+    "reason": "container/transport interaction beyond tabletop grasp region",
+    "evidence": "montages/E08-R005-v3.jpg",
+    "evidence_sha256": "b835603965026b3ca944b7d853e27bfbd3e482d6fd1db3b9a07ccbcd38f705ae",
+    "used_as_RL_reward": false
+  },
+  {
+    "candidate_id": "E08-R024-v3",
+    "candidate_sha256": "7f4d3a4b62157a3d28b0632a9d56007d989e4c7423280feedd6135e4ef8919ef",
+    "count_as_attempt": false,
+    "reviewer": "assistant_visual_audit",
+    "reason": "container/transport interaction beyond tabletop grasp region",
+    "evidence": "montages/E08-R024-v3.jpg",
+    "evidence_sha256": "0d2e19e6233731bb8ae75344ce664dbd9cc9cbef02c9ea2e1c1875a47d324bd2",
+    "used_as_RL_reward": false
+  }
+]

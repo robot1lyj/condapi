@@ -22,6 +22,7 @@ def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--dataset", type=Path, required=True)
     p.add_argument("--bundle", type=Path, required=True)
+    p.add_argument("--count-reviews", type=Path, help="candidate-SHA-bound count corrections; never reward labels")
     p.add_argument("--output", type=Path, required=True)
     args = p.parse_args()
     import h5py  # noqa: PLC0415
@@ -29,6 +30,7 @@ def main():
 
     candidate_path = args.dataset/"curator-v1/candidates.json"
     cs = json.loads(candidate_path.read_text())
+    reviews = {r["candidate_id"]: r for r in json.loads(args.count_reviews.read_text())} if args.count_reviews else {}
     contract = json.loads((args.bundle/"manifest.json").read_text())["contract"]
     fk = YamKinematics(args.bundle/"fk.xml")
     sources = json.loads((args.dataset/"source-snapshot-v2.json").read_text())
@@ -36,6 +38,8 @@ def main():
                for e in sources["episodes"]}
     rows, decisions, inputs = [], [], {str(candidate_path): sha256(candidate_path),
                                       str(args.bundle/"manifest.json"): sha256(args.bundle/"manifest.json")}
+    if args.count_reviews:
+        inputs[str(args.count_reviews)] = sha256(args.count_reviews)
     for audit_path in sorted((args.dataset/"batch-audit-v1").glob("E*.json")):
         audit = json.loads(audit_path.read_text())
         eid, count = audit["episode_id"], Counter()
@@ -55,18 +59,28 @@ def main():
                 continue
             off = 0 if c["arm"] == "left" else 7
             points = [fk.position(states[i, off:off+6]) for i in (c["close_row"], c["reference_row"])]
-            counted = any(in_workspace(x, c["arm"], contract) for x in points)
+            in_area = any(in_workspace(x, c["arm"], contract) for x in points)
+            count["outside_pose"] += int(not in_area)
+            counted = in_area
+            reason = "physical closure in grasp workspace" if counted else "outside calibrated grasp workspace"
+            review = reviews.get(c["candidate_id"])
+            if review:
+                if review["candidate_sha256"] != c["candidate_sha256"] or type(review["count_as_attempt"]) is not bool:
+                    raise ValueError("count review belongs to different candidate/evidence")
+                counted, reason = review["count_as_attempt"], review["reason"]
+                count["count_reviews"] += 1
             count["confirmed" if counted else "outside"] += 1
             if counted:
                 count[c["arm"]] += 1
             decisions.append({"candidate_id": c["candidate_id"], "counted": bool(counted),
                               "arm": c["arm"], "closure_and_reference_xyz_m": [x.tolist() for x in points],
-                              "reason": "physical closure in grasp workspace" if counted else "outside calibrated grasp workspace"})
+                              "reason": reason, "count_review": review})
         evaluations = [e["details"]["evaluation"] for e in audit["raw_evaluation_events"]]
         label = evaluations[-1] if evaluations else {"C": None, "N": 10}
         row = {"episode_number": audit["number"], "episode_id": eid,
-               "behavior_mode": "collect", "count_source": "relative_v3_grasp_workspace_v1",
-               "raw_candidates": count["raw"], "outside_grasp_workspace": count["outside"],
+               "behavior_mode": "collect", "count_source": "relative_v3_grasp_workspace_with_count_review_v2",
+               "raw_candidates": count["raw"], "outside_grasp_workspace": count["outside_pose"],
+               "excluded_non_target_closures": count["outside"], "count_reviews": count["count_reviews"],
                "forecast_only_windows": count["forecast_only"], "left_attempts": count["left"],
                "right_attempts": count["right"],
                **episode_metrics(initial_objects=label["N"], completed_objects=label["C"],
@@ -74,7 +88,7 @@ def main():
         rows.append(row)
     args.output.mkdir(parents=True, exist_ok=False)
     with (args.output/"episodes.csv").open("w", newline="") as f:
-        w = csv.DictWriter(f, fieldnames=list(rows[0]))
+        w = csv.DictWriter(f, fieldnames=list(rows[0]), lineterminator="\n")
         w.writeheader()
         w.writerows(rows)
     result = {"schema": "pld_rollout_efficiency_v2", "episodes": rows,

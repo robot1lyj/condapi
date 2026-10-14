@@ -1,0 +1,251 @@
+{
+  "number": 11,
+  "episode_path": "episode_000011",
+  "episode_id": "6fa76e1f2c2046dc995e35d478929417",
+  "rows": 2808,
+  "duration_s": 93.56600884301588,
+  "manifest_pld": {
+    "schema": "pld_sac_block_v2",
+    "mode": "eval",
+    "run_id": "d51b3b505b5a43f3b3ac6fa342f71f9c",
+    "contract_sha256": "959db331948a9acd7c59f45bae64cc6298bcb04c879e30ea414ef5de465bba9e",
+    "snapshot_sha256": "f668170b8c59bd799318f20bdf338a5349dfdc31295058dff21ae3eeac88a24c"
+  },
+  "mode_counts": {
+    "eval": 265
+  },
+  "contract_sha256": [
+    "959db331948a9acd7c59f45bae64cc6298bcb04c879e30ea414ef5de465bba9e"
+  ],
+  "snapshot_sha256": [
+    "f668170b8c59bd799318f20bdf338a5349dfdc31295058dff21ae3eeac88a24c"
+  ],
+  "delay_steps": {
+    "10": 265
+  },
+  "human_rows": 0,
+  "invalid_observation_rows": 0,
+  "invalid_submission_rows": 0,
+  "source_counts": {
+    "hold": 10,
+    "policy": 2798
+  },
+  "replies": 265,
+  "accepted_replies": 264,
+  "discarded_replies": [
+    {
+      "token": {
+        "epoch": 889,
+        "request_id": 3643,
+        "observation_id": 343331,
+        "created_at": 1399586.733796248,
+        "observed_at": 1399586.712253698,
+        "queue_size_at_request": null,
+        "observation_policy_tick": 343361,
+        "rtc_delay_steps": 10
+      },
+      "error": null,
+      "slack": 1
+    }
+  ],
+  "cancelled_requests": [
+    [
+      889,
+      "3643"
+    ]
+  ],
+  "server_ms": {
+    "p50": 216.63559111766517,
+    "p95": 219.99325579963624,
+    "p99": 222.49638609588146,
+    "max": 223.7663499545306
+  },
+  "worker_ms": {
+    "p50": 254.3205840047449,
+    "p95": 267.5145899411291,
+    "p99": 273.16040174104273,
+    "max": 285.34973389469087
+  },
+  "tracking": {
+    "left": {
+      "p50_error_rad": [
+        0.0032779442630748723,
+        0.015871561530904077,
+        0.009644264192170682,
+        0.020148899446524537,
+        0.017678819172799398,
+        0.014072902672082832
+      ],
+      "p95_error_rad": [
+        0.04493130441135837,
+        0.09507528477017951,
+        0.12153961096346266,
+        0.07491259605591372,
+        0.05860003993948715,
+        0.10710518522842954
+      ],
+      "measured_range_rad": [
+        1.014343480582891,
+        2.250705729762723,
+        2.205691615167467,
+        1.796749828336008,
+        0.6813153276874928,
+        0.997940032043946
+      ],
+      "target_range_rad": [
+        1.0168620135605124,
+        2.261120767071538,
+        2.228477981257797,
+        1.8940717302121057,
+        0.7848308553946851,
+        1.0339185484465079
+      ],
+      "error_over_0_3rad_runs": [
+        [],
+        [],
+        [],
+        [
+          {
+            "start_row": 2680,
+            "end_row": 2695,
+            "start_s": 89.33252266910858,
+            "end_s": 89.8326668580994,
+            "duration_s": 0.5001441889908165
+          }
+        ],
+        [],
+        []
+      ],
+      "note": "Dynamic tracking error is not itself a hardware-fault diagnosis."
+    },
+    "right": {
+      "p50_error_rad": [
+        0.013454689898300731,
+        0.035251323975730386,
+        0.03050132710344211,
+        0.02680626343290382,
+        0.02988771089162079,
+        0.030731594634074128
+      ],
+      "p95_error_rad": [
+        0.06769855852756923,
+        0.15773642026735737,
+        0.21717146418661246,
+        0.08501716997983551,
+        0.09277217489302743,
+        0.1453260528338042
+      ],
+      "measured_range_rad": [
+        1.1501487754634923,
+        2.380407415884642,
+        2.2808422980086984,
+        1.7742427710383737,
+        0.6095979247730252,
+        1.2954909590295287
+      ],
+      "target_range_rad": [
+        1.1557214315448863,
+        2.3994168089546735,
+        2.3211315281030442,
+        1.9294414288790507,
+        0.8709183745593547,
+        1.3497454214898466
+      ],
+      "error_over_0_3rad_runs": [
+        [],
+        [],
+        [],
+        [
+          {
+            "start_row": 2681,
+            "end_row": 2698,
+            "start_s": 89.36583555396646,
+            "end_s": 89.93252151994966,
+            "duration_s": 0.5666859659831971
+          }
+        ],
+        [],
+        []
+      ],
+      "note": "Dynamic tracking error is not itself a hardware-fault diagnosis."
+    }
+  },
+  "missing_action_origins": [],
+  "submission_mismatches": [],
+  "correction_rows": 1101,
+  "correction_rows_by_arm": {
+    "right": 747,
+    "left": 354
+  },
+  "max_joint_correction_rad": 0.04750541210174561,
+  "max_gripper_correction": 0.0344498589324026,
+  "max_direct_fk_correction_m": 0.035869173482558823,
+  "videos": [
+    {
+      "path": "episode_000011/segment_000000/top.mp4",
+      "frames": 1800,
+      "pts_monotonic": true,
+      "indices_in_range": true
+    },
+    {
+      "path": "episode_000011/segment_000000/left.mp4",
+      "frames": 1800,
+      "pts_monotonic": true,
+      "indices_in_range": true
+    },
+    {
+      "path": "episode_000011/segment_000000/right.mp4",
+      "frames": 1800,
+      "pts_monotonic": true,
+      "indices_in_range": true
+    },
+    {
+      "path": "episode_000011/segment_000001/top.mp4",
+      "frames": 1008,
+      "pts_monotonic": true,
+      "indices_in_range": true
+    },
+    {
+      "path": "episode_000011/segment_000001/left.mp4",
+      "frames": 1008,
+      "pts_monotonic": true,
+      "indices_in_range": true
+    },
+    {
+      "path": "episode_000011/segment_000001/right.mp4",
+      "frames": 1008,
+      "pts_monotonic": true,
+      "indices_in_range": true
+    }
+  ],
+  "raw_evaluation_events": [
+    {
+      "event": "evaluation",
+      "episode_id": "6fa76e1f2c2046dc995e35d478929417",
+      "time": 1399595.751561357,
+      "details": {
+        "evaluation": {
+          "C": 10,
+          "N": 10,
+          "purpose": "evaluation_only"
+        }
+      },
+      "audit_ref": "/home/wuyan-lyj/condapi-data/rl/lego-pld-actor2-eval-e11-20261014-v1/raw-v2/session_20261014_110716_0aa69a/policy_events.jsonl#line=7305"
+    }
+  ],
+  "sources_sha256": {
+    "/home/wuyan-lyj/condapi-data/rl/lego-pld-actor2-eval-e11-20261014-v1/raw-v2/session_20261014_110716_0aa69a/episode_000011/manifest.json": "f5f806370b56c6120bb0901b039ddf536f9e5e3ba9a00b7f66e82c8e2189f727",
+    "/home/wuyan-lyj/condapi-data/rl/lego-pld-actor2-eval-e11-20261014-v1/raw-v2/session_20261014_110716_0aa69a/episode_000011/segment_000000/samples.h5": "3280390d54a1519c12bc68821057af21f885a643d11a970c053d2ed00e329a7a",
+    "/home/wuyan-lyj/condapi-data/rl/lego-pld-actor2-eval-e11-20261014-v1/raw-v2/session_20261014_110716_0aa69a/episode_000011/segment_000001/samples.h5": "39297fe804b4a418caee5972bb893f99f9d59fa935c07dfbb1c7be837b0b22ac",
+    "/home/wuyan-lyj/condapi-data/rl/lego-pld-actor2-eval-e11-20261014-v1/raw-v2/session_20261014_110716_0aa69a/policy_events.jsonl": "95bb359e0eafe125a9622a1401f297296ed7d9dc565f63c9a408d25d7ab841d5",
+    "/home/wuyan-lyj/condapi-data/rl/lego-pld-actor2-eval-e11-20261014-v1/raw-v2/session_20261014_110716_0aa69a/episode_000011/segment_000000/left.mp4": "16e55cb462ddcd521e7a34085f013288f640247067bd0dd46323bd03b93362d8",
+    "/home/wuyan-lyj/condapi-data/rl/lego-pld-actor2-eval-e11-20261014-v1/raw-v2/session_20261014_110716_0aa69a/episode_000011/segment_000000/right.mp4": "74600a375b3ae7212f9e0d61d6413727e174983da9ef4ad04487e61ee97cde46",
+    "/home/wuyan-lyj/condapi-data/rl/lego-pld-actor2-eval-e11-20261014-v1/raw-v2/session_20261014_110716_0aa69a/episode_000011/segment_000000/top.mp4": "3d13ee66bfc49111e33cf48051f66c7c40f9af3fbb5f350923379132cf63ff9e",
+    "/home/wuyan-lyj/condapi-data/rl/lego-pld-actor2-eval-e11-20261014-v1/raw-v2/session_20261014_110716_0aa69a/episode_000011/segment_000001/left.mp4": "5947797cb6fa8a90e76e47b9bbd6f3d52bfab0fe2f17da5d77552fd5fd60fcb5",
+    "/home/wuyan-lyj/condapi-data/rl/lego-pld-actor2-eval-e11-20261014-v1/raw-v2/session_20261014_110716_0aa69a/episode_000011/segment_000001/right.mp4": "9728d47198dc8d90ed5624d1864c324f4b4e21ef845cb44718517a920f234472",
+    "/home/wuyan-lyj/condapi-data/rl/lego-pld-actor2-eval-e11-20261014-v1/raw-v2/session_20261014_110716_0aa69a/episode_000011/segment_000001/top.mp4": "715a6b3494d96ed5be1fa6fda759fa389ddde53c8e8380c2d2f34d602617d17f"
+  },
+  "training_executed": false,
+  "reward_labels_published": 0,
+  "robot_success_rate": null
+}

@@ -1,0 +1,41 @@
+{
+  "attempts": 245,
+  "train_attempts": 228,
+  "val_attempts": 17,
+  "learning_decisions": 882,
+  "train_decisions": 825,
+  "val_decisions": 57,
+  "train_outcomes": {
+    "1": 88,
+    "0": 140
+  },
+  "val_outcomes": {
+    "0": 12,
+    "1": 5
+  },
+  "attempts_by_arm": {
+    "1": 163,
+    "0": 82
+  },
+  "feature_group_rms": [
+    1.7320507764816284,
+    3.94085693359375,
+    75.74451446533203,
+    4.108546257019043,
+    3.6890406608581543
+  ],
+  "jobs": [
+    "parts-ct-td3bc-r03-s0",
+    "parts-ct-noanchor-r03-s0",
+    "bc-ct-success-r03-s0",
+    "parts-ct-td3bc-r03-s1",
+    "parts-ct-noanchor-r03-s1",
+    "bc-ct-success-r03-s1"
+  ],
+  "steps_per_job": 3000,
+  "RL_or_BC_actor_updates_per_job": 500,
+  "coordinate_alignment_updates_per_job": 200,
+  "reuse_old_critic": false,
+  "old13_replay_directly_mixed": false,
+  "actor1_prior_used_in_new_coordinates": true
+}
