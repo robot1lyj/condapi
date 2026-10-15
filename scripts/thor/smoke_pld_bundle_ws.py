@@ -4,9 +4,9 @@ import json
 from pathlib import Path
 import time
 
-from benchmark_pi05 import read_observation
 import numpy as np
 from openpi_client import msgpack_numpy
+from recorded_observation import read_observation
 from websockets.sync.client import connect
 
 
