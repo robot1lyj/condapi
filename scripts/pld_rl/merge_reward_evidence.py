@@ -40,7 +40,7 @@ def main():
                 if d["grasp_intent"] is False and d["confidence"] == "high":
                     c["model_non_grasp"] = True
                 elif d["grasp_intent"] is False:
-                    c["audit_flags"] = list(c.get("audit_flags", [])) + ["weak_negative_intent_not_excluded"]
+                    c["audit_flags"] = [*c.get("audit_flags", []), "weak_negative_intent_not_excluded"]
                 elif d["held_then_lost"] is True:
                     status = "dropped"
                 elif d["grasp_intent"] is True:
