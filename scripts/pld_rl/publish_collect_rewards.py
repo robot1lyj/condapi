@@ -36,6 +36,7 @@ def main():
     p.add_argument("--curator", default="curator-v2")
     p.add_argument("--vision", default="vision-v1")
     p.add_argument("--output", type=Path, required=True)
+    p.add_argument("--outcome-exclusions", type=Path, help="candidate-SHA-bound causal attribution exclusions")
     args = p.parse_args()
     parent = args.dataset / args.curator
     manifest = json.loads((parent / "manifest.json").read_text())
@@ -53,6 +54,19 @@ def main():
     if state["identity"] != sha256(parent / "candidates.json"):
         raise ValueError("human reviews belong to different candidate release")
     merged = merge_rewards(candidates, judged, state["reviews"])
+    causal = json.loads(args.outcome_exclusions.read_text()) if args.outcome_exclusions else []
+    originals = {c["candidate_id"]: c for c in candidates}
+    for item in causal:
+        original = originals.get(item["candidate_id"])
+        if not original or item["candidate_sha256"] != original["candidate_sha256"]:
+            raise ValueError("causal exclusion belongs to different candidate")
+    causal_ids = {c["candidate_id"] for c in causal}
+    # Preserve the visual result, but do not blame a residual for emptiness
+    # observed only after the base policy resumed opening the gripper.
+    removed = [r for r in merged["rewards"] if r["candidate_id"] in causal_ids and r["status"] != "held"]
+    removed_ids = {r["candidate_id"] for r in removed}
+    merged["rewards"] = [r for r in merged["rewards"] if r["candidate_id"] not in removed_ids]
+    merged["causal_attribution_exclusions"] = [c for c in causal if c["candidate_id"] in removed_ids]
     approvals = {r["candidate_id"]: r for r in merged["rewards"]}
     episodes = {}
     for item in json.loads((parent / "audit.json").read_text()):
@@ -91,11 +105,13 @@ def main():
                "splits": dict(Counter(r["split"] for r in labels)), "pending": len(merged["pending"]),
                "human_saved": len(state["reviews"]), "human_valid": sum(r["human_reviewed"] for r in merged["rewards"]),
                "policy": merged["policy"], "robot_success_rate": None, "detection_accuracy": None}
+    summary["causal_attribution_exclusions"] = len(removed)
     write_json(args.output / "summary.json", summary)
     write_json(args.output / "manifest.json", {"schema": "pld_curator_v2", "producer": "Replay-Curator",
                "ready_for_replay_compilation": bool(count), "purpose": "automatic_suggestion_reward_experiment",
                "parent_manifest_sha256": sha256(parent / "manifest.json"), "parent_manifest": manifest,
                "judgment_sha256": sha256(judged_path), "human_state_sha256": sha256(state_path) if state_path.exists() else None,
+               "causal_exclusions_sha256": sha256(args.outcome_exclusions) if args.outcome_exclusions else None,
                "producer_files_sha256": {str(Path(__file__).name): sha256(Path(__file__)),
                                          "review_policy.py": sha256(Path(__file__).resolve().parents[2] / "packages/pld-rl/src/yam_pld_rl/review_policy.py"),
                                          "curator.py": sha256(Path(__file__).resolve().parents[2] / "packages/pld-rl/src/yam_pld_rl/curator.py")},
