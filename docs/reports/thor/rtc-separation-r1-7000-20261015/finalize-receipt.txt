@@ -1,0 +1,24 @@
+2026-10-15T14:13:34+08:00
+assets/yam/norm_stats.json: OK
+params/_METADATA: OK
+params/_sharding: OK
+params/array_metadatas/process_0: OK
+params/d/714f3e59fcc3a8cb77a72b8159a88376: OK
+params/manifest.ocdbt: OK
+params/ocdbt.process_0/d/17d324cd9aca464d33bcf881eba215ab: OK
+params/ocdbt.process_0/d/1cd9a4e8e8a1351d2e241431ff72d2cb: OK
+params/ocdbt.process_0/d/33fbbbb166a2a738a6ad9d190b5e96de: OK
+params/ocdbt.process_0/d/6140f8940a9372f9fdad968cc6731428: OK
+params/ocdbt.process_0/d/6771697754de25768879ee02a261f9fc: OK
+params/ocdbt.process_0/d/8c1e14e1f8fa4d6f6d9256793596daf5: OK
+params/ocdbt.process_0/d/996de325f424131f614f10e22a6ecd86: OK
+params/ocdbt.process_0/d/9ff99a7ffc03d840cb960f6cb361136a: OK
+params/ocdbt.process_0/d/c798f84d3b218922137fa09bd7988cf3: OK
+params/ocdbt.process_0/d/dfd50a1bfd83751f0b9d8dbd8017c05d: OK
+params/ocdbt.process_0/manifest.ocdbt: OK
+_CHECKPOINT_METADATA: OK
+training_contract.json: OK
+initial_config.json: OK
+{"status": "downloaded_sha_verified_not_converted", "observed_at": "2026-10-15T06:13:45.099160+00:00", "parent_checkpoint": 240000, "adaptation_step": 7000, "rtc_training_max_delay": 10, "norm_sha256": "fd0d9cb2db3ce475c1175c7f21a3a0dd3aa7f59d36edc680e7044cd11b9f1edf", "files": 20, "bytes": 12440547840, "destination": "/home/wuyan-lyj/thor/pi/checkpoints/lego-pi05-rtc-separation-r1-10k-20261014/7000"}
+2026-10-15T14:13:45+08:00
+DOWNLOADED_ONLY_240000_PLUS_7000_NO_SERVICE_CHANGE

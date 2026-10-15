@@ -1,0 +1,11 @@
+{
+  "status": "downloaded_sha_verified_not_converted",
+  "observed_at": "2026-10-15T06:13:45.099160+00:00",
+  "parent_checkpoint": 240000,
+  "adaptation_step": 7000,
+  "rtc_training_max_delay": 10,
+  "norm_sha256": "fd0d9cb2db3ce475c1175c7f21a3a0dd3aa7f59d36edc680e7044cd11b9f1edf",
+  "files": 20,
+  "bytes": 12440547840,
+  "destination": "/home/wuyan-lyj/thor/pi/checkpoints/lego-pi05-rtc-separation-r1-10k-20261014/7000"
+}
