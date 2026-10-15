@@ -110,7 +110,7 @@ def main():
             raise ValueError("Missing, invalid or stale VLM evidence: " + c["candidate_id"])
         decision = raw["decision"]
         dino = summarize_dino(c, frames)
-        flags = []
+        flags = list(decision.get("format_audit_flags", []))
         if decision["confidence"] != "high":
             flags.append("vlm_" + decision["confidence"] + "_confidence")
         if dino["outcome"] and dino["outcome"] != decision["outcome"]:

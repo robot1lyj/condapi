@@ -50,10 +50,13 @@ def parse(text):
     end = text.rfind("}")
     data = json.loads(text[start : end + 1])
     data["event_type"] = "grasp"
-    assert len(data["evidence_frames"]) <= 3
+    # Four/five valid frame references violate a formatting preference, not the
+    # binary outcome schema. Keep them and record the deviation explicitly.
+    assert len(data["evidence_frames"]) <= 5
     assert all(x in "ABCDE" and len(x) == 1 for x in data["evidence_frames"])
     assert data["outcome"] in ["success", "failure"]
     assert data["confidence"] in ["high", "medium", "low"]
+    data["format_audit_flags"] = ["more_than_three_evidence_frames"] if len(data["evidence_frames"]) > 3 else []
     return data
 
 
