@@ -1,6 +1,10 @@
 # 13 · Pi0.5 training-time RTC：Thor 转换与推理候选
 
-## 当前：240000＋DAgger专项7000上线，共用Pi服务（2026-10-15）
+## 当前：DAgger专项10000上线，7000保留回退（2026-10-15）
+
+16:50 CST复核：用户授权后同run10000（parent原50h240000/RTC10/H50）已在同名`pi05-rtc-infer`/固定`ws://192.168.250.1:8000`上线。20项SHA、非有限0、811张量FP32保真转换、九例JAX/Torch/TRT及两轮真实协议通过，healthz OK/MAXN/GPU1575MHz。七步FP32＋TF32、quantile、缓存80/CUDA Graph、0.2rad/tick不变；最大单关节转换差0.000774rad、夹爪0.002478，稳态纯推理187.77/192.41ms，正式本机往返198.23/209.07ms（P50/P95），不是3588全链路。部署unit退出0、在线MAXN按唯一ID监控；7000停止完整保留回退，其他旧模型/CPU审阅页保留，PLD推理停止。未操作3588或发客户端任务，真机由用户测试；身份/回执/回退归[10000报告](../../reports/thor/rtc-separation-r1-10000-20261015/README.md)和[08](../../08_thor_edge_deployment.md)，下节为7000历史。
+
+## 已验收基线：240000＋DAgger专项7000（2026-10-15）
 
 16:06 CST复核：用户授权后`lego_pi05_rtc_separation_r1_10k_20261014/7000`（parent原50h240000）已在同名`pi05-rtc-infer`、固定`ws://192.168.250.1:8000`上线；同一Pi系列镜像，不新建DAgger服务。20项SHA、非有限0、811张量FP32映射、真实九例JAX/Torch/TRT及两轮协议通过，healthz OK/MAXN/GPU1575MHz。七步FP32＋TF32、quantile、缓存80/CUDA Graph和0.2rad/tick不变；最大单关节转换差0.000692rad、夹爪0.002328，稳态纯推理188.21/190.20ms，正式本机往返195.53/205.85ms（P50/P95），不代表3588全链路。部署unit退出0，在线MAXN按唯一ID监控，旧24万停止备份/所有产物保留；PLD推理停止、CPU审阅页面不动。真机由用户测试，不操作3588或发送客户端任务；身份/回执/回退归[专项7000报告](../../reports/thor/rtc-separation-r1-7000-20261015/README.md)及[08](../../08_thor_edge_deployment.md)。下文在线状态均为历史。
 

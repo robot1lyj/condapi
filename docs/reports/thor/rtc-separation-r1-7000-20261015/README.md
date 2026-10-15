@@ -2,6 +2,8 @@
 
 ## 当前状态与授权
 
+2026-10-15 16:50 CST更新：用户另行授权的[10000模型](../rtc-separation-r1-10000-20261015/README.md)已接管同名Pi/原8000，本页7000停止保留为`pi05-rtc-separation7000-preserved-20261015`，完整权重/引擎/参考和服务配置均保留，未删除。下文为7000的历史验收和16:05上线记录，不表示当前仍在线。
+
 **2026-10-15 16:05:55+08上线完成，16:06:09+08复核正常。** 用户在下载后另行授权转换并上线测试，确认DAgger与Pi05共用系列容器；本次固定7000，不改训练。新模型已由同名`pi05-rtc-infer`提供固定`ws://192.168.250.1:8000`，healthz OK，`thor-pi-maxn-separation7000-20261015.service` active、MAXN/GPU1575MHz；七步FP32权重＋TF32、quantile前缀、缓存80/CUDA Graph和0.2rad/tick拒绝不变。独立JAX/Torch/TRT和临时/正式两轮各九例真实协议通过。
 
 15:49:23 CPU准备退出0：20项源SHA、[原参数审计](rtc-separation-r1-7000-audit-20261015-r2.json)非有限0、[转换审计](conversion_audit.json)811张量/3,353,433,872元素FP32映射逐位一致、[RTC manifest](rtc_manifest.json)及[真实九例](cases.json)完成。权重SHA `223b7dc80c1ce6458787412e478848ffd297072cceebb9b79b983d686bab2e95`；训练norm逐字节相同。映射器打印的基础配置`rtc_training_max_delay=0`不代表普通路线，实际合同/manifest/采样器均为训练时RTC dmax10。
