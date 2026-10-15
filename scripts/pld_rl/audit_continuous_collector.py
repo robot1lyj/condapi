@@ -29,10 +29,13 @@ def main():
     p.add_argument("--records", type=Path, required=True)
     p.add_argument("--output", type=Path, required=True)
     p.add_argument("--samples", type=int, default=16)
+    p.add_argument("--mode", choices=("collect", "eval"), default="collect")
     args = p.parse_args()
     if args.output.exists():
         raise FileExistsError(args.output)
     m = json.loads((args.bundle / "manifest.json").read_text())
+    if args.mode == "eval" and not m["collector"].get("native_actor_coordinates"):
+        p.error("deterministic audit requires a native-coordinate learned actor")
     c = m["contract"]
     ac = m["actor_contract"]
     torch.set_num_threads(2)
@@ -88,8 +91,9 @@ def main():
         center = np.clip(center, -radius * neg, radius * pos)
         mu = center_latent(center, radius, pos, neg)
         xyz0 = model_fk().positions(b[:, off : off + 6])
-        for _ in range(args.samples):
-            u = np.tanh(mu + rng.normal(size=7) * np.asarray(m["collector"]["latent_std"]))
+        for _ in range(1 if args.mode == "eval" else args.samples):
+            noise = 0 if args.mode == "eval" else rng.normal(size=7) * np.asarray(m["collector"]["latent_std"])
+            u = np.tanh(mu + noise)
             action = map_action(u, pos, neg)
             q, info = trajectory_decode(b, action, arm, c, ctx)
             projection[info["reason"]] += 1
@@ -135,12 +139,14 @@ def main():
                 }
             )
     result = {
+        "status": "passed",
+        "mode": args.mode,
         "snapshot_sha256": sha256(args.bundle / "manifest.json"),
         "records_sha256": sha256(args.records),
         "contexts": len(poses),
         "eligible_contexts": reasons["None"],
         "context_reasons": dict(reasons),
-        "samples_per_context": args.samples,
+        "samples_per_context": 1 if args.mode == "eval" else args.samples,
         "projection": dict(projection),
         "training": False,
         "independent_recorded_context_geometry_only": True,

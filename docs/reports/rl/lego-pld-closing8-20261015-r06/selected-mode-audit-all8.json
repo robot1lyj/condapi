@@ -1,0 +1,146 @@
+[
+  {
+    "folder": "episode_000001",
+    "episode_id": "b16b12c06ec645bea449d691dfb59dc7",
+    "rows": 7569,
+    "duration_s": 252.3504013081547,
+    "request_modes": {
+      "collect": 717
+    },
+    "selected_modes": {
+      "collect": 7559
+    },
+    "unresolved_ticks": 0,
+    "first_nonzero_s": 2.8000258621759713,
+    "nonzero_ticks": 1911,
+    "snapshot_selected_ticks": {
+      "6b8a5670995fb487a2148469e011e60f10b634b27365a52d24128cc9368a0f0a": 7559
+    }
+  },
+  {
+    "folder": "episode_000002",
+    "episode_id": "205a6812f9ab463eba899b0e186781b5",
+    "rows": 3263,
+    "duration_s": 108.77524885209277,
+    "request_modes": {
+      "collect": 308
+    },
+    "selected_modes": {
+      "collect": 3253
+    },
+    "unresolved_ticks": 0,
+    "first_nonzero_s": 5.266822278965265,
+    "nonzero_ticks": 1416,
+    "snapshot_selected_ticks": {
+      "6b8a5670995fb487a2148469e011e60f10b634b27365a52d24128cc9368a0f0a": 3253
+    }
+  },
+  {
+    "folder": "episode_000003",
+    "episode_id": "07ab475a53c340ae8ab656f307a1bb12",
+    "rows": 3109,
+    "duration_s": 103.65122280200012,
+    "request_modes": {
+      "collect": 294
+    },
+    "selected_modes": {
+      "collect": 3099
+    },
+    "unresolved_ticks": 0,
+    "first_nonzero_s": 3.1666737960185856,
+    "nonzero_ticks": 1102,
+    "snapshot_selected_ticks": {
+      "6b8a5670995fb487a2148469e011e60f10b634b27365a52d24128cc9368a0f0a": 3099
+    }
+  },
+  {
+    "folder": "episode_000004",
+    "episode_id": "79579623477e425097ed07e7b8523e9f",
+    "rows": 2505,
+    "duration_s": 83.48685199790634,
+    "request_modes": {
+      "collect": 236
+    },
+    "selected_modes": {
+      "collect": 2495
+    },
+    "unresolved_ticks": 0,
+    "first_nonzero_s": 2.4668734909500927,
+    "nonzero_ticks": 1105,
+    "snapshot_selected_ticks": {
+      "6b8a5670995fb487a2148469e011e60f10b634b27365a52d24128cc9368a0f0a": 2495
+    }
+  },
+  {
+    "folder": "episode_000005",
+    "episode_id": "5d35f7feeadc412c9a6cd598cbb226ff",
+    "rows": 4368,
+    "duration_s": 145.59233163995668,
+    "request_modes": {
+      "collect": 414
+    },
+    "selected_modes": {
+      "collect": 4358
+    },
+    "unresolved_ticks": 0,
+    "first_nonzero_s": 2.4666647610720247,
+    "nonzero_ticks": 1992,
+    "snapshot_selected_ticks": {
+      "6b8a5670995fb487a2148469e011e60f10b634b27365a52d24128cc9368a0f0a": 4358
+    }
+  },
+  {
+    "folder": "episode_000007",
+    "episode_id": "c95b291737cf4176b45c3d48cae778a8",
+    "rows": 1873,
+    "duration_s": 62.400104173924774,
+    "request_modes": {
+      "collect": 177
+    },
+    "selected_modes": {
+      "collect": 1863
+    },
+    "unresolved_ticks": 0,
+    "first_nonzero_s": 2.7675111019052565,
+    "nonzero_ticks": 768,
+    "snapshot_selected_ticks": {
+      "6b8a5670995fb487a2148469e011e60f10b634b27365a52d24128cc9368a0f0a": 1863
+    }
+  },
+  {
+    "folder": "episode_000008",
+    "episode_id": "88678929904348d09316f356e61bf6de",
+    "rows": 1703,
+    "duration_s": 56.73333814693615,
+    "request_modes": {
+      "collect": 161
+    },
+    "selected_modes": {
+      "collect": 1693
+    },
+    "unresolved_ticks": 0,
+    "first_nonzero_s": 2.100320220924914,
+    "nonzero_ticks": 703,
+    "snapshot_selected_ticks": {
+      "6b8a5670995fb487a2148469e011e60f10b634b27365a52d24128cc9368a0f0a": 1693
+    }
+  },
+  {
+    "folder": "episode_000009",
+    "episode_id": "dcd3bfbea4a6480485ac77def7e77b1e",
+    "rows": 2246,
+    "duration_s": 74.83333709998988,
+    "request_modes": {
+      "collect": 213
+    },
+    "selected_modes": {
+      "collect": 2236
+    },
+    "unresolved_ticks": 0,
+    "first_nonzero_s": 2.0666729318909347,
+    "nonzero_ticks": 919,
+    "snapshot_selected_ticks": {
+      "6b8a5670995fb487a2148469e011e60f10b634b27365a52d24128cc9368a0f0a": 2236
+    }
+  }
+]
