@@ -36,9 +36,9 @@ def main():
     def step(name, script, argv, *, gpu=False, image=CPU_IMAGE):
         if gpu:
             offline_gpu()
-        command = ["docker", "run", "--name", "pld-closing8-" + name + "-r06",
+        command = ["docker", "run", "--name", "pld-reward-" + root.name[:36] + "-" + name + "-" + source[:8],
                    "--restart", "no", "--network", "none", "--read-only", "--cpus", "4",
-                   "--memory", "24g" if gpu else "8g", "--shm-size", "1g",
+                   "--memory", "48g" if gpu else "8g", "--shm-size", "1g",
                    "--user", f"{os.getuid()}:{os.getgid()}",
                    "--tmpfs", "/tmp:rw,nosuid,nodev,size=2g",
                    "-e", "PYTHONDONTWRITEBYTECODE=1", "-e", "OPENBLAS_NUM_THREADS=1",

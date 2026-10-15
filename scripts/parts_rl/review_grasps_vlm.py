@@ -223,7 +223,7 @@ def main():
                 "candidates": len(candidates),
                 "processed_this_run": len(pending),
                 "script_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
-                "prompt": SNAPSHOT_PROMPT if args.snapshot_check else PROMPT,
+                "prompt": prompt,
                 "tracking": False,
                 "training_executed": False,
             },
