@@ -1,0 +1,156 @@
+[
+  {
+    "folder": "episode_000001",
+    "episode_id": "b16b12c06ec645bea449d691dfb59dc7",
+    "rows": 7569,
+    "duration_s": 252.3504013081547,
+    "selected_ticks": 7559,
+    "selected_modes": {
+      "collect": 7559
+    },
+    "unresolved_ticks": 0,
+    "first_policy_s": 0.33333716611377895,
+    "first_active_gate_s": 2.8000258621759713,
+    "first_nonzero_selected_s": 2.8000258621759713,
+    "nonzero_selected_ticks": 1911,
+    "mode_changes": [
+      {
+        "at_s": 0.33333716611377895,
+        "mode": "collect",
+        "source_line": 2
+      }
+    ]
+  },
+  {
+    "folder": "episode_000002",
+    "episode_id": "205a6812f9ab463eba899b0e186781b5",
+    "rows": 3263,
+    "duration_s": 108.77524885209277,
+    "selected_ticks": 3253,
+    "selected_modes": {
+      "collect": 3253
+    },
+    "unresolved_ticks": 0,
+    "first_policy_s": 0.33336473209783435,
+    "first_active_gate_s": 1.4000192240346223,
+    "first_nonzero_selected_s": 5.266822278965265,
+    "nonzero_selected_ticks": 1416,
+    "mode_changes": [
+      {
+        "at_s": 0.33336473209783435,
+        "mode": "collect",
+        "source_line": 1438
+      }
+    ]
+  },
+  {
+    "folder": "episode_000003",
+    "episode_id": "07ab475a53c340ae8ab656f307a1bb12",
+    "rows": 3109,
+    "duration_s": 103.65122280200012,
+    "selected_ticks": 3099,
+    "selected_modes": {
+      "collect": 3099
+    },
+    "unresolved_ticks": 0,
+    "first_policy_s": 0.3333769468590617,
+    "first_active_gate_s": 3.1666737960185856,
+    "first_nonzero_selected_s": 3.1666737960185856,
+    "nonzero_selected_ticks": 1102,
+    "mode_changes": [
+      {
+        "at_s": 0.3333769468590617,
+        "mode": "collect",
+        "source_line": 2055
+      }
+    ]
+  },
+  {
+    "folder": "episode_000004",
+    "episode_id": "79579623477e425097ed07e7b8523e9f",
+    "rows": 2505,
+    "duration_s": 83.48685199790634,
+    "selected_ticks": 2495,
+    "selected_modes": {
+      "collect": 2495
+    },
+    "unresolved_ticks": 0,
+    "first_policy_s": 0.3333336650393903,
+    "first_active_gate_s": 2.4668734909500927,
+    "first_nonzero_selected_s": 2.4668734909500927,
+    "nonzero_selected_ticks": 1105,
+    "mode_changes": [
+      {
+        "at_s": 0.3333336650393903,
+        "mode": "collect",
+        "source_line": 2644
+      }
+    ]
+  },
+  {
+    "folder": "episode_000005",
+    "episode_id": "5d35f7feeadc412c9a6cd598cbb226ff",
+    "rows": 4368,
+    "duration_s": 145.59233163995668,
+    "selected_ticks": 4358,
+    "selected_modes": {
+      "collect": 4358
+    },
+    "unresolved_ticks": 0,
+    "first_policy_s": 0.333325486863032,
+    "first_active_gate_s": 2.4666647610720247,
+    "first_nonzero_selected_s": 2.4666647610720247,
+    "nonzero_selected_ticks": 1992,
+    "mode_changes": [
+      {
+        "at_s": 0.333325486863032,
+        "mode": "collect",
+        "source_line": 3117
+      }
+    ]
+  },
+  {
+    "folder": "episode_000007",
+    "episode_id": "c95b291737cf4176b45c3d48cae778a8",
+    "rows": 1873,
+    "duration_s": 62.400104173924774,
+    "selected_ticks": 1863,
+    "selected_modes": {
+      "collect": 1863
+    },
+    "unresolved_ticks": 0,
+    "first_policy_s": 0.3335099220275879,
+    "first_active_gate_s": 2.7675111019052565,
+    "first_nonzero_selected_s": 2.7675111019052565,
+    "nonzero_selected_ticks": 768,
+    "mode_changes": [
+      {
+        "at_s": 0.3335099220275879,
+        "mode": "collect",
+        "source_line": 4585
+      }
+    ]
+  },
+  {
+    "folder": "episode_000008",
+    "episode_id": "88678929904348d09316f356e61bf6de",
+    "rows": 1703,
+    "duration_s": 56.73333814693615,
+    "selected_ticks": 1693,
+    "selected_modes": {
+      "collect": 1693
+    },
+    "unresolved_ticks": 0,
+    "first_policy_s": 0.3333400150295347,
+    "first_active_gate_s": 2.100320220924914,
+    "first_nonzero_selected_s": 2.100320220924914,
+    "nonzero_selected_ticks": 703,
+    "mode_changes": [
+      {
+        "at_s": 0.3333400150295347,
+        "mode": "collect",
+        "source_line": 4940
+      }
+    ]
+  }
+]

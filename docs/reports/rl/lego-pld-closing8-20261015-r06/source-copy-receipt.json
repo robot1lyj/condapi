@@ -1,0 +1,11 @@
+{
+  "status": "verified",
+  "created_unix": 1792045223.6869586,
+  "raw_modified": false,
+  "pre_post_source_hashes_equal": true,
+  "local_hashes_match": true,
+  "episodes": 8,
+  "members": 84,
+  "event_prefix_bytes": 448066800,
+  "event_prefix_sha256": "8a22f8fd44cdc8f899b92b058a213344e21c37918c02f0ba981785eedbdd2b28"
+}

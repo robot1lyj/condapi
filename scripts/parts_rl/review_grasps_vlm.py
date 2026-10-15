@@ -82,7 +82,10 @@ def main():
     p.add_argument("--max-pixels", type=int, default=500000)
     p.add_argument("--output-name", default="vlm-primary")
     p.add_argument("--snapshot-check", action="store_true")
+    p.add_argument("--terminal-hold", action="store_true", help="judge held at the local post-drain endpoint")
     args = p.parse_args()
+    if args.snapshot_check and args.terminal_hold:
+        p.error("choose snapshot classification or terminal holding")
     if platform.machine() != "aarch64":
         p.error("Neural inference must run on Thor")
     from PIL import Image  # noqa: PLC0415
@@ -96,6 +99,12 @@ def main():
     candidates = json.loads((args.dataset / "candidates-prepared.json").read_text())
     candidates = candidates[: args.limit] if args.limit else candidates
     prompt = SNAPSHOT_PROMPT if args.snapshot_check else PROMPT
+    if args.terminal_hold:
+        prompt = prompt.replace(
+            "Normal release over a bin after carrying is still success.",
+            "This is a local grasp-and-hold goal. A success requires the brick to STILL be held in the LAST "
+            "lifted image. Earlier holding followed by an empty last image is failure. All lifted images "
+            "are after queued corrections drained; do not credit later Pi recovery.")
     pending = [c for c in candidates if needs_inference(c, out / (c["candidate_id"] + ".json"), prompt)]
     model = (
         Qwen3VLForConditionalGeneration.from_pretrained(
@@ -119,7 +128,7 @@ def main():
             for c in group:
                 path = args.dataset / c["montage"]
                 assert hashlib.sha256(path.read_bytes()).hexdigest() == c["montage_sha256"]
-                content = [{"type": "text", "text": SNAPSHOT_PROMPT if args.snapshot_check else PROMPT}]
+                content = [{"type": "text", "text": prompt}]
                 if args.snapshot_check:
                     for label in ["held_at_snapshot", "empty_at_snapshot"]:
                         options = [

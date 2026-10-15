@@ -1,0 +1,81 @@
+{
+  "status": "preparing",
+  "user_authorized": "2026-10-15: 用这次的几集开始下一轮; 已停止，可以暂停、训练并升级; 直到做完训练并且测试好",
+  "task_id": "8cac99c3-cca5-4a0c-972d-2bfd72affa8f",
+  "session": "session_20261015_130202_7f8c02",
+  "episodes": [
+    {
+      "folder": "episode_000001",
+      "episode_id": "b16b12c06ec645bea449d691dfb59dc7",
+      "rows": 7569
+    },
+    {
+      "folder": "episode_000002",
+      "episode_id": "205a6812f9ab463eba899b0e186781b5",
+      "rows": 3263
+    },
+    {
+      "folder": "episode_000003",
+      "episode_id": "07ab475a53c340ae8ab656f307a1bb12",
+      "rows": 3109
+    },
+    {
+      "folder": "episode_000004",
+      "episode_id": "79579623477e425097ed07e7b8523e9f",
+      "rows": 2505
+    },
+    {
+      "folder": "episode_000005",
+      "episode_id": "5d35f7feeadc412c9a6cd598cbb226ff",
+      "rows": 4368
+    },
+    {
+      "folder": "episode_000007",
+      "episode_id": "c95b291737cf4176b45c3d48cae778a8",
+      "rows": 1873
+    },
+    {
+      "folder": "episode_000008",
+      "episode_id": "88678929904348d09316f356e61bf6de",
+      "rows": 1703
+    },
+    {
+      "folder": "episode_000009",
+      "episode_id": "dcd3bfbea4a6480485ac77def7e77b1e",
+      "rows": 2246
+    }
+  ],
+  "missing_recording": {
+    "folder": "episode_000006",
+    "episode_id": "b7d9fb75cf654cbe9090026a6234f673",
+    "policy_events_only": true,
+    "train": false
+  },
+  "Pi_steps": 200000,
+  "behavior_snapshot": "6b8a5670995fb487a2148469e011e60f10b634b27365a52d24128cc9368a0f0a",
+  "contract_sha256": "c9de79c34861f713d8c9a575461dcf24950bfaec22e827e0b27e9599dc09d012",
+  "methods": [
+    "parts_td3bc",
+    "iql",
+    "sac",
+    "success_bc_control"
+  ],
+  "seeds": [
+    0,
+    1
+  ],
+  "steps": 3000,
+  "mc_warmup_steps": 1000,
+  "critic_warmup_steps": 2000,
+  "actor_prior_steps": 200,
+  "batch_size": 256,
+  "learning_rate": 0.0003,
+  "width": 256,
+  "depth": 3,
+  "validation_folder": "episode_000001",
+  "reward": "held=1; empty/not_lifted/no_closure/dropped=0 once at verified local endpoint; not frame rewards",
+  "global_C_N_train": false,
+  "old_narrow_contract_replay_mixed": false,
+  "production_replace_only_after": "real replay integrity, checkpoint/geometry audit, candidate Pi+RL/RTC latency smoke and production verification",
+  "training_executed": false
+}
