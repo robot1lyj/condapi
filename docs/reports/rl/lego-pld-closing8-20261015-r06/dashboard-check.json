@@ -1,0 +1,102 @@
+{
+  "status": "passed",
+  "runs": [
+    {
+      "id": "pld-closing8-r06-td3bc-s0",
+      "rows": 60,
+      "last_step": 3000,
+      "invalid_lines": 0
+    },
+    {
+      "id": "pld-closing8-r06-td3bc-s1",
+      "rows": 60,
+      "last_step": 3000,
+      "invalid_lines": 0
+    },
+    {
+      "id": "pld-closing8-r06-iql-s0",
+      "rows": 60,
+      "last_step": 3000,
+      "invalid_lines": 0
+    },
+    {
+      "id": "pld-closing8-r06-iql-s1",
+      "rows": 60,
+      "last_step": 3000,
+      "invalid_lines": 0
+    },
+    {
+      "id": "pld-closing8-r06-sac-s0",
+      "rows": 60,
+      "last_step": 3000,
+      "invalid_lines": 0
+    },
+    {
+      "id": "pld-closing8-r06-sac-s1",
+      "rows": 60,
+      "last_step": 3000,
+      "invalid_lines": 0
+    },
+    {
+      "id": "pld-closing8-r06-bc-s0",
+      "rows": 60,
+      "last_step": 3000,
+      "invalid_lines": 0
+    },
+    {
+      "id": "pld-closing8-r06-bc-s1",
+      "rows": 60,
+      "last_step": 3000,
+      "invalid_lines": 0
+    },
+    {
+      "id": "pld-closing8-r06-compact-td3bc-s0",
+      "rows": 60,
+      "last_step": 3000,
+      "invalid_lines": 0
+    },
+    {
+      "id": "pld-closing8-r06-compact-td3bc-s1",
+      "rows": 60,
+      "last_step": 3000,
+      "invalid_lines": 0
+    },
+    {
+      "id": "pld-closing8-r06-compact-iql-s0",
+      "rows": 60,
+      "last_step": 3000,
+      "invalid_lines": 0
+    },
+    {
+      "id": "pld-closing8-r06-compact-iql-s1",
+      "rows": 60,
+      "last_step": 3000,
+      "invalid_lines": 0
+    },
+    {
+      "id": "pld-closing8-r06-priorstate-td3bc-s0",
+      "rows": 60,
+      "last_step": 3000,
+      "invalid_lines": 0
+    },
+    {
+      "id": "pld-closing8-r06-priorstate-td3bc-s1",
+      "rows": 60,
+      "last_step": 3000,
+      "invalid_lines": 0
+    },
+    {
+      "id": "pld-closing8-r06-priorstate-iql-s0",
+      "rows": 60,
+      "last_step": 3000,
+      "invalid_lines": 0
+    },
+    {
+      "id": "pld-closing8-r06-priorstate-iql-s1",
+      "rows": 60,
+      "last_step": 3000,
+      "invalid_lines": 0
+    }
+  ],
+  "local_training": false
+}

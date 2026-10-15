@@ -1,0 +1,66 @@
+[
+  {
+    "episode": "episode_000001",
+    "rows": 7569,
+    "hil": 0,
+    "invalid_observation": 0,
+    "stop_latched": 0,
+    "device_faults": {}
+  },
+  {
+    "episode": "episode_000002",
+    "rows": 3263,
+    "hil": 0,
+    "invalid_observation": 0,
+    "stop_latched": 0,
+    "device_faults": {}
+  },
+  {
+    "episode": "episode_000003",
+    "rows": 3109,
+    "hil": 0,
+    "invalid_observation": 0,
+    "stop_latched": 0,
+    "device_faults": {}
+  },
+  {
+    "episode": "episode_000004",
+    "rows": 2505,
+    "hil": 0,
+    "invalid_observation": 0,
+    "stop_latched": 0,
+    "device_faults": {}
+  },
+  {
+    "episode": "episode_000005",
+    "rows": 4368,
+    "hil": 0,
+    "invalid_observation": 0,
+    "stop_latched": 0,
+    "device_faults": {}
+  },
+  {
+    "episode": "episode_000007",
+    "rows": 1873,
+    "hil": 0,
+    "invalid_observation": 0,
+    "stop_latched": 0,
+    "device_faults": {}
+  },
+  {
+    "episode": "episode_000008",
+    "rows": 1703,
+    "hil": 0,
+    "invalid_observation": 0,
+    "stop_latched": 0,
+    "device_faults": {}
+  },
+  {
+    "episode": "episode_000009",
+    "rows": 2246,
+    "hil": 0,
+    "invalid_observation": 0,
+    "stop_latched": 0,
+    "device_faults": {}
+  }
+]

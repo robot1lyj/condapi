@@ -34,14 +34,15 @@
         "train/advantage": "IQL平均优势"
       },
       "parameters": {
-        "数据": "新8集/14.8分钟；20w Pi；非对称夹爪0.20闭合/0.05张开",
+        "数据": "新8集/14.8分钟；123可用尝试/458决策；首集20尝试仅开发验证",
         "奖励": "抓起持住1/有证据失败0；整轮C/N仅评估",
         "初始化": "200次Actor-2行为中心坐标对齐；新critic；不混旧窄合同replay",
         "配方": "1000次MC初始化；2000次critic预热；末1000步共500次actor更新",
         "任务指标": "抓起持住率、空抓率、有效抓取尝试数和耗时；整轮C/N仅评估",
-        "状态": "切段/判奖中，尚未开始本轮训练",
+        "状态": "完成3000步及6份检查点审计；未选为本轮现场候选",
         "算法": "td3bc",
-        "价值语义": "SAC为含熵soft Q；其余为奖励回报，MC诊断不可直接混排"
+        "价值语义": "SAC为含熵soft Q；其余为奖励回报，MC诊断不可直接混排",
+        "验证结论": "首集20次开发验证；右臂价值不可靠，未证实真机改善"
       }
     },
     {
@@ -77,14 +78,15 @@
         "train/advantage": "IQL平均优势"
       },
       "parameters": {
-        "数据": "新8集/14.8分钟；20w Pi；非对称夹爪0.20闭合/0.05张开",
+        "数据": "新8集/14.8分钟；123可用尝试/458决策；首集20尝试仅开发验证",
         "奖励": "抓起持住1/有证据失败0；整轮C/N仅评估",
         "初始化": "200次Actor-2行为中心坐标对齐；新critic；不混旧窄合同replay",
         "配方": "1000次MC初始化；2000次critic预热；末1000步共500次actor更新",
         "任务指标": "抓起持住率、空抓率、有效抓取尝试数和耗时；整轮C/N仅评估",
-        "状态": "切段/判奖中，尚未开始本轮训练",
+        "状态": "完成3000步及6份检查点审计；未选为本轮现场候选",
         "算法": "td3bc",
-        "价值语义": "SAC为含熵soft Q；其余为奖励回报，MC诊断不可直接混排"
+        "价值语义": "SAC为含熵soft Q；其余为奖励回报，MC诊断不可直接混排",
+        "验证结论": "首集20次开发验证；右臂价值不可靠，未证实真机改善"
       }
     },
     {
@@ -120,14 +122,15 @@
         "train/advantage": "IQL平均优势"
       },
       "parameters": {
-        "数据": "新8集/14.8分钟；20w Pi；非对称夹爪0.20闭合/0.05张开",
+        "数据": "新8集/14.8分钟；123可用尝试/458决策；首集20尝试仅开发验证",
         "奖励": "抓起持住1/有证据失败0；整轮C/N仅评估",
         "初始化": "200次Actor-2行为中心坐标对齐；新critic；不混旧窄合同replay",
         "配方": "1000次MC初始化；2000次critic预热；末1000步共500次actor更新",
         "任务指标": "抓起持住率、空抓率、有效抓取尝试数和耗时；整轮C/N仅评估",
-        "状态": "切段/判奖中，尚未开始本轮训练",
+        "状态": "训练/工程验收完成；IQL候选容器按用户要求暂停，待真机测试",
         "算法": "iql",
-        "价值语义": "SAC为含熵soft Q；其余为奖励回报，MC诊断不可直接混排"
+        "价值语义": "SAC为含熵soft Q；其余为奖励回报，MC诊断不可直接混排",
+        "验证结论": "首集20次开发验证；右臂价值不可靠，未证实真机改善"
       }
     },
     {
@@ -163,14 +166,15 @@
         "train/advantage": "IQL平均优势"
       },
       "parameters": {
-        "数据": "新8集/14.8分钟；20w Pi；非对称夹爪0.20闭合/0.05张开",
+        "数据": "新8集/14.8分钟；123可用尝试/458决策；首集20尝试仅开发验证",
         "奖励": "抓起持住1/有证据失败0；整轮C/N仅评估",
         "初始化": "200次Actor-2行为中心坐标对齐；新critic；不混旧窄合同replay",
         "配方": "1000次MC初始化；2000次critic预热；末1000步共500次actor更新",
         "任务指标": "抓起持住率、空抓率、有效抓取尝试数和耗时；整轮C/N仅评估",
-        "状态": "切段/判奖中，尚未开始本轮训练",
+        "状态": "完成3000步及6份检查点审计；未选为本轮现场候选",
         "算法": "iql",
-        "价值语义": "SAC为含熵soft Q；其余为奖励回报，MC诊断不可直接混排"
+        "价值语义": "SAC为含熵soft Q；其余为奖励回报，MC诊断不可直接混排",
+        "验证结论": "首集20次开发验证；右臂价值不可靠，未证实真机改善"
       }
     },
     {
@@ -206,14 +210,15 @@
         "train/advantage": "IQL平均优势"
       },
       "parameters": {
-        "数据": "新8集/14.8分钟；20w Pi；非对称夹爪0.20闭合/0.05张开",
+        "数据": "新8集/14.8分钟；123可用尝试/458决策；首集20尝试仅开发验证",
         "奖励": "抓起持住1/有证据失败0；整轮C/N仅评估",
         "初始化": "200次Actor-2行为中心坐标对齐；新critic；不混旧窄合同replay",
         "配方": "1000次MC初始化；2000次critic预热；末1000步共500次actor更新",
         "任务指标": "抓起持住率、空抓率、有效抓取尝试数和耗时；整轮C/N仅评估",
-        "状态": "切段/判奖中，尚未开始本轮训练",
+        "状态": "完成3000步及6份检查点审计；未选为本轮现场候选",
         "算法": "sac",
-        "价值语义": "SAC为含熵soft Q；其余为奖励回报，MC诊断不可直接混排"
+        "价值语义": "SAC为含熵soft Q；其余为奖励回报，MC诊断不可直接混排",
+        "验证结论": "首集20次开发验证；右臂价值不可靠，未证实真机改善"
       }
     },
     {
@@ -249,14 +254,15 @@
         "train/advantage": "IQL平均优势"
       },
       "parameters": {
-        "数据": "新8集/14.8分钟；20w Pi；非对称夹爪0.20闭合/0.05张开",
+        "数据": "新8集/14.8分钟；123可用尝试/458决策；首集20尝试仅开发验证",
         "奖励": "抓起持住1/有证据失败0；整轮C/N仅评估",
         "初始化": "200次Actor-2行为中心坐标对齐；新critic；不混旧窄合同replay",
         "配方": "1000次MC初始化；2000次critic预热；末1000步共500次actor更新",
         "任务指标": "抓起持住率、空抓率、有效抓取尝试数和耗时；整轮C/N仅评估",
-        "状态": "切段/判奖中，尚未开始本轮训练",
+        "状态": "完成3000步及6份检查点审计；未选为本轮现场候选",
         "算法": "sac",
-        "价值语义": "SAC为含熵soft Q；其余为奖励回报，MC诊断不可直接混排"
+        "价值语义": "SAC为含熵soft Q；其余为奖励回报，MC诊断不可直接混排",
+        "验证结论": "首集20次开发验证；右臂价值不可靠，未证实真机改善"
       }
     },
     {
@@ -292,14 +298,15 @@
         "train/advantage": "IQL平均优势"
       },
       "parameters": {
-        "数据": "新8集/14.8分钟；20w Pi；非对称夹爪0.20闭合/0.05张开",
+        "数据": "新8集/14.8分钟；123可用尝试/458决策；首集20尝试仅开发验证",
         "奖励": "抓起持住1/有证据失败0；整轮C/N仅评估",
         "初始化": "200次Actor-2行为中心坐标对齐；新critic；不混旧窄合同replay",
         "配方": "1000次MC初始化；2000次critic预热；末1000步共500次actor更新",
         "任务指标": "抓起持住率、空抓率、有效抓取尝试数和耗时；整轮C/N仅评估",
-        "状态": "切段/判奖中，尚未开始本轮训练",
+        "状态": "完成3000步及6份检查点审计；未选为本轮现场候选",
         "算法": "bc",
-        "价值语义": "SAC为含熵soft Q；其余为奖励回报，MC诊断不可直接混排"
+        "价值语义": "SAC为含熵soft Q；其余为奖励回报，MC诊断不可直接混排",
+        "验证结论": "首集20次开发验证；右臂价值不可靠，未证实真机改善"
       }
     },
     {
@@ -335,14 +342,383 @@
         "train/advantage": "IQL平均优势"
       },
       "parameters": {
-        "数据": "新8集/14.8分钟；20w Pi；非对称夹爪0.20闭合/0.05张开",
+        "数据": "新8集/14.8分钟；123可用尝试/458决策；首集20尝试仅开发验证",
         "奖励": "抓起持住1/有证据失败0；整轮C/N仅评估",
         "初始化": "200次Actor-2行为中心坐标对齐；新critic；不混旧窄合同replay",
         "配方": "1000次MC初始化；2000次critic预热；末1000步共500次actor更新",
         "任务指标": "抓起持住率、空抓率、有效抓取尝试数和耗时；整轮C/N仅评估",
-        "状态": "切段/判奖中，尚未开始本轮训练",
+        "状态": "完成3000步及6份检查点审计；未选为本轮现场候选",
         "算法": "bc",
-        "价值语义": "SAC为含熵soft Q；其余为奖励回报，MC诊断不可直接混排"
+        "价值语义": "SAC为含熵soft Q；其余为奖励回报，MC诊断不可直接混排",
+        "验证结论": "首集20次开发验证；右臂价值不可靠，未证实真机改善"
+      }
+    },
+    {
+      "id": "pld-closing8-r06-compact-td3bc-s0",
+      "name": "pld-closing8-r06-compact-td3bc-s0",
+      "model": "PLD-Grasp / Actor-3 闭合学习",
+      "backend": "Thor PyTorch FP32",
+      "metrics": "../../artifacts/pld-closing8-r06/pld-closing8-r06-compact-td3bc-s0/metrics.jsonl",
+      "batch_size": 256,
+      "stage_steps": 3000,
+      "total_steps": 3000,
+      "save_interval": 500,
+      "metric_labels": {
+        "loss": "双Q训练误差",
+        "val_loss": "第一集Bellman误差",
+        "train/q_abs_max": "Q绝对最大值",
+        "train/q_disagreement": "双Q分歧",
+        "train/actor_loss": "Actor训练目标",
+        "train/success_bc": "成功动作约束",
+        "train/failure_anchor": "失败状态零修正约束",
+        "train/actor_prior_alignment_loss": "Actor-2行为中心坐标对齐误差",
+        "actor_prior_updates": "坐标对齐更新数",
+        "actor_updates": "RL/BC更新数",
+        "train/residual_rms": "归一化目标RMS",
+        "train/residual_saturation": "目标边界饱和比例",
+        "val/entry_both_mc_rmse": "验证入口回报RMSE",
+        "val/entry_both_auc": "验证入口AUC（非成功率）",
+        "val/entry_left_auc": "验证左臂入口AUC",
+        "val/entry_right_auc": "验证右臂入口AUC",
+        "val/all_both_outside_train_marginal_1_99": "验证动作训练边际范围外比例",
+        "train/value_loss": "IQL expectile价值误差",
+        "train/advantage_weight": "IQL平均优势权重",
+        "train/advantage": "IQL平均优势"
+      },
+      "parameters": {
+        "数据": "新8集/14.8分钟；123可用尝试/458决策；首集20尝试仅开发验证",
+        "奖励": "抓起持住1/有证据失败0；整轮C/N仅评估",
+        "初始化": "200次Actor-2行为中心坐标对齐；新critic；不混旧窄合同replay",
+        "配方": "1000次MC初始化；2000次critic预热；末1000步共500次actor更新",
+        "任务指标": "抓起持住率、空抓率、有效抓取尝试数和耗时；整轮C/N仅评估",
+        "状态": "完成3000步及6份检查点审计；未选为本轮现场候选",
+        "算法": "td3bc",
+        "价值语义": "SAC为含熵soft Q；其余为奖励回报，MC诊断不可直接混排",
+        "网络": "64宽×2层",
+        "特征": "保留三视角ResNet18",
+        "验证结论": "首集20次开发验证；右臂价值不可靠，未证实真机改善"
+      }
+    },
+    {
+      "id": "pld-closing8-r06-compact-td3bc-s1",
+      "name": "pld-closing8-r06-compact-td3bc-s1",
+      "model": "PLD-Grasp / Actor-3 闭合学习",
+      "backend": "Thor PyTorch FP32",
+      "metrics": "../../artifacts/pld-closing8-r06/pld-closing8-r06-compact-td3bc-s1/metrics.jsonl",
+      "batch_size": 256,
+      "stage_steps": 3000,
+      "total_steps": 3000,
+      "save_interval": 500,
+      "metric_labels": {
+        "loss": "双Q训练误差",
+        "val_loss": "第一集Bellman误差",
+        "train/q_abs_max": "Q绝对最大值",
+        "train/q_disagreement": "双Q分歧",
+        "train/actor_loss": "Actor训练目标",
+        "train/success_bc": "成功动作约束",
+        "train/failure_anchor": "失败状态零修正约束",
+        "train/actor_prior_alignment_loss": "Actor-2行为中心坐标对齐误差",
+        "actor_prior_updates": "坐标对齐更新数",
+        "actor_updates": "RL/BC更新数",
+        "train/residual_rms": "归一化目标RMS",
+        "train/residual_saturation": "目标边界饱和比例",
+        "val/entry_both_mc_rmse": "验证入口回报RMSE",
+        "val/entry_both_auc": "验证入口AUC（非成功率）",
+        "val/entry_left_auc": "验证左臂入口AUC",
+        "val/entry_right_auc": "验证右臂入口AUC",
+        "val/all_both_outside_train_marginal_1_99": "验证动作训练边际范围外比例",
+        "train/value_loss": "IQL expectile价值误差",
+        "train/advantage_weight": "IQL平均优势权重",
+        "train/advantage": "IQL平均优势"
+      },
+      "parameters": {
+        "数据": "新8集/14.8分钟；123可用尝试/458决策；首集20尝试仅开发验证",
+        "奖励": "抓起持住1/有证据失败0；整轮C/N仅评估",
+        "初始化": "200次Actor-2行为中心坐标对齐；新critic；不混旧窄合同replay",
+        "配方": "1000次MC初始化；2000次critic预热；末1000步共500次actor更新",
+        "任务指标": "抓起持住率、空抓率、有效抓取尝试数和耗时；整轮C/N仅评估",
+        "状态": "完成3000步及6份检查点审计；未选为本轮现场候选",
+        "算法": "td3bc",
+        "价值语义": "SAC为含熵soft Q；其余为奖励回报，MC诊断不可直接混排",
+        "网络": "64宽×2层",
+        "特征": "保留三视角ResNet18",
+        "验证结论": "首集20次开发验证；右臂价值不可靠，未证实真机改善"
+      }
+    },
+    {
+      "id": "pld-closing8-r06-compact-iql-s0",
+      "name": "pld-closing8-r06-compact-iql-s0",
+      "model": "PLD-Grasp / Actor-3 闭合学习",
+      "backend": "Thor PyTorch FP32",
+      "metrics": "../../artifacts/pld-closing8-r06/pld-closing8-r06-compact-iql-s0/metrics.jsonl",
+      "batch_size": 256,
+      "stage_steps": 3000,
+      "total_steps": 3000,
+      "save_interval": 500,
+      "metric_labels": {
+        "loss": "双Q训练误差",
+        "val_loss": "第一集Bellman误差",
+        "train/q_abs_max": "Q绝对最大值",
+        "train/q_disagreement": "双Q分歧",
+        "train/actor_loss": "Actor训练目标",
+        "train/success_bc": "成功动作约束",
+        "train/failure_anchor": "失败状态零修正约束",
+        "train/actor_prior_alignment_loss": "Actor-2行为中心坐标对齐误差",
+        "actor_prior_updates": "坐标对齐更新数",
+        "actor_updates": "RL/BC更新数",
+        "train/residual_rms": "归一化目标RMS",
+        "train/residual_saturation": "目标边界饱和比例",
+        "val/entry_both_mc_rmse": "验证入口回报RMSE",
+        "val/entry_both_auc": "验证入口AUC（非成功率）",
+        "val/entry_left_auc": "验证左臂入口AUC",
+        "val/entry_right_auc": "验证右臂入口AUC",
+        "val/all_both_outside_train_marginal_1_99": "验证动作训练边际范围外比例",
+        "train/value_loss": "IQL expectile价值误差",
+        "train/advantage_weight": "IQL平均优势权重",
+        "train/advantage": "IQL平均优势"
+      },
+      "parameters": {
+        "数据": "新8集/14.8分钟；123可用尝试/458决策；首集20尝试仅开发验证",
+        "奖励": "抓起持住1/有证据失败0；整轮C/N仅评估",
+        "初始化": "200次Actor-2行为中心坐标对齐；新critic；不混旧窄合同replay",
+        "配方": "1000次MC初始化；2000次critic预热；末1000步共500次actor更新",
+        "任务指标": "抓起持住率、空抓率、有效抓取尝试数和耗时；整轮C/N仅评估",
+        "状态": "完成3000步及6份检查点审计；未选为本轮现场候选",
+        "算法": "iql",
+        "价值语义": "SAC为含熵soft Q；其余为奖励回报，MC诊断不可直接混排",
+        "网络": "64宽×2层",
+        "特征": "保留三视角ResNet18",
+        "验证结论": "首集20次开发验证；右臂价值不可靠，未证实真机改善"
+      }
+    },
+    {
+      "id": "pld-closing8-r06-compact-iql-s1",
+      "name": "pld-closing8-r06-compact-iql-s1",
+      "model": "PLD-Grasp / Actor-3 闭合学习",
+      "backend": "Thor PyTorch FP32",
+      "metrics": "../../artifacts/pld-closing8-r06/pld-closing8-r06-compact-iql-s1/metrics.jsonl",
+      "batch_size": 256,
+      "stage_steps": 3000,
+      "total_steps": 3000,
+      "save_interval": 500,
+      "metric_labels": {
+        "loss": "双Q训练误差",
+        "val_loss": "第一集Bellman误差",
+        "train/q_abs_max": "Q绝对最大值",
+        "train/q_disagreement": "双Q分歧",
+        "train/actor_loss": "Actor训练目标",
+        "train/success_bc": "成功动作约束",
+        "train/failure_anchor": "失败状态零修正约束",
+        "train/actor_prior_alignment_loss": "Actor-2行为中心坐标对齐误差",
+        "actor_prior_updates": "坐标对齐更新数",
+        "actor_updates": "RL/BC更新数",
+        "train/residual_rms": "归一化目标RMS",
+        "train/residual_saturation": "目标边界饱和比例",
+        "val/entry_both_mc_rmse": "验证入口回报RMSE",
+        "val/entry_both_auc": "验证入口AUC（非成功率）",
+        "val/entry_left_auc": "验证左臂入口AUC",
+        "val/entry_right_auc": "验证右臂入口AUC",
+        "val/all_both_outside_train_marginal_1_99": "验证动作训练边际范围外比例",
+        "train/value_loss": "IQL expectile价值误差",
+        "train/advantage_weight": "IQL平均优势权重",
+        "train/advantage": "IQL平均优势"
+      },
+      "parameters": {
+        "数据": "新8集/14.8分钟；123可用尝试/458决策；首集20尝试仅开发验证",
+        "奖励": "抓起持住1/有证据失败0；整轮C/N仅评估",
+        "初始化": "200次Actor-2行为中心坐标对齐；新critic；不混旧窄合同replay",
+        "配方": "1000次MC初始化；2000次critic预热；末1000步共500次actor更新",
+        "任务指标": "抓起持住率、空抓率、有效抓取尝试数和耗时；整轮C/N仅评估",
+        "状态": "完成3000步及6份检查点审计；未选为本轮现场候选",
+        "算法": "iql",
+        "价值语义": "SAC为含熵soft Q；其余为奖励回报，MC诊断不可直接混排",
+        "网络": "64宽×2层",
+        "特征": "保留三视角ResNet18",
+        "验证结论": "首集20次开发验证；右臂价值不可靠，未证实真机改善"
+      }
+    },
+    {
+      "id": "pld-closing8-r06-priorstate-td3bc-s0",
+      "name": "pld-closing8-r06-priorstate-td3bc-s0",
+      "model": "PLD-Grasp / Actor-3 闭合学习",
+      "backend": "Thor PyTorch FP32",
+      "metrics": "../../artifacts/pld-closing8-r06/pld-closing8-r06-priorstate-td3bc-s0/metrics.jsonl",
+      "batch_size": 256,
+      "stage_steps": 3000,
+      "total_steps": 3000,
+      "save_interval": 500,
+      "metric_labels": {
+        "loss": "双Q训练误差",
+        "val_loss": "第一集Bellman误差",
+        "train/q_abs_max": "Q绝对最大值",
+        "train/q_disagreement": "双Q分歧",
+        "train/actor_loss": "Actor训练目标",
+        "train/success_bc": "成功动作约束",
+        "train/failure_anchor": "失败状态零修正约束",
+        "train/actor_prior_alignment_loss": "Actor-2行为中心坐标对齐误差",
+        "actor_prior_updates": "坐标对齐更新数",
+        "actor_updates": "RL/BC更新数",
+        "train/residual_rms": "归一化目标RMS",
+        "train/residual_saturation": "目标边界饱和比例",
+        "val/entry_both_mc_rmse": "验证入口回报RMSE",
+        "val/entry_both_auc": "验证入口AUC（非成功率）",
+        "val/entry_left_auc": "验证左臂入口AUC",
+        "val/entry_right_auc": "验证右臂入口AUC",
+        "val/all_both_outside_train_marginal_1_99": "验证动作训练边际范围外比例",
+        "train/value_loss": "IQL expectile价值误差",
+        "train/advantage_weight": "IQL平均优势权重",
+        "train/advantage": "IQL平均优势"
+      },
+      "parameters": {
+        "数据": "新8集/14.8分钟；123可用尝试/458决策；首集20尝试仅开发验证",
+        "奖励": "抓起持住1/有证据失败0；整轮C/N仅评估",
+        "初始化": "200次Actor-2行为中心坐标对齐；新critic；不混旧窄合同replay",
+        "配方": "1000次MC初始化；2000次critic预热；末1000步共500次actor更新",
+        "任务指标": "抓起持住率、空抓率、有效抓取尝试数和耗时；整轮C/N仅评估",
+        "状态": "完成3000步及6份检查点审计；未选为本轮现场候选",
+        "算法": "td3bc",
+        "价值语义": "SAC为含熵soft Q；其余为奖励回报，MC诊断不可直接混排",
+        "网络": "64宽×2层",
+        "特征": "Pi计划/状态为主；原始视觉消融",
+        "验证结论": "首集20次开发验证；右臂价值不可靠，未证实真机改善"
+      }
+    },
+    {
+      "id": "pld-closing8-r06-priorstate-td3bc-s1",
+      "name": "pld-closing8-r06-priorstate-td3bc-s1",
+      "model": "PLD-Grasp / Actor-3 闭合学习",
+      "backend": "Thor PyTorch FP32",
+      "metrics": "../../artifacts/pld-closing8-r06/pld-closing8-r06-priorstate-td3bc-s1/metrics.jsonl",
+      "batch_size": 256,
+      "stage_steps": 3000,
+      "total_steps": 3000,
+      "save_interval": 500,
+      "metric_labels": {
+        "loss": "双Q训练误差",
+        "val_loss": "第一集Bellman误差",
+        "train/q_abs_max": "Q绝对最大值",
+        "train/q_disagreement": "双Q分歧",
+        "train/actor_loss": "Actor训练目标",
+        "train/success_bc": "成功动作约束",
+        "train/failure_anchor": "失败状态零修正约束",
+        "train/actor_prior_alignment_loss": "Actor-2行为中心坐标对齐误差",
+        "actor_prior_updates": "坐标对齐更新数",
+        "actor_updates": "RL/BC更新数",
+        "train/residual_rms": "归一化目标RMS",
+        "train/residual_saturation": "目标边界饱和比例",
+        "val/entry_both_mc_rmse": "验证入口回报RMSE",
+        "val/entry_both_auc": "验证入口AUC（非成功率）",
+        "val/entry_left_auc": "验证左臂入口AUC",
+        "val/entry_right_auc": "验证右臂入口AUC",
+        "val/all_both_outside_train_marginal_1_99": "验证动作训练边际范围外比例",
+        "train/value_loss": "IQL expectile价值误差",
+        "train/advantage_weight": "IQL平均优势权重",
+        "train/advantage": "IQL平均优势"
+      },
+      "parameters": {
+        "数据": "新8集/14.8分钟；123可用尝试/458决策；首集20尝试仅开发验证",
+        "奖励": "抓起持住1/有证据失败0；整轮C/N仅评估",
+        "初始化": "200次Actor-2行为中心坐标对齐；新critic；不混旧窄合同replay",
+        "配方": "1000次MC初始化；2000次critic预热；末1000步共500次actor更新",
+        "任务指标": "抓起持住率、空抓率、有效抓取尝试数和耗时；整轮C/N仅评估",
+        "状态": "完成3000步及6份检查点审计；未选为本轮现场候选",
+        "算法": "td3bc",
+        "价值语义": "SAC为含熵soft Q；其余为奖励回报，MC诊断不可直接混排",
+        "网络": "64宽×2层",
+        "特征": "Pi计划/状态为主；原始视觉消融",
+        "验证结论": "首集20次开发验证；右臂价值不可靠，未证实真机改善"
+      }
+    },
+    {
+      "id": "pld-closing8-r06-priorstate-iql-s0",
+      "name": "pld-closing8-r06-priorstate-iql-s0",
+      "model": "PLD-Grasp / Actor-3 闭合学习",
+      "backend": "Thor PyTorch FP32",
+      "metrics": "../../artifacts/pld-closing8-r06/pld-closing8-r06-priorstate-iql-s0/metrics.jsonl",
+      "batch_size": 256,
+      "stage_steps": 3000,
+      "total_steps": 3000,
+      "save_interval": 500,
+      "metric_labels": {
+        "loss": "双Q训练误差",
+        "val_loss": "第一集Bellman误差",
+        "train/q_abs_max": "Q绝对最大值",
+        "train/q_disagreement": "双Q分歧",
+        "train/actor_loss": "Actor训练目标",
+        "train/success_bc": "成功动作约束",
+        "train/failure_anchor": "失败状态零修正约束",
+        "train/actor_prior_alignment_loss": "Actor-2行为中心坐标对齐误差",
+        "actor_prior_updates": "坐标对齐更新数",
+        "actor_updates": "RL/BC更新数",
+        "train/residual_rms": "归一化目标RMS",
+        "train/residual_saturation": "目标边界饱和比例",
+        "val/entry_both_mc_rmse": "验证入口回报RMSE",
+        "val/entry_both_auc": "验证入口AUC（非成功率）",
+        "val/entry_left_auc": "验证左臂入口AUC",
+        "val/entry_right_auc": "验证右臂入口AUC",
+        "val/all_both_outside_train_marginal_1_99": "验证动作训练边际范围外比例",
+        "train/value_loss": "IQL expectile价值误差",
+        "train/advantage_weight": "IQL平均优势权重",
+        "train/advantage": "IQL平均优势"
+      },
+      "parameters": {
+        "数据": "新8集/14.8分钟；123可用尝试/458决策；首集20尝试仅开发验证",
+        "奖励": "抓起持住1/有证据失败0；整轮C/N仅评估",
+        "初始化": "200次Actor-2行为中心坐标对齐；新critic；不混旧窄合同replay",
+        "配方": "1000次MC初始化；2000次critic预热；末1000步共500次actor更新",
+        "任务指标": "抓起持住率、空抓率、有效抓取尝试数和耗时；整轮C/N仅评估",
+        "状态": "完成3000步及6份检查点审计；未选为本轮现场候选",
+        "算法": "iql",
+        "价值语义": "SAC为含熵soft Q；其余为奖励回报，MC诊断不可直接混排",
+        "网络": "64宽×2层",
+        "特征": "Pi计划/状态为主；原始视觉消融",
+        "验证结论": "首集20次开发验证；右臂价值不可靠，未证实真机改善"
+      }
+    },
+    {
+      "id": "pld-closing8-r06-priorstate-iql-s1",
+      "name": "pld-closing8-r06-priorstate-iql-s1",
+      "model": "PLD-Grasp / Actor-3 闭合学习",
+      "backend": "Thor PyTorch FP32",
+      "metrics": "../../artifacts/pld-closing8-r06/pld-closing8-r06-priorstate-iql-s1/metrics.jsonl",
+      "batch_size": 256,
+      "stage_steps": 3000,
+      "total_steps": 3000,
+      "save_interval": 500,
+      "metric_labels": {
+        "loss": "双Q训练误差",
+        "val_loss": "第一集Bellman误差",
+        "train/q_abs_max": "Q绝对最大值",
+        "train/q_disagreement": "双Q分歧",
+        "train/actor_loss": "Actor训练目标",
+        "train/success_bc": "成功动作约束",
+        "train/failure_anchor": "失败状态零修正约束",
+        "train/actor_prior_alignment_loss": "Actor-2行为中心坐标对齐误差",
+        "actor_prior_updates": "坐标对齐更新数",
+        "actor_updates": "RL/BC更新数",
+        "train/residual_rms": "归一化目标RMS",
+        "train/residual_saturation": "目标边界饱和比例",
+        "val/entry_both_mc_rmse": "验证入口回报RMSE",
+        "val/entry_both_auc": "验证入口AUC（非成功率）",
+        "val/entry_left_auc": "验证左臂入口AUC",
+        "val/entry_right_auc": "验证右臂入口AUC",
+        "val/all_both_outside_train_marginal_1_99": "验证动作训练边际范围外比例",
+        "train/value_loss": "IQL expectile价值误差",
+        "train/advantage_weight": "IQL平均优势权重",
+        "train/advantage": "IQL平均优势"
+      },
+      "parameters": {
+        "数据": "新8集/14.8分钟；123可用尝试/458决策；首集20尝试仅开发验证",
+        "奖励": "抓起持住1/有证据失败0；整轮C/N仅评估",
+        "初始化": "200次Actor-2行为中心坐标对齐；新critic；不混旧窄合同replay",
+        "配方": "1000次MC初始化；2000次critic预热；末1000步共500次actor更新",
+        "任务指标": "抓起持住率、空抓率、有效抓取尝试数和耗时；整轮C/N仅评估",
+        "状态": "完成3000步及6份检查点审计；未选为本轮现场候选",
+        "算法": "iql",
+        "价值语义": "SAC为含熵soft Q；其余为奖励回报，MC诊断不可直接混排",
+        "网络": "64宽×2层",
+        "特征": "Pi计划/状态为主；原始视觉消融",
+        "验证结论": "首集20次开发验证；右臂价值不可靠，未证实真机改善"
       }
     }
   ]

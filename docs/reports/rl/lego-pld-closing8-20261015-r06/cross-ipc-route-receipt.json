@@ -1,0 +1,16 @@
+{
+  "status": "passed",
+  "observed_at": "2026-10-15T07:44:03.291839+00:00",
+  "route": "local ws:18000 -> SSH IPC 10.18.10.9 -> Thor direct Ethernet 192.168.250.1:8000",
+  "ipc_files_or_control_modified": false,
+  "robot_motion": false,
+  "actual_remote_inference": true,
+  "cross_IPC_network_path_tested": true,
+  "producer_report_cross_IPC_tested_field": false,
+  "producer_report_field_note": "Generic producer defaults to local route; this separate receipt records the actual SSH forwarding route.",
+  "report_sha256": "a896ede1d5fe1596f805ba560e5d78ee8db8428be57423a2a66b6ebc5a9e0b04",
+  "wire_sha256": "881030bb67c79103dec57e9ffb4a966e3622c1cfe6db8501886e0c1d19cce17d",
+  "cases": 48,
+  "server_p95_ms": 217.3957041813992,
+  "transport_latency_is_not_production_camera_control_benchmark": true
+}

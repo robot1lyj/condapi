@@ -1,0 +1,15 @@
+{
+  "status": "paused_by_user_pending_robot_test",
+  "observed_at": "2026-10-15T07:44:03.291839+00:00",
+  "user_instruction": "做完先不上线做测试，晚点通知开启；先暂停容器",
+  "container": "pld-rl",
+  "container_id": "514f92c73435418e0f1022d47994a57224ec5065910bc8b38ab0bab11b32a957",
+  "container_running": false,
+  "port_8000_listening": false,
+  "restart_policy": {
+    "Name": "no",
+    "MaximumRetryCount": 0
+  },
+  "new_actor_robot_rollout": false,
+  "resume_only_on_new_user_instruction": true
+}

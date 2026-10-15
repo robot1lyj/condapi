@@ -1,5 +1,5 @@
 {
-  "status": "preparing",
+  "status": "training_and_engineering_tests_complete_container_paused",
   "user_authorized": "2026-10-15: 用这次的几集开始下一轮; 已停止，可以暂停、训练并升级; 直到做完训练并且测试好",
   "task_id": "8cac99c3-cca5-4a0c-972d-2bfd72affa8f",
   "session": "session_20261015_130202_7f8c02",
@@ -73,9 +73,20 @@
   "width": 256,
   "depth": 3,
   "validation_folder": "episode_000001",
-  "reward": "held=1; empty/not_lifted/no_closure/dropped=0 once at verified local endpoint; not frame rewards",
+  "reward": "held=1; evidence-backed empty/not_lifted=0 once at local endpoint; uncertain and reopening-confounded negatives excluded; not frame rewards",
   "global_C_N_train": false,
   "old_narrow_contract_replay_mixed": false,
   "production_replace_only_after": "real replay integrity, checkpoint/geometry audit, candidate Pi+RL/RTC latency smoke and production verification",
-  "training_executed": false
+  "training_executed": true,
+  "completed_runs": 16,
+  "checkpoints_audited": 96,
+  "selected_candidate": "PLD-Grasp Actor-3 / IQL-Closing seed0 step3000",
+  "robot_improvement_verified": false,
+  "value_validation_converged": false,
+  "user_latest_instruction": "先暂停容器，晚点通知开启现场测试",
+  "resume_only_on_new_user_instruction": true,
+  "completed_ablations": [
+    "TD3BC/IQL width64 depth2, seeds0/1",
+    "same compact methods with visual divisor1e6, seeds0/1"
+  ]
 }

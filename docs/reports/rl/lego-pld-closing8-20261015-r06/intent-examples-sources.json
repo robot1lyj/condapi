@@ -1,0 +1,94 @@
+[
+  {
+    "id": "E01-L001-v3",
+    "pictures": [
+      {
+        "row": 236,
+        "view": "top",
+        "t": 0.0,
+        "sha256": "9b28969a6512a10a68af9973ba896cc20fcc0611c0e09e31af7bfacb89b7f15d"
+      },
+      {
+        "row": 236,
+        "view": "left",
+        "t": 0.0,
+        "sha256": "2b4e8e3a0bd4e9649283d43092305773b1d294e84e609a1416266009e692202f"
+      },
+      {
+        "row": 286,
+        "view": "left",
+        "t": 1.6666666666666667,
+        "sha256": "7e38b9459ff3a562595330d2812a57bafd5c9eaef4ba3e049a6960e27a139228"
+      }
+    ]
+  },
+  {
+    "id": "E01-R002-v3",
+    "pictures": [
+      {
+        "row": 375,
+        "view": "top",
+        "t": 0.0,
+        "sha256": "562746b317e0b18dd89889016bebe55a078ba06afab249a241dfa9f8ddd1a2c6"
+      },
+      {
+        "row": 375,
+        "view": "right",
+        "t": 0.0,
+        "sha256": "65576dd87361ed12a37857c99e5ecf8b4c881597cc160454da6b618c7707e03e"
+      },
+      {
+        "row": 435,
+        "view": "right",
+        "t": 2.0,
+        "sha256": "12010c05f96411a414f700f29af284381376970a5207bfaaf83423b9c5f2d37b"
+      }
+    ]
+  },
+  {
+    "id": "E02-L010-v3",
+    "pictures": [
+      {
+        "row": 1333,
+        "view": "top",
+        "t": 0.0,
+        "sha256": "c8ec1c194f90313276233a1363b0e6688e533423610c3f1e0763002eaa503921"
+      },
+      {
+        "row": 1333,
+        "view": "left",
+        "t": 0.0,
+        "sha256": "5e590127e99cdc932ea4d074526689b6743688761202fe1d5a28ddb5df2862dc"
+      },
+      {
+        "row": 1376,
+        "view": "left",
+        "t": 1.4333333333333333,
+        "sha256": "6d44ac630eba209b83ea48c5401ea8d2c17093df2145315a586df1d4fe691b65"
+      }
+    ]
+  },
+  {
+    "id": "E04-R008-v3",
+    "pictures": [
+      {
+        "row": 1715,
+        "view": "top",
+        "t": 0.0,
+        "sha256": "a87e1cfbda7e90ac95ebf537b81af2aa74087c964e9c1ea5f402b9cbe1647a88"
+      },
+      {
+        "row": 1715,
+        "view": "right",
+        "t": 0.0,
+        "sha256": "3fb684b18cd0ae4e023bf39e4b1586bd3ba94eb084578b0a716127b9684c4fce"
+      },
+      {
+        "row": 1750,
+        "view": "right",
+        "t": 1.1666666666666667,
+        "sha256": "6aafc95b13e29359ec8fad45c0b5f3279691f023df301866f97f9947eadc5b53"
+      }
+    ]
+  }
+]

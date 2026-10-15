@@ -2,7 +2,7 @@
 
 ## PLD 主线与 RECAP 后续路线（2026-10-11）
 
-**当前上线（2026-10-14）：** 20w Pi＋Actor-2 Closing-Collect r05，快照6b8a5670…，`pld-rl` healthy/MAXN，Pi7步/quantile RTC/前缀10。actor权重不变，eval逐值保持旧Actor-2；collect关节±0.08rad，夹爪额外闭合0.20/额外张开0.05，相关噪声夹爪std0.7，速度/空间/前缀/放置退出保护不变。863个记录可控上下文×16抽样通过，额外闭合≥0.10占11.28%；这是控制余量，不是成功率。40项CPU录制/Replay检查、独立GPU16例、候选/生产各48例Pi＋专家/9例RTC与生产客户端16包通过，生产P95 218.32ms。用户明确本轮固定20w；暂停前发现的纯24w服务保留停止，旧Actor-2容器也保留。2026-10-15新首集已完成采集工程验收，用户确认保留为本轮第1集、在同数据集后追加9集合计10集；固定20w/collect/前缀10，不切换线上模型。会话session_20261015_130202_7f8c02，UUID b16b12c0…，起始12块、原10/10无效，C/N不入RL。凑齐后再统一判奖和训练；当前未启动本批训练。[首集与追加约定](reports/rl/lego-pld-collect-20261013/continuous/batch10/closing-collect-r05/first-rollout-20261015/README.md)。[候选、实测余量、身份与回退](reports/rl/lego-pld-collect-20261013/continuous/batch10/closing-collect-r05/README.md)。
+**当前轮次（2026-10-15，R06已完成、待现场测试）：** 八集全collect，已按修正后的意图与归因规则发布v2；123次可用尝试/458学习决策，首集20次仅开发验证，其余103次训练，局部1/0，整轮C/N只评估。在Thor完成基础TD3BC/IQL/SAC/成功BC各两seed、小网络及输入消融共16组，96份检查点审计通过，优化器循环合计501秒。右臂价值验证仍弱，小网络和输入消融未解决，不能称收敛；选基础IQL seed0/3000为Actor-3实验候选，不宣称成功率改善。候选/生产完整Pi＋RL48例、普通RTC9例和经IPC直连48例通过，生产P95约217ms。用户随后明确先暂停容器、晚点通知测试；`pld-rl`已停止，8000未监听，未经新通知不启动。20w Pi与旧r05均保留。[完整数据修订、配方、选择与局限](reports/rl/lego-pld-closing8-20261015-r06/README.md)。
 
 **同合同算法实验：** 原10集245尝试/882学习决策，E01仅开发验证17尝试/57决策，其余9集训练。R04在Thor完成TD3BC/SAC/IQL/BC各两seed，48个checkpoint审计通过；IQL离线诊断更有希望，但尚未真机对照，生产没有自动换成IQL。C/N仍仅评估，局部持住1/有证据失败0用于训练。R03与第11集实录归[批次报告](reports/rl/lego-pld-collect-20261013/continuous/batch10/README.md)，R04归[同条件结果](reports/rl/lego-pld-collect-20261013/continuous/batch10/round04/README.md)。
 
