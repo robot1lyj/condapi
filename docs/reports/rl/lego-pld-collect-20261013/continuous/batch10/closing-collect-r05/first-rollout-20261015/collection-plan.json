@@ -1,0 +1,39 @@
+{
+  "schema": "pld_collection_batch_v1",
+  "task_name": "乐高分拣pld-rl第二轮",
+  "task_id": "8cac99c3-cca5-4a0c-972d-2bfd72affa8f",
+  "session": "session_20261015_130202_7f8c02",
+  "source_session_root": "/data/YAM/data/episodes/8cac99c3-cca5-4a0c-972d-2bfd72affa8f/session_20261015_130202_7f8c02",
+  "batch_episode_1": {
+    "folder": "episode_000001",
+    "episode_id": "b16b12c06ec645bea449d691dfb59dc7",
+    "rows": 7569,
+    "duration_s": 252.3504013081547,
+    "initial_count_N": 12,
+    "N_source": "user explicitly confirmed 2026-10-15: 确实是12块，10/10填错了",
+    "raw_C_N": [
+      10,
+      10
+    ],
+    "raw_C_N_valid": false,
+    "correct_C": null,
+    "global_C_N_used_by_RL": false,
+    "engineering_approved_for_batch": true
+  },
+  "target_total_episodes": 10,
+  "additional_episodes_requested": 9,
+  "user_plan_confirmed": "2026-10-15: 这一集你记住，我直接在这个数据集后面追加9集给你",
+  "mode": "collect",
+  "Pi_checkpoint_steps": 200000,
+  "rtc_delay_steps": 10,
+  "snapshot_sha256": "6b8a5670995fb487a2148469e011e60f10b634b27365a52d24128cc9368a0f0a",
+  "contract_sha256": "c9de79c34861f713d8c9a575461dcf24950bfaec22e827e0b27e9599dc09d012",
+  "joint_radius_rad": 0.08,
+  "gripper_extra_close_cap": 0.2,
+  "gripper_extra_open_cap": 0.05,
+  "gripper_latent_std": 0.7,
+  "training_started": false,
+  "local_dataset_root": "/home/wuyan-lyj/condapi-data/rl/lego-pld-closing-collect-20261015-e01-v1",
+  "Thor_dataset_root": "/home/wuyan-lyj/thor/rl-training/datasets/closing-collect-20261015-e01-v1",
+  "pending": "collect next nine, freeze episode identities, run Thor reward labeling then choose recipe/split"
+}

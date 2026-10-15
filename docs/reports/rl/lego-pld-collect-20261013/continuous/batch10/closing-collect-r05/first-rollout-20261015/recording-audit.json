@@ -1,0 +1,331 @@
+{
+  "number": 1,
+  "episode_path": "episode_000001",
+  "episode_id": "b16b12c06ec645bea449d691dfb59dc7",
+  "rows": 7569,
+  "duration_s": 252.3504013081547,
+  "manifest_pld": {
+    "schema": "pld_sac_block_v2",
+    "mode": "collect",
+    "run_id": "cb4171ff1eac44468661f6f57b950e2a",
+    "contract_sha256": "c9de79c34861f713d8c9a575461dcf24950bfaec22e827e0b27e9599dc09d012",
+    "snapshot_sha256": "6b8a5670995fb487a2148469e011e60f10b634b27365a52d24128cc9368a0f0a"
+  },
+  "mode_counts": {
+    "collect": 717
+  },
+  "contract_sha256": [
+    "c9de79c34861f713d8c9a575461dcf24950bfaec22e827e0b27e9599dc09d012"
+  ],
+  "snapshot_sha256": [
+    "6b8a5670995fb487a2148469e011e60f10b634b27365a52d24128cc9368a0f0a"
+  ],
+  "delay_steps": {
+    "10": 717
+  },
+  "human_rows": 0,
+  "invalid_observation_rows": 0,
+  "invalid_submission_rows": 0,
+  "source_counts": {
+    "hold": 10,
+    "policy": 7559
+  },
+  "replies": 717,
+  "accepted_replies": 715,
+  "discarded_replies": [
+    {
+      "token": {
+        "epoch": 3,
+        "request_id": 129,
+        "observation_id": 3351,
+        "created_at": 1481538.454045175,
+        "observed_at": 1481538.392043601,
+        "queue_size_at_request": null,
+        "observation_policy_tick": 3350,
+        "rtc_delay_steps": 10
+      },
+      "error": null,
+      "slack": -1
+    },
+    {
+      "token": {
+        "epoch": 3,
+        "request_id": 717,
+        "observation_id": 9565,
+        "created_at": 1481745.704437382,
+        "observed_at": 1481745.675478477,
+        "queue_size_at_request": null,
+        "observation_policy_tick": 9566,
+        "rtc_delay_steps": 10
+      },
+      "error": null,
+      "slack": 1
+    }
+  ],
+  "cancelled_requests": [
+    [
+      3,
+      "717"
+    ]
+  ],
+  "server_ms": {
+    "p50": 205.27509390376508,
+    "p95": 218.1645777542144,
+    "p99": 219.48902066797018,
+    "max": 222.49786602333188
+  },
+  "worker_ms": {
+    "p50": 244.26526995375752,
+    "p95": 258.6641796864569,
+    "p99": 267.7594702783974,
+    "max": 278.1420380342752
+  },
+  "tracking": {
+    "left": {
+      "p50_error_rad": [
+        0.0015852082237539644,
+        0.0038069875027253453,
+        0.004069104031075854,
+        0.029566020910774538,
+        0.005954147208751426,
+        0.008295502629462326
+      ],
+      "p95_error_rad": [
+        0.03275115158956084,
+        0.05879055567988998,
+        0.07024377207643542,
+        0.06635759840810582,
+        0.0511448333655187,
+        0.06087886173676074
+      ],
+      "measured_range_rad": [
+        1.2230106050202174,
+        2.1808957045853354,
+        2.0027466239414053,
+        1.8471046005951024,
+        0.6271457999542207,
+        1.1058976119630692
+      ],
+      "target_range_rad": [
+        1.2251268058081455,
+        2.190627159894821,
+        2.0263261448900285,
+        1.9578695068748224,
+        0.6835713183091423,
+        1.1714923790462828
+      ],
+      "error_over_0_3rad_runs": [
+        [],
+        [],
+        [],
+        [
+          {
+            "start_row": 3924,
+            "end_row": 3942,
+            "start_s": 130.8520060130395,
+            "end_s": 131.45201245509088,
+            "duration_s": 0.6000064420513809
+          }
+        ],
+        [],
+        []
+      ],
+      "note": "Dynamic tracking error is not itself a hardware-fault diagnosis."
+    },
+    "right": {
+      "p50_error_rad": [
+        0.0027793765980340668,
+        0.005491791412270519,
+        0.0065282701497832996,
+        0.019177420957511404,
+        0.0178226079056273,
+        0.012965882368395798
+      ],
+      "p95_error_rad": [
+        0.043694520160021726,
+        0.08365439865480993,
+        0.10578572360660937,
+        0.06638079874972623,
+        0.06144118457170094,
+        0.05943550309648607
+      ],
+      "measured_range_rad": [
+        1.3675898374914173,
+        2.5501640344853893,
+        2.563134203097581,
+        1.865033951323717,
+        0.4394598306248536,
+        1.0288395513847561
+      ],
+      "target_range_rad": [
+        1.3715434585089188,
+        2.566782807531495,
+        2.5906938578851046,
+        1.9618273156545327,
+        0.626787414406623,
+        1.1051624032163287
+      ],
+      "error_over_0_3rad_runs": [
+        [],
+        [],
+        [],
+        [
+          {
+            "start_row": 3926,
+            "end_row": 3943,
+            "start_s": 130.9186816920992,
+            "end_s": 131.48533702408895,
+            "duration_s": 0.5666553319897503
+          }
+        ],
+        [],
+        []
+      ],
+      "note": "Dynamic tracking error is not itself a hardware-fault diagnosis."
+    }
+  },
+  "missing_action_origins": [],
+  "submission_mismatches": [],
+  "correction_rows": 1911,
+  "correction_rows_by_arm": {
+    "right": 1023,
+    "left": 888
+  },
+  "max_joint_correction_rad": 0.07021852493286133,
+  "max_gripper_correction": 0.16393881058582283,
+  "max_direct_fk_correction_m": 0.04495263984021512,
+  "videos": [
+    {
+      "path": "episode_000001/segment_000000/top.mp4",
+      "frames": 1800,
+      "pts_monotonic": true,
+      "indices_in_range": true
+    },
+    {
+      "path": "episode_000001/segment_000000/left.mp4",
+      "frames": 1800,
+      "pts_monotonic": true,
+      "indices_in_range": true
+    },
+    {
+      "path": "episode_000001/segment_000000/right.mp4",
+      "frames": 1800,
+      "pts_monotonic": true,
+      "indices_in_range": true
+    },
+    {
+      "path": "episode_000001/segment_000001/top.mp4",
+      "frames": 1800,
+      "pts_monotonic": true,
+      "indices_in_range": true
+    },
+    {
+      "path": "episode_000001/segment_000001/left.mp4",
+      "frames": 1800,
+      "pts_monotonic": true,
+      "indices_in_range": true
+    },
+    {
+      "path": "episode_000001/segment_000001/right.mp4",
+      "frames": 1800,
+      "pts_monotonic": true,
+      "indices_in_range": true
+    },
+    {
+      "path": "episode_000001/segment_000002/top.mp4",
+      "frames": 1800,
+      "pts_monotonic": true,
+      "indices_in_range": true
+    },
+    {
+      "path": "episode_000001/segment_000002/left.mp4",
+      "frames": 1800,
+      "pts_monotonic": true,
+      "indices_in_range": true
+    },
+    {
+      "path": "episode_000001/segment_000002/right.mp4",
+      "frames": 1800,
+      "pts_monotonic": true,
+      "indices_in_range": true
+    },
+    {
+      "path": "episode_000001/segment_000003/top.mp4",
+      "frames": 1800,
+      "pts_monotonic": true,
+      "indices_in_range": true
+    },
+    {
+      "path": "episode_000001/segment_000003/left.mp4",
+      "frames": 1800,
+      "pts_monotonic": true,
+      "indices_in_range": true
+    },
+    {
+      "path": "episode_000001/segment_000003/right.mp4",
+      "frames": 1800,
+      "pts_monotonic": true,
+      "indices_in_range": true
+    },
+    {
+      "path": "episode_000001/segment_000004/top.mp4",
+      "frames": 369,
+      "pts_monotonic": true,
+      "indices_in_range": true
+    },
+    {
+      "path": "episode_000001/segment_000004/left.mp4",
+      "frames": 369,
+      "pts_monotonic": true,
+      "indices_in_range": true
+    },
+    {
+      "path": "episode_000001/segment_000004/right.mp4",
+      "frames": 369,
+      "pts_monotonic": true,
+      "indices_in_range": true
+    }
+  ],
+  "raw_evaluation_events": [
+    {
+      "event": "evaluation",
+      "episode_id": "b16b12c06ec645bea449d691dfb59dc7",
+      "time": 1481751.555700681,
+      "details": {
+        "evaluation": {
+          "C": 10,
+          "N": 10,
+          "purpose": "evaluation_only"
+        }
+      },
+      "audit_ref": "/home/wuyan-lyj/condapi-data/rl/lego-pld-closing-collect-20261015-e01-v1/raw-v2/session_20261015_130202_7f8c02/policy_events.jsonl#line=1436"
+    }
+  ],
+  "sources_sha256": {
+    "/home/wuyan-lyj/condapi-data/rl/lego-pld-closing-collect-20261015-e01-v1/raw-v2/session_20261015_130202_7f8c02/episode_000001/manifest.json": "b63f4e59b2e7980cd4d3f873b149c27d7c4fe4c0361391b0ddce0c0323b20be9",
+    "/home/wuyan-lyj/condapi-data/rl/lego-pld-closing-collect-20261015-e01-v1/raw-v2/session_20261015_130202_7f8c02/episode_000001/segment_000000/samples.h5": "fbae161a502ded6d3d285bebd1cf8981936fe16fd90afca446a139d87d832f84",
+    "/home/wuyan-lyj/condapi-data/rl/lego-pld-closing-collect-20261015-e01-v1/raw-v2/session_20261015_130202_7f8c02/episode_000001/segment_000001/samples.h5": "f65742db02231ee2424d22b87c58df471679a9f4a79e614184da2e73b0d019d7",
+    "/home/wuyan-lyj/condapi-data/rl/lego-pld-closing-collect-20261015-e01-v1/raw-v2/session_20261015_130202_7f8c02/episode_000001/segment_000002/samples.h5": "b585434634bdea9b939e5dbecae1f32d4413657761bbbfc12077ba53750769e4",
+    "/home/wuyan-lyj/condapi-data/rl/lego-pld-closing-collect-20261015-e01-v1/raw-v2/session_20261015_130202_7f8c02/episode_000001/segment_000003/samples.h5": "a0a9cbfbe0b67929689fe0531d9192f893c61d434678c24064685616bfa94121",
+    "/home/wuyan-lyj/condapi-data/rl/lego-pld-closing-collect-20261015-e01-v1/raw-v2/session_20261015_130202_7f8c02/episode_000001/segment_000004/samples.h5": "43813f070e4c0b4e1eac5724b0ef5ac9750739e1796827a771f245396149d9e5",
+    "/home/wuyan-lyj/condapi-data/rl/lego-pld-closing-collect-20261015-e01-v1/raw-v2/session_20261015_130202_7f8c02/policy_events.jsonl": "57422d12ac7ad047404f36cf88aa89f4f552998ad81f4f3728085e97637cbe1a",
+    "/home/wuyan-lyj/condapi-data/rl/lego-pld-closing-collect-20261015-e01-v1/raw-v2/session_20261015_130202_7f8c02/episode_000001/segment_000000/left.mp4": "5d8de768cd283af4d662fa0eb1fe5f841baab18eae6ecd332ac147f4a1032845",
+    "/home/wuyan-lyj/condapi-data/rl/lego-pld-closing-collect-20261015-e01-v1/raw-v2/session_20261015_130202_7f8c02/episode_000001/segment_000000/right.mp4": "ff1ceba845f5c6865d7a3a96ddca89bc490653b18a2ad94abbbe1636e445cf49",
+    "/home/wuyan-lyj/condapi-data/rl/lego-pld-closing-collect-20261015-e01-v1/raw-v2/session_20261015_130202_7f8c02/episode_000001/segment_000000/top.mp4": "554641c6bab13c06a2dfbb1e53b92902f7573bb1c9f4321af7f81a37ea59be29",
+    "/home/wuyan-lyj/condapi-data/rl/lego-pld-closing-collect-20261015-e01-v1/raw-v2/session_20261015_130202_7f8c02/episode_000001/segment_000001/left.mp4": "7adac1110b42a464f7aa5e437c03f93efd5b17a2b6628a7f588663204fe0918e",
+    "/home/wuyan-lyj/condapi-data/rl/lego-pld-closing-collect-20261015-e01-v1/raw-v2/session_20261015_130202_7f8c02/episode_000001/segment_000001/right.mp4": "27978e49cdb1961cbe9f7d8ce36f937604b5118fad8659a00526cf56151ddf96",
+    "/home/wuyan-lyj/condapi-data/rl/lego-pld-closing-collect-20261015-e01-v1/raw-v2/session_20261015_130202_7f8c02/episode_000001/segment_000001/top.mp4": "0747dd4084ba4bd2ca4fdde8b5fec2c987444f982f1dbc2a831fb5da2218c8fb",
+    "/home/wuyan-lyj/condapi-data/rl/lego-pld-closing-collect-20261015-e01-v1/raw-v2/session_20261015_130202_7f8c02/episode_000001/segment_000002/left.mp4": "e93ffa680a3cc91aa25df86e49b6add573f17a729528cba1ee34f260d8d2a391",
+    "/home/wuyan-lyj/condapi-data/rl/lego-pld-closing-collect-20261015-e01-v1/raw-v2/session_20261015_130202_7f8c02/episode_000001/segment_000002/right.mp4": "0546dc80bbd1af63f9555461f94157b6616f98e3919f513c79afe5a6532a5757",
+    "/home/wuyan-lyj/condapi-data/rl/lego-pld-closing-collect-20261015-e01-v1/raw-v2/session_20261015_130202_7f8c02/episode_000001/segment_000002/top.mp4": "19e9092c1c7dc4715bbffac6ac451968cbc24c539166a9bd6eab5ade1dc6dd31",
+    "/home/wuyan-lyj/condapi-data/rl/lego-pld-closing-collect-20261015-e01-v1/raw-v2/session_20261015_130202_7f8c02/episode_000001/segment_000003/left.mp4": "61d75e0b4ce0023f42b85918e45f4f29488574def40ae654661fe0e5ade04fab",
+    "/home/wuyan-lyj/condapi-data/rl/lego-pld-closing-collect-20261015-e01-v1/raw-v2/session_20261015_130202_7f8c02/episode_000001/segment_000003/right.mp4": "727d4d05738cd05a3b01a9ec2adad1805993e58eeb8aab1143793d628b1f5caa",
+    "/home/wuyan-lyj/condapi-data/rl/lego-pld-closing-collect-20261015-e01-v1/raw-v2/session_20261015_130202_7f8c02/episode_000001/segment_000003/top.mp4": "09766fc44795dd42abec6511843cd292d4f94ca3f62093877a66b361658f8db6",
+    "/home/wuyan-lyj/condapi-data/rl/lego-pld-closing-collect-20261015-e01-v1/raw-v2/session_20261015_130202_7f8c02/episode_000001/segment_000004/left.mp4": "8c0817976d2d7923d94462589132dbb417e91a6169d3e67831bf3e8618792fd1",
+    "/home/wuyan-lyj/condapi-data/rl/lego-pld-closing-collect-20261015-e01-v1/raw-v2/session_20261015_130202_7f8c02/episode_000001/segment_000004/right.mp4": "12f513b54e53fd4bca636dcc2e6e3e1dcf2554e974ef2a0970e0cf646173d03c",
+    "/home/wuyan-lyj/condapi-data/rl/lego-pld-closing-collect-20261015-e01-v1/raw-v2/session_20261015_130202_7f8c02/episode_000001/segment_000004/top.mp4": "38c15c10d3b332ad1a2b097eaed890c0bfee38045c1fbf5319eeb408b96a96c7"
+  },
+  "training_executed": false,
+  "reward_labels_published": 0,
+  "robot_success_rate": null
+}

@@ -1,0 +1,424 @@
+{
+  "source_root": "/data/YAM/data/episodes/8cac99c3-cca5-4a0c-972d-2bfd72affa8f/session_20261015_130202_7f8c02",
+  "episodes": [
+    {
+      "path": "episode_000001",
+      "manifest": {
+        "station": {
+          "robot": {
+            "type": "yam",
+            "arm_name": "left",
+            "arm_type": "yam",
+            "num_arm_joints": 6,
+            "gripper_type": "linear_4310",
+            "leader_gripper_type": "yam_teaching_handle",
+            "ee_mass": null,
+            "follower_channel": "can_left",
+            "leader_channel": "can_lead_l",
+            "bilateral_kp": 0.0,
+            "leader_joint_signs": null,
+            "leader_gripper": null,
+            "robots": [
+              {
+                "type": "yam_left",
+                "gripper": "linear_4310",
+                "gripper_limits": [
+                  6.9,
+                  1.2289234760051873
+                ],
+                "channel": "can_left",
+                "gripper_force_limit_n": 3.0
+              },
+              {
+                "type": "yam_right",
+                "gripper": "linear_4310",
+                "gripper_limits": [
+                  6.9,
+                  1.2434195468070488
+                ],
+                "channel": "can_right",
+                "gripper_force_limit_n": 3.0
+              }
+            ],
+            "controllers": [
+              {
+                "type": "yam_lead_left",
+                "controls": "yam_left",
+                "joint_signs": null,
+                "channel": "can_lead_l"
+              },
+              {
+                "type": "yam_lead_right",
+                "controls": "yam_right",
+                "joint_signs": null,
+                "channel": "can_lead_r"
+              }
+            ]
+          },
+          "cameras": [
+            {
+              "name": "top",
+              "type": "realsense",
+              "role": "top",
+              "mode": "mono",
+              "serial": "260522275397",
+              "width": 640,
+              "height": 480,
+              "fps": 30,
+              "enable_depth": false
+            },
+            {
+              "name": "left",
+              "type": "realsense",
+              "role": "left",
+              "mode": "mono",
+              "serial": "260522271298",
+              "width": 640,
+              "height": 480,
+              "fps": 30,
+              "enable_depth": false
+            },
+            {
+              "name": "right",
+              "type": "realsense",
+              "role": "right",
+              "mode": "mono",
+              "serial": "260422271123",
+              "width": 640,
+              "height": 480,
+              "fps": 30,
+              "enable_depth": false
+            }
+          ],
+          "control_hz": 30.0,
+          "save_root": "data/episodes",
+          "task_name": "sort the legos into containers by color",
+          "data_format": "default",
+          "deploy_home_pose": null
+        },
+        "mock": false,
+        "rtc": true,
+        "streaming": true,
+        "action_dt": 0.03333333333333333,
+        "policy_fusion": "rtc",
+        "expected_policy_latency": 0.2,
+        "prefetch_margin": 0.067,
+        "operator_task": "sort the legos into containers by color",
+        "task": "sort the legos into containers by color",
+        "collection_task": {
+          "id": "8cac99c3-cca5-4a0c-972d-2bfd72affa8f",
+          "created_at": "2026-10-14T01:46:16.816660+00:00",
+          "name": "乐高分拣pld-rl第二轮",
+          "instruction": "第二轮采集",
+          "task": "sort the legos into containers by color"
+        },
+        "leaders_connected": false,
+        "recording_mode": "standard",
+        "rtc_delay_steps": 10,
+        "hil_input": null,
+        "action_limits": {
+          "lower": [
+            -2.7679899999999997,
+            -0.15000000000000088,
+            -0.15,
+            -1.84297,
+            -1.7207999999999999,
+            -2.2443999999999997,
+            0.02,
+            -2.7679899999999997,
+            -0.15000000000000088,
+            -0.15,
+            -1.84297,
+            -1.7207999999999999,
+            -2.2443999999999997,
+            0.02
+          ],
+          "upper": [
+            3.29159,
+            3.81519,
+            3.29159,
+            1.7207999999999999,
+            1.7207999999999999,
+            2.2443999999999997,
+            0.98,
+            3.29159,
+            3.81519,
+            3.29159,
+            1.7207999999999999,
+            1.7207999999999999,
+            2.2443999999999997,
+            0.98
+          ],
+          "joint_unit": "radian",
+          "gripper_motor_limits_rad": [
+            [
+              6.9,
+              1.2289234760051873
+            ],
+            [
+              6.9,
+              1.2434195468070488
+            ]
+          ],
+          "gripper_unit": "0_closed_1_open",
+          "action_dt_s": 0.03333333333333333,
+          "max_target_step": null,
+          "target_slew_limited": false,
+          "range_implied_max_target_step": [
+            6.0595799999999995,
+            3.9651900000000007,
+            3.4415899999999997,
+            3.56377,
+            3.4415999999999998,
+            4.4887999999999995,
+            0.96,
+            6.0595799999999995,
+            3.9651900000000007,
+            3.4415899999999997,
+            3.56377,
+            3.4415999999999998,
+            4.4887999999999995,
+            0.96
+          ],
+          "command_scope": "normalized_SDK_input_not_internal_force_limiter_motor_target"
+        },
+        "policy_events": "../policy_events.jsonl",
+        "pld": {
+          "schema": "pld_sac_block_v2",
+          "mode": "collect",
+          "run_id": "cb4171ff1eac44468661f6f57b950e2a",
+          "contract_sha256": "c9de79c34861f713d8c9a575461dcf24950bfaec22e827e0b27e9599dc09d012",
+          "snapshot_sha256": "6b8a5670995fb487a2148469e011e60f10b634b27365a52d24128cc9368a0f0a"
+        },
+        "episode_id": "b16b12c06ec645bea449d691dfb59dc7",
+        "collection_mode": "inference",
+        "omitted_intervention_waits": [],
+        "recording_rules_revision": "1ea9d3415af1",
+        "video_encoder": "h264_rkmpp",
+        "schema": "yam_hil_v2",
+        "fps": 30.0,
+        "steps": 7569,
+        "segments": [
+          {
+            "path": "segment_000000",
+            "steps": 1800,
+            "start_frame": 0,
+            "video_frames": {
+              "top": 1800,
+              "left": 1800,
+              "right": 1800
+            },
+            "files": {
+              "left.mp4": {
+                "bytes": 19400749
+              },
+              "right.mp4": {
+                "bytes": 18113994
+              },
+              "top.mp4": {
+                "bytes": 22904071
+              },
+              "samples.h5": {
+                "bytes": 35009912
+              }
+            },
+            "state": "committed"
+          },
+          {
+            "path": "segment_000001",
+            "steps": 1800,
+            "start_frame": 1800,
+            "video_frames": {
+              "top": 1800,
+              "left": 1800,
+              "right": 1800
+            },
+            "files": {
+              "left.mp4": {
+                "bytes": 19261911
+              },
+              "right.mp4": {
+                "bytes": 16816916
+              },
+              "top.mp4": {
+                "bytes": 22155989
+              },
+              "samples.h5": {
+                "bytes": 35018376
+              }
+            },
+            "state": "committed"
+          },
+          {
+            "path": "segment_000002",
+            "steps": 1800,
+            "start_frame": 3600,
+            "video_frames": {
+              "top": 1800,
+              "left": 1800,
+              "right": 1800
+            },
+            "files": {
+              "left.mp4": {
+                "bytes": 22439637
+              },
+              "right.mp4": {
+                "bytes": 17473809
+              },
+              "top.mp4": {
+                "bytes": 17430249
+              },
+              "samples.h5": {
+                "bytes": 27175408
+              }
+            },
+            "state": "committed"
+          },
+          {
+            "path": "segment_000003",
+            "steps": 1800,
+            "start_frame": 5400,
+            "video_frames": {
+              "top": 1800,
+              "left": 1800,
+              "right": 1800
+            },
+            "files": {
+              "left.mp4": {
+                "bytes": 17377205
+              },
+              "right.mp4": {
+                "bytes": 14490815
+              },
+              "top.mp4": {
+                "bytes": 16194201
+              },
+              "samples.h5": {
+                "bytes": 26207928
+              }
+            },
+            "state": "committed"
+          },
+          {
+            "path": "segment_000004",
+            "steps": 369,
+            "start_frame": 7200,
+            "video_frames": {
+              "top": 369,
+              "left": 369,
+              "right": 369
+            },
+            "files": {
+              "left.mp4": {
+                "bytes": 3364760
+              },
+              "right.mp4": {
+                "bytes": 3050475
+              },
+              "top.mp4": {
+                "bytes": 3036801
+              },
+              "samples.h5": {
+                "bytes": 5402895
+              }
+            },
+            "state": "committed"
+          }
+        ],
+        "outcome": "unknown",
+        "episode_success": null,
+        "error": null,
+        "clock": "RK host monotonic; camera arrival alignment",
+        "action_semantics": "absolute submitted follower target after constraints"
+      }
+    }
+  ],
+  "files": {
+    "episode_000001/manifest.json": {
+      "sha256": "b63f4e59b2e7980cd4d3f873b149c27d7c4fe4c0361391b0ddce0c0323b20be9",
+      "bytes": 5355
+    },
+    "episode_000001/segment_000000/samples.h5": {
+      "sha256": "fbae161a502ded6d3d285bebd1cf8981936fe16fd90afca446a139d87d832f84",
+      "bytes": 35009912
+    },
+    "episode_000001/segment_000000/top.mp4": {
+      "sha256": "554641c6bab13c06a2dfbb1e53b92902f7573bb1c9f4321af7f81a37ea59be29",
+      "bytes": 22904071
+    },
+    "episode_000001/segment_000000/left.mp4": {
+      "sha256": "5d8de768cd283af4d662fa0eb1fe5f841baab18eae6ecd332ac147f4a1032845",
+      "bytes": 19400749
+    },
+    "episode_000001/segment_000000/right.mp4": {
+      "sha256": "ff1ceba845f5c6865d7a3a96ddca89bc490653b18a2ad94abbbe1636e445cf49",
+      "bytes": 18113994
+    },
+    "episode_000001/segment_000001/samples.h5": {
+      "sha256": "f65742db02231ee2424d22b87c58df471679a9f4a79e614184da2e73b0d019d7",
+      "bytes": 35018376
+    },
+    "episode_000001/segment_000001/top.mp4": {
+      "sha256": "0747dd4084ba4bd2ca4fdde8b5fec2c987444f982f1dbc2a831fb5da2218c8fb",
+      "bytes": 22155989
+    },
+    "episode_000001/segment_000001/left.mp4": {
+      "sha256": "7adac1110b42a464f7aa5e437c03f93efd5b17a2b6628a7f588663204fe0918e",
+      "bytes": 19261911
+    },
+    "episode_000001/segment_000001/right.mp4": {
+      "sha256": "27978e49cdb1961cbe9f7d8ce36f937604b5118fad8659a00526cf56151ddf96",
+      "bytes": 16816916
+    },
+    "episode_000001/segment_000002/samples.h5": {
+      "sha256": "b585434634bdea9b939e5dbecae1f32d4413657761bbbfc12077ba53750769e4",
+      "bytes": 27175408
+    },
+    "episode_000001/segment_000002/top.mp4": {
+      "sha256": "19e9092c1c7dc4715bbffac6ac451968cbc24c539166a9bd6eab5ade1dc6dd31",
+      "bytes": 17430249
+    },
+    "episode_000001/segment_000002/left.mp4": {
+      "sha256": "e93ffa680a3cc91aa25df86e49b6add573f17a729528cba1ee34f260d8d2a391",
+      "bytes": 22439637
+    },
+    "episode_000001/segment_000002/right.mp4": {
+      "sha256": "0546dc80bbd1af63f9555461f94157b6616f98e3919f513c79afe5a6532a5757",
+      "bytes": 17473809
+    },
+    "episode_000001/segment_000003/samples.h5": {
+      "sha256": "a0a9cbfbe0b67929689fe0531d9192f893c61d434678c24064685616bfa94121",
+      "bytes": 26207928
+    },
+    "episode_000001/segment_000003/top.mp4": {
+      "sha256": "09766fc44795dd42abec6511843cd292d4f94ca3f62093877a66b361658f8db6",
+      "bytes": 16194201
+    },
+    "episode_000001/segment_000003/left.mp4": {
+      "sha256": "61d75e0b4ce0023f42b85918e45f4f29488574def40ae654661fe0e5ade04fab",
+      "bytes": 17377205
+    },
+    "episode_000001/segment_000003/right.mp4": {
+      "sha256": "727d4d05738cd05a3b01a9ec2adad1805993e58eeb8aab1143793d628b1f5caa",
+      "bytes": 14490815
+    },
+    "episode_000001/segment_000004/samples.h5": {
+      "sha256": "43813f070e4c0b4e1eac5724b0ef5ac9750739e1796827a771f245396149d9e5",
+      "bytes": 5402895
+    },
+    "episode_000001/segment_000004/top.mp4": {
+      "sha256": "38c15c10d3b332ad1a2b097eaed890c0bfee38045c1fbf5319eeb408b96a96c7",
+      "bytes": 3036801
+    },
+    "episode_000001/segment_000004/left.mp4": {
+      "sha256": "8c0817976d2d7923d94462589132dbb417e91a6169d3e67831bf3e8618792fd1",
+      "bytes": 3364760
+    },
+    "episode_000001/segment_000004/right.mp4": {
+      "sha256": "12f513b54e53fd4bca636dcc2e6e3e1dcf2554e974ef2a0970e0cf646173d03c",
+      "bytes": 3050475
+    }
+  },
+  "event_prefix_bytes": 102208672,
+  "event_prefix_sha256": "57422d12ac7ad047404f36cf88aa89f4f552998ad81f4f3728085e97637cbe1a"
+}
