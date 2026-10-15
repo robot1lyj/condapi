@@ -27,6 +27,22 @@ def selected_frames(candidate):
     return sorted({f["row"]: f for f in choices}.values(), key=lambda f: f["row"])
 
 
+def parse_decision(raw):
+    decision = json.loads(raw[raw.find("{"):raw.rfind("}")+1])
+    flags = []
+    for key in ("grasp_intent", "held_then_lost"):
+        value = decision[key]
+        if isinstance(value, str) and value in ("true", "false"):
+            decision[key] = value == "true"
+            flags.append(key + "_string_boolean_normalized")
+        elif type(value) is not bool and value != "uncertain":
+            raise ValueError("invalid categorical decision")
+    if decision["confidence"] not in ("high", "medium", "low"):
+        raise ValueError("invalid confidence")
+    decision["format_audit_flags"] = flags
+    return decision
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--dataset", type=Path, required=True)
@@ -86,10 +102,7 @@ def main():
             decoded = processor.batch_decode(generated[:, inp["input_ids"].shape[-1]:], skip_special_tokens=True)
             for c, raw in zip(group, decoded, strict=True):
                 try:
-                    decision = json.loads(raw[raw.find("{"):raw.rfind("}")+1])
-                    if (any(decision[k] not in (True, False, "uncertain") for k in ("grasp_intent", "held_then_lost"))
-                            or decision["confidence"] not in ("high", "medium", "low")):
-                        raise ValueError("invalid categorical decision")
+                    decision = parse_decision(raw)
                     error = None
                 except (ValueError, KeyError) as exc:
                     decision, error = None, str(exc)
