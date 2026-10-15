@@ -1,0 +1,237 @@
+["/bench/serve_pi05_rtc_trt.py","--engine","/artifacts/rtc-50h-240000-trt-tf32-cache80-7step-20261014-r1","--checkpoint","/ckpt","--norm","/ckpt/assets/yam/norm_stats.json","--warmup-sample","/cases/episode-000095-early.npz","--warmup-rtc","/bench/rtc_warmup_d0.json","--host","192.168.250.1","--port","8000","--allow-validated-tf32-7step","--validation","/artifacts/rtc-50h-240000-trt-tf32-cache80-7step-20261014-r1/validation.json","--jax-reference","/artifacts/rtc-50h-240000-jax-quantile-7step-20261014-r1"]
+Clock backup (retained for recovery): /tmp/thor-maxn-xpj2a3fk
+NV Power Mode: 120W
+1
+Storing system configuration in /tmp/thor-maxn-xpj2a3fk/clocks.conf
+NV Power Mode: MAXN
+0
+Enabled Legacy persistence mode for GPU 00000000:01:00.0.
+All done.
+SOC family:tegra264  Machine:NVIDIA Jetson AGX Thor Developer Kit
+Online CPUs: 0-13, Offline CPUs:
+cpu0:  Governor=schedutil MinFreq=2601000 MaxFreq=2601000 CurrentFreq=2601000 IdleStates: WFI=0 cc7=0
+cpu1:  Governor=schedutil MinFreq=2601000 MaxFreq=2601000 CurrentFreq=2601000 IdleStates: WFI=0 cc7=0
+cpu2:  Governor=schedutil MinFreq=2601000 MaxFreq=2601000 CurrentFreq=2601000 IdleStates: WFI=0 cc7=0
+cpu3:  Governor=schedutil MinFreq=2601000 MaxFreq=2601000 CurrentFreq=2601000 IdleStates: WFI=0 cc7=0
+cpu4:  Governor=schedutil MinFreq=2601000 MaxFreq=2601000 CurrentFreq=2601000 IdleStates: WFI=0 cc7=0
+cpu5:  Governor=schedutil MinFreq=2601000 MaxFreq=2601000 CurrentFreq=2601000 IdleStates: WFI=0 cc7=0
+cpu6:  Governor=schedutil MinFreq=2601000 MaxFreq=2601000 CurrentFreq=2601000 IdleStates: WFI=0 cc7=0
+cpu7:  Governor=schedutil MinFreq=2601000 MaxFreq=2601000 CurrentFreq=2601000 IdleStates: WFI=0 cc7=0
+cpu8:  Governor=schedutil MinFreq=2601000 MaxFreq=2601000 CurrentFreq=2601000 IdleStates: WFI=0 cc7=0
+cpu9:  Governor=schedutil MinFreq=2601000 MaxFreq=2601000 CurrentFreq=2601000 IdleStates: WFI=0 cc7=0
+cpu10: Governor=schedutil MinFreq=2601000 MaxFreq=2601000 CurrentFreq=2601000 IdleStates: WFI=0 cc7=0
+cpu11: Governor=schedutil MinFreq=2601000 MaxFreq=2601000 CurrentFreq=2601000 IdleStates: WFI=0 cc7=0
+cpu12: Governor=schedutil MinFreq=2601000 MaxFreq=2601000 CurrentFreq=2601000 IdleStates: WFI=0 cc7=0
+cpu13: Governor=schedutil MinFreq=2601000 MaxFreq=2601000 CurrentFreq=2601000 IdleStates: WFI=0 cc7=0
+gpu-gpc-0 MinFreq=1575000000 MaxFreq=1575000000 CurrentFreq=1575000000
+gpu-nvd-0 MinFreq=1692000000 MaxFreq=1692000000 CurrentFreq=1692000000
+EMC MinFreq=4266000000 MaxFreq=4266000000 CurrentFreq=4266000000
+PVA0_VPS0: Online=0 MinFreq=0 MaxFreq=1215000000 CurrentFreq=1215000000
+PVA0_AXI:  Online=0 MinFreq=0 MaxFreq=909000000 CurrentFreq=909000000
+FAN Dynamic Speed Control=nvfancontrol hwmon1_pwm1=77
+FAN Dynamic Speed Control=nvfancontrol hwmon1_pwm1_enable=1
+NV Power Mode: MAXN
+PHASE_JAX_REFERENCE
+E1015 07:49:29.424614      56 cuda_executor.cc:1526] Could not get kernel mode driver version: ( INVALID_ARGUMENT: Version does not match the format X.Y.Z )
+E1015 07:49:29.438454       1 cuda_executor.cc:1526] Could not get kernel mode driver version: ( INVALID_ARGUMENT: Version does not match the format X.Y.Z )
+WARNING:absl:Metadata file does not exist: /checkpoints/7000/params/_CHECKPOINT_METADATA
+PHASE_TORCH_ONNX
+W1015 07:50:27.854000 1 torch/utils/_pytree.py:630] <enum 'KernelPreference'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+/usr/lib/python3.12/copyreg.py:99: FutureWarning: `isinstance(treespec, LeafSpec)` is deprecated, use `isinstance(treespec, TreeSpec) and treespec.is_leaf()` instead.
+  return cls.__new__(cls, *args)
+[torch.onnx] Obtain model graph for `Pi05RtcOnnxSampler([...]` with `torch.export.export(..., strict=False)`...
+[torch.onnx] Obtain model graph for `Pi05RtcOnnxSampler([...]` with `torch.export.export(..., strict=False)`... ✅
+[torch.onnx] Run decompositions...
+[torch.onnx] Run decompositions... ✅
+[torch.onnx] Translate the graph into ONNX...
+[torch.onnx] Translate the graph into ONNX... ✅
+[torch.onnx] Optimize the ONNX graph...
+[torch.onnx] Optimize the ONNX graph... ✅
+[torch.onnx] Export report has been saved to '/artifacts/rtc-separation-r1-7000-onnx-fp32-cache80-7step-20261015-r2/diagnostics/onnx_export_2026-10-15_07-52-19-940077_success.md'.
+PHASE_TENSORRT_BUILD
+&&&& RUNNING TensorRT.trtexec [TensorRT v101601] [b11] # /usr/src/tensorrt/bin/trtexec --onnx=/artifacts/rtc-separation-r1-7000-onnx-fp32-cache80-7step-20261015-r2/sampler.onnx --saveEngine=/artifacts/rtc-separation-r1-7000-trt-tf32-cache80-7step-20261015-r2/sampler.engine --stronglyTyped --skipInference --builderOptimizationLevel=3 --maxAuxStreams=0 --memPoolSize=workspace:8192 --profilingVerbosity=detailed --exportLayerInfo=/artifacts/rtc-separation-r1-7000-trt-tf32-cache80-7step-20261015-r2/layers.json --timingCacheFile=/artifacts/rtc-separation-r1-7000-trt-tf32-cache80-7step-20261015-r2/timing.cache
+[10/15/2026-08:00:09] [I] === Model Options ===
+[10/15/2026-08:00:09] [I] Format: ONNX
+[10/15/2026-08:00:09] [I] Model: /artifacts/rtc-separation-r1-7000-onnx-fp32-cache80-7step-20261015-r2/sampler.onnx
+[10/15/2026-08:00:09] [I] Output:
+[10/15/2026-08:00:09] [I] === Build Options ===
+[10/15/2026-08:00:09] [I] Memory Pools: workspace: 8192 MiB, dlaSRAM: default, dlaLocalDRAM: default, dlaGlobalDRAM: default, tacticSharedMem: default
+[10/15/2026-08:00:09] [I] avgTiming: 8
+[10/15/2026-08:00:09] [I] Precision: Strongly Typed
+[10/15/2026-08:00:09] [I] LayerPrecisions:
+[10/15/2026-08:00:09] [I] Layer Device Types:
+[10/15/2026-08:00:09] [I] Decomposable Attentions:
+[10/15/2026-08:00:09] [I] Calibration:
+[10/15/2026-08:00:09] [I] Refit: Disabled
+[10/15/2026-08:00:09] [I] Strip weights: Disabled
+[10/15/2026-08:00:09] [I] Version Compatible: Disabled
+[10/15/2026-08:00:09] [I] ONNX Plugin InstanceNorm: Disabled
+[10/15/2026-08:00:09] [I] ONNX kENABLE_UINT8_AND_ASYMMETRIC_QUANTIZATION_DLA flag: Disabled
+[10/15/2026-08:00:09] [I] ONNX kREPORT_CAPABILITY_DLA flag: Disabled
+[10/15/2026-08:00:09] [I] ONNX kADJUST_FOR_DLA flag: Disabled
+[10/15/2026-08:00:09] [I] ONNX kENABLE_PLUGIN_OVERRIDE flag: Disabled
+[10/15/2026-08:00:09] [I] TensorRT runtime: full
+[10/15/2026-08:00:09] [I] Lean DLL Path:
+[10/15/2026-08:00:09] [I] Tempfile Controls: { in_memory: allow, temporary: allow }
+[10/15/2026-08:00:09] [I] Exclude Lean Runtime: Disabled
+[10/15/2026-08:00:09] [I] Sparsity: Disabled
+[10/15/2026-08:00:09] [I] Safe mode: Disabled
+[10/15/2026-08:00:09] [I] Build DLA standalone loadable: Disabled
+[10/15/2026-08:00:09] [I] Allow GPU fallback for DLA: Disabled
+[10/15/2026-08:00:09] [I] DirectIO mode: Disabled
+[10/15/2026-08:00:09] [I] Restricted mode: Disabled
+[10/15/2026-08:00:09] [I] Skip inference: Enabled
+[10/15/2026-08:00:09] [I] Save engine: /artifacts/rtc-separation-r1-7000-trt-tf32-cache80-7step-20261015-r2/sampler.engine
+[10/15/2026-08:00:09] [I] Load engine:
+[10/15/2026-08:00:09] [I] Profiling verbosity: 2
+[10/15/2026-08:00:09] [I] Tactic sources: Using default tactic sources
+[10/15/2026-08:00:09] [I] timingCacheMode: global
+[10/15/2026-08:00:09] [I] timingCacheFile: /artifacts/rtc-separation-r1-7000-trt-tf32-cache80-7step-20261015-r2/timing.cache
+[10/15/2026-08:00:09] [I] Enable Compilation Cache: Enabled
+[10/15/2026-08:00:09] [I] Enable Monitor Memory: Disabled
+[10/15/2026-08:00:09] [I] CPU Only Mode: Disabled
+[10/15/2026-08:00:09] [I] errorOnTimingCacheMiss: Disabled
+[10/15/2026-08:00:09] [I] Preview Features: Use default preview flags.
+[10/15/2026-08:00:09] [I] MaxAuxStreams: 0
+[10/15/2026-08:00:09] [I] BuilderOptimizationLevel: 3
+[10/15/2026-08:00:09] [I] MaxTactics: -1
+[10/15/2026-08:00:09] [I] Calibration Profile Index: 0
+[10/15/2026-08:00:09] [I] Weight Streaming: Disabled
+[10/15/2026-08:00:09] [I] Runtime Platform: Same As Build
+[10/15/2026-08:00:09] [I] Debug Tensors:
+[10/15/2026-08:00:09] [I] Distributive Independence: Disabled
+[10/15/2026-08:00:09] [I] Mark Unfused Tensors As Debug Tensors: Disabled
+[10/15/2026-08:00:09] [I] Input(s)s format: fp32:CHW
+[10/15/2026-08:00:09] [I] Output(s)s format: fp32:CHW
+[10/15/2026-08:00:09] [I] Input build shapes: model
+[10/15/2026-08:00:09] [I] Input calibration shapes: model
+[10/15/2026-08:00:09] [I] === System Options ===
+[10/15/2026-08:00:09] [I] Device: 0
+[10/15/2026-08:00:09] [I] DLACore:
+[10/15/2026-08:00:09] [I] Loaded static plugins:
+[10/15/2026-08:00:09] [I] setPluginsToSerialize:
+[10/15/2026-08:00:09] [I] dynamicPlugins:
+[10/15/2026-08:00:09] [I] ignoreParsedPluginLibs: 0
+[10/15/2026-08:00:09] [I]
+[10/15/2026-08:00:09] [I] === Inference Options ===
+[10/15/2026-08:00:09] [I] Batch: Explicit
+[10/15/2026-08:00:09] [I] Input inference shapes: model
+[10/15/2026-08:00:09] [I] Iterations: 10
+[10/15/2026-08:00:09] [I] Duration: 3s (+ 200ms warm up)
+[10/15/2026-08:00:09] [I] Sleep time: 0ms
+[10/15/2026-08:00:09] [I] Idle time: 0ms
+[10/15/2026-08:00:09] [I] Inference Streams: 1
+[10/15/2026-08:00:09] [I] ExposeDMA: Disabled
+[10/15/2026-08:00:09] [I] Data transfers: Enabled
+[10/15/2026-08:00:09] [I] Spin-wait: Disabled
+[10/15/2026-08:00:09] [I] Multithreading: Disabled
+[10/15/2026-08:00:09] [I] CUDA Graph: Disabled
+[10/15/2026-08:00:09] [I] Separate profiling: Disabled
+[10/15/2026-08:00:09] [I] Time Deserialize: Disabled
+[10/15/2026-08:00:09] [I] Time Refit: Disabled
+[10/15/2026-08:00:09] [I] NVTX verbosity: 2
+[10/15/2026-08:00:09] [I] Persistent Cache Ratio: 0
+[10/15/2026-08:00:09] [I] Optimization Profile Index: 0
+[10/15/2026-08:00:09] [I] Weight Streaming Budget: 100.000000%
+[10/15/2026-08:00:09] [I] Inputs:
+[10/15/2026-08:00:09] [I] Debug Tensor Save Destinations:
+[10/15/2026-08:00:09] [I] Dump All Debug Tensor in Formats:
+[10/15/2026-08:00:09] [I] === Reporting Options ===
+[10/15/2026-08:00:09] [I] Verbose: Disabled
+[10/15/2026-08:00:09] [I] Averages: 10 inferences
+[10/15/2026-08:00:09] [I] Percentiles: 90,95,99
+[10/15/2026-08:00:09] [I] Dump refittable layers:Disabled
+[10/15/2026-08:00:09] [I] Dump output: Disabled
+[10/15/2026-08:00:09] [I] Profile: Disabled
+[10/15/2026-08:00:09] [I] Export timing to JSON file:
+[10/15/2026-08:00:09] [I] Export output to JSON file:
+[10/15/2026-08:00:09] [I] Export profile to JSON file:
+[10/15/2026-08:00:09] [I]
+[10/15/2026-08:00:09] [I] === Device Information ===
+[10/15/2026-08:00:09] [I] Available Devices:
+[10/15/2026-08:00:09] [I]   Device 0: "NVIDIA Thor" UUID: GPU-a7c66ad2-6dbb-0ab8-c1a2-37ba6dba3600
+[10/15/2026-08:00:09] [I] Selected Device: NVIDIA Thor
+[10/15/2026-08:00:09] [I] Selected Device ID: 0
+[10/15/2026-08:00:09] [I] Selected Device UUID: GPU-a7c66ad2-6dbb-0ab8-c1a2-37ba6dba3600
+[10/15/2026-08:00:09] [I] Compute Capability: 11.0
+[10/15/2026-08:00:09] [I] SMs: 20
+[10/15/2026-08:00:09] [I] Device Global Memory: 125748 MiB
+[10/15/2026-08:00:09] [I] Shared Memory per SM: 228 KiB
+[10/15/2026-08:00:09] [I] Memory Bus Width: 256 bits (ECC disabled)
+[10/15/2026-08:00:09] [I] Application Compute Clock Rate: 1.04858 GHz
+[10/15/2026-08:00:09] [I] Application Memory Clock Rate: 4.266 GHz
+[10/15/2026-08:00:09] [I]
+[10/15/2026-08:00:09] [I] Note: The application clock rates do not reflect the actual clock rates that the GPU is currently running at.
+[10/15/2026-08:00:09] [I]
+[10/15/2026-08:00:09] [I] TensorRT version: 10.16.1
+[10/15/2026-08:00:09] [I] Loading standard plugins
+[10/15/2026-08:00:09] [I] [TRT] [MemUsageChange] Init CUDA: CPU +0, GPU +0, now: CPU 29, GPU 93592 (MiB)
+[10/15/2026-08:00:09] [I] Start parsing network model.
+[10/15/2026-08:00:09] [I] [TRT] ----------------------------------------------------------------
+[10/15/2026-08:00:09] [I] [TRT] Input filename:   /artifacts/rtc-separation-r1-7000-onnx-fp32-cache80-7step-20261015-r2/sampler.onnx
+[10/15/2026-08:00:09] [I] [TRT] ONNX IR version:  0.0.10
+[10/15/2026-08:00:09] [I] [TRT] Opset version:    19
+[10/15/2026-08:00:09] [I] [TRT] Producer name:    pytorch
+[10/15/2026-08:00:09] [I] [TRT] Producer version: 2.12.0a0+5aff3928d8.nv26.05
+[10/15/2026-08:00:09] [I] [TRT] Domain:
+[10/15/2026-08:00:09] [I] [TRT] Model version:    0
+[10/15/2026-08:00:09] [I] [TRT] Doc string:
+[10/15/2026-08:00:09] [I] [TRT] ----------------------------------------------------------------
+[10/15/2026-08:00:09] [W] [TRT] ModelImporter.cpp:739: Make sure input lang_tokens has Int64 binding.
+[10/15/2026-08:00:10] [I] Finished parsing network model. Parse time: 0.518008
+[10/15/2026-08:00:10] [W] [TRT] Could not read cache from: /artifacts/rtc-separation-r1-7000-trt-tf32-cache80-7step-20261015-r2/timing.cache. A new cache will be generated and written.
+[10/15/2026-08:00:10] [I] [TRT] [MemUsageChange] Init builder kernel library: CPU +303, GPU +568, now: CPU 736, GPU 94584 (MiB)
+[10/15/2026-08:00:11] [W] [TRT] Unused Input: state
+[10/15/2026-08:00:12] [W] [TRT] [RemoveDeadLayers] Input Tensor state is unused or used only at compile-time, but is not being removed.
+[10/15/2026-08:00:12] [I] [TRT] Global timing cache in use. Profiling results in this builder pass will be stored.
+[10/15/2026-08:00:17] [I] [TRT] Compiler backend is used during engine build.
+[10/15/2026-08:03:27] [I] [TRT] Detected 8 inputs and 1 output network tensors.
+[10/15/2026-08:03:29] [I] [TRT] Total Host Persistent Memory: 80 bytes
+[10/15/2026-08:03:29] [I] [TRT] Total Device Persistent Memory: 0 bytes
+[10/15/2026-08:03:29] [I] [TRT] Max Scratch Memory: 231111680 bytes
+[10/15/2026-08:03:29] [I] [TRT] [BlockAssignment] Started assigning block shifts. This will take 1 steps to complete.
+[10/15/2026-08:03:29] [I] [TRT] [BlockAssignment] Algorithm ShiftNTopDown took 0.008936ms to assign 1 blocks to 1 nodes requiring 231111680 bytes.
+[10/15/2026-08:03:29] [I] [TRT] Total Activation Memory: 231111680 bytes
+[10/15/2026-08:03:31] [I] [TRT] Total Weights Memory: 12509680512 bytes
+[10/15/2026-08:03:31] [I] [TRT] Compiler backend is used during engine execution.
+[10/15/2026-08:03:31] [I] [TRT] Engine generation completed in 198.665 seconds.
+[10/15/2026-08:03:31] [I] [TRT] The following layers are used for L2 cache management and do not correspond to any layers in the INetworkDefinition: __mye3476025_myl0_0, __mye3476027_myl0_2135
+[10/15/2026-08:03:31] [I] [TRT] [MemUsageStats] Peak memory usage of TRT CPU/GPU memory allocators: CPU 1188 MiB, GPU 11930 MiB
+[10/15/2026-08:03:43] [I] Created engine with size: 11937 MiB
+[10/15/2026-08:03:43] [I] Engine built in 213.481 sec.
+[10/15/2026-08:03:43] [W] [TRT] Could not read cache from: /artifacts/rtc-separation-r1-7000-trt-tf32-cache80-7step-20261015-r2/timing.cache. A new cache will be generated and written.
+[10/15/2026-08:03:43] [I] [TRT] Serialized 4031 bytes of code generator cache.
+[10/15/2026-08:03:43] [I] [TRT] Serialized 627617 bytes of compilation cache.
+[10/15/2026-08:03:43] [I] [TRT] Serialized 14 timing cache entries
+[10/15/2026-08:03:43] [I] [TRT] Saved 633271 bytes of timing cache to /artifacts/rtc-separation-r1-7000-trt-tf32-cache80-7step-20261015-r2/timing.cache
+[10/15/2026-08:03:58] [I] [TRT] Loaded engine size: 11936 MiB
+[10/15/2026-08:04:06] [I] Engine deserialized in 11.7269 sec.
+[10/15/2026-08:04:06] [I] [TRT] The following layers are used for L2 cache management and do not correspond to any layers in the INetworkDefinition: __mye3476025_myl0_0, __mye3476027_myl0_2135
+[10/15/2026-08:04:06] [I] Skipped inference phase since --skipInference is added.
+&&&& PASSED TensorRT.trtexec [TensorRT v101601] [b11] # /usr/src/tensorrt/bin/trtexec --onnx=/artifacts/rtc-separation-r1-7000-onnx-fp32-cache80-7step-20261015-r2/sampler.onnx --saveEngine=/artifacts/rtc-separation-r1-7000-trt-tf32-cache80-7step-20261015-r2/sampler.engine --stronglyTyped --skipInference --builderOptimizationLevel=3 --maxAuxStreams=0 --memPoolSize=workspace:8192 --profilingVerbosity=detailed --exportLayerInfo=/artifacts/rtc-separation-r1-7000-trt-tf32-cache80-7step-20261015-r2/layers.json --timingCacheFile=/artifacts/rtc-separation-r1-7000-trt-tf32-cache80-7step-20261015-r2/timing.cache
+PHASE_TENSORRT_VALIDATION
+W1015 08:04:27.991000 1 torch/utils/_pytree.py:630] <enum 'KernelPreference'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+[10/15/2026-08:04:43] [TRT] [W] Using default stream in enqueueV3() may lead to performance issues due to additional calls to cudaStreamSynchronize() by TensorRT to ensure correct synchronization. Please use non-default stream instead.
+{"status": "compared_not_robot_task_validated", "observed_at": "2026-10-15T08:04:50.343191+00:00", "engine_sha256": "d7d2c3baa192c9f37784c31430d402ccdd12a76b6ed40149aedc480385bd9cfa", "engine_tf32": true, "num_steps": 7, "checkpoint_weights_sha256": "223b7dc80c1ce6458787412e478848ffd297072cceebb9b79b983d686bab2e95", "jax_reference_manifest_sha256": "8bb9b5b5b85f3d05ddba1121f660344b70b93475c00c18df39668a2d319486a1", "checkpoint_metadata_sha256": "2912d15ba42fe0d742b5ac46e88804dacce69644369b4cf9b7405cf7d8fe7247", "norm_stats_sha256": "fd0d9cb2db3ce475c1175c7f21a3a0dd3aa7f59d36edc680e7044cd11b9f1edf", "cases_sha256": "0f2f78a093069f20e31a07e4f2c57ed5b434c3ccf0771c89baab6cacae906723", "prefix_use_quantiles": true, "physical_max_abs": 0.0023279726262688816, "physical_mean_abs": 8.166257243220872e-05, "physical_p95_abs": 0.00024396740068832187, "physical_p99_abs": 0.0004150839754740377, "worst_element": {"case_index": 1, "action_step": 48, "dimension": 13}, "per_dimension": [{"dimension": 0, "kind": "joint_rad", "max_abs": 0.0003269829268738311, "mean_abs": 6.066148419233166e-05, "p95_abs": 0.0002130937883304595}, {"dimension": 1, "kind": "joint_rad", "max_abs": 0.00046867183267518264, "mean_abs": 0.00010577904075932645, "p95_abs": 0.0002810232578346225}, {"dimension": 2, "kind": "joint_rad", "max_abs": 0.0006159903016758062, "mean_abs": 0.00011092466512117162, "p95_abs": 0.00033876528518805843}, {"dimension": 3, "kind": "joint_rad", "max_abs": 0.0005066868892762422, "mean_abs": 7.447669191173073e-05, "p95_abs": 0.00020831099630330693}, {"dimension": 4, "kind": "joint_rad", "max_abs": 0.00033234410368887524, "mean_abs": 5.660292901652054e-05, "p95_abs": 0.00018189838677989386}, {"dimension": 5, "kind": "joint_rad", "max_abs": 0.0003387916652057843, "mean_abs": 5.6294228645399347e-05, "p95_abs": 0.00019400695700526023}, {"dimension": 6, "kind": "gripper", "max_abs": 0.0002712711617947061, "mean_abs": 6.727015377600899e-05, "p95_abs": 0.00015855116219523038}, {"dimension": 7, "kind": "joint_rad", "max_abs": 0.0006461920949161204, "mean_abs": 5.6018875932910424e-05, "p95_abs": 0.00018502021620697652}, {"dimension": 8, "kind": "joint_rad", "max_abs": 0.0006918943222840035, "mean_abs": 9.84304363230273e-05, "p95_abs": 0.0003297192285608204}, {"dimension": 9, "kind": "joint_rad", "max_abs": 0.0006572909447000175, "mean_abs": 0.00011930087965465081, "p95_abs": 0.0003648664425998426}, {"dimension": 10, "kind": "joint_rad", "max_abs": 0.0004121000067047742, "mean_abs": 6.543947085945387e-05, "p95_abs": 0.00019663887491390135}, {"dimension": 11, "kind": "joint_rad", "max_abs": 0.00027314173316339563, "mean_abs": 7.039479038353398e-05, "p95_abs": 0.00017111755244298416}, {"dimension": 12, "kind": "joint_rad", "max_abs": 0.00029729029256997386, "mean_abs": 6.18075933678994e-05, "p95_abs": 0.00018185739919669976}, {"dimension": 13, "kind": "gripper", "max_abs": 0.0023279726262688816, "mean_abs": 0.00013987477410695696, "p95_abs": 0.0003623711280360792}], "server_infer_p50_ms": 190.77133294194937, "server_infer_p95_ms": 383.01508310250927, "steady_server_infer_p50_ms": 188.2146461866796, "steady_server_infer_p95_ms": 190.2047571958974, "steady_server_total_p50_ms": 192.19688908196986, "steady_server_total_p95_ms": 194.1831769188866}
+PHASE_TEMPORARY_PROTOCOL
+bdb478064699a315df6fe5227ca4864c9bfee555d743548b8cc433d0d68c454d
+pi05-rtc-validation-20261015
+{"status": "passed", "observed_at": "2026-10-15T08:05:16.592689+00:00", "url": "ws://192.168.250.1:8000", "handshake_ms": 2.6512769982218742, "metadata": {"robot": "YAM", "hardware_family": "YAM-ABC-compatible", "num_arms": 2, "robot_action_dim": 14, "model_action_dim": 32, "action_horizon": 50, "action_layout": "[left 6 joints, left gripper, right 6 joints, right gripper]", "image_keys": ["observation.images.top_rgb", "observation.images.left_rgb", "observation.images.right_rgb"], "config": "pi05_yam", "backend": "tensorrt_cuda_graph", "rtc_mode": "trained", "rtc_prefix_norm": "quantile", "rtc_joint_step_guard_rad_per_tick": 0.2, "rtc_semantics": "clean aligned committed prefix at flow time zero; postfix denoised; no guidance/fallback", "rtc_max_delay_steps": 10, "checkpoint_weights_sha256": "223b7dc80c1ce6458787412e478848ffd297072cceebb9b79b983d686bab2e95", "norm_stats_sha256": "fd0d9cb2db3ce475c1175c7f21a3a0dd3aa7f59d36edc680e7044cd11b9f1edf", "engine_sha256": "d7d2c3baa192c9f37784c31430d402ccdd12a76b6ed40149aedc480385bd9cfa", "compute_dtype": "float32", "precision_mode": "fp32_weights_tf32_compute", "denoising_steps": 7, "action_dt_s": 0.03333333333333333, "action_dim": 14, "action_mode": "absolute physical target after checkpoint inverse transforms", "joint_unit": "radian (dataset contract; hardware calibration not claimed)", "gripper_unit": "continuous; nominal 0 closed, 1 open; outputs not clipped", "target_tick_semantics": "30Hz policy tick; observation_policy_tick == target_start_tick == committed_start_tick", "action_0_relative_to_observation_policy_tick": 0, "camera_exposure_to_policy_tick_offset_s": null}, "cases": [{"sample": "episode-000095-early.npz", "delay_steps": 0, "output_shape": [50, 14], "prefix_exact": true, "output_finite": true, "max_new_joint_step_rad": 0.03836732643347829, "server_infer_ms": 211.01340581662953, "roundtrip_ms": 212.39496115595102}, {"sample": "episode-000095-middle.npz", "delay_steps": 1, "output_shape": [50, 14], "prefix_exact": true, "output_finite": true, "max_new_joint_step_rad": 0.019407808019936912, "server_infer_ms": 194.62564797140658, "roundtrip_ms": 195.98359195515513}, {"sample": "episode-000095-late.npz", "delay_steps": 10, "output_shape": [50, 14], "prefix_exact": true, "output_finite": true, "max_new_joint_step_rad": 0.038300757650410855, "server_infer_ms": 194.0492019057274, "roundtrip_ms": 194.73610306158662}, {"sample": "episode-000096-early.npz", "delay_steps": 0, "output_shape": [50, 14], "prefix_exact": true, "output_finite": true, "max_new_joint_step_rad": 0.06326782111591411, "server_infer_ms": 194.23676398582757, "roundtrip_ms": 194.77518694475293}, {"sample": "episode-000096-middle.npz", "delay_steps": 1, "output_shape": [50, 14], "prefix_exact": true, "output_finite": true, "max_new_joint_step_rad": 0.05127715507430697, "server_infer_ms": 193.4848080854863, "roundtrip_ms": 194.03751916252077}, {"sample": "episode-000096-late.npz", "delay_steps": 10, "output_shape": [50, 14], "prefix_exact": true, "output_finite": true, "max_new_joint_step_rad": 0.08901088927081768, "server_infer_ms": 194.03967284597456, "roundtrip_ms": 194.7441769298166}, {"sample": "episode-000097-early.npz", "delay_steps": 0, "output_shape": [50, 14], "prefix_exact": true, "output_finite": true, "max_new_joint_step_rad": 0.12053861838548663, "server_infer_ms": 193.7859021127224, "roundtrip_ms": 194.45442501455545}, {"sample": "episode-000097-middle.npz", "delay_steps": 1, "output_shape": [50, 14], "prefix_exact": true, "output_finite": true, "max_new_joint_step_rad": 0.06481231532746312, "server_infer_ms": 193.69599502533674, "roundtrip_ms": 194.30345413275063}, {"sample": "episode-000097-late.npz", "delay_steps": 10, "output_shape": [50, 14], "prefix_exact": true, "output_finite": true, "max_new_joint_step_rad": 0.05509890604412804, "server_infer_ms": 193.71245009824634, "roundtrip_ms": 194.30364202708006}], "server_infer_p50_ms": 194.03967284597456, "server_infer_p95_ms": 204.45830267854035, "roundtrip_p50_ms": 194.73610306158662, "roundtrip_p95_ms": 205.83041347563267}
+pi05-rtc-validation-20261015
+Restoring system configuration from /tmp/thor-maxn-xpj2a3fk/clocks.conf
+Disabled persistence mode for GPU 00000000:01:00.0.
+All done.
+NV Power Mode: 120W
+1
+a99a3856b66e7a0815f1499007525422fcbcfb16afca107444fcefa787b737d3
+Running as unit: thor-pi-maxn-separation7000-20261015.service; invocation ID: 3727cd6254154b40a238131e3907c41e
+["/bench/serve_pi05_rtc_trt.py","--engine","/artifacts/rtc-separation-r1-7000-trt-tf32-cache80-7step-20261015-r2","--checkpoint","/ckpt","--norm","/ckpt/assets/yam/norm_stats.json","--warmup-sample","/cases/episode-000095-early.npz","--warmup-rtc","/bench/rtc_warmup_d0.json","--host","192.168.250.1","--port","8000","--allow-validated-tf32-7step","--validation","/artifacts/rtc-separation-r1-7000-trt-tf32-cache80-7step-20261015-r2/validation.json","--jax-reference","/artifacts/rtc-separation-r1-7000-jax-quantile-7step-20261015-r2"]
+{"status": "passed", "observed_at": "2026-10-15T08:05:54.499190+00:00", "url": "ws://192.168.250.1:8000", "handshake_ms": 3.6956490948796272, "metadata": {"robot": "YAM", "hardware_family": "YAM-ABC-compatible", "num_arms": 2, "robot_action_dim": 14, "model_action_dim": 32, "action_horizon": 50, "action_layout": "[left 6 joints, left gripper, right 6 joints, right gripper]", "image_keys": ["observation.images.top_rgb", "observation.images.left_rgb", "observation.images.right_rgb"], "config": "pi05_yam", "backend": "tensorrt_cuda_graph", "rtc_mode": "trained", "rtc_prefix_norm": "quantile", "rtc_joint_step_guard_rad_per_tick": 0.2, "rtc_semantics": "clean aligned committed prefix at flow time zero; postfix denoised; no guidance/fallback", "rtc_max_delay_steps": 10, "checkpoint_weights_sha256": "223b7dc80c1ce6458787412e478848ffd297072cceebb9b79b983d686bab2e95", "norm_stats_sha256": "fd0d9cb2db3ce475c1175c7f21a3a0dd3aa7f59d36edc680e7044cd11b9f1edf", "engine_sha256": "d7d2c3baa192c9f37784c31430d402ccdd12a76b6ed40149aedc480385bd9cfa", "compute_dtype": "float32", "precision_mode": "fp32_weights_tf32_compute", "denoising_steps": 7, "action_dt_s": 0.03333333333333333, "action_dim": 14, "action_mode": "absolute physical target after checkpoint inverse transforms", "joint_unit": "radian (dataset contract; hardware calibration not claimed)", "gripper_unit": "continuous; nominal 0 closed, 1 open; outputs not clipped", "target_tick_semantics": "30Hz policy tick; observation_policy_tick == target_start_tick == committed_start_tick", "action_0_relative_to_observation_policy_tick": 0, "camera_exposure_to_policy_tick_offset_s": null}, "cases": [{"sample": "episode-000095-early.npz", "delay_steps": 0, "output_shape": [50, 14], "prefix_exact": true, "output_finite": true, "max_new_joint_step_rad": 0.12038192002826076, "server_infer_ms": 211.14091109484434, "roundtrip_ms": 212.4856081791222}, {"sample": "episode-000095-middle.npz", "delay_steps": 1, "output_shape": [50, 14], "prefix_exact": true, "output_finite": true, "max_new_joint_step_rad": 0.006397383507108834, "server_infer_ms": 194.95025905780494, "roundtrip_ms": 195.88755583390594}, {"sample": "episode-000095-late.npz", "delay_steps": 10, "output_shape": [50, 14], "prefix_exact": true, "output_finite": true, "max_new_joint_step_rad": 0.04743648551091595, "server_infer_ms": 194.97840316034853, "roundtrip_ms": 195.69596205838025}, {"sample": "episode-000096-early.npz", "delay_steps": 0, "output_shape": [50, 14], "prefix_exact": true, "output_finite": true, "max_new_joint_step_rad": 0.06379372983480569, "server_infer_ms": 194.32195997796953, "roundtrip_ms": 194.96427103877068}, {"sample": "episode-000096-middle.npz", "delay_steps": 1, "output_shape": [50, 14], "prefix_exact": true, "output_finite": true, "max_new_joint_step_rad": 0.05018603954268497, "server_infer_ms": 194.69107198528945, "roundtrip_ms": 195.31834707595408}, {"sample": "episode-000096-late.npz", "delay_steps": 10, "output_shape": [50, 14], "prefix_exact": true, "output_finite": true, "max_new_joint_step_rad": 0.08808837605002973, "server_infer_ms": 194.79210092686117, "roundtrip_ms": 195.44087606482208}, {"sample": "episode-000097-early.npz", "delay_steps": 0, "output_shape": [50, 14], "prefix_exact": true, "output_finite": true, "max_new_joint_step_rad": 0.09901344092608921, "server_infer_ms": 195.11066004633904, "roundtrip_ms": 195.67257608287036}, {"sample": "episode-000097-middle.npz", "delay_steps": 1, "output_shape": [50, 14], "prefix_exact": true, "output_finite": true, "max_new_joint_step_rad": 0.05517162254830499, "server_infer_ms": 194.97723295353353, "roundtrip_ms": 195.53213799372315}, {"sample": "episode-000097-late.npz", "delay_steps": 10, "output_shape": [50, 14], "prefix_exact": true, "output_finite": true, "max_new_joint_step_rad": 0.05495196610024844, "server_infer_ms": 194.59150591865182, "roundtrip_ms": 195.1471990905702}], "server_infer_p50_ms": 194.95025905780494, "server_infer_p95_ms": 204.72881067544222, "roundtrip_p50_ms": 195.53213799372315, "roundtrip_p95_ms": 205.8463872410357}
+2026-10-15T16:05:55+08:00
+NV Power Mode: MAXN
+0
+a99a3856b66e pi05-rtc-infer Up 26 seconds
+cb21e522e0ce pld-closing8-review-r06 Up 42 minutes
+Filesystem         1B-blocks         Used    Available Use% Mounted on
+/dev/nvme0n1p1 1004162105344 473474670592 479603331072  50% /
+DEPLOYED_PI05_240000_PLUS_SEPARATION_7000_SAME_SERVICE

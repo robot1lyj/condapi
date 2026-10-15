@@ -2,6 +2,8 @@
 
 ## 当前状态
 
+2026-10-15 16:06 CST更新：用户另行授权的[240000＋专项7000](../rtc-separation-r1-7000-20261015/README.md)已接管同名Pi服务/原8000。本文原24万停止保留为`pi05-rtc-50h240000-preserved-20261015`，完整原始/转换权重、参考及引擎均保留为回退，无删除；下文为10月14日原24万验收/上线历史，不表示它仍在线。
+
 2026-10-14用户在恢复20万后，**另行明确授权“24w步开始部署上线”**，本次转换、GPU验收和验收后同地址上线均已获准；此前只下载限制是历史，不再作为本次阻断。新的冻结stage为`/home/wuyan-lyj/thor/pi/probes/rtc-50h-240000-20261014-r1`，不重跑10月13日的旧prepare/deploy脚本。
 
 14:57+08完成CPU准备：18项源SHA重新通过；[原始参数审计](rtc-50h-240000-audit-20261014-r1.json)非有限0；[转换审计](conversion_audit.json)811张量/3,353,433,872元素FP32映射逐位一致；[RTC manifest](rtc_manifest.json)确认训练dmax10、checkpoint自身norm（仅末尾换行与训练norm不同）。FP32权重SHA256 `12b08533d61119bf9b7b98bc20a3f64553b42a7140fd99107f52610f19184288`。映射器打印的基础config中`rtc_training_max_delay=0`不代表本checkpoint普通推理，路线由训练合同、manifest及实际采样器共同确认。
