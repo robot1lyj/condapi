@@ -49,7 +49,8 @@ def main():
             cfg.update(id=run, method=method, feature_group_rms=rms,
                        feature_balance_source={"replay_sha256": manifest["replay_sha256"],
                                                "training_rows": int(train.sum()), "validation_used": False},
-                       behavior_snapshot_sha256=sha256(behavior))
+                       behavior_snapshot_sha256=sha256(behavior),
+                       collector_latent_std=bm["collector"]["latent_std"])
             write_json(args.output / "configs" / (run + ".json"), cfg)
             jobs.append(run)
     write_json(args.output / "contract.json", manifest["contract"])

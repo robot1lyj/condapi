@@ -36,6 +36,23 @@ def parent():
 
 
 class CollectorChecks(unittest.TestCase):
+    def test_native_export_retains_explicit_collection_noise(self):
+        behavior = smooth_manifest(parent(), parent_snapshot="1"*64)
+        learned = native_trajectory_manifest({"contract": behavior["contract"], "provenance": {}},
+                                             behavior_snapshot="2"*64)
+        closing = closing_collect_manifest(learned, parent_snapshot="3"*64)
+        noise = closing["collector"]["latent_std"]
+        out = native_trajectory_manifest({"contract": closing["contract"]},
+                                         behavior_snapshot="4"*64, latent_std=noise)
+        self.assertEqual(out["collector"]["latent_std"], [.5]*6+[.7])
+        self.assertEqual(out["actor_contract"]["negative_radius"][6], .20)
+        self.assertEqual(out["eval_contract"]["positive_radius"][6], .05)
+        noise[-1] = .3
+        self.assertEqual(out["collector"]["latent_std"][-1], .7)
+        with self.assertRaises(ValueError):
+            native_trajectory_manifest({"contract": closing["contract"]},
+                                       behavior_snapshot="4"*64, latent_std=[.5]*6+[1.1])
+
     def test_closing_collector_preserves_parent_eval_and_weights(self):
         behavior = smooth_manifest(parent(), parent_snapshot="1"*64)
         learned = native_trajectory_manifest({"contract": behavior["contract"], "actor_sha256": "learned",

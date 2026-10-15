@@ -47,7 +47,8 @@ def export_bundle(path, learner, contract, normalization, encoder_sha, config, p
                "entropy_semantics": "tanh latent u; critic action is state-feasible normalized physical offset"}
     if contract.get("trajectory"):
         manifest["entropy_semantics"] = "tanh latent target; critic action precedes deterministic recorded trajectory/geometry decoding"
-        manifest = native_trajectory_manifest(manifest, behavior_snapshot=config["behavior_snapshot_sha256"])
+        manifest = native_trajectory_manifest(manifest, behavior_snapshot=config["behavior_snapshot_sha256"],
+                                              latent_std=config.get("collector_latent_std"))
     write_json(path / "manifest.json", manifest)
 
 

@@ -117,7 +117,7 @@ def smooth_manifest(parent, *, parent_snapshot):
     return out
 
 
-def native_trajectory_manifest(manifest, *, behavior_snapshot):
+def native_trajectory_manifest(manifest, *, behavior_snapshot, latent_std=None):
     """Export a newly learned trajectory actor in its OWN action coordinates.
 
     Actor-1's .02 contract is only for decoding Actor-1 behavior. A new actor
@@ -130,7 +130,7 @@ def native_trajectory_manifest(manifest, *, behavior_snapshot):
     out["eval_contract"] = copy.deepcopy(out["contract"])
     out["collector"] = {"kind": "coherent_trajectory_v1", "native_actor_coordinates": True,
                         "parent_snapshot_sha256": behavior_snapshot,
-                        "latent_std": [.5]*6+[.2],
+                        "latent_std": list(latent_std) if latent_std is not None else [.5]*6+[.2],
                         "eval_preserves_parent_physical_policy": False,
                         "eval_preserves_parent_target_scale": True,
                         "density_semantics": "conditional Gaussian innovation then tanh; before deterministic trajectory/geometry decoding"}
