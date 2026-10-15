@@ -13,6 +13,7 @@ def main():
     p.add_argument("--encoder", type=Path, required=True)
     p.add_argument("--image", required=True)
     p.add_argument("--run-name", required=True)
+    p.add_argument("--learning-replay", default="learning-replay-v1")
     args = p.parse_args()
     code = Path(__file__).resolve().parents[2]
     data = args.dataset.resolve()
@@ -29,7 +30,7 @@ def main():
                "--config", str(data / "training-input-v1/configs" / (name + ".json")),
                "--contract", str(data / "training-input-v1/contract.json"),
                "--normalization", str(data / "training-input-v1/normalization.json"),
-               "--replay", str(data / "learning-replay-v1")]
+               "--replay", str(data / args.learning_replay)]
         rec = {"run": name, "argv": cmd, "started_unix": time.time(), "status": "running"}
         statuses.append(rec)
         (audit / "status.json").write_text(json.dumps(statuses, indent=2) + "\n")
@@ -42,7 +43,7 @@ def main():
             raise SystemExit(r.returncode)
         check = ["docker", "exec", "pld-rl-train", "/opt/pld-rl/bin/python",
                  "/workspace/scripts/pld_rl/audit_calibrated_run.py", "--run", "/runs/" + name,
-                 "--replay", "/datasets/" + data.name + "/learning-replay-v1",
+                 "--replay", "/datasets/" + data.name + "/" + args.learning_replay,
                  "--output", "/runs/" + args.run_name + "/" + name + "-audit.json"]
         with (audit / (name + "-audit.log")).open("w") as f:
             r = subprocess.run(check, stdout=f, stderr=subprocess.STDOUT, check=False)

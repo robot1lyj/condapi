@@ -10,8 +10,9 @@ from pathlib import Path
 import platform
 import time
 
-PROMPT = """Inspect this chronological robot wrist/top image sequence.
-Does the robot attempt to grasp a small loose object between the two black triangular finger pads? This differs from moving a large container, incidental gripper motion, or idling. Also report whether a small object is visibly held in the fingers and then LOST before the final image. Background objects seen through the gap do not count as held. Do not infer holding from finger closure or camera height. Use \"uncertain\" if images cannot establish a fact.
+PROMPT = """Inspect this chronological robot wrist/top image sequence for ATTEMPT versus OUTCOME separately.
+grasp_intent asks whether the robot TRIES to pick up a loose LEGO brick. Approaching/alignment/descent and closing the two black triangular finger pads near a loose brick is a grasp ATTEMPT EVEN WHEN THE FINGERS END EMPTY. An empty or unsuccessful grasp is NOT evidence for grasp_intent=false. Return true for a visible successful OR failed pickup attempt. Return false ONLY with positive evidence of a different activity such as moving a large container, idling, or carrying an already-held object without attempting a new pickup. If the target or motion is unclear, use \"uncertain\", never false merely because no object was captured.
+held_then_lost is a DIFFERENT question: was a small brick clearly held in an earlier image and clearly lost before the last image? Mere occlusion/blur is not loss; use \"uncertain\" in that case. Background objects through the gap do not count as held. Do not infer holding from closed fingers or height. Confidence describes the visual evidence, not whether the attempt succeeded.
 Return ONLY compact JSON: {\"grasp_intent\":true/false/\"uncertain\",\"held_then_lost\":true/false/\"uncertain\",\"confidence\":\"high/medium/low\",\"reason\":\"under 20 words\"}."""
 
 
@@ -31,6 +32,8 @@ def main():
     p.add_argument("--dataset", type=Path, required=True)
     p.add_argument("--model", type=Path, required=True)
     p.add_argument("--batch-size", type=int, default=8)
+    p.add_argument("--output-name", default="vlm-intent")
+    p.add_argument("--candidate-ids", nargs="*")
     args = p.parse_args()
     if platform.machine() != "aarch64":
         p.error("model inference runs on Thor")
@@ -41,7 +44,12 @@ def main():
 
     torch.set_num_threads(4)
     candidates = json.loads((args.dataset/"intent-prepared.json").read_text())
-    out = args.dataset/"vlm-intent"
+    if args.candidate_ids:
+        wanted = set(args.candidate_ids)
+        if wanted - {c["candidate_id"] for c in candidates}:
+            p.error("unknown candidate identity")
+        candidates = [c for c in candidates if c["candidate_id"] in wanted]
+    out = args.dataset/args.output_name
     out.mkdir(exist_ok=False)
     model = Qwen3VLForConditionalGeneration.from_pretrained(
         args.model, dtype=torch.bfloat16, attn_implementation="sdpa", local_files_only=True).eval().cuda()
@@ -56,8 +64,10 @@ def main():
             texts, images = [], []
             for c in group:
                 content = [{"type": "text", "text": PROMPT}]
-                for i, f in enumerate(selected_frames(c)):
-                    for view in ([c["arm"], "top"] if i == 0 else [c["arm"]]):
+                frames = selected_frames(c)
+                close_row = min(frames, key=lambda f: abs(f["since_close_s"]))["row"]
+                for i, f in enumerate(frames):
+                    for view in ([c["arm"], "top"] if i == 0 or f["row"] == close_row else [c["arm"]]):
                         if view not in f["views"]:
                             continue
                         path = args.dataset/f["views"][view]["image"]

@@ -20,8 +20,9 @@ def main():
     p.add_argument("--dataset", type=Path, required=True)
     p.add_argument("--output", type=Path, required=True)
     p.add_argument("--run-prefix", required=True)
+    p.add_argument("--learning-replay", default="learning-replay-v1")
     args = p.parse_args()
-    replay = args.dataset / "learning-replay-v1"
+    replay = args.dataset / args.learning_replay
     manifest = json.loads((replay / "manifest.json").read_text())
     if sha256(replay / "replay.npz") != manifest["replay_sha256"]:
         raise ValueError("replay changed")

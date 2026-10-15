@@ -16,6 +16,7 @@ def main():
     p.add_argument("--curator", type=Path, required=True)
     p.add_argument("--vision", type=Path, required=True)
     p.add_argument("--intent", type=Path, required=True)
+    p.add_argument("--intent-output", default="vlm-intent")
     p.add_argument("--output", type=Path, required=True)
     args = p.parse_args()
     candidates = json.loads((args.curator / "candidates.json").read_text())
@@ -23,7 +24,7 @@ def main():
     results = []
     for original in candidates:
         c = {**original, **held.get(original["candidate_id"], {})}
-        path = args.intent / "vlm-intent" / (original["candidate_id"] + ".json")
+        path = args.intent / args.intent_output / (original["candidate_id"] + ".json")
         if path.exists():
             raw = json.loads(path.read_text())
             if raw["candidate_sha256"] != original["candidate_sha256"]:
@@ -36,7 +37,7 @@ def main():
                          held_then_lost_confirmed=d["held_then_lost"] is True)
                 proof = original["outcome"]
                 status = None
-                if d["grasp_intent"] is False:
+                if d["grasp_intent"] is False and d["confidence"] == "high":
                     c["model_non_grasp"] = True
                 elif d["held_then_lost"] is True:
                     status = "dropped"
