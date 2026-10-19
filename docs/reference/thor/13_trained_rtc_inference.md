@@ -1,8 +1,8 @@
 # 13 · Pi0.5 training-time RTC：Thor 转换与推理候选
 
-## 当前：DAgger专项10000上线，7000保留回退（2026-10-15）
+## 当前：DAgger专项10000已确认在线，未重启（2026-10-19）
 
-16:50 CST复核：用户授权后同run10000（parent原50h240000/RTC10/H50）已在同名`pi05-rtc-infer`/固定`ws://192.168.250.1:8000`上线。20项SHA、非有限0、811张量FP32保真转换、九例JAX/Torch/TRT及两轮真实协议通过，healthz OK/MAXN/GPU1575MHz。七步FP32＋TF32、quantile、缓存80/CUDA Graph、0.2rad/tick不变；最大单关节转换差0.000774rad、夹爪0.002478，稳态纯推理187.77/192.41ms，正式本机往返198.23/209.07ms（P50/P95），不是3588全链路。部署unit退出0、在线MAXN按唯一ID监控；7000停止完整保留回退，其他旧模型/CPU审阅页保留，PLD推理停止。未操作3588或发客户端任务，真机由用户测试；身份/回执/回退归[10000报告](../../reports/thor/rtc-separation-r1-10000-20261015/README.md)和[08](../../08_thor_edge_deployment.md)，下节为7000历史。
+15:32 CST用户要求开启时，原同run10000/原容器ID已运行，MAXN watcher active/GPU1575MHz，未重启、重转换或换模型。固定`ws://192.168.250.1:8000`/healthz OK，本次九例三相机/14D state/prompt/d=0/1/10通过，有限50×14、前缀精确、握手身份一致；七步FP32＋TF32、quantile、缓存80/CUDA Graph和0.2rad/tick不变。本机推理197.44/198.39ms、往返198.07/199.30ms（P50/P95），仅九例快照，不冒充3588全链路或尾延迟已消除。历史独立JAX/TRT精度、完整回执和回退归[10000报告](../../reports/thor/rtc-separation-r1-10000-20261015/README.md)和[08](../../08_thor_edge_deployment.md)。旧产物/CPU审阅页保留，未操作3588或发客户端任务，下节为7000历史。
 
 ## 已验收基线：240000＋DAgger专项7000（2026-10-15）
 
