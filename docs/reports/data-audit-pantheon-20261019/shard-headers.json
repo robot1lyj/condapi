@@ -1,0 +1,642 @@
+[
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0000000.json",
+    "size": 2782205720,
+    "first_episode_id": "train/fold_the_paper_box/episode_8c38afd4-1c56-4db3-8c0e-79a28c524b3a"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0001000.json",
+    "size": 2802571280,
+    "first_episode_id": "train/fold_and_stack_the_t_shirts/episode_c2a2410d-1648-4029-90e3-241bba991190"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0002000.json",
+    "size": 2409985833,
+    "first_episode_id": "train/lock_with_the_key/episode_e7e30705-9491-4b9a-9394-10965ad68388"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0003000.json",
+    "size": 2140087730,
+    "first_episode_id": "train/place_and_organize_the_plastic_toys_onto_the_shelf/episode_e0511809-39cd-4ae7-a7ce-dacece9156d1"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0004000.json",
+    "size": 2311642105,
+    "first_episode_id": "train/put_the_credit_cards_into_the_card_holder/episode_d753d094-f0e6-4a82-9775-be2572d46cfe"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0005000.json",
+    "size": 2139466337,
+    "first_episode_id": "train/turn_the_large_container_upside_down/episode_8ecfd68f-ed42-4444-b603-fe828d612ec2"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0006000.json",
+    "size": 2010060678,
+    "first_episode_id": "train/put_the_screwdriver_in_the_bin/episode_aa85641d-5cfb-4db6-9d69-424d80805361"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0007000.json",
+    "size": 2468661165,
+    "first_episode_id": "train/take_the_credit_cards_out_of_the_card_holder/episode_c3dff36c-8cd6-4ca5-a502-302518c22592"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0008000.json",
+    "size": 2483182219,
+    "first_episode_id": "train/fold_a_paper_plane_with_a_square_sheet_of_paper_pick_it_up_from_the_middle/episode_4cbe943b-fab6-4e8c-aebe-6a197472ea08"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0009000.json",
+    "size": 2731339647,
+    "first_episode_id": "train/fold_and_stack_the_tank_tops/episode_6d7184de-5234-456a-aa99-3629a9856b35"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0010000.json",
+    "size": 2326549265,
+    "first_episode_id": "train/open_the_zip_top_bag_and_remove_the_fake_food/episode_4be92b11-f68f-4e19-a2a5-608132bf3ff1"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0011000.json",
+    "size": 2054095867,
+    "first_episode_id": "train/place_the_beverage_into_the_canvas_bag/episode_f4199278-a5da-4e82-bd7b-61bd34402da3"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0012000.json",
+    "size": 2298784549,
+    "first_episode_id": "train/put_the_credit_cards_into_the_card_holder/episode_c017d47c-d452-41f6-a68c-afc7a389c742"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0013000.json",
+    "size": 2033556882,
+    "first_episode_id": "train/turn_the_mug_right_side_up/episode_081034d0-649f-4dbb-b2fd-54b3defa520c"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0014000.json",
+    "size": 2144865619,
+    "first_episode_id": "train/put_the_screwdriver_in_the_bin/episode_43c233e3-374d-47b9-9664-1d1a053cf5ed"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0015000.json",
+    "size": 2794435255,
+    "first_episode_id": "train/take_the_credit_cards_out_of_the_card_holder/episode_ebc8fc16-fada-4773-bbb6-dac2af81995f"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0016000.json",
+    "size": 2044899835,
+    "first_episode_id": "train/fold_a_paper_plane_with_a_square_sheet_of_paper_pick_it_up_from_the_middle/episode_d3755c12-edaf-499c-beba-8556ed1e8cf6"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0017000.json",
+    "size": 2740100772,
+    "first_episode_id": "train/fold_and_stack_the_tank_tops/episode_7f958e44-d483-4464-9546-ced05d46ac77"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0018000.json",
+    "size": 2433627946,
+    "first_episode_id": "train/load_the_mixed_dishes_into_the_dish_rack/episode_37487a6d-440b-47cd-95c8-fc6d8f9e8c91"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0019000.json",
+    "size": 1595955643,
+    "first_episode_id": "train/place_and_organize_the_cleaning_sponges_onto_the_shelf/episode_26ef1808-e83c-4eda-bcab-e19d7fb1c73f"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0020000.json",
+    "size": 2366736741,
+    "first_episode_id": "train/place_the_skirt_on_the_hanger/episode_09e9baeb-6367-4411-a312-824d1d662321"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0021000.json",
+    "size": 2117330454,
+    "first_episode_id": "train/roll_the_towels/episode_09bee267-b257-4d0d-9be2-c6839567fe42"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0022000.json",
+    "size": 1852560453,
+    "first_episode_id": "train/sort_the_legos_into_containers_by_color/episode_0a4dea08-6998-4129-8a07-f99cfa39c28d"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0023000.json",
+    "size": 2496600038,
+    "first_episode_id": "train/sort_the_legos_into_containers_by_color/episode_3ad71652-3757-4eb2-bf32-22ad2495fc83"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0024000.json",
+    "size": 2639335623,
+    "first_episode_id": "train/unzip_the_laundry_bag_and_remove_the_bra/episode_a4d0554b-1dd7-4e26-be33-443d2c3ea920"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0025000.json",
+    "size": 2737119353,
+    "first_episode_id": "train/fold_and_stack_the_t_shirts/episode_66f587b4-c45d-4f67-8ae5-4c037e1203bb"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0026000.json",
+    "size": 2471386358,
+    "first_episode_id": "train/load_the_batteries_into_the_remote_control/episode_482f7aab-c31e-49dd-b27e-f78f3ccbf2c8"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0027000.json",
+    "size": 1256267300,
+    "first_episode_id": "train/pack_the_tool_kit/episode_578d4048-d8d3-43e9-9106-addacaaf883b"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0028000.json",
+    "size": 2232530867,
+    "first_episode_id": "train/place_the_mixed_dishes_into_the_plastic_bin/episode_cf58308c-e91e-4955-a8ff-15714dde2e71"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0029000.json",
+    "size": 2098551841,
+    "first_episode_id": "train/set_up_the_instrument_practice_props/episode_0261fab7-4207-4009-b759-24593a17c503"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0030000.json",
+    "size": 1921265185,
+    "first_episode_id": "train/roll_the_socks/episode_58a25fb9-3612-4376-aefb-52af90707741"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0031000.json",
+    "size": 2417510800,
+    "first_episode_id": "train/set_the_dinner_table_for_one_person/episode_c556c42a-1e1f-44f6-bbc9-83b9f14bf27f"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0032000.json",
+    "size": 2810002643,
+    "first_episode_id": "train/untangle_the_cables/episode_af35f6bd-1f33-4847-a8e1-1d5769d16be6"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0033000.json",
+    "size": 2731262428,
+    "first_episode_id": "train/fold_and_stack_the_t_shirts/episode_4bf80e58-8688-4a99-bb99-98db6f08f7b5"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0034000.json",
+    "size": 2251412430,
+    "first_episode_id": "train/insert_the_wireless_bluetooth_earbuds_into_the_charging_case/episode_7e704c2d-b3f2-40a0-a3e6-d6e0294d9cfc"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0035000.json",
+    "size": 1288645143,
+    "first_episode_id": "train/pack_the_takeout_coffee/episode_06f01bac-d632-4ecc-ad62-d8d2fa4c24dc"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0036000.json",
+    "size": 2210357244,
+    "first_episode_id": "train/place_the_food_in_the_zip_top_bag_and_seal_the_zipper/episode_05436cf9-d977-48e3-ad7e-ddb9cf0ef2b8"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0037000.json",
+    "size": 2091418780,
+    "first_episode_id": "train/put_the_phone_into_the_phone_case/episode_10137d47-cd22-48df-894f-3ef436e874ba"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0038000.json",
+    "size": 1869134876,
+    "first_episode_id": "train/untie_the_knot_of_the_plastic_bag_and_take_out_the_fruit/episode_abce8fdd-b57e-481a-9bdd-0cd1cd7291e8"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0039000.json",
+    "size": 2279089487,
+    "first_episode_id": "train/remove_the_trousers_from_the_hanger/episode_ee17f0ce-cdf5-4227-a666-c1715eb38c35"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0040000.json",
+    "size": 3052822928,
+    "first_episode_id": "train/unlock_the_padlock_with_the_key/episode_9c2fed3d-7959-433a-b2a0-6725a88a322c"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0041000.json",
+    "size": 2506132735,
+    "first_episode_id": "train/fold_and_stack_the_t_shirts/episode_010aaa4f-7125-4207-810e-a27dcc89e9e0"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0042000.json",
+    "size": 2135264223,
+    "first_episode_id": "train/fold_the_paper_box/episode_aa2eb156-06ce-4fa5-bedf-d2650bccdad6"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0043000.json",
+    "size": 2102030677,
+    "first_episode_id": "train/organize_the_sunglasses/episode_11598a5f-28af-4015-9cf9-52fbe3243565"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0044000.json",
+    "size": 1981227894,
+    "first_episode_id": "train/place_the_fake_fruits_into_the_plastic_bag_and_tie_a_complex_knot/episode_274b9535-db12-4ea0-80cf-baf5175edf86"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0045000.json",
+    "size": 2273400708,
+    "first_episode_id": "train/put_the_keys_on_the_keyring/episode_0564533d-d5fe-47a4-8c93-8f8e9bd7fefb"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0046000.json",
+    "size": 2034461720,
+    "first_episode_id": "train/unload_the_cups_from_the_dish_rack/episode_9a482ce7-5438-480b-ae3b-192878635056"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0047000.json",
+    "size": 2144468280,
+    "first_episode_id": "train/put_the_trash_bags_into_the_trash_bin/episode_e3562ff5-91fb-4f23-994c-6c8ef4c1e667"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0048000.json",
+    "size": 2621243896,
+    "first_episode_id": "train/take_the_credit_cards_out_of_the_card_holder/episode_fa534200-4d24-4f62-9abf-1ef40d029504"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0049000.json",
+    "size": 2507072060,
+    "first_episode_id": "train/fold_a_paper_plane_with_a_square_sheet_of_paper_pick_it_up_from_the_middle/episode_5168a4ec-c964-4fdd-b2d6-b73b98fbd5ac"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0050000.json",
+    "size": 2881621855,
+    "first_episode_id": "train/fold_and_stack_the_t_shirts/episode_face4006-e61f-46eb-8f8e-4a8972507b82"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0051000.json",
+    "size": 2320927192,
+    "first_episode_id": "train/load_the_plates_into_the_dish_rack/episode_5b47d768-0afb-4ae9-b557-cd31a5d9a38b"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0052000.json",
+    "size": 1561418505,
+    "first_episode_id": "train/place_and_organize_the_fake_fruits_in_the_fruit_bowl/episode_e868949d-5c95-42e4-82a4-63ff872c3b86"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0053000.json",
+    "size": 2540495340,
+    "first_episode_id": "train/pull_the_plug_from_the_switch_port/episode_53220124-6868-430f-9f50-df12fd9ad19e"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0054000.json",
+    "size": 2180227657,
+    "first_episode_id": "train/take_the_fake_fruits_out_of_the_plastic_bag/episode_09bf67bc-0f8e-46f2-a83f-b3d590366265"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0055000.json",
+    "size": 1888430940,
+    "first_episode_id": "train/put_the_plastic_bottles_in_the_bin/episode_5fcebebf-56d8-4f84-80ce-027e4a2d12fc"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0056000.json",
+    "size": 2264530763,
+    "first_episode_id": "train/take_the_credit_cards_out_of_the_card_holder/episode_344fa650-ffff-43f9-bcc0-f606f8acd371"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0057000.json",
+    "size": 2833188754,
+    "first_episode_id": "train/distribute_texas_hold_em_gaming_equipment/episode_bf119d4d-4bfb-489c-88b8-e66823cfb90d"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0058000.json",
+    "size": 2788159867,
+    "first_episode_id": "train/fold_and_stack_the_t_shirts/episode_d0ae06b1-a981-462b-ad3b-606d8ea1a205"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0059000.json",
+    "size": 2199144421,
+    "first_episode_id": "train/lock_with_the_key/episode_a164631c-3d29-4466-9247-778882d4e08d"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0060000.json",
+    "size": 1792863974,
+    "first_episode_id": "train/place_the_bread/episode_d98ba943-6722-4ff7-a052-55afb3ddb57c"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0061000.json",
+    "size": 2338025466,
+    "first_episode_id": "train/put_the_credit_cards_into_the_card_holder/episode_ca4803ea-7d53-4fb7-99fa-03ab133e9161"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0062000.json",
+    "size": 2096229828,
+    "first_episode_id": "train/unload_the_bowls_from_the_dish_rack/episode_062836ab-20aa-4c92-85f6-9bacf3f062e3"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0063000.json",
+    "size": 2122239612,
+    "first_episode_id": "train/put_the_screwdriver_in_the_bin/episode_f570c911-4f26-4f30-889f-dfe39e85efa3"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0064000.json",
+    "size": 2875908354,
+    "first_episode_id": "train/take_the_fake_fruits_out_of_the_plastic_bag/episode_7fb23e00-a2ca-4fc7-a0a4-610dd205d468"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0065000.json",
+    "size": 2311262858,
+    "first_episode_id": "train/fold_and_stack_the_shorts/episode_13f9715a-e959-491d-a942-da61ad121e06"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0066000.json",
+    "size": 2237307465,
+    "first_episode_id": "train/fold_the_paper_box/episode_c36c32ea-de22-4382-91a2-dc2bebdc0c71"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0067000.json",
+    "size": 2380286401,
+    "first_episode_id": "train/pack_the_candies/episode_e8fd27f1-25e3-43d3-b5b6-d7080865045e"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0068000.json",
+    "size": 2238073089,
+    "first_episode_id": "train/place_the_food_in_the_zip_top_bag_and_seal_the_zipper/episode_51dd6488-f65a-477b-84b8-286e75128f82"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0069000.json",
+    "size": 2114067755,
+    "first_episode_id": "train/remove_the_phone_from_the_phone_stand/episode_1bda6ee1-1502-4801-b187-fd7c84e50cbb"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0070000.json",
+    "size": 1925767212,
+    "first_episode_id": "train/write_a_sentence_on_the_whiteboard/episode_1861cd47-2796-475b-884a-3bd1aa67042a"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0071000.json",
+    "size": 2199404455,
+    "first_episode_id": "train/serve_the_lunch_box/episode_90fff112-ca56-4ed8-9610-1fda3f21be40"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0072000.json",
+    "size": 2840624065,
+    "first_episode_id": "train/unlock_the_padlock_with_the_key/episode_d889e08c-0939-4663-a1f6-d7179efd507f"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0073000.json",
+    "size": 2562063182,
+    "first_episode_id": "train/fold_and_stack_the_t_shirts/episode_088e29d1-131c-4382-8261-ca56cf249c30"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0074000.json",
+    "size": 2011856915,
+    "first_episode_id": "train/insert_the_plug/episode_847820fa-0733-4bb8-b059-002920c3c2c5"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0075000.json",
+    "size": 2424605282,
+    "first_episode_id": "train/pack_the_chocolate/episode_bf475d8c-c034-4392-a7c6-dd095b5e8c54"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0076000.json",
+    "size": 2202631688,
+    "first_episode_id": "train/place_the_food_in_the_zip_top_bag_and_seal_the_zipper/episode_f919cf41-8b8b-4b6c-85a0-154e2da96067"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0077000.json",
+    "size": 2156072727,
+    "first_episode_id": "train/remove_the_shorts_from_the_hanger/episode_712f2567-6991-4f47-a7e2-74be401fa095"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0078000.json",
+    "size": 1885331959,
+    "first_episode_id": "val/sort_the_legos_into_containers_by_color/episode_3189040f-f199-4f2f-9ce8-8221ef3a12b5"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0079000.json",
+    "size": 2205846260,
+    "first_episode_id": "train/set_the_dinner_table_for_one_person/episode_a993a955-89b4-4e26-95e1-75144e22e488"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0080000.json",
+    "size": 2960523637,
+    "first_episode_id": "train/unlock_the_padlock_with_the_key/episode_febf4f10-d1cb-4f86-b439-6cc34fbbeb26"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0081000.json",
+    "size": 2448358029,
+    "first_episode_id": "train/fold_and_stack_the_skirts/episode_a76f22cb-8fce-47aa-b527-75da3c92bcde"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0082000.json",
+    "size": 2316645530,
+    "first_episode_id": "train/fold_the_paper_box/episode_1e65dff2-774a-4218-ad97-6916b342f031"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0083000.json",
+    "size": 2339713434,
+    "first_episode_id": "train/organize_the_condiment_bottles/episode_dffee534-7631-47d6-9160-c78e2cb8cb43"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0084000.json",
+    "size": 2243018745,
+    "first_episode_id": "train/place_the_food_in_the_zip_top_bag_and_seal_the_zipper/episode_34ff0378-1056-4846-b305-9a9f8868f959"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0085000.json",
+    "size": 2032489608,
+    "first_episode_id": "train/put_the_keys_on_the_keyring/episode_93da3ec6-d38a-4060-8598-d3522c63a932"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0086000.json",
+    "size": 1777073753,
+    "first_episode_id": "train/unlock_with_the_key/episode_3daf9cdd-9d27-487b-9946-4ed4724a296b"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0087000.json",
+    "size": 2282301427,
+    "first_episode_id": "train/remove_the_trousers_from_the_hanger/episode_fc6b5242-9510-4b61-ad4d-9f889687ccb1"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0088000.json",
+    "size": 2721575095,
+    "first_episode_id": "train/unload_the_plates_from_the_dish_rack/episode_8ddd96d2-dd3c-44f8-bf60-a58f1a3efcfe"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0089000.json",
+    "size": 2465934945,
+    "first_episode_id": "train/fold_and_stack_the_shorts/episode_8e375e01-bdf9-4b85-833a-c10e4951e5ad"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0090000.json",
+    "size": 2118328820,
+    "first_episode_id": "train/fold_the_paper_box/episode_d9af052d-cf88-4199-99ff-26a4245bd105"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0091000.json",
+    "size": 2399141718,
+    "first_episode_id": "train/organize_the_sunglasses/episode_65133cce-6721-4d33-84ae-88959f7d1f6e"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0092000.json",
+    "size": 2124513127,
+    "first_episode_id": "train/place_the_food_in_the_zip_top_bag_and_seal_the_zipper/episode_cfcb2f8c-1ac3-4596-adc9-9e037a373c6b"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0093000.json",
+    "size": 2224489022,
+    "first_episode_id": "train/remove_the_tank_top_from_the_hanger/episode_4480fda6-8ebb-4c4a-afbe-5a57081f1ee2"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0094000.json",
+    "size": 1867206913,
+    "first_episode_id": "train/put_the_phone_into_the_phone_case/episode_52c350d6-10ac-4a01-aeb1-05369b5d2e7b"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0095000.json",
+    "size": 2379270323,
+    "first_episode_id": "train/set_up_the_chess_pieces_on_the_board/episode_b25745e4-63dd-4930-9ae2-23ed345ede8d"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0096000.json",
+    "size": 2674546274,
+    "first_episode_id": "train/untangle_the_cables/episode_6e026d81-f682-4f46-b258-e39024d41271"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0097000.json",
+    "size": 2819517339,
+    "first_episode_id": "train/fold_and_stack_the_t_shirts/episode_57d00bae-d64b-451b-b71a-82a6aba1a012"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0098000.json",
+    "size": 2372234557,
+    "first_episode_id": "train/insert_the_wireless_bluetooth_earbuds_into_the_charging_case/episode_dfd5f5fc-d90a-4a8b-9316-6023fbf86868"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0099000.json",
+    "size": 1967737619,
+    "first_episode_id": "train/pack_the_takeout_coffee/episode_8dd11b2d-153b-4f46-a268-e0db209d461e"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0100000.json",
+    "size": 2490131286,
+    "first_episode_id": "train/place_the_t_shirt_on_the_hanger/episode_3a42b1ba-7dc0-42bc-bb89-35dddf5dcf88"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0101000.json",
+    "size": 2073495213,
+    "first_episode_id": "train/stack_the_books_and_files/episode_705efe6a-99b2-49e2-be57-7d2168d9a8f0"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0102000.json",
+    "size": 1839750822,
+    "first_episode_id": "train/put_the_photo_into_the_frame/episode_a4426eba-40ef-4bdd-ab31-23a09952dd81"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0103000.json",
+    "size": 2227242153,
+    "first_episode_id": "train/sort_the_legos_into_containers_by_color/episode_cadb3707-5774-4845-acb9-2059b73415f6"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0104000.json",
+    "size": 2823638522,
+    "first_episode_id": "train/attach_the_microphones_to_the_stand/episode_e1b691ea-5482-4d3f-b593-e21419f91126"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0105000.json",
+    "size": 2821172693,
+    "first_episode_id": "train/fold_and_stack_the_t_shirts/episode_b516c7a2-ade4-4504-bae0-93fb83682891"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0106000.json",
+    "size": 2517828990,
+    "first_episode_id": "train/load_the_plates_into_the_dish_rack/episode_bc8276c1-d39a-41a1-a024-7068387b6130"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0107000.json",
+    "size": 1784864583,
+    "first_episode_id": "train/place_and_organize_the_fake_fruits_in_the_fruit_bowl/episode_7e7aecd8-8abc-402a-96a9-12ae495aefff"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0108000.json",
+    "size": 2415012973,
+    "first_episode_id": "train/put_the_credit_cards_into_the_card_holder/episode_3555ef1b-40fa-42d2-b2e1-83b2141fb687"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0109000.json",
+    "size": 1975180959,
+    "first_episode_id": "train/tie_the_bouquet_of_fake_flowers/episode_71298cf7-5eb5-471a-8494-229d9ad6b336"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0110000.json",
+    "size": 2041097980,
+    "first_episode_id": "train/put_the_screwdriver_in_the_bin/episode_7a2f4ba0-1cae-4c5b-afe5-4d7c3da6d177"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0111000.json",
+    "size": 2137415156,
+    "first_episode_id": "train/take_the_credit_cards_out_of_the_card_holder/episode_bf79d2da-035e-4a0a-917a-f3547854e168"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0112000.json",
+    "size": 2739204194,
+    "first_episode_id": "train/fold_a_paper_plane_with_a_square_sheet_of_paper_fold_left_side_to_right_side/episode_9b6fca43-deec-4424-b45b-04626c4f06c0"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0113000.json",
+    "size": 3017931901,
+    "first_episode_id": "train/fold_and_stack_the_t_shirts/episode_eee0d60b-119e-4399-a5f9-51af67ad3ad5"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0114000.json",
+    "size": 2448235271,
+    "first_episode_id": "train/open_the_pen_caps/episode_6095e3d6-1831-4d71-8adc-a7310da20a6b"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0115000.json",
+    "size": 2023778553,
+    "first_episode_id": "train/place_the_cup_by_the_coaster/episode_61a5e64e-0c30-48cc-bd58-888b3a977ec4"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0116000.json",
+    "size": 2202625905,
+    "first_episode_id": "train/put_the_files_into_the_folder/episode_76a4a4f1-8c03-457b-af9e-2babf51e8093"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0117000.json",
+    "size": 1886001589,
+    "first_episode_id": "train/unload_the_mixed_dishes_from_the_dish_rack/episode_0f21a852-7934-437f-b764-617109820c0b"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0118000.json",
+    "size": 2233071151,
+    "first_episode_id": "train/put_the_screwdriver_in_the_bin/episode_e9829573-2154-49e9-b0a1-cf72e7a4a73a"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0119000.json",
+    "size": 2952138721,
+    "first_episode_id": "train/take_the_snacks_out_of_the_paper_bag/episode_f87a75cf-a29b-4904-a4f8-d441c6346fd2"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0120000.json",
+    "size": 2510415497,
+    "first_episode_id": "train/fold_and_stack_the_long_sleeve_shirts/episode_dddea3dc-5ae7-433b-b679-389cefcadfb1"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0121000.json",
+    "size": 2167628741,
+    "first_episode_id": "train/insert_the_plug_into_the_switch_port/episode_279bb8be-6d09-49bf-a013-8a9777944330"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0122000.json",
+    "size": 2418121145,
+    "first_episode_id": "train/pack_the_student_bag/episode_0bab945e-8e44-470d-b12c-2ccf01b49db1"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0123000.json",
+    "size": 2301619804,
+    "first_episode_id": "train/place_the_shirt_on_the_hanger/episode_8bc58c02-917c-4729-8a17-c2f6f763e020"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0124000.json",
+    "size": 2105480606,
+    "first_episode_id": "train/roll_up_the_long_pants/episode_fb11aa46-16cf-4c4a-b994-e3812416c6f6"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0125000.json",
+    "size": 1769379189,
+    "first_episode_id": "train/take_the_wine_glass_off_the_wine_glass_rack/episode_64c48903-706b-47a2-9fd1-4182cb94399c"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0126000.json",
+    "size": 2185713724,
+    "first_episode_id": "train/sort_the_legos_into_containers_by_color/episode_4792c2ab-af63-4466-bf2b-1ea15c48001b"
+  },
+  {
+    "path": "v1/data/XDOF_ABC-130k_v1_0127000.json",
+    "size": 189729110,
+    "first_episode_id": "train/write_a_sentence_on_the_whiteboard/episode_5bda8454-a222-45b8-b060-419debd40f54"
+  }
+]

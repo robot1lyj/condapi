@@ -10,6 +10,8 @@ import json
 from pathlib import Path
 import random
 
+from yam_episode_exclusions import find_excluded_episodes
+
 
 def read_episode_ids(path):
     values = json.loads(Path(path).read_text())
@@ -32,6 +34,7 @@ def select_episodes(episodes, *, fps, hours, seed, excluded_ids=()):
     excluded = set(excluded_ids)
     if not excluded <= set(ids):
         raise ValueError("Excluded episode IDs missing from source")
+    excluded.update(row["episode_index"] for row in find_excluded_episodes(rows))
     random.Random(seed).shuffle(rows)
     selected, frames = [], 0
     for row in rows:
@@ -84,6 +87,7 @@ def main():
         "frames": sum(row["length"] for row in selected),
         "review_status": "candidate: verify success, task diversity and held-out split before training",
         "episodes": selected,
+        "known_qc_exclusions": find_excluded_episodes(rows),
     }
     args.output.mkdir(parents=True, exist_ok=False)
     (args.output / "episodes.json").write_text(json.dumps([row["episode_index"] for row in selected]) + "\n")

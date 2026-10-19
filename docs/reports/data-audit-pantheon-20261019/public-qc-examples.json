@@ -1,0 +1,134 @@
+[
+  {
+    "dataset": "XDOF/ABC-130k",
+    "dataset_revision": "29136bc9b9e38d320b00ffcddbbe4cd0e3278c58",
+    "episode_id": "train/sort_the_legos_into_containers_by_color/episode_0a4dea08-6998-4129-8a07-f99cfa39c28d",
+    "split": "train",
+    "duration_s": 76.903130752,
+    "num_frames": 4584,
+    "quality_status": "quarantined",
+    "flags": [
+      "native_camera_timestamp_gap",
+      "state_timestamp_gap"
+    ],
+    "unlocalized_flags": [
+      "native_camera_timestamp_gap"
+    ],
+    "annotation_file": "v1/data/XDOF_ABC-130k_v1_0022000.json",
+    "source_line_sha256": "d525ba8f34c171c7cdf57c7485fdbcadba55cf61e598ef0fc4890cab4cca5979"
+  },
+  {
+    "dataset": "XDOF/ABC-130k",
+    "dataset_revision": "29136bc9b9e38d320b00ffcddbbe4cd0e3278c58",
+    "episode_id": "train/sort_the_legos_into_containers_by_color/episode_3ad71652-3757-4eb2-bf32-22ad2495fc83",
+    "split": "train",
+    "duration_s": 76.336358016,
+    "num_frames": 4571,
+    "quality_status": "quarantined",
+    "flags": [
+      "native_camera_timestamp_gap",
+      "state_timestamp_gap",
+      "video_duplicate_frames_corrected",
+      "video_frozen_run_corrected"
+    ],
+    "unlocalized_flags": [
+      "native_camera_timestamp_gap"
+    ],
+    "annotation_file": "v1/data/XDOF_ABC-130k_v1_0023000.json",
+    "source_line_sha256": "1a497460cd3da67e9b3bc868b56be01551c706cb1e0ec793558c5854782bcc5e"
+  },
+  {
+    "dataset": "XDOF/ABC-130k",
+    "dataset_revision": "29136bc9b9e38d320b00ffcddbbe4cd0e3278c58",
+    "episode_id": "train/insert_the_wireless_bluetooth_earbuds_into_the_charging_case/episode_7e704c2d-b3f2-40a0-a3e6-d6e0294d9cfc",
+    "split": "train",
+    "duration_s": 137.7268448,
+    "num_frames": 8205,
+    "quality_status": "quarantined",
+    "flags": [
+      "native_camera_timestamp_gap",
+      "state_timestamp_gap"
+    ],
+    "unlocalized_flags": [
+      "native_camera_timestamp_gap"
+    ],
+    "annotation_file": "v1/data/XDOF_ABC-130k_v1_0034000.json",
+    "source_line_sha256": "baf417a508cbb2b8478777f4ae43e9d31e6f2f6bb692f49a933c0a1c2a0693a3"
+  },
+  {
+    "dataset": "XDOF/ABC-130k",
+    "dataset_revision": "29136bc9b9e38d320b00ffcddbbe4cd0e3278c58",
+    "episode_id": "val/sort_the_legos_into_containers_by_color/episode_3189040f-f199-4f2f-9ce8-8221ef3a12b5",
+    "split": "val",
+    "duration_s": 80.376337152,
+    "num_frames": 4794,
+    "quality_status": "quarantined",
+    "flags": [
+      "native_camera_timestamp_gap",
+      "state_timestamp_gap",
+      "visual_change_unexplained_by_action_corrected"
+    ],
+    "unlocalized_flags": [
+      "native_camera_timestamp_gap"
+    ],
+    "annotation_file": "v1/data/XDOF_ABC-130k_v1_0078000.json",
+    "source_line_sha256": "4a38f75b7dfd34955cf9a27803f0560e531db6084d8e177abf00e8bf40f48642"
+  },
+  {
+    "dataset": "XDOF/ABC-130k",
+    "dataset_revision": "29136bc9b9e38d320b00ffcddbbe4cd0e3278c58",
+    "episode_id": "train/insert_the_wireless_bluetooth_earbuds_into_the_charging_case/episode_dfd5f5fc-d90a-4a8b-9316-6023fbf86868",
+    "split": "train",
+    "duration_s": 64.533379584,
+    "num_frames": 1856,
+    "quality_status": "quarantined",
+    "flags": [
+      "native_camera_timestamp_gap",
+      "state_timestamp_gap"
+    ],
+    "unlocalized_flags": [
+      "native_camera_timestamp_gap"
+    ],
+    "annotation_file": "v1/data/XDOF_ABC-130k_v1_0098000.json",
+    "source_line_sha256": "b9b106c39ef0bbcc79f16f5b1c26f2ef554cc226a7cdeb87cba9db612d9f4845"
+  },
+  {
+    "dataset": "XDOF/ABC-130k",
+    "dataset_revision": "29136bc9b9e38d320b00ffcddbbe4cd0e3278c58",
+    "episode_id": "train/sort_the_legos_into_containers_by_color/episode_cadb3707-5774-4845-acb9-2059b73415f6",
+    "split": "train",
+    "duration_s": 75.517371904,
+    "num_frames": 2168,
+    "quality_status": "quarantined",
+    "flags": [
+      "native_camera_timestamp_gap",
+      "state_timestamp_gap",
+      "visual_change_unexplained_by_action_corrected"
+    ],
+    "unlocalized_flags": [
+      "native_camera_timestamp_gap"
+    ],
+    "annotation_file": "v1/data/XDOF_ABC-130k_v1_0103000.json",
+    "source_line_sha256": "58981ff79e3df364797b4dfcb6f63915fda875d07f1973b2d9831770e8dbb58b"
+  },
+  {
+    "dataset": "XDOF/ABC-130k",
+    "dataset_revision": "29136bc9b9e38d320b00ffcddbbe4cd0e3278c58",
+    "episode_id": "train/sort_the_legos_into_containers_by_color/episode_4792c2ab-af63-4466-bf2b-1ea15c48001b",
+    "split": "train",
+    "duration_s": 79.774605568,
+    "num_frames": 1175,
+    "quality_status": "quarantined",
+    "flags": [
+      "action_smoothness_discontinuity_corrected",
+      "native_camera_timestamp_gap",
+      "state_timestamp_gap",
+      "visual_change_unexplained_by_action_corrected"
+    ],
+    "unlocalized_flags": [
+      "native_camera_timestamp_gap"
+    ],
+    "annotation_file": "v1/data/XDOF_ABC-130k_v1_0126000.json",
+    "source_line_sha256": "d2b480b0fddd154a975d90946d5b5d101e989fd034d5d0bb97e23f2bd77085ff"
+  }
+]

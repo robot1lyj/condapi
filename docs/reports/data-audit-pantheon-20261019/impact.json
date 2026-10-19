@@ -1,0 +1,204 @@
+{
+  "annotation_repo": "sambhav-pantheon/XDOF_ABC-130k_pantheon_annotated",
+  "annotation_revision": "08345b7cbbb19581bb04d91940ef2e31e273f5d2",
+  "sample_scope": "Seven first rows of shards whose first episode belongs to either target task. Not a full manifest scan, not a random sample; counts are lower bounds.",
+  "datasets": {
+    "lego-train": {
+      "repo": "/home/wuyan/lyj/YAM/YAM_data/processed/lego_lerobot_v1_20260907/train",
+      "manifest_sha256": "9844c0b86b93fd40adf251275d770899ba413800d2a0cba11d4e9bdae40544dc",
+      "split": "train",
+      "selection_source": "published conversion manifest",
+      "original_episodes": 4458,
+      "original_frames": 10374181,
+      "excluded_episodes": [
+        {
+          "episode_index": 255,
+          "source_repo": "lerobot/abc_130k_v3_train",
+          "source_revision": "68651e4929d9fb00f798937b2d62617cab5c771d",
+          "source_episode_index": 8096,
+          "length": 2290
+        },
+        {
+          "episode_index": 565,
+          "source_repo": "lerobot/abc_130k_v3_train",
+          "source_revision": "68651e4929d9fb00f798937b2d62617cab5c771d",
+          "source_episode_index": 15948,
+          "length": 2393
+        },
+        {
+          "episode_index": 3490,
+          "source_repo": "lerobot/abc_130k_v3_train",
+          "source_revision": "68651e4929d9fb00f798937b2d62617cab5c771d",
+          "source_episode_index": 101616,
+          "length": 2307
+        },
+        {
+          "episode_index": 3919,
+          "source_repo": "lerobot/abc_130k_v3_train",
+          "source_revision": "68651e4929d9fb00f798937b2d62617cab5c771d",
+          "source_episode_index": 113728,
+          "length": 2265
+        }
+      ],
+      "retained_episodes": 4454,
+      "retained_frames": 10364926,
+      "retained_hours_at_30fps": 95.97153703703704,
+      "retained_ids_file": "retained-episode-ids/lego-train.json",
+      "status": "KNOWN_EXCLUSIONS_APPLIED_NOT_FULLY_SCREENED_NOT_TRAINING_READY",
+      "replenished": false,
+      "norm_recomputed": false
+    },
+    "lego-val": {
+      "repo": "/home/wuyan/lyj/YAM/YAM_data/processed/lego_lerobot_v1_20260907/val",
+      "manifest_sha256": "e26acdb13dd77181e01781b21e39e9efe8f50746739fccd524512868a19a4307",
+      "split": "val",
+      "selection_source": "published conversion manifest",
+      "original_episodes": 69,
+      "original_frames": 165142,
+      "excluded_episodes": [
+        {
+          "episode_index": 17,
+          "source_repo": "lerobot/abc_130k_v3_val",
+          "source_revision": "46ca817c39d3df08115a75c31b3cd3867e3d875a",
+          "source_episode_index": 455,
+          "length": 2412
+        }
+      ],
+      "retained_episodes": 68,
+      "retained_frames": 162730,
+      "retained_hours_at_30fps": 1.5067592592592594,
+      "retained_ids_file": "retained-episode-ids/lego-val.json",
+      "status": "KNOWN_EXCLUSIONS_APPLIED_NOT_FULLY_SCREENED_NOT_TRAINING_READY",
+      "replenished": false,
+      "norm_recomputed": false
+    },
+    "earbuds-train": {
+      "repo": "/home/wuyan/lyj/YAM/YAM_data/processed/earbuds_lerobot_50h_clean_v2_20261013/train",
+      "manifest_sha256": "2f0f22c91004268871e37daa13a035bf57e5c2e46b4caa0c7f1956d9338059f5",
+      "split": "train",
+      "selection_source": "published conversion manifest",
+      "original_episodes": 1384,
+      "original_frames": 5403161,
+      "excluded_episodes": [
+        {
+          "episode_index": 158,
+          "source_repo": "lerobot/abc_130k_v3_train",
+          "source_revision": "68651e4929d9fb00f798937b2d62617cab5c771d",
+          "source_episode_index": 15503,
+          "length": 4132
+        },
+        {
+          "episode_index": 556,
+          "source_repo": "lerobot/abc_130k_v3_train",
+          "source_revision": "68651e4929d9fb00f798937b2d62617cab5c771d",
+          "source_episode_index": 52311,
+          "length": 1937
+        }
+      ],
+      "retained_episodes": 1382,
+      "retained_frames": 5397092,
+      "retained_hours_at_30fps": 49.97307407407408,
+      "retained_ids_file": "retained-episode-ids/earbuds-train.json",
+      "status": "KNOWN_EXCLUSIONS_APPLIED_NOT_FULLY_SCREENED_NOT_TRAINING_READY",
+      "replenished": false,
+      "norm_recomputed": false
+    },
+    "earbuds-val": {
+      "repo": "/home/wuyan/lyj/YAM/YAM_data/processed/earbuds_lerobot_50h_clean_v2_20261013/val",
+      "manifest_sha256": "0d7e71d6447eed1391ff7c1ba782bd407234691e5989b8c18ee949c967ef0226",
+      "split": "val",
+      "selection_source": "published conversion manifest",
+      "original_episodes": 17,
+      "original_frames": 62173,
+      "excluded_episodes": [],
+      "retained_episodes": 17,
+      "retained_frames": 62173,
+      "retained_hours_at_30fps": 0.575675925925926,
+      "retained_ids_file": "retained-episode-ids/earbuds-val.json",
+      "status": "KNOWN_EXCLUSIONS_APPLIED_NOT_FULLY_SCREENED_NOT_TRAINING_READY",
+      "replenished": false,
+      "norm_recomputed": false
+    },
+    "lego-10h": {
+      "repo": "/home/wuyan/lyj/YAM/YAM_data/processed/lego_lerobot_v1_20260907/train",
+      "split": "train",
+      "selection_source": "docs/reports/training/rtc-base-10h-20260916/selection.json",
+      "selection_sha256": "e55791c255549f14ff30398d6fff80bef1a4768c06c7d4a3e54aecbcfc898a09",
+      "original_episodes": 468,
+      "original_frames": 1082232,
+      "excluded_episodes": [],
+      "retained_episodes": 468,
+      "retained_frames": 1082232,
+      "retained_hours_at_30fps": 10.020666666666667,
+      "retained_ids_file": "retained-episode-ids/lego-10h.json",
+      "status": "KNOWN_EXCLUSIONS_APPLIED_NOT_FULLY_SCREENED_NOT_TRAINING_READY",
+      "replenished": false,
+      "norm_recomputed": false
+    },
+    "lego-20h": {
+      "repo": "/home/wuyan/lyj/YAM/YAM_data/processed/lego_lerobot_v1_20260907/train",
+      "split": "train",
+      "selection_source": "docs/reports/training/rtc-base-20h-20260918/selection.json",
+      "selection_sha256": "358ec6b0f21816b871e187559626b5a7043e2e16ba7bd2c9febecd1cdc34ee90",
+      "original_episodes": 941,
+      "original_frames": 2160813,
+      "excluded_episodes": [],
+      "retained_episodes": 941,
+      "retained_frames": 2160813,
+      "retained_hours_at_30fps": 20.007527777777778,
+      "retained_ids_file": "retained-episode-ids/lego-20h.json",
+      "status": "KNOWN_EXCLUSIONS_APPLIED_NOT_FULLY_SCREENED_NOT_TRAINING_READY",
+      "replenished": false,
+      "norm_recomputed": false
+    },
+    "lego-50h": {
+      "repo": "/home/wuyan/lyj/YAM/YAM_data/processed/lego_lerobot_v1_20260907/train",
+      "split": "train",
+      "selection_source": "docs/reports/training/rtc-base-50h-20260921/selection.json",
+      "selection_sha256": "0ecabcc855d0045e76ab3c7b3db687a9f849123790e8aa8a59aa2b585511917c",
+      "original_episodes": 2337,
+      "original_frames": 5400685,
+      "excluded_episodes": [
+        {
+          "episode_index": 565,
+          "length": 2393,
+          "source_episode_index": 15948,
+          "source_repo": "lerobot/abc_130k_v3_train",
+          "source_revision": "68651e4929d9fb00f798937b2d62617cab5c771d",
+          "task": "sort the legos into containers by color"
+        },
+        {
+          "episode_index": 3490,
+          "length": 2307,
+          "source_episode_index": 101616,
+          "source_repo": "lerobot/abc_130k_v3_train",
+          "source_revision": "68651e4929d9fb00f798937b2d62617cab5c771d",
+          "task": "sort the legos into containers by color"
+        }
+      ],
+      "retained_episodes": 2335,
+      "retained_frames": 5395985,
+      "retained_hours_at_30fps": 49.96282407407407,
+      "retained_ids_file": "retained-episode-ids/lego-50h.json",
+      "status": "KNOWN_EXCLUSIONS_APPLIED_NOT_FULLY_SCREENED_NOT_TRAINING_READY",
+      "replenished": false,
+      "norm_recomputed": false
+    },
+    "lego-specialist-replay-200": {
+      "repo": "/home/wuyan/lyj/YAM/YAM_data/processed/lego_lerobot_v1_20260907/train",
+      "split": "train",
+      "selection_source": "docs/reports/training/lego-separation-20261014/bimanual100-replay100/dataset.json",
+      "selection_sha256": "121b67ae9462d52cf1089d8b502167d2a7f17311eb0a812ccff5c4b06f7ac450",
+      "original_episodes": 200,
+      "original_frames": 557032,
+      "excluded_episodes": [],
+      "retained_episodes": 200,
+      "retained_frames": 557032,
+      "retained_hours_at_30fps": 5.157703703703704,
+      "retained_ids_file": "retained-episode-ids/lego-specialist-replay-200.json",
+      "status": "KNOWN_EXCLUSIONS_APPLIED_NOT_FULLY_SCREENED_NOT_TRAINING_READY",
+      "replenished": false,
+      "norm_recomputed": false
+    }
+  }
+}

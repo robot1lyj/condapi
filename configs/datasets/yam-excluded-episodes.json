@@ -1,0 +1,125 @@
+{
+  "schema_version": 1,
+  "scope": "Verified matches only; this registry does not certify unlisted episodes as clean.",
+  "policy": "Exclude the entire matched episode from future selections; preserve originals and frozen run records.",
+  "episodes": [
+    {
+      "source_repo": "lerobot/abc_130k_v3_train",
+      "source_revision": "68651e4929d9fb00f798937b2d62617cab5c771d",
+      "split": "train",
+      "source_episode_index": 8096,
+      "raw_dataset": "XDOF/ABC-130k",
+      "raw_revision": "29136bc9b9e38d320b00ffcddbbe4cd0e3278c58",
+      "raw_episode_id": "train/sort_the_legos_into_containers_by_color/episode_3ad71652-3757-4eb2-bf32-22ad2495fc83",
+      "quality_status": "quarantined",
+      "flags": [
+        "native_camera_timestamp_gap",
+        "state_timestamp_gap",
+        "video_duplicate_frames_corrected",
+        "video_frozen_run_corrected"
+      ],
+      "identity_verified": true,
+      "evidence": "docs/reports/data-audit-pantheon-20261019/identity-matches.json"
+    },
+    {
+      "source_repo": "lerobot/abc_130k_v3_train",
+      "source_revision": "68651e4929d9fb00f798937b2d62617cab5c771d",
+      "split": "train",
+      "source_episode_index": 15503,
+      "raw_dataset": "XDOF/ABC-130k",
+      "raw_revision": "29136bc9b9e38d320b00ffcddbbe4cd0e3278c58",
+      "raw_episode_id": "train/insert_the_wireless_bluetooth_earbuds_into_the_charging_case/episode_7e704c2d-b3f2-40a0-a3e6-d6e0294d9cfc",
+      "quality_status": "quarantined",
+      "flags": [
+        "native_camera_timestamp_gap",
+        "state_timestamp_gap"
+      ],
+      "identity_verified": true,
+      "evidence": "docs/reports/data-audit-pantheon-20261019/identity-matches.json"
+    },
+    {
+      "source_repo": "lerobot/abc_130k_v3_train",
+      "source_revision": "68651e4929d9fb00f798937b2d62617cab5c771d",
+      "split": "train",
+      "source_episode_index": 15948,
+      "raw_dataset": "XDOF/ABC-130k",
+      "raw_revision": "29136bc9b9e38d320b00ffcddbbe4cd0e3278c58",
+      "raw_episode_id": "train/sort_the_legos_into_containers_by_color/episode_4792c2ab-af63-4466-bf2b-1ea15c48001b",
+      "quality_status": "quarantined",
+      "flags": [
+        "action_smoothness_discontinuity_corrected",
+        "native_camera_timestamp_gap",
+        "state_timestamp_gap",
+        "visual_change_unexplained_by_action_corrected"
+      ],
+      "identity_verified": true,
+      "evidence": "docs/reports/data-audit-pantheon-20261019/identity-matches.json"
+    },
+    {
+      "source_repo": "lerobot/abc_130k_v3_train",
+      "source_revision": "68651e4929d9fb00f798937b2d62617cab5c771d",
+      "split": "train",
+      "source_episode_index": 52311,
+      "raw_dataset": "XDOF/ABC-130k",
+      "raw_revision": "29136bc9b9e38d320b00ffcddbbe4cd0e3278c58",
+      "raw_episode_id": "train/insert_the_wireless_bluetooth_earbuds_into_the_charging_case/episode_dfd5f5fc-d90a-4a8b-9316-6023fbf86868",
+      "quality_status": "quarantined",
+      "flags": [
+        "native_camera_timestamp_gap",
+        "state_timestamp_gap"
+      ],
+      "identity_verified": true,
+      "evidence": "docs/reports/data-audit-pantheon-20261019/identity-matches.json"
+    },
+    {
+      "source_repo": "lerobot/abc_130k_v3_train",
+      "source_revision": "68651e4929d9fb00f798937b2d62617cab5c771d",
+      "split": "train",
+      "source_episode_index": 101616,
+      "raw_dataset": "XDOF/ABC-130k",
+      "raw_revision": "29136bc9b9e38d320b00ffcddbbe4cd0e3278c58",
+      "raw_episode_id": "train/sort_the_legos_into_containers_by_color/episode_0a4dea08-6998-4129-8a07-f99cfa39c28d",
+      "quality_status": "quarantined",
+      "flags": [
+        "native_camera_timestamp_gap",
+        "state_timestamp_gap"
+      ],
+      "identity_verified": true,
+      "evidence": "docs/reports/data-audit-pantheon-20261019/identity-matches.json"
+    },
+    {
+      "source_repo": "lerobot/abc_130k_v3_train",
+      "source_revision": "68651e4929d9fb00f798937b2d62617cab5c771d",
+      "split": "train",
+      "source_episode_index": 113728,
+      "raw_dataset": "XDOF/ABC-130k",
+      "raw_revision": "29136bc9b9e38d320b00ffcddbbe4cd0e3278c58",
+      "raw_episode_id": "train/sort_the_legos_into_containers_by_color/episode_cadb3707-5774-4845-acb9-2059b73415f6",
+      "quality_status": "quarantined",
+      "flags": [
+        "native_camera_timestamp_gap",
+        "state_timestamp_gap",
+        "visual_change_unexplained_by_action_corrected"
+      ],
+      "identity_verified": true,
+      "evidence": "docs/reports/data-audit-pantheon-20261019/identity-matches.json"
+    },
+    {
+      "source_repo": "lerobot/abc_130k_v3_val",
+      "source_revision": "46ca817c39d3df08115a75c31b3cd3867e3d875a",
+      "split": "val",
+      "source_episode_index": 455,
+      "raw_dataset": "XDOF/ABC-130k",
+      "raw_revision": "29136bc9b9e38d320b00ffcddbbe4cd0e3278c58",
+      "raw_episode_id": "val/sort_the_legos_into_containers_by_color/episode_3189040f-f199-4f2f-9ce8-8221ef3a12b5",
+      "quality_status": "quarantined",
+      "flags": [
+        "native_camera_timestamp_gap",
+        "state_timestamp_gap",
+        "visual_change_unexplained_by_action_corrected"
+      ],
+      "identity_verified": true,
+      "evidence": "docs/reports/data-audit-pantheon-20261019/identity-matches.json"
+    }
+  ]
+}

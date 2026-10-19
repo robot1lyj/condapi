@@ -14,6 +14,7 @@ from pathlib import Path
 import time
 
 from select_lego_rtc_episodes import select_episodes
+from yam_episode_exclusions import find_excluded_episodes
 
 
 def audit_episode(task):
@@ -88,6 +89,12 @@ def main():
     root = args.source.resolve()
     blobs = {split: (root / "manifests" / f"{split}.jsonl").read_bytes() for split in ("train", "val")}
     rows = {split: [json.loads(line) for line in blob.splitlines() if line.strip()] for split, blob in blobs.items()}
+    qc_exclusions = {
+        split: find_excluded_episodes(
+            [dict(row, episode_index=row["source_episode_index"]) for row in members], split=split
+        )
+        for split, members in rows.items()
+    }
     if {row["fps"] for split in rows.values() for row in split} != {30}:
         raise ValueError("Expected a consistent 30fps source")
     args.output.mkdir(parents=True, exist_ok=False)
@@ -95,10 +102,11 @@ def main():
         (args.output / f"source-{split}.jsonl").write_bytes(blob)
     (args.output / "contract.json").write_bytes(args.contract.read_bytes())
     results = {"train": {}, "val": {}}
-    excluded = set()
+    excluded = {row["source_episode_index"] for row in qc_exclusions["train"]}
     started = time.monotonic()
     with ProcessPoolExecutor(max_workers=args.workers) as pool, (args.output / "audit.jsonl").open("x") as log:
-        pending_val = rows["val"]
+        qc_excluded_val = {row["source_episode_index"] for row in qc_exclusions["val"]}
+        pending_val = [row for row in rows["val"] if row["source_episode_index"] not in qc_excluded_val]
         while True:
             selected = choose(rows["train"], excluded, 50, 42)
             pending_train = [row for row in selected if row["source_episode_index"] not in results["train"]]
@@ -132,7 +140,7 @@ def main():
         if (root / "manifests" / f"{split}.jsonl").read_bytes() != blob:
             raise RuntimeError("Source manifest changed during audit")
     selected = choose(rows["train"], excluded, 50, 42)
-    excluded_val = [key for key, value in results["val"].items() if value["status"] == "excluded"]
+    excluded_val = qc_excluded_val | {key for key, value in results["val"].items() if value["status"] == "excluded"}
     valid_val = [row for row in rows["val"] if row["source_episode_index"] not in excluded_val]
     if not valid_val:
         raise RuntimeError("No valid held-out episodes remain")
@@ -152,6 +160,10 @@ def main():
         "val_frames": sum(row["length"] for row in valid_val),
         "excluded_val_source_episode_ids": sorted(excluded_val),
         "excluded_source_episode_ids": sorted(excluded),
+        "known_qc_exclusions": {
+            split: [{key: value for key, value in row.items() if key != "episode_index"} for row in members]
+            for split, members in qc_exclusions.items()
+        },
         "selected_episodes": selected,
         "review_status": "all selected numeric rows and all three videos fully audited; success not manually reviewed",
         "exclusion_policy": "whole episode excluded; original files retained; no frame trimming or repair; replenish in fixed seed42 order",

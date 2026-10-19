@@ -176,3 +176,4 @@ cython_debug/
 
 # Live training dashboard mirrors (not evidence records).
 artifacts/training_dashboard/
+artifacts/pantheon-audit-20261019/

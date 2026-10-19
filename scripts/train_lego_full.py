@@ -11,6 +11,7 @@ import re
 import jax
 from select_lego_rtc_episodes import read_episode_ids
 import train
+from yam_episode_exclusions import require_no_excluded_episodes
 
 from openpi.training import checkpoints
 from openpi.training import config as configs
@@ -126,6 +127,7 @@ def make_config(
 
 def check_training_contract(config, control):
     """Pin the objective, subset, parent and norm across restarts of a new run."""
+    require_no_excluded_episodes(config.data.repo_id, config.data.base_config.train_episodes)
     norm_path = Path(config.data.assets.assets_dir) / "yam" / "norm_stats.json"
     record = {
         "model": dataclasses.asdict(config.model),
