@@ -10,7 +10,7 @@ OpenWAM独立镜像、官方权重、LoRA合并与压缩候选见 [14 · OpenWAM
 
 ## 1. 当前决策
 
-- **2026-10-19 15:32 CST：DAgger专项10000已确认在线，未重启**：用户要求开启，现场原`pi05-rtc-infer`已运行同一10000引擎/容器ID，原MAXN watcher active、GPU1575MHz，故未重启或重转换。固定`ws://192.168.250.1:8000`/healthz OK；本次真实九例d=0/1/10协议通过，有限50×14、前缀精确，weight/norm/engine匹配。七步FP32＋TF32、quantile、缓存80/CUDA Graph、dmax10/0.2rad/tick不变；本机服务推理197.44/198.39ms、往返198.07/199.30ms（P50/P95），是九例快照，不代表尾延迟消失或3588全链路。原15日精度/转换及19日回执归[10000报告](reports/thor/rtc-separation-r1-10000-20261015/README.md)，7000/旧产物保留，CPU审阅页继续运行，无删除、无3588操作或客户端消息。下条30000为历史。
+- **2026-10-21 18:20 CST：耳机50h112000已上线**。用户授权的`earbuds_pi05_rtc_base_50h_20261012/112000`经20项SHA、非有限0、811张量FP32保真、真实耳机val0/1/2九例JAX/Torch/TRT及两轮协议通过，运行在原`pi05-rtc-infer`/`ws://192.168.250.1:8000`，healthz OK，`thor-pi-maxn-earbuds112000-20261021.service` active/MAXN。七步FP32＋TF32、quantile、缓存80/CUDA Graph/dmax10/0.2rad/tick不变；最大单关节数值差0.000810rad、夹爪0.000558，稳态纯推理184.55/185.81ms，正式本机往返192.83/203.95ms（P50/P95），不代表3588全链路或任务效果。原DAgger10000停止保留为`pi05-rtc-separation10000-preserved-20261021`，原始权重/引擎不删，CPU审阅页不动。模型身份、英文prompt、回执/回退及v3数据提取归[耳机112000报告](reports/thor/rtc-earbuds-112000-20261021/README.md)；此前10000在线复核归[原报告](reports/thor/rtc-separation-r1-10000-20261015/README.md)。不训练、不操作3588或发送客户端任务，下条30000为历史。
 
 - 2026-09-18 09:33 CST，固定 `ws://192.168.250.1:8000` 由**修正分位数前缀**的30000 RTC七步FP32权重＋TF32 TensorRT Docker `pi05-rtc-infer` 提供，MAXN临时会话运行。已核验新版回执绑定、原9例两轮与事故4例本机WebSocket输出有限50×14、前缀不变、事故集最大新后缀关节步进0.0924rad/tick。首轮9例本机往返P50约193.9ms，事故4例约202.6ms；第二轮9例偶发约390ms往返，服务推理仍约193–194ms，成因未知。旧错误前缀的7/10步验证和BF16候选不得作上线精度依据；旧10步不是安全回退。**3588端到端/真机效果未验收**，详见[事故报告更新](reports/thor/rtc-prefix-quantile-incident-20260917.md#2026-09-18-更新新版服务与-thor-本机协议测试)。推理/测试阶段MAXN、容器停止后回120W；不设开机持久化。
 

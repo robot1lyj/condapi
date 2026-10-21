@@ -1,0 +1,44 @@
+{
+  "run_id": "rtc-earbuds-112000-trt-tf32-cache80-7step-20261021-r1",
+  "phase": "engine_build_tactic_profile",
+  "started_at": "2026-10-21T10:14:10.033997+00:00",
+  "status": "built_experiment_not_accuracy_validated",
+  "source_export": "/artifacts/rtc-earbuds-112000-onnx-fp32-cache80-7step-20261021-r1",
+  "source_export_report_sha256": "69383133ee7b347758d346273c3bdca8320156e0dddfd065568dd74784b5d052",
+  "source_onnx_sha256": "4e641c442e9e81d67ec81c15d5bc66b439a5323f6b2a0823081a40eec2bb851a",
+  "external_weights_sha256": {
+    "sampler.onnx.data": "54cdb2664e22b115ff1b0aeab3fd3c1c10190ee84adaa61b64df7f851acac384"
+  },
+  "tensorrt_version": "10.16.1.11",
+  "command": [
+    "/usr/src/tensorrt/bin/trtexec",
+    "--onnx=/artifacts/rtc-earbuds-112000-onnx-fp32-cache80-7step-20261021-r1/sampler.onnx",
+    "--saveEngine=/artifacts/rtc-earbuds-112000-trt-tf32-cache80-7step-20261021-r1/sampler.engine",
+    "--stronglyTyped",
+    "--skipInference",
+    "--builderOptimizationLevel=3",
+    "--maxAuxStreams=0",
+    "--memPoolSize=workspace:8192",
+    "--profilingVerbosity=detailed",
+    "--exportLayerInfo=/artifacts/rtc-earbuds-112000-trt-tf32-cache80-7step-20261021-r1/layers.json",
+    "--timingCacheFile=/artifacts/rtc-earbuds-112000-trt-tf32-cache80-7step-20261021-r1/timing.cache"
+  ],
+  "tf32": true,
+  "precision_candidate_kind": "tf32",
+  "quantization": null,
+  "strongly_typed": true,
+  "contract": {
+    "views": 3,
+    "image_resolution": [
+      224,
+      224
+    ],
+    "horizon": 50,
+    "steps": 7,
+    "action_dim": 32
+  },
+  "exit_code": 0,
+  "build_s": 249.01815739599988,
+  "engine_sha256": "26839aac33baa2b64adb9b3ba9d2e5fcd5d4c538ddfd99e103560633180cd6e5",
+  "finished_at": "2026-10-21T10:18:37.125763+00:00"
+}
