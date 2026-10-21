@@ -1,5 +1,9 @@
 # 01 · 系统架构
 
+## 耳机 RECAP 与 FLORA 适配提案
+
+2026-10-21 用户要求研究 RECAP、FLORA 和 Evo-RL，并优先做耳机入盒 RL。[适配方案](reports/rl/earbuds-recap-flora-20261021/README.md)建议以现有 Pi0.5 耳机 SFT 为起点，由服务器离线标注和学习价值，以优势条件更新原生 OpenPI 策略，Thor 保留 Pi/RTC 推理。方案待审核；尚未生成训练配置、命令或作业，未操作远端设备或发送客户端任务。下方 EXPO-FT 保留为此前设计，不能将两者视为已接通能力。
+
 ## EXPO-FT 强化学习架构（2026-10-10，设计草案）
 
 本轮目标是乐高按颜色分拣与蓝牙耳机入充电盒的 RL 微调。**旧 PARTS、RLT、Cal-QL/SAC residual-rl 实现已退役；新 EXPO-FT 学习器尚未实现、未训练、未部署。** 用户授权本仓库清理与设计；YAM 为只读参考，客户端方案尚未发送任务。普通 Pi/RTC、数据、权重及历史证据保留。详见 [论文与代码审读](reports/rl/expo-ft-20261010/README.md)、[训练设计](03_training_and_evaluation.md#expo-ft-学习与评估设计2026-10-10)、[数据核验](04_data_contracts.md#expo-ft-双任务数据合同2026-10-10)、[协议设计](05_inference_and_rollout.md#expo-ft-三方接口草案2026-10-10)。

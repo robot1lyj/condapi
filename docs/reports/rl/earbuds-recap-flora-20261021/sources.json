@@ -1,0 +1,90 @@
+{
+  "review_date": "2026-10-21",
+  "timezone": "Asia/Shanghai",
+  "scope": "耳机入盒 RECAP 与 FLORA 适配研究及密集标注后训练证据",
+  "local_code_review_base": "30bf34a2b7359afb4e8ee6f116106d96991d2698",
+  "sources": [
+    {
+      "id": "recap",
+      "title": "pi-star-0.6: a VLA That Learns From Experience",
+      "url": "https://www.pi.website/download/pistar06.pdf",
+      "reviewed": "方法第 IV–V 节和附录 F；价值、优势条件、奖励及数据来源"
+    },
+    {
+      "id": "pi06-model-card",
+      "url": "https://website.pi-asset.com/pi06star/PI06_model_card.pdf",
+      "reviewed": "Gemma 3 4B、动作专家、图像和 Knowledge Insulation；区分基座升级与后训练"
+    },
+    {
+      "id": "flora-paper",
+      "url": "https://research.nvidia.com/labs/gear/flora/assets/paper/flora.pdf?v=2026-10-19c",
+      "sha256": "c661979db3c1fbc7740b67fbc9efb2935dd672e71d98c408f0d19add7e1404ba",
+      "reviewed": "模型分工、过程与结果奖励、rubric 和过程评分评测；不推定本项目下游收益"
+    },
+    {
+      "id": "flora-rewarder",
+      "url": "https://huggingface.co/nvidia/Flora-Rewarder",
+      "revision": "7de68d22c4a9decec5ddb7f86ddcaee8f82d3367",
+      "reviewed": "模型卡的输入输出、规模、部署及非商业研究用途"
+    },
+    {
+      "id": "flora-captioner",
+      "url": "https://huggingface.co/nvidia/Flora-Captioner",
+      "revision": "f736ca36925ae55d2f7915993ed1bc9f87288bb3",
+      "reviewed": "模型身份与动作语义标注用途"
+    },
+    {
+      "id": "evo-paper",
+      "title": "Evo-RL: Iterative Robot Reinforcement Learning from Selective Experience",
+      "url": "https://arxiv.org/html/2610.13345v1",
+      "reviewed": "成功轨迹、人工纠正、接管成本、价值与优势筛选；区分于 RECAP"
+    },
+    {
+      "id": "evo-code",
+      "url": "https://github.com/MINT-SJTU/Evo-RL",
+      "revision": "ec9842d8a8dd0371b4b50021547552e4608ec5ee",
+      "files_reviewed": [
+        "README.md",
+        "src/lerobot/values/pistar06/configuration_pistar06.py",
+        "src/lerobot/configs/value_reward.py",
+        "src/lerobot/values/rewards.py"
+      ],
+      "reviewed": "分布价值头、vision-only 可选路线、成功轨迹目标的限制、原地回写与 ACP 示例"
+    },
+    {
+      "id": "steerable-policies",
+      "title": "Steerable Vision-Language-Action Policies for Embodied Reasoning and Hierarchical Control",
+      "year": 2026,
+      "url": "https://arxiv.org/html/2602.13193v1",
+      "project_url": "https://steerable-policies.github.io/",
+      "reviewed": "多粒度合成命令、OpenVLA/Pi0.5 适配和高低层接口"
+    },
+    {
+      "id": "stake",
+      "title": "Improving Vision-Language-Action Model Fine-Tuning with Structured Stage and Keyframe Supervision",
+      "year": 2026,
+      "url": "https://arxiv.org/html/2606.26801v1",
+      "reviewed": "Pi0.5 阶段与关键帧辅助监督、仿真结果及消融；推理保留 query token"
+    },
+    {
+      "id": "ecot",
+      "title": "Robotic Control via Embodied Chain-of-Thought Reasoning",
+      "year": 2024,
+      "revision_year": 2025,
+      "url": "https://arxiv.org/html/2407.08693v3",
+      "reviewed": "合成结构推理、从发布 OpenVLA 继续微调，以及通用 VL 共训的有限收益"
+    },
+    {
+      "id": "thinkact",
+      "title": "ThinkAct: Vision-Language-Action Reasoning via Reinforced Visual Latent Planning",
+      "year": 2025,
+      "url": "https://arxiv.org/html/2507.16815v2",
+      "reviewed": "高层 SFT/强化微调与动作模型条件适配的分工"
+    }
+  ],
+  "limitations": [
+    "只做公开资料、上游代码和本地仓库审读，没有运行模型或训练",
+    "未下载模型权重，未操作服务器或机器人",
+    "架构及实验因素是待审核提案，不是可执行训练配方"
+  ]
+}
