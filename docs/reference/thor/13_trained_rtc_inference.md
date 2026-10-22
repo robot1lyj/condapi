@@ -1,8 +1,8 @@
 # 13 · Pi0.5 training-time RTC：Thor 转换与推理候选
 
-## 当前：乐高50h200000已恢复，耳机114000停止保留（2026-10-22）
+## 当前：乐高50h200000已暂停，Thor恢复120W（2026-10-22）
 
-16:35 CST按用户指定恢复`lego_pi05_rtc_base_50h_20260921/200000`，不是DAgger。复用旧引擎与原Pi服务/8000，healthz OK，MAXN unit `thor-pi-maxn-50h200000-resume-20261022.service`按容器唯一ID监控、GPU1575MHz。真实九例d=0/1/10通过，全部有限50×14、前缀精确，权重/norm/engine指纹匹配；七步FP32＋TF32、quantile、缓存80/CUDA Graph/dmax10/0.2rad/tick不变。推理P50/P95=196.39/206.99ms、本机往返196.96/208.24ms，不代表3588全链路或任务效果。耳机114000停止保留为`pi05-rtc-earbuds114000-preserved-20261022`，旧MAXN已正常退出；未下载、重转换或删除资产。当前证据归[20万报告](../../reports/thor/rtc-50h-200000-20261010/README.md)及[08](../../08_thor_edge_deployment.md)。耳机历史验收和112000永久清理归[114000报告](../../reports/thor/rtc-earbuds-114000-20261022/README.md)，不能本地回退112000。不训练、不操作3588或发送客户端任务；以下在线状态均为历史。
+17:45 CST用户要求暂停推理：`pi05-rtc-infer`已停止（running=false），其`thor-pi-maxn-50h200000-resume-20261022.service` inactive，实查120W/模式1。保留乐高50h200000的既有容器、七步FP32＋TF32/quantile RTC引擎和原8000配置，耳机114000停止备份亦保留；无删除、不自动恢复、不操作3588。此前16:35真实九例恢复验收与指纹归[20万报告](../../reports/thor/rtc-50h-200000-20261010/README.md)；当前状态归[08](../../08_thor_edge_deployment.md)。耳机历史验收和112000永久清理归[114000报告](../../reports/thor/rtc-earbuds-114000-20261022/README.md)，不能本地回退112000。以下在线记录均为历史，恢复前重新观测。
 
 ## 已验收基线：240000＋DAgger专项7000（2026-10-15）
 
