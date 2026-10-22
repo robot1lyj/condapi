@@ -9,6 +9,7 @@ from types import SimpleNamespace
 import jax
 import jax.numpy as jnp
 import numpy as np
+import orbax.checkpoint as ocp
 
 from openpi.training import numerical_evidence as evidence
 from openpi.training.numerical_diagnostics import NumericalDiagnostics
@@ -48,6 +49,19 @@ def main():
     assert bad["device_id"] == devices[1].id
     assert bad["integers"][1:4] == [1, 1, 0]
     assert bad["index"] == [[2, 4, None]]
+    # Exercise the exact kind of buffers used by a resumed native trainer,
+    # rather than relying exclusively on explicitly committed device_put arrays.
+    with ocp.PyTreeCheckpointer() as checkpointer:
+        checkpoint_path = args.output.resolve() / "synthetic-orbax-state"
+        checkpointer.save(checkpoint_path, {"restored_shards": array})
+        restored_state = checkpointer.restore(
+            checkpoint_path,
+            item={"restored_shards": jax.ShapeDtypeStruct(array.shape, array.dtype, sharding=spec)},
+            restore_args={"restored_shards": ocp.ArrayRestoreArgs(restore_type=jax.Array, sharding=spec)},
+        )
+    restored_stats = diagnostic.inspect(restored_state, "orbax_restored")
+    assert restored_stats["summary"]["bad_shards"][0]["device_id"] == devices[1].id
+    assert restored_stats["summary"]["bad_shards"][0]["integers"][1:4] == [1, 1, 0]
     assert np.isclose(result["summary"]["stable_finite_values_l2"], np.sqrt(2) * 1e30, rtol=1e-6)
     assert not evidence.gradient_verdict(0.01, float("inf"), result["summary"])["update_allowed"]
     large = jax.device_put(np.array([1e30, -1e30], np.float32), devices[0])
@@ -100,6 +114,7 @@ def main():
             "correct_bad_device": bad["device_id"],
             "shard_metadata_and_tensor_readback": "passed",
             "stable_large_value_norm": "passed",
+            "orbax_restored_shard_placement": "passed",
         },
     )
     print("NUMERICAL_EVIDENCE_SELF_CHECK=PASS", flush=True)

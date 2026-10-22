@@ -65,7 +65,9 @@ class NumericalDiagnostics:
         self.directory = Path(directory).resolve()
         self.directory.mkdir(parents=True, mode=0o700, exist_ok=False)
         self.journal = (self.directory / "steps.jsonl").open("x", buffering=1)
-        self.statistics = jax.jit(local_statistics)
+        # Orbax-restored shard buffers can be uncommitted. Pin each executable
+        # explicitly, otherwise JAX 0.5.x may reuse a cuda:0 placement for cuda:1.
+        self.statistics = {device.id: jax.jit(local_statistics, device=device) for device in jax.local_devices()}
         self.schemas = {}
         self.failure_written = False
         self.context = {}
@@ -142,7 +144,9 @@ class NumericalDiagnostics:
         pending = []
         for device_id in sorted(by_device):
             group = by_device[device_id]
-            pending.append(([item for item, _ in group], self.statistics(tuple(array for _, array in group))))
+            pending.append(
+                ([item for item, _ in group], self.statistics[device_id](tuple(array for _, array in group)))
+            )
         records, schema = [], []
         for descriptions, values in pending:
             integers, floats = jax.device_get(values)
