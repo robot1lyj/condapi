@@ -1,0 +1,302 @@
+[
+  {
+    "source": "yam-server:/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_20261012/slurm-2328.log",
+    "local": "raw/earbuds_pi05_rtc_base_50h_20261012/slurm-2328.log",
+    "bytes": 1497,
+    "sha256": "6b31c1d7daec620262bb68a53b671dcdc8225ddcf1e79b1ab6276cfaec3a2dc8"
+  },
+  {
+    "source": "yam-server:/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_20261012/resume_config.json",
+    "local": "raw/earbuds_pi05_rtc_base_50h_20261012/resume_config.json",
+    "bytes": 21329,
+    "sha256": "a9d93c1bb986487dfd49eae6c251868b3a7379e78b27ab1dda980923f9129970"
+  },
+  {
+    "source": "yam-server:/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_20261012/train.log",
+    "local": "raw/earbuds_pi05_rtc_base_50h_20261012/train.log",
+    "bytes": 13636867,
+    "sha256": "6018d96598e21a9f790e2d947d3567f15f959afd3781a9c9c86e2245a52e02a0"
+  },
+  {
+    "source": "yam-server:/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_20261012/normprep-2548.log",
+    "local": "raw/earbuds_pi05_rtc_base_50h_20261012/normprep-2548.log",
+    "bytes": 8538,
+    "sha256": "ac16d6e94ca6a223c049098eb9c3ca68f5e041a7e4ff3eea79377abb850bc84d"
+  },
+  {
+    "source": "yam-server:/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_20261012/recovery.log",
+    "local": "raw/earbuds_pi05_rtc_base_50h_20261012/recovery.log",
+    "bytes": 129454,
+    "sha256": "170edde61af2dad39a2a87372fcb992dda79d4a62ab3d384a9395b019f211b6b"
+  },
+  {
+    "source": "yam-server:/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_20261021/data-gate.json",
+    "local": "raw/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_20261021/data-gate.json",
+    "bytes": 1564,
+    "sha256": "d9b7cc075f95171bc6012a44a33e64931d26276a8f0f4a166ce150995671201f"
+  },
+  {
+    "source": "yam-server:/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_20261021/gpu-probe-excl-pantheon.sbatch",
+    "local": "raw/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_20261021/gpu-probe-excl-pantheon.sbatch",
+    "bytes": 972,
+    "sha256": "e33e5b56a7dd9647edcc46dbdeff52596b396077b4f3db43bfa89fbc822a14ea"
+  },
+  {
+    "source": "yam-server:/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_20261021/gpu-health-2549.log",
+    "local": "raw/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_20261021/gpu-health-2549.log",
+    "bytes": 196,
+    "sha256": "6ec44c4c6e977cca25486f1ba1137647b8c49755109ff9e5ccc265736faf5a20"
+  },
+  {
+    "source": "yam-server:/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_20261021/training_contract.json",
+    "local": "raw/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_20261021/training_contract.json",
+    "bytes": 13604,
+    "sha256": "277ff178033c9f87eca6ee99276b29c3cfe96c7faf9cc165de2e52d0985b1924"
+  },
+  {
+    "source": "yam-server:/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_20261021/initial_config.json",
+    "local": "raw/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_20261021/initial_config.json",
+    "bytes": 21366,
+    "sha256": "72bf2a61e5a398190720ea06aa0d06d307fc269f3f2f892e23d92a3e7a2c2a3f"
+  },
+  {
+    "source": "yam-server:/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_20261021/train-excl-pantheon.sbatch",
+    "local": "raw/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_20261021/train-excl-pantheon.sbatch",
+    "bytes": 3700,
+    "sha256": "3eb559eb4a250d46a24f2015448fc2823ad56010483670f6174dd95a502a186a"
+  },
+  {
+    "source": "yam-server:/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_20261021/resume-excl-pantheon.sbatch",
+    "local": "raw/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_20261021/resume-excl-pantheon.sbatch",
+    "bytes": 2604,
+    "sha256": "60b555f2d2d8e8469a0bf5ad89398c80f13dc7a40336dbb42c85b933ba528e9f"
+  },
+  {
+    "source": "yam-server:/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_20261021/train-2550.log",
+    "local": "raw/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_20261021/train-2550.log",
+    "bytes": 94260,
+    "sha256": "44b923add88c28c5601b605bdafe7d1da200be8223903a7cada55ef702f49f18"
+  },
+  {
+    "source": "yam-server:/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_20261021/recovery.log",
+    "local": "raw/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_20261021/recovery.log",
+    "bytes": 3922,
+    "sha256": "62a2e05eccc2fc1d7745562d85057a0d2f844d1c5fb1538e56d9846cc5a8d127"
+  },
+  {
+    "source": "yam-server:/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry1_20261022/gpu-probe-excl-pantheon.sbatch",
+    "local": "raw/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry1_20261022/gpu-probe-excl-pantheon.sbatch",
+    "bytes": 979,
+    "sha256": "e6e3b708221a8e06ceddca13fe34b78a7061a1abf5d90dc55c42c60839275218"
+  },
+  {
+    "source": "yam-server:/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry1_20261022/gpu-health-2551.log",
+    "local": "raw/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry1_20261022/gpu-health-2551.log",
+    "bytes": 196,
+    "sha256": "6ec44c4c6e977cca25486f1ba1137647b8c49755109ff9e5ccc265736faf5a20"
+  },
+  {
+    "source": "yam-server:/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry1_20261022/initial_config.json",
+    "local": "raw/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry1_20261022/initial_config.json",
+    "bytes": 21373,
+    "sha256": "173ec73a7a0c86ee8b1f875526ede0e2c808cf267c5875b03fa38f773d3f15bd"
+  },
+  {
+    "source": "yam-server:/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry1_20261022/training_contract.json",
+    "local": "raw/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry1_20261022/training_contract.json",
+    "bytes": 13604,
+    "sha256": "277ff178033c9f87eca6ee99276b29c3cfe96c7faf9cc165de2e52d0985b1924"
+  },
+  {
+    "source": "yam-server:/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry1_20261022/resume-excl-pantheon.sbatch",
+    "local": "raw/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry1_20261022/resume-excl-pantheon.sbatch",
+    "bytes": 2618,
+    "sha256": "f29d4286f9c9eb558b7a655283c6bbf0f90cb928d57a14224e13cb7f760fe8e4"
+  },
+  {
+    "source": "yam-server:/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry1_20261022/train-excl-pantheon.sbatch",
+    "local": "raw/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry1_20261022/train-excl-pantheon.sbatch",
+    "bytes": 3948,
+    "sha256": "55132307dd8121961cad8a09860788c436d0a909dc58149daea9cad076bea5ec"
+  },
+  {
+    "source": "yam-server:/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry1_20261022/train-2552.log",
+    "local": "raw/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry1_20261022/train-2552.log",
+    "bytes": 120481,
+    "sha256": "4a5e3572c51a8e3c75f3635e5a139fc9df73a194122d8dd2e7ff7fae146805c1"
+  },
+  {
+    "source": "yam-server:/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry1_20261022/recovery.log",
+    "local": "raw/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry1_20261022/recovery.log",
+    "bytes": 4195,
+    "sha256": "44a86b3aef7b7a9e4a5f2361bddb6b3a03d2f86d036e4667f4bce7fb500804c1"
+  },
+  {
+    "source": "yam-server:/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry2_20261022/gpu-probe-excl-pantheon.sbatch",
+    "local": "raw/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry2_20261022/gpu-probe-excl-pantheon.sbatch",
+    "bytes": 979,
+    "sha256": "933dcef470072d6b5d12e564fa00870a1de5f4b956ea5fdda4c3701df44fd071"
+  },
+  {
+    "source": "yam-server:/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry2_20261022/train-excl-pantheon.sbatch",
+    "local": "raw/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry2_20261022/train-excl-pantheon.sbatch",
+    "bytes": 3948,
+    "sha256": "b6ac904e8e694391cb14ec2d2e8eb11d65891f8e330b4e2ab9fdb16280c87e72"
+  },
+  {
+    "source": "yam-server:/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry2_20261022/resume-excl-pantheon.sbatch",
+    "local": "raw/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry2_20261022/resume-excl-pantheon.sbatch",
+    "bytes": 2618,
+    "sha256": "4b3392ff9b4c887f581beb7ab5e0c9d49b9714bcfe94b34d306247dc2358a447"
+  },
+  {
+    "source": "yam-server:/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry2_20261022/training_contract.json",
+    "local": "raw/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry2_20261022/training_contract.json",
+    "bytes": 13790,
+    "sha256": "0d3598e0406dcaa8e9cb96e4729988c90c8e76f50e921d81012e7ba45cba1ddc"
+  },
+  {
+    "source": "yam-server:/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry2_20261022/gpu-health-2553.log",
+    "local": "raw/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry2_20261022/gpu-health-2553.log",
+    "bytes": 196,
+    "sha256": "6ec44c4c6e977cca25486f1ba1137647b8c49755109ff9e5ccc265736faf5a20"
+  },
+  {
+    "source": "yam-server:/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry2_20261022/train-2554.log",
+    "local": "raw/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry2_20261022/train-2554.log",
+    "bytes": 1411,
+    "sha256": "793b953777791ad4a21090befd8366fe5ef788fd246f03de9e545bb130cc2646"
+  },
+  {
+    "source": "yam-server:/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry2_20261022/recovery.log",
+    "local": "raw/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry2_20261022/recovery.log",
+    "bytes": 1623,
+    "sha256": "efe5a09f9726aad9b3a21b20b6ce547ae5e298bf1e53bbba7c887b0181c67fcf"
+  },
+  {
+    "source": "yam-server:/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry3_20261022/gpu-probe-excl-pantheon.sbatch",
+    "local": "raw/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry3_20261022/gpu-probe-excl-pantheon.sbatch",
+    "bytes": 979,
+    "sha256": "db62f7f7af6cb403c94e404a2fc94e27218ef7c5e88d741cb5f347abbbfba1d0"
+  },
+  {
+    "source": "yam-server:/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry3_20261022/train-excl-pantheon.sbatch",
+    "local": "raw/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry3_20261022/train-excl-pantheon.sbatch",
+    "bytes": 3948,
+    "sha256": "d31def11919da4914a09d402f93743ed075e1df2578202ddbae702e2db24989c"
+  },
+  {
+    "source": "yam-server:/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry3_20261022/resume-excl-pantheon.sbatch",
+    "local": "raw/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry3_20261022/resume-excl-pantheon.sbatch",
+    "bytes": 2618,
+    "sha256": "7aabd127cb24dfc9a90bb44a17ab33585f3b7070dbd43e7fe5b1a7281f4c6071"
+  },
+  {
+    "source": "yam-server:/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry3_20261022/gpu-health-2555.log",
+    "local": "raw/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry3_20261022/gpu-health-2555.log",
+    "bytes": 196,
+    "sha256": "6ec44c4c6e977cca25486f1ba1137647b8c49755109ff9e5ccc265736faf5a20"
+  },
+  {
+    "source": "yam-server:/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry3_20261022/training_contract.json",
+    "local": "raw/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry3_20261022/training_contract.json",
+    "bytes": 13604,
+    "sha256": "277ff178033c9f87eca6ee99276b29c3cfe96c7faf9cc165de2e52d0985b1924"
+  },
+  {
+    "source": "yam-server:/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry3_20261022/initial_config.json",
+    "local": "raw/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry3_20261022/initial_config.json",
+    "bytes": 21373,
+    "sha256": "d5b26fc9b329b0a230b9b80aee6a6924e6c627d95858c51aaf6933864815dbca"
+  },
+  {
+    "source": "yam-server:/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry3_20261022/train-2556.log",
+    "local": "raw/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry3_20261022/train-2556.log",
+    "bytes": 99966,
+    "sha256": "2a4136a332d182ba8bed534c31899cd041c820a2558aedc362e86a2124c4179a"
+  },
+  {
+    "source": "yam-server:/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry3_20261022/recovery.log",
+    "local": "raw/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry3_20261022/recovery.log",
+    "bytes": 3508,
+    "sha256": "f263e10037cc7d3d9a15d0ebe1470c7cba753fc771cd1c3a86070c07ff47d7ab"
+  },
+  {
+    "source": "yam-server:/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/gpu-probe-excl-pantheon.sbatch",
+    "local": "raw/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/gpu-probe-excl-pantheon.sbatch",
+    "bytes": 979,
+    "sha256": "3c25eda4d8273d018215e6f2d56a1320be517fdd5559883493729217a75bd976"
+  },
+  {
+    "source": "yam-server:/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/train-excl-pantheon.sbatch",
+    "local": "raw/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/train-excl-pantheon.sbatch",
+    "bytes": 3948,
+    "sha256": "2dc93c377706f654687cada7680e727e1d2a424d50be28fca4e76cb31b6b5059"
+  },
+  {
+    "source": "yam-server:/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/resume-excl-pantheon.sbatch",
+    "local": "raw/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/resume-excl-pantheon.sbatch",
+    "bytes": 2618,
+    "sha256": "1074b7bee981959dda0d37176e6ad69a0a9926e598b1685d814eb74f9c7998ef"
+  },
+  {
+    "source": "yam-server:/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/gpu-health-2557.log",
+    "local": "raw/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/gpu-health-2557.log",
+    "bytes": 196,
+    "sha256": "6ec44c4c6e977cca25486f1ba1137647b8c49755109ff9e5ccc265736faf5a20"
+  },
+  {
+    "source": "yam-server:/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/training_contract.json",
+    "local": "raw/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/training_contract.json",
+    "bytes": 13604,
+    "sha256": "277ff178033c9f87eca6ee99276b29c3cfe96c7faf9cc165de2e52d0985b1924"
+  },
+  {
+    "source": "yam-server:/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/initial_config.json",
+    "local": "raw/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/initial_config.json",
+    "bytes": 21373,
+    "sha256": "de56a3835ff8cc611c5bfca7837431e6f7cffbba11c5bf6c1e78b77c16a1b95c"
+  },
+  {
+    "source": "yam-server:/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/train-2558.log",
+    "local": "raw/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/train-2558.log",
+    "bytes": 118142,
+    "sha256": "23413d87c7765c5d0dbbf89501a33fada757f7b623593aa9247e085e0e3720f4"
+  },
+  {
+    "source": "yam-server:/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/gpu-health-2559.log",
+    "local": "raw/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/gpu-health-2559.log",
+    "bytes": 196,
+    "sha256": "6ec44c4c6e977cca25486f1ba1137647b8c49755109ff9e5ccc265736faf5a20"
+  },
+  {
+    "source": "yam-server:/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/resume-2560.log",
+    "local": "raw/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/resume-2560.log",
+    "bytes": 130746,
+    "sha256": "9d7ed657480b838e988d23a540e2fe33a6be7f7b62f2f48774f4c34d17874ada"
+  },
+  {
+    "source": "yam-server:/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/gpu-health-2561.log",
+    "local": "raw/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/gpu-health-2561.log",
+    "bytes": 196,
+    "sha256": "6ec44c4c6e977cca25486f1ba1137647b8c49755109ff9e5ccc265736faf5a20"
+  },
+  {
+    "source": "yam-server:/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/resume_config.json",
+    "local": "raw/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/resume_config.json",
+    "bytes": 21372,
+    "sha256": "b4f1a553f890b40a3bd009b1d64568a84f71e434f9d2134fe3c6f04182edb3a4"
+  },
+  {
+    "source": "yam-server:/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/recovery.log",
+    "local": "raw/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/recovery.log",
+    "bytes": 8064,
+    "sha256": "c33e65b25039042616ba4f62c212f734f2f48f4851cada7f2174f8eb600d136f"
+  },
+  {
+    "source": "yam-server:/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/resume-2562.log",
+    "local": "raw/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/resume-2562.log",
+    "bytes": 46911,
+    "sha256": "126c78c1eca5ccff6bb7cb20ee00f76fd925dd61b08a3e989e5ea2f0013887d8"
+  }
+]

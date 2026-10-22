@@ -1,0 +1,89 @@
+EDAC_COUNTERS
+/sys/devices/system/edac/mc/mc0/ce_count 3781237
+/sys/devices/system/edac/mc/mc1/ce_count 0
+/sys/devices/system/edac/mc/mc2/ce_count 0
+/sys/devices/system/edac/mc/mc3/ce_count 0
+/sys/devices/system/edac/mc/mc0/ue_count 0
+/sys/devices/system/edac/mc/mc1/ue_count 0
+/sys/devices/system/edac/mc/mc2/ue_count 0
+/sys/devices/system/edac/mc/mc3/ue_count 0
+/sys/devices/system/edac/mc/mc0/dimm0/dimm_ce_count 0
+/sys/devices/system/edac/mc/mc0/dimm2/dimm_ce_count 3781237
+/sys/devices/system/edac/mc/mc1/dimm0/dimm_ce_count 0
+/sys/devices/system/edac/mc/mc1/dimm2/dimm_ce_count 0
+/sys/devices/system/edac/mc/mc2/dimm0/dimm_ce_count 0
+/sys/devices/system/edac/mc/mc2/dimm2/dimm_ce_count 0
+/sys/devices/system/edac/mc/mc3/dimm0/dimm_ce_count 0
+/sys/devices/system/edac/mc/mc3/dimm2/dimm_ce_count 0
+/sys/devices/system/edac/mc/mc0/dimm0/dimm_ue_count 0
+/sys/devices/system/edac/mc/mc0/dimm2/dimm_ue_count 0
+/sys/devices/system/edac/mc/mc1/dimm0/dimm_ue_count 0
+/sys/devices/system/edac/mc/mc1/dimm2/dimm_ue_count 0
+/sys/devices/system/edac/mc/mc2/dimm0/dimm_ue_count 0
+/sys/devices/system/edac/mc/mc2/dimm2/dimm_ue_count 0
+/sys/devices/system/edac/mc/mc3/dimm0/dimm_ue_count 0
+/sys/devices/system/edac/mc/mc3/dimm2/dimm_ue_count 0
+/sys/devices/system/edac/mc/mc0/dimm0/dimm_label CPU_SrcID#0_MC#0_Chan#0_DIMM#0
+/sys/devices/system/edac/mc/mc0/dimm2/dimm_label CPU_SrcID#0_MC#0_Chan#1_DIMM#0
+/sys/devices/system/edac/mc/mc1/dimm0/dimm_label CPU_SrcID#0_MC#1_Chan#0_DIMM#0
+/sys/devices/system/edac/mc/mc1/dimm2/dimm_label CPU_SrcID#0_MC#1_Chan#1_DIMM#0
+/sys/devices/system/edac/mc/mc2/dimm0/dimm_label CPU_SrcID#0_MC#2_Chan#0_DIMM#0
+/sys/devices/system/edac/mc/mc2/dimm2/dimm_label CPU_SrcID#0_MC#2_Chan#1_DIMM#0
+/sys/devices/system/edac/mc/mc3/dimm0/dimm_label CPU_SrcID#0_MC#3_Chan#0_DIMM#0
+/sys/devices/system/edac/mc/mc3/dimm2/dimm_label CPU_SrcID#0_MC#3_Chan#1_DIMM#0
+TRAIN_PROCESSES
+PID 1703825 CMD flock -n /home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/launch.lock /home/wuyan/.conda/envs/condapi-yam/bin/python scripts/train_lego_full.py --resume --run-name earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022 --steps 86000 --init-params /home/wuyan/lyj/YAM/training-runs/pi05_yam/earbuds_pi05_rtc_base_50h_20261012/114000/params --train-episodes-file /home/wuyan/lyj/YAM/training-assets/earbuds_rtc_50h_clean_v2_excl_pantheon_20261021/episodes.json --rtc-training-max-delay 10 --assets-dir /home/wuyan/lyj/YAM/training-assets/earbuds_rtc_50h_clean_v2_excl_pantheon_20261021/norm --dataset /home/wuyan/lyj/YAM/YAM_data/processed/earbuds_lerobot_50h_clean_v2_20261013/train --warmup-steps 1000 --decay-steps 338000
+ENV {"PYTHONUNBUFFERED": "1", "SLURM_JOB_GPUS": "0,1,2,3", "XLA_PYTHON_CLIENT_MEM_FRACTION": "0.92", "XLA_PYTHON_CLIENT_PREALLOCATE": "true", "CUDA_VISIBLE_DEVICES": "0,1,2,3", "PYTHONFAULTHANDLER": "1", "SLURM_JOB_ID": "2562"}
+LIMITS Limit                     Soft Limit           Hard Limit           Units
+Max cpu time              unlimited            unlimited            seconds
+Max file size             unlimited            unlimited            bytes
+Max data size             unlimited            unlimited            bytes
+Max stack size            8388608              unlimited            bytes
+Max core file size        unlimited            unlimited            bytes
+Max resident set          515396075520         515396075520         bytes
+Max processes             30551                2058332              processes
+Max open files            65535                65535                files
+Max locked memory         8388608              unlimited            bytes
+Max address space         unlimited            unlimited            bytes
+Max file locks            unlimited            unlimited            locks
+Max pending signals       2058332              2058332              signals
+Max msgqueue size         819200               819200               bytes
+Max nice priority         0                    0
+Max realtime priority     0                    0
+Max realtime timeout      unlimited            unlimited            us
+
+LOADED_LIBS []
+PID 1703839 CMD /home/wuyan/.conda/envs/condapi-yam/bin/python scripts/train_lego_full.py --resume --run-name earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022 --steps 86000 --init-params /home/wuyan/lyj/YAM/training-runs/pi05_yam/earbuds_pi05_rtc_base_50h_20261012/114000/params --train-episodes-file /home/wuyan/lyj/YAM/training-assets/earbuds_rtc_50h_clean_v2_excl_pantheon_20261021/episodes.json --rtc-training-max-delay 10 --assets-dir /home/wuyan/lyj/YAM/training-assets/earbuds_rtc_50h_clean_v2_excl_pantheon_20261021/norm --dataset /home/wuyan/lyj/YAM/YAM_data/processed/earbuds_lerobot_50h_clean_v2_20261013/train --warmup-steps 1000 --decay-steps 338000
+ENV {"PYTHONUNBUFFERED": "1", "SLURM_JOB_GPUS": "0,1,2,3", "XLA_PYTHON_CLIENT_MEM_FRACTION": "0.92", "XLA_PYTHON_CLIENT_PREALLOCATE": "true", "CUDA_VISIBLE_DEVICES": "0,1,2,3", "PYTHONFAULTHANDLER": "1", "SLURM_JOB_ID": "2562"}
+LIMITS Limit                     Soft Limit           Hard Limit           Units
+Max cpu time              unlimited            unlimited            seconds
+Max file size             unlimited            unlimited            bytes
+Max data size             unlimited            unlimited            bytes
+Max stack size            8388608              unlimited            bytes
+Max core file size        unlimited            unlimited            bytes
+Max resident set          515396075520         515396075520         bytes
+Max processes             30551                2058332              processes
+Max open files            65535                65535                files
+Max locked memory         8388608              unlimited            bytes
+Max address space         unlimited            unlimited            bytes
+Max file locks            unlimited            unlimited            locks
+Max pending signals       2058332              2058332              signals
+Max msgqueue size         819200               819200               bytes
+Max nice priority         0                    0
+Max realtime priority     0                    0
+Max realtime timeout      unlimited            unlimited            us
+
+LOADED_LIBS NVIDIA (R) Compute Sanitizer
+Copyright (c) 2020-2026 NVIDIA Corporation
+Version 2026.1.0.0 (build 37182542) (public-release)
+NVIDIA (R) Compute Sanitizer
+Copyright (c) 2020-2026 NVIDIA Corporation
+Version 2026.1.0.0 (build 37182542) (public-release)
+["/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/jax_cuda12_plugin/cuda_plugin_extension.so", "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/jax_plugins/xla_cuda12/xla_cuda_plugin.so", "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/jaxlib/cpu/_lapack.so", "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/jaxlib/cpu_feature_guard.so", "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/jaxlib/mlir/_mlir_libs/_chlo.so", "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/jaxlib/mlir/_mlir_libs/_mlir.so", "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/jaxlib/mlir/_mlir_libs/_mlirHlo.so", "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/jaxlib/mlir/_mlir_libs/_mosaic_gpu_ext.so", "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/jaxlib/mlir/_mlir_libs/_sdy.so", "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/jaxlib/mlir/_mlir_libs/_stablehlo.so", "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/jaxlib/mlir/_mlir_libs/_tpu_ext.so", "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/jaxlib/mlir/_mlir_libs/_triton_ext.so", "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/jaxlib/mlir/_mlir_libs/libjaxlib_mlir_capi.so", "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/jaxlib/mlir/_mlir_libs/register_jax_dialects.so", "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/jaxlib/utils.so", "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/jaxlib/xla_extension.so", "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/nvidia/cublas/lib/libcublas.so.12", "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/nvidia/cublas/lib/libcublasLt.so.12", "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/nvidia/cuda_runtime/lib/libcudart.so.12", "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/nvidia/cudnn/lib/libcudnn.so.9", "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/nvidia/cudnn/lib/libcudnn_engines_precompiled.so.9", "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/nvidia/cudnn/lib/libcudnn_engines_runtime_compiled.so.9", "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/nvidia/cudnn/lib/libcudnn_graph.so.9", "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/nvidia/cudnn/lib/libcudnn_heuristic.so.9", "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/nvidia/cudnn/lib/libcudnn_ops.so.9", "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/nvidia/nccl/lib/libnccl.so.2", "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/torchvision.libs/libcudart.45e7f3ed.so.12", "/usr/lib64/libcuda.so.595.45.04"]
+TOOLS
+/usr/local/cuda/bin/compute-sanitizer
+/usr/local/cuda-13.2/bin/compute-sanitizer
+/usr/local/cuda/bin/cuda-gdb
+/usr/local/cuda-13.2/bin/cuda-gdb
+
+STDERR

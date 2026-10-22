@@ -1,0 +1,16 @@
+[
+  {
+    "local": "kernel-access.txt",
+    "bytes": 1223941,
+    "sha256": "da0959ab3499839e1cacc0dd016bf74502c79813859ed74fdc9d7beb7c2a322f",
+    "source": "yam-server -> gpu001: dmesg --time-format iso (journalctl and sudo access failures retained in kernel-access.txt)",
+    "observed_at": "2026-10-22T14:21:17+08:00"
+  },
+  {
+    "local": "kernel-host-memory-window.txt",
+    "bytes": 1219293,
+    "sha256": "caa8e8c978b0d52b5b6c7c9a8e77805059e6def60407832efbaf8fa7c9031790",
+    "source": "yam-server -> gpu001: dmesg --time-format iso (journalctl and sudo access failures retained in kernel-access.txt)",
+    "observed_at": "2026-10-22T14:21:17+08:00"
+  }
+]

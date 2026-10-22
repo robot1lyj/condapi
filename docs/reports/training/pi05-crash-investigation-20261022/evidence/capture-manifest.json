@@ -1,0 +1,79 @@
+[
+  {
+    "local_original": "raw/capture-originals/node-process-and-edac.txt",
+    "sha256": "629ffb85f1fe3dc968aa1e1f08ee1212bf1d6b5992ed976d88e68db62d4a326b",
+    "bytes": 9786,
+    "git_copy": "node-process-and-edac.txt",
+    "normalization": "trailing whitespace and blank EOF removed; originals preserved"
+  },
+  {
+    "local_original": "raw/capture-originals/sacct.txt",
+    "sha256": "da57a95d64c89e6d0016855b2e59b64546557a545bd846e8599ee4c7ed708a57",
+    "bytes": 8736,
+    "git_copy": "sacct.txt",
+    "normalization": "trailing whitespace and blank EOF removed; originals preserved"
+  },
+  {
+    "local_original": "raw/capture-originals/host-memory-excerpts.txt",
+    "sha256": "36aa9cc5cf513fce3d5671d7337f75d31b9eb158e5a958b9995d3a54b3106c20",
+    "bytes": 3181,
+    "git_copy": "host-memory-excerpts.txt",
+    "normalization": "trailing whitespace and blank EOF removed; originals preserved"
+  },
+  {
+    "local_original": "raw/capture-originals/node-health.txt",
+    "sha256": "f0c16e226cd7b61031e9db68afd9105ddfb142cba0840e634e7685c6f7228146",
+    "bytes": 58416,
+    "git_copy": "node-health.txt",
+    "normalization": "trailing whitespace and blank EOF removed; originals preserved"
+  },
+  {
+    "local_original": "raw/capture-originals/environment-versions.txt",
+    "sha256": "8d5495ff366546ba3ed4e13b1aba37d41b48153fa40fe6b840b372c9ac25f9fe",
+    "bytes": 783,
+    "git_copy": "environment-versions.txt",
+    "normalization": "trailing whitespace and blank EOF removed; originals preserved"
+  },
+  {
+    "local_original": "raw/capture-originals/control-files.txt",
+    "sha256": "8e90722ac7a3148a02b4960830f085520f287c4b5945e0aec9b67af081965aba",
+    "bytes": 26845,
+    "git_copy": "control-files.txt",
+    "normalization": "trailing whitespace and blank EOF removed; originals preserved"
+  },
+  {
+    "local_original": "raw/capture-originals/kernel-xid-window.txt",
+    "sha256": "fc81ed7c5e57be144a3818a9b454ea60bf27a4d794c017d4276057126137aad5",
+    "bytes": 3923,
+    "git_copy": "kernel-xid-window.txt",
+    "normalization": "trailing whitespace and blank EOF removed; originals preserved"
+  },
+  {
+    "local_original": "raw/capture-originals/active-job.txt",
+    "sha256": "9e01b3877ab713e622eede8511bb121e217d7824d014c4ed7f3a0f7bf8f104c8",
+    "bytes": 2424,
+    "git_copy": "active-job.txt",
+    "normalization": "trailing whitespace and blank EOF removed; originals preserved"
+  },
+  {
+    "local_original": "raw/capture-originals/failure-excerpts.txt",
+    "sha256": "137bbbd4412bbf7b23cd7354db77589415780e3c005f856f12fff23ccb2eb581",
+    "bytes": 25841,
+    "git_copy": "failure-excerpts.txt",
+    "normalization": "trailing whitespace and blank EOF removed; originals preserved"
+  },
+  {
+    "local_original": "raw/capture-originals/cores.txt",
+    "sha256": "3ce3e1686cb7ad0c5c5f7e490e3cf970f7be0b9f7c1fcc334fd03e109427bf3d",
+    "bytes": 552,
+    "git_copy": "cores.txt",
+    "normalization": "trailing whitespace and blank EOF removed; originals preserved"
+  },
+  {
+    "local_original": "raw/capture-originals/final-status.txt",
+    "sha256": "10889a798eca193788416c0da38e50428a63dc984dbb58c3e8d8f6ca074eec5d",
+    "bytes": 637,
+    "git_copy": "final-status.txt",
+    "normalization": "trailing whitespace and blank EOF removed; originals preserved"
+  }
+]

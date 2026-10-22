@@ -1,0 +1,22 @@
+Source: kernel-access.txt (full dmesg retained locally); filtered first/last 10 matching records
+2026-10-21T17:05:10,376293+08:00 EDAC MC0: 0 CE memory read error on CPU_SrcID#0_MC#0_Chan#1_DIMM#0 (channel:1 slot:0 page:0x2ac0d6c offset:0x3c0 grain:32 syndrome:0x0 -  err_code:0x0000:0x009f  SystemAddress:0x2ac0d6c3c0 ProcessorSocketId:0x0 MemoryControllerId:0x0 ChannelAddress:0x5481ad9c0 ChannelId:0x1 RankAddress:0x15206b640 PhysicalRankId:0x1 DimmSlotId:0x0 DimmRankId:0x1 Row:0x5f03 Column:0x80 Bank:0x2 BankGroup:0x5 ChipSelect:0x3)
+2026-10-21T17:05:10,376511+08:00 EDAC skx MC0: HANDLING MCE MEMORY ERROR
+2026-10-21T17:05:10,376512+08:00 EDAC skx MC0: CPU 0: Machine Check Event: 0x0 Bank 255: 0x9c0000000000009f
+2026-10-21T17:05:10,376513+08:00 EDAC skx MC0: TSC 0x0
+2026-10-21T17:05:10,376513+08:00 EDAC skx MC0: ADDR 0x2ac0d6c3c0
+2026-10-21T17:05:10,376513+08:00 EDAC skx MC0: MISC 0x8c
+2026-10-21T17:05:10,376514+08:00 EDAC skx MC0: PROCESSOR 0:0x806f8 TIME 1792573510 SOCKET 0 APIC 0x0
+2026-10-21T17:05:10,376515+08:00 EDAC MC0: 0 CE memory read error on CPU_SrcID#0_MC#0_Chan#1_DIMM#0 (channel:1 slot:0 page:0x2ac0d6c offset:0x3c0 grain:32 syndrome:0x0 -  err_code:0x0000:0x009f  SystemAddress:0x2ac0d6c3c0 ProcessorSocketId:0x0 MemoryControllerId:0x0 ChannelAddress:0x5481ad9c0 ChannelId:0x1 RankAddress:0x15206b640 PhysicalRankId:0x1 DimmSlotId:0x0 DimmRankId:0x1 Row:0x5f03 Column:0x80 Bank:0x2 BankGroup:0x5 ChipSelect:0x3)
+2026-10-21T17:05:10,376729+08:00 EDAC skx MC0: HANDLING MCE MEMORY ERROR
+2026-10-21T17:05:10,376730+08:00 EDAC skx MC0: CPU 0: Machine Check Event: 0x0 Bank 255: 0x9c0000000000009f
+[middle omitted in this excerpt]
+2026-10-21T17:05:13,997279+08:00 EDAC skx MC0: MISC 0x8c
+2026-10-21T17:05:13,997279+08:00 EDAC skx MC0: PROCESSOR 0:0x806f8 TIME 1792573514 SOCKET 0 APIC 0x0
+2026-10-21T17:05:13,997281+08:00 EDAC MC0: 0 CE memory read error on CPU_SrcID#0_MC#0_Chan#1_DIMM#0 (channel:1 slot:0 page:0x2ac0d6c offset:0x3c0 grain:32 syndrome:0x0 -  err_code:0x0000:0x009f  SystemAddress:0x2ac0d6c3c0 ProcessorSocketId:0x0 MemoryControllerId:0x0 ChannelAddress:0x5481ad9c0 ChannelId:0x1 RankAddress:0x15206b640 PhysicalRankId:0x1 DimmSlotId:0x0 DimmRankId:0x1 Row:0x5f03 Column:0x80 Bank:0x2 BankGroup:0x5 ChipSelect:0x3)
+2026-10-21T17:05:14,049724+08:00 EDAC skx MC0: HANDLING MCE MEMORY ERROR
+2026-10-21T17:05:14,049728+08:00 EDAC skx MC0: CPU 0: Machine Check Event: 0x0 Bank 14: 0x8c01c04200800091
+2026-10-21T17:05:14,049730+08:00 EDAC skx MC0: TSC 0x0
+2026-10-21T17:05:14,049731+08:00 EDAC skx MC0: ADDR 0x2ac0d6c3c0
+2026-10-21T17:05:14,049732+08:00 EDAC skx MC0: MISC 0xb000b22f8184086
+2026-10-21T17:05:14,049733+08:00 EDAC skx MC0: PROCESSOR 0:0x806f8 TIME 1792573514 SOCKET 0 APIC 0x0
+2026-10-21T17:05:14,049738+08:00 EDAC MC0: 1793 CE memory read error on CPU_SrcID#0_MC#0_Chan#1_DIMM#0 (channel:1 slot:0 page:0x2ac0d6c offset:0x3c0 grain:32 syndrome:0x0 -  err_code:0x0080:0x0091  SystemAddress:0x2ac0d6c3c0 ProcessorSocketId:0x0 MemoryControllerId:0x0 ChannelAddress:0x5481ad9c0 ChannelId:0x1 RankAddress:0x15206b640 PhysicalRankId:0x1 DimmSlotId:0x0 DimmRankId:0x1 Row:0x5f03 Column:0x80 Bank:0x2 BankGroup:0x5 ChipSelect:0x3)

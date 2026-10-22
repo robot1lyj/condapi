@@ -1,0 +1,4 @@
+# Full originals remain local and on the server. Commit bounded excerpts and hashes.
+/raw/
+/kernel-access.txt
+/kernel-host-memory-window.txt

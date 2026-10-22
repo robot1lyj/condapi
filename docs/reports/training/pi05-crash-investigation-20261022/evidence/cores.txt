@@ -1,0 +1,10 @@
+2026-10-22T14:21:17+08:00
+NVRM version: NVIDIA UNIX Open Kernel Module for x86_64  595.45.04  Release Build  (dvs-builder@U22-I3-AM25-25-6)  Fri Feb 27 17:30:05 UTC 2026
+GCC version:  gcc version 11.5.0 20240719 (Red Hat 11.5.0-11) (GCC)
+
+STDERR
+Hint: You are currently not seeing messages from other users and the system.
+      Users in groups 'adm', 'systemd-journal', 'wheel' can see all messages.
+      Pass -q to turn off this notice.
+No journal files were opened due to insufficient permissions.
+sh: line 1: compute-sanitizer: command not found

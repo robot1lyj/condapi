@@ -1,0 +1,263 @@
+
+FILE raw/earbuds_pi05_rtc_base_50h_20261012/normprep-2548.log
+
+64: {"episodes": 1351, "total_episodes": 1382, "frames": 5265467, "total_frames": 5397092, "seconds": 76.90498258300067}
+65: {"episodes": 1376, "total_episodes": 1382, "frames": 5367774, "total_frames": 5397092, "seconds": 78.29142632100047}
+66: {"episodes": 1382, "total_episodes": 1382, "frames": 5397092, "total_frames": 5397092, "seconds": 78.68364730599933}
+67: NORM_COMPLETE=/home/wuyan/lyj/YAM/training-assets/earbuds_rtc_50h_clean_v2_excl_pantheon_20261021/norm/yam/norm_stats.json frames=5397092
+68: Traceback (most recent call last):
+69:   File "<stdin>", line 13, in <module>
+70: KeyError: 'state'
+
+FILE raw/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_20261021/train-2550.log
+
+618:
+619:
+620: Step 860: grad_norm=0.0754, loss=0.0076, param_norm=1803.7688, learning_rate=0.0000, time=1792586991.5012, step_seconds=2.2832, samples_per_second=14.0156, gpu_memory_gib=9.3966
+621: 20:49:51.501 [I] Progress on: 860it/86.0kit rate:2.3s/it remaining:53:54:55 elapsed:33:14 postfix:- (1810414:tqdm_logging.py:145)
+622: Fatal Python error: Fatal Python error: Fatal Python error: Segmentation faultE1021 20:49:58.086745 1810585 pjrt_stream_executor_client.cc:3077] Execution of replica 0 failed: INTERNAL: NCCL operation ncclGroupEnd() failed: unhandled cuda error (run with NCCL_DEBUG=INFO for details). Last NCCL warning(error) log entry (may be unrelated) 'Cuda failure 'an illegal memory access was encountered''.
+623: Segmentation faultSegmentation fault
+624:
+625:
+626:
+627:
+628:
+629: Thread 0x00007fef6affd640 (most recent call first):
+630:   File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/threading.py", line 355 in wait
+631:   File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/multiprocessing/queues.py", line 251 in _feed
+632:   File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/threading.py", line 1012 in run
+633:   File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/threading.py", line 1075 in _bootstrap_inner
+634:   File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/threading.py", line 1032 in _bootstrap
+635:
+636: Thread 0x00007fef6b7fe640 (most recent call first):
+637:   File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/threading.py", line 355 in wait
+638:   File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/multiprocessing/queues.py", line 251 in _feed
+639:   File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/threading.py", line 1012 in run
+640:   File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/threading.py", line 1075 in _bootstrap_inner
+641:   File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/threading.py", line 1032 in _bootstrap
+642:
+643: Thread 0x00007ff0077fe640 (most recent call first):
+644:   File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/threading.py", line 359 in wait
+645:   File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/threading.py", line 655 in wait
+646:   File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/tqdm/_monitor.py
+647: Extension modules: "
+648: Extension modules: jaxlib.cpu_feature_guard, line jaxlib.cpu_feature_guard69 in run
+649:   File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/threading.py", line , 1075numpy._core._multiarray_umath,  in numpy._core._multiarray_umath_bootstrap_inner
+650:   File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/threading.py", , line numpy.linalg._umath_linalg, 1032numpy.linalg._umath_linalg in _bootstrap
+651:
+652: Thread 0x00007ff007fff640 (most recent call first):
+653:   File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/threading.py", line 359 in wait
+654:   File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/threading.py", line 655 in wait
+655:   File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/tqdm/_monitor.py", line 69 in run
+656:   File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/threading.py", line 1075 in _bootstrap_inner
+657:   File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/threading.py", line 1032 in _bootstrap
+658: , ,
+659: msgpack._cmsgpackmsgpack._cmsgpackThread 0x00007ff00effe640 (most recent call first):
+660:   File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/selectors.py", line 468 in select
+661:   File , , "yaml._yamlyaml._yaml/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/asyncio/base_events.py", line 1961 in _run_once
+
+FILE raw/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry1_20261022/train-2552.log
+
+573:
+574:
+575: Step 770: grad_norm=0.1152, loss=0.0090, param_norm=1803.7678, learning_rate=0.0000, time=1792638009.5146, step_seconds=2.2830, samples_per_second=14.0165, gpu_memory_gib=9.4011
+576: 11:00:16.016 [I] Progress on: 774it/86.0kit rate:2.3s/it remaining:53:39:36 elapsed:29:51 postfix:- (3135592:tqdm_logging.py:145)
+577: E1022 11:00:23.390338 3135754 pjrt_stream_executor_client.cc:3077] Execution of replica 0 failed: INTERNAL: NCCL operation ncclGroupEnd() failed: unhandled cuda error (run with NCCL_DEBUG=INFO for details). Last NCCL warning(error) log entry (may be unrelated) 'Cuda failure 'an illegal memory access was encountered''.
+578: E1022 11:00:23.390337 3135751 pjrt_stream_executor_client.cc:3077] Execution of replica 0 failed: INTERNAL: CUDA error: Failed to launch CUDA kernel: loop_convert_fusion_19; block dims: 128x1x1; grid dims: 16384x1x1; shared memory size: 0: CUDA_ERROR_ILLEGAL_ADDRESS: an illegal memory access was encountered
+579: E1022 11:00:23.390344 3135748 pjrt_stream_executor_client.cc:3077] Execution of replica 0 failed: INTERNAL: NCCL operation ncclGroupEnd() failed: unhandled cuda error (run with NCCL_DEBUG=INFO for details). Last NCCL warning(error) log entry (may be unrelated) 'Cuda failure 'an illegal memory access was encountered''.
+580: E1022 11:00:23.390338 3135757 pjrt_stream_executor_client.cc:3077] Execution of replica 0 failed: INTERNAL: NCCL operation ncclGroupEnd() failed: unhandled cuda error (run with NCCL_DEBUG=INFO for details). Last NCCL warning(error) log entry (may be unrelated) 'Cuda failure 'an illegal memory access was encountered''.
+581: 11:00:23.390 [I] Progress on: 777it/86.0kit rate:2.3s/it remaining:53:50:57 elapsed:29:59 postfix:- (3135592:tqdm_logging.py:145)
+582: Traceback (most recent call last):
+583:   File "/home/wuyan/lyj/YAM/code-snapshots/earbuds50h-clean-v2-20261013/scripts/train_lego_full.py", line 214, in <module>
+584:     main()
+585:   File "/home/wuyan/lyj/YAM/code-snapshots/earbuds50h-clean-v2-20261013/scripts/train_lego_full.py", line 210, in main
+586:     train.main(config)
+587:   File "/home/wuyan/lyj/YAM/code-snapshots/earbuds50h-clean-v2-20261013/scripts/train.py", line 346, in main
+588:     train_state, info = ptrain_step(train_rng, train_state, batch)
+589:                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+590: ValueError: INTERNAL: NCCL operation ncclGroupEnd() failed: unhandled cuda error (run with NCCL_DEBUG=INFO for details). Last NCCL warning(error) log entry (may be unrelated) 'Cuda failure 'an illegal memory access was encountered''.: while running replica 0 and partition 0 of a replicated computation (other replicas may have failed as well).
+591: E1022 11:00:25.110798 3135592 cuda_executor.cc:247] failed to unload module 0x7fc814de6c70; leaking: INTERNAL: CUDA error: : CUDA_ERROR_ILLEGAL_ADDRESS: an illegal memory access was encountered
+592: E1022 11:00:25.111442 3135592 cuda_executor.cc:247] failed to unload module 0x7fc80cff6e40; leaking: INTERNAL: CUDA error: : CUDA_ERROR_ILLEGAL_ADDRESS: an illegal memory access was encountered
+593: E1022 11:00:25.111448 3135592 cuda_executor.cc:247] failed to unload module 0x7fc77010afc0; leaking: INTERNAL: CUDA error: : CUDA_ERROR_ILLEGAL_ADDRESS: an illegal memory access was encountered
+594: E1022 11:00:25.111452 3135592 cuda_executor.cc:247] failed to unload module 0x7fc75c017cb0; leaking: INTERNAL: CUDA error: : CUDA_ERROR_ILLEGAL_ADDRESS: an illegal memory access was encountered
+595: E1022 11:00:25.113411 3135592 cuda_executor.cc:247] failed to unload module 0x7fc75c123ad0; leaking: INTERNAL: CUDA error: : CUDA_ERROR_ILLEGAL_ADDRESS: an illegal memory access was encountered
+596: E1022 11:00:25.113984 3135592 cuda_executor.cc:247] failed to unload module 0x7fc814de1c20; leaking: INTERNAL: CUDA error: : CUDA_ERROR_ILLEGAL_ADDRESS: an illegal memory access was encountered
+597: E1022 11:00:25.113990 3135592 cuda_executor.cc:247] failed to unload module 0x7fc80d005580; leaking: INTERNAL: CUDA error: : CUDA_ERROR_ILLEGAL_ADDRESS: an illegal memory access was encountered
+598: E1022 11:00:25.113995 3135592 cuda_executor.cc:247] failed to unload module 0x7fc77010f490; leaking: INTERNAL: CUDA error: : CUDA_ERROR_ILLEGAL_ADDRESS: an illegal memory access was encountered
+599: E1022 11:00:25.140936 3135592 cuda_executor.cc:247] failed to unload module 0x55592dacc350; leaking: INTERNAL: CUDA error: : CUDA_ERROR_ILLEGAL_ADDRESS: an illegal memory access was encountered
+600: E1022 11:00:25.141604 3135592 cuda_executor.cc:247] failed to unload module 0x55592d8076e0; leaking: INTERNAL: CUDA error: : CUDA_ERROR_ILLEGAL_ADDRESS: an illegal memory access was encountered
+601: E1022 11:00:25.142184 3135592 cuda_executor.cc:247] failed to unload module 0x55592dd00200; leaking: INTERNAL: CUDA error: : CUDA_ERROR_ILLEGAL_ADDRESS: an illegal memory access was encountered
+602: E1022 11:00:25.142435 3135592 cuda_executor.cc:247] failed to unload module 0x55594565c640; leaking: INTERNAL: CUDA error: : CUDA_ERROR_ILLEGAL_ADDRESS: an illegal memory access was encountered
+603: E1022 11:00:25.142670 3135592 cuda_executor.cc:247] failed to unload module 0x555934a7d4b0; leaking: INTERNAL: CUDA error: : CUDA_ERROR_ILLEGAL_ADDRESS: an illegal memory access was encountered
+604: E1022 11:00:25.142720 3135592 cuda_executor.cc:247] failed to unload module 0x5559461cd860; leaking: INTERNAL: CUDA error: : CUDA_ERROR_ILLEGAL_ADDRESS: an illegal memory access was encountered
+605: E1022 11:00:25.142810 3135592 cuda_executor.cc:247] failed to unload module 0x5559349a3560; leaking: INTERNAL: CUDA error: : CUDA_ERROR_ILLEGAL_ADDRESS: an illegal memory access was encountered
+606: E1022 11:00:25.142945 3135592 cuda_executor.cc:247] failed to unload module 0x7fc814dedab0; leaking: INTERNAL: CUDA error: : CUDA_ERROR_ILLEGAL_ADDRESS: an illegal memory access was encountered
+607: E1022 11:00:25.142961 3135592 cuda_executor.cc:247] failed to unload module 0x7fc77010c0a0; leaking: INTERNAL: CUDA error: : CUDA_ERROR_ILLEGAL_ADDRESS: an illegal memory access was encountered
+608: E1022 11:00:25.142965 3135592 cuda_executor.cc:247] failed to unload module 0x7fc75c0197e0; leaking: INTERNAL: CUDA error: : CUDA_ERROR_ILLEGAL_ADDRESS: an illegal memory access was encountered
+609: E1022 11:00:25.142969 3135592 cuda_executor.cc:247] failed to unload module 0x7fc80d00ae70; leaking: INTERNAL: CUDA error: : CUDA_ERROR_ILLEGAL_ADDRESS: an illegal memory access was encountered
+610: E1022 11:00:25.143057 3135592 cuda_executor.cc:247] failed to unload module 0x55594629eb00; leaking: INTERNAL: CUDA error: : CUDA_ERROR_ILLEGAL_ADDRESS: an illegal memory access was encountered
+611: E1022 11:00:25.143180 3135592 cuda_executor.cc:247] failed to unload module 0x7fc75c118790; leaking: INTERNAL: CUDA error: : CUDA_ERROR_ILLEGAL_ADDRESS: an illegal memory access was encountered
+612: E1022 11:00:25.143197 3135592 cuda_executor.cc:247] failed to unload module 0x7fc7701080a0; leaking: INTERNAL: CUDA error: : CUDA_ERROR_ILLEGAL_ADDRESS: an illegal memory access was encountered
+613: E1022 11:00:25.143201 3135592 cuda_executor.cc:247] failed to unload module 0x7fc80d008f90; leaking: INTERNAL: CUDA error: : CUDA_ERROR_ILLEGAL_ADDRESS: an illegal memory access was encountered
+614: E1022 11:00:25.143205 3135592 cuda_executor.cc:247] failed to unload module 0x7fc814de94e0; leaking: INTERNAL: CUDA error: : CUDA_ERROR_ILLEGAL_ADDRESS: an illegal memory access was encountered
+615: E1022 11:00:25.143269 3135592 cuda_executor.cc:247] failed to unload module 0x5559448f7c50; leaking: INTERNAL: CUDA error: : CUDA_ERROR_ILLEGAL_ADDRESS: an illegal memory access was encountered
+616: E1022 11:00:25.143391 3135592 cuda_executor.cc:247] failed to unload module 0x555945e70200; leaking: INTERNAL: CUDA error: : CUDA_ERROR_ILLEGAL_ADDRESS: an illegal memory access was encountered
+
+FILE raw/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry2_20261022/train-2554.log
+
+1: PRELAUNCH_DATA_CONTRACT=PASS episodes=1382 excluded=158,556 norm_sha256=05f65ada286965f1c5c5b32e62bf3fcdafb7d41d2e22d6683e0c05efc443c5b2
+2: /home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/torch/cuda/__init__.py:61: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+3:   import pynvml  # type: ignore[import]
+4: Traceback (most recent call last):
+5:   File "/home/wuyan/lyj/YAM/code-snapshots/earbuds50h-clean-v2-20261013/scripts/train_lego_full.py", line 214, in <module>
+6:     main()
+7:   File "/home/wuyan/lyj/YAM/code-snapshots/earbuds50h-clean-v2-20261013/scripts/train_lego_full.py", line 207, in main
+8:     check_training_contract(config, control)
+9:   File "/home/wuyan/lyj/YAM/code-snapshots/earbuds50h-clean-v2-20261013/scripts/train_lego_full.py", line 150, in check_training_contract
+10:     with path.open("x") as handle:
+11:          ^^^^^^^^^^^^^^
+12:   File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/pathlib.py", line 1013, in open
+13:     return io.open(self, mode, buffering, encoding, errors, newline)
+14:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+15: FileExistsError: [Errno 17] File exists: '/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry2_20261022/training_contract.json'
+
+FILE raw/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry3_20261022/train-2556.log
+
+638:
+639:
+640: Step 900: grad_norm=0.0868, loss=0.0080, param_norm=1803.7694, learning_rate=0.0000, time=1792641812.4562, step_seconds=2.2828, samples_per_second=14.0181, gpu_memory_gib=9.3966
+641: 12:03:32.456 [I] Progress on: 900it/86.0kit rate:2.3s/it remaining:54:11:14 elapsed:34:45 postfix:- (3760119:tqdm_logging.py:145)
+642: Fatal Python error: Fatal Python error: Fatal Python error: Fatal Python error: Segmentation faultSegmentation faultSegmentation faultSegmentation fault
+643:
+644:
+645:
+646:
+647:
+648:
+649:
+650: Thread 0x00007fdbfbfff640 (most recent call first):
+651:   File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/threading.py", line 359 in wait
+652:   File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/threading.py", line 655 in wait
+653:   File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/tqdm/_monitor.py", line 69 in run
+654:   File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/threading.py", line 1075 in _bootstrap_inner
+655:   File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/threading.py", line 1032 in _bootstrap
+656:
+657: Thread 0x00007fdc077fe640 (most recent call first):
+658:   File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/threading.py", line 355 in wait
+659:   File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/multiprocessing/queues.py", line 251 in _feed
+660:   File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/threading.py", line 1012 in run
+661:   File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/threading.py", line 1075 in _bootstrap_inner
+662:   File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/threading.py", line 1032 in _bootstrap
+663:
+664: Thread 0x00007fdc07fff640 (most recent call first):
+665:   File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/threading.py", line 355 in wait
+666:
+667: Extension modules:
+668: Extension modules:
+669: Extension modules:   File jaxlib.cpu_feature_guardjaxlib.cpu_feature_guardjaxlib.cpu_feature_guard"/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/multiprocessing/queues.py", line 251 in _feed
+670: ,   File , , numpy._core._multiarray_umath"numpy._core._multiarray_umathnumpy._core._multiarray_umath/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/threading.py", , line numpy.linalg._umath_linalg, , 1012numpy.linalg._umath_linalgnumpy.linalg._umath_linalg in run
+671:   File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/threading.py", line 1075 in _bootstrap_inner
+672:   File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/threading.py", line 1032 in _bootstrap
+673:
+674: Thread 0x00007fdcb9ffb640 (most recent call first):
+675:   File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/threading.py", line 359 in wait
+676:   File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/threading.py", line 655 in wait, , ,
+677: msgpack._cmsgpackmsgpack._cmsgpackmsgpack._cmsgpack  File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/tqdm/_monitor.py", line 69 in run
+678:   File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/threading.py", , , , line yaml._yamlyaml._yamlyaml._yaml1075 in _bootstrap_inner
+679:   File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/threading.py", line 1032, , ,  in google._upb._messagegoogle._upb._messagegoogle._upb._message_bootstrap
+680:
+681: Thread 0x00007fdcc4ffe640 (most recent call first):
+
+FILE raw/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/resume-2560.log
+
+678: Step 1970: grad_norm=0.1022, loss=0.0082, param_norm=1803.7852, learning_rate=0.0000, time=1792649070.7144, step_seconds=2.2774, samples_per_second=14.0509, gpu_memory_gib=9.4011
+679: 14:04:37.206 [I] Progress on: 1.97kit/86.0kit rate:2.3s/it remaining:52:48:40 elapsed:37:31 postfix:- (4028057:tqdm_logging.py:145)
+680: 14:04:48.588 [I] Progress on: 1.98kit/86.0kit rate:2.3s/it remaining:53:04:30 elapsed:37:42 postfix:- (4028057:tqdm_logging.py:145)
+681: 14:04:53.256 [I] Progress on: 1.98kit/86.0kit rate:2.3s/it remaining:53:05:22 elapsed:37:47 postfix:- (4028057:tqdm_logging.py:145)
+682: Traceback (most recent call last):
+683:   File "/home/wuyan/lyj/YAM/code-snapshots/earbuds50h-clean-v2-20261013/scripts/train_lego_full.py", line 214, in <module>
+684:     main()
+685:   File "/home/wuyan/lyj/YAM/code-snapshots/earbuds50h-clean-v2-20261013/scripts/train_lego_full.py", line 210, in main
+686:     train.main(config)
+687:   File "/home/wuyan/lyj/YAM/code-snapshots/earbuds50h-clean-v2-20261013/scripts/train.py", line 350, in main
+688:     stacked_infos = common_utils.stack_forest(infos)
+689:                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+690:   File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/flax/training/common_utils.py", line 69, in stack_forest
+691:     return jax.tree_util.tree_map(stack_args, *forest)
+692:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+693:   File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/jax/_src/tree_util.py", line 358, in tree_map
+694:     return treedef.unflatten(f(*xs) for xs in zip(*all_leaves))
+695:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+696:   File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/jax/_src/tree_util.py", line 358, in <genexpr>
+697:     return treedef.unflatten(f(*xs) for xs in zip(*all_leaves))
+698:                              ^^^^^^
+699:   File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/flax/training/common_utils.py", line 68, in <lambda>
+700:     stack_args = lambda *args: np.stack(args)
+701:                                ^^^^^^^^^^^^^^
+702:   File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/numpy/_core/shape_base.py", line 454, in stack
+703:     arrays = [asanyarray(arr) for arr in arrays]
+704:               ^^^^^^^^^^^^^^^
+705:   File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/jax/_src/array.py", line 441, in __array__
+706:     return np.asarray(self._value, dtype=dtype, **kwds)
+707:                       ^^^^^^^^^^^
+708:   File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/jax/_src/profiler.py", line 334, in wrapper
+709:     return func(*args, **kwargs)
+710:            ^^^^^^^^^^^^^^^^^^^^^
+711:   File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/jax/_src/array.py", line 640, in _value
+712:     npy_value, did_copy = self._single_device_array_to_np_array_did_copy()
+713:                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+714: jaxlib.xla_extension.XlaRuntimeError: INTERNAL: CUDA error: : CUDA_ERROR_ILLEGAL_ADDRESS: an illegal memory access was encountered
+715: E1022 14:04:54.665094 4028057 cuda_executor.cc:247] failed to unload module 0x7f3ae003e2e0; leaking: INTERNAL: CUDA error: : CUDA_ERROR_ILLEGAL_ADDRESS: an illegal memory access was encountered
+716: E1022 14:04:54.665769 4028057 cuda_executor.cc:247] failed to unload module 0x7f3b8cd05650; leaking: INTERNAL: CUDA error: : CUDA_ERROR_ILLEGAL_ADDRESS: an illegal memory access was encountered
+717: E1022 14:04:54.665774 4028057 cuda_executor.cc:247] failed to unload module 0x7f3af003bf00; leaking: INTERNAL: CUDA error: : CUDA_ERROR_ILLEGAL_ADDRESS: an illegal memory access was encountered
+718: E1022 14:04:54.665779 4028057 cuda_executor.cc:247] failed to unload module 0x7f3b88cf8d80; leaking: INTERNAL: CUDA error: : CUDA_ERROR_ILLEGAL_ADDRESS: an illegal memory access was encountered
+719: E1022 14:04:54.668183 4028057 cuda_executor.cc:247] failed to unload module 0x7f3ae0003940; leaking: INTERNAL: CUDA error: : CUDA_ERROR_ILLEGAL_ADDRESS: an illegal memory access was encountered
+720: E1022 14:04:54.668372 4028057 cuda_executor.cc:247] failed to unload module 0x7f3af0002150; leaking: INTERNAL: CUDA error: : CUDA_ERROR_ILLEGAL_ADDRESS: an illegal memory access was encountered
+721: E1022 14:04:54.668377 4028057 cuda_executor.cc:247] failed to unload module 0x7f3b8c6c1cb0; leaking: INTERNAL: CUDA error: : CUDA_ERROR_ILLEGAL_ADDRESS: an illegal memory access was encountered
+
+FILE raw/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/train-2558.log
+
+816:
+817:
+818: Step 1170: grad_norm=0.1006, loss=0.0076, param_norm=1803.7734, learning_rate=0.0000, time=1792645968.9591, step_seconds=2.2789, samples_per_second=14.0417, gpu_memory_gib=9.3966
+819: 13:12:50.895 [I] Progress on: 1.17kit/86.0kit rate:2.2s/it remaining:52:58:53 elapsed:46:12 postfix:- (957891:tqdm_logging.py:145)
+820: Fatal Python error: Fatal Python error: Fatal Python error: Segmentation faultSegmentation faultSegmentation fault
+821:
+822:
+823:
+824:
+825:
+826: Thread 0x00007f07aad9b640 (most recent call first):
+827:   File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/concurrent/futures/thread.py", line 90 in _worker
+828:   File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/threading.py", line 1012 in run
+829:   File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/threading.py", line 1075 in _bootstrap_inner
+830:   File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/threading.py", line 1032 in _bootstrap
+831:
+832: Thread 0x00007f074b7fe640 (most recent call first):
+833:   File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/threading.py", line 359 in wait
+834:   File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/threading.py", line 655 in wait
+835:   File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/tqdm/_monitor.py", line 69 in run
+836:   File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/threading.py", line 1075 in _bootstrap_inner
+837:   File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/threading.py", line 1032 in _bootstrap
+838:
+839: Thread 0x00007f07637fe640 (most recent call first):
+840:   File E1022 13:12:58.964392  958076 pjrt_stream_executor_client.cc:3077] Execution of replica 0 failed: INTERNAL: NCCL operation ncclGroupEnd() failed: unhandled cuda error (run with NCCL_DEBUG=INFO for details). Last NCCL warning(error) log entry (may be unrelated) 'Cuda failure 'an illegal memory access was encountered''.
+841: "
+842: Extension modules:
+843: Extension modules: /home/wuyan/.conda/envs/condapi-yam/lib/python3.12/threading.pyjaxlib.cpu_feature_guardjaxlib.cpu_feature_guard", line 355 in wait
+844:   File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/multiprocessing/queues.py, , "numpy._core._multiarray_umathnumpy._core._multiarray_umath, line 251 in _feed
+845:   File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/threading.py", line 1012 in , run, numpy.linalg._umath_linalg
+846: numpy.linalg._umath_linalg  File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/threading.py", line 1075 in _bootstrap_inner
+847:   File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/threading.py", line 1032 in _bootstrap
+848:
+849: Thread 0x00007f0763fff640 (most recent call first):
+850:   File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/threading.py", line 355 in wait
+851:   File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/multiprocessing/queues.py", line 251 in _feed
+852:   File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/threading.py", line 1012 in run
+853:   File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/threading.py", line 1075 in _bootstrap_inner
+854: , ,   File msgpack._cmsgpackmsgpack._cmsgpack"/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/threading.py", line 1032 in _bootstrap
+855:
+856: Thread 0x00007f080b7fe640 (most recent call first):
+857:   File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/threading.py", line , , 359yaml._yamlyaml._yaml in wait
+858:   File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/threading.py", line 655 in wait
+859:   File "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/tqdm/_monitor.py", line 69 in run

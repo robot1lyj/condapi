@@ -1,0 +1,8 @@
+2026-10-22T14:29:11+08:00
+     JOBID                     NAME        STATE         TIME             NODELIST
+      2562         pi05-earbuds-50h      RUNNING        18:40               gpu001
+14:28:51.346 [I] Progress on: 1.39kit/86.0kit rate:2.3s/it remaining:53:15:47 elapsed:14:54 postfix:- (1703839:tqdm_logging.py:145)
+
+
+Step 1390: grad_norm=0.0848, loss=0.0078, param_norm=1803.7766, learning_rate=0.0000, time=1792650543.0833, step_seconds=2.2760, samples_per_second=14.0599, gpu_memory_gib=9.3966
+14:29:03.083 [I] Progress on: 1.39kit/86.0kit rate:2.3s/it remaining:53:24:02 elapsed:15:06 postfix:- (1703839:tqdm_logging.py:145)
