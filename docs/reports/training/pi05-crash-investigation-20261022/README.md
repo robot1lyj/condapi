@@ -1,5 +1,20 @@
 # Pi0.5 服务器反复崩溃调查与现场采集（2026-10-22）
 
+## 数值现场实现与重新启动授权
+
+用户要求“记录代码写好，然后开始重新启动训练”，追加“确保写全写好”。本次沿同一run和已确认训练合同增加诊断，不改变batch32/FSDP4/workers2、选集/norm、LR/RTC、目标本地86000或checkpoint保存合同。启动前动态确认唯一活动作业、最新finalized checkpoint和norm一致性，保留旧现场后串行切换；不新增聊天监控或自动恢复。
+
+实现入口：`scripts/train.py`复用原生loss/gradient及optimizer函数，诊断关闭仍为原来单次JIT路径；开启`OPENPI_NUMERIC_DIAGNOSTICS_DIR`后在原生循环内分开gradient与update，以host guard确保失败步不会继续调用optimizer。编译/同步和显存生命周期会变化，属于诊断开销，不把该路径的稳定性直接当原路径的修复证明。
+
+- 每步的`attempt_started`记录精确尝试步、真实32条dataset/index/episode/frame/task/timestamp、loader实际张量SHA256，以及按step fold后的RNG；metadata在变换前保留、在输入模型前移除，不改变模型输入。SHA明确对应Observation.from_dict之前；异常导出的是实际进入forward的batch，包含图像/state/action/token/mask。
+- `input_checked`、`gradients_checked`、`update_finished`按实际addressable shard记录NaN/+Inf/-Inf数量、最大有限绝对值、首异常和最大值的局部索引/数值、稳定缩放平方和；schema固定参数路径、全局/局部shape、dtype、分片全局范围、device ID/replica ID。设备ID与外部GPU UUID/PCI快照关联。完整统计先在各设备本地算，复制小表到CPU；不把整模型all-gather到单张卡。
+- 原生grad_norm与CPU float64组合的稳定范数并存；复制分片只在逻辑范数中计一次，但每一物理副本的异常独立保留，不能被去重掩盖。输入/梯度非有限及原生范数非有限均在optimizer调用前停止。优化器的实际updates及所有参数/optimizer叶子在更新后再验，不只看旧param_norm筛选的kernel。
+- 故障先原子保存`failure.json`并fsync，再逐叶/逐设备写实际batch、根RNG、梯度（若尚在）、参数、optimizer和updates（若已有）；`.npy`禁止pickle，BF16按uint16原始位存并注明编码。每个文件有shape、全局分片索引、原dtype、字节数、SHA256。`tensor-manifest.json`逐文件更新；只有全部写完才有`COMPLETE`。这是故障包，不是正式checkpoint，带`NOT_A_TRAINING_CHECKPOINT`，不自动恢复。
+- **边界明确：** pre-update异常保留实际更新前state；post-update或optimizer运行期异常可能已donate旧buffer，记录明确phase，不能声称保留旧state。SIGKILL/掉电/设备不可读也可能阻止张量导出，manifest保留partial/error；外层CUDA/Xid/core及退出采集继续提供证据。不承诺抓到模型内部每一层激活，先用输入、实际梯度及更新定位坏叶子后再细化反向算子。
+- `steps.jsonl`逐事件flush/fsync。新作业使用独立JAX编译缓存保留完整新编译图，不删除共享缓存；self-check与真实训练XLA目录独立。外层CUDA/NCCL/内核/GPU遥测仍工作。
+
+本地只做纯数组、序列化与stub协议检查：17项通过，包含稳定大数范数、坏副本不被隐藏、身份/内容hash、严格JSON、拒绝覆盖、失败/超时留痕、输入/梯度异常时optimizer绝不被调用、post-state语义与正常路径各调用一次；Ruff通过。未在本地运行模型前向、梯度或训练smoke。新Slurm作业内先运行`check_numerical_diagnostics.py`，仅用四GPU小数组验证正确故障卡/分片定位、有限大数的范数溢出、复制去重及真实异常张量导出/读回；该检查不创建模型或执行优化器，通过后才进入原生正式续训。实际作业号和运行回执在启动验收后更新。
+
 ## 2563失败复核（2026-10-22 15:21起，只读）
 
 用户报告再次崩溃后，按本次请求读取事故包；没有启动训练、修改当前配方、恢复自动化或向其他agent发消息。15:21队列为空。**本次直接退出原因已确定为数值保护：completed step1491检测到聚合`grad_norm=inf`，抛出FloatingPointError；原生trainer退出码1、signal=null，包装器未收到终止信号。** Slurm于15:02:58结束，elapsed22:31。该事件不能继续归类为SIGSEGV或已证明的CUDA非法地址。

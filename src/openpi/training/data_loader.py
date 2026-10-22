@@ -19,6 +19,7 @@ except ModuleNotFoundError:
     import lerobot.common.datasets.lerobot_dataset as lerobot_dataset
 
 import openpi.models.model as _model
+from openpi.training import numerical_evidence as _numerical_evidence
 import openpi.training.config as _config
 from openpi.training.droid_rlds_dataset import DroidRldsDataset
 import openpi.transforms as _transforms
@@ -67,7 +68,16 @@ class TransformedDataset(Dataset[T_co]):
         self._transform = _transforms.compose(transforms)
 
     def __getitem__(self, index: SupportsIndex) -> T_co:
-        return self._transform(self._dataset[index])
+        sample = self._dataset[index]
+        identity = (
+            _numerical_evidence.sample_identity(sample, index)
+            if os.environ.get("OPENPI_NUMERIC_DIAGNOSTICS_DIR")
+            else None
+        )
+        result = self._transform(sample)
+        if identity is not None:
+            result[_numerical_evidence.IDENTITY_KEY] = identity
+        return result
 
     def __len__(self) -> int:
         return len(self._dataset)
@@ -618,6 +628,12 @@ class TorchDataLoader:
                 except StopIteration:
                     break  # We've exhausted the dataset. Create a new iterator and start over.
                 num_items += 1
+                self.last_batch_identity = batch.pop(_numerical_evidence.IDENTITY_KEY, None)
+                self.last_batch_fingerprint = (
+                    _numerical_evidence.batch_fingerprint(batch)
+                    if os.environ.get("OPENPI_NUMERIC_DIAGNOSTICS_DIR")
+                    else None
+                )
                 # For JAX, convert to sharded arrays; for PyTorch, return torch tensors
                 if self._sharding is not None:
                     yield jax.tree.map(lambda x: jax.make_array_from_process_local_data(self._sharding, x), batch)
@@ -701,6 +717,14 @@ class DataLoaderImpl(DataLoader):
     def __iter__(self):
         for batch in self._data_loader:
             yield _model.Observation.from_dict(batch), batch["actions"]
+
+    @property
+    def last_batch_identity(self):
+        return getattr(self._data_loader, "last_batch_identity", None)
+
+    @property
+    def last_batch_fingerprint(self):
+        return getattr(self._data_loader, "last_batch_fingerprint", None)
 
     def set_start_step(self, step: int) -> None:
         set_start_step = getattr(self._data_loader, "set_start_step", None)

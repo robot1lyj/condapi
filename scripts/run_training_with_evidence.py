@@ -87,6 +87,9 @@ def run(args):
     output.mkdir(mode=0o700, parents=True, exist_ok=False)
     (output / "xla").mkdir()
     env = diagnostic_environment(output, os.environ)
+    if getattr(args, "numeric_diagnostics", False):
+        env["OPENPI_NUMERIC_DIAGNOSTICS_DIR"] = str(output / "numerical")
+        env["OPENPI_JAX_CACHE_DIR"] = str(output / "jax-cache")
     event_file = (output / "events.jsonl").open("x", buffering=1)
 
     def event(kind, **fields):
@@ -103,6 +106,32 @@ def run(args):
     )
     event("starting", command=args.command, cwd=str(Path.cwd()), job_id=snapshot_args.job_id)
     collect(snapshot_args)
+    if getattr(args, "numeric_diagnostics", False):
+        check_env = dict(env, XLA_PYTHON_CLIENT_PREALLOCATE="false")
+        (output / "xla-self-check").mkdir()
+        check_env["XLA_FLAGS"] = env["XLA_FLAGS"].replace(
+            "--xla_dump_to=" + str(output / "xla"), "--xla_dump_to=" + str(output / "xla-self-check")
+        )
+        check_command = [
+            args.metadata_python,
+            str(Path(__file__).with_name("check_numerical_diagnostics.py")),
+            "--output",
+            str(output / "numerical-self-check"),
+        ]
+        with (output / "numerical-self-check.log").open("xb") as handle:
+            check = subprocess.run(
+                check_command,
+                env=check_env,
+                stdin=subprocess.DEVNULL,
+                stdout=handle,
+                stderr=subprocess.STDOUT,
+                timeout=300,
+                check=False,
+            )
+        event("numeric_self_check", returncode=check.returncode)
+        if check.returncode:
+            event_file.close()
+            return check.returncode
     monitors = []
     handles = []
     trainer = None
@@ -232,6 +261,11 @@ def main():
     parser.add_argument("--since", required=True)
     parser.add_argument("--metadata-python", default=sys.executable)
     parser.add_argument("--source-file", type=Path, action="append", default=[])
+    parser.add_argument(
+        "--numeric-diagnostics",
+        action="store_true",
+        help="Enable per-step numerical evidence and an isolated compilation cache",
+    )
     parser.add_argument("command", nargs=argparse.REMAINDER)
     args = parser.parse_args()
     if args.command[:1] == ["--"]:

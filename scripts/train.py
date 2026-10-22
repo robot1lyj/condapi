@@ -1,3 +1,5 @@
+# ruff: noqa: E402
+# JAX distributed initialization must precede imports that may initialize a backend.
 import dataclasses
 import functools
 import logging
@@ -58,6 +60,7 @@ import openpi.training.checkpoints as _checkpoints
 import openpi.training.config as _config
 import openpi.training.data_loader as _data_loader
 import openpi.training.metrics as _metrics
+import openpi.training.numerical_diagnostics as _numerical
 import openpi.training.optimizer as _optimizer
 import openpi.training.sharding as sharding
 import openpi.training.utils as training_utils
@@ -202,13 +205,12 @@ def init_train_state(
     return train_state, state_sharding
 
 
-@at.typecheck
-def train_step(
+def _loss_and_grads(
     config: _config.TrainConfig,
     rng: at.KeyArrayLike,
     state: training_utils.TrainState,
     batch: tuple[_model.Observation, _model.Actions],
-) -> tuple[training_utils.TrainState, dict[str, at.Array]]:
+):
     model = nnx.merge(state.model_def, state.params)
     model.train()
 
@@ -226,6 +228,10 @@ def train_step(
     diff_state = nnx.DiffState(0, config.trainable_filter)
     loss, grads = nnx.value_and_grad(loss_fn, argnums=diff_state)(model, train_rng, observation, actions)
 
+    return model, loss, grads
+
+
+def _apply_native_gradients(config, state, model, grads, *, return_updates=False):
     params = state.params.filter(config.trainable_filter)
     updates, new_opt_state = state.tx.update(grads, state.opt_state, params)
     new_params = optax.apply_updates(params, updates)
@@ -243,6 +249,10 @@ def train_step(
             ),
         )
 
+    return (new_state, updates) if return_updates else new_state
+
+
+def _kernel_param_norm(model):
     # Filter out params that aren't kernels.
     kernel_params = nnx.state(
         model,
@@ -252,12 +262,30 @@ def train_step(
             lambda _, x: x.value.ndim > 1,
         ),
     )
-    info = {
-        "loss": loss,
-        "grad_norm": optax.global_norm(grads),
-        "param_norm": optax.global_norm(kernel_params),
-    }
-    return new_state, info
+    return optax.global_norm(kernel_params)
+
+
+@at.typecheck
+def train_step(
+    config: _config.TrainConfig,
+    rng: at.KeyArrayLike,
+    state: training_utils.TrainState,
+    batch: tuple[_model.Observation, _model.Actions],
+) -> tuple[training_utils.TrainState, dict[str, at.Array]]:
+    model, loss, grads = _loss_and_grads(config, rng, state, batch)
+    new_state = _apply_native_gradients(config, state, model, grads)
+    return new_state, {"loss": loss, "grad_norm": optax.global_norm(grads), "param_norm": _kernel_param_norm(model)}
+
+
+def _diagnostic_gradients(config, rng, state, batch):
+    _, loss, grads = _loss_and_grads(config, rng, state, batch)
+    return loss, grads, optax.global_norm(grads)
+
+
+def _diagnostic_update(config, state, grads):
+    model = nnx.merge(state.model_def, state.params)
+    state, updates = _apply_native_gradients(config, state, model, grads, return_updates=True)
+    return state, _kernel_param_norm(model), updates
 
 
 def main(config: _config.TrainConfig):
@@ -274,7 +302,10 @@ def main(config: _config.TrainConfig):
             f"Batch size {config.batch_size} must be divisible by the number of devices {jax.device_count()}."
         )
 
-    jax.config.update("jax_compilation_cache_dir", str(epath.Path("~/.cache/jax").expanduser()))
+    jax.config.update(
+        "jax_compilation_cache_dir",
+        os.environ.get("OPENPI_JAX_CACHE_DIR", str(epath.Path("~/.cache/jax").expanduser())),
+    )
 
     rng = jax.random.key(config.seed)
     train_rng, init_rng = jax.random.split(rng)
@@ -319,12 +350,39 @@ def main(config: _config.TrainConfig):
     if is_primary_process:
         wandb.log({"camera_views": images_to_log}, step=start_step)
 
-    ptrain_step = jax.jit(
-        functools.partial(train_step, config),
-        in_shardings=(replicated_sharding, train_state_sharding, data_sharding),
-        out_shardings=(train_state_sharding, replicated_sharding),
-        donate_argnums=(1,),
-    )
+    numerical = None
+    if numerical_dir := os.environ.get("OPENPI_NUMERIC_DIAGNOSTICS_DIR"):
+        # The split phase must not discard mutable non-parameter model state.
+        if jax.tree.leaves(train_state.params.filter(nnx.Not(nnx.Param))):
+            raise ValueError("Numerical diagnostics requires a model with parameter-only state")
+        numerical = _numerical.NumericalDiagnostics(numerical_dir, config)
+        numerical.begin(start_step, data_loader.last_batch_identity, data_loader.last_batch_fingerprint, train_rng)
+        restored = numerical.inspect({"params": train_state.params, "optimizer": train_state.opt_state}, "state")
+        numerical.record("restored_state", statistics=restored)
+        if not restored["summary"]["all_finite"]:
+            numerical.failure(
+                "nonfinite_restored_state", state=train_state, batch=batch, rng=train_rng, details=restored
+            )
+            raise FloatingPointError("Restored parameters/optimizer are nonfinite; numerical evidence saved")
+        grads_sharding = train_state_sharding.params.filter(config.trainable_filter)
+        pgradient_step = jax.jit(
+            functools.partial(_diagnostic_gradients, config),
+            in_shardings=(replicated_sharding, train_state_sharding, data_sharding),
+            out_shardings=(replicated_sharding, grads_sharding, replicated_sharding),
+        )
+        pupdate_step = jax.jit(
+            functools.partial(_diagnostic_update, config),
+            in_shardings=(train_state_sharding, grads_sharding),
+            out_shardings=(train_state_sharding, replicated_sharding, grads_sharding),
+            donate_argnums=(0, 1),
+        )
+    else:
+        ptrain_step = jax.jit(
+            functools.partial(train_step, config),
+            in_shardings=(replicated_sharding, train_state_sharding, data_sharding),
+            out_shardings=(train_state_sharding, replicated_sharding),
+            donate_argnums=(1,),
+        )
 
     metric_logger = (
         _metrics.LocalMetricLogger(config.checkpoint_dir, resume_step=start_step if resuming else None)
@@ -343,13 +401,26 @@ def main(config: _config.TrainConfig):
     interval_steps = 0
     for step in pbar:
         with sharding.set_mesh(mesh):
-            train_state, info = ptrain_step(train_rng, train_state, batch)
+            if numerical is not None:
+                numerical.begin(step, data_loader.last_batch_identity, data_loader.last_batch_fingerprint, train_rng)
+                train_state, info = numerical.update(train_state, batch, train_rng, pgradient_step, pupdate_step)
+            else:
+                train_state, info = ptrain_step(train_rng, train_state, batch)
         infos.append(info)
         interval_steps += 1
         if step % config.log_interval == 0:
             stacked_infos = common_utils.stack_forest(infos)
             reduced_info = jax.device_get(jax.tree.map(jnp.mean, stacked_infos))
             if not all(np.isfinite(value) for value in reduced_info.values()):
+                if numerical is not None:
+                    numerical.failure(
+                        "nonfinite_metric_aggregation",
+                        state=train_state,
+                        batch=batch,
+                        rng=train_rng,
+                        phase="post_update_metrics",
+                        details={"aggregated_metrics": reduced_info},
+                    )
                 raise FloatingPointError(f"Nonfinite training metrics at completed step {step + 1}: {reduced_info}")
             reduced_info["learning_rate"] = _learning_rate(config, step)
             reduced_info["time"] = time.time()
@@ -372,11 +443,31 @@ def main(config: _config.TrainConfig):
 
         if (step + 1) % config.save_interval == 0 or step == config.num_train_steps - 1:
             if not _tree_is_finite(train_state.params):
+                if numerical is not None:
+                    numerical.failure(
+                        "nonfinite_checkpoint_params",
+                        state=train_state,
+                        batch=batch,
+                        rng=train_rng,
+                        phase="checkpoint",
+                        details={"batch_is_next_loader_batch": True},
+                    )
                 raise FloatingPointError(f"Nonfinite model parameters at checkpoint step {step + 1}")
             if not _tree_is_finite(train_state.opt_state):
+                if numerical is not None:
+                    numerical.failure(
+                        "nonfinite_checkpoint_optimizer",
+                        state=train_state,
+                        batch=batch,
+                        rng=train_rng,
+                        phase="checkpoint",
+                        details={"batch_is_next_loader_batch": True},
+                    )
                 raise FloatingPointError(f"Nonfinite optimizer state at checkpoint step {step + 1}")
             _checkpoints.save_state(checkpoint_manager, train_state, data_loader, step + 1)
 
+    if numerical is not None:
+        numerical.close()
     if metric_logger is not None:
         metric_logger.flush()
     logging.info("Waiting for checkpoint manager to finish")
