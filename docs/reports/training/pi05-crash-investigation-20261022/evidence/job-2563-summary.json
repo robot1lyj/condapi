@@ -1,0 +1,115 @@
+{
+  "job_id": 2563,
+  "exit": {
+    "utc": "2026-10-22T07:02:56.903104+00:00",
+    "pid": 1594045,
+    "returncode": 1,
+    "signal": null,
+    "wrapper_received_signals": []
+  },
+  "gpu_telemetry": {
+    "0": {
+      "samples": 269,
+      "min_temp_C": 46.0,
+      "max_temp_C": 69.0,
+      "max_power_W": 321.19,
+      "last_before_exit": {
+        "timestamp": "2026/10/22 15:02:48.988",
+        " index": " 0",
+        " uuid": " GPU-673638cf-82ca-6b28-639e-77561b944ceb",
+        " pci.bus_id": " 00000000:16:00.0",
+        " temperature.gpu": " 65",
+        " power.draw [W]": " 312.93 W",
+        " utilization.gpu [%]": " 100 %",
+        " memory.used [MiB]": " 22818 MiB",
+        " memory.total [MiB]": " 24564 MiB"
+      }
+    },
+    "1": {
+      "samples": 269,
+      "min_temp_C": 45.0,
+      "max_temp_C": 70.0,
+      "max_power_W": 318.69,
+      "last_before_exit": {
+        "timestamp": "2026/10/22 15:02:48.994",
+        " index": " 1",
+        " uuid": " GPU-7a9a29a1-9059-b0ef-d7b4-53c298565ca1",
+        " pci.bus_id": " 00000000:52:00.0",
+        " temperature.gpu": " 66",
+        " power.draw [W]": " 306.24 W",
+        " utilization.gpu [%]": " 100 %",
+        " memory.used [MiB]": " 22816 MiB",
+        " memory.total [MiB]": " 24564 MiB"
+      }
+    },
+    "2": {
+      "samples": 269,
+      "min_temp_C": 44.0,
+      "max_temp_C": 69.0,
+      "max_power_W": 324.38,
+      "last_before_exit": {
+        "timestamp": "2026/10/22 15:02:48.998",
+        " index": " 2",
+        " uuid": " GPU-3dab425e-aa1d-4187-7fc0-d5177815444c",
+        " pci.bus_id": " 00000000:AC:00.0",
+        " temperature.gpu": " 65",
+        " power.draw [W]": " 307.29 W",
+        " utilization.gpu [%]": " 100 %",
+        " memory.used [MiB]": " 22816 MiB",
+        " memory.total [MiB]": " 24564 MiB"
+      }
+    },
+    "3": {
+      "samples": 269,
+      "min_temp_C": 46.0,
+      "max_temp_C": 68.0,
+      "max_power_W": 309.93,
+      "last_before_exit": {
+        "timestamp": "2026/10/22 15:02:49.001",
+        " index": " 3",
+        " uuid": " GPU-b318a64d-8d2e-95ee-8f12-f185e4f6e760",
+        " pci.bus_id": " 00000000:CA:00.0",
+        " temperature.gpu": " 64",
+        " power.draw [W]": " 296.13 W",
+        " utilization.gpu [%]": " 100 %",
+        " memory.used [MiB]": " 22816 MiB",
+        " memory.total [MiB]": " 24564 MiB"
+      }
+    }
+  },
+  "host_samples": 270,
+  "edac_first": {
+    "/sys/devices/system/edac/mc/mc2/ce_count": "0",
+    "/sys/devices/system/edac/mc/mc0/ce_count": "3781237",
+    "/sys/devices/system/edac/mc/mc3/ce_count": "0",
+    "/sys/devices/system/edac/mc/mc1/ce_count": "0",
+    "/sys/devices/system/edac/mc/mc2/ue_count": "0",
+    "/sys/devices/system/edac/mc/mc0/ue_count": "0",
+    "/sys/devices/system/edac/mc/mc3/ue_count": "0",
+    "/sys/devices/system/edac/mc/mc1/ue_count": "0"
+  },
+  "edac_last": {
+    "/sys/devices/system/edac/mc/mc2/ce_count": "0",
+    "/sys/devices/system/edac/mc/mc0/ce_count": "3781237",
+    "/sys/devices/system/edac/mc/mc3/ce_count": "0",
+    "/sys/devices/system/edac/mc/mc1/ce_count": "0",
+    "/sys/devices/system/edac/mc/mc2/ue_count": "0",
+    "/sys/devices/system/edac/mc/mc0/ue_count": "0",
+    "/sys/devices/system/edac/mc/mc3/ue_count": "0",
+    "/sys/devices/system/edac/mc/mc1/ue_count": "0"
+  },
+  "new_kernel_records": [],
+  "last_retained_kernel_record": "2026-10-22T14:04:54,521100+08:00 NVRM: Xid (PCI:0000:52:00): 43, pid=4028057, name=python, channel 0x00000008",
+  "last_good_metric_completed_step": 1481,
+  "nonfinite_window_completed_steps": [
+    1482,
+    1491
+  ],
+  "detected_at_completed_step": 1491,
+  "grad_norm": "inf",
+  "loss": 0.00729946,
+  "param_norm": 1803.7782,
+  "full_gradient_or_optimizer_finite_checks_at_failure": "not recorded",
+  "latest_complete_checkpoint": 1000,
+  "next_checkpoint_2000": "absent"
+}

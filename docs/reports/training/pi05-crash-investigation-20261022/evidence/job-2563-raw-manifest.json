@@ -1,0 +1,86 @@
+[
+  {
+    "source": "yam-server:/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/incidents/job-2563/trainer.log",
+    "local": "raw/job-2563/trainer.log",
+    "bytes": 62277,
+    "sha256": "efffa31f720aa52b02c4d3b5e2e4ef9b3567e2109db20f64831433b4d7fd69fd"
+  },
+  {
+    "source": "yam-server:/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/incidents/job-2563/events.jsonl",
+    "local": "raw/job-2563/events.jsonl",
+    "bytes": 1664,
+    "sha256": "c3e32db6628307673b36d277df25e53fc303dbd7b9849698d543c24efceff215"
+  },
+  {
+    "source": "yam-server:/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/incidents/job-2563/exit.json",
+    "local": "raw/job-2563/exit.json",
+    "bytes": 137,
+    "sha256": "7f4d9ea054ee4c09ed327fc79257ad79e5a18066b45caf0925fa09086f48ef7d"
+  },
+  {
+    "source": "yam-server:/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/incidents/job-2563/gpu-telemetry.log",
+    "local": "raw/job-2563/gpu-telemetry.log",
+    "bytes": 139224,
+    "sha256": "ba01ee326c242a31385e3944c730f88cfcc201b6bc700ebe3a416fbe44369def"
+  },
+  {
+    "source": "yam-server:/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/incidents/job-2563/host-telemetry.jsonl",
+    "local": "raw/job-2563/host-telemetry.jsonl",
+    "bytes": 591813,
+    "sha256": "0b7df36b41a5f43c7cae43ef59f5b049b87489c4ce48800b095f058fc2ddf210"
+  },
+  {
+    "source": "yam-server:/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/incidents/job-2563/kernel-follow.log",
+    "local": "raw/job-2563/kernel-follow.log",
+    "bytes": 1223622,
+    "sha256": "d8e92112ce0d249949351543ef6ce8d639ae150876051da3a6098c796a487b08"
+  },
+  {
+    "source": "yam-server:/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/incidents/job-2563/process-snapshots.jsonl",
+    "local": "raw/job-2563/process-snapshots.jsonl",
+    "bytes": 125048,
+    "sha256": "7e70359ca85c4794b613ab87ff8a694ac42b71a65296df16cc3984019f1353c9"
+  },
+  {
+    "source": "yam-server:/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/incidents/job-2563/after/manifest.json",
+    "local": "raw/job-2563/after/manifest.json",
+    "bytes": 24674,
+    "sha256": "cbcc45d961823df451df5be4138a7c5c1a037bc6309082abf34922bc18da1289"
+  },
+  {
+    "source": "yam-server:/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/incidents/job-2563/after/gpu-full.stdout.txt",
+    "local": "raw/job-2563/after/gpu-full.stdout.txt",
+    "bytes": 55676,
+    "sha256": "39eeff04106fe17e7c2b4ff5f0c5687724a2efc88b72a7b11b50fa8b7d3af697"
+  },
+  {
+    "source": "yam-server:/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/incidents/job-2563/after/kernel-wallclock.stdout.txt",
+    "local": "raw/job-2563/after/kernel-wallclock.stdout.txt",
+    "bytes": 1223622,
+    "sha256": "d8e92112ce0d249949351543ef6ce8d639ae150876051da3a6098c796a487b08"
+  },
+  {
+    "source": "yam-server:/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/incidents/job-2563/after/memory.stdout.txt",
+    "local": "raw/job-2563/after/memory.stdout.txt",
+    "bytes": 211,
+    "sha256": "f2a682367b4e31bfae1f39f70d249ebcc312b7fb41dc8caf73120fecf04414aa"
+  },
+  {
+    "source": "yam-server:/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/incidents/job-2563/after/disk.stdout.txt",
+    "local": "raw/job-2563/after/disk.stdout.txt",
+    "bytes": 180,
+    "sha256": "962c45c1bf0eb924b0dce98ffeeba034b4d078eb795f52b3f331919c08069048"
+  },
+  {
+    "source": "yam-server:/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/incidents/job-2563/after/disk-inodes.stdout.txt",
+    "local": "raw/job-2563/after/disk-inodes.stdout.txt",
+    "bytes": 224,
+    "sha256": "6ebf0a8f7f0ae4d079fa8abcb3d2cdda3d6f25d078dc68040809db1a93971db6"
+  },
+  {
+    "source": "yam-server:incidents/job-2563/xla (tar snapshot)",
+    "local": "raw/job-2563/xla-original.tar.gz",
+    "bytes": 23733,
+    "sha256": "9b5404ec01286044904c46914fd7a5efbddc28b62bd1974307bb92060992818f"
+  }
+]

@@ -1,0 +1,105 @@
+{
+  "all_history_error_count": 25,
+  "since_20261020": [
+    {
+      "source": "raw/earbuds_pi05_rtc_base_50h_20261012/train.log",
+      "line": 78395,
+      "error": "FloatingPointError: Nonfinite training metrics at completed step 92581: {'grad_norm': array(inf, dtype=float32), 'loss': array(0.00870145, dtype=float32), 'param_norm': array(1803.5487, dtype=float32)}",
+      "last_metric": {
+        "text": "Step 92570: grad_norm=0.1000, loss=0.0088, param_norm=1803.5482, learning_rate=0.0000, time=1792432133.1966, step_seconds=2.2804, samples_per_second=14.0326, gpu_memory_gib=9.3966",
+        "local_time": "2026-10-20T01:48:53.196600+08:00",
+        "line": 78384
+      }
+    },
+    {
+      "source": "raw/earbuds_pi05_rtc_base_50h_20261012/train.log",
+      "line": 97454,
+      "error": "FloatingPointError: Nonfinite training metrics at completed step 106851: {'grad_norm': array(nan, dtype=float32), 'loss': array(nan, dtype=float32), 'param_norm': array(nan, dtype=float32)}",
+      "last_metric": {
+        "text": "Step 106840: grad_norm=0.0884, loss=0.0085, param_norm=1803.6975, learning_rate=0.0000, time=1792503088.9084, step_seconds=2.2829, samples_per_second=14.0174, gpu_memory_gib=9.4011",
+        "local_time": "2026-10-20T21:31:28.908400+08:00",
+        "line": 97443
+      }
+    },
+    {
+      "source": "raw/earbuds_pi05_rtc_base_50h_20261012/train.log",
+      "line": 98146,
+      "error": "FloatingPointError: Nonfinite training metrics at completed step 106811: {'grad_norm': array(inf, dtype=float32), 'loss': array(0.00796013, dtype=float32), 'param_norm': array(1803.6973, dtype=float32)}",
+      "last_metric": {
+        "text": "Step 106800: grad_norm=0.0816, loss=0.0078, param_norm=1803.6971, learning_rate=0.0000, time=1792506843.6420, step_seconds=2.2872, samples_per_second=13.9911, gpu_memory_gib=9.4011",
+        "local_time": "2026-10-20T22:34:03.642000+08:00",
+        "line": 98135
+      }
+    },
+    {
+      "source": "raw/earbuds_pi05_rtc_base_50h_20261012/train.log",
+      "line": 100159,
+      "error": "FloatingPointError: Nonfinite training metrics at completed step 107511: {'grad_norm': array(nan, dtype=float32), 'loss': array(nan, dtype=float32), 'param_norm': array(nan, dtype=float32)}",
+      "last_metric": {
+        "text": "Step 107500: grad_norm=0.0779, loss=0.0076, param_norm=1803.7041, learning_rate=0.0000, time=1792515670.8129, step_seconds=2.2844, samples_per_second=14.0081, gpu_memory_gib=9.4011",
+        "local_time": "2026-10-21T01:01:10.812900+08:00",
+        "line": 100148
+      }
+    },
+    {
+      "source": "raw/earbuds_pi05_rtc_base_50h_20261012/train.log",
+      "line": 100574,
+      "error": "FloatingPointError: Nonfinite training metrics at completed step 107271: {'grad_norm': array(nan, dtype=float32), 'loss': array(nan, dtype=float32), 'param_norm': array(nan, dtype=float32)}",
+      "last_metric": {
+        "text": "Step 107260: grad_norm=0.0806, loss=0.0084, param_norm=1803.7014, learning_rate=0.0000, time=1792518139.7446, step_seconds=2.2786, samples_per_second=14.0436, gpu_memory_gib=9.4011",
+        "local_time": "2026-10-21T01:42:19.744600+08:00",
+        "line": 100563
+      }
+    },
+    {
+      "source": "raw/earbuds_pi05_rtc_base_50h_20261012/train.log",
+      "line": 100964,
+      "error": "FloatingPointError: Nonfinite training metrics at completed step 107221: {'grad_norm': array(inf, dtype=float32), 'loss': array(0.00820646, dtype=float32), 'param_norm': array(1803.7012, dtype=float32)}",
+      "last_metric": {
+        "text": "Step 107210: grad_norm=0.0866, loss=0.0080, param_norm=1803.7012, learning_rate=0.0000, time=1792519815.7609, step_seconds=2.2778, samples_per_second=14.0486, gpu_memory_gib=9.4011",
+        "local_time": "2026-10-21T02:10:15.760900+08:00",
+        "line": 100953
+      }
+    },
+    {
+      "source": "raw/earbuds_pi05_rtc_base_50h_20261012/train.log",
+      "line": 102132,
+      "error": "FloatingPointError: Nonfinite training metrics at completed step 107311: {'grad_norm': array(inf, dtype=float32), 'loss': array(0.00756752, dtype=float32), 'param_norm': array(1803.7021, dtype=float32)}",
+      "last_metric": {
+        "text": "Step 107300: grad_norm=0.0888, loss=0.0085, param_norm=1803.7020, learning_rate=0.0000, time=1792525414.9162, step_seconds=2.2805, samples_per_second=14.0319, gpu_memory_gib=9.4011",
+        "local_time": "2026-10-21T03:43:34.916200+08:00",
+        "line": 102121
+      }
+    },
+    {
+      "source": "raw/earbuds_pi05_rtc_base_50h_20261012/train.log",
+      "line": 104476,
+      "error": "FloatingPointError: Nonfinite training metrics at completed step 107031: {'grad_norm': array(nan, dtype=float32), 'loss': array(nan, dtype=float32), 'param_norm': array(nan, dtype=float32)}",
+      "last_metric": {
+        "text": "Step 107020: grad_norm=0.0982, loss=0.0081, param_norm=1803.6995, learning_rate=0.0000, time=1792535589.7487, step_seconds=2.2739, samples_per_second=14.0727, gpu_memory_gib=9.3966",
+        "local_time": "2026-10-21T06:33:09.748700+08:00",
+        "line": 104465
+      }
+    },
+    {
+      "source": "raw/earbuds_pi05_rtc_base_50h_20261012/train.log",
+      "line": 104866,
+      "error": "FloatingPointError: Nonfinite training metrics at completed step 107221: {'grad_norm': array(nan, dtype=float32), 'loss': array(nan, dtype=float32), 'param_norm': array(nan, dtype=float32)}",
+      "last_metric": {
+        "text": "Step 107210: grad_norm=0.0865, loss=0.0080, param_norm=1803.7012, learning_rate=0.0000, time=1792537802.6329, step_seconds=2.2776, samples_per_second=14.0501, gpu_memory_gib=9.4011",
+        "local_time": "2026-10-21T07:10:02.632900+08:00",
+        "line": 104855
+      }
+    },
+    {
+      "source": "raw/earbuds_pi05_rtc_base_50h_20261012/train.log",
+      "line": 106802,
+      "error": "FloatingPointError: Nonfinite training metrics at completed step 108351: {'grad_norm': array(inf, dtype=float32), 'loss': array(0.00896384, dtype=float32), 'param_norm': array(1803.7122, dtype=float32)}",
+      "last_metric": {
+        "text": "Step 108340: grad_norm=0.0840, loss=0.0077, param_norm=1803.7122, learning_rate=0.0000, time=1792545831.9781, step_seconds=2.2779, samples_per_second=14.0478, gpu_memory_gib=9.4011",
+        "local_time": "2026-10-21T09:23:51.978100+08:00",
+        "line": 106791
+      }
+    }
+  ]
+}

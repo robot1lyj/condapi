@@ -1,0 +1,693 @@
+{
+  "source": "/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/incidents/job-2563/nccl.gpu001.1594045.log",
+  "bytes": 1305029845,
+  "sha256": "d3ee50ca93d3b310b54d240ffe6a238beca4a90f2ac857692bffa9721910d87c",
+  "lines": 6655548,
+  "warning_error_matches": [],
+  "transport_counts": {
+    "SHM/direct/direct": 32
+  },
+  "xla_files": [
+    {
+      "name": "module_0011.jit_true_divide.autotune_results.pbtxt",
+      "bytes": 11
+    },
+    {
+      "name": "module_0011.jit_true_divide.before_optimizations.txt",
+      "bytes": 1006
+    },
+    {
+      "name": "module_0011.jit_true_divide.gpu_target_config.pbtxt",
+      "bytes": 708
+    },
+    {
+      "name": "module_0011.jit_true_divide.ir-no-opt.ll",
+      "bytes": 1929
+    },
+    {
+      "name": "module_0011.jit_true_divide.ir-with-opt.ll",
+      "bytes": 2543
+    },
+    {
+      "name": "module_0011.jit_true_divide.ptx",
+      "bytes": 1125
+    },
+    {
+      "name": "module_0011.jit_true_divide.sm_8.9_gpu_after_optimizations-buffer-assignment.txt",
+      "bytes": 1565
+    },
+    {
+      "name": "module_0011.jit_true_divide.sm_8.9_gpu_after_optimizations-memory-usage-report.txt",
+      "bytes": 805
+    },
+    {
+      "name": "module_0011.jit_true_divide.sm_8.9_gpu_after_optimizations.txt",
+      "bytes": 1601
+    },
+    {
+      "name": "module_0011.jit_true_divide.thunk_sequence.txt",
+      "bytes": 131
+    },
+    {
+      "name": "module_0013.jit_multiply.autotune_results.pbtxt",
+      "bytes": 11
+    },
+    {
+      "name": "module_0013.jit_multiply.before_optimizations.txt",
+      "bytes": 999
+    },
+    {
+      "name": "module_0013.jit_multiply.gpu_target_config.pbtxt",
+      "bytes": 708
+    },
+    {
+      "name": "module_0013.jit_multiply.ir-no-opt.ll",
+      "bytes": 1925
+    },
+    {
+      "name": "module_0013.jit_multiply.ir-with-opt.ll",
+      "bytes": 2539
+    },
+    {
+      "name": "module_0013.jit_multiply.ptx",
+      "bytes": 1133
+    },
+    {
+      "name": "module_0013.jit_multiply.sm_8.9_gpu_after_optimizations-buffer-assignment.txt",
+      "bytes": 1580
+    },
+    {
+      "name": "module_0013.jit_multiply.sm_8.9_gpu_after_optimizations-memory-usage-report.txt",
+      "bytes": 805
+    },
+    {
+      "name": "module_0013.jit_multiply.sm_8.9_gpu_after_optimizations.txt",
+      "bytes": 1597
+    },
+    {
+      "name": "module_0013.jit_multiply.thunk_sequence.txt",
+      "bytes": 133
+    },
+    {
+      "name": "module_0015.jit_subtract.autotune_results.pbtxt",
+      "bytes": 11
+    },
+    {
+      "name": "module_0015.jit_subtract.before_optimizations.txt",
+      "bytes": 999
+    },
+    {
+      "name": "module_0015.jit_subtract.gpu_target_config.pbtxt",
+      "bytes": 708
+    },
+    {
+      "name": "module_0015.jit_subtract.ir-no-opt.ll",
+      "bytes": 1925
+    },
+    {
+      "name": "module_0015.jit_subtract.ir-with-opt.ll",
+      "bytes": 2539
+    },
+    {
+      "name": "module_0015.jit_subtract.ptx",
+      "bytes": 1133
+    },
+    {
+      "name": "module_0015.jit_subtract.sm_8.9_gpu_after_optimizations-buffer-assignment.txt",
+      "bytes": 1580
+    },
+    {
+      "name": "module_0015.jit_subtract.sm_8.9_gpu_after_optimizations-memory-usage-report.txt",
+      "bytes": 805
+    },
+    {
+      "name": "module_0015.jit_subtract.sm_8.9_gpu_after_optimizations.txt",
+      "bytes": 1597
+    },
+    {
+      "name": "module_0015.jit_subtract.thunk_sequence.txt",
+      "bytes": 133
+    },
+    {
+      "name": "module_0017.jit_broadcast_in_dim.autotune_results.pbtxt",
+      "bytes": 11
+    },
+    {
+      "name": "module_0017.jit_broadcast_in_dim.before_optimizations.txt",
+      "bytes": 521
+    },
+    {
+      "name": "module_0017.jit_broadcast_in_dim.gpu_target_config.pbtxt",
+      "bytes": 708
+    },
+    {
+      "name": "module_0017.jit_broadcast_in_dim.ir-no-opt.ll",
+      "bytes": 188
+    },
+    {
+      "name": "module_0017.jit_broadcast_in_dim.ir-with-opt.ll",
+      "bytes": 188
+    },
+    {
+      "name": "module_0017.jit_broadcast_in_dim.ptx",
+      "bytes": 0
+    },
+    {
+      "name": "module_0017.jit_broadcast_in_dim.sm_8.9_gpu_after_optimizations-buffer-assignment.txt",
+      "bytes": 790
+    },
+    {
+      "name": "module_0017.jit_broadcast_in_dim.sm_8.9_gpu_after_optimizations-memory-usage-report.txt",
+      "bytes": 566
+    },
+    {
+      "name": "module_0017.jit_broadcast_in_dim.sm_8.9_gpu_after_optimizations.txt",
+      "bytes": 514
+    },
+    {
+      "name": "module_0017.jit_broadcast_in_dim.thunk_sequence.txt",
+      "bytes": 7
+    },
+    {
+      "name": "module_0021.jit_broadcast_in_dim.autotune_results.pbtxt",
+      "bytes": 11
+    },
+    {
+      "name": "module_0021.jit_broadcast_in_dim.before_optimizations.txt",
+      "bytes": 344
+    },
+    {
+      "name": "module_0021.jit_broadcast_in_dim.gpu_target_config.pbtxt",
+      "bytes": 708
+    },
+    {
+      "name": "module_0021.jit_broadcast_in_dim.ir-no-opt.ll",
+      "bytes": 188
+    },
+    {
+      "name": "module_0021.jit_broadcast_in_dim.ir-with-opt.ll",
+      "bytes": 188
+    },
+    {
+      "name": "module_0021.jit_broadcast_in_dim.ptx",
+      "bytes": 0
+    },
+    {
+      "name": "module_0021.jit_broadcast_in_dim.sm_8.9_gpu_after_optimizations-buffer-assignment.txt",
+      "bytes": 860
+    },
+    {
+      "name": "module_0021.jit_broadcast_in_dim.sm_8.9_gpu_after_optimizations-memory-usage-report.txt",
+      "bytes": 635
+    },
+    {
+      "name": "module_0021.jit_broadcast_in_dim.sm_8.9_gpu_after_optimizations.txt",
+      "bytes": 498
+    },
+    {
+      "name": "module_0021.jit_broadcast_in_dim.thunk_sequence.txt",
+      "bytes": 7
+    },
+    {
+      "name": "module_0025.jit__mean.autotune_results.pbtxt",
+      "bytes": 11
+    },
+    {
+      "name": "module_0025.jit__mean.before_optimizations.txt",
+      "bytes": 1256
+    },
+    {
+      "name": "module_0025.jit__mean.gpu_target_config.pbtxt",
+      "bytes": 708
+    },
+    {
+      "name": "module_0025.jit__mean.ir-no-opt.ll",
+      "bytes": 166
+    },
+    {
+      "name": "module_0025.jit__mean.ir-with-opt.ll",
+      "bytes": 166
+    },
+    {
+      "name": "module_0025.jit__mean.ptx",
+      "bytes": 0
+    },
+    {
+      "name": "module_0025.jit__mean.sm_8.9_gpu_after_optimizations-buffer-assignment.txt",
+      "bytes": 784
+    },
+    {
+      "name": "module_0025.jit__mean.sm_8.9_gpu_after_optimizations-memory-usage-report.txt",
+      "bytes": 566
+    },
+    {
+      "name": "module_0025.jit__mean.sm_8.9_gpu_after_optimizations.txt",
+      "bytes": 488
+    },
+    {
+      "name": "module_0025.jit__mean.thunk_sequence.txt",
+      "bytes": 7
+    },
+    {
+      "name": "module_0029.jit_true_divide.autotune_results.pbtxt",
+      "bytes": 11
+    },
+    {
+      "name": "module_0029.jit_true_divide.before_optimizations.txt",
+      "bytes": 1021
+    },
+    {
+      "name": "module_0029.jit_true_divide.gpu_target_config.pbtxt",
+      "bytes": 708
+    },
+    {
+      "name": "module_0029.jit_true_divide.ir-no-opt.ll",
+      "bytes": 724
+    },
+    {
+      "name": "module_0029.jit_true_divide.ir-with-opt.ll",
+      "bytes": 1257
+    },
+    {
+      "name": "module_0029.jit_true_divide.ptx",
+      "bytes": 841
+    },
+    {
+      "name": "module_0029.jit_true_divide.sm_8.9_gpu_after_optimizations-buffer-assignment.txt",
+      "bytes": 1366
+    },
+    {
+      "name": "module_0029.jit_true_divide.sm_8.9_gpu_after_optimizations-memory-usage-report.txt",
+      "bytes": 732
+    },
+    {
+      "name": "module_0029.jit_true_divide.sm_8.9_gpu_after_optimizations.txt",
+      "bytes": 1539
+    },
+    {
+      "name": "module_0029.jit_true_divide.thunk_sequence.txt",
+      "bytes": 126
+    },
+    {
+      "name": "module_0031.jit_subtract.autotune_results.pbtxt",
+      "bytes": 11
+    },
+    {
+      "name": "module_0031.jit_subtract.before_optimizations.txt",
+      "bytes": 792
+    },
+    {
+      "name": "module_0031.jit_subtract.gpu_target_config.pbtxt",
+      "bytes": 708
+    },
+    {
+      "name": "module_0031.jit_subtract.ir-no-opt.ll",
+      "bytes": 692
+    },
+    {
+      "name": "module_0031.jit_subtract.ir-with-opt.ll",
+      "bytes": 1223
+    },
+    {
+      "name": "module_0031.jit_subtract.ptx",
+      "bytes": 828
+    },
+    {
+      "name": "module_0031.jit_subtract.sm_8.9_gpu_after_optimizations-buffer-assignment.txt",
+      "bytes": 1381
+    },
+    {
+      "name": "module_0031.jit_subtract.sm_8.9_gpu_after_optimizations-memory-usage-report.txt",
+      "bytes": 732
+    },
+    {
+      "name": "module_0031.jit_subtract.sm_8.9_gpu_after_optimizations.txt",
+      "bytes": 1309
+    },
+    {
+      "name": "module_0031.jit_subtract.thunk_sequence.txt",
+      "bytes": 128
+    },
+    {
+      "name": "module_0033.jit_integer_pow.autotune_results.pbtxt",
+      "bytes": 11
+    },
+    {
+      "name": "module_0033.jit_integer_pow.before_optimizations.txt",
+      "bytes": 286
+    },
+    {
+      "name": "module_0033.jit_integer_pow.gpu_target_config.pbtxt",
+      "bytes": 708
+    },
+    {
+      "name": "module_0033.jit_integer_pow.ir-no-opt.ll",
+      "bytes": 178
+    },
+    {
+      "name": "module_0033.jit_integer_pow.ir-with-opt.ll",
+      "bytes": 178
+    },
+    {
+      "name": "module_0033.jit_integer_pow.ptx",
+      "bytes": 0
+    },
+    {
+      "name": "module_0033.jit_integer_pow.sm_8.9_gpu_after_optimizations-buffer-assignment.txt",
+      "bytes": 730
+    },
+    {
+      "name": "module_0033.jit_integer_pow.sm_8.9_gpu_after_optimizations-memory-usage-report.txt",
+      "bytes": 564
+    },
+    {
+      "name": "module_0033.jit_integer_pow.sm_8.9_gpu_after_optimizations.txt",
+      "bytes": 425
+    },
+    {
+      "name": "module_0033.jit_integer_pow.thunk_sequence.txt",
+      "bytes": 7
+    },
+    {
+      "name": "module_0035.jit_multiply.autotune_results.pbtxt",
+      "bytes": 11
+    },
+    {
+      "name": "module_0035.jit_multiply.before_optimizations.txt",
+      "bytes": 573
+    },
+    {
+      "name": "module_0035.jit_multiply.gpu_target_config.pbtxt",
+      "bytes": 708
+    },
+    {
+      "name": "module_0035.jit_multiply.ir-no-opt.ll",
+      "bytes": 660
+    },
+    {
+      "name": "module_0035.jit_multiply.ir-with-opt.ll",
+      "bytes": 1189
+    },
+    {
+      "name": "module_0035.jit_multiply.ptx",
+      "bytes": 750
+    },
+    {
+      "name": "module_0035.jit_multiply.sm_8.9_gpu_after_optimizations-buffer-assignment.txt",
+      "bytes": 1359
+    },
+    {
+      "name": "module_0035.jit_multiply.sm_8.9_gpu_after_optimizations-memory-usage-report.txt",
+      "bytes": 732
+    },
+    {
+      "name": "module_0035.jit_multiply.sm_8.9_gpu_after_optimizations.txt",
+      "bytes": 1098
+    },
+    {
+      "name": "module_0035.jit_multiply.thunk_sequence.txt",
+      "bytes": 124
+    },
+    {
+      "name": "module_0037.jit_add.autotune_results.pbtxt",
+      "bytes": 11
+    },
+    {
+      "name": "module_0037.jit_add.before_optimizations.txt",
+      "bytes": 553
+    },
+    {
+      "name": "module_0037.jit_add.gpu_target_config.pbtxt",
+      "bytes": 708
+    },
+    {
+      "name": "module_0037.jit_add.ir-no-opt.ll",
+      "bytes": 645
+    },
+    {
+      "name": "module_0037.jit_add.ir-with-opt.ll",
+      "bytes": 1174
+    },
+    {
+      "name": "module_0037.jit_add.ptx",
+      "bytes": 710
+    },
+    {
+      "name": "module_0037.jit_add.sm_8.9_gpu_after_optimizations-buffer-assignment.txt",
+      "bytes": 1304
+    },
+    {
+      "name": "module_0037.jit_add.sm_8.9_gpu_after_optimizations-memory-usage-report.txt",
+      "bytes": 732
+    },
+    {
+      "name": "module_0037.jit_add.sm_8.9_gpu_after_optimizations.txt",
+      "bytes": 1058
+    },
+    {
+      "name": "module_0037.jit_add.thunk_sequence.txt",
+      "bytes": 119
+    },
+    {
+      "name": "module_0039.jit_minimum.autotune_results.pbtxt",
+      "bytes": 11
+    },
+    {
+      "name": "module_0039.jit_minimum.before_optimizations.txt",
+      "bytes": 569
+    },
+    {
+      "name": "module_0039.jit_minimum.gpu_target_config.pbtxt",
+      "bytes": 708
+    },
+    {
+      "name": "module_0039.jit_minimum.ir-no-opt.ll",
+      "bytes": 918
+    },
+    {
+      "name": "module_0039.jit_minimum.ir-with-opt.ll",
+      "bytes": 1478
+    },
+    {
+      "name": "module_0039.jit_minimum.ptx",
+      "bytes": 743
+    },
+    {
+      "name": "module_0039.jit_minimum.sm_8.9_gpu_after_optimizations-buffer-assignment.txt",
+      "bytes": 1348
+    },
+    {
+      "name": "module_0039.jit_minimum.sm_8.9_gpu_after_optimizations-memory-usage-report.txt",
+      "bytes": 732
+    },
+    {
+      "name": "module_0039.jit_minimum.sm_8.9_gpu_after_optimizations.txt",
+      "bytes": 1090
+    },
+    {
+      "name": "module_0039.jit_minimum.thunk_sequence.txt",
+      "bytes": 123
+    },
+    {
+      "name": "module_0041.jit_true_divide.autotune_results.pbtxt",
+      "bytes": 11
+    },
+    {
+      "name": "module_0041.jit_true_divide.before_optimizations.txt",
+      "bytes": 577
+    },
+    {
+      "name": "module_0041.jit_true_divide.gpu_target_config.pbtxt",
+      "bytes": 708
+    },
+    {
+      "name": "module_0041.jit_true_divide.ir-no-opt.ll",
+      "bytes": 664
+    },
+    {
+      "name": "module_0041.jit_true_divide.ir-with-opt.ll",
+      "bytes": 1193
+    },
+    {
+      "name": "module_0041.jit_true_divide.ptx",
+      "bytes": 736
+    },
+    {
+      "name": "module_0041.jit_true_divide.sm_8.9_gpu_after_optimizations-buffer-assignment.txt",
+      "bytes": 1344
+    },
+    {
+      "name": "module_0041.jit_true_divide.sm_8.9_gpu_after_optimizations-memory-usage-report.txt",
+      "bytes": 732
+    },
+    {
+      "name": "module_0041.jit_true_divide.sm_8.9_gpu_after_optimizations.txt",
+      "bytes": 1099
+    },
+    {
+      "name": "module_0041.jit_true_divide.thunk_sequence.txt",
+      "bytes": 122
+    },
+    {
+      "name": "module_0045.jit_add.autotune_results.pbtxt",
+      "bytes": 11
+    },
+    {
+      "name": "module_0045.jit_add.before_optimizations.txt",
+      "bytes": 767
+    },
+    {
+      "name": "module_0045.jit_add.gpu_target_config.pbtxt",
+      "bytes": 708
+    },
+    {
+      "name": "module_0045.jit_add.ir-no-opt.ll",
+      "bytes": 677
+    },
+    {
+      "name": "module_0045.jit_add.ir-with-opt.ll",
+      "bytes": 1208
+    },
+    {
+      "name": "module_0045.jit_add.ptx",
+      "bytes": 788
+    },
+    {
+      "name": "module_0045.jit_add.sm_8.9_gpu_after_optimizations-buffer-assignment.txt",
+      "bytes": 1326
+    },
+    {
+      "name": "module_0045.jit_add.sm_8.9_gpu_after_optimizations-memory-usage-report.txt",
+      "bytes": 732
+    },
+    {
+      "name": "module_0045.jit_add.sm_8.9_gpu_after_optimizations.txt",
+      "bytes": 1264
+    },
+    {
+      "name": "module_0045.jit_add.thunk_sequence.txt",
+      "bytes": 123
+    },
+    {
+      "name": "module_0047.jit__power.autotune_results.pbtxt",
+      "bytes": 11
+    },
+    {
+      "name": "module_0047.jit__power.before_optimizations.txt",
+      "bytes": 565
+    },
+    {
+      "name": "module_0047.jit__power.gpu_target_config.pbtxt",
+      "bytes": 708
+    },
+    {
+      "name": "module_0047.jit__power.ir-no-opt.ll",
+      "bytes": 717
+    },
+    {
+      "name": "module_0047.jit__power.ir-with-opt.ll",
+      "bytes": 8879
+    },
+    {
+      "name": "module_0047.jit__power.ptx",
+      "bytes": 4435
+    },
+    {
+      "name": "module_0047.jit__power.sm_8.9_gpu_after_optimizations-buffer-assignment.txt",
+      "bytes": 1329
+    },
+    {
+      "name": "module_0047.jit__power.sm_8.9_gpu_after_optimizations-memory-usage-report.txt",
+      "bytes": 732
+    },
+    {
+      "name": "module_0047.jit__power.sm_8.9_gpu_after_optimizations.txt",
+      "bytes": 1079
+    },
+    {
+      "name": "module_0047.jit__power.thunk_sequence.txt",
+      "bytes": 121
+    },
+    {
+      "name": "module_0049.jit__where.autotune_results.pbtxt",
+      "bytes": 11
+    },
+    {
+      "name": "module_0049.jit__where.before_optimizations.txt",
+      "bytes": 675
+    },
+    {
+      "name": "module_0049.jit__where.gpu_target_config.pbtxt",
+      "bytes": 708
+    },
+    {
+      "name": "module_0049.jit__where.ir-no-opt.ll",
+      "bytes": 790
+    },
+    {
+      "name": "module_0049.jit__where.ir-with-opt.ll",
+      "bytes": 1413
+    },
+    {
+      "name": "module_0049.jit__where.ptx",
+      "bytes": 1020
+    },
+    {
+      "name": "module_0049.jit__where.sm_8.9_gpu_after_optimizations-buffer-assignment.txt",
+      "bytes": 1692
+    },
+    {
+      "name": "module_0049.jit__where.sm_8.9_gpu_after_optimizations-memory-usage-report.txt",
+      "bytes": 900
+    },
+    {
+      "name": "module_0049.jit__where.sm_8.9_gpu_after_optimizations.txt",
+      "bytes": 1263
+    },
+    {
+      "name": "module_0049.jit__where.thunk_sequence.txt",
+      "bytes": 122
+    },
+    {
+      "name": "module_0051.jit__mean.autotune_results.pbtxt",
+      "bytes": 11
+    },
+    {
+      "name": "module_0051.jit__mean.before_optimizations.txt",
+      "bytes": 1260
+    },
+    {
+      "name": "module_0051.jit__mean.gpu_target_config.pbtxt",
+      "bytes": 708
+    },
+    {
+      "name": "module_0051.jit__mean.ir-no-opt.ll",
+      "bytes": 1836
+    },
+    {
+      "name": "module_0051.jit__mean.ir-with-opt.ll",
+      "bytes": 2045
+    },
+    {
+      "name": "module_0051.jit__mean.ptx",
+      "bytes": 1045
+    },
+    {
+      "name": "module_0051.jit__mean.sm_8.9_gpu_after_optimizations-buffer-assignment.txt",
+      "bytes": 1893
+    },
+    {
+      "name": "module_0051.jit__mean.sm_8.9_gpu_after_optimizations-memory-usage-report.txt",
+      "bytes": 884
+    },
+    {
+      "name": "module_0051.jit__mean.sm_8.9_gpu_after_optimizations.txt",
+      "bytes": 1720
+    },
+    {
+      "name": "module_0051.jit__mean.thunk_sequence.txt",
+      "bytes": 128
+    }
+  ],
+  "cuda_cores": []
+}

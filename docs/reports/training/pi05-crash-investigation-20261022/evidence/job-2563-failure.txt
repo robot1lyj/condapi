@@ -1,0 +1,18 @@
+Source: raw/job-2563/trainer.log; logical lines use splitlines; trailing whitespace removed.
+426: Step 1470: grad_norm=0.1027, loss=0.0084, param_norm=1803.7776, learning_rate=0.0000, time=1792652527.8245, step_seconds=2.2772, samples_per_second=14.0524, gpu_memory_gib=9.3966
+427: 15:02:14.312 [I] Progress on: 1.47kit/86.0kit rate:2.3s/it remaining:53:06:02 elapsed:18:18 postfix:- (1594045:tqdm_logging.py:145)
+428: 15:02:25.686 [I] Progress on: 1.48kit/86.0kit rate:2.3s/it remaining:53:21:20 elapsed:18:29 postfix:- (1594045:tqdm_logging.py:145)
+429:
+430:
+431: Step 1480: grad_norm=0.0954, loss=0.0093, param_norm=1803.7782, learning_rate=0.0000, time=1792652550.6025, step_seconds=2.2775, samples_per_second=14.0504, gpu_memory_gib=9.4011
+432: 15:02:37.085 [I] Progress on: 1.48kit/86.0kit rate:2.3s/it remaining:53:04:12 elapsed:18:41 postfix:- (1594045:tqdm_logging.py:145)
+433: 15:02:48.465 [I] Progress on: 1.49kit/86.0kit rate:2.3s/it remaining:53:21:59 elapsed:18:52 postfix:- (1594045:tqdm_logging.py:145)
+434: 15:02:53.381 [I] Progress on: 1.49kit/86.0kit rate:2.3s/it remaining:53:22:51 elapsed:18:57 postfix:- (1594045:tqdm_logging.py:145)
+435: Traceback (most recent call last):
+436:   File "/home/wuyan/lyj/YAM/code-snapshots/earbuds50h-clean-v2-20261013/scripts/train_lego_full.py", line 214, in <module>
+437:     main()
+438:   File "/home/wuyan/lyj/YAM/code-snapshots/earbuds50h-clean-v2-20261013/scripts/train_lego_full.py", line 210, in main
+439:     train.main(config)
+440:   File "/home/wuyan/lyj/YAM/code-snapshots/earbuds50h-clean-v2-20261013/scripts/train.py", line 353, in main
+441:     raise FloatingPointError(f"Nonfinite training metrics at completed step {step + 1}: {reduced_info}")
+442: FloatingPointError: Nonfinite training metrics at completed step 1491: {'grad_norm': array(inf, dtype=float32), 'loss': array(0.00729946, dtype=float32), 'param_norm': array(1803.7782, dtype=float32)}
