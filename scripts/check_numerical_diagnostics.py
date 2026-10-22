@@ -30,7 +30,15 @@ def main():
         checkpoint_dir="not-a-checkpoint",
         data=SimpleNamespace(repo_id="synthetic"),
     )
+    # Exercise the production cache guard even if a caller enables caching.
+    # Without the guard, zero thresholds make the small cuda:0 executable hit
+    # the disk cache on cuda:1 and reproduce the observed placement failure.
+    jax.config.update("jax_compilation_cache_dir", str(args.output.resolve().parent / "self-check-cache"))
+    jax.config.update("jax_persistent_cache_min_compile_time_secs", 0)
+    jax.config.update("jax_persistent_cache_min_entry_size_bytes", -1)
+    jax.config.update("jax_enable_compilation_cache", val=True)
     diagnostic = NumericalDiagnostics(args.output, config)
+    assert not jax.config.jax_enable_compilation_cache
     mesh = jax.sharding.Mesh(np.asarray(devices), ("check",))
     spec = jax.sharding.NamedSharding(mesh, jax.sharding.PartitionSpec("check"))
     blocks = [
@@ -115,6 +123,7 @@ def main():
             "shard_metadata_and_tensor_readback": "passed",
             "stable_large_value_norm": "passed",
             "orbax_restored_shard_placement": "passed",
+            "persistent_cache_placement_guard": "passed",
         },
     )
     print("NUMERICAL_EVIDENCE_SELF_CHECK=PASS", flush=True)

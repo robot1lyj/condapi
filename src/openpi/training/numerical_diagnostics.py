@@ -62,11 +62,16 @@ class NumericalDiagnostics:
     def __init__(self, directory, config):
         if jax.process_count() != 1:
             raise ValueError("Numerical evidence currently requires one process with all devices addressable")
+        # JAX/jaxlib 0.5.3 on the training host reuses a disk-cached single-GPU
+        # executable with cuda:0 assignment for cuda:1 despite device= below.
+        # The four-GPU cache on/off regression reproduces this even with tiny
+        # committed arrays. Keep in-memory JIT reuse, but disable disk caching
+        # for this opt-in diagnostic process. Never delete the shared cache.
+        jax.config.update("jax_enable_compilation_cache", val=False)
         self.directory = Path(directory).resolve()
         self.directory.mkdir(parents=True, mode=0o700, exist_ok=False)
         self.journal = (self.directory / "steps.jsonl").open("x", buffering=1)
-        # Orbax-restored shard buffers can be uncommitted. Pin each executable
-        # explicitly, otherwise JAX 0.5.x may reuse a cuda:0 placement for cuda:1.
+        # Pin each statistics executable to the physical shard's actual device.
         self.statistics = {device.id: jax.jit(local_statistics, device=device) for device in jax.local_devices()}
         self.schemas = {}
         self.failure_written = False
@@ -89,6 +94,8 @@ class NumericalDiagnostics:
                 "checkpoint_directory": str(config.checkpoint_dir),
                 "dataset": config.data.repo_id,
                 "mode": "split_native_gradient_and_optimizer_with_host_guard",
+                "persistent_compilation_cache_enabled": False,
+                "in_memory_jit_reuse": True,
                 "integer_fields": evidence.INTEGER_FIELDS,
                 "float_fields": evidence.FLOAT_FIELDS,
                 "devices": [
@@ -144,9 +151,12 @@ class NumericalDiagnostics:
         pending = []
         for device_id in sorted(by_device):
             group = by_device[device_id]
-            pending.append(
-                ([item for item, _ in group], self.statistics[device_id](tuple(array for _, array in group)))
-            )
+            try:
+                values = self.statistics[device_id](tuple(array for _, array in group))
+            except Exception as exc:
+                self.record("statistics_dispatch_error", label=label, device_id=device_id, exception=repr(exc))
+                raise
+            pending.append(([item for item, _ in group], values))
         records, schema = [], []
         for descriptions, values in pending:
             integers, floats = jax.device_get(values)

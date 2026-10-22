@@ -44,6 +44,7 @@ ENV_KEYS = {
     "CUDA_LAUNCH_BLOCKING",
     "OPENPI_NUMERIC_DIAGNOSTICS_DIR",
     "OPENPI_JAX_CACHE_DIR",
+    "JAX_ENABLE_COMPILATION_CACHE",
 }
 METADATA_CODE = """
 import importlib.metadata as m, json, sys

@@ -90,6 +90,7 @@ def run(args):
     if getattr(args, "numeric_diagnostics", False):
         env["OPENPI_NUMERIC_DIAGNOSTICS_DIR"] = str(output / "numerical")
         env["OPENPI_JAX_CACHE_DIR"] = str(output / "jax-cache")
+        env["JAX_ENABLE_COMPILATION_CACHE"] = "false"
     event_file = (output / "events.jsonl").open("x", buffering=1)
 
     def event(kind, **fields):
@@ -264,7 +265,7 @@ def main():
     parser.add_argument(
         "--numeric-diagnostics",
         action="store_true",
-        help="Enable per-step numerical evidence and an isolated compilation cache",
+        help="Enable per-step numerical evidence; disable persistent cache to preserve device placement and fresh HLO",
     )
     parser.add_argument("command", nargs=argparse.REMAINDER)
     args = parser.parse_args()
