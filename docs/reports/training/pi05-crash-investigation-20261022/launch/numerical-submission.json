@@ -1,0 +1,12 @@
+{
+  "job_id": "2566",
+  "commit": "58578bea84ff2e2308701470cc356a1823ffa7a1",
+  "code": "/home/wuyan/lyj/YAM/code-snapshots/pi05-numerical-evidence-20261022",
+  "cancelled_job": 2565,
+  "verified_latest_complete_checkpoint": 2000,
+  "same_run": true,
+  "target_local_step": 86000,
+  "norm_sha256": "05f65ada286965f1c5c5b32e62bf3fcdafb7d41d2e22d6683e0c05efc443c5b2",
+  "command": "sbatch --parsable --export=ALL,DIAG_CODE=/home/wuyan/lyj/YAM/code-snapshots/pi05-numerical-evidence-20261022,DIAG_COMMIT=58578bea84ff2e2308701470cc356a1823ffa7a1 /home/wuyan/lyj/YAM/code-snapshots/pi05-numerical-evidence-20261022/docs/reports/training/pi05-crash-investigation-20261022/launch/numerical-resume.sbatch",
+  "authorization": "用户要求记录代码写全写好，然后重新启动训练；沿用原训练合同，增加诊断，无新监控"
+}

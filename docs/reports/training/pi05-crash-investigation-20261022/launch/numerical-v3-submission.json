@@ -1,0 +1,21 @@
+{
+  "submitted_utc": "2026-10-22T08:41:55.152951+00:00",
+  "job_id": "2574",
+  "commit": "4959866c2eb51538fa92f1a4aed0d2110d2f7b32",
+  "checkout": "/home/wuyan/lyj/YAM/code-snapshots/pi05-numerical-evidence-v3-20261022",
+  "resume_step": 2000,
+  "recipe_changed": false,
+  "persistent_compilation_cache": false,
+  "stdout": "2574\n",
+  "stderr": "",
+  "command": [
+    "ssh",
+    "-o",
+    "BatchMode=yes",
+    "yam-server",
+    "sbatch",
+    "--parsable",
+    "--export=ALL,DIAG_CODE=/home/wuyan/lyj/YAM/code-snapshots/pi05-numerical-evidence-v3-20261022,DIAG_COMMIT=4959866c2eb51538fa92f1a4aed0d2110d2f7b32",
+    "/home/wuyan/lyj/YAM/code-snapshots/pi05-numerical-evidence-v3-20261022/docs/reports/training/pi05-crash-investigation-20261022/launch/numerical-resume.sbatch"
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "job_id": "2567",
+  "commit": "bdccf199dc696f1cc9ae055c84e8d5f2612f15c1",
+  "code": "/home/wuyan/lyj/YAM/code-snapshots/pi05-numerical-evidence-v2-20261022",
+  "previous_diagnostic_job": 2566,
+  "previous_result": "collector startup placement error before first update",
+  "resume_checkpoint": 2000,
+  "training_contract_unchanged": true,
+  "command": "sbatch --parsable --export=ALL,DIAG_CODE=/home/wuyan/lyj/YAM/code-snapshots/pi05-numerical-evidence-v2-20261022,DIAG_COMMIT=bdccf199dc696f1cc9ae055c84e8d5f2612f15c1 /home/wuyan/lyj/YAM/code-snapshots/pi05-numerical-evidence-v2-20261022/docs/reports/training/pi05-crash-investigation-20261022/launch/numerical-resume.sbatch"
+}

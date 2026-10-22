@@ -1,0 +1,1390 @@
+{
+  "observed_utc": "2026-10-22T08:49:55.639499+00:00",
+  "job_id": 2574,
+  "node": "gpu001",
+  "trainer_pid": 3976967,
+  "resume_step": 2000,
+  "last_verified_completed_step": 2041,
+  "verified_update_count": 41,
+  "all_inputs_gradients_states_and_updates_finite": true,
+  "batch_identities_per_event": 32,
+  "consecutive_completed_steps": true,
+  "steady_step_interval_mean_seconds": 2.521920847892761,
+  "maximum_native_stable_gradient_relative_difference": 1.4574549415084763e-07,
+  "first_complete_step": [
+    {
+      "utc": "2026-10-22T08:45:23.584523+00:00",
+      "event": "attempt_started",
+      "attempted_completed_step": 2001,
+      "loader_tensor_sha256": "f27660d23e7de5309c2c294ffb0ca18ea595101d4ff48472f5c59304fdfb2e89",
+      "step_rng": [
+        2583511492,
+        1902246119
+      ],
+      "batch_size": 32
+    },
+    {
+      "utc": "2026-10-22T08:46:40.179810+00:00",
+      "event": "restored_state",
+      "attempted_completed_step": 2001,
+      "loader_tensor_sha256": "f27660d23e7de5309c2c294ffb0ca18ea595101d4ff48472f5c59304fdfb2e89",
+      "step_rng": [
+        2583511492,
+        1902246119
+      ],
+      "statistics": {
+        "all_finite": true,
+        "bad_record_indexes": [],
+        "replica_disagreement_indexes": [],
+        "stable_finite_values_l2": 5562.53115589816,
+        "logical_shards": 362,
+        "physical_shards": 620,
+        "bad_shards": []
+      },
+      "batch_size": 32
+    },
+    {
+      "utc": "2026-10-22T08:46:41.731318+00:00",
+      "event": "attempt_started",
+      "attempted_completed_step": 2001,
+      "loader_tensor_sha256": "f27660d23e7de5309c2c294ffb0ca18ea595101d4ff48472f5c59304fdfb2e89",
+      "step_rng": [
+        2583511492,
+        1902246119
+      ],
+      "batch_size": 32
+    },
+    {
+      "utc": "2026-10-22T08:46:46.116993+00:00",
+      "event": "input_checked",
+      "attempted_completed_step": 2001,
+      "loader_tensor_sha256": "f27660d23e7de5309c2c294ffb0ca18ea595101d4ff48472f5c59304fdfb2e89",
+      "step_rng": [
+        2583511492,
+        1902246119
+      ],
+      "statistics": {
+        "all_finite": true,
+        "bad_record_indexes": [],
+        "replica_disagreement_indexes": [],
+        "stable_finite_values_l2": 10007153.043331223,
+        "logical_shards": 40,
+        "physical_shards": 40,
+        "bad_shards": []
+      },
+      "batch_size": 32
+    },
+    {
+      "utc": "2026-10-22T08:48:09.052106+00:00",
+      "event": "gradients_checked",
+      "attempted_completed_step": 2001,
+      "loader_tensor_sha256": "f27660d23e7de5309c2c294ffb0ca18ea595101d4ff48472f5c59304fdfb2e89",
+      "step_rng": [
+        2583511492,
+        1902246119
+      ],
+      "loss": 0.011045421473681927,
+      "native_grad_norm": 0.10108989477157593,
+      "verdict": {
+        "update_allowed": true,
+        "reasons": [],
+        "finite_elements_but_native_norm_nonfinite": false,
+        "native_vs_stable_relative_difference": 6.395097217605543e-08
+      },
+      "statistics": {
+        "all_finite": true,
+        "bad_record_indexes": [],
+        "replica_disagreement_indexes": [],
+        "stable_finite_values_l2": 0.10108990123637339,
+        "logical_shards": 120,
+        "physical_shards": 204,
+        "bad_shards": []
+      },
+      "batch_size": 32
+    },
+    {
+      "utc": "2026-10-22T08:48:12.905095+00:00",
+      "event": "update_finished",
+      "attempted_completed_step": 2001,
+      "loader_tensor_sha256": "f27660d23e7de5309c2c294ffb0ca18ea595101d4ff48472f5c59304fdfb2e89",
+      "step_rng": [
+        2583511492,
+        1902246119
+      ],
+      "param_norm": 1803.78564453125,
+      "statistics": {
+        "all_finite": true,
+        "bad_record_indexes": [],
+        "replica_disagreement_indexes": [],
+        "stable_finite_values_l2": 5563.250386804535,
+        "logical_shards": 362,
+        "physical_shards": 620,
+        "bad_shards": []
+      },
+      "optimizer_updates": {
+        "all_finite": true,
+        "bad_record_indexes": [],
+        "replica_disagreement_indexes": [],
+        "stable_finite_values_l2": 0.047645862882390075,
+        "logical_shards": 120,
+        "physical_shards": 204,
+        "bad_shards": []
+      },
+      "batch_size": 32
+    }
+  ],
+  "last_complete_step": [
+    {
+      "utc": "2026-10-22T08:49:51.323117+00:00",
+      "event": "attempt_started",
+      "attempted_completed_step": 2041,
+      "loader_tensor_sha256": "63a610d0b99e6eacbd1e3130a43d290b96bf145394a3427c45053a5d59947ee4",
+      "step_rng": [
+        878954049,
+        1188214638
+      ],
+      "batch_size": 32
+    },
+    {
+      "utc": "2026-10-22T08:49:51.357772+00:00",
+      "event": "input_checked",
+      "attempted_completed_step": 2041,
+      "loader_tensor_sha256": "63a610d0b99e6eacbd1e3130a43d290b96bf145394a3427c45053a5d59947ee4",
+      "step_rng": [
+        878954049,
+        1188214638
+      ],
+      "statistics": {
+        "all_finite": true,
+        "bad_record_indexes": [],
+        "replica_disagreement_indexes": [],
+        "stable_finite_values_l2": 10029232.388968134,
+        "logical_shards": 40,
+        "physical_shards": 40,
+        "bad_shards": []
+      },
+      "batch_size": 32
+    },
+    {
+      "utc": "2026-10-22T08:49:53.578287+00:00",
+      "event": "gradients_checked",
+      "attempted_completed_step": 2041,
+      "loader_tensor_sha256": "63a610d0b99e6eacbd1e3130a43d290b96bf145394a3427c45053a5d59947ee4",
+      "step_rng": [
+        878954049,
+        1188214638
+      ],
+      "loss": 0.008478122763335705,
+      "native_grad_norm": 0.07380151003599167,
+      "verdict": {
+        "update_allowed": true,
+        "reasons": [],
+        "finite_elements_but_native_norm_nonfinite": false,
+        "native_vs_stable_relative_difference": 1.0048497219071343e-07
+      },
+      "statistics": {
+        "all_finite": true,
+        "bad_record_indexes": [],
+        "replica_disagreement_indexes": [],
+        "stable_finite_values_l2": 0.0738015174519351,
+        "logical_shards": 120,
+        "physical_shards": 204,
+        "bad_shards": []
+      },
+      "batch_size": 32
+    },
+    {
+      "utc": "2026-10-22T08:49:53.781929+00:00",
+      "event": "update_finished",
+      "attempted_completed_step": 2041,
+      "loader_tensor_sha256": "63a610d0b99e6eacbd1e3130a43d290b96bf145394a3427c45053a5d59947ee4",
+      "step_rng": [
+        878954049,
+        1188214638
+      ],
+      "param_norm": 1803.786376953125,
+      "statistics": {
+        "all_finite": true,
+        "bad_record_indexes": [],
+        "replica_disagreement_indexes": [],
+        "stable_finite_values_l2": 5592.2371420909785,
+        "logical_shards": 362,
+        "physical_shards": 620,
+        "bad_shards": []
+      },
+      "optimizer_updates": {
+        "all_finite": true,
+        "bad_record_indexes": [],
+        "replica_disagreement_indexes": [],
+        "stable_finite_values_l2": 0.048980644941336415,
+        "logical_shards": 120,
+        "physical_shards": 204,
+        "bad_shards": []
+      },
+      "batch_size": 32
+    }
+  ],
+  "manifest": {
+    "version": 1,
+    "created_utc": "2026-10-22T08:45:23.379384+00:00",
+    "code_commit": "4959866c2eb51538fa92f1a4aed0d2110d2f7b32",
+    "job_id": "2574",
+    "run": "earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022",
+    "seed": 42,
+    "batch_size": 32,
+    "fsdp_devices": 4,
+    "checkpoint_directory": "/home/wuyan/lyj/YAM/training-runs/pi05_yam/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022",
+    "dataset": "/home/wuyan/lyj/YAM/YAM_data/processed/earbuds_lerobot_50h_clean_v2_20261013/train",
+    "mode": "split_native_gradient_and_optimizer_with_host_guard",
+    "persistent_compilation_cache_enabled": false,
+    "in_memory_jit_reuse": true,
+    "integer_fields": [
+      "size",
+      "nan_count",
+      "posinf_count",
+      "neginf_count",
+      "first_bad_flat_index",
+      "max_abs_flat_index"
+    ],
+    "float_fields": [
+      "max_abs_finite",
+      "scaled_sum_squares",
+      "first_bad_value",
+      "max_abs_value"
+    ],
+    "devices": [
+      {
+        "id": 0,
+        "process_index": 0,
+        "kind": "NVIDIA GeForce RTX 4090",
+        "local_hardware_id": 0
+      },
+      {
+        "id": 1,
+        "process_index": 0,
+        "kind": "NVIDIA GeForce RTX 4090",
+        "local_hardware_id": 1
+      },
+      {
+        "id": 2,
+        "process_index": 0,
+        "kind": "NVIDIA GeForce RTX 4090",
+        "local_hardware_id": 2
+      },
+      {
+        "id": 3,
+        "process_index": 0,
+        "kind": "NVIDIA GeForce RTX 4090",
+        "local_hardware_id": 3
+      }
+    ],
+    "limitations": [
+      "Instrumentation changes compilation and adds synchronization",
+      "Post-update failures retain post-state; pre-state buffers may have been donated",
+      "A GPU/native crash can prevent tensor export; external incident capture remains active"
+    ]
+  },
+  "self_check": {
+    "synthetic_arrays_only": true,
+    "model_or_optimizer_executed": false,
+    "devices": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "correct_bad_device": 1,
+    "shard_metadata_and_tensor_readback": "passed",
+    "stable_large_value_norm": "passed",
+    "orbax_restored_shard_placement": "passed",
+    "persistent_cache_placement_guard": "passed"
+  },
+  "process_environment": {
+    "PYTHONUNBUFFERED": "1",
+    "SLURM_JOB_GPUS": "0,1,2,3",
+    "XLA_PYTHON_CLIENT_MEM_FRACTION": "0.92",
+    "XLA_PYTHON_CLIENT_PREALLOCATE": "true",
+    "SLURM_PROCID": "0",
+    "CUDA_VISIBLE_DEVICES": "0,1,2,3",
+    "PYTHONFAULTHANDLER": "1",
+    "SLURM_JOB_ID": "2574",
+    "NCCL_DEBUG": "INFO",
+    "NCCL_DEBUG_SUBSYS": "INIT,ENV,GRAPH,COLL,P2P,SHM,NET",
+    "NCCL_DEBUG_FILE": "/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/incidents/job-2574/nccl.%h.%p.log",
+    "CUDA_ENABLE_COREDUMP_ON_EXCEPTION": "1",
+    "CUDA_COREDUMP_FILE": "/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/incidents/job-2574/cuda.%h.%p.%t.nvcudmp",
+    "XLA_FLAGS": "--xla_dump_to=/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/incidents/job-2574/xla --xla_dump_hlo_as_text",
+    "OPENPI_NUMERIC_DIAGNOSTICS_DIR": "/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/incidents/job-2574/numerical",
+    "OPENPI_JAX_CACHE_DIR": "/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/incidents/job-2574/jax-cache",
+    "JAX_ENABLE_COMPILATION_CACHE": "false"
+  },
+  "actual_libraries": [
+    "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/jax_cuda12_plugin/cuda_plugin_extension.so",
+    "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/jax_plugins/xla_cuda12/xla_cuda_plugin.so",
+    "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/jaxlib/cpu/_lapack.so",
+    "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/jaxlib/cpu_feature_guard.so",
+    "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/jaxlib/mlir/_mlir_libs/_chlo.so",
+    "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/jaxlib/mlir/_mlir_libs/_mlir.so",
+    "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/jaxlib/mlir/_mlir_libs/_mlirHlo.so",
+    "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/jaxlib/mlir/_mlir_libs/_mosaic_gpu_ext.so",
+    "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/jaxlib/mlir/_mlir_libs/_sdy.so",
+    "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/jaxlib/mlir/_mlir_libs/_stablehlo.so",
+    "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/jaxlib/mlir/_mlir_libs/_tpu_ext.so",
+    "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/jaxlib/mlir/_mlir_libs/_triton_ext.so",
+    "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/jaxlib/mlir/_mlir_libs/libjaxlib_mlir_capi.so",
+    "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/jaxlib/mlir/_mlir_libs/register_jax_dialects.so",
+    "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/jaxlib/utils.so",
+    "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/jaxlib/xla_extension.so",
+    "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/nvidia/cublas/lib/libcublas.so.12",
+    "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/nvidia/cublas/lib/libcublasLt.so.12",
+    "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/nvidia/cuda_runtime/lib/libcudart.so.12",
+    "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/nvidia/cudnn/lib/libcudnn.so.9",
+    "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/nvidia/cudnn/lib/libcudnn_engines_precompiled.so.9",
+    "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/nvidia/cudnn/lib/libcudnn_engines_runtime_compiled.so.9",
+    "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/nvidia/cudnn/lib/libcudnn_graph.so.9",
+    "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/nvidia/cudnn/lib/libcudnn_heuristic.so.9",
+    "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/nvidia/cudnn/lib/libcudnn_ops.so.9",
+    "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/nvidia/nccl/lib/libnccl.so.2",
+    "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/torchvision.libs/libcudart.45e7f3ed.so.12",
+    "/usr/lib64/libcuda.so.595.45.04"
+  ],
+  "training_jit_artifacts": [
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.443.0.before_validation.ttir",
+      "bytes": 8875,
+      "sha256": "7d0e50baf5fe832e934e871b00b5a7cc4bc5aa5238035b98b264b9474f0e1a03"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.447.0.before_validation.ttir",
+      "bytes": 4795,
+      "sha256": "aef42f08d11394ac5b2aa7a0a79de14286e5b0cff436422e2985583ab137f2d2"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.611.0.before_validation.ttir",
+      "bytes": 6959,
+      "sha256": "0bd2a5a9995012e6d17e0ffe232abe1727f2ede6ccc877487bb512b502157081"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.fused_computation.1010.hlo",
+      "bytes": 5935,
+      "sha256": "157f72b5601e688b961f47d461cd1722e169810d4f6bd4614599e848d9df5d83"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.545.0.before_validation.ttir",
+      "bytes": 4667,
+      "sha256": "cfacdc83106a6c8e2a31038144969a1f0292451951d44853b581c82b34036286"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.fusion.2168.ttir",
+      "bytes": 4214,
+      "sha256": "1aebb12bfac536232e85070f9839b4b1b1be1d757e2a852c4963630d1399d47c"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.552.0.before_validation.ttir",
+      "bytes": 4726,
+      "sha256": "098d0c9012e649667578e86eb3bad18a23b62a3fd6c273a22b1a92b922ae03a0"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.672_computation.hlo",
+      "bytes": 3030,
+      "sha256": "e0c0c224dd115db4fe74dbad7d65aaf6be95d8065f184b8617cecbf51af26c5d"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.554_computation.hlo",
+      "bytes": 953,
+      "sha256": "614983277fe783e9168447ec47526070dc209f9f638d623fc326c0428cc78a71"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.435.0.before_validation.ttir",
+      "bytes": 4814,
+      "sha256": "e66adc5db705c21526746a78721bfc0b446e1a0dad9112b8fc3510dc7721f06e"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.614.0.before_validation.ttir",
+      "bytes": 7633,
+      "sha256": "0d4458bcd9f0be4c4f63245cb16b867d318df1ccc7131f5688a96ce75443554c"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.449_computation.hlo",
+      "bytes": 781,
+      "sha256": "36eb6ff25f102c0ff27be581d66dbe83c415daacf2793e85fce72e570473288a"
+    },
+    {
+      "file": "module_2805.jit__unnamed_wrapped_function_.thunk_sequence.txt",
+      "bytes": 85,
+      "sha256": "b2f9d2fe2f2ccdedda8287188718d66a0f51c7b28212f62e318ff4d3a4e319b5"
+    },
+    {
+      "file": "module_2805.jit__unnamed_wrapped_function_.sm_8.9_gpu_after_optimizations-buffer-assignment.txt",
+      "bytes": 602113,
+      "sha256": "fcecc3abc9fde291ecd3fa6c0fc3225f1d0793193bc1287ffd24fab76f53b9e4"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.429.0.ttir",
+      "bytes": 2718,
+      "sha256": "7e3840e14ecd22e80a27ce295f11eeabfc9d1df03596db6e9019b933f8e2c4a5"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.646.0.ttir",
+      "bytes": 2711,
+      "sha256": "9f6fba6f64f660cc0f3a561106b947a147f039cf521a4db064b8306eb96cdea6"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.614_computation.hlo",
+      "bytes": 893,
+      "sha256": "0884e28663d1748e6e2111beb1e2e449af4cd7fd3a627e6dd1e7d7c46edced1c"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.666_computation.hlo",
+      "bytes": 1785,
+      "sha256": "077385a791bfa5e0eeb1f3a79cb95a11363b1a627dc9d5b51e0569175ce9b241"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.442_computation.hlo",
+      "bytes": 906,
+      "sha256": "141ff1b425336780da24b161f5f8d39d6b735d5a19ec682e65a2bbef8fbad76f"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.fusion.1187.ttir",
+      "bytes": 5987,
+      "sha256": "64199639d0413e12adc00ea65fa354d0f09dd7fcf809cf3f4c4134e037859acb"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.474.0.ttir",
+      "bytes": 2802,
+      "sha256": "809b5e9797337a3f534a90f71ad282b5941b27449dc3be9960216805d731a4e3"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.615.0.before_validation.ttir",
+      "bytes": 5865,
+      "sha256": "30be46d5efffd63bb6eba348a6ecebf640bf981fe0c39fc7e2fb98a1537f2366"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.432_computation.hlo",
+      "bytes": 775,
+      "sha256": "de0ae162a432eb7936dad19cda90b171fce61ab3ebc746daa5fc56349cbd922f"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.648.0.before_validation.ttir",
+      "bytes": 4788,
+      "sha256": "668eb3dad77858df7ef21d3b2e9a23c3fa3e71d1297811ece3ed7f0bc7923292"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.fused_computation.955.hlo",
+      "bytes": 4354,
+      "sha256": "cdf613526f5cd13f80534fe5800133ce886797371262b9119a3136adb17d1ab2"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.sm_8.9_gpu_after_optimizations-buffer-assignment.txt",
+      "bytes": 2441827,
+      "sha256": "d681e271c27ff24f0124bd64abacb7d7a4932738bd2d1aee14468093b2cf2298"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.648.0.ttir",
+      "bytes": 2694,
+      "sha256": "e8a5d520512ca33678317d55afec6e462f38e45893ed40d9423b1bf9a369ac0e"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.659_computation.hlo",
+      "bytes": 834,
+      "sha256": "2cfcc3acb3d9ec0a122267b9ff48e798a538e0e7116c5858b218fc5c6b6c285a"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.447_computation.hlo",
+      "bytes": 779,
+      "sha256": "2d733b6d5e915f9b1f242248ba219b13fe46472c94ffcd05d497786263c7e2a1"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.656.0.before_validation.ttir",
+      "bytes": 4849,
+      "sha256": "e4cd25ad4310e726443039faa8bd5f8c0eaa6ea82f6c9991d9b4c9e537f97631"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.617_computation.hlo",
+      "bytes": 1582,
+      "sha256": "5564bdb055b858e01f6c606f46d79425d43ac92cfb892a0e1857f95a0a589635"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.662_computation.hlo",
+      "bytes": 1300,
+      "sha256": "c06d9cad13b77a15ae69b1c87b496e6c78c94681114f0aaac98b72f66466d0d5"
+    },
+    {
+      "file": "module_2805.jit__unnamed_wrapped_function_.sm_8.9_gpu_after_optimizations-memory-usage-report.txt",
+      "bytes": 89228,
+      "sha256": "35ec0c652bdf78a2c1dca51acff1bb873e1a90789afcc48c90876047e224216f"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.674_computation.hlo",
+      "bytes": 1922,
+      "sha256": "76593a64dab22f5ec7e6941bb17fe01436469dddb2df8672f335fbcd5f841f9e"
+    },
+    {
+      "file": "module_2805.jit__unnamed_wrapped_function_.ir-no-opt.ll",
+      "bytes": 850351,
+      "sha256": "26bf17c4bf652733c97b4b9a7769c6b8a06536dc1cb4deb1bf7b92e23ed4d7d6"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.393_computation.hlo",
+      "bytes": 1181,
+      "sha256": "08c450ec9a711e200db24feda23412673c189a452b3df55488d07ce26f1ffc39"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.674.0.ttir",
+      "bytes": 2999,
+      "sha256": "d475c8a0ae266a803e120685baf1f7beedd0dc3f05bb1b2714e3fd233aca8848"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.432.0.ttir",
+      "bytes": 2733,
+      "sha256": "8ba6c1836afb93bb870f658bc0a651b5e2c98d5708c8869c13f6b1e26086b035"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.ptx",
+      "bytes": 4901239,
+      "sha256": "898770ff74ce7a415e095c97df4a6d217bb825c85895bec41c10f37273599933"
+    },
+    {
+      "file": "module_2805.jit__unnamed_wrapped_function_.sm_8.9_gpu_after_optimizations.txt",
+      "bytes": 835475,
+      "sha256": "fbce8d72fb6f20a51cb516e6928eddb197cdd6de9db79d3a25adff947291c916"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.445.0.ttir",
+      "bytes": 5322,
+      "sha256": "8b7060b1d625d731588c43f19ff1ec8c30376c048d0ac3a0657211d698af7047"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.544.0.ttir",
+      "bytes": 2837,
+      "sha256": "562e4f5afedd9c26afdfc53099cf19d316b852e6565ae54d16792f006106c2d8"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.394.0.ttir",
+      "bytes": 2802,
+      "sha256": "8d49a78cfffc6310b0f928c65037abc5820d8551d4c7e0bda268a671f667e99d"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.484_computation.hlo",
+      "bytes": 787,
+      "sha256": "c9e3f8db65e49c7f07b7d57176cb4dc5f962b5bea91301ed1295521831d511ae"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.659.0.before_validation.ttir",
+      "bytes": 4862,
+      "sha256": "b8dbe724828037e668a6dd5a3f2057f75743e59409ec2ce2d285681a78fa1036"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.453.0.before_validation.ttir",
+      "bytes": 5165,
+      "sha256": "3977d4bf79a69660598dac943235f26f50c33f534378f91f6229c98c760adf4d"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.536.0.ttir",
+      "bytes": 2989,
+      "sha256": "54d15b3c33c493d18c84bc6969284d5d7675f17a50cb16df6262d1d8a6bbd89a"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.486.0.before_validation.ttir",
+      "bytes": 4736,
+      "sha256": "e27145da13c504faddb46df264c0827bfb6ef48055842b2e8c7f99f695cce8ee"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.554.0.ttir",
+      "bytes": 3056,
+      "sha256": "5aa3e16deb2e8753318eb6d2f82ca119863ddc095c95a6bfbc0ca26991d90842"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.451.0.before_validation.ttir",
+      "bytes": 4781,
+      "sha256": "b55da44b9fdbd8b9026aedc22056bfe41add2984efcfd87a5658adaa959ef2cf"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.445_computation.hlo",
+      "bytes": 3509,
+      "sha256": "ac694b7c0c12e166508cf714d20a59ecb3c12d1ecb4617e308fb9e678e211e6a"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.553_computation.hlo",
+      "bytes": 1419,
+      "sha256": "6dff8b6fe9c961d922e20a845aeb18cfaefdc65d8744f876738e160accb3452a"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.fusion.1132.before_validation.ttir",
+      "bytes": 5795,
+      "sha256": "622359db5fdf19608071d00fb1da0e8fe90d707c28d407f76987662c945e1aa5"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.657.0.before_validation.ttir",
+      "bytes": 4811,
+      "sha256": "d273e6a644f6e0658a367967ed537a95bd45c3ac815c332aaad5807df5def7d8"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.thunk_sequence.txt",
+      "bytes": 14462,
+      "sha256": "5a3df6cfb6e09dad285ea3b1c3d4c7c29e498becb661f5b735eacbdabea403ac"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.484.0.ttir",
+      "bytes": 2798,
+      "sha256": "9c2980dcaa91a374418a86e38181619fadd5cb19f08e667b25d01250d608cb66"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.673.0.before_validation.ttir",
+      "bytes": 6018,
+      "sha256": "429a5185412a4e258b83966d8c642d50b3d5b8f1551a4609f79083137f8a6b17"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.autotune_results.pbtxt",
+      "bytes": 64106,
+      "sha256": "836df8cbafe34c8f1c8421d457cfa24c9a7c444d20f25886663c042259003d2a"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.455.0.ttir",
+      "bytes": 2691,
+      "sha256": "18235f6190f46141610888512715af7b137b60576a80078735fdd180436feb55"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.447.0.ttir",
+      "bytes": 2746,
+      "sha256": "9aebdf49b6d44525b780639ad0f3ac341cf26e2e36175252aa094df06e273a43"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.ir-no-opt.ll",
+      "bytes": 20807500,
+      "sha256": "471e95d9f54893b018d72a83a255f5d835d1600228d36b92510a0b21f9a52d50"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.fused_computation.1992.hlo",
+      "bytes": 7602,
+      "sha256": "b5918534fdcb6cce5c43c747892e49de1060f94ab243098ad2d7356845bb43d6"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.658_computation.hlo",
+      "bytes": 815,
+      "sha256": "8f3069e9e6acad7c30eb8d4276def4ee7152b76e9ff3cefaf0e093790ff577a0"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.fusion.1184.ttir",
+      "bytes": 5135,
+      "sha256": "31aa8dfab9aa9bb8931b8bcb4fc8d328e16728ea291fa4206769dde4573013f2"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.450.0.ttir",
+      "bytes": 2672,
+      "sha256": "ef5c1e0a5531993e9c38663bcab2af2d88a940d461302a66987bec5b50978abb"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.536.0.before_validation.ttir",
+      "bytes": 6410,
+      "sha256": "7a45004c355bd3c4e9e2f059cfed1deb17d1ff00f6d79e7f3ba80718e2adec13"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.611_computation.hlo",
+      "bytes": 1639,
+      "sha256": "74e0116c2ec716ba1739f6b59610913e8b26224557fc9a9287d6059c8a59e5d7"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.545_computation.hlo",
+      "bytes": 881,
+      "sha256": "d3f131d0b6106ded9e1129eb2249cdf45f2c556e8b2b3c6aff42efc25f24db15"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.486.0.ttir",
+      "bytes": 2579,
+      "sha256": "7dd65c7e554b6d4cfeb72333da563e77997fab670428b27ae9567ff83dc54c61"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.443_computation.hlo",
+      "bytes": 2569,
+      "sha256": "6d80a95d7a499ae14511194125da38ee30800551d8f29f39e38a5a0e9b6549c9"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.621_computation.hlo",
+      "bytes": 1356,
+      "sha256": "dbde4e804ffbfedff3124d866b2bee5963d3dc41087692554eb289c30c8ae8a1"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.615.0.ttir",
+      "bytes": 2908,
+      "sha256": "6cd2d1d2b1d58f9c60e328bf6c699abf7d7653191b7a0df521d3dfa2102fb709"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.fusion.2451.ttir",
+      "bytes": 3883,
+      "sha256": "551d65ff54a38f6943131dc534e16629077216879bec06cbfca92e6e2eb692f3"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.474.0.before_validation.ttir",
+      "bytes": 4824,
+      "sha256": "669a0b306df408eb3597cd7b4a15439f05eddcc648a999d93f53330e4b798c8e"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.651.0.before_validation.ttir",
+      "bytes": 6059,
+      "sha256": "18e97787910f41acd9b755bbf1cfa316338a5f613cd8641fba50e529ea280da1"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.486_computation.hlo",
+      "bytes": 871,
+      "sha256": "e01cf35e4a647154a9419d5b3c3f26be5df2bd4ac27e0730f0e0c3cba624462e"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.656.0.ttir",
+      "bytes": 2733,
+      "sha256": "668acc40d8bb4399a49017648f46801fdfb437f61b8e8575c20b3d274c172e56"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.435.0.ttir",
+      "bytes": 2754,
+      "sha256": "d9a776f8e668a80f6c4f22b990de127402835015e4b68a14575fba6cad29f2c2"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.647_computation.hlo",
+      "bytes": 761,
+      "sha256": "7515624e6625ba04b5614af2706cea502097bd07e5203911e38156f776cc3400"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.649.0.ttir",
+      "bytes": 2638,
+      "sha256": "1736b34a968f2e16e555e99ef81295501030b4118e3e2776fc3dac81cf3610ad"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.651_computation.hlo",
+      "bytes": 1875,
+      "sha256": "bcbaea9b157ff31182ab82b83db20a6b0ba26fda7b193a11a8ab431554546cad"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.fusion.2168.before_validation.ttir",
+      "bytes": 6727,
+      "sha256": "b4b63b62df1931fb4e5524648079573f393827bcaef2a2addeabadf8be7e4e82"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.fusion.1187.before_validation.ttir",
+      "bytes": 9530,
+      "sha256": "59e6e33c66752ebbb2ba4b3c157845ad4949d8a319cc195776b7c4d50673945d"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.fused_computation.1966.hlo",
+      "bytes": 2731,
+      "sha256": "f3092488c52d1581f8afef2bbcb846eab887408dae32ef05f1c2d6f991378a43"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.662.0.ttir",
+      "bytes": 4650,
+      "sha256": "5f906fe0cc0c211c9bcecb79ebfa279d99c0eb22d8bf7291d78830ca8d6fb4e9"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.621.0.before_validation.ttir",
+      "bytes": 6942,
+      "sha256": "db9dcb7588957ec6726cf80b10a82f9b13b3c573a6d3651c11648fafac3a4b99"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.455.0.before_validation.ttir",
+      "bytes": 4760,
+      "sha256": "9152c73aef05045f901c27b22fa0e6f64a3d9c5e5644852d87a007953a309b48"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.before_optimizations.txt",
+      "bytes": 4556987,
+      "sha256": "caa94247719634cc2b26acd3601b77c7ee9ad83542b48724d5600752cbf25fa6"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.429.0.before_validation.ttir",
+      "bytes": 4834,
+      "sha256": "2b337a0e93f6c658f99828fe6265bb0f9cef147f7084f034c903d241d5e85b2a"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.651.0.ttir",
+      "bytes": 3463,
+      "sha256": "3ee2ca50d89faa5329bff9cf0108b816f4ecb61e15e2bd271d16280879d3b9e4"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.649.0.before_validation.ttir",
+      "bytes": 4753,
+      "sha256": "50aff52dcfccf64e58b568368545cbcd5aecd31b2799c36d1cb954ea7b283995"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.662.0.before_validation.ttir",
+      "bytes": 7253,
+      "sha256": "4f4db4c0e7803afd072784449ce9b459d7e08d0520c1521f74cb14cf2b0b08cb"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.fused_computation.2274.hlo",
+      "bytes": 3326,
+      "sha256": "93ba05876bfd58697cbfef2e8ba7be51aaf4b6ce08431c456be4e23fe5a6e0ca"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.674.0.before_validation.ttir",
+      "bytes": 5416,
+      "sha256": "b79da82639048eafcae9d933c3873f9428b66603eda828c43c332cb3492af536"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.544.0.before_validation.ttir",
+      "bytes": 4907,
+      "sha256": "7627222b822897cd4a3e4b9750f7cbfd5b28eb597881da1b572b54104c0e6223"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.fusion.1134.before_validation.ttir",
+      "bytes": 7070,
+      "sha256": "ea384df01cc6352569a346db342bb2bbb7888fe089dc6597d4abd9a3701b39bb"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.544_computation.hlo",
+      "bytes": 1068,
+      "sha256": "ba26b04e570e01ff5515a91f57ecbf1225cba00ab65c97a82008227d2bf1936d"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.666.0.before_validation.ttir",
+      "bytes": 5431,
+      "sha256": "8ac5aa791b24459bd22ceb6674cee4f0229a9bc597d1f10aaecbbde501a065ca"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.649_computation.hlo",
+      "bytes": 827,
+      "sha256": "639d859007eb39bf72f9901a277936d2c5c9b860cb94ca9bbff949b6a81905e9"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.665_computation.hlo",
+      "bytes": 2757,
+      "sha256": "7ca353a4b4c8efa2db0f2217f6f13e046dfe6e5481981ac21116c050773f4b91"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.435_computation.hlo",
+      "bytes": 846,
+      "sha256": "b1b9ae4ef4ec9545091ac261f42be27dd018bbbd069e8a395f419b892ccf82d3"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.449.0.ttir",
+      "bytes": 2696,
+      "sha256": "b47ca450e5c41089f0451a5e474101e447892d5b388954ebf6f446edc9b1cb07"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.658.0.before_validation.ttir",
+      "bytes": 4744,
+      "sha256": "f634481c3527d69680a33eb8b382abf5d1bb3406eecadaf93e18b4fd882e4c44"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.393.0.before_validation.ttir",
+      "bytes": 5176,
+      "sha256": "9be4326239874d86a54e783b8900c91b2f4d4c4f723b88e58cff11711a077207"
+    },
+    {
+      "file": "module_2805.jit__unnamed_wrapped_function_.before_optimizations.txt",
+      "bytes": 543346,
+      "sha256": "fd2c2439b1bd259443b4209c7d184e3b18af39804ddc2a8de5629026a6cdfd0a"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.665.0.ttir",
+      "bytes": 4709,
+      "sha256": "c79ac8e97bb7e7e00dd834628b9d752175b03e5a0b2b01f1e3f04ec541462d4c"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.615_computation.hlo",
+      "bytes": 1562,
+      "sha256": "60fd3fd7289eb47fe5ac99aa89560a303c7bf7f95083ee8dd55cc9dd1b991ef2"
+    },
+    {
+      "file": "module_2805.jit__unnamed_wrapped_function_.ptx",
+      "bytes": 657640,
+      "sha256": "2b8ffb5e8fe010439111d710a01f8c74d7440ebfe630fc4a96a36139ba353926"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.646_computation.hlo",
+      "bytes": 834,
+      "sha256": "a810d8c56e06ffadce5d6b99ecb8a16a8bd70033dcc717feeaf56762abe9fadb"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.fusion.2143.before_validation.ttir",
+      "bytes": 5064,
+      "sha256": "63db06ff903bee647f20f0fe4c564c70557fe5b0c5c506b2371af83575911788"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.673.0.ttir",
+      "bytes": 3316,
+      "sha256": "944031ca9c381617bf90fe715935c2b978ccc38ce7ebe49985597de2413e678f"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.fusion.2143.ttir",
+      "bytes": 3750,
+      "sha256": "d1a6a237d42f4ca9ecdada25705841f8ea34881e659c847ff8d8deb49e10abba"
+    },
+    {
+      "file": "module_2805.jit__unnamed_wrapped_function_.autotune_results.pbtxt",
+      "bytes": 64106,
+      "sha256": "836df8cbafe34c8f1c8421d457cfa24c9a7c444d20f25886663c042259003d2a"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.616.0.ttir",
+      "bytes": 2966,
+      "sha256": "2e02a4f2940324909013abb2621e85349c29bd92df3f1aa3a4868fffac535ba3"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.441_computation.hlo",
+      "bytes": 850,
+      "sha256": "c35158de39c56d5b0d9eddc7a417636c7df42a0f5229d34b6019904066faecef"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.671.0.ttir",
+      "bytes": 4447,
+      "sha256": "3e4a93276ef5b226544c0bcffa261a55df602c52d8999f1cda5d1b3a51342d49"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.654_computation.hlo",
+      "bytes": 746,
+      "sha256": "353e0f1427ab929a679eac880846ddde83c4b3984c8ae928543521007e36702a"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.659.0.ttir",
+      "bytes": 2696,
+      "sha256": "efdb0e57ede5683bcefc3fbc67823d041c0c0c5fd178eb4faa6be76407b89d2d"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.fusion.1184.before_validation.ttir",
+      "bytes": 9619,
+      "sha256": "75fedc99770a5d3537cb0c8547eb80f2e6474a7658528fbace792fc2cf55a21d"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.671.0.before_validation.ttir",
+      "bytes": 7156,
+      "sha256": "0e57c36925b50b9b46aadb2168305ded9b0a2e5819107318d5fb494473469443"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.482.0.before_validation.ttir",
+      "bytes": 5176,
+      "sha256": "26a34e7575dfe96cca32465321fba89cffb947daed9f2d2f448e1d672094fea5"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.421.0.before_validation.ttir",
+      "bytes": 4712,
+      "sha256": "11053c1b5c681a51692baef874a3b36157c04b68bb63dfa872977f22644d4218"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.453.0.ttir",
+      "bytes": 2985,
+      "sha256": "a21ec69e00b8e3d376651048b0d73e93c7e68a90455b7df22d6f739a012d8b86"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.ir-with-opt.ll",
+      "bytes": 13343276,
+      "sha256": "483805aa90552056e600de9d37325720b78af37080ccbf58fb68ed40116219b9"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gpu_target_config.pbtxt",
+      "bytes": 708,
+      "sha256": "03eb5efdd40edb380e6e3ae3900be074ca55083daca07902eecfa425a8e3ba57"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.545.0.ttir",
+      "bytes": 2076,
+      "sha256": "beb9cb77d3a32a816bd3b5d75a27d18baf1649d712f374d7ba999cc70d9bacdd"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.621.0.ttir",
+      "bytes": 3373,
+      "sha256": "24995e34f43681e53bb6af8e485d41de2f6053c3461607b0c7005319b518e4c8"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.fusion.1132.ttir",
+      "bytes": 3667,
+      "sha256": "482b426fe6416500acab42773a43f358fbb03e400306378d70a9e60ee400f239"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.459_computation.hlo",
+      "bytes": 766,
+      "sha256": "e4dcd63d4db84ad729df60acf4480a128d3d351e3b85a508ee5f9ff4c8279191"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.616_computation.hlo",
+      "bytes": 1467,
+      "sha256": "26cc94e981ec8e94cb269c468389e82a8b29f16391eba99e6e68d3246085a227"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.657.0.ttir",
+      "bytes": 2795,
+      "sha256": "535456aa811c60b386c9b2ac19df6d8df675560f664a8bde3bc2ff5bdff83b9f"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.459.0.before_validation.ttir",
+      "bytes": 4796,
+      "sha256": "35c10dcc42eec2ef92f5ddd39891a0ea1ad0db385a411a6af185d77eedfdb57d"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.453_computation.hlo",
+      "bytes": 1235,
+      "sha256": "cb860de8d4be4843db9928a437e7979c71ef972d227d571edc45ab2e6b520f09"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.483.0.ttir",
+      "bytes": 2802,
+      "sha256": "6ed359a084e9e9997ea285ba9c086d2a8d6bd774d7b9af60df24dd6d977d6628"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.647.0.ttir",
+      "bytes": 2612,
+      "sha256": "771e08680374a11d471fb2b4bb2449868e35021aaaa00a4b756ddcfc468e8f4e"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.450_computation.hlo",
+      "bytes": 782,
+      "sha256": "b0584ef8e854272732eaa9dc9871c4534f8613e41db3e0daa0fc755a972eac69"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.648_computation.hlo",
+      "bytes": 830,
+      "sha256": "ab11ed53d1f630f45e8b20a763df3e193a54dada93a998b5ef4faf194baab850"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.429_computation.hlo",
+      "bytes": 769,
+      "sha256": "b2234331ea9a973023d654b6a6264bc8467ef37d8c16eba2c6f3afe0476b693c"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.474_computation.hlo",
+      "bytes": 721,
+      "sha256": "2b8f18b66d443e016e7e5cd674c8f4c93b07398aa9dd91e223bbc39a73b246b1"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.438.0.before_validation.ttir",
+      "bytes": 4865,
+      "sha256": "df519b92554b6753b59dba5b1d260828b081794210c186d67c039ffe6f0485c1"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.646.0.before_validation.ttir",
+      "bytes": 4727,
+      "sha256": "0155d2f139380c4ee95a2061c94e82baad5510073590f700b7c814230eb0dbc2"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.656_computation.hlo",
+      "bytes": 821,
+      "sha256": "be4cae9e6a4bec721a4c1e9fdb771093c21e5254c2795028fbc06def14698779"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.421_computation.hlo",
+      "bytes": 798,
+      "sha256": "f841629eb690c8425afe36f330b5f8c2faa61c59bbc122632339b6023f3f1aed"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.552_computation.hlo",
+      "bytes": 746,
+      "sha256": "e73a8f47df14af01be27ae4e0d54c3c971d85c036a7254b327304b8e7f97316c"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.614.0.ttir",
+      "bytes": 4639,
+      "sha256": "97aca896e6c320c9d527380a80dd5fa9164ec83c34de5ecb9fc49d7d7c5f7e10"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.672.0.ttir",
+      "bytes": 3259,
+      "sha256": "5c81fe61e74b0ce5ebbd3ef8de75abc39f5d74119479b44389800c76d05bdeae"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.552.0.ttir",
+      "bytes": 2630,
+      "sha256": "17604c363964f1550aa6ea1a4bfc2011b5b4e89f5c099cadc1cb01c1086d4c8e"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.483_computation.hlo",
+      "bytes": 787,
+      "sha256": "e7f682194bdfc1ff1d74f6cdb3edddc2dc4a0bacf13e9b56727153385d50cc5d"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.451_computation.hlo",
+      "bytes": 850,
+      "sha256": "4e22c1c19c3b51de2ffc07c2e744f29e2f33c8a8599a3d0af6fcbf5e629d751a"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.sm_8.9_gpu_after_optimizations-memory-usage-report.txt",
+      "bytes": 47058,
+      "sha256": "a729511c6647ff66aa68467dd8050511a182382434791be2a7307f459f6a7bfa"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.482_computation.hlo",
+      "bytes": 1233,
+      "sha256": "1d9c6d1ecc129a6090ffcbeae4efaa456c8fc8af0fde803a0cc2b9b5e5423c67"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.459.0.ttir",
+      "bytes": 2623,
+      "sha256": "39f84c9e77d5ef1e1e1d4d9ad54b7daa5c9c17d63f1e78ba1f21afb9275cb53f"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.484.0.before_validation.ttir",
+      "bytes": 4817,
+      "sha256": "c286822b6bf26b23483202a22bd196a918d0afd5b89641d5373fa54cb9f3df6e"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.666.0.ttir",
+      "bytes": 3057,
+      "sha256": "98736a43fe52058ead1acde960bc77879d4ccf94d47c569c2e64972d2e031d25"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.540.0.ttir",
+      "bytes": 2005,
+      "sha256": "ce4333c52817a05a6f4fc3997353dc1ea21b0e9429058398af9295a78aff87f1"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.554.0.before_validation.ttir",
+      "bytes": 6522,
+      "sha256": "a591c4c5d65f557c2286537e199f583328ef12c7a4181f60a5e0f0ff26bc3193"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.fusion.1134.ttir",
+      "bytes": 4129,
+      "sha256": "a504549267f96a589b6d4d31b5d4291147f20bd1bf78e1e7e13500671d418780"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.441.0.ttir",
+      "bytes": 2638,
+      "sha256": "890af4892e4f7d31e18c6bef76608f66e18a7fa3f44688a75e6878122ba381ea"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.616.0.before_validation.ttir",
+      "bytes": 5874,
+      "sha256": "2bf08c8f6265fe5ebf3afdf4b87c6c490743860db8f2a9aec433bb52022aa8c2"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.654.0.ttir",
+      "bytes": 2788,
+      "sha256": "394bc78f72cd4fa9bb40fef780564aa8121a86f1775dc687080177704f17be33"
+    },
+    {
+      "file": "module_2805.jit__unnamed_wrapped_function_.ir-with-opt.ll",
+      "bytes": 1380440,
+      "sha256": "4200e724ebb50e40171d9965ec94b37adac6058a27ff60315451f8bba553dbe7"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.394.0.before_validation.ttir",
+      "bytes": 4824,
+      "sha256": "b398bdbcab488aabe72e4863256a7d34724e989929e8e679026b495d17201896"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.482.0.ttir",
+      "bytes": 2896,
+      "sha256": "30fda23c1589b17f3a5ff8863ee9bfb48c4edd9ccb1489eb5f6af7acdc9c7c52"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.394_computation.hlo",
+      "bytes": 699,
+      "sha256": "0157af4f54d2f2d15a4c562017607bfadfb34cc9637d0e2863fd65e2e12289bc"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.611.0.ttir",
+      "bytes": 3334,
+      "sha256": "463149007a4bc80d10312689d94c1416e28842bdef9dbc9946b1faa3c286d7a6"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.442.0.ttir",
+      "bytes": 3250,
+      "sha256": "0b36ce99c475c932c90114259b612ca4d963c193421e39dc299409720c95a119"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.fusion.2169.ttir",
+      "bytes": 5736,
+      "sha256": "dce80f1528041ce099bb354030d230d0d983f66a81d1eed46df3845d3b8f5baf"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.553.0.before_validation.ttir",
+      "bytes": 7104,
+      "sha256": "bd7d08e23983832c97b313b14f1dac3a93a4c95640c79e283eb5064482d7f8d5"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.fused_computation.1991.hlo",
+      "bytes": 3219,
+      "sha256": "e0b412019c184302820791a0620a2772ec30b7a76de23d13b32ca5178adbb6e9"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.654.0.before_validation.ttir",
+      "bytes": 4865,
+      "sha256": "a6fd51a0094b945538f1dc94dff585407adede1429326a6f8c97f208a65df02c"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.fusion.2169.before_validation.ttir",
+      "bytes": 9415,
+      "sha256": "64b95445f956acc9fea9f095766f57c1a8e070686bd44f4d238d7a7b8d7d6f23"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.657_computation.hlo",
+      "bytes": 745,
+      "sha256": "437eddf93e8f0450eee7d2c6958fb30988c830012118740f260f9a19e44b320b"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.fusion.2451.before_validation.ttir",
+      "bytes": 5723,
+      "sha256": "c28db12f9c4277b2de6402ad62ce1486ca9c7211927002f3b7fb13e7be5e601f"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.617.0.before_validation.ttir",
+      "bytes": 8081,
+      "sha256": "34c2ecd19a042b67a191c2c13f7c50256274e79f2d31f217dce987a2943b98c2"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.665.0.before_validation.ttir",
+      "bytes": 7756,
+      "sha256": "e22d76e2bd9194d5faf75c0f7da7d30c96c3ee63c3985868709b7cfc74821169"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.sm_8.9_gpu_after_optimizations.txt",
+      "bytes": 4877870,
+      "sha256": "40188ec31b38538ac5a2782226058da3b6a28dc9282260c3b93c83a7fa4373dd"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.442.0.before_validation.ttir",
+      "bytes": 5556,
+      "sha256": "fd57503f9af747fa9ca2d12c6ed3369a2807b5a72083d3b96d0a4b5d11268f86"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.451.0.ttir",
+      "bytes": 2613,
+      "sha256": "21a17dfc06a1bfd01db592632e8b49185045b351bf265ca2a503eedbbdd9ef66"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.449.0.before_validation.ttir",
+      "bytes": 4862,
+      "sha256": "1a7ba65f147a8f4f4dc6a91d9a5afa195ee9803378419dac3d61b78b3b0db031"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.438_computation.hlo",
+      "bytes": 700,
+      "sha256": "a74db047be8aea60d8cbcc4ed8b4e04f59fb5abe04e4df99b9ee62ca8c60b8cf"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.457.0.before_validation.ttir",
+      "bytes": 4785,
+      "sha256": "e0547432a8c1a24476f027ef871bb08214c95b7a1709966e7656fe1f79dfd31b"
+    },
+    {
+      "file": "module_2805.jit__unnamed_wrapped_function_.gpu_target_config.pbtxt",
+      "bytes": 708,
+      "sha256": "03eb5efdd40edb380e6e3ae3900be074ca55083daca07902eecfa425a8e3ba57"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.483.0.before_validation.ttir",
+      "bytes": 4823,
+      "sha256": "91b35779e69b5099bbf1af42d5ff8f3803fea1fbf986712d537f76fba2933ded"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.457_computation.hlo",
+      "bytes": 766,
+      "sha256": "6b47cc4d429417bf42da69c16cadbcc6a72f318d437c3c8666d2b8172d895acf"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.fused_computation.957.hlo",
+      "bytes": 4738,
+      "sha256": "dd9be145d80fbe09c64201c6e9b0372d6d22618bbe860476f61fc2781babb17b"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.617.0.ttir",
+      "bytes": 4945,
+      "sha256": "18b58eab2400106358e67ede93a3d6a5fd4cb15a4be1411a679993268636d6cd"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.647.0.before_validation.ttir",
+      "bytes": 4708,
+      "sha256": "dd7960bf22617dbad165eaafbfa67f9b8934082d062a19474f3c9cdc303ee1f8"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.393.0.ttir",
+      "bytes": 2896,
+      "sha256": "4d2833aad938ad8419e3a453b0bf2a820127892f6718d8ae638dd5051115bba8"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.fused_computation.1007.hlo",
+      "bytes": 6007,
+      "sha256": "f2e9f4514935e8501a930d9cce21da1c025f0eca813dc1e6f3c357c1f04e239c"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.421.0.ttir",
+      "bytes": 2613,
+      "sha256": "a5e6e8f1ae34a0d95c12d0bd0ba1aab7a48d54f657d53f0115adf34936a7d773"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.540_computation.hlo",
+      "bytes": 613,
+      "sha256": "eaa33fc2187022f83c29bf04a27be4ee9bbc35308bdf93704aadab67729a06f1"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.536_computation.hlo",
+      "bytes": 936,
+      "sha256": "878f6e9fdd7de3053baa98a672bc451a5d591b86326f4f3743e6fdb0f83e8eef"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.457.0.ttir",
+      "bytes": 2707,
+      "sha256": "55c7602b1cca0760f4647844c308710372c5b53003bd039395bd4013e6d6281d"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.671_computation.hlo",
+      "bytes": 1912,
+      "sha256": "f5fa5af163cca8cdfbb23535d5ddec7bda2ffd628181f7b6952cff966bca39eb"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.432.0.before_validation.ttir",
+      "bytes": 4849,
+      "sha256": "fd275e70ebf6852e0e5c9bf8d107c19b8dc16809e007e37faa1e20836eb0d1ee"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.672.0.before_validation.ttir",
+      "bytes": 6012,
+      "sha256": "edbe738d558b12306aee3ac335e6ba6f4a8f544bb42324fb6d47a05d1c51c764"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.441.0.before_validation.ttir",
+      "bytes": 4753,
+      "sha256": "de3dce94ff7cb8c1e62744d1f40c66ea41db669245170d2ac9e66edfbe48acd7"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.450.0.before_validation.ttir",
+      "bytes": 4731,
+      "sha256": "c6f67987297b9c7c2e387f26d84dc94dd2067eb4f22b3b2646c36683f6409677"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.673_computation.hlo",
+      "bytes": 3038,
+      "sha256": "eb9125fcea2490c55347f83d415a5eafdd071bd4e4a9d1e818cf5f06a18a95d1"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.540.0.before_validation.ttir",
+      "bytes": 4597,
+      "sha256": "315584dc377ca049ea6b099424141c46fdb87a1ed2d6753187f226555b20dd2f"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.443.0.ttir",
+      "bytes": 5230,
+      "sha256": "450e827ae14fc201bdb7bd5daf272722766626162287c6f45dc14c12dee63e0f"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.658.0.ttir",
+      "bytes": 2633,
+      "sha256": "d83531675a3e53a42a168892f33d3533adb63bbe763c98971ea6d48c35853596"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.445.0.before_validation.ttir",
+      "bytes": 9024,
+      "sha256": "256ce64a5fb6ab55c10b3dd545ce0d91553c0857124a31f53c00649435c79774"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.455_computation.hlo",
+      "bytes": 843,
+      "sha256": "99ea53011609fe36a2fed9739f394f7f8eb35a804488c63b1473c9419a0418b8"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.438.0.ttir",
+      "bytes": 2788,
+      "sha256": "c982653e0473b80ddf5a74187e152b7e9c191a44a69647dd47b0de7b079673cf"
+    },
+    {
+      "file": "module_0043.jit__unnamed_wrapped_function_.gemm_fusion_dot.553.0.ttir",
+      "bytes": 4499,
+      "sha256": "28b8fc0ec1c093742d7fe159adfe22b96c2ee78ea272fdf2f36f0890f76c039d"
+    }
+  ],
+  "xla_total_files": 596,
+  "kernel_follow_bytes": 1223622,
+  "journal_snapshot_bytes": 4252513,
+  "journal_snapshot_sha256": "22e3b28ba0841e5dc1047dd52a12183188c87dea470db8effe92a5b526f7d30c",
+  "slurm": "             JOBID                         NAME      STATE         TIME NODELIST(REASON)\n              2574             pi05-earbuds-50h    RUNNING         8:00 gpu001\n",
+  "native_exit_record_exists": false,
+  "failure_directories": []
+}

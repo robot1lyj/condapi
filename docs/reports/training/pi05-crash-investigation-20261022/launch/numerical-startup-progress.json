@@ -1,0 +1,79 @@
+{
+  "observed_at": "2026-10-22T16:14:34.932221+08:00",
+  "self_check": {
+    "synthetic_arrays_only": true,
+    "model_or_optimizer_executed": false,
+    "devices": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "correct_bad_device": 1,
+    "shard_metadata_and_tensor_readback": "passed",
+    "stable_large_value_norm": "passed"
+  },
+  "events": [
+    {
+      "utc": "2026-10-22T08:12:39.733985+00:00",
+      "event": "starting",
+      "command": [
+        "/home/wuyan/.conda/envs/condapi-yam/bin/python",
+        "scripts/train_lego_full.py",
+        "--resume",
+        "--run-name",
+        "earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022",
+        "--steps",
+        "86000",
+        "--init-params",
+        "/home/wuyan/lyj/YAM/training-runs/pi05_yam/earbuds_pi05_rtc_base_50h_20261012/114000/params",
+        "--train-episodes-file",
+        "/home/wuyan/lyj/YAM/training-assets/earbuds_rtc_50h_clean_v2_excl_pantheon_20261021/episodes.json",
+        "--rtc-training-max-delay",
+        "10",
+        "--assets-dir",
+        "/home/wuyan/lyj/YAM/training-assets/earbuds_rtc_50h_clean_v2_excl_pantheon_20261021/norm",
+        "--dataset",
+        "/home/wuyan/lyj/YAM/YAM_data/processed/earbuds_lerobot_50h_clean_v2_20261013/train",
+        "--warmup-steps",
+        "1000",
+        "--decay-steps",
+        "338000"
+      ],
+      "cwd": "/home/wuyan/lyj/YAM/code-snapshots/pi05-numerical-evidence-20261022",
+      "job_id": "2566"
+    },
+    {
+      "utc": "2026-10-22T08:12:43.897509+00:00",
+      "event": "numeric_self_check",
+      "returncode": 0
+    },
+    {
+      "utc": "2026-10-22T08:12:43.898994+00:00",
+      "event": "monitor_started",
+      "name": "gpu-telemetry",
+      "pid": 3408017
+    },
+    {
+      "utc": "2026-10-22T08:12:43.899901+00:00",
+      "event": "monitor_started",
+      "name": "kernel-follow",
+      "pid": 3408018
+    },
+    {
+      "utc": "2026-10-22T08:12:43.900695+00:00",
+      "event": "trainer_started",
+      "pid": 3408019
+    }
+  ],
+  "filtered_tail": [
+    "16:12:47.768 [I] Deferred registration for item: \"assets\". Adding handler `<openpi.training.checkpoints.CallbackHandler object at 0x7f74940f7770>` for item \"assets\" and save args `<class 'openpi.training.checkpoints.CallbackSave'>` and restore args `<class 'openpi.training.checkpoints.CallbackRestore'>` to `_handler_registry`. (3408019:composite_checkpoint_handler.py:234)",
+    "16:12:47.768 [I] Deferred registration for item: \"train_state\". Adding handler `<orbax.checkpoint._src.handlers.pytree_checkpoint_handler.PyTreeCheckpointHandler object at 0x7f74940f6420>` for item \"train_state\" and save args `<class 'orbax.checkpoint._src.handlers.pytree_checkpoint_handler.PyTreeSaveArgs'>` and restore args `<class 'orbax.checkpoint._src.handlers.pytree_checkpoint_handler.PyTreeRestoreArgs'>` to `_handler_registry`. (3408019:composite_checkpoint_handler.py:234)",
+    "16:12:47.768 [I] Deferred registration for item: \"params\". Adding handler `<orbax.checkpoint._src.handlers.pytree_checkpoint_handler.PyTreeCheckpointHandler object at 0x7f74a4f812b0>` for item \"params\" and save args `<class 'orbax.checkpoint._src.handlers.pytree_checkpoint_handler.PyTreeSaveArgs'>` and restore args `<class 'orbax.checkpoint._src.handlers.pytree_checkpoint_handler.PyTreeRestoreArgs'>` to `_handler_registry`. (3408019:composite_checkpoint_handler.py:234)",
+    "16:12:47.768 [I] Deferred registration for item: \"metrics\". Adding handler `<orbax.checkpoint._src.handlers.json_checkpoint_handler.JsonCheckpointHandler object at 0x7f7494133c80>` for item \"metrics\" and save args `<class 'orbax.checkpoint._src.handlers.json_checkpoint_handler.JsonSaveArgs'>` and restore args `<class 'orbax.checkpoint._src.handlers.json_checkpoint_handler.JsonRestoreArgs'>` to `_handler_registry`. (3408019:composite_checkpoint_handler.py:234)"
+  ],
+  "log_bytes": 17858,
+  "numerical_files": [],
+  "xla_file_count": 40,
+  "xla_bytes": 112278
+}

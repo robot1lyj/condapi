@@ -11,9 +11,36 @@
 - 原生grad_norm与CPU float64组合的稳定范数并存；复制分片只在逻辑范数中计一次，但每一物理副本的异常独立保留，不能被去重掩盖。输入/梯度非有限及原生范数非有限均在optimizer调用前停止。优化器的实际updates及所有参数/optimizer叶子在更新后再验，不只看旧param_norm筛选的kernel。
 - 故障先原子保存`failure.json`并fsync，再逐叶/逐设备写实际batch、根RNG、梯度（若尚在）、参数、optimizer和updates（若已有）；`.npy`禁止pickle，BF16按uint16原始位存并注明编码。每个文件有shape、全局分片索引、原dtype、字节数、SHA256。`tensor-manifest.json`逐文件更新；只有全部写完才有`COMPLETE`。这是故障包，不是正式checkpoint，带`NOT_A_TRAINING_CHECKPOINT`，不自动恢复。
 - **边界明确：** pre-update异常保留实际更新前state；post-update或optimizer运行期异常可能已donate旧buffer，记录明确phase，不能声称保留旧state。SIGKILL/掉电/设备不可读也可能阻止张量导出，manifest保留partial/error；外层CUDA/Xid/core及退出采集继续提供证据。不承诺抓到模型内部每一层激活，先用输入、实际梯度及更新定位坏叶子后再细化反向算子。
-- `steps.jsonl`逐事件flush/fsync。新作业使用独立JAX编译缓存保留完整新编译图，不删除共享缓存；self-check与真实训练XLA目录独立。外层CUDA/NCCL/内核/GPU遥测仍工作。
+- `steps.jsonl`逐事件flush/fsync。诊断作业禁用JAX持久编译缓存，保留进程内JIT复用与完整新编译图；不删除共享缓存。self-check与真实训练XLA目录独立。外层CUDA/NCCL/内核/GPU遥测仍工作。
 
-本地只做纯数组、序列化与stub协议检查：17项通过，包含稳定大数范数、坏副本不被隐藏、身份/内容hash、严格JSON、拒绝覆盖、失败/超时留痕、输入/梯度异常时optimizer绝不被调用、post-state语义与正常路径各调用一次；Ruff通过。未在本地运行模型前向、梯度或训练smoke。新Slurm作业内先运行`check_numerical_diagnostics.py`，仅用四GPU小数组验证正确故障卡/分片定位、有限大数的范数溢出、复制去重及真实异常张量导出/读回；该检查不创建模型或执行优化器，通过后才进入原生正式续训。实际作业号和运行回执在启动验收后更新。
+本地只做纯数组、序列化与stub协议检查：17项通过，包含稳定大数范数、坏副本不被隐藏、身份/内容hash、严格JSON、拒绝覆盖、失败/超时留痕、输入/梯度异常时optimizer绝不被调用、post-state语义与正常路径各调用一次；Ruff通过。未在本地运行模型前向、梯度或训练smoke。新Slurm作业内先运行`check_numerical_diagnostics.py`，仅用四GPU小数组验证正确故障卡/分片定位、有限大数的范数溢出、复制去重、真实异常张量导出/读回，以及实际Orbax保存/恢复后的分片设备绑定；该检查不创建模型或执行优化器，通过后才进入原生正式续训。`numerical-self-check/failure-step-1001`是自检故意注入的异常包，不能当作正式训练故障。
+
+### 诊断启动记录与交接
+
+固定诊断版本为`4959866c2eb51538fa92f1a4aed0d2110d2f7b32`，从Gitea取得并在独立稀疏checkout `/home/wuyan/lyj/YAM/code-snapshots/pi05-numerical-evidence-v3-20261022`执行。它是用户明确批准的数值取证版本，训练配方沿原合同不变；不能仅因训练源码不再是旧`b1446ee`自动取消。
+
+- 原2565已发布完整2000（params/train_state/assets齐备，norm JSON与冻结选集资产逐值一致）；16:10授权切换时保留原现场再取消。
+- 首版2566（`58578bea`）在恢复后的初始统计处退出，尚未执行新优化器更新：Orbax恢复的未绑定buffer被统计JIT错误派发至cuda:0。这是新增诊断代码的启动缺陷，**不是原训练再次发生硬件/数值故障**。`bdccf199`为每个实际设备固定统计JIT，并增加真实Orbax保存/恢复自检；该修正仍未覆盖持久缓存命中，见2572/2573结果。
+- 2567使用修复版，四GPU及Orbax恢复自检通过，但16:23:52被另一监控聊天按旧代码规则取消，尚未进入更新。之后该聊天另起2571。用户选择自行通知其暂停，并明确“他已经停止了，你直接开始吧”；本聊天没有向其他聊天发送指令。
+- 2571在原代码上运行到2000之后，16:31:24由本聊天按切换授权取消；完整交接现场保存在同control的`incidents/handover-job2571-numerical-20261022`。已确认extern结束、队列清空、launch.lock可取得后才提交2572。未删除旧现场/数据/权重。
+- 2572于16:32:00 +08提交，gpu001，训练PID3943158，同run从2000恢复。小数组/Orbax自检通过，但16:35:49真实恢复状态的统计仍报cuda:1 buffer与cuda:0 executable不匹配；退出1，未执行新更新。此前“固定device即可修复”的假设不足。
+- **2573为独立6秒纯数组对照，无模型/优化器：** 将缓存写入阈值设为0后，旧采集器在持久缓存开启时稳定复现同一错误（rc1），关闭时四GPU/Orbax/导出读回全部通过（rc0）。失败目录内仅有一个`jit_local_statistics`缓存条目，现场JAX 0.5.3的GPU缓存键会剥离device assignment；设备绑定复用是此次采集器启动缺陷的已复现机制，不把它当成原训练Xid/Inf的根因。新版本在wrapper与诊断入口明确禁用磁盘缓存，保留内存JIT复用，不改共享缓存文件；自检主动启用缓存/阈值0再验证保护生效。[对照原始输出](evidence/cache-placement-regression.txt)。
+
+[首次启动回执](launch/numerical-submission.json)、[首次启动过程](launch/numerical-startup-progress.json)、[修复版2567回执](launch/numerical-v2-submission.json)、[四GPU与Orbax自检](launch/numerical-v2-self-check.json)、[作业分类原始记录](evidence/numerical-attempts.txt)、[2572提交回执](launch/numerical-v2-retry-submission.json)。完整失败原件保留在服务器各job目录及本地忽略的`evidence/raw/`，不把core或模型张量推送Git。
+
+**最终启动验收：2574，gpu001，训练PID3976967。** 16:41:55提交，16:49:55 +08核验仍RUNNING，从2000连续完成2001–2041共41次真实更新；不是只检查进程存在。每步32条身份/输入hash/RNG齐备，输入40、梯度204、更新量204、全部参数/optimizer620个物理分片均有限，未记录坏副本。原生与稳定梯度范数最大相对差约1.46e-7；初始编译后平均更新间隔2.52秒（早期观察，不是长期吞吐保证）。本次恢复的全部state也通过有限值检查。
+
+训练源码为上述`4959866`，两远端已核对，服务器只从Gitea部署。自检新增缓存保护通过；真实进程环境确认`JAX_ENABLE_COMPILATION_CACHE=false`、NCCL INFO及CUDA core开关生效。XLA目录已有596个文件，含真实梯度/更新编译的HLO、LLVM、PTX等206个产物，文件名/大小/SHA归验收JSON；不再只有小数组图。原日志保留了编译期lexer和rematerialization警告，随后实际更新正常；不把警告改写成不存在。kernel-follow虽含约1.2MB历史缓冲，末条仍是14:04:54旧Xid，验收时无新内核记录。CPU journal/core权限及原生异常时张量可能不可读的限制仍存在。
+
+新现场根目录（服务器）：
+
+```text
+/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/incidents/job-2574
+```
+
+交接时优先读`numerical/steps.jsonl`的最后完整事件，关联`trainer.log`、`events.jsonl`、退出时的`exit.json`。数值异常看`numerical/failure-step-*/failure.json`和`tensor-manifest.json`；只有`COMPLETE`才表示全部列出的张量导出成功。CUDA/NCCL/XLA及GPU/主机/内核证据在该根目录。`numerical-self-check/`是故意注入异常的自检，不能误判正式训练崩溃。监控由用户安排，本聊天验收后停止轮询，不自动重启、不发送跨聊天指令。当前完整恢复点仍为2000；2041是已完成更新，不是新checkpoint，也不证明之前的训练根因已修复。
+
+[2574提交回执](launch/numerical-v3-submission.json)、[完整启动验收](launch/numerical-v3-startup-verified.json)、[真实运行manifest](launch/numerical-v3-manifest.json)、[加强后的GPU自检](launch/numerical-v3-self-check.json)、[原件快照哈希](evidence/job-2574-raw-manifest.json)。
 
 ## 2563失败复核（2026-10-22 15:21起，只读）
 

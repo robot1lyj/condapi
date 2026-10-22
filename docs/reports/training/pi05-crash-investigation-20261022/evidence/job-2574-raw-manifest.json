@@ -1,0 +1,47 @@
+{
+  "captured_utc": "2026-10-22T08:50:40.261963+00:00",
+  "files": [
+    {
+      "source": "/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/incidents/job-2574/trainer.log",
+      "local_file": "evidence/raw/job-2574/trainer.log",
+      "bytes": 42663,
+      "sha256": "16aeb9aba7ddc841a12786b4680a3c1b12e4a5c893343a1ec2079c56eab9d490"
+    },
+    {
+      "source": "/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/incidents/job-2574/events.jsonl",
+      "local_file": "evidence/raw/job-2574/events.jsonl",
+      "bytes": 1309,
+      "sha256": "ae8bb78a7f1500c4f50d0a43560091d6fda93e01126ada35105970c22ac8c24e"
+    },
+    {
+      "source": "/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/incidents/job-2574/numerical/steps.jsonl",
+      "local_file": "evidence/raw/job-2574/numerical/steps.jsonl",
+      "bytes": 5998495,
+      "sha256": "42ccb004821170dd6190e1308f6b337d163d9f98b0c7df440c99234cc9ba95a3"
+    },
+    {
+      "source": "/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/incidents/job-2574/numerical/schema-state.json",
+      "local_file": "evidence/raw/job-2574/numerical/schema-state.json",
+      "bytes": 274370,
+      "sha256": "971168c3db2e39bb0dce27484c3d5805b1eb24db5623dc714c097df79d689c6a"
+    },
+    {
+      "source": "/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/incidents/job-2574/numerical/schema-gradient.json",
+      "local_file": "evidence/raw/job-2574/numerical/schema-gradient.json",
+      "bytes": 87336,
+      "sha256": "b6b53403d6a407270b7c03cd5a71689b614c67f2fbf85645dfc78b805a2205c4"
+    },
+    {
+      "source": "/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/incidents/job-2574/numerical/schema-input.json",
+      "local_file": "evidence/raw/job-2574/numerical/schema-input.json",
+      "bytes": 14533,
+      "sha256": "931f5e10a5594d408b6df9e8a69617d5cc51b0b797b725cc63d77cbce192a8eb"
+    },
+    {
+      "source": "/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/incidents/job-2574/numerical/schema-optimizer_updates.json",
+      "local_file": "evidence/raw/job-2574/numerical/schema-optimizer_updates.json",
+      "bytes": 87336,
+      "sha256": "b6b53403d6a407270b7c03cd5a71689b614c67f2fbf85645dfc78b805a2205c4"
+    }
+  ]
+}

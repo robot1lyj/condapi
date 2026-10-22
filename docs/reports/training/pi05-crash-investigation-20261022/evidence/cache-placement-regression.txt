@@ -1,0 +1,19 @@
+fatal: not a git repository (or any parent up to mount point /)
+Stopping at filesystem boundary (GIT_DISCOVERY_ACROSS_FILESYSTEM not set).
+E1022 16:38:00.149797 3975503 pjrt_stream_executor_client.cc:3077] Execution of replica 0 failed: INVALID_ARGUMENT: Buffer passed to Execute() as argument 0 to replica 0 is on device cuda:1, but replica is assigned to device cuda:0.
+Traceback (most recent call last):
+  File "/home/wuyan/lyj/YAM/code-snapshots/pi05-numerical-evidence-v2-20261022/scripts/check_numerical_diagnostics.py", line 124, in <module>
+    main()
+  File "/home/wuyan/lyj/YAM/code-snapshots/pi05-numerical-evidence-v2-20261022/scripts/check_numerical_diagnostics.py", line 45, in main
+    result = diagnostic.inspect({"test_gradient": array}, "gradient")
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/wuyan/lyj/YAM/code-snapshots/pi05-numerical-evidence-v2-20261022/src/openpi/training/numerical_diagnostics.py", line 148, in inspect
+    ([item for item, _ in group], self.statistics[device_id](tuple(array for _, array in group)))
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+jaxlib.xla_extension.XlaRuntimeError: INVALID_ARGUMENT: Buffer passed to Execute() as argument 0 to replica 0 is on device cuda:1, but replica is assigned to device cuda:0.
+--------------------
+For simplicity, JAX has removed its internal frames from the traceback of the following exception. Set JAX_TRACEBACK_FILTERING=off to include these.
+fatal: not a git repository (or any parent up to mount point /)
+Stopping at filesystem boundary (GIT_DISCOVERY_ACROSS_FILESYSTEM not set).
+NUMERICAL_EVIDENCE_SELF_CHECK=PASS
+CACHE_ENABLED_RC=1 CACHE_DISABLED_RC=0

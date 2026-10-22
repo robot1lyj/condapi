@@ -1,0 +1,60 @@
+{
+  "version": 1,
+  "created_utc": "2026-10-22T08:45:23.379384+00:00",
+  "code_commit": "4959866c2eb51538fa92f1a4aed0d2110d2f7b32",
+  "job_id": "2574",
+  "run": "earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022",
+  "seed": 42,
+  "batch_size": 32,
+  "fsdp_devices": 4,
+  "checkpoint_directory": "/home/wuyan/lyj/YAM/training-runs/pi05_yam/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022",
+  "dataset": "/home/wuyan/lyj/YAM/YAM_data/processed/earbuds_lerobot_50h_clean_v2_20261013/train",
+  "mode": "split_native_gradient_and_optimizer_with_host_guard",
+  "persistent_compilation_cache_enabled": false,
+  "in_memory_jit_reuse": true,
+  "integer_fields": [
+    "size",
+    "nan_count",
+    "posinf_count",
+    "neginf_count",
+    "first_bad_flat_index",
+    "max_abs_flat_index"
+  ],
+  "float_fields": [
+    "max_abs_finite",
+    "scaled_sum_squares",
+    "first_bad_value",
+    "max_abs_value"
+  ],
+  "devices": [
+    {
+      "id": 0,
+      "process_index": 0,
+      "kind": "NVIDIA GeForce RTX 4090",
+      "local_hardware_id": 0
+    },
+    {
+      "id": 1,
+      "process_index": 0,
+      "kind": "NVIDIA GeForce RTX 4090",
+      "local_hardware_id": 1
+    },
+    {
+      "id": 2,
+      "process_index": 0,
+      "kind": "NVIDIA GeForce RTX 4090",
+      "local_hardware_id": 2
+    },
+    {
+      "id": 3,
+      "process_index": 0,
+      "kind": "NVIDIA GeForce RTX 4090",
+      "local_hardware_id": 3
+    }
+  ],
+  "limitations": [
+    "Instrumentation changes compilation and adds synchronization",
+    "Post-update failures retain post-state; pre-state buffers may have been donated",
+    "A GPU/native crash can prevent tensor export; external incident capture remains active"
+  ]
+}

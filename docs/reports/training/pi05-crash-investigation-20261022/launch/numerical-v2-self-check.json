@@ -1,0 +1,14 @@
+{
+  "synthetic_arrays_only": true,
+  "model_or_optimizer_executed": false,
+  "devices": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "correct_bad_device": 1,
+  "shard_metadata_and_tensor_readback": "passed",
+  "stable_large_value_norm": "passed",
+  "orbax_restored_shard_placement": "passed"
+}
