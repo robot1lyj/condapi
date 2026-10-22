@@ -4,7 +4,7 @@
 
 只读核查10月20日至22日14:19的Slurm记录：耳机Pi共44个FAILED、1个RUNNING；其中2554是启动合同文件冲突。当前可读内核现场对应8次失败，全部指向GPU1/PCI52:00.0，7次Xid13/43重复GPC8/TPC0/SM0，另1次Xid31。主机mc0/dimm2累计CE3,781,237、UE0，需独立管理员诊断；尚未证明坏卡、内存或XLA/NCCL为唯一根因。调查时2562正在从本run1000恢复，状态使用前重查。完整证据、权限/日志缺口、诊断分层及恢复建议归[调查报告](reports/training/pi05-crash-investigation-20261022/README.md)。
 
-新增标准库只读工具[collect_training_incident.py](../scripts/collect_training_incident.py)，每次attempt新目录保存GPU/内核/Slurm/EDAC、PID白名单环境/加载库和显式日志，保留采集失败与哈希；不训练、不重启、不自动部署。NCCL INFO、XLA dump、CPU/GPU core和持续遥测的具体方案见报告。本轮未改变正在运行的训练、配方或自动恢复；4项离线收集器测试通过，更细现场采集尚未接入服务器作业。
+新增标准库只读工具[collect_training_incident.py](../scripts/collect_training_incident.py)，每次attempt新目录保存GPU/内核/Slurm/EDAC、PID白名单环境/加载库和显式日志，保留采集失败与哈希；不训练、不重启、不自动部署。NCCL INFO、XLA dump、CPU/GPU core和持续遥测的具体方案见报告。用户随后授权接管并带采集续训：已保存现场、取消2562，同合同从完整1000提交2563，gpu001训练PID1594045；14:43为RUNNING但尚未首个新指标，不能宣称稳定。诊断固定43e9bc0、训练仍b1446ee，NCCL/XLA/GPU core开关与GPU/内核连续采集已接入；7项轻量测试/Ruff通过。旧pi0-5-50h自动恢复已暂停。用户明确由其他agent监控，本聊天不再监控或创建自动化，进程/日志/限制见报告交接。
 
 ## 乐高拆开专项与回放首轮训练（2026-10-14，10000步v2）
 

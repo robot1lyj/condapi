@@ -1,0 +1,123 @@
+{
+  "observed_at": "2026-10-22T14:43:03.967565+08:00",
+  "incident_dir": "/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/incidents/job-2563",
+  "events": [
+    {
+      "utc": "2026-10-22T06:40:27.938813+00:00",
+      "event": "starting",
+      "command": [
+        "/home/wuyan/.conda/envs/condapi-yam/bin/python",
+        "scripts/train_lego_full.py",
+        "--resume",
+        "--run-name",
+        "earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022",
+        "--steps",
+        "86000",
+        "--init-params",
+        "/home/wuyan/lyj/YAM/training-runs/pi05_yam/earbuds_pi05_rtc_base_50h_20261012/114000/params",
+        "--train-episodes-file",
+        "/home/wuyan/lyj/YAM/training-assets/earbuds_rtc_50h_clean_v2_excl_pantheon_20261021/episodes.json",
+        "--rtc-training-max-delay",
+        "10",
+        "--assets-dir",
+        "/home/wuyan/lyj/YAM/training-assets/earbuds_rtc_50h_clean_v2_excl_pantheon_20261021/norm",
+        "--dataset",
+        "/home/wuyan/lyj/YAM/YAM_data/processed/earbuds_lerobot_50h_clean_v2_20261013/train",
+        "--warmup-steps",
+        "1000",
+        "--decay-steps",
+        "338000"
+      ],
+      "cwd": "/home/wuyan/lyj/YAM/code-snapshots/earbuds50h-clean-v2-20261013",
+      "job_id": "2563"
+    },
+    {
+      "utc": "2026-10-22T06:40:28.877161+00:00",
+      "event": "monitor_started",
+      "name": "gpu-telemetry",
+      "pid": 1594043
+    },
+    {
+      "utc": "2026-10-22T06:40:28.877770+00:00",
+      "event": "monitor_started",
+      "name": "kernel-follow",
+      "pid": 1594044
+    },
+    {
+      "utc": "2026-10-22T06:40:28.878410+00:00",
+      "event": "trainer_started",
+      "pid": 1594045
+    }
+  ],
+  "squeue": "2563|RUNNING|gpu001|2:36",
+  "sacct": "JobID|State|ExitCode|Start|End\n2563|RUNNING|0:0|2026-10-22T14:40:27|Unknown\n2563.batch|RUNNING|0:0|2026-10-22T14:40:27|Unknown\n2563.extern|RUNNING|0:0|2026-10-22T14:40:27|Unknown",
+  "training_tail": [
+    "ERROR:absl:File /home/wuyan/lyj/YAM/training-runs/pi05_yam/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/1000/metrics/metrics not found.",
+    "14:40:32.800 [I] [process=0][thread=MainThread] CheckpointManager init: checkpointers=None, item_names=None, item_handlers={'assets': <openpi.training.checkpoints.CallbackHandler object at 0x7fb844077e90>, 'train_state': <orbax.checkpoint._src.handlers.pytree_checkpoint_handler.PyTreeCheckpointHandler object at 0x7fb844099cd0>, 'params': <orbax.checkpoint._src.handlers.pytree_checkpoint_handler.PyTreeCheckpointHandler object at 0x7fb844077bc0>}, handler_registry=None (1594045:checkpoint_manager.py:620)",
+    "14:40:32.800 [I] Deferred registration for item: \"assets\". Adding handler `<openpi.training.checkpoints.CallbackHandler object at 0x7fb844077e90>` for item \"assets\" and save args `<class 'openpi.training.checkpoints.CallbackSave'>` and restore args `<class 'openpi.training.checkpoints.CallbackRestore'>` to `_handler_registry`. (1594045:composite_checkpoint_handler.py:234)",
+    "14:40:32.800 [I] Deferred registration for item: \"train_state\". Adding handler `<orbax.checkpoint._src.handlers.pytree_checkpoint_handler.PyTreeCheckpointHandler object at 0x7fb844099cd0>` for item \"train_state\" and save args `<class 'orbax.checkpoint._src.handlers.pytree_checkpoint_handler.PyTreeSaveArgs'>` and restore args `<class 'orbax.checkpoint._src.handlers.pytree_checkpoint_handler.PyTreeRestoreArgs'>` to `_handler_registry`. (1594045:composite_checkpoint_handler.py:234)",
+    "14:40:32.800 [I] Deferred registration for item: \"params\". Adding handler `<orbax.checkpoint._src.handlers.pytree_checkpoint_handler.PyTreeCheckpointHandler object at 0x7fb844077bc0>` for item \"params\" and save args `<class 'orbax.checkpoint._src.handlers.pytree_checkpoint_handler.PyTreeSaveArgs'>` and restore args `<class 'orbax.checkpoint._src.handlers.pytree_checkpoint_handler.PyTreeRestoreArgs'>` to `_handler_registry`. (1594045:composite_checkpoint_handler.py:234)",
+    "14:40:32.800 [I] Deferred registration for item: \"metrics\". Adding handler `<orbax.checkpoint._src.handlers.json_checkpoint_handler.JsonCheckpointHandler object at 0x7fb84409b3b0>` for item \"metrics\" and save args `<class 'orbax.checkpoint._src.handlers.json_checkpoint_handler.JsonSaveArgs'>` and restore args `<class 'orbax.checkpoint._src.handlers.json_checkpoint_handler.JsonRestoreArgs'>` to `_handler_registry`. (1594045:composite_checkpoint_handler.py:234)",
+    "14:40:32.800 [I] Initialized registry DefaultCheckpointHandlerRegistry({('assets', <class 'openpi.training.checkpoints.CallbackSave'>): <openpi.training.checkpoints.CallbackHandler object at 0x7fb844077e90>, ('assets', <class 'openpi.training.checkpoints.CallbackRestore'>): <openpi.training.checkpoints.CallbackHandler object at 0x7fb844077e90>, ('train_state', <class 'orbax.checkpoint._src.handlers.pytree_checkpoint_handler.PyTreeSaveArgs'>): <orbax.checkpoint._src.handlers.pytree_checkpoint_handler.PyTreeCheckpointHandler object at 0x7fb844099cd0>, ('train_state', <class 'orbax.checkpoint._src.handlers.pytree_checkpoint_handler.PyTreeRestoreArgs'>): <orbax.checkpoint._src.handlers.pytree_checkpoint_handler.PyTreeCheckpointHandler object at 0x7fb844099cd0>, ('params', <class 'orbax.checkpo"
+  ],
+  "files": {
+    "gpu-telemetry.stderr.txt": 0,
+    "kernel-follow.stderr.txt": 0,
+    "gpu-telemetry.log": 15680,
+    "trainer.log": 17858,
+    "process-snapshots.jsonl": 13048,
+    "host-telemetry.jsonl": 70143,
+    "kernel-follow.log": 1223622,
+    "events.jsonl": 1210
+  },
+  "xla_file_count": 0,
+  "process_snapshot": {
+    "utc": "2026-10-22T06:42:28.930845+00:00",
+    "pid": 1594045,
+    "stat": "1594045 (python) R 1593998 1594045 1594045 0 -1 4194304 237688 1142 0 0 11860 213 0 0 20 0 223 0 8723853 68575211520 800751 515396075520 94500287959040 94500290383213 140725331997120 0 0 0 0 16781312 1258 0 0 0 17 31 0 0 0 0 0 94500291812080 94500293794352 94500297793536 140725332001238 140725332001901 140725332001901 140725332008905 0\n",
+    "environment": {
+      "PYTHONUNBUFFERED": "1",
+      "SLURM_JOB_GPUS": "0,1,2,3",
+      "XLA_PYTHON_CLIENT_MEM_FRACTION": "0.92",
+      "XLA_PYTHON_CLIENT_PREALLOCATE": "true",
+      "SLURM_PROCID": "0",
+      "CUDA_VISIBLE_DEVICES": "0,1,2,3",
+      "PYTHONFAULTHANDLER": "1",
+      "SLURM_JOB_ID": "2563",
+      "NCCL_DEBUG": "INFO",
+      "NCCL_DEBUG_SUBSYS": "INIT,ENV,GRAPH,COLL,P2P,SHM,NET",
+      "NCCL_DEBUG_FILE": "/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/incidents/job-2563/nccl.%h.%p.log",
+      "CUDA_ENABLE_COREDUMP_ON_EXCEPTION": "1",
+      "CUDA_COREDUMP_FILE": "/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/incidents/job-2563/cuda.%h.%p.%t.nvcudmp",
+      "XLA_FLAGS": "--xla_dump_to=/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/incidents/job-2563/xla --xla_dump_hlo_as_text"
+    },
+    "libraries": [
+      "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/jax_cuda12_plugin/cuda_plugin_extension.so",
+      "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/jax_plugins/xla_cuda12/xla_cuda_plugin.so",
+      "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/jaxlib/cpu/_lapack.so",
+      "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/jaxlib/cpu_feature_guard.so",
+      "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/jaxlib/mlir/_mlir_libs/_chlo.so",
+      "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/jaxlib/mlir/_mlir_libs/_mlir.so",
+      "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/jaxlib/mlir/_mlir_libs/_mlirHlo.so",
+      "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/jaxlib/mlir/_mlir_libs/_mosaic_gpu_ext.so",
+      "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/jaxlib/mlir/_mlir_libs/_sdy.so",
+      "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/jaxlib/mlir/_mlir_libs/_stablehlo.so",
+      "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/jaxlib/mlir/_mlir_libs/_tpu_ext.so",
+      "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/jaxlib/mlir/_mlir_libs/_triton_ext.so",
+      "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/jaxlib/mlir/_mlir_libs/libjaxlib_mlir_capi.so",
+      "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/jaxlib/mlir/_mlir_libs/register_jax_dialects.so",
+      "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/jaxlib/utils.so",
+      "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/jaxlib/xla_extension.so",
+      "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/nvidia/cublas/lib/libcublas.so.12",
+      "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/nvidia/cublas/lib/libcublasLt.so.12",
+      "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/nvidia/cuda_runtime/lib/libcudart.so.12",
+      "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/nvidia/cudnn/lib/libcudnn.so.9",
+      "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/nvidia/cudnn/lib/libcudnn_graph.so.9",
+      "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/nvidia/nccl/lib/libnccl.so.2",
+      "/home/wuyan/.conda/envs/condapi-yam/lib/python3.12/site-packages/torchvision.libs/libcudart.45e7f3ed.so.12",
+      "/usr/lib64/libcuda.so.595.45.04"
+    ],
+    "limits": "Limit                     Soft Limit           Hard Limit           Units     \nMax cpu time              unlimited            unlimited            seconds   \nMax file size             unlimited            unlimited            bytes     \nMax data size             unlimited            unlimited            bytes     \nMax stack size            8388608              unlimited            bytes     \nMax core file size        unlimited            unlimited            bytes     \nMax resident set          515396075520         515396075520         bytes     \nMax processes             30551                2058332              processes \nMax open files            65535                65535                files     \nMax locked memory         8388608              unlimited            bytes     \nMax address space         unlimited            unlimited            bytes     \nMax file locks            unlimited            unlimited            locks     \nMax pending signals       2058332              2058332              signals   \nMax msgqueue size         819200               819200               bytes     \nMax nice priority         0                    0                    \nMax realtime priority     0                    0                    \nMax realtime timeout      unlimited            unlimited            us        \n",
+    "cgroup": "0::/system.slice/slurmstepd.scope/job_2563/step_batch/user/task_0\n"
+  }
+}

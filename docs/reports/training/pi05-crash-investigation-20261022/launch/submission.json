@@ -1,0 +1,13 @@
+{
+  "job_id": "2563",
+  "diagnostic_commit": "43e9bc0daa8a9a0c1c0e2d219442b19d54e93b9c",
+  "diagnostic_code": "/home/wuyan/lyj/YAM/code-snapshots/pi05-incident-tools-sparse-20261022",
+  "trainer_commit": "b1446eefdf8c3cd347689bb41cc77fa6af251aaa",
+  "cancelled_job": "2562",
+  "restore_checkpoint": 1000,
+  "run": "earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022",
+  "local_stop_step": 86000,
+  "parent_parameter_step": 114000,
+  "command": "sbatch --parsable --export=ALL,DIAG_CODE=/home/wuyan/lyj/YAM/code-snapshots/pi05-incident-tools-sparse-20261022,DIAG_COMMIT=43e9bc0daa8a9a0c1c0e2d219442b19d54e93b9c /home/wuyan/lyj/YAM/code-snapshots/pi05-incident-tools-sparse-20261022/docs/reports/training/pi05-crash-investigation-20261022/launch/diagnostic-resume.sbatch",
+  "authorization": "2026-10-22用户：好的，你接管服务器，可以取消目前的训练，然后用你有现场采集工具的开始训练"
+}

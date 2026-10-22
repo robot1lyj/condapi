@@ -1,8 +1,31 @@
 # Pi0.5 服务器反复崩溃调查与现场采集（2026-10-22）
 
+## 接管后交接（2026-10-22 14:43 +08）
+
+用户先明确授权“接管服务器，可以取消目前的训练，然后用你有现场采集工具的开始训练”，随后明确“不需要你来监控，我让别的agent监控的，你只需告诉我进程即可”。已停止后续主动轮询，没有创建新监控/自动恢复，也没有向其他聊天发送任务。
+
+- **Slurm2563，gpu001，训练PID1594045**；14:40:27启动，14:43单次交接核查为RUNNING。当时尚未出现首个新训练指标或NCCL/XLA输出，不能宣称已完成恢复/编译或稳定性验收；其他agent需按实际日志继续核验。
+- 原2562于14:39:21取消，末次指标1651；交接前完整现场保存在同control的`incidents/handover-job2562-20261022`。Slurm batch以SIGTERM结束，extern已结束、队列清空、launch.lock可取得。分配释放后SSH到gpu001被pam_slurm_adopt拒绝；新作业before快照的GPU进程表为空，未见残留计算进程。
+- 保持同run从完整1000恢复，保留参数/优化器/loader合同，目标本地86000、逻辑偏移114000。checkpoint norm和选集norm的JSON逐值相等，序列化字节哈希不同已核对；原训练norm SHA仍05f65ada…，未改batch32/FSDP4/workers2/RTC/LR/选集/代码。
+- 原训练代码固定`b1446eefdf8c3cd347689bb41cc77fa6af251aaa`；诊断代码固定`43e9bc0daa8a9a0c1c0e2d219442b19d54e93b9c`，从Gitea经验证主机密钥的SSH隧道取得。诊断checkout为`/home/wuyan/lyj/YAM/code-snapshots/pi05-incident-tools-sparse-20261022`，训练仍在原checkout执行。全量worktree首次checkout较慢，改用三文件稀疏checkout完成；旧目录保留。
+- GPU遥测PID1594043、内核日志PID1594044是作业内采集子进程；每5秒记录GPU/主机/EDAC，每60秒保存真实trainer环境/加载库。原生退出单独写`exit.json`并补采，不自动重启。它们属于故障取证，不是新的聊天监控任务。
+- 原自动化 **Pi0.5耳机训练监控（pi0-5-50h）已PAUSED**，避免其旧恢复命令重复拉起。用户安排其他agent监控，本聊天不恢复旧自动化、不新建自动化。
+
+现场目录（服务器）：
+
+```text
+/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/incidents/job-2563
+```
+
+其中`trainer.log`为完整训练日志，`events.jsonl`/`exit.json`为生命周期，`gpu-telemetry.log`、`host-telemetry.jsonl`、`kernel-follow.log`、`process-snapshots.jsonl`为连续证据；NCCL写`nccl.<host>.<pid>.log`，XLA写`xla/`，GPU异常触发`cuda.<host>.<pid>.<time>.nvcudmp`。实际环境已确认启用这些开关，但没有人为制造GPU异常来验证core生成。退出/失败后先读现场，再决定是否恢复。
+
+节点本地`sacct`连接localhost:6819失败，需从`yam-server`登录节点读取；当前作业已另取登录节点Slurm回执。节点journal/coredump访问权限仍未解决，首版收集器还遇到Rocky journal时间参数不接受ISO的T分隔符；当前源码已修正，未修改正在运行的固定43e9bc0。当前核心内核证据由已实际写出的dmesg快照和follow提供。未来节点掉电/SIGKILL仍可能跳过after补采，需要监控agent在登录节点补取调度器结果。
+
+[提交回执](launch/submission.json)、[单次进程/环境核验](launch/startup-verified.json)、[原作业取消](evidence/handover-cancel.txt)、[固定作业文件](launch/diagnostic-resume.sbatch)。7项离线合成进程/收集测试及Ruff通过，未在工作站运行训练。
+
 ## 结论与适用范围
 
-本轮只读调查 `yam-server → gpu001`，观察时间为北京时间2026-10-22 14:19–14:24；未提交训练、改变配方/环境、停止作业、重启节点或修改自动恢复。原始源日志保留，本地完整副本位于 `evidence/raw/`；Git保存来源/哈希、关键摘录和统计。仅涉及服务器训练，不涉及Thor/3588。
+初始只读调查 `yam-server → gpu001`，观察时间为北京时间2026-10-22 14:19–14:24；该调查阶段未改变运行。随后用户授权接管、取消旧训练并带现场采集续训，实际操作见下节。原始源日志保留，本地完整副本位于 `evidence/raw/`；Git保存来源/哈希、关键摘录和统计。仅涉及服务器训练，不涉及Thor/3588。
 
 **当前最强线索是 GPU1 / PCI `0000:52:00.0` 的重复设备异常，同时存在独立的主机内存纠错异常。尚未定位到硬件、驱动、XLA生成代码或应用内存错误的唯一根因。** NCCL报错和最终SIGABRT可能是前面CUDA故障的后续表现，不能根据最后一行定责。
 
@@ -57,7 +80,7 @@ GPU1 UUID：`GPU-7a9a29a1-9059-b0ef-d7b4-53c298565ca1`。同一物理卡/子单�
 | 故障 | 完整stdout/stderr、NCCL每进程文件、Xid/AER/MCE/OOM、CPU/GPU core、XLA编译产物 | 保住第一个异常与执行上下文 |
 | 判定 | 已知事实、候选原因、反证/缺证、干预、验证覆盖、恢复点、后续条件 | “重新跑起来”不自动成为“已修复” |
 
-新工具 [collect_training_incident.py](../../../../scripts/collect_training_incident.py) 是标准库只读快照工具：采集GPU、内核、Slurm、EDAC、core目录查询、指定PID白名单环境/加载库、包metadata和显式日志/配置；每项保存退出码、错误与时间，拒绝复用输出目录。它不训练、不发信号、不sudo、不改GPU参数，也不自动部署到服务器。复制增长日志只读开始时的文件长度，并注明复制期间是否变化。
+新工具 [collect_training_incident.py](../../../../scripts/collect_training_incident.py) 是标准库只读快照工具：采集GPU、内核、Slurm、EDAC、core目录查询、指定PID白名单环境/加载库、包metadata和显式日志/配置；每项保存退出码、错误与时间，拒绝复用输出目录。它不训练、不发信号、不sudo、不改GPU参数，也不自动部署到服务器；本次部署是后续用户明确授权的操作。复制增长日志只读开始时的文件长度，并注明复制期间是否变化。
 
 部署该工具后，在**故障计算节点**执行，变量须由本次实际作业填写：
 
@@ -71,11 +94,11 @@ python3 scripts/collect_training_incident.py \
 
 这是一次快照，不是持续采集器；需要在启动前、首错后各做一次。进程退出后`/proc`证据会消失；必须在启动时存PID/库/环境，不能依赖退出trap。收集器不自动保存任意cmdline/全环境以避免凭据；提交脚本/日志须检查后再共享。现有本地原始日志和core不进Git。
 
-连续采集建议放在受控的节点日志服务中：持久journal/rsyslog保留每次boot；`dmesg --follow`仅为普通用户可用的临时补充，不清空缓冲。训练启动时启动限定生命周期的GPU遥测；退出先冻结事故包，再评估恢复。退出trap处理不了SIGKILL、节点掉电、OOM杀死整个cgroup，需登录节点依据Slurm结束事件做独立补采，节点持续日志与训练作业解耦。当前还未安装这些自动采集/恢复熔断逻辑。
+连续采集建议放在受控的节点日志服务中：持久journal/rsyslog保留每次boot；`dmesg --follow`仅为普通用户可用的临时补充，不清空缓冲。训练启动时启动限定生命周期的GPU遥测；退出先冻结事故包，再评估恢复。退出trap处理不了SIGKILL、节点掉电、OOM杀死整个cgroup，需登录节点依据Slurm结束事件做独立补采，节点持续日志与训练作业解耦。当前已接入作业内采集，未安装登录节点独立补采服务；后续交由用户指定agent监控。
 
 ## 更细的CUDA/XLA/NCCL现场：按层启用
 
-以下是诊断设计，不是新一轮训练配方或已运行命令；本轮未修改任何训练作业。涉及新的训练/插桩实验先明确配方、GPU分配、时限和输出目录；DAgger轮次遵循逐轮确认规则。
+以下保留分层诊断设计；按用户后续明确授权，第一/二层采集已加入2563，第三层sanitizer未运行。涉及其他训练/插桩实验先明确配方、GPU分配、时限和输出目录；DAgger轮次遵循逐轮确认规则。
 
 ### 第一层：下一次受控启动加入NCCL日志和有限XLA dump
 
@@ -118,10 +141,10 @@ GPU core可能很大，启用本身也可能影响性能；预留空间/配额�
 
 ## 排查优先级与恢复门槛
 
-1. 先保住现场；建议暂停“几秒psum通过即无限恢复”的策略，重复同类Xid进入人工诊断。当前自动恢复配置未在本轮修改。
+1. 先保住现场；建议暂停“几秒psum通过即无限恢复”的策略，重复同类Xid进入人工诊断。旧自动恢复已在后续用户授权接管时暂停，详见交接。
 2. 管理员检查GPU1/52:00的硬件、插槽/供电/链路和主机mc0/dimm2，导出本次及前一次boot的内核/BMC/core记录。GPU1和DIMM问题分别建条目，不先假定共同因果。
 3. 在独占的获批资源上，用同一小型复现对比GPU UUID并改变逻辑映射，观察错误跟随物理卡还是rank/代码路径；再区分单卡计算、双卡通信、原四卡训练。不能随手把FSDP4改成3卡继续原run。若单节点同卡异常持续，优先硬件/节点诊断，不先泛化为跨节点网络问题。
 4. 若物理卡对照不能解释，再在隔离环境做驱动/JAX/NCCL的一次一变量对照；保留595.45.04/JAX0.5.3/NCCL2.26.2基线，不原地升级训练前缀。
 5. 验证覆盖必须超过已观察故障窗口并有多次对照，同时核对checkpoint完整性和有限值；一次短测通过、loss有限、从checkpoint恢复成功都不能替代稳定性验收。
 
-本轮完成的是定位调查方向与采集方案，不是根因修复。验证：收集器4项离线测试通过（凭据白名单、拒绝覆盖、失败/缺工具/超时保留、完整日志快照），CLI帮助通过；没有运行训练或训练smoke。新增工具尚未部署至服务器，NCCL/XLA/core/持续遥测方案尚未接入当前作业。
+本轮完成了调查、采集工具和授权后的诊断续训启动，不是根因修复。收集器/包装器共7项轻量测试和Ruff通过；只在服务器Slurm中启动原生训练，未在工作站运行训练或训练smoke。后续监控交由用户指定agent。
