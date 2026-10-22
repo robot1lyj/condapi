@@ -1,8 +1,8 @@
 # 13 · Pi0.5 training-time RTC：Thor 转换与推理候选
 
-## 当前：耳机50h114000已上线，112000已清理（2026-10-22）
+## 当前：乐高50h200000已恢复，耳机114000停止保留（2026-10-22）
 
-11:05 CST用户授权的`earbuds_pi05_rtc_base_50h_20261012/114000`已通过20项SHA、原始非有限0、811张量FP32映射、真实耳机九例JAX/Torch/TRT及两轮协议，在同名Pi/固定8000上线，healthz OK/MAXN watcher active；七步FP32＋TF32、quantile、缓存80/CUDA Graph/dmax10/0.2rad/tick不变。最大单关节差0.000626rad、夹爪0.000516，稳态纯推理184.45/188.92ms，正式本机往返194.07/204.57ms（P50/P95），不冒充任务效果或3588全链路。之后按用户授权永久删除112000旧容器及原始/FP32/ONNX/TRT四目录，释放48.40GiB，**不能本地回退112000**；小证据/回放/原JAX输出、共享镜像、乐高DAgger与CPU审阅页保留，服务器文件不删。部署/清理unit均退出0，在线unit为`thor-pi-maxn-earbuds114000-20261022.service`，按新容器唯一ID跟踪。模型身份、指令及回执归[114000报告](../../reports/thor/rtc-earbuds-114000-20261022/README.md)与[08](../../08_thor_edge_deployment.md)，112000标记[历史退役](../../reports/thor/rtc-earbuds-112000-20261021/README.md)。不训练、不操作3588或发送客户端任务。
+16:35 CST按用户指定恢复`lego_pi05_rtc_base_50h_20260921/200000`，不是DAgger。复用旧引擎与原Pi服务/8000，healthz OK，MAXN unit `thor-pi-maxn-50h200000-resume-20261022.service`按容器唯一ID监控、GPU1575MHz。真实九例d=0/1/10通过，全部有限50×14、前缀精确，权重/norm/engine指纹匹配；七步FP32＋TF32、quantile、缓存80/CUDA Graph/dmax10/0.2rad/tick不变。推理P50/P95=196.39/206.99ms、本机往返196.96/208.24ms，不代表3588全链路或任务效果。耳机114000停止保留为`pi05-rtc-earbuds114000-preserved-20261022`，旧MAXN已正常退出；未下载、重转换或删除资产。当前证据归[20万报告](../../reports/thor/rtc-50h-200000-20261010/README.md)及[08](../../08_thor_edge_deployment.md)。耳机历史验收和112000永久清理归[114000报告](../../reports/thor/rtc-earbuds-114000-20261022/README.md)，不能本地回退112000。不训练、不操作3588或发送客户端任务；以下在线状态均为历史。
 
 ## 已验收基线：240000＋DAgger专项7000（2026-10-15）
 
