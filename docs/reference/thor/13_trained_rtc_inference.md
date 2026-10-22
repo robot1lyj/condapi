@@ -1,8 +1,8 @@
 # 13 · Pi0.5 training-time RTC：Thor 转换与推理候选
 
-## 当前：耳机50h112000已上线（2026-10-21）
+## 当前：耳机50h114000已上线，112000已清理（2026-10-22）
 
-18:20 CST用户授权的`earbuds_pi05_rtc_base_50h_20261012/112000`已通过下载/FP32映射、原始非有限0、真实耳机val0/1/2九例JAX/Torch/TRT和两轮协议，在原`pi05-rtc-infer`/固定8000上线，healthz OK/MAXN watcher active。七步FP32＋TF32、quantile、缓存80/CUDA Graph/dmax10/0.2rad/tick不变；JAX/TRT最大单关节差0.000810rad、夹爪0.000558，稳态纯推理184.55/185.81ms、正式本机往返192.83/203.95ms（P50/P95），不冒充任务效果或3588全链路。DAgger10000停止保留，CPU审阅页不动；一次性部署unit退出0，在线电源unit为`thor-pi-maxn-earbuds112000-20261021.service`，按新容器唯一ID跟踪。模型身份、norm、原始回执、英文prompt和回退归[耳机112000报告](../../reports/thor/rtc-earbuds-112000-20261021/README.md)及[08](../../08_thor_edge_deployment.md)，此前10000证据保留在[原报告](../../reports/thor/rtc-separation-r1-10000-20261015/README.md)。本轮不训练、不删除旧模型、不操作3588或发送客户端任务。
+11:05 CST用户授权的`earbuds_pi05_rtc_base_50h_20261012/114000`已通过20项SHA、原始非有限0、811张量FP32映射、真实耳机九例JAX/Torch/TRT及两轮协议，在同名Pi/固定8000上线，healthz OK/MAXN watcher active；七步FP32＋TF32、quantile、缓存80/CUDA Graph/dmax10/0.2rad/tick不变。最大单关节差0.000626rad、夹爪0.000516，稳态纯推理184.45/188.92ms，正式本机往返194.07/204.57ms（P50/P95），不冒充任务效果或3588全链路。之后按用户授权永久删除112000旧容器及原始/FP32/ONNX/TRT四目录，释放48.40GiB，**不能本地回退112000**；小证据/回放/原JAX输出、共享镜像、乐高DAgger与CPU审阅页保留，服务器文件不删。部署/清理unit均退出0，在线unit为`thor-pi-maxn-earbuds114000-20261022.service`，按新容器唯一ID跟踪。模型身份、指令及回执归[114000报告](../../reports/thor/rtc-earbuds-114000-20261022/README.md)与[08](../../08_thor_edge_deployment.md)，112000标记[历史退役](../../reports/thor/rtc-earbuds-112000-20261021/README.md)。不训练、不操作3588或发送客户端任务。
 
 ## 已验收基线：240000＋DAgger专项7000（2026-10-15）
 

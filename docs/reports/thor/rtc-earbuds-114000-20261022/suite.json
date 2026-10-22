@@ -1,0 +1,72 @@
+{
+  "source_kind": "real_yam_recording",
+  "source_root": "/home/wuyan/lyj/YAM/YAM_data/processed/earbuds_lerobot_50h_clean_v2_20261013/val",
+  "norm_stats_sha256": "ee56da7d2361623500ba4c4465a0836b88613c9b389460620d8fcd33a5ae7058",
+  "norm_identity": {
+    "checkpoint_norm_sha256": "ee56da7d2361623500ba4c4465a0836b88613c9b389460620d8fcd33a5ae7058",
+    "training_norm_sha256": "109af6930ddfdf9e0c04995809cd5e056037b42bbeeb54399ec1b4871ddb3cce",
+    "identity_relation": "checkpoint_omitted_one_final_newline"
+  },
+  "checkpoint_metadata_sha256": "2912d15ba42fe0d742b5ac46e88804dacce69644369b4cf9b7405cf7d8fe7247",
+  "created_at": "2026-10-21T09:54:08.548233+00:00",
+  "validation_scope": "real training replay; conversion parity and latency, not holdout task success",
+  "samples": [
+    {
+      "sample": "episode-000000-early.npz",
+      "provenance": "episode-000000-early.json"
+    },
+    {
+      "sample": "episode-000000-middle.npz",
+      "provenance": "episode-000000-middle.json"
+    },
+    {
+      "sample": "episode-000000-late.npz",
+      "provenance": "episode-000000-late.json"
+    },
+    {
+      "sample": "episode-000001-early.npz",
+      "provenance": "episode-000001-early.json"
+    },
+    {
+      "sample": "episode-000001-middle.npz",
+      "provenance": "episode-000001-middle.json"
+    },
+    {
+      "sample": "episode-000001-late.npz",
+      "provenance": "episode-000001-late.json"
+    },
+    {
+      "sample": "episode-000002-early.npz",
+      "provenance": "episode-000002-early.json"
+    },
+    {
+      "sample": "episode-000002-middle.npz",
+      "provenance": "episode-000002-middle.json"
+    },
+    {
+      "sample": "episode-000002-late.npz",
+      "provenance": "episode-000002-late.json"
+    }
+  ],
+  "source_files": {
+    "data/chunk-000/file-000.parquet": "30358d7b1a414c66663a18fdb71441f2f39f232b4c70bb59c2460068bcdc28ef",
+    "data/chunk-000/file-001.parquet": "3ed1673e372e1b2fd995d3722ccd949179a97ab5cc61f53df19b50357c412b8f",
+    "data/chunk-000/file-002.parquet": "54e72b5ec2a8f5b4e63bca8d75710a9a0519fbf43e6656b494b499fbcb984c35",
+    "meta/episodes/chunk-000/file-000.parquet": "0d0f196614a7dc7a2d6085fd348ebcfa104fd572e4bdceeaef8dce5e430108fe",
+    "meta/info.json": "459c9809786a8332fe02587e83779c988819762f9e7a4259a5a502b6d0c43352",
+    "videos/observation.images.left_rgb/chunk-000/file-000.mp4": "44a1b6c19cf91b2f090c434516974b410c678362c8b89b716801d3d7107e3c9c",
+    "videos/observation.images.left_rgb/chunk-000/file-001.mp4": "63e1a61f4ef1b77504533eb6ad41c70233ff5521d192a1af13a822aa45872b72",
+    "videos/observation.images.left_rgb/chunk-000/file-002.mp4": "afd55b97f3bc6471a573c6171066ffad4c7141ce163fc75b38677002b79d148f",
+    "videos/observation.images.right_rgb/chunk-000/file-000.mp4": "e1288e6fec0db613c24a775a9c3cdbba18d779d94d34d346feb5ddfca2a9afba",
+    "videos/observation.images.right_rgb/chunk-000/file-001.mp4": "c660bcf7c4862b721da2001dd977eb178aaa2693fcd240f92f7a47bbb44895ce",
+    "videos/observation.images.right_rgb/chunk-000/file-002.mp4": "7a0290efd913ce200bb1b6ad5e7081078a09ecbddd54ba5c70ebaf1d50681c73",
+    "videos/observation.images.top_rgb/chunk-000/file-000.mp4": "26ad64873fd6802736fee9c026d81bce18acbf6c11eaae7dac583caab79c064c",
+    "videos/observation.images.top_rgb/chunk-000/file-001.mp4": "8c32312a9ccdc5b3648e448c81f29bf9a050d8eae6fa7a482e3f529b89cdfc6c",
+    "videos/observation.images.top_rgb/chunk-000/file-002.mp4": "d630a4ca917192e36556b1b9443ba6d7dfcbd89a911b46064e19d76edfa2b76b"
+  },
+  "base_model_only": false,
+  "observation_count": 9,
+  "parent_suite_sha256": "74518cc94c642207d97975103e14b400ed6da93e6bbe453648d95e3647f2ee03",
+  "normalization_scope": "checkpoint_training_norm",
+  "normalization_method": "unaltered checkpoint assets/yam/norm_stats.json"
+}

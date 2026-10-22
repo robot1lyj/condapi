@@ -1,0 +1,15 @@
+{
+  "status": "downloaded_sha_verified_not_converted",
+  "checkpoint_step": 114000,
+  "observed_at": "2026-10-22T02:45:19.626768+00:00",
+  "rtc_training_max_delay": 10,
+  "norm_identity": {
+    "checkpoint_norm_sha256": "ee56da7d2361623500ba4c4465a0836b88613c9b389460620d8fcd33a5ae7058",
+    "training_norm_sha256": "109af6930ddfdf9e0c04995809cd5e056037b42bbeeb54399ec1b4871ddb3cce",
+    "identity_relation": "checkpoint_omitted_one_final_newline"
+  },
+  "norm_stats_sha256": "ee56da7d2361623500ba4c4465a0836b88613c9b389460620d8fcd33a5ae7058",
+  "files": 20,
+  "bytes": 12440582734,
+  "destination": "/home/wuyan-lyj/thor/pi/checkpoints/earbuds-pi05-rtc-base-50h-20261012/114000"
+}

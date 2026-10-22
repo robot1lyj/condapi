@@ -1,0 +1,34 @@
+{
+  "status": "deleted_only_retired_thor_earbuds112000",
+  "authorized_scope": "2026-10-22 user: remove Thor earbuds 112000 inference, replace by 114000",
+  "observed_at": "2026-10-22T03:05:33.926506+00:00",
+  "new_weights_sha256": "b70344c1e09b4a0ce3436b50e9c00280210ba754ff4ee17743d7a4286ccdb0c5",
+  "old_container_id": "dc2e00ad1e2581769e2b8aad832f9b1fc75aad122f32a1c60a665fecaa8d5221",
+  "targets": [
+    {
+      "path": "/home/wuyan-lyj/thor/pi/checkpoints/earbuds-pi05-rtc-base-50h-20261012/112000",
+      "file_bytes": 12440586815,
+      "allocated_bytes": 12440657920
+    },
+    {
+      "path": "/home/wuyan-lyj/thor/pi/checkpoints/earbuds-pi05-rtc-base-50h-20261012/112000-pytorch-fp32-r1",
+      "file_bytes": 14467173169,
+      "allocated_bytes": 14467186688
+    },
+    {
+      "path": "/home/wuyan-lyj/thor/pi/artifacts/rtc-earbuds-112000-onnx-fp32-cache80-7step-20261021-r1",
+      "file_bytes": 12541839547,
+      "allocated_bytes": 12541861888
+    },
+    {
+      "path": "/home/wuyan-lyj/thor/pi/artifacts/rtc-earbuds-112000-trt-tf32-cache80-7step-20261021-r1",
+      "file_bytes": 12519107233,
+      "allocated_bytes": 12519120896
+    }
+  ],
+  "filesystem_free_before": 323182272512,
+  "deletion_is_permanent": true,
+  "retained": "server originals untouched; shared images, DAgger models, small replay/reference/receipts retained",
+  "filesystem_free_after": 375151640576,
+  "completed_at": "2026-10-22T03:05:36.415036+00:00"
+}
