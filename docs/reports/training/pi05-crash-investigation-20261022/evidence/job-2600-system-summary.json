@@ -1,0 +1,214 @@
+{
+  "nccl": [
+    {
+      "file": "nccl.gpu001.3624406.log",
+      "bytes": 19787134857,
+      "mtime_epoch": 1792735492.4654691,
+      "full_scan_command": [
+        "grep",
+        "-n",
+        "-i",
+        "-E",
+        "WARN|ERROR|Cuda failure|illegal|abort",
+        "/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/incidents/job-2600/nccl.gpu001.3624406.log"
+      ],
+      "returncode": 1,
+      "matching_lines": 0,
+      "examples": [],
+      "stderr": "",
+      "full_sha256": "not_computed_19.8GB_original_retained",
+      "first_65536_bytes_sha256": "f7ec04d7beba4888efa16f49d9c73074ef7fa17cd2b2036d912d10aba645bd55"
+    }
+  ],
+  "gpu": {
+    "0": {
+      "uuid": "GPU-673638cf-82ca-6b28-639e-77561b944ceb",
+      "samples": 4226,
+      "max_temperature_c": 73.0,
+      "max_power_w": 328.79,
+      "last_sample_before_xid": {
+        "timestamp": "2026/10/23 14:04:53.114",
+        "index": "0",
+        "uuid": "GPU-673638cf-82ca-6b28-639e-77561b944ceb",
+        "pci.bus_id": "00000000:16:00.0",
+        "temperature.gpu": "64",
+        "power.draw [W]": "292.97 W",
+        "utilization.gpu [%]": "100 %",
+        "memory.used [MiB]": "22848 MiB",
+        "memory.total [MiB]": "24564 MiB"
+      },
+      "last_sample": {
+        "timestamp": "2026/10/23 14:14:30.246",
+        "index": "0",
+        "uuid": "GPU-673638cf-82ca-6b28-639e-77561b944ceb",
+        "pci.bus_id": "00000000:16:00.0",
+        "temperature.gpu": "49",
+        "power.draw [W]": "79.32 W",
+        "utilization.gpu [%]": "0 %",
+        "memory.used [MiB]": "1 MiB",
+        "memory.total [MiB]": "24564 MiB"
+      }
+    },
+    "1": {
+      "uuid": "GPU-7a9a29a1-9059-b0ef-d7b4-53c298565ca1",
+      "samples": 4226,
+      "max_temperature_c": 74.0,
+      "max_power_w": 326.16,
+      "last_sample_before_xid": {
+        "timestamp": "2026/10/23 14:04:53.122",
+        "index": "1",
+        "uuid": "GPU-7a9a29a1-9059-b0ef-d7b4-53c298565ca1",
+        "pci.bus_id": "00000000:52:00.0",
+        "temperature.gpu": "60",
+        "power.draw [W]": "195.65 W",
+        "utilization.gpu [%]": "0 %",
+        "memory.used [MiB]": "22828 MiB",
+        "memory.total [MiB]": "24564 MiB"
+      },
+      "last_sample": {
+        "timestamp": "2026/10/23 14:14:30.253",
+        "index": "1",
+        "uuid": "GPU-7a9a29a1-9059-b0ef-d7b4-53c298565ca1",
+        "pci.bus_id": "00000000:52:00.0",
+        "temperature.gpu": "48",
+        "power.draw [W]": "83.33 W",
+        "utilization.gpu [%]": "0 %",
+        "memory.used [MiB]": "1 MiB",
+        "memory.total [MiB]": "24564 MiB"
+      }
+    },
+    "2": {
+      "uuid": "GPU-3dab425e-aa1d-4187-7fc0-d5177815444c",
+      "samples": 4226,
+      "max_temperature_c": 73.0,
+      "max_power_w": 330.28,
+      "last_sample_before_xid": {
+        "timestamp": "2026/10/23 14:04:53.127",
+        "index": "2",
+        "uuid": "GPU-3dab425e-aa1d-4187-7fc0-d5177815444c",
+        "pci.bus_id": "00000000:AC:00.0",
+        "temperature.gpu": "60",
+        "power.draw [W]": "208.98 W",
+        "utilization.gpu [%]": "100 %",
+        "memory.used [MiB]": "22828 MiB",
+        "memory.total [MiB]": "24564 MiB"
+      },
+      "last_sample": {
+        "timestamp": "2026/10/23 14:14:30.256",
+        "index": "2",
+        "uuid": "GPU-3dab425e-aa1d-4187-7fc0-d5177815444c",
+        "pci.bus_id": "00000000:AC:00.0",
+        "temperature.gpu": "48",
+        "power.draw [W]": "80.99 W",
+        "utilization.gpu [%]": "0 %",
+        "memory.used [MiB]": "1 MiB",
+        "memory.total [MiB]": "24564 MiB"
+      }
+    },
+    "3": {
+      "uuid": "GPU-b318a64d-8d2e-95ee-8f12-f185e4f6e760",
+      "samples": 4226,
+      "max_temperature_c": 72.0,
+      "max_power_w": 314.88,
+      "last_sample_before_xid": {
+        "timestamp": "2026/10/23 14:04:53.130",
+        "index": "3",
+        "uuid": "GPU-b318a64d-8d2e-95ee-8f12-f185e4f6e760",
+        "pci.bus_id": "00000000:CA:00.0",
+        "temperature.gpu": "62",
+        "power.draw [W]": "277.61 W",
+        "utilization.gpu [%]": "100 %",
+        "memory.used [MiB]": "22828 MiB",
+        "memory.total [MiB]": "24564 MiB"
+      },
+      "last_sample": {
+        "timestamp": "2026/10/23 14:14:30.260",
+        "index": "3",
+        "uuid": "GPU-b318a64d-8d2e-95ee-8f12-f185e4f6e760",
+        "pci.bus_id": "00000000:CA:00.0",
+        "temperature.gpu": "49",
+        "power.draw [W]": "78.02 W",
+        "utilization.gpu [%]": "0 %",
+        "memory.used [MiB]": "1 MiB",
+        "memory.total [MiB]": "24564 MiB"
+      }
+    }
+  },
+  "host_samples": 4240,
+  "edac_values": {
+    "/sys/devices/system/edac/mc/mc2/ce_count": [
+      "0"
+    ],
+    "/sys/devices/system/edac/mc/mc0/ce_count": [
+      "3781237"
+    ],
+    "/sys/devices/system/edac/mc/mc3/ce_count": [
+      "0"
+    ],
+    "/sys/devices/system/edac/mc/mc1/ce_count": [
+      "0"
+    ],
+    "/sys/devices/system/edac/mc/mc2/ue_count": [
+      "0"
+    ],
+    "/sys/devices/system/edac/mc/mc0/ue_count": [
+      "0"
+    ],
+    "/sys/devices/system/edac/mc/mc3/ue_count": [
+      "0"
+    ],
+    "/sys/devices/system/edac/mc/mc1/ue_count": [
+      "0"
+    ]
+  },
+  "thermal_slowdown_microseconds": {
+    "before": {
+      "sw": [
+        "39142",
+        "7061621",
+        "4835432",
+        "180322"
+      ],
+      "hw": [
+        "0",
+        "0",
+        "0",
+        "0"
+      ]
+    },
+    "after": {
+      "sw": [
+        "39142",
+        "7061621",
+        "4835432",
+        "180322"
+      ],
+      "hw": [
+        "0",
+        "0",
+        "0",
+        "0"
+      ]
+    }
+  },
+  "kernel_during_job": [
+    "2026-10-23T14:04:55,623445+08:00 NVRM: Xid (PCI:0000:52:00): 13, Graphics SM Warp Exception on (GPC 8, TPC 0, SM 0): Out Of Range Address",
+    "2026-10-23T14:04:55,623468+08:00 NVRM: Xid (PCI:0000:52:00): 13, Graphics SM Global Exception on (GPC 8, TPC 0, SM 0): Multiple Warp Errors",
+    "2026-10-23T14:04:55,623478+08:00 NVRM: Xid (PCI:0000:52:00): 13, Graphics Exception: ESR 0x544730=0xc00000e 0x544734=0x24 0x544728=0xf81eb60 0x54472c=0x1174"
+  ],
+  "core": {
+    "path": "/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/incidents/job-2600/cuda.gpu001.hlink.local.3624406.1792714861.nvcudmp",
+    "bytes": 98597930094,
+    "mtime_epoch": 1792736065.3710923,
+    "full_sha256": "not_computed_98.6GB_original_retained",
+    "first_65536_bytes_sha256": "078eba781f93ba75106b5056d8057f0d1810d8326248e1576af9b972ff3aaa5e"
+  },
+  "xla_files": 1879,
+  "exit": {
+    "utc": "2026-10-23T06:14:28.540013+00:00",
+    "pid": 3624406,
+    "returncode": -6,
+    "signal": 6,
+    "wrapper_received_signals": []
+  }
+}

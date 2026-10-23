@@ -1,0 +1,3 @@
+2026-10-23T14:04:55,623445+08:00 NVRM: Xid (PCI:0000:52:00): 13, Graphics SM Warp Exception on (GPC 8, TPC 0, SM 0): Out Of Range Address
+2026-10-23T14:04:55,623468+08:00 NVRM: Xid (PCI:0000:52:00): 13, Graphics SM Global Exception on (GPC 8, TPC 0, SM 0): Multiple Warp Errors
+2026-10-23T14:04:55,623478+08:00 NVRM: Xid (PCI:0000:52:00): 13, Graphics Exception: ESR 0x544730=0xc00000e 0x544734=0x24 0x544728=0xf81eb60 0x54472c=0x1174

@@ -1,0 +1,513 @@
+{
+  "manifest": {
+    "version": 1,
+    "created_utc": "2026-10-23T00:27:12.905799+00:00",
+    "code_commit": "4959866c2eb51538fa92f1a4aed0d2110d2f7b32",
+    "job_id": "2600",
+    "run": "earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022",
+    "seed": 42,
+    "batch_size": 32,
+    "fsdp_devices": 4,
+    "checkpoint_directory": "/home/wuyan/lyj/YAM/training-runs/pi05_yam/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022",
+    "dataset": "/home/wuyan/lyj/YAM/YAM_data/processed/earbuds_lerobot_50h_clean_v2_20261013/train",
+    "mode": "split_native_gradient_and_optimizer_with_host_guard",
+    "persistent_compilation_cache_enabled": false,
+    "in_memory_jit_reuse": true,
+    "integer_fields": [
+      "size",
+      "nan_count",
+      "posinf_count",
+      "neginf_count",
+      "first_bad_flat_index",
+      "max_abs_flat_index"
+    ],
+    "float_fields": [
+      "max_abs_finite",
+      "scaled_sum_squares",
+      "first_bad_value",
+      "max_abs_value"
+    ],
+    "devices": [
+      {
+        "id": 0,
+        "process_index": 0,
+        "kind": "NVIDIA GeForce RTX 4090",
+        "local_hardware_id": 0
+      },
+      {
+        "id": 1,
+        "process_index": 0,
+        "kind": "NVIDIA GeForce RTX 4090",
+        "local_hardware_id": 1
+      },
+      {
+        "id": 2,
+        "process_index": 0,
+        "kind": "NVIDIA GeForce RTX 4090",
+        "local_hardware_id": 2
+      },
+      {
+        "id": 3,
+        "process_index": 0,
+        "kind": "NVIDIA GeForce RTX 4090",
+        "local_hardware_id": 3
+      }
+    ],
+    "limitations": [
+      "Instrumentation changes compilation and adds synchronization",
+      "Post-update failures retain post-state; pre-state buffers may have been donated",
+      "A GPU/native crash can prevent tensor export; external incident capture remains active"
+    ]
+  },
+  "event_counts": {
+    "attempt_started": 7417,
+    "restored_state": 1,
+    "input_checked": 7416,
+    "gradients_checked": 7415,
+    "update_finished": 7415
+  },
+  "first_completed_step": 7001,
+  "last_completed_step": 14415,
+  "bad_summaries": [],
+  "replica_disagreement_count": 0,
+  "last_events": [
+    {
+      "utc": "2026-10-23T06:04:45.518982+00:00",
+      "event": "attempt_started",
+      "attempted_completed_step": 14414,
+      "pre_update_step": 14413,
+      "loader_tensor_sha256": "d08d07ed753654d6edd479f3a073b3938d880cc95d6d354757a4c57b3f1077e6",
+      "loader_hash_stage": "before_Observation.from_dict",
+      "step_rng": [
+        2385169240,
+        167117749
+      ],
+      "batch_size": 32
+    },
+    {
+      "utc": "2026-10-23T06:04:45.552999+00:00",
+      "event": "input_checked",
+      "attempted_completed_step": 14414,
+      "pre_update_step": 14413,
+      "loader_tensor_sha256": "d08d07ed753654d6edd479f3a073b3938d880cc95d6d354757a4c57b3f1077e6",
+      "loader_hash_stage": "before_Observation.from_dict",
+      "step_rng": [
+        2385169240,
+        167117749
+      ],
+      "batch_size": 32,
+      "statistics": {
+        "all_finite": true,
+        "bad_record_indexes": [],
+        "replica_disagreement_indexes": [],
+        "stable_finite_values_l2": 10059546.5145448,
+        "logical_shards": 40,
+        "physical_shards": 40,
+        "bad_shards": []
+      }
+    },
+    {
+      "utc": "2026-10-23T06:04:47.786934+00:00",
+      "event": "gradients_checked",
+      "attempted_completed_step": 14414,
+      "pre_update_step": 14413,
+      "loader_tensor_sha256": "d08d07ed753654d6edd479f3a073b3938d880cc95d6d354757a4c57b3f1077e6",
+      "loader_hash_stage": "before_Observation.from_dict",
+      "step_rng": [
+        2385169240,
+        167117749
+      ],
+      "loss": 0.007252606097608805,
+      "native_grad_norm": 0.10232668370008469,
+      "verdict": {
+        "update_allowed": true,
+        "reasons": [],
+        "finite_elements_but_native_norm_nonfinite": false,
+        "native_vs_stable_relative_difference": 7.380661483155643e-08
+      },
+      "batch_size": 32,
+      "statistics": {
+        "all_finite": true,
+        "bad_record_indexes": [],
+        "replica_disagreement_indexes": [],
+        "stable_finite_values_l2": 0.10232669125247137,
+        "logical_shards": 120,
+        "physical_shards": 204,
+        "bad_shards": []
+      }
+    },
+    {
+      "utc": "2026-10-23T06:04:47.949244+00:00",
+      "event": "update_finished",
+      "attempted_completed_step": 14414,
+      "pre_update_step": 14413,
+      "loader_tensor_sha256": "d08d07ed753654d6edd479f3a073b3938d880cc95d6d354757a4c57b3f1077e6",
+      "loader_hash_stage": "before_Observation.from_dict",
+      "step_rng": [
+        2385169240,
+        167117749
+      ],
+      "param_norm": 1803.9705810546875,
+      "batch_size": 32,
+      "statistics": {
+        "all_finite": true,
+        "bad_record_indexes": [],
+        "replica_disagreement_indexes": [],
+        "stable_finite_values_l2": 20939.656240439002,
+        "logical_shards": 362,
+        "physical_shards": 620,
+        "bad_shards": []
+      },
+      "optimizer_updates": {
+        "all_finite": true,
+        "bad_record_indexes": [],
+        "replica_disagreement_indexes": [],
+        "stable_finite_values_l2": 0.04991023735529953,
+        "logical_shards": 120,
+        "physical_shards": 204,
+        "bad_shards": []
+      }
+    },
+    {
+      "utc": "2026-10-23T06:04:48.028264+00:00",
+      "event": "attempt_started",
+      "attempted_completed_step": 14415,
+      "pre_update_step": 14414,
+      "loader_tensor_sha256": "2f8baae4c0db5a7a76e1be52d6469dc688592355e3ccdd1a0ef9b98601fefc9d",
+      "loader_hash_stage": "before_Observation.from_dict",
+      "step_rng": [
+        3380547514,
+        1247345603
+      ],
+      "batch_size": 32
+    },
+    {
+      "utc": "2026-10-23T06:04:48.069939+00:00",
+      "event": "input_checked",
+      "attempted_completed_step": 14415,
+      "pre_update_step": 14414,
+      "loader_tensor_sha256": "2f8baae4c0db5a7a76e1be52d6469dc688592355e3ccdd1a0ef9b98601fefc9d",
+      "loader_hash_stage": "before_Observation.from_dict",
+      "step_rng": [
+        3380547514,
+        1247345603
+      ],
+      "batch_size": 32,
+      "statistics": {
+        "all_finite": true,
+        "bad_record_indexes": [],
+        "replica_disagreement_indexes": [],
+        "stable_finite_values_l2": 10037519.104284734,
+        "logical_shards": 40,
+        "physical_shards": 40,
+        "bad_shards": []
+      }
+    },
+    {
+      "utc": "2026-10-23T06:04:50.310474+00:00",
+      "event": "gradients_checked",
+      "attempted_completed_step": 14415,
+      "pre_update_step": 14414,
+      "loader_tensor_sha256": "2f8baae4c0db5a7a76e1be52d6469dc688592355e3ccdd1a0ef9b98601fefc9d",
+      "loader_hash_stage": "before_Observation.from_dict",
+      "step_rng": [
+        3380547514,
+        1247345603
+      ],
+      "loss": 0.007560204714536667,
+      "native_grad_norm": 0.08314362913370132,
+      "verdict": {
+        "update_allowed": true,
+        "reasons": [],
+        "finite_elements_but_native_norm_nonfinite": false,
+        "native_vs_stable_relative_difference": 1.4643105304811237e-07
+      },
+      "batch_size": 32,
+      "statistics": {
+        "all_finite": true,
+        "bad_record_indexes": [],
+        "replica_disagreement_indexes": [],
+        "stable_finite_values_l2": 0.08314364130851228,
+        "logical_shards": 120,
+        "physical_shards": 204,
+        "bad_shards": []
+      }
+    },
+    {
+      "utc": "2026-10-23T06:04:50.469019+00:00",
+      "event": "update_finished",
+      "attempted_completed_step": 14415,
+      "pre_update_step": 14414,
+      "loader_tensor_sha256": "2f8baae4c0db5a7a76e1be52d6469dc688592355e3ccdd1a0ef9b98601fefc9d",
+      "loader_hash_stage": "before_Observation.from_dict",
+      "step_rng": [
+        3380547514,
+        1247345603
+      ],
+      "param_norm": 1803.970703125,
+      "batch_size": 32,
+      "statistics": {
+        "all_finite": true,
+        "bad_record_indexes": [],
+        "replica_disagreement_indexes": [],
+        "stable_finite_values_l2": 20941.032956056213,
+        "logical_shards": 362,
+        "physical_shards": 620,
+        "bad_shards": []
+      },
+      "optimizer_updates": {
+        "all_finite": true,
+        "bad_record_indexes": [],
+        "replica_disagreement_indexes": [],
+        "stable_finite_values_l2": 0.04965532354802731,
+        "logical_shards": 120,
+        "physical_shards": 204,
+        "bad_shards": []
+      }
+    },
+    {
+      "utc": "2026-10-23T06:04:50.553325+00:00",
+      "event": "attempt_started",
+      "attempted_completed_step": 14416,
+      "pre_update_step": 14415,
+      "loader_tensor_sha256": "09a8250015109b920544db72b4a653090c1015644f5580d5d5667fa3f77413b1",
+      "loader_hash_stage": "before_Observation.from_dict",
+      "step_rng": [
+        1202269147,
+        2537917816
+      ],
+      "batch_size": 32
+    },
+    {
+      "utc": "2026-10-23T06:04:50.594263+00:00",
+      "event": "input_checked",
+      "attempted_completed_step": 14416,
+      "pre_update_step": 14415,
+      "loader_tensor_sha256": "09a8250015109b920544db72b4a653090c1015644f5580d5d5667fa3f77413b1",
+      "loader_hash_stage": "before_Observation.from_dict",
+      "step_rng": [
+        1202269147,
+        2537917816
+      ],
+      "batch_size": 32,
+      "statistics": {
+        "all_finite": true,
+        "bad_record_indexes": [],
+        "replica_disagreement_indexes": [],
+        "stable_finite_values_l2": 10037514.82576042,
+        "logical_shards": 40,
+        "physical_shards": 40,
+        "bad_shards": []
+      }
+    }
+  ],
+  "last_batch_identity": {
+    "dataset_index": [
+      1697763,
+      4220509,
+      4777882,
+      114788,
+      3609666,
+      3817512,
+      4655435,
+      2837536,
+      4903822,
+      2026611,
+      3101269,
+      4512460,
+      1891069,
+      228445,
+      3951935,
+      3712382,
+      875402,
+      1462437,
+      1232389,
+      5050541,
+      3365456,
+      1485375,
+      3188821,
+      655570,
+      3462441,
+      1008287,
+      911818,
+      2724489,
+      2585653,
+      5111689,
+      4008894,
+      4264130
+    ],
+    "episode_index": [
+      439,
+      1087,
+      1227,
+      29,
+      927,
+      981,
+      1195,
+      737,
+      1260,
+      525,
+      804,
+      1160,
+      489,
+      59,
+      1018,
+      954,
+      228,
+      380,
+      321,
+      1297,
+      870,
+      385,
+      826,
+      168,
+      892,
+      261,
+      237,
+      706,
+      671,
+      1312,
+      1033,
+      1099
+    ],
+    "frame_index": [
+      881,
+      2335,
+      1940,
+      4259,
+      3097,
+      2651,
+      2407,
+      1883,
+      2171,
+      446,
+      1637,
+      962,
+      641,
+      4218,
+      1525,
+      2413,
+      465,
+      728,
+      2846,
+      5992,
+      2178,
+      3917,
+      4111,
+      2156,
+      2281,
+      6713,
+      116,
+      2373,
+      3237,
+      3385,
+      2744,
+      1750
+    ],
+    "index": [
+      1701895,
+      4226578,
+      4783951,
+      114788,
+      3615735,
+      3823581,
+      4661504,
+      2843605,
+      4909891,
+      2030743,
+      3107338,
+      4518529,
+      1895201,
+      228445,
+      3958004,
+      3718451,
+      879534,
+      1466569,
+      1236521,
+      5056610,
+      3371525,
+      1489507,
+      3194890,
+      659702,
+      3468510,
+      1012419,
+      915950,
+      2730558,
+      2591722,
+      5117758,
+      4014963,
+      4270199
+    ],
+    "task_index": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "timestamp": [
+      29.366666793823242,
+      77.83333587646484,
+      64.66666412353516,
+      141.96665954589844,
+      103.23332977294922,
+      88.36666870117188,
+      80.23332977294922,
+      62.766666412353516,
+      72.36666870117188,
+      14.866666793823242,
+      54.56666564941406,
+      32.06666564941406,
+      21.366666793823242,
+      140.60000610351562,
+      50.83333206176758,
+      80.43333435058594,
+      15.5,
+      24.266666412353516,
+      94.86666870117188,
+      199.73333740234375,
+      72.5999984741211,
+      130.56666564941406,
+      137.03334045410156,
+      71.86666870117188,
+      76.03333282470703,
+      223.76666259765625,
+      3.866666555404663,
+      79.0999984741211,
+      107.9000015258789,
+      112.83333587646484,
+      91.46666717529297,
+      58.33333206176758
+    ]
+  },
+  "failure_files": [],
+  "journal_bytes": 758704816,
+  "journal_sha256": "e32cf49201705d8efacab34bc1f5879023771ef09db782f462e0a4d29bb0cb9b"
+}

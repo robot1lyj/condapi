@@ -1,0 +1,21 @@
+{
+  "before/package-metadata.stdout.txt": {
+    "available": true,
+    "identical_bytes": true,
+    "job2598_sha256": "c13abf0d480fabbb3ef5bdd5752a1647421a8fb9d4324082ed0bd85bbd329e06",
+    "job2600_sha256": "c13abf0d480fabbb3ef5bdd5752a1647421a8fb9d4324082ed0bd85bbd329e06"
+  },
+  "before/driver.txt": {
+    "available": true,
+    "identical_bytes": true,
+    "job2598_sha256": "a9c93565e1fe7467cb4ecb0881ed77048fa94d741f1b5eeaf152c14012a8cf9d",
+    "job2600_sha256": "a9c93565e1fe7467cb4ecb0881ed77048fa94d741f1b5eeaf152c14012a8cf9d"
+  },
+  "training_contract": {
+    "job2598_source": "before/input-000-training_contract.json",
+    "job2600_source": "before/input-000-training_contract.json",
+    "identical_bytes": true,
+    "job2598_sha256": "277ff178033c9f87eca6ee99276b29c3cfe96c7faf9cc165de2e52d0985b1924",
+    "job2600_sha256": "277ff178033c9f87eca6ee99276b29c3cfe96c7faf9cc165de2e52d0985b1924"
+  }
+}

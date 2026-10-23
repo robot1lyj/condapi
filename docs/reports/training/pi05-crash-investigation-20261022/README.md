@@ -1,5 +1,61 @@
 # Pi0.5 服务器反复崩溃调查与现场采集（2026-10-22）
 
+## 2600复核与2598累计对照（2026-10-23）
+
+用户要求检查2600并累计两次原因后联系管理员。本次只读分析、保存证据，不提交训练、不取消作业、不发跨聊天或管理员消息；16:29观测队列已有2604在gpu001运行，未干预。两次训练代码均为`4959866c2eb51538fa92f1a4aed0d2110d2f7b32`，冻结training_contract、包metadata和驱动快照逐字节相同，均从本run完整7000恢复。[环境与合同对照](evidence/jobs-2598-2600-environment-comparison.json)。
+
+**两次均已抓到可解析GPU core，直接故障特征相同：同一物理GPU1、同一硬件子单元、同一个CUTLASS BF16 GEMM、同一条偏移+2720的LDGSTS指令发生Warp Out of range Address，随后SIGABRT。** 这比只比较Slurm的6:0有明确得多的定位；共同根因仍需物理卡/节点或软件对照确认，不能把重复签名直接写成已证明坏卡。
+
+| 对照项目 | job2598 | job2600 |
+|---|---|---|
+| 运行时间（10月23日+08） | 07:20:46–07:51:02 | 08:20:53–14:14:33 |
+| 内核异常时间 | 07:41:16.593 | 14:04:55.623 |
+| 最后10步汇总completed指标 | 7301 | 14411 |
+| 逐步检查实际最后完成 | 7307 | 14415 |
+| 实际失败尝试步 | **7308** | **14416** |
+| 此attempt正常完成更新数 | 307 | 7415 |
+| 故障卡 | GPU1 / PCI52:00.0 | GPU1 / PCI52:00.0 |
+| 内核Xid位置 | Xid13 / GPC8/TPC0/SM0 | Xid13 / GPC8/TPC0/SM0 |
+| CUDA-GDB逻辑位置 | device1 / SM12 / warp0 | device1 / SM12 / warp0 |
+| 故障kernel | 下述同一CUTLASS kernel | 下述同一CUTLASS kernel |
+| errorpc函数偏移 | **+2720 / 0xaa0** | **+2720 / 0xaa0** |
+| 错误指令 | 下述同一LDGSTS指令 | 下述同一LDGSTS指令 |
+| 焦点block | (18,1,1) | (39,1,1) |
+| grid / block维度 | (256,3,2) / (128,1,1) | (256,3,2) / (128,1,1) |
+| 原生退出 / Slurm | -6、SIGABRT / FAILED6:0 | -6、SIGABRT / FAILED6:0 |
+| GPU core字节数 | 103,996,497,694（约104GB） | 98,597,930,094（约98.6GB） |
+
+疑似设备UUID为`GPU-7a9a29a1-9059-b0ef-d7b4-53c298565ca1`。两份core均由CUDA-GDB13.2离线打开，没有attach活动进程；两次同一kernel和指令如下：
+
+```text
+cutlass::Kernel2<cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_64x64_32x6_tn_align8>
++2720: LDGSTS.E.BYPASS.LTC128B.128 [R79][R14.64],P0
+```
+
+2600的errorpc为`0x7f7ac1536ca0`，停止时pc为`0x7f7ac1536de0`（+3040）；2598的errorpc为`0x7f66d652ffa0`。跨进程绝对地址不同，比较的是函数内相同偏移，不能只比较绝对PC。两次core的其他三张卡均在`ncclDevKernel_AllReduce_Sum_f32_RING_LL()`，报异常的GPU1均在计算kernel。2600的Python栈位于`numerical_diagnostics.py:284 → inspect:162 → jax.device_get`，这是读取梯度统计的同步位置；core实际指向CUTLASS计算，不能把host报错位置直接认作统计器自身发生越界。[2600 core解析/寄存器/反汇编](evidence/job-2600-cuda-gdb.txt)、[2598 core解析](evidence/job-2598-cuda-gdb.txt)、[2598故障指令](evidence/job-2598-cuda-gdb-fault-instruction.txt)、[两作业Slurm原文](evidence/jobs-2598-2600-slurm.txt)。
+
+### 2600的数值与输入对照
+
+14:04:50.469，14415的完整更新检查通过：loss0.00756020、原生grad_norm0.08314363、稳定范数0.08314364，620个参数/optimizer物理分片和204个updates分片有限；7001–14415全部7415次更新未记录非有限值或副本统计不一致。14:04:50.594，14416输入40个分片检查通过，随后没有该步`gradients_checked`/`update_finished`，该步optimizer尚未调用。原生abort没有回到Python异常导出逻辑，因此没有`numerical/failure-step-*`，不能声称已有14416完整独立NumPy梯度包。[数值日志全量扫描/末步身份](evidence/job-2600-numerical-summary.json)。
+
+14416的32条样本身份、loader SHA`09a8250015109b920544db72b4a653090c1015644f5580d5d5667fa3f77413b1`和RNG`[1202269147,2537917816]`均已保存。另一个关键对照是：**2598崩溃的7308，在2600于08:43:01正常完成；记录的batch身份、输入SHA和RNG完全相同。** 该次loss0.00631518、grad_norm0.07670385，输入/梯度/更新/完整state都通过。这削弱“固定坏输入每次必崩”的解释，但没有逐值比较两次完整模型/optimizer，因此不宣称所有执行状态完全相同，也不能排除时序相关软件问题。[7308逐项对照](evidence/jobs-2598-2600-step7308-comparison.json)。
+
+2600四卡各4226次GPU采样，最高温73/74/73/72°C，GPU1最高功耗326.16W；SW/HW热降频累计值在作业前后不变。主机EDAC的mc0 CE仍3,781,237、全部UE仍0，本窗口无增量。5秒采样不能排除瞬态，现有记录不足以把过热或CPU纠错事件作为两次直接原因。core没有可用源码行号/参数符号，尚未唯一映射到模型层。
+
+2600的NCCL原件为19,787,134,857字节，使用服务器可用的grep对整个文件扫描`WARN|ERROR|Cuda failure|illegal|abort`，返回1（无匹配）、stderr为空；没有把抽样tail当全量结果。该19.8GB原件没有另做全量SHA，仅记录大小/mtime/首64KiB哈希，保留服务器原件。XLA目录1879个文件，主机4240次采样，作业窗口内核仅记录上述三条Xid13。原生PID3624406在14:14:28.540以-6/signal6退出，wrapper未收到取消信号；core最后修改时间为14:14:25.371。详细[系统与NCCL扫描结果](evidence/job-2600-system-summary.json)可与两份core交叉核对；未报告NCCL错误不等于排除所有通信静默问题。
+
+### 给管理员的结论与现场位置
+
+建议表述为：**gpu001的GPU1已在两次独立训练进程中重复发生完全一致的设备/内核/指令级异常，优先申请硬件检查和同型号卡替换对照；硬件稳定性为首要怀疑，驱动/计算库缺陷仍未排除。** 请检查该卡本体、供电/插槽和BMC记录；保持四张卡与原训练合同做替换或换节点验证，观察故障是否跟随该物理卡。操作前协调停训窗口、保留两份core；本次没有自行执行换卡、GPU reset、驱动升级或新训练。
+
+两次现场位于同一control目录下的`incidents/job-2598`和`incidents/job-2600`：
+
+```text
+/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/incidents
+```
+
+2600的完整逐步日志758,704,816字节已全量扫描并计算SHA256；完整原件留在服务器，没有截断或删除。约21.9MB的配置/系统日志/训练日志/分片schema已复制本地忽略目录，归档全量SHA归[原件清单](evidence/job-2600-raw-manifest.json)。98.6GB core和19.8GB NCCL原件不复制到Git，core仅记录大小/mtime/首64KiB哈希并验证可解析，不冒称做了core全量哈希。[2600 Xid原文](evidence/job-2600-kernel.txt)、[末次汇总指标与原生栈](evidence/job-2600-failure.txt)。
+
 ## 2598 GPU原生异常：已取得可解析core（2026-10-23复核）
 
 用户报告“job2598在step7301后以exit6:0失败”后，只读核查该attempt并保存证据，未重启/取消训练、修改配方或发送跨聊天指令。09:48查询时另有2600在gpu001运行，本次没有干预。2598实际源码仍为`4959866c2eb51538fa92f1a4aed0d2110d2f7b32`，诊断/缓存保护/四GPU自检生效，从完整7000恢复。
