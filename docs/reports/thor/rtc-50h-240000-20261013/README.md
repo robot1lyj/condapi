@@ -2,6 +2,10 @@
 
 ## 当前状态
 
+2026-10-23 11:07:46+08：用户要求“先取消推理”，`docker stop --timeout 20 pi05-rtc-infer`完成，实查running=false；`thor-pi-maxn-50h240000-resume-20261023.service` inactive，`nvpmodel -q`显示120W/模式1。容器及所有模型权重/引擎保留，不删除、不自动恢复、不操作3588；以下为此前上线和验收历史，不表示当前在线。
+
+## 历史：2026-10-23恢复24万步
+
 **2026-10-23 10:56 CST：用户要求从20万切换为本页50h240000基础版（非DAgger），已在线。** 先停止20万唯一容器，等待其MAXN watcher退出并确认120W，再保留为`pi05-rtc-50h200000-preserved-20261023`；将原24万停止容器恢复同名`pi05-rtc-infer`，ID `d80c40497577a3028a4ca7bc16fd49c861c0c3893937df62f291e5887b5ef523`。新`thor-pi-maxn-50h240000-resume-20261023.service`使用既有MAXN launcher和按该唯一ID监控的watcher，MAXN/锁频，healthz OK，固定`ws://192.168.250.1:8000`。直接复用原已验收权重/引擎，无下载、转换、构建或删除；耳机114000备份、DAgger资产、其余模型与CPU审阅页保留。
 
 [本次九例真实协议回执](resume-20261023-smoke.json)于10:56:06+08通过：episode95/96/97早中晚、三路RGB/14D state/prompt、d=0/1/10均有限50×14、前缀精确、实际RTC启用，握手weight/norm/engine与原验收匹配。七步FP32权重＋TF32、quantile前缀、缓存80/CUDA Graph、dmax10和0.2rad/tick保护不变；推理P50/P95=195.80/206.78ms，本机往返196.35/208.07ms，最大新后缀关节步进0.115720rad/tick。仅恢复后的Thor本机协议测试，未重跑JAX对照，不代表3588全链路或实机成功率；不训练、不操作3588或发送客户端任务。停服恢复120W，不新增开机自启。以下为此前转换与上线历史。
