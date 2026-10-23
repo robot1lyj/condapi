@@ -1,0 +1,205 @@
+{
+  "nccl": [
+    {
+      "file": "nccl.gpu001.1690708.log",
+      "bytes": 817293594,
+      "sha256": "08ff131e59115dbf63eb23d7fedc291f2973163ba26ad260144f410ac37fae1d",
+      "lines": 4170320,
+      "matching_lines": 0,
+      "examples": []
+    }
+  ],
+  "gpu": {
+    "0": {
+      "uuid": "GPU-673638cf-82ca-6b28-639e-77561b944ceb",
+      "samples": 361,
+      "max_temperature_c": 77.0,
+      "max_power_w": 402.62,
+      "last_sample_before_xid": {
+        "timestamp": "2026/10/23 07:41:15.986",
+        "index": "0",
+        "uuid": "GPU-673638cf-82ca-6b28-639e-77561b944ceb",
+        "pci.bus_id": "00000000:16:00.0",
+        "temperature.gpu": "65",
+        "power.draw [W]": "97.47 W",
+        "utilization.gpu [%]": "0 %",
+        "memory.used [MiB]": "22858 MiB",
+        "memory.total [MiB]": "24564 MiB"
+      },
+      "last_sample": {
+        "timestamp": "2026/10/23 07:50:58.187",
+        "index": "0",
+        "uuid": "GPU-673638cf-82ca-6b28-639e-77561b944ceb",
+        "pci.bus_id": "00000000:16:00.0",
+        "temperature.gpu": "54",
+        "power.draw [W]": "69.83 W",
+        "utilization.gpu [%]": "0 %",
+        "memory.used [MiB]": "22858 MiB",
+        "memory.total [MiB]": "24564 MiB"
+      }
+    },
+    "1": {
+      "uuid": "GPU-7a9a29a1-9059-b0ef-d7b4-53c298565ca1",
+      "samples": 361,
+      "max_temperature_c": 78.0,
+      "max_power_w": 338.49,
+      "last_sample_before_xid": {
+        "timestamp": "2026/10/23 07:41:15.994",
+        "index": "1",
+        "uuid": "GPU-7a9a29a1-9059-b0ef-d7b4-53c298565ca1",
+        "pci.bus_id": "00000000:52:00.0",
+        "temperature.gpu": "65",
+        "power.draw [W]": "92.18 W",
+        "utilization.gpu [%]": "0 %",
+        "memory.used [MiB]": "22838 MiB",
+        "memory.total [MiB]": "24564 MiB"
+      },
+      "last_sample": {
+        "timestamp": "2026/10/23 07:50:58.193",
+        "index": "1",
+        "uuid": "GPU-7a9a29a1-9059-b0ef-d7b4-53c298565ca1",
+        "pci.bus_id": "00000000:52:00.0",
+        "temperature.gpu": "53",
+        "power.draw [W]": "70.72 W",
+        "utilization.gpu [%]": "0 %",
+        "memory.used [MiB]": "22838 MiB",
+        "memory.total [MiB]": "24564 MiB"
+      }
+    },
+    "2": {
+      "uuid": "GPU-3dab425e-aa1d-4187-7fc0-d5177815444c",
+      "samples": 361,
+      "max_temperature_c": 77.0,
+      "max_power_w": 336.92,
+      "last_sample_before_xid": {
+        "timestamp": "2026/10/23 07:41:15.998",
+        "index": "2",
+        "uuid": "GPU-3dab425e-aa1d-4187-7fc0-d5177815444c",
+        "pci.bus_id": "00000000:AC:00.0",
+        "temperature.gpu": "64",
+        "power.draw [W]": "100.61 W",
+        "utilization.gpu [%]": "0 %",
+        "memory.used [MiB]": "22838 MiB",
+        "memory.total [MiB]": "24564 MiB"
+      },
+      "last_sample": {
+        "timestamp": "2026/10/23 07:50:58.197",
+        "index": "2",
+        "uuid": "GPU-3dab425e-aa1d-4187-7fc0-d5177815444c",
+        "pci.bus_id": "00000000:AC:00.0",
+        "temperature.gpu": "52",
+        "power.draw [W]": "62.61 W",
+        "utilization.gpu [%]": "0 %",
+        "memory.used [MiB]": "22838 MiB",
+        "memory.total [MiB]": "24564 MiB"
+      }
+    },
+    "3": {
+      "uuid": "GPU-b318a64d-8d2e-95ee-8f12-f185e4f6e760",
+      "samples": 361,
+      "max_temperature_c": 76.0,
+      "max_power_w": 324.25,
+      "last_sample_before_xid": {
+        "timestamp": "2026/10/23 07:41:10.982",
+        "index": "3",
+        "uuid": "GPU-b318a64d-8d2e-95ee-8f12-f185e4f6e760",
+        "pci.bus_id": "00000000:CA:00.0",
+        "temperature.gpu": "75",
+        "power.draw [W]": "255.84 W",
+        "utilization.gpu [%]": "100 %",
+        "memory.used [MiB]": "22838 MiB",
+        "memory.total [MiB]": "24564 MiB"
+      },
+      "last_sample": {
+        "timestamp": "2026/10/23 07:50:58.201",
+        "index": "3",
+        "uuid": "GPU-b318a64d-8d2e-95ee-8f12-f185e4f6e760",
+        "pci.bus_id": "00000000:CA:00.0",
+        "temperature.gpu": "53",
+        "power.draw [W]": "69.88 W",
+        "utilization.gpu [%]": "0 %",
+        "memory.used [MiB]": "22838 MiB",
+        "memory.total [MiB]": "24564 MiB"
+      }
+    }
+  },
+  "host_samples": 362,
+  "edac_values": {
+    "/sys/devices/system/edac/mc/mc2/ce_count": [
+      "0"
+    ],
+    "/sys/devices/system/edac/mc/mc0/ce_count": [
+      "3781237"
+    ],
+    "/sys/devices/system/edac/mc/mc3/ce_count": [
+      "0"
+    ],
+    "/sys/devices/system/edac/mc/mc1/ce_count": [
+      "0"
+    ],
+    "/sys/devices/system/edac/mc/mc2/ue_count": [
+      "0"
+    ],
+    "/sys/devices/system/edac/mc/mc0/ue_count": [
+      "0"
+    ],
+    "/sys/devices/system/edac/mc/mc3/ue_count": [
+      "0"
+    ],
+    "/sys/devices/system/edac/mc/mc1/ue_count": [
+      "0"
+    ]
+  },
+  "kernel_during_job": [
+    "2026-10-23T07:41:16,593225+08:00 NVRM: Xid (PCI:0000:52:00): 13, Graphics SM Warp Exception on (GPC 8, TPC 0, SM 0): Out Of Range Address",
+    "2026-10-23T07:41:16,593250+08:00 NVRM: Xid (PCI:0000:52:00): 13, Graphics SM Global Exception on (GPC 8, TPC 0, SM 0): Multiple Warp Errors",
+    "2026-10-23T07:41:16,593260+08:00 NVRM: Xid (PCI:0000:52:00): 13, Graphics Exception: ESR 0x544730=0xc00000e 0x544734=0x24 0x544728=0xf81eb60 0x54472c=0x1174"
+  ],
+  "core": {
+    "path": "/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/incidents/job-2598/cuda.gpu001.hlink.local.1690708.1792711254.nvcudmp",
+    "bytes": 103996497694,
+    "mtime_epoch": 1792713057.436083,
+    "full_sha256": "not_computed_to_avoid_104GB_read_during_active_training",
+    "first_65536_bytes_sha256": "57cc70c8d688ce6442fb03787429de78cfe22f0171fe91cbba041eba6af581c1"
+  },
+  "xla_files": 596,
+  "thermal_slowdown_microseconds": {
+    "before": {
+      "sw": [
+        "39142",
+        "7061621",
+        "4835432",
+        "180322"
+      ],
+      "hw": [
+        "0",
+        "0",
+        "0",
+        "0"
+      ]
+    },
+    "after": {
+      "sw": [
+        "39142",
+        "7061621",
+        "4835432",
+        "180322"
+      ],
+      "hw": [
+        "0",
+        "0",
+        "0",
+        "0"
+      ]
+    }
+  },
+  "exit": {
+    "utc": "2026-10-22T23:51:00.063046+00:00",
+    "pid": 1690708,
+    "returncode": -6,
+    "signal": 6,
+    "wrapper_received_signals": []
+  },
+  "analysis_method": "cuda-gdb 13.2 target cudacore, read-only offline; no attach to active trainer",
+  "debugger_limitation": "No source-line/argument symbols. Second command batch returned 1 only because info cuda kernel_launch_backtrace is unsupported in this 13.2 build; core, lanes, registers and disassembly decoded successfully."
+}

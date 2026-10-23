@@ -1,0 +1,510 @@
+{
+  "manifest": {
+    "version": 1,
+    "created_utc": "2026-10-22T23:25:14.564680+00:00",
+    "code_commit": "4959866c2eb51538fa92f1a4aed0d2110d2f7b32",
+    "job_id": "2598",
+    "run": "earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022",
+    "seed": 42,
+    "batch_size": 32,
+    "fsdp_devices": 4,
+    "checkpoint_directory": "/home/wuyan/lyj/YAM/training-runs/pi05_yam/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022",
+    "dataset": "/home/wuyan/lyj/YAM/YAM_data/processed/earbuds_lerobot_50h_clean_v2_20261013/train",
+    "mode": "split_native_gradient_and_optimizer_with_host_guard",
+    "persistent_compilation_cache_enabled": false,
+    "in_memory_jit_reuse": true,
+    "integer_fields": [
+      "size",
+      "nan_count",
+      "posinf_count",
+      "neginf_count",
+      "first_bad_flat_index",
+      "max_abs_flat_index"
+    ],
+    "float_fields": [
+      "max_abs_finite",
+      "scaled_sum_squares",
+      "first_bad_value",
+      "max_abs_value"
+    ],
+    "devices": [
+      {
+        "id": 0,
+        "process_index": 0,
+        "kind": "NVIDIA GeForce RTX 4090",
+        "local_hardware_id": 0
+      },
+      {
+        "id": 1,
+        "process_index": 0,
+        "kind": "NVIDIA GeForce RTX 4090",
+        "local_hardware_id": 1
+      },
+      {
+        "id": 2,
+        "process_index": 0,
+        "kind": "NVIDIA GeForce RTX 4090",
+        "local_hardware_id": 2
+      },
+      {
+        "id": 3,
+        "process_index": 0,
+        "kind": "NVIDIA GeForce RTX 4090",
+        "local_hardware_id": 3
+      }
+    ],
+    "limitations": [
+      "Instrumentation changes compilation and adds synchronization",
+      "Post-update failures retain post-state; pre-state buffers may have been donated",
+      "A GPU/native crash can prevent tensor export; external incident capture remains active"
+    ]
+  },
+  "event_counts": {
+    "attempt_started": 309,
+    "restored_state": 1,
+    "input_checked": 308,
+    "gradients_checked": 307,
+    "update_finished": 307
+  },
+  "first_completed_step": 7001,
+  "last_completed_step": 7307,
+  "bad_summaries": [],
+  "last_events": [
+    {
+      "utc": "2026-10-22T23:41:06.954507+00:00",
+      "event": "attempt_started",
+      "attempted_completed_step": 7306,
+      "pre_update_step": 7305,
+      "loader_tensor_sha256": "f959726850f2181416aede0caa77ba7b1ef0035441c12cf3ec2b4d3a3f28f915",
+      "loader_hash_stage": "before_Observation.from_dict",
+      "step_rng": [
+        1801109806,
+        2223466939
+      ],
+      "batch_size": 32
+    },
+    {
+      "utc": "2026-10-22T23:41:06.990313+00:00",
+      "event": "input_checked",
+      "attempted_completed_step": 7306,
+      "pre_update_step": 7305,
+      "loader_tensor_sha256": "f959726850f2181416aede0caa77ba7b1ef0035441c12cf3ec2b4d3a3f28f915",
+      "loader_hash_stage": "before_Observation.from_dict",
+      "step_rng": [
+        1801109806,
+        2223466939
+      ],
+      "statistics": {
+        "all_finite": true,
+        "bad_record_indexes": [],
+        "replica_disagreement_indexes": [],
+        "stable_finite_values_l2": 9976680.736484958,
+        "logical_shards": 40,
+        "physical_shards": 40,
+        "bad_shards": []
+      },
+      "batch_size": 32
+    },
+    {
+      "utc": "2026-10-22T23:41:09.212731+00:00",
+      "event": "gradients_checked",
+      "attempted_completed_step": 7306,
+      "pre_update_step": 7305,
+      "loader_tensor_sha256": "f959726850f2181416aede0caa77ba7b1ef0035441c12cf3ec2b4d3a3f28f915",
+      "loader_hash_stage": "before_Observation.from_dict",
+      "step_rng": [
+        1801109806,
+        2223466939
+      ],
+      "loss": 0.009098497219383717,
+      "native_grad_norm": 0.10923239588737488,
+      "verdict": {
+        "update_allowed": true,
+        "reasons": [],
+        "finite_elements_but_native_norm_nonfinite": false,
+        "native_vs_stable_relative_difference": 8.56761732886588e-08
+      },
+      "statistics": {
+        "all_finite": true,
+        "bad_record_indexes": [],
+        "replica_disagreement_indexes": [],
+        "stable_finite_values_l2": 0.10923240524598936,
+        "logical_shards": 120,
+        "physical_shards": 204,
+        "bad_shards": []
+      },
+      "batch_size": 32
+    },
+    {
+      "utc": "2026-10-22T23:41:09.369932+00:00",
+      "event": "update_finished",
+      "attempted_completed_step": 7306,
+      "pre_update_step": 7305,
+      "loader_tensor_sha256": "f959726850f2181416aede0caa77ba7b1ef0035441c12cf3ec2b4d3a3f28f915",
+      "loader_hash_stage": "before_Observation.from_dict",
+      "step_rng": [
+        1801109806,
+        2223466939
+      ],
+      "param_norm": 1803.865234375,
+      "statistics": {
+        "all_finite": true,
+        "bad_record_indexes": [],
+        "replica_disagreement_indexes": [],
+        "stable_finite_values_l2": 11388.472605016064,
+        "logical_shards": 362,
+        "physical_shards": 620,
+        "bad_shards": []
+      },
+      "optimizer_updates": {
+        "all_finite": true,
+        "bad_record_indexes": [],
+        "replica_disagreement_indexes": [],
+        "stable_finite_values_l2": 0.05569705049849005,
+        "logical_shards": 120,
+        "physical_shards": 204,
+        "bad_shards": []
+      },
+      "batch_size": 32
+    },
+    {
+      "utc": "2026-10-22T23:41:09.436723+00:00",
+      "event": "attempt_started",
+      "attempted_completed_step": 7307,
+      "pre_update_step": 7306,
+      "loader_tensor_sha256": "39b6c9505471d2bd6ad16de943c3cc074f0587541611543f15e64f5c2a10fe76",
+      "loader_hash_stage": "before_Observation.from_dict",
+      "step_rng": [
+        2837233382,
+        444080184
+      ],
+      "batch_size": 32
+    },
+    {
+      "utc": "2026-10-22T23:41:09.472595+00:00",
+      "event": "input_checked",
+      "attempted_completed_step": 7307,
+      "pre_update_step": 7306,
+      "loader_tensor_sha256": "39b6c9505471d2bd6ad16de943c3cc074f0587541611543f15e64f5c2a10fe76",
+      "loader_hash_stage": "before_Observation.from_dict",
+      "step_rng": [
+        2837233382,
+        444080184
+      ],
+      "statistics": {
+        "all_finite": true,
+        "bad_record_indexes": [],
+        "replica_disagreement_indexes": [],
+        "stable_finite_values_l2": 10065037.285701983,
+        "logical_shards": 40,
+        "physical_shards": 40,
+        "bad_shards": []
+      },
+      "batch_size": 32
+    },
+    {
+      "utc": "2026-10-22T23:41:11.712393+00:00",
+      "event": "gradients_checked",
+      "attempted_completed_step": 7307,
+      "pre_update_step": 7306,
+      "loader_tensor_sha256": "39b6c9505471d2bd6ad16de943c3cc074f0587541611543f15e64f5c2a10fe76",
+      "loader_hash_stage": "before_Observation.from_dict",
+      "step_rng": [
+        2837233382,
+        444080184
+      ],
+      "loss": 0.008184563368558884,
+      "native_grad_norm": 0.09573330730199814,
+      "verdict": {
+        "update_allowed": true,
+        "reasons": [],
+        "finite_elements_but_native_norm_nonfinite": false,
+        "native_vs_stable_relative_difference": 1.0420030399026924e-07
+      },
+      "statistics": {
+        "all_finite": true,
+        "bad_record_indexes": [],
+        "replica_disagreement_indexes": [],
+        "stable_finite_values_l2": 0.09573329732655946,
+        "logical_shards": 120,
+        "physical_shards": 204,
+        "bad_shards": []
+      },
+      "batch_size": 32
+    },
+    {
+      "utc": "2026-10-22T23:41:11.862041+00:00",
+      "event": "update_finished",
+      "attempted_completed_step": 7307,
+      "pre_update_step": 7306,
+      "loader_tensor_sha256": "39b6c9505471d2bd6ad16de943c3cc074f0587541611543f15e64f5c2a10fe76",
+      "loader_hash_stage": "before_Observation.from_dict",
+      "step_rng": [
+        2837233382,
+        444080184
+      ],
+      "param_norm": 1803.865234375,
+      "statistics": {
+        "all_finite": true,
+        "bad_record_indexes": [],
+        "replica_disagreement_indexes": [],
+        "stable_finite_values_l2": 11389.755677128911,
+        "logical_shards": 362,
+        "physical_shards": 620,
+        "bad_shards": []
+      },
+      "optimizer_updates": {
+        "all_finite": true,
+        "bad_record_indexes": [],
+        "replica_disagreement_indexes": [],
+        "stable_finite_values_l2": 0.05548508474603049,
+        "logical_shards": 120,
+        "physical_shards": 204,
+        "bad_shards": []
+      },
+      "batch_size": 32
+    },
+    {
+      "utc": "2026-10-22T23:41:11.928571+00:00",
+      "event": "attempt_started",
+      "attempted_completed_step": 7308,
+      "pre_update_step": 7307,
+      "loader_tensor_sha256": "12ba06607f6f4a53b8c41d38e00224a64c5795df464527dd3fe16de4e2431d8c",
+      "loader_hash_stage": "before_Observation.from_dict",
+      "step_rng": [
+        4052012641,
+        2720522280
+      ],
+      "batch_size": 32
+    },
+    {
+      "utc": "2026-10-22T23:41:11.956323+00:00",
+      "event": "input_checked",
+      "attempted_completed_step": 7308,
+      "pre_update_step": 7307,
+      "batch_identity": {
+        "dataset_index": [
+          3553608,
+          2118359,
+          3535315,
+          2985664,
+          5256179,
+          4028605,
+          1811435,
+          3947331,
+          4071579,
+          1639616,
+          2750906,
+          2584865,
+          5358437,
+          640145,
+          2455714,
+          1307643,
+          3442146,
+          3500519,
+          4416827,
+          843226,
+          4977377,
+          545091,
+          2203701,
+          2395555,
+          4751007,
+          4818667,
+          3178569,
+          3412193,
+          3613855,
+          4228170,
+          4898518,
+          2469267
+        ],
+        "episode_index": [
+          915,
+          549,
+          910,
+          775,
+          1350,
+          1039,
+          468,
+          1017,
+          1051,
+          424,
+          713,
+          671,
+          1375,
+          164,
+          638,
+          339,
+          888,
+          902,
+          1136,
+          219,
+          1279,
+          140,
+          571,
+          620,
+          1221,
+          1238,
+          824,
+          881,
+          928,
+          1089,
+          1258,
+          640
+        ],
+        "frame_index": [
+          2060,
+          148,
+          4438,
+          4433,
+          1655,
+          1371,
+          789,
+          1385,
+          2535,
+          416,
+          2832,
+          2449,
+          2156,
+          2264,
+          606,
+          1674,
+          1251,
+          1321,
+          304,
+          3530,
+          1369,
+          3028,
+          2835,
+          3307,
+          201,
+          2458,
+          1194,
+          1347,
+          1394,
+          3728,
+          3443,
+          3291
+        ],
+        "index": [
+          3559677,
+          2122491,
+          3541384,
+          2991733,
+          5262248,
+          4034674,
+          1815567,
+          3953400,
+          4077648,
+          1643748,
+          2756975,
+          2590934,
+          5364506,
+          644277,
+          2461783,
+          1311775,
+          3448215,
+          3506588,
+          4422896,
+          847358,
+          4983446,
+          545091,
+          2209770,
+          2401624,
+          4757076,
+          4824736,
+          3184638,
+          3418262,
+          3619924,
+          4234239,
+          4904587,
+          2475336
+        ],
+        "task_index": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "timestamp": [
+          68.66666412353516,
+          4.933333396911621,
+          147.93333435058594,
+          147.76666259765625,
+          55.16666793823242,
+          45.70000076293945,
+          26.299999237060547,
+          46.16666793823242,
+          84.5,
+          13.866666793823242,
+          94.4000015258789,
+          81.63333129882812,
+          71.86666870117188,
+          75.46666717529297,
+          20.200000762939453,
+          55.79999923706055,
+          41.70000076293945,
+          44.03333282470703,
+          10.133333206176758,
+          117.66666412353516,
+          45.63333511352539,
+          100.93333435058594,
+          94.5,
+          110.23332977294922,
+          6.699999809265137,
+          81.93333435058594,
+          39.79999923706055,
+          44.900001525878906,
+          46.46666717529297,
+          124.26667022705078,
+          114.76667022705078,
+          109.69999694824219
+        ]
+      },
+      "loader_tensor_sha256": "12ba06607f6f4a53b8c41d38e00224a64c5795df464527dd3fe16de4e2431d8c",
+      "loader_hash_stage": "before_Observation.from_dict",
+      "step_rng": [
+        4052012641,
+        2720522280
+      ],
+      "statistics": {
+        "all_finite": true,
+        "bad_record_indexes": [],
+        "replica_disagreement_indexes": [],
+        "stable_finite_values_l2": 10023711.109386312,
+        "logical_shards": 40,
+        "physical_shards": 40,
+        "bad_shards": []
+      },
+      "batch_size": 32
+    }
+  ],
+  "failure_files": []
+}

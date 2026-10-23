@@ -1,5 +1,47 @@
 # Pi0.5 服务器反复崩溃调查与现场采集（2026-10-22）
 
+## 2598 GPU原生异常：已取得可解析core（2026-10-23复核）
+
+用户报告“job2598在step7301后以exit6:0失败”后，只读核查该attempt并保存证据，未重启/取消训练、修改配方或发送跨聊天指令。09:48查询时另有2600在gpu001运行，本次没有干预。2598实际源码仍为`4959866c2eb51538fa92f1a4aed0d2110d2f7b32`，诊断/缓存保护/四GPU自检生效，从完整7000恢复。
+
+**本次已定位为尝试完成7308时的GPU原生越界异常，退出为SIGABRT；不是已记录到的NaN/Inf保护退出。** Slurm显示07:20:46–07:51:02、FAILED、`6:0`；子进程PID1690708的`exit.json`明确`returncode=-6, signal=6, wrapper_received_signals=[]`。7301是最后一条每10步汇总的completed指标；逐步日志完整记录7001–7307共307次更新，输入/梯度/实际updates/全部参数和optimizer均有限。7308的输入已通过检查，未出现该步`gradients_checked`或`update_finished`；原生栈停在`numerical_diagnostics.py:283`的gradient_function调用内，故障步尚未调用optimizer。
+
+| 时间（2026-10-23 +08） | 现场事实 |
+|---|---|
+| 07:41:11.712–11.862 | 7307梯度与更新后状态检查完成；loss0.00818456、原生grad_norm0.09573331、稳定范数0.09573330；620个state物理分片有限 |
+| 07:41:11.928–11.956 | 7308开始，32条真实样本身份、输入SHA、RNG落盘，40个输入分片有限 |
+| 07:41:16.593 | 内核记录GPU1/PCI52:00的Xid13，GPC8/TPC0/SM0，Out Of Range Address / Multiple Warp Errors |
+| 07:50:57.436 | GPU core文件最后修改时间；不能把文件名中的时间字段当作本次异常发生时刻 |
+| 07:51:00–07:51:02 | 原生进程SIGABRT，wrapper完成after补采，随后Slurm结束；故障至退出约10分钟与core生成窗口相符，不是继续正常训练 |
+
+### core给出的直接定位
+
+本次保留`103,996,497,694`字节（约104GB/96.9GiB）的`.nvcudmp`，使用节点已有CUDA-GDB13.2以`target cudacore`离线成功打开，没有attach当前训练进程。得到：
+
+- 故障设备1，PCI`52:00.0`，UUID仍为`GPU-7a9a29a1-9059-b0ef-d7b4-53c298565ca1`；异常为`Warp Out of range Address`。
+- 内核为`cutlass::Kernel2<cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_64x64_32x6_tn_align8>`，属于BF16 GEMM计算；grid`(256,3,2)`、block`(128,1,1)`。调试器焦点为block`(18,1,1)`、SM12/warp0/lane0；这里的CUDA逻辑SM编号与内核日志的GPC/TPC/SM层级分别原样保留，不自行换算。
+- 异常PC=`0x7f66d652ffa0`，函数偏移`+2720`，指令为`LDGSTS.E.BYPASS.LTC128B.128 [R79][R14.64],P0`。停止时PC另为`+3072`，已分别保留errorpc与pc，不能混用；寄存器与相邻反汇编已保存。
+- 其他三卡当时的活动kernel为`ncclDevKernel_AllReduce_Sum_f32_RING_LL()`。这支持把GPU1计算异常作为本次直接定位，不能由其他卡在collective中等待反推NCCL是首因。
+
+[CUDA-GDB完整解析](evidence/job-2598-cuda-gdb.txt)、[故障指令/warp现场](evidence/job-2598-cuda-gdb-fault-instruction.txt)。当前core没有可用源码行号和参数符号，尚未映射到唯一模型层/HLO矩阵；第二批gdb命令的exit1来自13.2不支持`info cuda kernel_launch_backtrace`，之前core/寄存器/反汇编均成功。NVIDIA将该异常定义为warp访问局部或共享内存有效范围之外；该定义说明故障类型，不证明软件或硬件中的唯一根因。[CUDA-GDB异常说明](https://docs.nvidia.com/cuda/cuda-gdb/index.html#cuda-exception-codes)。
+
+### 数值、系统证据与缺口
+
+完整逐步日志31,463,147字节；7308 batch SHA为`12ba06607f6f4a53b8c41d38e00224a64c5795df464527dd3fe16de4e2431d8c`，step RNG为`[4052012641,2720522280]`，全部episode/frame/index已保留。[末步身份与数值](evidence/job-2598-numerical-summary.json)。此次原生abort没有返回Python异常处理，因而没有`numerical/failure-step-*`张量导出包；GPU core、样本身份/hash和此前分片统计已经留下，不能声称有故障步的完整独立NumPy梯度/模型包，也不能由输入有限推定所有内部激活健康。
+
+- NCCL原件817,293,594字节、4,170,320行，全量扫描WARN/ERROR/Cuda failure/illegal/abort为0；已存完整SHA256，源文件未改动。这仅说明NCCL没有报告错误，不证明所有通信数据一定正确。
+- 四卡各361次采样，最高温分别77/78/77/76°C；本次前后SW/HW热降频累计计数完全相同，未见本窗口新热降频。GPU1最高功耗338.49W。5秒采样不能排除瞬态供电/温度问题，不能直接把78°C当过热根因。
+- 362次主机采样中，mc0 CE始终3,781,237、所有UE始终0，无本窗口新增EDAC。内核本作业窗口只有上述三条Xid13，没有新增OOM/MCE记录；after快照/home尚余2.7TiB。CPU journal/core仍因权限不可读。
+- XLA目录596个文件，原始HLO/PTX等保留。core仅记录路径/大小/mtime和首64KiB哈希，明确**未对104GB文件计算全量哈希**，避免在另一训练运行时额外全盘扫描。约39.9MB的完整小型日志/配置/逐步记录已复制本地忽略目录并计算归档全量SHA；大core、NCCL及XLA原件仍在服务器。
+
+[系统/NCCL扫描汇总](evidence/job-2598-system-summary.json)、[Xid原文](evidence/job-2598-kernel.txt)、[末次指标与原生栈](evidence/job-2598-failure.txt)、[原件归档清单](evidence/job-2598-raw-manifest.json)。现场根目录为：
+
+```text
+/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/incidents/job-2598
+```
+
+**当前判断：同一物理GPU1/同一GPC8子单元持续重复异常，且这次捕获到了具体计算kernel与出错指令，优先排查GPU1硬件稳定性及其驱动/计算执行路径。** 尚不能直接定为坏卡，也不能因为kernel名含CUTLASS就判定CUTLASS实现有bug。下一步最有区分力的是保留四卡/FSDP4合同，做物理卡替换或节点/设备映射对照，观察异常是否跟随该UUID；再围绕已捕获GEMM做有界复现与软件版本对照。本次未执行这些新实验，也未改动当前2600。
+
 ## 数值现场实现与重新启动授权
 
 用户要求“记录代码写好，然后开始重新启动训练”，追加“确保写全写好”。本次沿同一run和已确认训练合同增加诊断，不改变batch32/FSDP4/workers2、选集/norm、LR/RTC、目标本地86000或checkpoint保存合同。启动前动态确认唯一活动作业、最新finalized checkpoint和norm一致性，保留旧现场后串行切换；不新增聊天监控或自动恢复。

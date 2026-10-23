@@ -1,0 +1,69 @@
+Opening GPU coredump: /home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/incidents/job-2598/cuda.gpu001.hlink.local.1690708.1792711254.nvcudmp
+[Current focus set to CUDA kernel 0, grid 5684, block (18,1,1), thread (0,0,0), device 1, sm 12, warp 0, lane 0]
+
+CUDA Exception: Warp Out of range Address
+The exception was triggered at PC 0x7f66d652ffa0  void cutlass::Kernel2<cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_64x64_32x6_tn_align8>(cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_64x64_32x6_tn_align8::Params)
+#0  0x00007f66d6530100 in void cutlass::Kernel2<cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_64x64_32x6_tn_align8>(cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_64x64_32x6_tn_align8::Params)<<<(256,3,2),(128,1,1)>>> ()
+  Ln  State         PC         ThreadIdx         Exception         
+Device 1 SM 12 Warp 0
+*  0 active 0x00007f66d6530100   (0,0,0) Warp Out of range Address 
+   1 active 0x00007f66d6530100   (1,0,0) Warp Out of range Address 
+   2 active 0x00007f66d6530100   (2,0,0) Warp Out of range Address 
+   3 active 0x00007f66d6530100   (3,0,0) Warp Out of range Address 
+   4 active 0x00007f66d6530100   (4,0,0) Warp Out of range Address 
+   5 active 0x00007f66d6530100   (5,0,0) Warp Out of range Address 
+   6 active 0x00007f66d6530100   (6,0,0) Warp Out of range Address 
+   7 active 0x00007f66d6530100   (7,0,0) Warp Out of range Address 
+   8 active 0x00007f66d6530100   (8,0,0) Warp Out of range Address 
+   9 active 0x00007f66d6530100   (9,0,0) Warp Out of range Address 
+  10 active 0x00007f66d6530100  (10,0,0) Warp Out of range Address 
+  11 active 0x00007f66d6530100  (11,0,0) Warp Out of range Address 
+  12 active 0x00007f66d6530100  (12,0,0) Warp Out of range Address 
+  13 active 0x00007f66d6530100  (13,0,0) Warp Out of range Address 
+  14 active 0x00007f66d6530100  (14,0,0) Warp Out of range Address 
+  15 active 0x00007f66d6530100  (15,0,0) Warp Out of range Address 
+  16 active 0x00007f66d6530100  (16,0,0) Warp Out of range Address 
+  17 active 0x00007f66d6530100  (17,0,0) Warp Out of range Address 
+  18 active 0x00007f66d6530100  (18,0,0) Warp Out of range Address 
+  19 active 0x00007f66d6530100  (19,0,0) Warp Out of range Address 
+  20 active 0x00007f66d6530100  (20,0,0) Warp Out of range Address 
+  21 active 0x00007f66d6530100  (21,0,0) Warp Out of range Address 
+  22 active 0x00007f66d6530100  (22,0,0) Warp Out of range Address 
+  23 active 0x00007f66d6530100  (23,0,0) Warp Out of range Address 
+  24 active 0x00007f66d6530100  (24,0,0) Warp Out of range Address 
+  25 active 0x00007f66d6530100  (25,0,0) Warp Out of range Address 
+  26 active 0x00007f66d6530100  (26,0,0) Warp Out of range Address 
+  27 active 0x00007f66d6530100  (27,0,0) Warp Out of range Address 
+  28 active 0x00007f66d6530100  (28,0,0) Warp Out of range Address 
+  29 active 0x00007f66d6530100  (29,0,0) Warp Out of range Address 
+  30 active 0x00007f66d6530100  (30,0,0) Warp Out of range Address 
+  31 active 0x00007f66d6530100  (31,0,0) Warp Out of range Address 
+  Wp Active Lanes Mask Divergent Lanes Mask          Active PC Kernel  BlockIdx First Active ThreadIdx 
+Device 1 SM 12
+*  0        0xffffffff           0x00000000 0x00007f66d6530100      0  (18,1,1)                (0,0,0) 
+   1        0xffffffff           0x00000000 0x00007f66d6530100      0  (18,1,1)               (32,0,0) 
+   2        0xffffffff           0x00000000 0x00007f66d65300c0      0  (18,1,1)               (64,0,0) 
+   3        0xffffffff           0x00000000 0x00007f66d652fc70      0  (18,1,1)               (96,0,0) 
+   4        0xffffffff           0x00000000 0x00007f66d6532180      0 (114,0,1)               (32,0,0) 
+   5        0xffffffff           0x00000000 0x00007f66d65320d0      0 (114,0,1)               (64,0,0) 
+   6        0xffffffff           0x00000000 0x00007f66d65320d0      0 (114,0,1)               (96,0,0) 
+   7        0xffffffff           0x00000000 0x00007f66d65320d0      0 (114,0,1)                (0,0,0) 
+No symbol table info available.
+No line number information available for address 0x7f66d652ffa0 <_ZN7cutlass7Kernel2I66cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_64x64_32x6_tn_align8EEvNT_6ParamsE+2720>
+   0x7f66d652ff60 <_ZN7cutlass7Kernel2I66cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_64x64_32x6_tn_align8EEvNT_6ParamsE+2656>:	LOP3.LUT R79,R9,0xfffffff0,RZ,0xc0,!PT
+   0x7f66d652ff70 <_ZN7cutlass7Kernel2I66cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_64x64_32x6_tn_align8EEvNT_6ParamsE+2672>:	IMAD.MOV.U32 R9,RZ,RZ,R15
+   0x7f66d652ff80 <_ZN7cutlass7Kernel2I66cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_64x64_32x6_tn_align8EEvNT_6ParamsE+2688>:	IMAD.SHL.U32 R7,R7,0x2,RZ
+   0x7f66d652ff90 <_ZN7cutlass7Kernel2I66cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_64x64_32x6_tn_align8EEvNT_6ParamsE+2704>:	IMAD R0,R0,c[0x0][0x1b8],RZ
+*> 0x7f66d652ffa0 <_ZN7cutlass7Kernel2I66cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_64x64_32x6_tn_align8EEvNT_6ParamsE+2720>:	LDGSTS.E.BYPASS.LTC128B.128 [R79][R14.64],P0
+   0x7f66d652ffb0 <_ZN7cutlass7Kernel2I66cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_64x64_32x6_tn_align8EEvNT_6ParamsE+2736>:	LOP3.LUT R77,R7,0xfffffff0,RZ,0xc0,!PT
+   0x7f66d652ffc0 <_ZN7cutlass7Kernel2I66cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_64x64_32x6_tn_align8EEvNT_6ParamsE+2752>:	@!P2 IMAD.MOV.U32 R2,RZ,RZ,RZ
+   0x7f66d652ffd0 <_ZN7cutlass7Kernel2I66cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_64x64_32x6_tn_align8EEvNT_6ParamsE+2768>:	IMAD R0,R59.reuse,c[0x0][0x1bc],R0
+   0x7f66d652ffe0 <_ZN7cutlass7Kernel2I66cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_64x64_32x6_tn_align8EEvNT_6ParamsE+2784>:	IMAD.WIDE.U32 R6,R59,c[0x0][0x1b8],R60
+   0x7f66d652fff0 <_ZN7cutlass7Kernel2I66cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_64x64_32x6_tn_align8EEvNT_6ParamsE+2800>:	LDGSTS.E.BYPASS.LTC128B.128 [R77][R8.64+UR6],P1
+   0x7f66d6530000 <_ZN7cutlass7Kernel2I66cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_64x64_32x6_tn_align8EEvNT_6ParamsE+2816>:	R2P PR,R2,0x3
+   0x7f66d6530010 <_ZN7cutlass7Kernel2I66cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_64x64_32x6_tn_align8EEvNT_6ParamsE+2832>:	ULDC.64 UR6,c[0x0][0x1d0]
+   0x7f66d6530020 <_ZN7cutlass7Kernel2I66cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_64x64_32x6_tn_align8EEvNT_6ParamsE+2848>:	IMAD.IADD R2,R7,0x1,R0
+   0x7f66d6530030 <_ZN7cutlass7Kernel2I66cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_64x64_32x6_tn_align8EEvNT_6ParamsE+2864>:	LEA R4,P2,R6,R52,0x1
+   0x7f66d6530040 <_ZN7cutlass7Kernel2I66cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_64x64_32x6_tn_align8EEvNT_6ParamsE+2880>:	IMAD.U32 R7,RZ,RZ,UR11
+   0x7f66d6530050 <_ZN7cutlass7Kernel2I66cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_64x64_32x6_tn_align8EEvNT_6ParamsE+2896>:	UIADD3 UR6,UP0,UR8,-UR6,URZ
+Unrecognized option: 'kernel_launch_backtrace'.

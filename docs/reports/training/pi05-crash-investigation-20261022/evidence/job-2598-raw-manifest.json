@@ -1,0 +1,25 @@
+{
+  "captured_utc": "2026-10-23T01:52:20.801461+00:00",
+  "source": "/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/incidents/job-2598",
+  "included_paths": [
+    "before",
+    "after",
+    "numerical",
+    "events.jsonl",
+    "exit.json",
+    "trainer.log",
+    "kernel-follow.log",
+    "gpu-telemetry.log",
+    "host-telemetry.jsonl",
+    "process-snapshots.jsonl",
+    "numerical-self-check/SELF_CHECK_PASSED.json"
+  ],
+  "archive": "evidence/raw/job-2598-logs.tar",
+  "bytes": 39864320,
+  "sha256": "3b03d3edfcc76fea0b77e7dbfcc53a02b8030976bc97b69bb2b830663cc0f197",
+  "excluded_large_originals_retained_on_server": [
+    "CUDA core",
+    "NCCL log",
+    "XLA artifacts"
+  ]
+}

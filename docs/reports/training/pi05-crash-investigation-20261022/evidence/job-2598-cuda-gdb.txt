@@ -1,0 +1,202 @@
+Opening GPU coredump: /home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/incidents/job-2598/cuda.gpu001.hlink.local.1690708.1792711254.nvcudmp
+[Current focus set to CUDA kernel 0, grid 5684, block (18,1,1), thread (0,0,0), device 1, sm 12, warp 0, lane 0]
+
+CUDA Exception: Warp Out of range Address
+The exception was triggered at PC 0x7f66d652ffa0  void cutlass::Kernel2<cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_64x64_32x6_tn_align8>(cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_64x64_32x6_tn_align8::Params)
+#0  0x00007f66d6530100 in void cutlass::Kernel2<cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_64x64_32x6_tn_align8>(cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_64x64_32x6_tn_align8::Params)<<<(256,3,2),(128,1,1)>>> ()
+  Dev PCI Bus/Dev ID                    Name Description SM Type SMs Warps/SM Lanes/Warp Max Regs/Lane                    Active SMs Mask 
+    0        16:00.0 NVIDIA GeForce RTX 4090     AD102-A   sm_89 128       48         32           255 0x00000000000000000000000000000001 
+*   1        52:00.0 NVIDIA GeForce RTX 4090     AD102-A   sm_89 128       48         32           255 0x00000000000000000000000000001000 
+    2        ac:00.0 NVIDIA GeForce RTX 4090     AD102-A   sm_89 128       48         32           255 0x00000000000000000000000000000001 
+    3        ca:00.0 NVIDIA GeForce RTX 4090     AD102-A   sm_89 128       48         32           255 0x00000000000000000000000000000001 
+  Kernel Parent Dev Grid Status                           SMs Mask   GridDim  BlockDim Invocation                                                                             
+       3      -   3 498686 Active 0x00000000000000000000000000000001   (1,1,1) (512,1,1) ncclDevKernel_AllReduce_Sum_f32_RING_LL()                                              
+       2      -   2 498686 Active 0x00000000000000000000000000000001   (1,1,1) (512,1,1) ncclDevKernel_AllReduce_Sum_f32_RING_LL()                                              
+       1      -   0 527542 Active 0x00000000000000000000000000000001   (1,1,1) (512,1,1) ncclDevKernel_AllReduce_Sum_f32_RING_LL()                                              
+*      0      -   1 5684 Active 0x00000000000000000000000000001000 (256,3,2) (128,1,1) cutlass::Kernel2<cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_64x64_32x6_tn_align8>() 
+  Lvl Kernel Dev Grid Status   GridDim  BlockDim Invocation                                                                             
+* #0        0   1 5684 Active (256,3,2) (128,1,1) cutlass::Kernel2<cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_64x64_32x6_tn_align8>() 
+#0  0x00007f66d6530100 in void cutlass::Kernel2<cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_64x64_32x6_tn_align8>(cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_64x64_32x6_tn_align8::Params)<<<(256,3,2),(128,1,1)>>> ()
+pc             0x7f66d6530100      0x7f66d6530100 <void cutlass::Kernel2<cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_64x64_32x6_tn_align8>(cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_64x64_32x6_tn_align8::Params)+3072>
+errorpc        0x7f66d652ffa0      0x7f66d652ffa0 <void cutlass::Kernel2<cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_64x64_32x6_tn_align8>(cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_64x64_32x6_tn_align8::Params)+2720>
+R0             0x0                 0
+R1             0xfffc80            16776320
+R2             0x240               576
+R3             0x80                128
+R4             0xdedc3c00          3738975232
+R5             0x7f76              32630
+R6             0x40                64
+R7             0x0                 0
+R8             0xe18ebc00          3784227840
+R9             0x7f76              32630
+R10            0x0                 0
+R11            0x27e               638
+R12            0x3                 3
+R13            0x4                 4
+R14            0xe18ebc00          3784227840
+R15            0x7f76              32630
+R16            0x0                 0
+R17            0x0                 0
+R18            0x0                 0
+R19            0x0                 0
+R20            0x0                 0
+R21            0x0                 0
+R22            0x0                 0
+R23            0x0                 0
+R24            0x0                 0
+R25            0x0                 0
+R26            0x0                 0
+R27            0x0                 0
+R28            0x0                 0
+R29            0x0                 0
+R30            0x0                 0
+R31            0x0                 0
+R32            0x0                 0
+R33            0x0                 0
+R34            0x0                 0
+R35            0x0                 0
+R36            0x38                56
+R37            0x31420000          826408960
+R38            0x2ef8411c          788021532
+R39            0xaee7b734          2934421300
+R40            0xc2e4cd00          3269774592
+R41            0x7f75              32629
+R42            0x2e85f256          780530262
+R43            0xb11c0000          2971402240
+R44            0x2ecb4faa          785076138
+R45            0x2fdc0000          802947072
+R46            0xaed4e70b          2933188363
+R47            0xaddc0465          2916877413
+R48            0xae1ea3a1          2921243553
+R49            0x2d8b8c4d          764120141
+R50            0x2e27b840          774355008
+R51            0xaf32ff16          2939354902
+R52            0xdec5b780          3737499520
+R53            0x7f76              32630
+R54            0xe18a3780          3783931776
+R55            0x7f76              32630
+R56            0x20                32
+R57            0x7f75              32629
+R58            0x3111316d          823210349
+R59            0x280               640
+R60            0x240               576
+R61            0x0                 0
+R62            0x30fc85ff          821855743
+R63            0x0                 0
+R64            0xc2e67c80          3269885056
+R65            0x7f75              32629
+R66            0x24000             147456
+R67            0x0                 0
+R68            0x17                23
+R69            0x1                 1
+R70            0xd6534690          3595781776
+R71            0x7f66              32614
+R72            0x2cab2d46          749415750
+R73            0x0                 0
+R74            0x0                 0
+R75            0x0                 0
+R76            0xa                 10
+R77            0xc00               3072
+R78            0x25f               607
+R79            0x0                 0
+R80            0xaedd2ef3          2933731059
+R81            0x3015b8bd          806729917
+R82            0x2e4eae6f          776908399
+R83            0x0                 0
+R84            0x0                 0
+R85            0x0                 0
+R86            0x0                 0
+R87            0x0                 0
+RZ             0x0                 0
+P0             0x0                 0
+P1             0x1                 1
+P2             0x0                 0
+P3             0x0                 0
+P4             0x0                 0
+P5             0x0                 0
+P6             0x0                 0
+PT             0x1                 1
+UR0            0x0                 0
+UR1            0x0                 0
+UR2            0x0                 0
+UR3            0x0                 0
+UR4            0xffffb840          4294948928
+UR5            0xffffffff          4294967295
+UR6            0x0                 0
+UR7            0xffffffff          4294967295
+UR8            0xffffb840          4294948928
+UR9            0xffffffff          4294967295
+UR10           0x0                 0
+UR11           0x0                 0
+UR12           0x4800              18432
+UR13           0x0                 0
+UR14           0x4800              18432
+UR15           0x0                 0
+UR16           0x4800              18432
+UR17           0x0                 0
+UR18           0x0                 0
+UR19           0xffffffff          4294967295
+UR20           0x140               320
+UR21           0x0                 0
+UR22           0x4940              18752
+UR23           0x0                 0
+UR24           0x5a000             368640
+UR25           0x0                 0
+UR26           0x10300             66304
+UR27           0xff00              65280
+UR28           0x17f03             98051
+UR29           0x17f02             98050
+UR30           0x17f01             98049
+UR31           0x18300             99072
+UR32           0x17f00             98048
+UR33           0x2                 2
+UR34           0x4                 4
+UR35           0x6                 6
+UR36           0x20                32
+UR37           0x40                64
+UR38           0x606               1542
+UR39           0x60                96
+UR40           0x906               2310
+UR41           0x0                 0
+UR42           0x0                 0
+UR43           0x0                 0
+UR44           0x0                 0
+UR45           0x0                 0
+UR46           0x0                 0
+UR47           0x0                 0
+UR48           0x0                 0
+UR49           0x0                 0
+UR50           0x0                 0
+UR51           0x0                 0
+UR52           0x0                 0
+UR53           0x0                 0
+UR54           0x0                 0
+UR55           0x0                 0
+UR56           0x0                 0
+UR57           0x0                 0
+UR58           0x0                 0
+UR59           0x0                 0
+UR60           0x0                 0
+UR61           0x0                 0
+UR62           0x0                 0
+URZ            0x0                 0
+UP0            0x1                 1
+UP1            0x1                 1
+UP2            0x1                 1
+UP3            0x1                 1
+UP4            0x1                 1
+UP5            0x1                 1
+UP6            0x0                 0
+UPT            0x1                 1
+   0x7f66d65300c0 <_ZN7cutlass7Kernel2I66cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_64x64_32x6_tn_align8EEvNT_6ParamsE+3008>:	ISETP.GE.AND P0,PT,R3,c[0x0][0x160],PT
+   0x7f66d65300d0 <_ZN7cutlass7Kernel2I66cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_64x64_32x6_tn_align8EEvNT_6ParamsE+3024>:	UIADD3 UR6,UP0,UR6,UR14,URZ
+   0x7f66d65300e0 <_ZN7cutlass7Kernel2I66cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_64x64_32x6_tn_align8EEvNT_6ParamsE+3040>:	LDGSTS.E.BYPASS.LTC128B.128 [R77+0x6000][R4.64+UR12],P1
+   0x7f66d65300f0 <_ZN7cutlass7Kernel2I66cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_64x64_32x6_tn_align8EEvNT_6ParamsE+3056>:	R2P PR,RZ,0xc
+=> 0x7f66d6530100 <_ZN7cutlass7Kernel2I66cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_64x64_32x6_tn_align8EEvNT_6ParamsE+3072>:	UIADD3.X UR7,UR7,UR15,URZ,UP0,!UPT
+   0x7f66d6530110 <_ZN7cutlass7Kernel2I66cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_64x64_32x6_tn_align8EEvNT_6ParamsE+3088>:	PLOP3.LUT P0,PT,P0,PT,PT,0x8,0x0
+   0x7f66d6530120 <_ZN7cutlass7Kernel2I66cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_64x64_32x6_tn_align8EEvNT_6ParamsE+3104>:	IMAD.U32 R10,RZ,RZ,UR6
+   0x7f66d6530130 <_ZN7cutlass7Kernel2I66cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_64x64_32x6_tn_align8EEvNT_6ParamsE+3120>:	PLOP3.LUT P1,PT,P6,PT,PT,0x8,0x0
+   0x7f66d6530140 <_ZN7cutlass7Kernel2I66cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_64x64_32x6_tn_align8EEvNT_6ParamsE+3136>:	LDGDEPBAR
+   0x7f66d6530150 <_ZN7cutlass7Kernel2I66cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_64x64_32x6_tn_align8EEvNT_6ParamsE+3152>:	ISETP.NE.AND P6,PT,R2,0x20,PT
+   0x7f66d6530160 <_ZN7cutlass7Kernel2I66cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_64x64_32x6_tn_align8EEvNT_6ParamsE+3168>:	IMAD.U32 R11,RZ,RZ,UR7
+   0x7f66d6530170 <_ZN7cutlass7Kernel2I66cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_64x64_32x6_tn_align8EEvNT_6ParamsE+3184>:	PR P2R R82,RZ,0xf
