@@ -242,6 +242,12 @@ PR #960 作者给出的局部 checkpoint 对照如下；样本范围、硬件及
 
 ## 7. 当前状态
 
+2026-10-26管理网络：用户要求通过已接通USB把Thor改连`wuyan`并忘记其他Wi-Fi。USB `192.168.55.1`实连，创建系统连接`thor-wuyan`（UUID `cde2b800-b21e-42b6-9fa0-25381ed16b34`），实际连接SSID `wuyan`、5200MHz/5GHz，DHCP **`192.168.31.118/24`**、网关/DNS `192.168.31.1`。autoconnect=yes、priority=200、retries=0（无限）、PSK flags=0（系统保存）、powersave=disable；实际省电off，NetworkManager enabled。已用既有严格主机密钥/身份验证工作站经Wi-Fi SSH访问同一Thor，绑定Wi-Fi的网关ping两次通过；本机`thor`/`thor-wifi` SSH别名改为`.118`，主机密钥别名保持不变。该IP仍为DHCP，不保证固定；未重启验证开机回连。
+
+新连接成功后按明确授权删除且仅删除三个旧Wi-Fi配置：`thor-workstation-ap`、`thor-5g`、`thor-admin-wifi`。复核只剩`thor-wuyan`这一无线连接；旧配置不再可直接回退，恢复需重新添加相应凭据，不保留秘密备份。USB桥、所有有线配置与生产直连`enP2p1s0=192.168.250.1/24`未改，未操作3588。原Pi服务现场仍running=false，没有启动推理。密码仅交互输入NetworkManager，不写入文档/Git；NoMachine图形会话和公网HTTPS本轮未验证。
+
+### 历史：2026-10-08管理网络复核
+
 2026-10-08管理网络复核：旧10.18.10.89不可达，通过设备广播发现10.18.10.8，并使用既有SSH主机密钥严格确认同一Thor；实测`wlP1p1s0=10.18.10.8/23`、`enP2p1s0=192.168.250.1/24`。本机thor SSH别名已更新，使用既有主机密钥别名；未更改Thor网络配置。Wi-Fi仍是DHCP临时值，不能把下方9月23日地址当当前地址。USB桥存在但本轮物理USB接口DOWN，未通过USB连接；NoMachine图形会话未重新测试。
 
 ### 2026-09-23 · Thor 管理 Wi-Fi 跟随工作站当前 AP
