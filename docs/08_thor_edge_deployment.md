@@ -10,7 +10,7 @@ OpenWAM独立镜像、官方权重、LoRA合并与压缩候选见 [14 · OpenWAM
 
 ## 1. 当前决策
 
-- **2026-10-26 14:36 CST：用户要求开启乐高50h240000基础版（非DAgger），已在线；其他容器已按追加要求停止保留**。复用既有`pi05-rtc-infer`与原引擎，不下载/转换/构建；`thor-pi-maxn-50h240000-resume-20261026.service` active、MAXN/GPU1575MHz，固定`ws://192.168.250.1:8000`、healthz OK。`yam-agent-perception`、`pld-closing8-review-r06`已停止，实查只有Pi容器运行。独占GPU九例d=0/1/10全部有限50×14、前缀精确、指纹匹配；本机推理P50/P95=195.50/205.80ms，往返196.24/207.25ms，不代表3588全链路或真机效果。七步FP32＋TF32、quantile、缓存80/CUDA Graph/dmax10/0.2rad/tick不变，停服后MAXN watcher恢复120W；所有资产保留，不删除、不操作3588。当前证据归[24万报告](reports/thor/rtc-50h-240000-20261013/README.md)；耳机历史与112000永久清理归[114000报告](reports/thor/rtc-earbuds-114000-20261022/README.md)。下条30000为历史。
+- **2026-10-26 15:55 CST：按用户要求关闭Thor推理，乐高50h240000已停止**。实查`pi05-rtc-infer` running=false，`thor-pi-maxn-50h240000-resume-20261026.service` inactive，Thor退出MAXN并恢复120W/模式1。仅停止当前Pi，不恢复此前暂停的其他容器；所有容器、模型权重和引擎均保留，无删除、不自动恢复、不操作3588。原8000配置及此前七步FP32＋TF32/quantile RTC验收归[24万报告](reports/thor/rtc-50h-240000-20261013/README.md)，历史通过不表示当前在线。耳机历史与112000永久清理归[114000报告](reports/thor/rtc-earbuds-114000-20261022/README.md)。下条30000为历史。
 
 - 2026-09-18 09:33 CST，固定 `ws://192.168.250.1:8000` 由**修正分位数前缀**的30000 RTC七步FP32权重＋TF32 TensorRT Docker `pi05-rtc-infer` 提供，MAXN临时会话运行。已核验新版回执绑定、原9例两轮与事故4例本机WebSocket输出有限50×14、前缀不变、事故集最大新后缀关节步进0.0924rad/tick。首轮9例本机往返P50约193.9ms，事故4例约202.6ms；第二轮9例偶发约390ms往返，服务推理仍约193–194ms，成因未知。旧错误前缀的7/10步验证和BF16候选不得作上线精度依据；旧10步不是安全回退。**3588端到端/真机效果未验收**，详见[事故报告更新](reports/thor/rtc-prefix-quantile-incident-20260917.md#2026-09-18-更新新版服务与-thor-本机协议测试)。推理/测试阶段MAXN、容器停止后回120W；不设开机持久化。
 

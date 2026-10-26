@@ -1,8 +1,8 @@
 # 13 · Pi0.5 training-time RTC：Thor 转换与推理候选
 
-## 当前：乐高50h240000在线，其他容器停止保留（2026-10-26）
+## 当前：乐高50h240000已关闭，Thor恢复120W（2026-10-26）
 
-14:36 CST按用户要求开启24万基础版（非DAgger），复用既有引擎和同名Pi/固定8000；`thor-pi-maxn-50h240000-resume-20261026.service` active、MAXN/GPU1575MHz，healthz OK。用户随后明确暂停其他容器，已停止保留`yam-agent-perception`和`pld-closing8-review-r06`，仅Pi运行。独占GPU真实九例d=0/1/10全部有限50×14、前缀精确、指纹匹配；推理P50/P95=195.50/205.80ms，本机往返196.24/207.25ms，不代表3588全链路或任务成功率。七步FP32＋TF32/quantile、缓存80/CUDA Graph/dmax10/0.2rad/tick保护不变；停服恢复120W，不新增开机自启，无下载/重转换/删除、不操作3588。当前证据归[24万报告](../../reports/thor/rtc-50h-240000-20261013/README.md)及[08](../../08_thor_edge_deployment.md)，以下在线记录均为历史。
+15:55 CST按用户要求关闭推理，实查`pi05-rtc-infer` running=false，`thor-pi-maxn-50h240000-resume-20261026.service` inactive，Thor已恢复120W/模式1。保留24万容器、权重、引擎及原8000配置，不自动恢复；此前暂停的其他容器不恢复，无删除、不操作3588。14:36恢复时的独占GPU九例RTC验收与本次停服记录归[24万报告](../../reports/thor/rtc-50h-240000-20261013/README.md)，当前状态归[08](../../08_thor_edge_deployment.md)；以下在线记录均为历史，恢复前重新观测。
 
 ## 已验收基线：240000＋DAgger专项7000（2026-10-15）
 
