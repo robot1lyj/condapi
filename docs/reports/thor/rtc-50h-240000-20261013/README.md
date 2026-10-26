@@ -2,6 +2,12 @@
 
 ## 当前状态
 
+**2026-10-26 14:36 CST：按用户要求开启24万基础版（非DAgger），并按追加要求停止其他容器，已在线。** 现场原Pi停止/120W、无MAXN会话，复用原容器ID `d80c40497577a3028a4ca7bc16fd49c861c0c3893937df62f291e5887b5ef523`与已验收权重/引擎；新`thor-pi-maxn-50h240000-resume-20261026.service`先MAXN/锁频后启动，并按唯一ID监控，日志GPU1575MHz/CPU2601MHz/EMC4266MHz。原`yam-agent-perception`占GPU、CPU审阅`pld-closing8-review-r06`运行；起初保留它们，随后用户明确“把其他的容器先暂停”，才将这两个容器停止保留、不删除、不更改重启策略，复核只剩Pi容器运行且GPU进程仅Pi。
+
+初次50秒就绪等待结束时服务仍未监听，随后协议尝试报ConnectionRefusedError，未产出通过回执；容器仍running、无OOM。没有重启或修改引擎，继续等待healthz真正OK后，于14:36:17+08完成[独占GPU九例协议复核](resume-20261026-isolated-smoke.json)。真实episode95/96/97早中晚、三相机/14D state/prompt、d=0/1/10全部有限50×14、前缀精确，握手weight/norm/engine与原24万一致。推理P50/P95=195.50/205.80ms，本机往返196.24/207.25ms，最大新后缀关节步进0.127803rad/tick。七步FP32＋TF32、quantile、缓存80/CUDA Graph/dmax10/0.2rad/tick不变；固定`ws://192.168.250.1:8000`、healthz OK/MAXN active。未重跑JAX精度对照，不冒称跨IPC/实机任务验收；没有下载、转换、构建、删除、训练或操作3588。停服恢复120W，不新增开机自启。
+
+## 历史：2026-10-23停止推理
+
 2026-10-23 11:07:46+08：用户要求“先取消推理”，`docker stop --timeout 20 pi05-rtc-infer`完成，实查running=false；`thor-pi-maxn-50h240000-resume-20261023.service` inactive，`nvpmodel -q`显示120W/模式1。容器及所有模型权重/引擎保留，不删除、不自动恢复、不操作3588；以下为此前上线和验收历史，不表示当前在线。
 
 ## 历史：2026-10-23恢复24万步
