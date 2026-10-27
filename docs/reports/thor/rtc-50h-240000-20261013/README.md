@@ -2,6 +2,10 @@
 
 ## 当前状态
 
+2026-10-27 11:13:44+08：用户要求关闭当前推理，`docker stop --timeout 20 pi05-rtc-infer`完成，实查running=false。`yam-agent-perception`仍运行，GPU进程为python PID4140324（2658MiB）和parts-vision Python PID4140323（4446MiB）；只停止Pi，没有修改其他容器或其任务。`nvpmodel -q`仍为MAXN/模式0：本轮Pi启动前已是共享MAXN，未创建专属watcher，因此保留已有性能状态、不擅自降为120W影响视觉任务。权重、引擎和容器保留，不删除、不自动恢复、不操作3588。以下为此前上线验收，不表示当前Pi在线。
+
+## 历史：2026-10-27恢复24万步
+
 **2026-10-27 10:45 CST：用户要求开启24万推理，已恢复原50h240000基础版（非DAgger）。** 现场原Pi停止，但`yam-agent-perception`和`sun-yat-sen-ep02-audio`运行，宿主已是MAXN，无正在运行的Pi MAXN watcher或`maxn_session.py`进程。只启动原Pi唯一ID `d80c40497577a3028a4ca7bc16fd49c861c0c3893937df62f291e5887b5ef523`，不停止其他容器、不修改启动前已有的电源配置。通过sudo只读`jetson_clocks --show`核对MAXN/GPU1575MHz、CPU2601MHz、EMC4266MHz均锁频。不是重新进入120W再取MAXN快照，没有新建Pi MAXN unit；后续停服须核对并行任务和电源归属，不得宣称Pi停止会自动回120W，也不应擅自降频影响其他任务。
 
 [本次九例协议回执](resume-20261027-smoke.json)于10:45:41+08通过，真实episode95/96/97早中晚、三相机/14D state/prompt、d=0/1/10全部有限50×14、前缀精确、指纹匹配。七步FP32＋TF32/quantile、缓存80/CUDA Graph、dmax10与0.2rad/tick保护不变；固定`ws://192.168.250.1:8000`、healthz OK。当前共享负载下推理P50/P95=200.26/223.62ms、本机往返201.04/224.88ms，最大新后缀关节步进0.122233rad/tick；不是独占GPU基准、3588全链路或任务成功率。复用既有权重/引擎，未重跑JAX精度对照，无下载、转换、构建、删除、训练或3588操作。
