@@ -1,0 +1,31 @@
+{
+  "at": "2026-10-29T18:28:26.040482+08:00",
+  "status": "COMPLETE",
+  "authorization": "User explicitly requested deletion of the two previously listed historical logs",
+  "deleted_files": [
+    {
+      "path": "/home/wuyan/lyj/YAM/training-runs/control/lego_full_b32_after_xid13_20260910/train.log",
+      "logical_bytes": 114975092740,
+      "allocated_bytes": 114975129600,
+      "mtime_ns": 1789097954241857958,
+      "inode": 211353910,
+      "device": 46
+    },
+    {
+      "path": "/home/wuyan/lyj/YAM/training-runs/control/lego_full_b32_xid13_recovery_20260911/train.log",
+      "logical_bytes": 50629728562,
+      "allocated_bytes": 50629742592,
+      "mtime_ns": 1789177145624342544,
+      "inode": 214696744,
+      "device": 46
+    }
+  ],
+  "deleted_allocated_bytes": 165604872192,
+  "compute_open_reference_check": {
+    "scanned_user_processes": 12,
+    "references": []
+  },
+  "df_before": "Filesystem                     1B-blocks          Used     Available Use% Mounted on\n10.18.31.240:/export/home 15873633943552 8731853062144 6341718441984  58% /home\n",
+  "df_after": "Filesystem                     1B-blocks          Used     Available Use% Mounted on\n10.18.31.240:/export/home 15873633943552 8566251454464 6507321098240  57% /home\n",
+  "jobs_after": "2637|pi05-earbuds-50h|RUNNING\n2640|abc-paper-box|RUNNING\n"
+}
