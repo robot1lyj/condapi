@@ -4,6 +4,8 @@ from fractions import Fraction
 import io
 import json
 from pathlib import Path
+from urllib.parse import parse_qs
+from urllib.parse import urlparse
 import urllib.request
 
 import av
@@ -12,11 +14,33 @@ from download_abc_task import POLICY
 from download_abc_task import RangeReader
 from download_abc_task import audit_video
 from download_abc_task import clip_video
+from download_abc_task import get_tree
 from download_abc_task import run
 import numpy as np
 import pyarrow as pa
 import pyarrow.parquet as pq
 import pytest
+
+
+def test_tree_pagination_fetches_all_declared_files(monkeypatch):
+    pages = []
+
+    def fetch(url, timeout):
+        page = int(parse_qs(urlparse(url).query)["PageNumber"][0])
+        pages.append(page)
+        value = {"Code": 200, "Data": {"Files": [{"Path": f"file-{page}"}], "TotalCount": 3}}
+        return io.BytesIO(json.dumps(value).encode())
+
+    monkeypatch.setattr(urllib.request, "urlopen", fetch)
+    assert [r["Path"] for r in get_tree("repo", "fixed", "directory")] == ["file-1", "file-2", "file-3"]
+    assert pages == [1, 2, 3]
+
+
+def test_repeated_tree_page_is_rejected(monkeypatch):
+    value = {"Code": 200, "Data": {"Files": [{"Path": "same"}], "TotalCount": 3}}
+    monkeypatch.setattr(urllib.request, "urlopen", lambda *a, **k: io.BytesIO(json.dumps(value).encode()))
+    with pytest.raises(RuntimeError, match="duplicate directory page"):
+        get_tree("repo", "fixed", "directory")
 
 
 def make_video(path, *, frozen=False):

@@ -49,24 +49,41 @@ def sha256(path):
         return hashlib.file_digest(stream, "sha256").hexdigest()
 
 
-def api_url(repo, revision, path, *, tree=False):
+def api_url(repo, revision, path, *, tree=False, page=1):
     query = {"Revision": revision, "Root" if tree else "FilePath": path}
+    if tree:
+        query.update(PageNumber=page, PageSize=1000)
     return f"https://modelscope.cn/api/v1/datasets/{repo}/repo{'/tree' if tree else ''}?{urllib.parse.urlencode(query)}"
 
 
 def get_tree(repo, revision, path):
-    for attempt in range(6):
-        try:
-            with urllib.request.urlopen(api_url(repo, revision, path, tree=True), timeout=90) as response:
-                value = json.load(response)
-            if value["Code"] != 200:
-                raise RuntimeError("mirror tree API failed")
-            return value["Data"]["Files"]
-        except Exception:
-            if attempt == 5:
-                raise RuntimeError(f"Cannot list pinned source directory: {repo}/{path}") from None
-            time.sleep(min(30, 2**attempt))
-    raise RuntimeError("Source listing retries exhausted")
+    files, seen, page = [], set(), 1
+    while True:
+        for attempt in range(6):
+            try:
+                with urllib.request.urlopen(
+                    api_url(repo, revision, path, tree=True, page=page), timeout=90
+                ) as response:
+                    value = json.load(response)
+                if value["Code"] != 200:
+                    raise RuntimeError("mirror tree API failed")
+                break
+            except Exception:
+                if attempt == 5:
+                    raise RuntimeError(f"Cannot list pinned source directory: {repo}/{path}") from None
+                time.sleep(min(30, 2**attempt))
+        batch = value["Data"]["Files"]
+        total = value["Data"]["TotalCount"]
+        for record in batch:
+            if record["Path"] in seen:
+                raise RuntimeError("Mirror returned duplicate directory page; inventory incomplete")
+            seen.add(record["Path"])
+            files.append(record)
+        if len(files) == total:
+            return files
+        if not batch or len(files) > total:
+            raise RuntimeError("Mirror pagination disagrees with declared inventory size")
+        page += 1
 
 
 class RangeReader(io.RawIOBase):
