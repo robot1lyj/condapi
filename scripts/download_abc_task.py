@@ -74,6 +74,7 @@ class RangeReader(io.RawIOBase):
 
     def __init__(self, url, size, block_size=2 * 1024 * 1024):
         self.url, self.size, self.block_size = url, size, block_size
+        self.active_url = url
         self.position, self.transferred = 0, 0
         self.cache = OrderedDict()
 
@@ -99,11 +100,14 @@ class RangeReader(io.RawIOBase):
             end = min(start + self.block_size, self.size) - 1
             for attempt in range(6):
                 try:
-                    request = urllib.request.Request(self.url, headers={"Range": f"bytes={start}-{end}"})
+                    request = urllib.request.Request(self.active_url, headers={"Range": f"bytes={start}-{end}"})
                     with urllib.request.urlopen(request, timeout=90) as response:
                         expected = f"bytes {start}-{end}/{self.size}"
                         if response.status != 206 or response.headers.get("Content-Range") != expected:
                             raise OSError("source does not honor the exact requested byte range")
+                        # Reuse the temporary CDN URL in memory; refresh through the
+                        # pinned API if it expires. Never log or persist signed URLs.
+                        self.active_url = response.geturl()
                         value = response.read(end - start + 2)
                     if len(value) != end - start + 1:
                         raise OSError("short byte range")
@@ -111,6 +115,7 @@ class RangeReader(io.RawIOBase):
                     self.cache[index] = value
                     break
                 except Exception:
+                    self.active_url = self.url
                     if attempt == 5:
                         raise OSError("Source range unavailable after retries; not classified as bad data") from None
                     time.sleep(min(30, 2**attempt))

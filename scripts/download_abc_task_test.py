@@ -43,6 +43,9 @@ def test_ranges_seek_eof_and_bounded_cache(monkeypatch):
     class Response(io.BytesIO):
         status = 206
 
+        def geturl(self):
+            return "https://example.test/file"
+
     def open_range(request, timeout):
         start, end = map(int, request.get_header("Range").split("=")[1].split("-"))
         response = Response(blob[start : end + 1])
