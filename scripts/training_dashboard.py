@@ -246,6 +246,7 @@ class Dashboard:
                     "stage_steps": args.stage_steps,
                     "total_steps": args.total_steps,
                     "save_interval": args.save_interval,
+                    "step_offset": args.step_offset,
                     "history_metrics": [str(path.resolve()) for path in args.history_metrics or []],
                 }
             ]
@@ -285,6 +286,9 @@ class Dashboard:
             for key in ("batch_size", "stage_steps", "total_steps", "save_interval"):
                 if run.get(key) is not None and (type(run[key]) is not int or run[key] <= 0):
                     raise ValueError("run counts must be positive integers or omitted")
+            step_offset = run.get("step_offset", 0)
+            if type(step_offset) is not int or step_offset < 0:
+                raise ValueError("step_offset must be a nonnegative integer")
             if run.get("stage_steps") and run.get("total_steps") and run["stage_steps"] > run["total_steps"]:
                 raise ValueError("stage exceeds total steps")
             for key in ("field_map", "metric_labels", "parameters"):
@@ -316,6 +320,12 @@ class Dashboard:
             source_format=run.get("format", "auto"),
             field_map=run.get("field_map"),
         )
+        step_offset = run.get("step_offset", 0)
+        if step_offset:
+            current = {
+                **current,
+                "rows": [{**row, "step": row["step"] + step_offset} for row in current["rows"]],
+            }
         history = [
             read_metrics(
                 path,
@@ -338,6 +348,7 @@ class Dashboard:
                 },
                 "name": run.get("name", run["id"]),
                 "source": str(run["metrics"]),
+                "history_source_count": len(run.get("history_metrics", [])),
                 "parameters": run.get("parameters", {}),
                 "loss_semantics": run.get("loss_semantics", "生产者提供的数值; 未声明瞬时值或区间均值"),
                 "metric_labels": run.get("metric_labels", {}),
@@ -491,6 +502,12 @@ def parse_args(argv=None):
     parser.add_argument("--stage-steps", type=int)
     parser.add_argument("--total-steps", type=int)
     parser.add_argument("--save-interval", type=int)
+    parser.add_argument(
+        "--step-offset",
+        type=int,
+        default=0,
+        help="Shift current-run step numbers for a logical history timeline; history sources stay unshifted",
+    )
     parser.add_argument("--remote", help="Optional SSH alias, e.g. yam-server")
     parser.add_argument("--remote-metrics", help="Absolute remote JSONL file; no shell metacharacters")
     parser.add_argument(
@@ -513,6 +530,7 @@ def parse_args(argv=None):
         or args.history_remote_metrics
         or args.remote_status_job_name
         or args.remote_status_node
+        or args.step_offset
     ):
         parser.error("multi-run sources are local; mirror each remote source separately")
     if any(
@@ -529,6 +547,8 @@ def parse_args(argv=None):
         parser.error("counts and interval must be positive")
     if args.stage_steps and args.total_steps and args.stage_steps > args.total_steps:
         parser.error("stage steps must not exceed total steps")
+    if args.step_offset < 0:
+        parser.error("--step-offset must be nonnegative")
     if args.remote or args.remote_metrics or args.history_remote_metrics:
         if not args.remote or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.@-]*", args.remote):
             parser.error("invalid SSH alias")

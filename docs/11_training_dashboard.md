@@ -13,15 +13,15 @@ python3 scripts/training_dashboard.py --metrics /absolute/run/metrics.jsonl --mo
 
 打开 `http://127.0.0.1:8765`。顶部切换运行；自动显示已有数值指标，默认至多添加八个辅助图，其余通过“添加指标”选择，× 可移除。训练损失图固定保留；没有 loss 的模型可通过自定义指标图观察。未知 batch、目标步数、精度、GPU 数留空，绝不套用 Pi 配置。
 
-2026-10-13按用户要求，活动的 `training_dashboard.service` 已从XR-1切换到耳机Pi0.5 run `earbuds_pi05_rtc_base_50h_20261012`；独立缓存为 `artifacts/training_dashboard/pi05_earbuds_50h_20261012/metrics.jsonl`，专属metadata为 `configs/dashboards/pi05-earbuds-metadata.json`，可复现服务模板为 `scripts/training_dashboard_earbuds.service`。面板本次阶段/总体目标均显示200000，LR decay仍为338000，仅作为学习率参数展示。旧XR-1/乐高缓存保留，不拼接到耳机曲线。源端未产生真实metrics时步号/loss保持空白。
+2026-10-29活动的 `training_dashboard.service` 展示耳机 clean-v2 run `earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022`，缓存位于 `artifacts/training_dashboard/pi05_earbuds_50h_clean_v2_excl_pantheon_retry4_20261022/metrics.jsonl`。旧耳机父run `earbuds_pi05_rtc_base_50h_20261012` 的只读历史拼接到逻辑 step114000；当前 run-local 步号按 `+114000` 显示，逻辑目标200000，本run目标86000。新旧run数据规模/norm不同，metadata明确标注边界。当前活动命令见用户级 systemd override，可复现模板为 `scripts/training_dashboard_earbuds.service`，metadata模板为 `configs/dashboards/pi05-earbuds-metadata.json`。其他XR-1/乐高缓存不并入耳机曲线。
 
 首次数据准备2322因source35033左腕视频少一帧失败，依赖训练2323被取消；用户已授权异常整集排除并补足50h。清洗/转换时曾临时轮询对应作业名，当前正式轮询 `pi05-earbuds-50h`，已显示2328的真实step/loss和RUNNING状态；metadata里的文字状态须带观察时间，不能当成实时进展。清洗方案和当前作业归[耳机训练记录](reports/training/earbuds-pi05-50h-20261012/README.md)。服务每10秒镜像指标、每30秒只读查询Slurm；不会启动、停止或修改训练。2026-10-13修复空作业列表分隔符解析，已有idle测试与完整看板测试通过，空队列显示无活动作业，不再误报Slurm查询失败。
 
-旧Pi服务模板 `scripts/training_dashboard.service` 保留历史乐高338k设置；它不是当前活动override。活动服务通过 `systemctl --user cat training_dashboard.service` 核查。切换前的XR-1 override备份在 `artifacts/training_dashboard/pi05_earbuds_50h_20261012/previous-xr1-override.conf`。
+旧Pi服务模板 `scripts/training_dashboard.service` 保留历史乐高338k设置；它不是当前活动override。活动服务通过 `systemctl --user cat training_dashboard.service` 核查；耳机专用模板保留在 `scripts/training_dashboard_earbuds.service`。切换前的XR-1 override备份在 `artifacts/training_dashboard/pi05_earbuds_50h_20261012/previous-xr1-override.conf`。
 
 重启初始化期间远端 metrics 可能暂时保留上次运行的尾部 step；看板同步成功只证明 SSH 文件镜像成功，不证明当前作业已写新指标。展示当前进度前同时复核远端 `squeue`、metrics 源文件 mtime 与最后step；如源mtime落后于当前作业启动时刻，应标为恢复初始化/旧尾值。2026-09-28 10:24 +08 的 2183 已在gpu001恢复至新step69021；本机看板API当次同步到69011，约落后一个10秒轮询间隔。
 
-单次运行也可以用 `--history-metrics /path/to/parent.jsonl` 指定本地父日志；远端父日志使用同一 SSH 主机上的重复 `--history-remote-metrics /absolute/parent.jsonl`。当前 run 尚无记录时，看板先显示父 run；当前 run 写入后自动拼接为连续曲线。父日志只读，镜像失败时保留上次缓存。
+单次运行也可以用 `--history-metrics /path/to/parent.jsonl` 指定本地父日志；远端父日志使用同一 SSH 主机上的重复 `--history-remote-metrics /absolute/parent.jsonl`。当前段步号需要映射到累计逻辑步号时，用 `--step-offset N` 只平移当前指标，父日志保持原步号；看板按平移后的首步截断父日志，并让当前段覆盖重叠步。当前 run 尚无记录时，看板先显示父 run；当前 run 写入后自动拼接为连续曲线。父日志只读，镜像失败时保留上次缓存。数据集、归一化或优化器合同改变时，应在看板metadata中明确标注分段边界，避免把不同条件下的 loss 当作同条件连续比较。
 
 ## 工具复用与配置实测边界
 

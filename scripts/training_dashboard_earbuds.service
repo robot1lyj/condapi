@@ -5,7 +5,7 @@ After=network.target
 [Service]
 Type=simple
 WorkingDirectory=%h/condapi
-ExecStart=/usr/bin/python3 %h/condapi/scripts/training_dashboard.py --metrics %h/condapi/artifacts/training_dashboard/pi05_earbuds_50h_20261012/metrics.jsonl --remote yam-server --remote-metrics /home/wuyan/lyj/YAM/training-runs/pi05_yam/earbuds_pi05_rtc_base_50h_20261012/metrics/metrics.jsonl --interval 10 --remote-status-job-name pi05-earbuds-50h --remote-status-node gpu001 --status-interval 30 --save-interval 1000 --batch-size 32 --stage-steps 200000 --total-steps 200000 --model pi05 --backend OpenPI/JAX --metadata %h/condapi/configs/dashboards/pi05-earbuds-metadata.json --name "Pi0.5 · 耳机50h · 目标200000步"
+ExecStart=/usr/bin/python3 %h/condapi/scripts/training_dashboard.py --metrics %h/condapi/artifacts/training_dashboard/pi05_earbuds_50h_clean_v2_excl_pantheon_retry4_20261022/metrics.jsonl --remote yam-server --remote-metrics /home/wuyan/lyj/YAM/training-runs/pi05_yam/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/metrics/metrics.jsonl --history-remote-metrics /home/wuyan/lyj/YAM/training-runs/pi05_yam/earbuds_pi05_rtc_base_50h_20261012/metrics/metrics.jsonl --step-offset 114000 --interval 10 --remote-status-job-name pi05-earbuds-50h --remote-status-node gpu001 --status-interval 30 --save-interval 1000 --batch-size 32 --stage-steps 200000 --total-steps 200000 --model pi05 --backend OpenPI/JAX --metadata %h/condapi/configs/dashboards/pi05-earbuds-metadata.json --name "Pi0.5 · 耳机 clean-v2 续训 · 逻辑目标200000步"
 Restart=on-failure
 RestartSec=10
 NoNewPrivileges=true
