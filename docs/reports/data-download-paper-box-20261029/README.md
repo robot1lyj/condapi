@@ -4,13 +4,13 @@
 
 ## 当前状态
 
-服务器 CPU-only Slurm 作业 **2639 / abc-paper-box** 已启动，2 CPU、12 GiB 内存、0 GPU，运行在 gpu001；耳机训练 2637 继续运行。下载根目录为：
+服务器 CPU-only Slurm 作业 **2640 / abc-paper-box** 已启动，2 CPU、12 GiB 内存、0 GPU，运行在 gpu001；耳机训练 2637 继续运行。下载根目录为：
 
 ```text
 /home/wuyan/lyj/YAM/YAM_data/ABC-130k-paper-box-20261029
 ```
 
-本回执的状态是 **DOWNLOADING_AND_SCREENING**，不是下载完成、全量清洗完成或训练 READY。现场以 `squeue -j 2639`、根目录 `download-2639.log`、随后生成的 `progress.json` 和最终 `completion.json` 为准。网络、权限、磁盘容量或 I/O 失败会停止重试后报错，不会被计为坏 episode。完成前不发布最终通过清单。
+本回执的状态是 **DOWNLOADING_AND_SCREENING**，不是下载完成、全量清洗完成或训练 READY。现场以 `squeue -j 2640`、根目录 `download-2640.log`、随后生成的 `progress.json` 和最终 `completion.json` 为准。网络、权限、磁盘容量或 I/O 失败会停止重试后报错，不会被计为坏 episode。完成前不发布最终通过清单。
 
 源元数据统计（排除前）：
 
@@ -54,18 +54,18 @@
 
 ## 代码与验证
 
-入口：[download_abc_task.py](../../../scripts/download_abc_task.py)。代码提交 `9a4db38` 已推送两个配置远端；服务器仅从 Gitea 取得，并从该提交导出独立快照到 `/home/wuyan/lyj/YAM/code-snapshots/abc-paper-box-20261029-v2`，未更新原训练快照或 Python 环境。执行使用现有独立数据 prefix `/home/wuyan/.conda/envs/yam-xr1-data`。
+入口：[download_abc_task.py](../../../scripts/download_abc_task.py)。代码提交 `ad8a218` 已推送两个配置远端；服务器仅从 Gitea 取得，并从该提交导出独立快照到 `/home/wuyan/lyj/YAM/code-snapshots/abc-paper-box-20261029-v3`，未更新原训练快照或 Python 环境。执行使用现有独立数据 prefix `/home/wuyan/.conda/envs/yam-xr1-data`。
 
-镜像 API 每个 Range 都重新跳转的实测耗时约 3.43 s/2 MiB，复用内存中的临时 CDN URL 后约 0.065 s/2 MiB；URL 失效时重新经固定版本 API 获取，不打印或保存签名 URL。初始本轮作业 2638 因此停止并替换为优化后的 2639，保留其日志和未完成 metadata 文件 `file-000.parquet.partial-job2638`；其他原有任务未动。工作站已取得并校验的 metadata 只复制到本轮新目录，服务器再次校验后复用。
+镜像 API 每个 Range 都重新跳转的实测耗时约 3.43 s/2 MiB，复用内存中的临时 CDN URL 后约 0.065 s/2 MiB；URL 失效时重新经固定版本 API 获取，不打印或保存签名 URL。初始本轮作业 2638 因此停止并替换为优化后的 2639，保留其日志和未完成 metadata 文件 `file-000.parquet.partial-job2638`；2639随后因完整性检查发现镜像目录默认只返回100条而退出；补齐分页并对照TotalCount后，以2640恢复，保留两轮日志。其他原有任务未动。工作站已取得并校验的 metadata 只复制到本轮新目录，服务器再次校验后复用。
 
-11 项轻量文件/元数据/编码检查通过，覆盖 HTTP 精确范围与错误响应、关键帧预滚、重封装前后目标帧像素相同、冻结检测、非目标 episode 排除、断点复跑，以及既有数据审计器检查。真实 train source 23 的 top 视频完成无重编码范围提取，读取 27,262,976 字节，4,442 个目标帧全部解码且时间戳通过。Ruff 与 `git diff --check` 通过；没有运行任何训练循环、模型 smoke 或 GPU 检查。
+13 项轻量文件/元数据/编码检查通过，覆盖 目录分页与重复页拦截、HTTP 精确范围与错误响应、关键帧预滚、重封装前后目标帧像素相同、冻结检测、非目标 episode 排除、断点复跑，以及既有数据审计器检查。真实 train source 23 的 top 视频完成无重编码范围提取，读取 27,262,976 字节，4,442 个目标帧全部解码且时间戳通过。Ruff 与 `git diff --check` 通过；没有运行任何训练循环、模型 smoke 或 GPU 检查。
 
 复跑使用同一冻结目录（仅用于原作业已退出后，不并行启动第二份）：
 
 ```bash
 export CUDA_VISIBLE_DEVICES='' OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1
 nice -n 15 /home/wuyan/.conda/envs/yam-xr1-data/bin/python -u \
-  /home/wuyan/lyj/YAM/code-snapshots/abc-paper-box-20261029-v2/scripts/download_abc_task.py \
+  /home/wuyan/lyj/YAM/code-snapshots/abc-paper-box-20261029-v3/scripts/download_abc_task.py \
   --root /home/wuyan/lyj/YAM/YAM_data/ABC-130k-paper-box-20261029
 ```
 

@@ -2,7 +2,7 @@
 
 ## 折纸盒 ABC-130k 下载与筛查（2026-10-29）
 
-按用户要求下载 `fold the paper box` 到服务器新目录 `/home/wuyan/lyj/YAM/YAM_data/ABC-130k-paper-box-20261029`。排除前 train 2,387 集/99.341148h、val 29 集/1.192657h；CPU-only Slurm 2639 已启动，状态为下载/逐集筛查中，不是完成或训练 READY。通过有界 HTTP Range 保存完整目标 episode 的原 14D 行及不重编码视频，关键帧预滚通过 `offset_s` 显式对齐；原数据、此前既有下载和训练不修改。
+按用户要求下载 `fold the paper box` 到服务器新目录 `/home/wuyan/lyj/YAM/YAM_data/ABC-130k-paper-box-20261029`。排除前 train 2,387 集/99.341148h、val 29 集/1.192657h；CPU-only Slurm 2640 已启动，状态为下载/逐集筛查中，不是完成或训练 READY。通过有界 HTTP Range 保存完整目标 episode 的原 14D 行及不重编码视频，关键帧预滚通过 `offset_s` 显式对齐；原数据、此前既有下载和训练不修改。
 
 本轮检查有限值/shape、帧号/30fps时间戳、三路完整目标帧解码，以及持续冻结和严重亮度/对比度异常，整集隔离、保留原件及原因；规律性相邻重复仅统计，避免将重采样误判成损坏。**未覆盖完整 Pantheon 原始 UUID 标注、原生时间缺口和任务成功语义**，不能称所有上游问题均已排除。来源提交、检查阈值、服务器日志/恢复方式、格式偏移边界和完成条件见[下载回执](reports/data-download-paper-box-20261029/README.md)。最终通过清单只在全量下载/本轮检查结束后生成；不自动转换训练格式、重算 norm 或创建训练配方。
 

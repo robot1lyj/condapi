@@ -1,0 +1,186 @@
+{
+  "observed_at": "2026-10-29T17:58:27.309773+08:00",
+  "operation": "READ_ONLY_INVENTORY_NO_DELETION_AUTHORIZED",
+  "historical_cuda_dumps": [
+    {
+      "path": "/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/incidents/job-2574/cuda.gpu001.hlink.local.3976967.1792658523.nvcudmp",
+      "logical_bytes": 112598909426,
+      "allocated_bytes": 112598925312,
+      "mtime_ns": 1792663725095218730
+    },
+    {
+      "path": "/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/incidents/job-2576/cuda.gpu001.hlink.local.1418398.1792664529.nvcudmp",
+      "logical_bytes": 104004207644,
+      "allocated_bytes": 104004227072,
+      "mtime_ns": 1792672612628190605
+    },
+    {
+      "path": "/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/incidents/job-2580/cuda.gpu001.hlink.local.1387690.1792673617.nvcudmp",
+      "logical_bytes": 104017983628,
+      "allocated_bytes": 104018001920,
+      "mtime_ns": 1792678907187966094
+    },
+    {
+      "path": "/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/incidents/job-2582/cuda.gpu001.hlink.local.3217828.1792680698.nvcudmp",
+      "logical_bytes": 104034203581,
+      "allocated_bytes": 104034230272,
+      "mtime_ns": 1792685341904968191
+    },
+    {
+      "path": "/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/incidents/job-2584/cuda.gpu001.hlink.local.2928945.1792686068.nvcudmp",
+      "logical_bytes": 104006180022,
+      "allocated_bytes": 104006238208,
+      "mtime_ns": 1792688607819620615
+    },
+    {
+      "path": "/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/incidents/job-2586/cuda.gpu001.hlink.local.2549481.1792689756.nvcudmp",
+      "logical_bytes": 99701688636,
+      "allocated_bytes": 99701702656,
+      "mtime_ns": 1792692100708235910
+    },
+    {
+      "path": "/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/incidents/job-2588/cuda.gpu001.hlink.local.1217185.1792693279.nvcudmp",
+      "logical_bytes": 99705251336,
+      "allocated_bytes": 99705266176,
+      "mtime_ns": 1792696114579586507
+    },
+    {
+      "path": "/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/incidents/job-2590/cuda.gpu001.hlink.local.1255574.1792696868.nvcudmp",
+      "logical_bytes": 99705193810,
+      "allocated_bytes": 99705208832,
+      "mtime_ns": 1792698910678014364
+    },
+    {
+      "path": "/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/incidents/job-2592/cuda.gpu001.hlink.local.3680761.1792700458.nvcudmp",
+      "logical_bytes": 99706020690,
+      "allocated_bytes": 99706036224,
+      "mtime_ns": 1792702377145251331
+    },
+    {
+      "path": "/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/incidents/job-2594/cuda.gpu001.hlink.local.1427043.1792704057.nvcudmp",
+      "logical_bytes": 104536985360,
+      "allocated_bytes": 104536997888,
+      "mtime_ns": 1792705852354420936
+    },
+    {
+      "path": "/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/incidents/job-2596/cuda.gpu001.hlink.local.3379128.1792707657.nvcudmp",
+      "logical_bytes": 98578642778,
+      "allocated_bytes": 98578657280,
+      "mtime_ns": 1792709814858722989
+    },
+    {
+      "path": "/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/incidents/job-2598/cuda.gpu001.hlink.local.1690708.1792711254.nvcudmp",
+      "logical_bytes": 103996497694,
+      "allocated_bytes": 103996510208,
+      "mtime_ns": 1792713057436083175
+    },
+    {
+      "path": "/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/incidents/job-2600/cuda.gpu001.hlink.local.3624406.1792714861.nvcudmp",
+      "logical_bytes": 98597930094,
+      "allocated_bytes": 98597945344,
+      "mtime_ns": 1792736065371092426
+    },
+    {
+      "path": "/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/incidents/job-2602/cuda.gpu001.hlink.local.3168902.1792736619.nvcudmp",
+      "logical_bytes": 104011976502,
+      "allocated_bytes": 104011988992,
+      "mtime_ns": 1792742852455700961
+    },
+    {
+      "path": "/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/incidents/job-2604/cuda.gpu001.hlink.local.2906244.1792743686.nvcudmp",
+      "logical_bytes": 104008155246,
+      "allocated_bytes": 104008171520,
+      "mtime_ns": 1792748806409189348
+    },
+    {
+      "path": "/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/incidents/job-2613-attempt-20261028T022208Z/cuda.gpu001.hlink.local.246907.1793154170.nvcudmp",
+      "logical_bytes": 99708671806,
+      "allocated_bytes": 99708686336,
+      "mtime_ns": 1793200477725382958
+    },
+    {
+      "path": "/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/incidents/job-2615-attempt-20261028T152755Z/cuda.gpu001.hlink.local.1526174.1793201288.nvcudmp",
+      "logical_bytes": 104012232838,
+      "allocated_bytes": 104012247040,
+      "mtime_ns": 1793205546253103009
+    },
+    {
+      "path": "/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/incidents/job-2617-attempt-20261028T165630Z/cuda.gpu001.hlink.local.618584.1793206602.nvcudmp",
+      "logical_bytes": 112613464917,
+      "allocated_bytes": 112613478400,
+      "mtime_ns": 1793208172935601579
+    },
+    {
+      "path": "/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/incidents/job-2619-attempt-20261028T172630Z/cuda.gpu001.hlink.local.2085502.1793208402.nvcudmp",
+      "logical_bytes": 99705015940,
+      "allocated_bytes": 99705028608,
+      "mtime_ns": 1793209752875506045
+    },
+    {
+      "path": "/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/incidents/job-2621-attempt-20261028T175651Z/cuda.gpu001.hlink.local.2606302.1793210220.nvcudmp",
+      "logical_bytes": 104002006362,
+      "allocated_bytes": 104002019328,
+      "mtime_ns": 1793212496020867877
+    },
+    {
+      "path": "/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/incidents/job-2623-attempt-20261028T185621Z/cuda.gpu001.hlink.local.1471091.1793213789.nvcudmp",
+      "logical_bytes": 99705247058,
+      "allocated_bytes": 99705262080,
+      "mtime_ns": 1793216225371845390
+    },
+    {
+      "path": "/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/incidents/job-2625-attempt-20261028T195618Z/cuda.gpu001.hlink.local.305814.1793217386.nvcudmp",
+      "logical_bytes": 99831156562,
+      "allocated_bytes": 99831169024,
+      "mtime_ns": 1793219771442738707
+    },
+    {
+      "path": "/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/incidents/job-2627-attempt-20261028T205612Z/cuda.gpu001.hlink.local.3015499.1793220980.nvcudmp",
+      "logical_bytes": 99697461148,
+      "allocated_bytes": 99697475584,
+      "mtime_ns": 1793222855160543639
+    },
+    {
+      "path": "/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/incidents/job-2629-attempt-20261028T215614Z/cuda.gpu001.hlink.local.701198.1793224582.nvcudmp",
+      "logical_bytes": 100141550188,
+      "allocated_bytes": 100141563904,
+      "mtime_ns": 1793226260709420026
+    },
+    {
+      "path": "/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/incidents/job-2631-attempt-20261028T222613Z/cuda.gpu001.hlink.local.2057856.1793226382.nvcudmp",
+      "logical_bytes": 97557980920,
+      "allocated_bytes": 97557995520,
+      "mtime_ns": 1793228245819555196
+    },
+    {
+      "path": "/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/incidents/job-2633-attempt-20261028T232612Z/cuda.gpu001.hlink.local.3690955.1793229980.nvcudmp",
+      "logical_bytes": 100250904668,
+      "allocated_bytes": 100250918912,
+      "mtime_ns": 1793231593675552176
+    },
+    {
+      "path": "/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/incidents/job-2635-attempt-20261028T235611Z/cuda.gpu001.hlink.local.1093332.1793231782.nvcudmp",
+      "logical_bytes": 97018311532,
+      "allocated_bytes": 97018327040,
+      "mtime_ns": 1793233645876931355
+    }
+  ],
+  "historical_cuda_dump_allocated_bytes": 2755454279680,
+  "historical_train_logs": [
+    {
+      "path": "/home/wuyan/lyj/YAM/training-runs/control/lego_full_b32_after_xid13_20260910/train.log",
+      "logical_bytes": 114975092740,
+      "allocated_bytes": 114975129600,
+      "mtime_ns": 1789097954241857958
+    },
+    {
+      "path": "/home/wuyan/lyj/YAM/training-runs/control/lego_full_b32_xid13_recovery_20260911/train.log",
+      "logical_bytes": 50629728562,
+      "allocated_bytes": 50629742592,
+      "mtime_ns": 1789177145624342544
+    }
+  ],
+  "historical_train_log_allocated_bytes": 165604872192,
+  "active_job_2637_evidence_directory": "/home/wuyan/lyj/YAM/training-runs/control/earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/incidents/job-2637-attempt-20261029T005619Z",
+  "active_source_params": "/home/wuyan/lyj/YAM/training-runs/pi05_yam/earbuds_pi05_rtc_base_50h_20261012/114000/params"
+}
