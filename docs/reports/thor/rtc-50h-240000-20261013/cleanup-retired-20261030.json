@@ -1,0 +1,137 @@
+{
+  "status": "deleted_verified",
+  "observed_at": "2026-10-30T03:03:29.792476+00:00",
+  "targets": [
+    {
+      "path": "/home/wuyan-lyj/thor/pi/checkpoints/lego-pi05-rtc-separation-r1-10k-20261014/7000/params",
+      "files": 16,
+      "bytes": 12440535344,
+      "allocated_bytes": 12440592384
+    },
+    {
+      "path": "/home/wuyan-lyj/thor/pi/checkpoints/lego-pi05-rtc-separation-r1-10k-20261014/7000-pytorch-fp32-r1/model.safetensors",
+      "files": 1,
+      "bytes": 14467165872,
+      "allocated_bytes": 14467170304
+    },
+    {
+      "path": "/home/wuyan-lyj/thor/pi/artifacts/rtc-separation-r1-7000-onnx-fp32-cache80-7step-20261015-r2/sampler.onnx",
+      "files": 1,
+      "bytes": 25667489,
+      "allocated_bytes": 25669632
+    },
+    {
+      "path": "/home/wuyan-lyj/thor/pi/artifacts/rtc-separation-r1-7000-onnx-fp32-cache80-7step-20261015-r2/sampler.onnx.data",
+      "files": 1,
+      "bytes": 12510887936,
+      "allocated_bytes": 12510892032
+    },
+    {
+      "path": "/home/wuyan-lyj/thor/pi/artifacts/rtc-separation-r1-7000-trt-tf32-cache80-7step-20261015-r2/sampler.engine",
+      "files": 1,
+      "bytes": 12516807428,
+      "allocated_bytes": 12516814848
+    },
+    {
+      "path": "/home/wuyan-lyj/thor/pi/checkpoints/lego-pi05-rtc-separation-r1-10k-20261014/10000/params",
+      "files": 16,
+      "bytes": 12440542070,
+      "allocated_bytes": 12440604672
+    },
+    {
+      "path": "/home/wuyan-lyj/thor/pi/checkpoints/lego-pi05-rtc-separation-r1-10k-20261014/10000-pytorch-fp32-r1/model.safetensors",
+      "files": 1,
+      "bytes": 14467165872,
+      "allocated_bytes": 14467170304
+    },
+    {
+      "path": "/home/wuyan-lyj/thor/pi/artifacts/rtc-separation-r1-10000-onnx-fp32-cache80-7step-20261015-r2/sampler.onnx",
+      "files": 1,
+      "bytes": 25667489,
+      "allocated_bytes": 25669632
+    },
+    {
+      "path": "/home/wuyan-lyj/thor/pi/artifacts/rtc-separation-r1-10000-onnx-fp32-cache80-7step-20261015-r2/sampler.onnx.data",
+      "files": 1,
+      "bytes": 12510887936,
+      "allocated_bytes": 12510892032
+    },
+    {
+      "path": "/home/wuyan-lyj/thor/pi/artifacts/rtc-separation-r1-10000-trt-tf32-cache80-7step-20261015-r2/sampler.engine",
+      "files": 1,
+      "bytes": 12516772356,
+      "allocated_bytes": 12516777984
+    },
+    {
+      "path": "/home/wuyan-lyj/thor/pi/checkpoints/earbuds-pi05-rtc-base-50h-20261012/114000/params",
+      "files": 16,
+      "bytes": 12440543965,
+      "allocated_bytes": 12440604672
+    },
+    {
+      "path": "/home/wuyan-lyj/thor/pi/checkpoints/earbuds-pi05-rtc-base-50h-20261012/114000-pytorch-fp32-r1/model.safetensors",
+      "files": 1,
+      "bytes": 14467165872,
+      "allocated_bytes": 14467170304
+    },
+    {
+      "path": "/home/wuyan-lyj/thor/pi/artifacts/rtc-earbuds-114000-onnx-fp32-cache80-7step-20261022-r1/sampler.onnx",
+      "files": 1,
+      "bytes": 25667489,
+      "allocated_bytes": 25669632
+    },
+    {
+      "path": "/home/wuyan-lyj/thor/pi/artifacts/rtc-earbuds-114000-onnx-fp32-cache80-7step-20261022-r1/sampler.onnx.data",
+      "files": 1,
+      "bytes": 12510887936,
+      "allocated_bytes": 12510892032
+    },
+    {
+      "path": "/home/wuyan-lyj/thor/pi/artifacts/rtc-earbuds-114000-trt-tf32-cache80-7step-20261022-r1/sampler.engine",
+      "files": 1,
+      "bytes": 12516618612,
+      "allocated_bytes": 12516626432
+    }
+  ],
+  "containers": [
+    {
+      "name": "pi05-rtc-separation7000-preserved-20261015",
+      "id": "a99a3856b66e7a0815f1499007525422fcbcfb16afca107444fcefa787b737d3"
+    },
+    {
+      "name": "pi05-rtc-separation10000-preserved-20261021",
+      "id": "908cf1c2b7d8a99fe3410dd84f8d01a4cdf1314b0036287e5db8899af99a4cd0"
+    },
+    {
+      "name": "pi05-rtc-earbuds114000-preserved-20261022",
+      "id": "6de9d18bb2385d3e5f15aeadb285aab4759967b1ec9b1fe37141b83486363528"
+    }
+  ],
+  "permanent": true,
+  "authorized_scope": "2026-10-30: delete Thor DAgger 7000/10000 and earbuds 114000",
+  "available_before": 181805035520,
+  "completed": [
+    "pi05-rtc-separation7000-preserved-20261015",
+    "pi05-rtc-separation10000-preserved-20261021",
+    "pi05-rtc-earbuds114000-preserved-20261022",
+    "/home/wuyan-lyj/thor/pi/checkpoints/lego-pi05-rtc-separation-r1-10k-20261014/7000/params",
+    "/home/wuyan-lyj/thor/pi/checkpoints/lego-pi05-rtc-separation-r1-10k-20261014/7000-pytorch-fp32-r1/model.safetensors",
+    "/home/wuyan-lyj/thor/pi/artifacts/rtc-separation-r1-7000-onnx-fp32-cache80-7step-20261015-r2/sampler.onnx",
+    "/home/wuyan-lyj/thor/pi/artifacts/rtc-separation-r1-7000-onnx-fp32-cache80-7step-20261015-r2/sampler.onnx.data",
+    "/home/wuyan-lyj/thor/pi/artifacts/rtc-separation-r1-7000-trt-tf32-cache80-7step-20261015-r2/sampler.engine",
+    "/home/wuyan-lyj/thor/pi/checkpoints/lego-pi05-rtc-separation-r1-10k-20261014/10000/params",
+    "/home/wuyan-lyj/thor/pi/checkpoints/lego-pi05-rtc-separation-r1-10k-20261014/10000-pytorch-fp32-r1/model.safetensors",
+    "/home/wuyan-lyj/thor/pi/artifacts/rtc-separation-r1-10000-onnx-fp32-cache80-7step-20261015-r2/sampler.onnx",
+    "/home/wuyan-lyj/thor/pi/artifacts/rtc-separation-r1-10000-onnx-fp32-cache80-7step-20261015-r2/sampler.onnx.data",
+    "/home/wuyan-lyj/thor/pi/artifacts/rtc-separation-r1-10000-trt-tf32-cache80-7step-20261015-r2/sampler.engine",
+    "/home/wuyan-lyj/thor/pi/checkpoints/earbuds-pi05-rtc-base-50h-20261012/114000/params",
+    "/home/wuyan-lyj/thor/pi/checkpoints/earbuds-pi05-rtc-base-50h-20261012/114000-pytorch-fp32-r1/model.safetensors",
+    "/home/wuyan-lyj/thor/pi/artifacts/rtc-earbuds-114000-onnx-fp32-cache80-7step-20261022-r1/sampler.onnx",
+    "/home/wuyan-lyj/thor/pi/artifacts/rtc-earbuds-114000-onnx-fp32-cache80-7step-20261022-r1/sampler.onnx.data",
+    "/home/wuyan-lyj/thor/pi/artifacts/rtc-earbuds-114000-trt-tf32-cache80-7step-20261022-r1/sampler.engine"
+  ],
+  "retained": "20w/23w/24w/base; norms/contracts/reports/replays/JAX references/images; server untouched",
+  "completed_at": "2026-10-30T03:03:30.342574+00:00",
+  "available_after": 337689800704,
+  "deleted_allocated_bytes": 155883216896
+}

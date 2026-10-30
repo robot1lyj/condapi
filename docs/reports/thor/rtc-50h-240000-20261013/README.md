@@ -4,6 +4,12 @@
 
 2026-10-27 11:13:44+08：用户要求关闭当前推理，`docker stop --timeout 20 pi05-rtc-infer`完成，实查running=false。`yam-agent-perception`仍运行，GPU进程为python PID4140324（2658MiB）和parts-vision Python PID4140323（4446MiB）；只停止Pi，没有修改其他容器或其任务。`nvpmodel -q`仍为MAXN/模式0：本轮Pi启动前已是共享MAXN，未创建专属watcher，因此保留已有性能状态、不擅自降为120W影响视觉任务。权重、引擎和容器保留，不删除、不自动恢复、不操作3588。以下为此前上线验收，不表示当前Pi在线。
 
+## 2026-10-30存档清理
+
+用户从实际盘点列表明确指定删除“乐高24万＋DAgger7000”“乐高24万＋DAgger10000”“耳机50h114000”三款。11:03:30+08[删除回执](cleanup-retired-20261030.json)为`deleted_verified`：[冻结脚本](cleanup_retired_20261030.py)在Thor核对设备、三款停止容器唯一ID/模型挂载、运行容器未引用目标、精确15个载荷路径无符号链接，并在删除前后检查20万/23万/24万和官方基础权重均存在。移除三个对应停止容器，永久删除三款params目录、FP32权重、ONNX图/外部权重和sampler.engine；保留norm、训练合同、配置、比较回放、报告、JAX参考、共享镜像和服务器原件，不删除整个共享目录、不做Docker prune。
+
+实际载荷分配字节155,883,216,896，约145.18GiB；回执文件系统可用314.50GiB，随后df显示约315GiB，Pi目录约173GiB。`pi05-rtc-infer`仍停止，指向本页24万；`comfyui-h3`和`yam-agent-perception`继续运行，未操作其程序/数据或3588。完整可用Pi存档现为乐高50h200000/230000/240000与官方基础权重，已删三款只剩小记录、不可直接本地恢复；若要恢复须重新取得原权重并转换/构建。脚本执行成功后禁止重跑，失败或未知状态先读回执，不以目录名推定模型可用。
+
 ## 历史：2026-10-27恢复24万步
 
 **2026-10-27 10:45 CST：用户要求开启24万推理，已恢复原50h240000基础版（非DAgger）。** 现场原Pi停止，但`yam-agent-perception`和`sun-yat-sen-ep02-audio`运行，宿主已是MAXN，无正在运行的Pi MAXN watcher或`maxn_session.py`进程。只启动原Pi唯一ID `d80c40497577a3028a4ca7bc16fd49c861c0c3893937df62f291e5887b5ef523`，不停止其他容器、不修改启动前已有的电源配置。通过sudo只读`jetson_clocks --show`核对MAXN/GPU1575MHz、CPU2601MHz、EMC4266MHz均锁频。不是重新进入120W再取MAXN快照，没有新建Pi MAXN unit；后续停服须核对并行任务和电源归属，不得宣称Pi停止会自动回120W，也不应擅自降频影响其他任务。
