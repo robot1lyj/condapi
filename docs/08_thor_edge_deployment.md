@@ -10,6 +10,8 @@ OpenWAM独立镜像、官方权重、LoRA合并与压缩候选见 [14 · OpenWAM
 
 ## 1. 当前决策
 
+- **2026-10-30 16:20 CST：最新耳机clean-v2 retry4的62000已下载到Thor，仅下载未部署**。查询各耳机run后锁定正式完整保存点`earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022/62000`，不是旧114000；从旧114000初始化后按新run计步，训练数据/norm已变化。仅取params/assets/完成元数据与合同配置，19项SHA通过、约11.59GiB，不取优化器/train_state。目标`checkpoints/earbuds-pi05-rtc-clean-v2-excl-pantheon-retry4-20261022/62000`，自身norm与新合同身份通过，不可复用旧114000 norm或引擎。Pi现场仍停止，无转换/测试/上线、其他容器不动；可用约303GiB。身份、脚本、完整SHA与回执归[62000下载交接](reports/thor/rtc-earbuds-clean-v2-62000-20261030/README.md)。下载校验不等于参数有限性或部署验收；旧114000仍保持已清理状态。
+
 - **2026-10-30 11:03 CST存档清理完成**：按用户指定永久删除Thor的“24万＋DAgger7000”“24万＋DAgger10000”“耳机114000”三款原始params、FP32 model.safetensors、ONNX图/外部权重、TensorRT引擎与三个已停止的对应容器；释放大文件实际分配约145.18GiB，清理回执可用314.50GiB（df约315GiB），Pi目录降为约173GiB。**现完整保留乐高50h200000/230000/240000与官方Pi0.5基础权重**，Pi仍停止；运行中的`comfyui-h3`、`yam-agent-perception`未动。norm/训练合同/配置/报告/真实回放/JAX参考输出、共享镜像和服务器原件均保留；旧目录可能仍有小记录，不能当完整模型。已删三款不可本地直接回退，需要重新取得权重并转换构建。脚本、15项载荷/3个容器删除明细与验证归[24万报告清理记录](reports/thor/rtc-50h-240000-20261013/README.md#2026-10-30存档清理)，不表示真机精度或新上线验收。
 
 - **2026-10-27 11:13 CST：按用户要求关闭乐高50h240000推理，已停止**。实查`pi05-rtc-infer` running=false，容器/权重/引擎保留，不删除、不自动恢复。`yam-agent-perception`仍运行并有两个GPU进程，本轮只停止Pi，不改其他任务；宿主保持启动Pi前已有的MAXN/模式0，**没有恢复120W**，也没有Pi MAXN watcher可自动恢复。此前启动验收及本次停服记录归[24万报告](reports/thor/rtc-50h-240000-20261013/README.md)，原8000配置保留但不表示当前在线。后续电源变更先核对并行任务和归属，不操作3588。下条30000为历史。

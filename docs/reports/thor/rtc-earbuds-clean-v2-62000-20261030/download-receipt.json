@@ -1,0 +1,14 @@
+{
+  "status": "downloaded_sha_verified_not_converted",
+  "observed_at": "2026-10-30T08:20:15.147444+00:00",
+  "checkpoint_step": 62000,
+  "source_run": "earbuds_pi05_rtc_base_50h_clean_v2_excl_pantheon_retry4_20261022",
+  "initial_params_path": "/home/wuyan/lyj/YAM/training-runs/pi05_yam/earbuds_pi05_rtc_base_50h_20261012/114000/params",
+  "rtc_training_max_delay": 10,
+  "norm_stats_sha256": "b7c63db5b78959d5da3ce720fe8f45c075eac57ed97bf949dacc9c86108f1878",
+  "training_norm_sha256": "05f65ada286965f1c5c5b32e62bf3fcdafb7d41d2e22d6683e0c05efc443c5b2",
+  "files": 19,
+  "bytes": 12440562368,
+  "destination": "/home/wuyan-lyj/thor/pi/checkpoints/earbuds-pi05-rtc-clean-v2-excl-pantheon-retry4-20261022/62000",
+  "not_downloaded": "train_state/optimizer; no conversion/inference/training"
+}
