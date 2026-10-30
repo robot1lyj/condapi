@@ -1,0 +1,190 @@
+b1b6591d7e3c8dafd1223e967efd4ba8717083f2287cb5e8dac33218faeaaf8e
+PHASE_JAX_REFERENCE
+E1030 08:31:25.907254      56 cuda_executor.cc:1526] Could not get kernel mode driver version: ( INVALID_ARGUMENT: Version does not match the format X.Y.Z )
+E1030 08:31:25.921018       1 cuda_executor.cc:1526] Could not get kernel mode driver version: ( INVALID_ARGUMENT: Version does not match the format X.Y.Z )
+WARNING:absl:Metadata file does not exist: /checkpoints/62000/params/_CHECKPOINT_METADATA
+PHASE_TORCH_ONNX
+W1030 08:32:23.114000 1 torch/utils/_pytree.py:630] <enum 'KernelPreference'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+/usr/lib/python3.12/copyreg.py:99: FutureWarning: `isinstance(treespec, LeafSpec)` is deprecated, use `isinstance(treespec, TreeSpec) and treespec.is_leaf()` instead.
+  return cls.__new__(cls, *args)
+[torch.onnx] Obtain model graph for `Pi05RtcOnnxSampler([...]` with `torch.export.export(..., strict=False)`...
+[torch.onnx] Obtain model graph for `Pi05RtcOnnxSampler([...]` with `torch.export.export(..., strict=False)`... ✅
+[torch.onnx] Run decompositions...
+[torch.onnx] Run decompositions... ✅
+[torch.onnx] Translate the graph into ONNX...
+[torch.onnx] Translate the graph into ONNX... ✅
+[torch.onnx] Optimize the ONNX graph...
+[torch.onnx] Optimize the ONNX graph... ✅
+[torch.onnx] Export report has been saved to '/artifacts/rtc-earbuds-clean-v2-62000-onnx-fp32-cache80-7step-20261030-r1/diagnostics/onnx_export_2026-10-30_08-34-13-999576_success.md'.
+PHASE_TENSORRT_BUILD
+&&&& RUNNING TensorRT.trtexec [TensorRT v101601] [b11] # /usr/src/tensorrt/bin/trtexec --onnx=/artifacts/rtc-earbuds-clean-v2-62000-onnx-fp32-cache80-7step-20261030-r1/sampler.onnx --saveEngine=/artifacts/rtc-earbuds-clean-v2-62000-trt-tf32-cache80-7step-20261030-r1/sampler.engine --stronglyTyped --skipInference --builderOptimizationLevel=3 --maxAuxStreams=0 --memPoolSize=workspace:8192 --profilingVerbosity=detailed --exportLayerInfo=/artifacts/rtc-earbuds-clean-v2-62000-trt-tf32-cache80-7step-20261030-r1/layers.json --timingCacheFile=/artifacts/rtc-earbuds-clean-v2-62000-trt-tf32-cache80-7step-20261030-r1/timing.cache
+[10/30/2026-08:42:06] [I] === Model Options ===
+[10/30/2026-08:42:06] [I] Format: ONNX
+[10/30/2026-08:42:06] [I] Model: /artifacts/rtc-earbuds-clean-v2-62000-onnx-fp32-cache80-7step-20261030-r1/sampler.onnx
+[10/30/2026-08:42:06] [I] Output:
+[10/30/2026-08:42:06] [I] === Build Options ===
+[10/30/2026-08:42:06] [I] Memory Pools: workspace: 8192 MiB, dlaSRAM: default, dlaLocalDRAM: default, dlaGlobalDRAM: default, tacticSharedMem: default
+[10/30/2026-08:42:06] [I] avgTiming: 8
+[10/30/2026-08:42:06] [I] Precision: Strongly Typed
+[10/30/2026-08:42:06] [I] LayerPrecisions: 
+[10/30/2026-08:42:06] [I] Layer Device Types: 
+[10/30/2026-08:42:06] [I] Decomposable Attentions: 
+[10/30/2026-08:42:06] [I] Calibration: 
+[10/30/2026-08:42:06] [I] Refit: Disabled
+[10/30/2026-08:42:06] [I] Strip weights: Disabled
+[10/30/2026-08:42:06] [I] Version Compatible: Disabled
+[10/30/2026-08:42:06] [I] ONNX Plugin InstanceNorm: Disabled
+[10/30/2026-08:42:06] [I] ONNX kENABLE_UINT8_AND_ASYMMETRIC_QUANTIZATION_DLA flag: Disabled
+[10/30/2026-08:42:06] [I] ONNX kREPORT_CAPABILITY_DLA flag: Disabled
+[10/30/2026-08:42:06] [I] ONNX kADJUST_FOR_DLA flag: Disabled
+[10/30/2026-08:42:06] [I] ONNX kENABLE_PLUGIN_OVERRIDE flag: Disabled
+[10/30/2026-08:42:06] [I] TensorRT runtime: full
+[10/30/2026-08:42:06] [I] Lean DLL Path: 
+[10/30/2026-08:42:06] [I] Tempfile Controls: { in_memory: allow, temporary: allow }
+[10/30/2026-08:42:06] [I] Exclude Lean Runtime: Disabled
+[10/30/2026-08:42:06] [I] Sparsity: Disabled
+[10/30/2026-08:42:06] [I] Safe mode: Disabled
+[10/30/2026-08:42:06] [I] Build DLA standalone loadable: Disabled
+[10/30/2026-08:42:06] [I] Allow GPU fallback for DLA: Disabled
+[10/30/2026-08:42:06] [I] DirectIO mode: Disabled
+[10/30/2026-08:42:06] [I] Restricted mode: Disabled
+[10/30/2026-08:42:06] [I] Skip inference: Enabled
+[10/30/2026-08:42:06] [I] Save engine: /artifacts/rtc-earbuds-clean-v2-62000-trt-tf32-cache80-7step-20261030-r1/sampler.engine
+[10/30/2026-08:42:06] [I] Load engine: 
+[10/30/2026-08:42:06] [I] Profiling verbosity: 2
+[10/30/2026-08:42:06] [I] Tactic sources: Using default tactic sources
+[10/30/2026-08:42:06] [I] timingCacheMode: global
+[10/30/2026-08:42:06] [I] timingCacheFile: /artifacts/rtc-earbuds-clean-v2-62000-trt-tf32-cache80-7step-20261030-r1/timing.cache
+[10/30/2026-08:42:06] [I] Enable Compilation Cache: Enabled
+[10/30/2026-08:42:06] [I] Enable Monitor Memory: Disabled
+[10/30/2026-08:42:06] [I] CPU Only Mode: Disabled
+[10/30/2026-08:42:06] [I] errorOnTimingCacheMiss: Disabled
+[10/30/2026-08:42:06] [I] Preview Features: Use default preview flags.
+[10/30/2026-08:42:06] [I] MaxAuxStreams: 0
+[10/30/2026-08:42:06] [I] BuilderOptimizationLevel: 3
+[10/30/2026-08:42:06] [I] MaxTactics: -1
+[10/30/2026-08:42:06] [I] Calibration Profile Index: 0
+[10/30/2026-08:42:06] [I] Weight Streaming: Disabled
+[10/30/2026-08:42:06] [I] Runtime Platform: Same As Build
+[10/30/2026-08:42:06] [I] Debug Tensors: 
+[10/30/2026-08:42:06] [I] Distributive Independence: Disabled
+[10/30/2026-08:42:06] [I] Mark Unfused Tensors As Debug Tensors: Disabled
+[10/30/2026-08:42:06] [I] Input(s)s format: fp32:CHW
+[10/30/2026-08:42:06] [I] Output(s)s format: fp32:CHW
+[10/30/2026-08:42:06] [I] Input build shapes: model
+[10/30/2026-08:42:06] [I] Input calibration shapes: model
+[10/30/2026-08:42:06] [I] === System Options ===
+[10/30/2026-08:42:06] [I] Device: 0
+[10/30/2026-08:42:06] [I] DLACore: 
+[10/30/2026-08:42:06] [I] Loaded static plugins:
+[10/30/2026-08:42:06] [I] setPluginsToSerialize:
+[10/30/2026-08:42:06] [I] dynamicPlugins:
+[10/30/2026-08:42:06] [I] ignoreParsedPluginLibs: 0
+[10/30/2026-08:42:06] [I] 
+[10/30/2026-08:42:06] [I] === Inference Options ===
+[10/30/2026-08:42:06] [I] Batch: Explicit
+[10/30/2026-08:42:06] [I] Input inference shapes: model
+[10/30/2026-08:42:06] [I] Iterations: 10
+[10/30/2026-08:42:06] [I] Duration: 3s (+ 200ms warm up)
+[10/30/2026-08:42:06] [I] Sleep time: 0ms
+[10/30/2026-08:42:06] [I] Idle time: 0ms
+[10/30/2026-08:42:06] [I] Inference Streams: 1
+[10/30/2026-08:42:06] [I] ExposeDMA: Disabled
+[10/30/2026-08:42:06] [I] Data transfers: Enabled
+[10/30/2026-08:42:06] [I] Spin-wait: Disabled
+[10/30/2026-08:42:06] [I] Multithreading: Disabled
+[10/30/2026-08:42:06] [I] CUDA Graph: Disabled
+[10/30/2026-08:42:06] [I] Separate profiling: Disabled
+[10/30/2026-08:42:06] [I] Time Deserialize: Disabled
+[10/30/2026-08:42:06] [I] Time Refit: Disabled
+[10/30/2026-08:42:06] [I] NVTX verbosity: 2
+[10/30/2026-08:42:06] [I] Persistent Cache Ratio: 0
+[10/30/2026-08:42:06] [I] Optimization Profile Index: 0
+[10/30/2026-08:42:06] [I] Weight Streaming Budget: 100.000000%
+[10/30/2026-08:42:06] [I] Inputs:
+[10/30/2026-08:42:06] [I] Debug Tensor Save Destinations:
+[10/30/2026-08:42:06] [I] Dump All Debug Tensor in Formats: 
+[10/30/2026-08:42:06] [I] === Reporting Options ===
+[10/30/2026-08:42:06] [I] Verbose: Disabled
+[10/30/2026-08:42:06] [I] Averages: 10 inferences
+[10/30/2026-08:42:06] [I] Percentiles: 90,95,99
+[10/30/2026-08:42:06] [I] Dump refittable layers:Disabled
+[10/30/2026-08:42:06] [I] Dump output: Disabled
+[10/30/2026-08:42:06] [I] Profile: Disabled
+[10/30/2026-08:42:06] [I] Export timing to JSON file: 
+[10/30/2026-08:42:06] [I] Export output to JSON file: 
+[10/30/2026-08:42:06] [I] Export profile to JSON file: 
+[10/30/2026-08:42:06] [I] 
+[10/30/2026-08:42:06] [I] === Device Information ===
+[10/30/2026-08:42:06] [I] Available Devices: 
+[10/30/2026-08:42:06] [I]   Device 0: "NVIDIA Thor" UUID: GPU-a7c66ad2-6dbb-0ab8-c1a2-37ba6dba3600
+[10/30/2026-08:42:06] [I] Selected Device: NVIDIA Thor
+[10/30/2026-08:42:06] [I] Selected Device ID: 0
+[10/30/2026-08:42:06] [I] Selected Device UUID: GPU-a7c66ad2-6dbb-0ab8-c1a2-37ba6dba3600
+[10/30/2026-08:42:06] [I] Compute Capability: 11.0
+[10/30/2026-08:42:06] [I] SMs: 20
+[10/30/2026-08:42:06] [I] Device Global Memory: 125748 MiB
+[10/30/2026-08:42:06] [I] Shared Memory per SM: 228 KiB
+[10/30/2026-08:42:06] [I] Memory Bus Width: 256 bits (ECC disabled)
+[10/30/2026-08:42:06] [I] Application Compute Clock Rate: 1.04858 GHz
+[10/30/2026-08:42:06] [I] Application Memory Clock Rate: 4.266 GHz
+[10/30/2026-08:42:06] [I] 
+[10/30/2026-08:42:06] [I] Note: The application clock rates do not reflect the actual clock rates that the GPU is currently running at.
+[10/30/2026-08:42:06] [I] 
+[10/30/2026-08:42:06] [I] TensorRT version: 10.16.1
+[10/30/2026-08:42:06] [I] Loading standard plugins
+[10/30/2026-08:42:06] [I] [TRT] [MemUsageChange] Init CUDA: CPU +0, GPU +0, now: CPU 29, GPU 68449 (MiB)
+[10/30/2026-08:42:06] [I] Start parsing network model.
+[10/30/2026-08:42:06] [I] [TRT] ----------------------------------------------------------------
+[10/30/2026-08:42:06] [I] [TRT] Input filename:   /artifacts/rtc-earbuds-clean-v2-62000-onnx-fp32-cache80-7step-20261030-r1/sampler.onnx
+[10/30/2026-08:42:06] [I] [TRT] ONNX IR version:  0.0.10
+[10/30/2026-08:42:06] [I] [TRT] Opset version:    19
+[10/30/2026-08:42:06] [I] [TRT] Producer name:    pytorch
+[10/30/2026-08:42:06] [I] [TRT] Producer version: 2.12.0a0+5aff3928d8.nv26.05
+[10/30/2026-08:42:06] [I] [TRT] Domain:           
+[10/30/2026-08:42:06] [I] [TRT] Model version:    0
+[10/30/2026-08:42:06] [I] [TRT] Doc string:       
+[10/30/2026-08:42:06] [I] [TRT] ----------------------------------------------------------------
+[10/30/2026-08:42:06] [W] [TRT] ModelImporter.cpp:739: Make sure input lang_tokens has Int64 binding.
+[10/30/2026-08:42:07] [I] Finished parsing network model. Parse time: 0.522469
+[10/30/2026-08:42:07] [W] [TRT] Could not read cache from: /artifacts/rtc-earbuds-clean-v2-62000-trt-tf32-cache80-7step-20261030-r1/timing.cache. A new cache will be generated and written.
+[10/30/2026-08:42:07] [I] [TRT] [MemUsageChange] Init builder kernel library: CPU +303, GPU +566, now: CPU 736, GPU 69445 (MiB)
+[10/30/2026-08:42:07] [W] [TRT] Unused Input: state
+[10/30/2026-08:42:09] [W] [TRT] [RemoveDeadLayers] Input Tensor state is unused or used only at compile-time, but is not being removed.
+[10/30/2026-08:42:09] [I] [TRT] Global timing cache in use. Profiling results in this builder pass will be stored.
+[10/30/2026-08:42:14] [I] [TRT] Compiler backend is used during engine build.
+[10/30/2026-08:45:22] [I] [TRT] Detected 8 inputs and 1 output network tensors.
+[10/30/2026-08:45:24] [I] [TRT] Total Host Persistent Memory: 80 bytes
+[10/30/2026-08:45:24] [I] [TRT] Total Device Persistent Memory: 0 bytes
+[10/30/2026-08:45:24] [I] [TRT] Max Scratch Memory: 231111680 bytes
+[10/30/2026-08:45:24] [I] [TRT] [BlockAssignment] Started assigning block shifts. This will take 1 steps to complete.
+[10/30/2026-08:45:24] [I] [TRT] [BlockAssignment] Algorithm ShiftNTopDown took 0.00825ms to assign 1 blocks to 1 nodes requiring 231111680 bytes.
+[10/30/2026-08:45:24] [I] [TRT] Total Activation Memory: 231111680 bytes
+[10/30/2026-08:45:26] [I] [TRT] Total Weights Memory: 12509680512 bytes
+[10/30/2026-08:45:26] [I] [TRT] Compiler backend is used during engine execution.
+[10/30/2026-08:45:26] [I] [TRT] Engine generation completed in 196.786 seconds.
+[10/30/2026-08:45:26] [I] [TRT] The following layers are used for L2 cache management and do not correspond to any layers in the INetworkDefinition: __mye3475145_myl0_0, __mye3475147_myl0_2135
+[10/30/2026-08:45:26] [I] [TRT] [MemUsageStats] Peak memory usage of TRT CPU/GPU memory allocators: CPU 1188 MiB, GPU 11930 MiB
+[10/30/2026-08:45:35] [I] Created engine with size: 11937.1 MiB
+[10/30/2026-08:45:35] [I] Engine built in 208.501 sec.
+[10/30/2026-08:45:35] [W] [TRT] Could not read cache from: /artifacts/rtc-earbuds-clean-v2-62000-trt-tf32-cache80-7step-20261030-r1/timing.cache. A new cache will be generated and written.
+[10/30/2026-08:45:35] [I] [TRT] Serialized 3801 bytes of code generator cache.
+[10/30/2026-08:45:35] [I] [TRT] Serialized 627617 bytes of compilation cache.
+[10/30/2026-08:45:35] [I] [TRT] Serialized 14 timing cache entries
+[10/30/2026-08:45:35] [I] [TRT] Saved 633041 bytes of timing cache to /artifacts/rtc-earbuds-clean-v2-62000-trt-tf32-cache80-7step-20261030-r1/timing.cache
+[10/30/2026-08:45:47] [I] [TRT] Loaded engine size: 11937 MiB
+[10/30/2026-08:45:48] [I] Engine deserialized in 2.92717 sec.
+[10/30/2026-08:45:48] [I] [TRT] The following layers are used for L2 cache management and do not correspond to any layers in the INetworkDefinition: __mye3475145_myl0_0, __mye3475147_myl0_2135
+[10/30/2026-08:45:48] [I] Skipped inference phase since --skipInference is added.
+&&&& PASSED TensorRT.trtexec [TensorRT v101601] [b11] # /usr/src/tensorrt/bin/trtexec --onnx=/artifacts/rtc-earbuds-clean-v2-62000-onnx-fp32-cache80-7step-20261030-r1/sampler.onnx --saveEngine=/artifacts/rtc-earbuds-clean-v2-62000-trt-tf32-cache80-7step-20261030-r1/sampler.engine --stronglyTyped --skipInference --builderOptimizationLevel=3 --maxAuxStreams=0 --memPoolSize=workspace:8192 --profilingVerbosity=detailed --exportLayerInfo=/artifacts/rtc-earbuds-clean-v2-62000-trt-tf32-cache80-7step-20261030-r1/layers.json --timingCacheFile=/artifacts/rtc-earbuds-clean-v2-62000-trt-tf32-cache80-7step-20261030-r1/timing.cache
+PHASE_TENSORRT_VALIDATION
+W1030 08:46:05.382000 1 torch/utils/_pytree.py:630] <enum 'KernelPreference'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+[10/30/2026-08:46:18] [TRT] [W] Using default stream in enqueueV3() may lead to performance issues due to additional calls to cudaStreamSynchronize() by TensorRT to ensure correct synchronization. Please use non-default stream instead.
+{"status": "compared_not_robot_task_validated", "observed_at": "2026-10-30T08:46:26.206379+00:00", "engine_sha256": "fb79a8b13a19e763d93439e40a71f3881a263398ec4416fe52b57faf60c927f2", "engine_tf32": true, "num_steps": 7, "checkpoint_weights_sha256": "80b97378cfa44a9a39dda91306a20f0940d1c33c77f5db8f18d7614b51c3d8c7", "jax_reference_manifest_sha256": "7f37798bb22a66391118fcc401087ed76336bfe8c57c0889404d99cd62055a3a", "checkpoint_metadata_sha256": "2912d15ba42fe0d742b5ac46e88804dacce69644369b4cf9b7405cf7d8fe7247", "norm_stats_sha256": "b7c63db5b78959d5da3ce720fe8f45c075eac57ed97bf949dacc9c86108f1878", "cases_sha256": "502f530606211212f45180ee9972b4c1f0a0743369abe48230480680a34946a6", "prefix_use_quantiles": true, "physical_max_abs": 0.000625979121871123, "physical_mean_abs": 4.713964102857433e-05, "physical_p95_abs": 0.00016030949712924616, "physical_p99_abs": 0.0003028805888532016, "worst_element": {"case_index": 2, "action_step": 33, "dimension": 3}, "per_dimension": [{"dimension": 0, "kind": "joint_rad", "max_abs": 0.00024265854144966958, "mean_abs": 2.2514474389756266e-05, "p95_abs": 9.593398305322575e-05}, {"dimension": 1, "kind": "joint_rad", "max_abs": 0.0005191180780959037, "mean_abs": 6.214673212735376e-05, "p95_abs": 0.00024548135720631176}, {"dimension": 2, "kind": "joint_rad", "max_abs": 0.0002645671640746361, "mean_abs": 3.838802135684771e-05, "p95_abs": 0.00015227174614952898}, {"dimension": 3, "kind": "joint_rad", "max_abs": 0.000625979121871123, "mean_abs": 5.4624620596022255e-05, "p95_abs": 0.00020583236550440433}, {"dimension": 4, "kind": "joint_rad", "max_abs": 0.0003204709733459765, "mean_abs": 4.662553158876117e-05, "p95_abs": 0.0001647395131197132}, {"dimension": 5, "kind": "joint_rad", "max_abs": 0.0003172182107817889, "mean_abs": 4.5215218185042556e-05, "p95_abs": 0.00016618229679073442}, {"dimension": 6, "kind": "gripper", "max_abs": 0.0005702104786038387, "mean_abs": 7.245250309850672e-05, "p95_abs": 0.00017290354351693339}, {"dimension": 7, "kind": "joint_rad", "max_abs": 0.00026184450996269426, "mean_abs": 2.463088670080666e-05, "p95_abs": 7.728979769437149e-05}, {"dimension": 8, "kind": "joint_rad", "max_abs": 0.00046667466411487446, "mean_abs": 5.90072567153557e-05, "p95_abs": 0.00021443361184790842}, {"dimension": 9, "kind": "joint_rad", "max_abs": 0.0002733461469099918, "mean_abs": 4.0253549329785086e-05, "p95_abs": 0.0001183755505177019}, {"dimension": 10, "kind": "joint_rad", "max_abs": 0.0005623277950093097, "mean_abs": 5.6954794791815e-05, "p95_abs": 0.00020457678334568903}, {"dimension": 11, "kind": "joint_rad", "max_abs": 0.0002514998492821885, "mean_abs": 4.0849050117015194e-05, "p95_abs": 0.0001253250521522864}, {"dimension": 12, "kind": "joint_rad", "max_abs": 0.00020815700197784892, "mean_abs": 4.48845906250518e-05, "p95_abs": 0.00013869317525804767}, {"dimension": 13, "kind": "gripper", "max_abs": 0.0002231722673176062, "mean_abs": 5.1407744777920676e-05, "p95_abs": 0.00013979237351418588}], "server_infer_p50_ms": 188.9792480506003, "server_infer_p95_ms": 367.29177869856346, "steady_server_infer_p50_ms": 188.19746235385537, "steady_server_infer_p95_ms": 188.58072003349662, "steady_server_total_p50_ms": 191.7835110798478, "steady_server_total_p95_ms": 192.45629641227424}
+PHASE_OFFLINE_GUARD_CHECK
+W1030 08:46:32.235000 1 torch/utils/_pytree.py:630] <enum 'KernelPreference'> is an Enum subclass and is now natively supported by torch.compile as an opaque value type. Calling register_constant() on Enum subclasses is deprecated and will be an error in a future release.
+[10/30/2026-08:46:45] [TRT] [W] Using default stream in enqueueV3() may lead to performance issues due to additional calls to cudaStreamSynchronize() by TensorRT to ensure correct synchronization. Please use non-default stream instead.
+{"status": "offline_guard_passed_no_service", "cases": [{"sample": "episode-000000-early.npz", "delay_steps": 0, "jax_max_joint_step_rad": 0.0437701940536499, "trt_max_joint_step_rad": 0.043794989585876465, "joint_max_abs_rad": 0.0002655982971191406, "gripper_max_abs": 0.00015217065811157227, "prefix_exact": true}, {"sample": "episode-000000-middle.npz", "delay_steps": 1, "jax_max_joint_step_rad": 0.016917824745178223, "trt_max_joint_step_rad": 0.01698160171508789, "joint_max_abs_rad": 0.00016039609909057617, "gripper_max_abs": 0.00019360193982720375, "prefix_exact": true}, {"sample": "episode-000000-late.npz", "delay_steps": 10, "jax_max_joint_step_rad": 0.06394608318805695, "trt_max_joint_step_rad": 0.06402339041233063, "joint_max_abs_rad": 0.0006259754300117493, "gripper_max_abs": 0.0005702078342437744, "prefix_exact": true}, {"sample": "episode-000001-early.npz", "delay_steps": 0, "jax_max_joint_step_rad": 0.03629863262176514, "trt_max_joint_step_rad": 0.036273837089538574, "joint_max_abs_rad": 0.00025010108947753906, "gripper_max_abs": 0.00016361474990844727, "prefix_exact": true}, {"sample": "episode-000001-middle.npz", "delay_steps": 1, "jax_max_joint_step_rad": 0.011781096458435059, "trt_max_joint_step_rad": 0.011771559715270996, "joint_max_abs_rad": 0.00014925003051757812, "gripper_max_abs": 0.00018815696239471436, "prefix_exact": true}, {"sample": "episode-000001-late.npz", "delay_steps": 10, "jax_max_joint_step_rad": 0.03670144081115723, "trt_max_joint_step_rad": 0.03666245937347412, "joint_max_abs_rad": 0.0002831965684890747, "gripper_max_abs": 0.00018662214279174805, "prefix_exact": true}, {"sample": "episode-000002-early.npz", "delay_steps": 0, "jax_max_joint_step_rad": 0.05157053470611572, "trt_max_joint_step_rad": 0.051569342613220215, "joint_max_abs_rad": 0.0004667043685913086, "gripper_max_abs": 0.0001925826072692871, "prefix_exact": true}, {"sample": "episode-000002-middle.npz", "delay_steps": 1, "jax_max_joint_step_rad": 0.05495738983154297, "trt_max_joint_step_rad": 0.05499136447906494, "joint_max_abs_rad": 0.00023794174194335938, "gripper_max_abs": 0.00019931793212890625, "prefix_exact": true}, {"sample": "episode-000002-late.npz", "delay_steps": 10, "jax_max_joint_step_rad": 0.07994584739208221, "trt_max_joint_step_rad": 0.07982078194618225, "joint_max_abs_rad": 0.0005623400211334229, "gripper_max_abs": 0.00020456314086914062, "prefix_exact": true}], "guard_rad_per_tick": 0.2, "engine_sha256": "fb79a8b13a19e763d93439e40a71f3881a263398ec4416fe52b57faf60c927f2", "cases_sha256": "502f530606211212f45180ee9972b4c1f0a0743369abe48230480680a34946a6", "norm_stats_sha256": "b7c63db5b78959d5da3ce720fe8f45c075eac57ed97bf949dacc9c86108f1878"}
+CONVERTED_VALIDATED_EARBUDS_62000_NO_PI_SERVICE
+b1b6591d7e3c8dafd1223e967efd4ba8717083f2287cb5e8dac33218faeaaf8e
+H3_RESTORED_AFTER_GPU_EXIT_0

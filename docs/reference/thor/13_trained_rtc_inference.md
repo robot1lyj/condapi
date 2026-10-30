@@ -6,7 +6,7 @@
 
 ## 存档可用性（2026-10-30）
 
-16:20 CST新增耳机新分支clean-v2 retry4/62000原生JAX推理参数与自身norm/训练合同，19项SHA通过；目标`checkpoints/earbuds-pi05-rtc-clean-v2-excl-pantheon-retry4-20261022/62000`。只下载未转换/构建/测试/上线，Pi仍停止，不追更本轮锁定目标。其新norm不得复用旧114000 norm，后续路线仍是训练时RTC dmax10/H50，必须独立验收。源run、初始化关系、SHA和回执归[62000交接](../../reports/thor/rtc-earbuds-clean-v2-62000-20261030/README.md)。
+约16:47 CST耳机新分支clean-v2 retry4/62000已完成FP32保真转换、七步quantile RTC的JAX/Torch/ONNX/TF32 TRT构建与九例离线对照，0.2rad/tick步进检查通过；**用户要求暂不上线，Pi仍停止、原24万容器配置未改，8000无监听**。最大单关节差0.000626rad、夹爪0.000570；共享GPU预热后推理P50/P95=188.20/188.58ms，本机总处理191.78/192.46ms，首轮含捕获P95=367.29ms，不是WebSocket/跨IPC或任务验收。只按授权暂停并恢复H3（已healthy），agent保持运行；沿用已有MAXN不降频，不新建Pi watcher。原始、FP32及独立新引擎均保留，新norm不能替换为旧114000的norm。初始化关系、精度门槛、身份/产物和全日志归[62000离线交接](../../reports/thor/rtc-earbuds-clean-v2-62000-20261030/README.md)，后续另获上线授权才重新配置同一个Pi服务并做协议验收。
 
 按用户授权，DAgger7000/10000和耳机114000的Thor权重、ONNX/TRT载荷及停止容器已永久清理，不可直接回退；仅保留小报告/norm/合同/回放与JAX参考，服务器未动。当前完整保留原50h200000/230000/240000与官方基础权重。释放145.18GiB，证据归[24万报告清理记录](../../reports/thor/rtc-50h-240000-20261013/README.md#2026-10-30存档清理)。下节及更早已验收/保留描述均是历史，不代表资产仍存在。
 
