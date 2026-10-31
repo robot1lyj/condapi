@@ -1,0 +1,1726 @@
+{
+  "status": "deleted_roots_and_containers_verified",
+  "started_at": "2026-10-31T05:40:34.228109+00:00",
+  "authorized_scope": "2026-10-31: delete rl-training, comfyui-h3, xr1, openwam; remove other Pi stopped containers only",
+  "permanent": true,
+  "roots": [
+    {
+      "path": "/home/wuyan-lyj/thor/rl-training",
+      "allocated_bytes": 33483788288
+    },
+    {
+      "path": "/home/wuyan-lyj/comfyui-h3",
+      "allocated_bytes": 160310136832
+    },
+    {
+      "path": "/home/wuyan-lyj/thor/xr1",
+      "allocated_bytes": 20365180928
+    },
+    {
+      "path": "/home/wuyan-lyj/thor/openwam",
+      "allocated_bytes": 24905453568
+    }
+  ],
+  "containers": [
+    {
+      "name": "sun-yat-sen-audio-04-fist-final-qa-20261028",
+      "id": "e3f4860bd52a9d3d84549fc73107d4ef2948d9ebc2c7e90c7b0de61e1e81ff91",
+      "running": false,
+      "started": "2026-10-28T03:31:02.847619218Z",
+      "image_id": "sha256:9e6c0cc266bf05a06b5725242f17d5625733458deda51490643946595d90e6d0",
+      "image": "sha256:9e6c0cc266bf05a06b5725242f17d5625733458deda51490643946595d90e6d0"
+    },
+    {
+      "name": "sun-yat-sen-audio-04-fist-native-qa-20261028",
+      "id": "abf5196df19a3a926af13f69697f42bf74055f6e3525c32e32b336acdb4bc4df",
+      "running": false,
+      "started": "2026-10-28T03:22:33.966975888Z",
+      "image_id": "sha256:9e6c0cc266bf05a06b5725242f17d5625733458deda51490643946595d90e6d0",
+      "image": "sha256:9e6c0cc266bf05a06b5725242f17d5625733458deda51490643946595d90e6d0"
+    },
+    {
+      "name": "sun-yat-sen-audio-04-fist-20261028",
+      "id": "74acb66879622fa2632faa78b4c505c5d53ec36fefd9caebd680f8dc5a402419",
+      "running": false,
+      "started": "2026-10-28T03:15:12.289292567Z",
+      "image_id": "sha256:9e6c0cc266bf05a06b5725242f17d5625733458deda51490643946595d90e6d0",
+      "image": "sha256:9e6c0cc266bf05a06b5725242f17d5625733458deda51490643946595d90e6d0"
+    },
+    {
+      "name": "sun-yat-sen-audio-04-earnest-final-qa-20261027",
+      "id": "8cf7940e09fc8d1baa2cb2f9def22f20537771aa4fce4c1bfa8d790857ee495e",
+      "running": false,
+      "started": "2026-10-27T13:43:28.184157291Z",
+      "image_id": "sha256:9e6c0cc266bf05a06b5725242f17d5625733458deda51490643946595d90e6d0",
+      "image": "comfyui-h3:thor-20261026"
+    },
+    {
+      "name": "sun-yat-sen-audio-04-earnest-qa-20261027",
+      "id": "d54aaa868593a684542f3113aeb6cbd5f61b1aa557fc514764664f12c129bdf9",
+      "running": false,
+      "started": "2026-10-27T13:31:18.56489761Z",
+      "image_id": "sha256:9e6c0cc266bf05a06b5725242f17d5625733458deda51490643946595d90e6d0",
+      "image": "comfyui-h3:thor-20261026"
+    },
+    {
+      "name": "sun-yat-sen-audio-04-earnest-20261027",
+      "id": "22838b02d4a143416f60f2d7c9ee6e3aa511e7bd47541834ca58a44683319752",
+      "running": false,
+      "started": "2026-10-27T13:07:41.461442788Z",
+      "image_id": "sha256:9e6c0cc266bf05a06b5725242f17d5625733458deda51490643946595d90e6d0",
+      "image": "comfyui-h3:thor-20261026"
+    },
+    {
+      "name": "sun-yat-sen-audio-04-uplift-final-qa-20261027",
+      "id": "b39e10f42b1afd59e5a9b17450bd221e9fc7aac7296a03ada5abf233b79ec979",
+      "running": false,
+      "started": "2026-10-27T12:48:16.422846668Z",
+      "image_id": "sha256:9e6c0cc266bf05a06b5725242f17d5625733458deda51490643946595d90e6d0",
+      "image": "comfyui-h3:thor-20261026"
+    },
+    {
+      "name": "sun-yat-sen-audio-04-uplift-qa-20261027",
+      "id": "50ba539b7fc95ae4d3a9bfc1a90727a8c7d77dbee67929db8504712875cafe34",
+      "running": false,
+      "started": "2026-10-27T12:41:15.502352406Z",
+      "image_id": "sha256:9e6c0cc266bf05a06b5725242f17d5625733458deda51490643946595d90e6d0",
+      "image": "comfyui-h3:thor-20261026"
+    },
+    {
+      "name": "sun-yat-sen-audio-04-uplift-20261027",
+      "id": "45495b2a30834a9665688871343857a553e03253309721b07d5ac8d51fb5d718",
+      "running": false,
+      "started": "2026-10-27T12:37:57.390429087Z",
+      "image_id": "sha256:9e6c0cc266bf05a06b5725242f17d5625733458deda51490643946595d90e6d0",
+      "image": "comfyui-h3:thor-20261026"
+    },
+    {
+      "name": "sun-yat-sen-audio-234-speaker-qa",
+      "id": "50c694d03c8e60fbac57c84048bed0e1b443658621e6aecd29731e5eec11d088",
+      "running": false,
+      "started": "2026-10-27T11:05:38.057618662Z",
+      "image_id": "sha256:9e6c0cc266bf05a06b5725242f17d5625733458deda51490643946595d90e6d0",
+      "image": "comfyui-h3:thor-20261026"
+    },
+    {
+      "name": "sun-yat-sen-audio-234-final-qa",
+      "id": "0ed8ddb19940a5fd63b47dd3f67756ff6400bf4ba459008a7886d1cf2f625517",
+      "running": false,
+      "started": "2026-10-27T11:01:03.440348464Z",
+      "image_id": "sha256:9e6c0cc266bf05a06b5725242f17d5625733458deda51490643946595d90e6d0",
+      "image": "comfyui-h3:thor-20261026"
+    },
+    {
+      "name": "sun-yat-sen-audio-234-native-qa",
+      "id": "93c9bcdc045b721331afbdd47442a4f7a940a4730733d962f599831eb9ebff16",
+      "running": false,
+      "started": "2026-10-27T10:50:33.028399625Z",
+      "image_id": "sha256:9e6c0cc266bf05a06b5725242f17d5625733458deda51490643946595d90e6d0",
+      "image": "comfyui-h3:thor-20261026"
+    },
+    {
+      "name": "sun-yat-sen-audio-234-20261027",
+      "id": "a9837c4b47e3a78965d9249aad4a9b165dc287bf946927284fb2136c1d6b92d6",
+      "running": false,
+      "started": "2026-10-27T10:45:34.786748379Z",
+      "image_id": "sha256:9e6c0cc266bf05a06b5725242f17d5625733458deda51490643946595d90e6d0",
+      "image": "comfyui-h3:thor-20261026"
+    },
+    {
+      "name": "sun-yat-sen-ep02-emotion-v4-final-qa",
+      "id": "ac1a6fe00941e00cbd54f05df0c21fd01938f4620894ec6f90e7dd10a879457b",
+      "running": false,
+      "started": "2026-10-27T08:24:25.813526315Z",
+      "image_id": "sha256:9e6c0cc266bf05a06b5725242f17d5625733458deda51490643946595d90e6d0",
+      "image": "comfyui-h3:thor-20261026"
+    },
+    {
+      "name": "sun-yat-sen-ep02-emotion-v4-source-qa",
+      "id": "e68ceeff05e0831d83f3ed77a363e6f31ee60be28238b775abe3a0c5fe362071",
+      "running": false,
+      "started": "2026-10-27T08:15:39.429717197Z",
+      "image_id": "sha256:9e6c0cc266bf05a06b5725242f17d5625733458deda51490643946595d90e6d0",
+      "image": "comfyui-h3:thor-20261026"
+    },
+    {
+      "name": "sun-yat-sen-ep02-tone-v3-final-qa",
+      "id": "33b868e7d2f56c770a66f29b0a676f7b200dbf68d6ad8bf781a6d2d94f84adc2",
+      "running": false,
+      "started": "2026-10-27T08:00:40.57748632Z",
+      "image_id": "sha256:9e6c0cc266bf05a06b5725242f17d5625733458deda51490643946595d90e6d0",
+      "image": "comfyui-h3:thor-20261026"
+    },
+    {
+      "name": "sun-yat-sen-ep02-tone-match-v3",
+      "id": "937686c22a1077e6e66ff7cb04ebc0556b4b6fc190bb0496f01e314f49a9a9cd",
+      "running": false,
+      "started": "2026-10-27T07:19:55.543110405Z",
+      "image_id": "sha256:9e6c0cc266bf05a06b5725242f17d5625733458deda51490643946595d90e6d0",
+      "image": "comfyui-h3:thor-20261026"
+    },
+    {
+      "name": "sun-yat-sen-ep03-audio-v2-qa",
+      "id": "2a849653ea2b00b1a5a5cf62beaea66b0cb06f455b477c5fa240c6c1a85798f6",
+      "running": false,
+      "started": "2026-10-27T06:16:39.602428492Z",
+      "image_id": "sha256:9e6c0cc266bf05a06b5725242f17d5625733458deda51490643946595d90e6d0",
+      "image": "comfyui-h3:thor-20261026"
+    },
+    {
+      "name": "sun-yat-sen-ep03-audio-v2-qa-entrypoint-failed",
+      "id": "a07c26c105c350af89a099b5ea09ae4c8d17be8661798569de8f28de5420f4c9",
+      "running": false,
+      "started": "2026-10-27T06:14:51.77449531Z",
+      "image_id": "sha256:9e6c0cc266bf05a06b5725242f17d5625733458deda51490643946595d90e6d0",
+      "image": "comfyui-h3:thor-20261026"
+    },
+    {
+      "name": "sun-yat-sen-ep03-audio-v2",
+      "id": "c772bc4f50159b575e6cc9e93232a1f342757bb336656e601acdde9ae96a5b41",
+      "running": false,
+      "started": "2026-10-27T05:53:08.864507278Z",
+      "image_id": "sha256:9e6c0cc266bf05a06b5725242f17d5625733458deda51490643946595d90e6d0",
+      "image": "comfyui-h3:thor-20261026"
+    },
+    {
+      "name": "sun-yat-sen-ep03-audio-v1-qa",
+      "id": "e13ec285891a1cc1cd1130951f9f5b4b9bad67727915bff858647eb6d95fa8b1",
+      "running": false,
+      "started": "2026-10-27T05:38:44.545052222Z",
+      "image_id": "sha256:9e6c0cc266bf05a06b5725242f17d5625733458deda51490643946595d90e6d0",
+      "image": "comfyui-h3:thor-20261026"
+    },
+    {
+      "name": "sun-yat-sen-ep03-audio-v1",
+      "id": "e0e702d757d089af8711ae9700494f71d6c8c57da7c19e26a26ba3a424cb8072",
+      "running": false,
+      "started": "2026-10-27T05:33:38.083284734Z",
+      "image_id": "sha256:9e6c0cc266bf05a06b5725242f17d5625733458deda51490643946595d90e6d0",
+      "image": "comfyui-h3:thor-20261026"
+    },
+    {
+      "name": "sun-yat-sen-ep02-emotion-continuous-final-qa",
+      "id": "300bdc30c356b491ae034d350449252ea198f81e273dea8e8eb2f69bfc6e36c5",
+      "running": false,
+      "started": "2026-10-27T03:58:08.236713391Z",
+      "image_id": "sha256:9e6c0cc266bf05a06b5725242f17d5625733458deda51490643946595d90e6d0",
+      "image": "comfyui-h3:thor-20261026"
+    },
+    {
+      "name": "sun-yat-sen-ep02-emotion-continuous-qa",
+      "id": "c0697e91ab5db803ec177dea1ccd7112bc86b494d1b96ede068324c6041b201a",
+      "running": false,
+      "started": "2026-10-27T03:53:02.840326269Z",
+      "image_id": "sha256:9e6c0cc266bf05a06b5725242f17d5625733458deda51490643946595d90e6d0",
+      "image": "comfyui-h3:thor-20261026"
+    },
+    {
+      "name": "sun-yat-sen-ep02-emotion-continuous",
+      "id": "d5c6d1b8ec98b59ffae5bd5a7a17613443a5fd836c7cac74d6b3f02e0e5631db",
+      "running": false,
+      "started": "2026-10-27T03:51:39.213358994Z",
+      "image_id": "sha256:9e6c0cc266bf05a06b5725242f17d5625733458deda51490643946595d90e6d0",
+      "image": "comfyui-h3:thor-20261026"
+    },
+    {
+      "name": "sun-yat-sen-ep02-emotion-v2-asr-fix",
+      "id": "1721f685230e56fa5bf6f28087e13859cdfe34fc765b35d5374baabe0ae84bda",
+      "running": false,
+      "started": "2026-10-27T03:46:42.03454911Z",
+      "image_id": "sha256:9e6c0cc266bf05a06b5725242f17d5625733458deda51490643946595d90e6d0",
+      "image": "comfyui-h3:thor-20261026"
+    },
+    {
+      "name": "sun-yat-sen-ep02-emotion-v2-asr",
+      "id": "f5f3f9f7631a7aef667dc690d61326c1a25b9d6a1d54378acfe6f6accd9c5a8a",
+      "running": false,
+      "started": "2026-10-27T03:38:16.785720674Z",
+      "image_id": "sha256:9e6c0cc266bf05a06b5725242f17d5625733458deda51490643946595d90e6d0",
+      "image": "comfyui-h3:thor-20261026"
+    },
+    {
+      "name": "sun-yat-sen-ep02-emotion-v2-qa",
+      "id": "3792dcd90f55409e13d4bf810cb326122086176f0b7cc57c91376f27bd92c83d",
+      "running": false,
+      "started": "2026-10-27T03:30:35.33738982Z",
+      "image_id": "sha256:9e6c0cc266bf05a06b5725242f17d5625733458deda51490643946595d90e6d0",
+      "image": "comfyui-h3:thor-20261026"
+    },
+    {
+      "name": "sun-yat-sen-ep02-emotion-v2",
+      "id": "bef58a86068d1935df65ae631c52b5eafb9619734a9ab575ca6a9596f44d3e80",
+      "running": false,
+      "started": "2026-10-27T03:27:02.968545804Z",
+      "image_id": "sha256:9e6c0cc266bf05a06b5725242f17d5625733458deda51490643946595d90e6d0",
+      "image": "comfyui-h3:thor-20261026"
+    },
+    {
+      "name": "sun-yat-sen-ep02-asr-final",
+      "id": "e5b632396147b0fa8aa8d10aaded99f055adb4f5b6932eebe46e47fb232b66be",
+      "running": false,
+      "started": "2026-10-27T02:51:02.060358879Z",
+      "image_id": "sha256:9e6c0cc266bf05a06b5725242f17d5625733458deda51490643946595d90e6d0",
+      "image": "comfyui-h3:thor-20261026"
+    },
+    {
+      "name": "sun-yat-sen-ep02-asr",
+      "id": "cf20c9582c83c77935663453571b2c4bf798c7176025cfd65909bb39a1269e49",
+      "running": false,
+      "started": "2026-10-27T02:47:49.137505164Z",
+      "image_id": "sha256:9e6c0cc266bf05a06b5725242f17d5625733458deda51490643946595d90e6d0",
+      "image": "comfyui-h3:thor-20261026"
+    },
+    {
+      "name": "sun-yat-sen-ep02-audio",
+      "id": "ff40eff9899ef1f26d5e0612a8d76a641c6c396cea70725f937312f7bd6145d7",
+      "running": false,
+      "started": "2026-10-27T02:43:24.541445584Z",
+      "image_id": "sha256:9e6c0cc266bf05a06b5725242f17d5625733458deda51490643946595d90e6d0",
+      "image": "comfyui-h3:thor-20261026"
+    },
+    {
+      "name": "comfyui-h3",
+      "id": "b1b6591d7e3c8dafd1223e967efd4ba8717083f2287cb5e8dac33218faeaaf8e",
+      "running": true,
+      "started": "2026-10-30T08:46:49.382193044Z",
+      "image_id": "sha256:9e6c0cc266bf05a06b5725242f17d5625733458deda51490643946595d90e6d0",
+      "image": "comfyui-h3:thor-20261026"
+    },
+    {
+      "name": "pld-rl",
+      "id": "514f92c73435418e0f1022d47994a57224ec5065910bc8b38ab0bab11b32a957",
+      "running": false,
+      "started": "2026-10-15T07:33:47.212916171Z",
+      "image_id": "sha256:92b71c9d6c22034f6a7032e44621af2a3b5f2ae3dd1b386abd6146777b1aeefd",
+      "image": "sha256:92b71c9d6c22034f6a7032e44621af2a3b5f2ae3dd1b386abd6146777b1aeefd"
+    },
+    {
+      "name": "pld-rl-preflight-pld-actor3-iql-closing8-20261015-r06",
+      "id": "67d06339bbb28ad14d41d5f3c85c4b8306af0f8cd45e8bf80e7f51ce481d0af2",
+      "running": false,
+      "started": "2026-10-15T07:32:27.809919894Z",
+      "image_id": "sha256:92b71c9d6c22034f6a7032e44621af2a3b5f2ae3dd1b386abd6146777b1aeefd",
+      "image": "sha256:92b71c9d6c22034f6a7032e44621af2a3b5f2ae3dd1b386abd6146777b1aeefd"
+    },
+    {
+      "name": "pld-actor3-iql-gpu-authority-r06",
+      "id": "72b5edfa8d7e05ec3343a7b2b93377a62f2ea5fdff1fed06046ee9a3014fc41f",
+      "running": false,
+      "started": "2026-10-15T07:26:51.746224532Z",
+      "image_id": "sha256:92b71c9d6c22034f6a7032e44621af2a3b5f2ae3dd1b386abd6146777b1aeefd",
+      "image": "sha256:92b71c9d6c22034f6a7032e44621af2a3b5f2ae3dd1b386abd6146777b1aeefd"
+    },
+    {
+      "name": "pld-closing8-review-r06",
+      "id": "cb21e522e0ceb030c5178d178cbc6e6c868680d3418175c9a1b036b96d401c06",
+      "running": false,
+      "started": "2026-10-15T07:23:28.777431217Z",
+      "image_id": "sha256:2711020dd277e9114ef6296ddc0ed721de376a4b1156183ed39c6c1450a2439c",
+      "image": "sha256:2711020dd277e9114ef6296ddc0ed721de376a4b1156183ed39c6c1450a2439c"
+    },
+    {
+      "name": "nice_diffie",
+      "id": "439d7cd490feb78bddf638f063302cb3a87490199b9389d992d65ff036bc14dd",
+      "running": false,
+      "started": "2026-10-15T07:23:27.952108503Z",
+      "image_id": "sha256:2711020dd277e9114ef6296ddc0ed721de376a4b1156183ed39c6c1450a2439c",
+      "image": "sha256:2711020dd277e9114ef6296ddc0ed721de376a4b1156183ed39c6c1450a2439c"
+    },
+    {
+      "name": "pld-closing8-eval-geometry-v1",
+      "id": "3490b5103c503b24619ed03ea267fe49e4a8113a2952bc3887c44e84bfaeaced",
+      "running": false,
+      "started": "2026-10-15T07:17:31.82113209Z",
+      "image_id": "sha256:2711020dd277e9114ef6296ddc0ed721de376a4b1156183ed39c6c1450a2439c",
+      "image": "sha256:2711020dd277e9114ef6296ddc0ed721de376a4b1156183ed39c6c1450a2439c"
+    },
+    {
+      "name": "frosty_bassi",
+      "id": "1dd688b89565d13860148c24a2f5f34263bbb21f7d30677500ea1cbdce854e82",
+      "running": false,
+      "started": "2026-10-15T07:04:55.114132719Z",
+      "image_id": "sha256:2711020dd277e9114ef6296ddc0ed721de376a4b1156183ed39c6c1450a2439c",
+      "image": "sha256:2711020dd277e9114ef6296ddc0ed721de376a4b1156183ed39c6c1450a2439c"
+    },
+    {
+      "name": "magical_nobel",
+      "id": "d8615d2696a6fe0d4e68b98dec38e91205be497cc45be71d5ee44d3c5db2c64c",
+      "running": false,
+      "started": "2026-10-15T07:04:54.063518086Z",
+      "image_id": "sha256:2711020dd277e9114ef6296ddc0ed721de376a4b1156183ed39c6c1450a2439c",
+      "image": "sha256:2711020dd277e9114ef6296ddc0ed721de376a4b1156183ed39c6c1450a2439c"
+    },
+    {
+      "name": "vigorous_dirac",
+      "id": "0ccc824fb440105dfd84e6f471c54a95ac51f4079a3fb9940b93129db65eea3d",
+      "running": false,
+      "started": "2026-10-15T07:04:47.586897652Z",
+      "image_id": "sha256:2711020dd277e9114ef6296ddc0ed721de376a4b1156183ed39c6c1450a2439c",
+      "image": "sha256:2711020dd277e9114ef6296ddc0ed721de376a4b1156183ed39c6c1450a2439c"
+    },
+    {
+      "name": "zen_kare",
+      "id": "c606f58bb8ed4c7e18cb9401e47f85c4be2b4d150bd83aa96fcfa42af17adf76",
+      "running": false,
+      "started": "2026-10-15T07:04:37.909531158Z",
+      "image_id": "sha256:2711020dd277e9114ef6296ddc0ed721de376a4b1156183ed39c6c1450a2439c",
+      "image": "sha256:2711020dd277e9114ef6296ddc0ed721de376a4b1156183ed39c6c1450a2439c"
+    },
+    {
+      "name": "pld-closing8-merge-v2",
+      "id": "4f2f6715d459a8e097c5febb38c93a81d08601646c6a95169a0460065dd9cb5b",
+      "running": false,
+      "started": "2026-10-15T06:59:38.889817086Z",
+      "image_id": "sha256:2711020dd277e9114ef6296ddc0ed721de376a4b1156183ed39c6c1450a2439c",
+      "image": "sha256:2711020dd277e9114ef6296ddc0ed721de376a4b1156183ed39c6c1450a2439c"
+    },
+    {
+      "name": "pld-rl-train",
+      "id": "8a82ae134ba8884772d23be5f3b831c5107a68a6c38c7877f984ceb94ce8c2ca",
+      "running": false,
+      "started": "2026-10-15T06:54:19.156791561Z",
+      "image_id": "sha256:325ef815f1ae6b153c04425ff96d55595c2d17a86ee29b56cbe5752201780afd",
+      "image": "sha256:325ef815f1ae6b153c04425ff96d55595c2d17a86ee29b56cbe5752201780afd"
+    },
+    {
+      "name": "pld-closing8-intent-v2-full",
+      "id": "5562de7d630a31801191a051b926e722b5da21255bb2c1a582a991081765f790",
+      "running": false,
+      "started": "2026-10-15T06:52:18.709680205Z",
+      "image_id": "sha256:5957f49ff9062148d8c66c85aab0ec862d135a989c772c8f259fafbdf0161235",
+      "image": "sha256:5957f49ff9062148d8c66c85aab0ec862d135a989c772c8f259fafbdf0161235"
+    },
+    {
+      "name": "pld-closing8-intent-v2-pilot",
+      "id": "4741388125fd3ba60f244e93275c81a4bcde4d95efd6d5de90b0546d9f3250fd",
+      "running": false,
+      "started": "2026-10-15T06:48:30.730640417Z",
+      "image_id": "sha256:5957f49ff9062148d8c66c85aab0ec862d135a989c772c8f259fafbdf0161235",
+      "image": "sha256:5957f49ff9062148d8c66c85aab0ec862d135a989c772c8f259fafbdf0161235"
+    },
+    {
+      "name": "pld-reward-closing8-20261015-v1-learning-7c136370",
+      "id": "c226160c7f52842ce321c795989142ae7c8f09f88e3ea300b013203f9f9117d2",
+      "running": false,
+      "started": "2026-10-15T06:44:40.892408014Z",
+      "image_id": "sha256:2711020dd277e9114ef6296ddc0ed721de376a4b1156183ed39c6c1450a2439c",
+      "image": "sha256:2711020dd277e9114ef6296ddc0ed721de376a4b1156183ed39c6c1450a2439c"
+    },
+    {
+      "name": "pld-reward-closing8-20261015-v1-replay-7c136370",
+      "id": "508d9030fe762d9c06d9e542acbf03a75fe8f4812f65e2318cabcd3df5a7c536",
+      "running": false,
+      "started": "2026-10-15T06:44:37.510776047Z",
+      "image_id": "sha256:2711020dd277e9114ef6296ddc0ed721de376a4b1156183ed39c6c1450a2439c",
+      "image": "sha256:2711020dd277e9114ef6296ddc0ed721de376a4b1156183ed39c6c1450a2439c"
+    },
+    {
+      "name": "pld-reward-closing8-20261015-v1-rewards-7c136370",
+      "id": "978acb025653ef442aaff58a297138896c9ef652730d75c0ddaed4c936e87efd",
+      "running": false,
+      "started": "2026-10-15T06:44:30.459494947Z",
+      "image_id": "sha256:2711020dd277e9114ef6296ddc0ed721de376a4b1156183ed39c6c1450a2439c",
+      "image": "sha256:2711020dd277e9114ef6296ddc0ed721de376a4b1156183ed39c6c1450a2439c"
+    },
+    {
+      "name": "pld-reward-closing8-20261015-v1-merge-7c136370",
+      "id": "57a5fa412a0e4b824c030c49e4fc2b53af14dd53a6a18344b498d53c4dc704de",
+      "running": false,
+      "started": "2026-10-15T06:44:29.487367535Z",
+      "image_id": "sha256:2711020dd277e9114ef6296ddc0ed721de376a4b1156183ed39c6c1450a2439c",
+      "image": "sha256:2711020dd277e9114ef6296ddc0ed721de376a4b1156183ed39c6c1450a2439c"
+    },
+    {
+      "name": "admiring_hellman",
+      "id": "7706cd4803aa87e7f4d2d407fdc5a563d8a9bc09f86453b015e06e6edc715685",
+      "running": false,
+      "started": "2026-10-15T06:44:28.585792533Z",
+      "image_id": "sha256:2711020dd277e9114ef6296ddc0ed721de376a4b1156183ed39c6c1450a2439c",
+      "image": "sha256:2711020dd277e9114ef6296ddc0ed721de376a4b1156183ed39c6c1450a2439c"
+    },
+    {
+      "name": "relaxed_hopper",
+      "id": "d4994203cb94de15807ebe3078e17c4350a0fb78a0ce102895f214ba95b2d7ce",
+      "running": false,
+      "started": "2026-10-15T06:44:28.108796064Z",
+      "image_id": "sha256:2711020dd277e9114ef6296ddc0ed721de376a4b1156183ed39c6c1450a2439c",
+      "image": "sha256:2711020dd277e9114ef6296ddc0ed721de376a4b1156183ed39c6c1450a2439c"
+    },
+    {
+      "name": "pld-reward-closing8-20261015-v1-classify-dc814e05",
+      "id": "f4caacd461216c2a82a3187da56eff91698fdd80f7212fab85e47b7876d118b3",
+      "running": false,
+      "started": "2026-10-15T06:41:29.594671185Z",
+      "image_id": "sha256:2711020dd277e9114ef6296ddc0ed721de376a4b1156183ed39c6c1450a2439c",
+      "image": "sha256:2711020dd277e9114ef6296ddc0ed721de376a4b1156183ed39c6c1450a2439c"
+    },
+    {
+      "name": "pld-reward-closing8-20261015-v1-intent-dc814e05",
+      "id": "823be7f905c595665ee39bdc2758561b810640533500c1048c777726c23b1717",
+      "running": false,
+      "started": "2026-10-15T06:36:54.874781022Z",
+      "image_id": "sha256:5957f49ff9062148d8c66c85aab0ec862d135a989c772c8f259fafbdf0161235",
+      "image": "sha256:5957f49ff9062148d8c66c85aab0ec862d135a989c772c8f259fafbdf0161235"
+    },
+    {
+      "name": "pld-rl-train-retained-dc814e0-r06",
+      "id": "0b503bfbc091209fe33335b23addb54ca7c18ffdafc1a56a5d66ee6ed48c54f8",
+      "running": false,
+      "started": "2026-10-15T06:35:07.346791036Z",
+      "image_id": "sha256:325ef815f1ae6b153c04425ff96d55595c2d17a86ee29b56cbe5752201780afd",
+      "image": "sha256:325ef815f1ae6b153c04425ff96d55595c2d17a86ee29b56cbe5752201780afd"
+    },
+    {
+      "name": "pld-closing8-trace-audit-r06",
+      "id": "46b05475ee6d9dbe5de9cef4035217826efff6297c06774ac38ef47eaa9fc239",
+      "running": false,
+      "started": "2026-10-15T06:34:43.288349294Z",
+      "image_id": "sha256:2711020dd277e9114ef6296ddc0ed721de376a4b1156183ed39c6c1450a2439c",
+      "image": "sha256:2711020dd277e9114ef6296ddc0ed721de376a4b1156183ed39c6c1450a2439c"
+    },
+    {
+      "name": "pld-reward-closing8-20261015-v1-qwen-dc814e05",
+      "id": "93f48cd20651873852acdba56c598bd3b3c0e355c88954d80d8afe7df69eefcc",
+      "running": false,
+      "started": "2026-10-15T06:33:30.513890169Z",
+      "image_id": "sha256:5957f49ff9062148d8c66c85aab0ec862d135a989c772c8f259fafbdf0161235",
+      "image": "sha256:5957f49ff9062148d8c66c85aab0ec862d135a989c772c8f259fafbdf0161235"
+    },
+    {
+      "name": "pld-reward-closing8-20261015-v1-dino-dc814e05",
+      "id": "eeb676078a3c4ad04c7d37f838e46e9f5e3764561448cc2062bd5819515a8ed1",
+      "running": false,
+      "started": "2026-10-15T06:33:17.920532501Z",
+      "image_id": "sha256:5957f49ff9062148d8c66c85aab0ec862d135a989c772c8f259fafbdf0161235",
+      "image": "sha256:5957f49ff9062148d8c66c85aab0ec862d135a989c772c8f259fafbdf0161235"
+    },
+    {
+      "name": "pld-closing8-crops-r06",
+      "id": "5af9b6d790f0be48398f2a95f1efe54b6b5eca17cf8bbf333505726b59967f78",
+      "running": false,
+      "started": "2026-10-15T06:32:13.144733371Z",
+      "image_id": "sha256:2711020dd277e9114ef6296ddc0ed721de376a4b1156183ed39c6c1450a2439c",
+      "image": "sha256:2711020dd277e9114ef6296ddc0ed721de376a4b1156183ed39c6c1450a2439c"
+    },
+    {
+      "name": "pld-closing8-stage-r06",
+      "id": "6006bbcc498f983c0a30578214830bc075ff56dc6487c039da3a4146692b5f74",
+      "running": false,
+      "started": "2026-10-15T06:32:08.653767069Z",
+      "image_id": "sha256:2711020dd277e9114ef6296ddc0ed721de376a4b1156183ed39c6c1450a2439c",
+      "image": "sha256:2711020dd277e9114ef6296ddc0ed721de376a4b1156183ed39c6c1450a2439c"
+    },
+    {
+      "name": "pld-closing8-curate-r06",
+      "id": "d1d327f458bdfcdba000aaf120711a27dd2ffacd665b0040036a6470f61bc0ee",
+      "running": false,
+      "started": "2026-10-15T06:27:17.427654962Z",
+      "image_id": "sha256:2711020dd277e9114ef6296ddc0ed721de376a4b1156183ed39c6c1450a2439c",
+      "image": "sha256:2711020dd277e9114ef6296ddc0ed721de376a4b1156183ed39c6c1450a2439c"
+    },
+    {
+      "name": "pld-rl-retained-pld-actor3-iql-closing8-20261015-r06",
+      "id": "cd3829c70673ac354365fd959693caad6015287ceb78e16e14e0f74f431e98ff",
+      "running": false,
+      "started": "2026-10-14T09:11:00.287342178Z",
+      "image_id": "sha256:92b71c9d6c22034f6a7032e44621af2a3b5f2ae3dd1b386abd6146777b1aeefd",
+      "image": "sha256:92b71c9d6c22034f6a7032e44621af2a3b5f2ae3dd1b386abd6146777b1aeefd"
+    },
+    {
+      "name": "pld-rl-preflight-pld-closing-collect-20261014-r05",
+      "id": "80be663d7bc37b668640f06cdb627611f60b9a2473c9d50a1d07fe4c08749fd2",
+      "running": false,
+      "started": "2026-10-14T09:08:25.270467197Z",
+      "image_id": "sha256:92b71c9d6c22034f6a7032e44621af2a3b5f2ae3dd1b386abd6146777b1aeefd",
+      "image": "sha256:92b71c9d6c22034f6a7032e44621af2a3b5f2ae3dd1b386abd6146777b1aeefd"
+    },
+    {
+      "name": "pld-rl-train-retained-229bc2f-r06",
+      "id": "4ba0d53916b138e416e4c87ef2b5cc9157ff02107bdd71a6b1ed3b38187d79c4",
+      "running": false,
+      "started": "2026-10-14T08:20:55.152781533Z",
+      "image_id": "sha256:325ef815f1ae6b153c04425ff96d55595c2d17a86ee29b56cbe5752201780afd",
+      "image": "sha256:325ef815f1ae6b153c04425ff96d55595c2d17a86ee29b56cbe5752201780afd"
+    },
+    {
+      "name": "pld-rl-retained-pld-closing-collect-20261014-r05",
+      "id": "0fdb1aad6ec995a30a4fd41d4f46de359b30dcb44217e34acca0d09ae717f5f6",
+      "running": false,
+      "started": "2026-10-14T06:13:07.745731695Z",
+      "image_id": "sha256:0abd010efa86b9339462d4ea03a98a145829581962c7217bb7f94a28df4de3ef",
+      "image": "pld-rl:thor-actor2-continuous10-20261014-r03"
+    },
+    {
+      "name": "pld-rl-preflight-pld-actor2-bc-continuous10-20261014-r03",
+      "id": "24db0c63c9f4ff35b098e3d76519f2a06afd0dd870a21eb05b5d73e59ebdac8b",
+      "running": false,
+      "started": "2026-10-14T05:43:43.778292058Z",
+      "image_id": "sha256:0abd010efa86b9339462d4ea03a98a145829581962c7217bb7f94a28df4de3ef",
+      "image": "pld-rl:thor-actor2-continuous10-20261014-r03"
+    },
+    {
+      "name": "pld-rl-preflight-pld-actor2-continuous10-20261014-r03",
+      "id": "5ba1d81b854ffd289f611ab795d1ef7c33607a8fb3a8a9ab0edae7d3525144d0",
+      "running": false,
+      "started": "2026-10-14T05:38:58.406125344Z",
+      "image_id": "sha256:0abd010efa86b9339462d4ea03a98a145829581962c7217bb7f94a28df4de3ef",
+      "image": "pld-rl:thor-actor2-continuous10-20261014-r03"
+    },
+    {
+      "name": "pld-rl-train-retained-26c1b76-r04",
+      "id": "74ba93b88d0f4837c8ab785e56075d3318fa92788827160c6b7aaeb98b6fdd78",
+      "running": false,
+      "started": "2026-10-14T05:23:56.645989422Z",
+      "image_id": "sha256:325ef815f1ae6b153c04425ff96d55595c2d17a86ee29b56cbe5752201780afd",
+      "image": "sha256:325ef815f1ae6b153c04425ff96d55595c2d17a86ee29b56cbe5752201780afd"
+    },
+    {
+      "name": "pld-rl-train-retained-834e64e-continuous10",
+      "id": "4dcf10fc160391178c67f8b3cd65f203ea28bad0258a572b9b8b0afce7a5e509",
+      "running": false,
+      "started": "2026-10-14T04:54:33.582611196Z",
+      "image_id": "sha256:325ef815f1ae6b153c04425ff96d55595c2d17a86ee29b56cbe5752201780afd",
+      "image": "sha256:325ef815f1ae6b153c04425ff96d55595c2d17a86ee29b56cbe5752201780afd"
+    },
+    {
+      "name": "pld-continuous10-judge-20261014-v1",
+      "id": "4315a6d9f4f05ca8cd619d88ca4bd3f4503018f45bb715cc92934ee7354d3a32",
+      "running": false,
+      "started": "2026-10-14T04:48:35.771841957Z",
+      "image_id": "sha256:5957f49ff9062148d8c66c85aab0ec862d135a989c772c8f259fafbdf0161235",
+      "image": "sha256:5957f49ff9062148d8c66c85aab0ec862d135a989c772c8f259fafbdf0161235"
+    },
+    {
+      "name": "pld-rl-train-retained-9083b5b-continuous10",
+      "id": "0b0329dbaea29a51b873ee1f18109b7ccf46cde2f3fea0992f6b113add574a36",
+      "running": false,
+      "started": "2026-10-14T04:37:15.567384182Z",
+      "image_id": "sha256:325ef815f1ae6b153c04425ff96d55595c2d17a86ee29b56cbe5752201780afd",
+      "image": "sha256:325ef815f1ae6b153c04425ff96d55595c2d17a86ee29b56cbe5752201780afd"
+    },
+    {
+      "name": "pld-rl-retained-pld-actor2-continuous10-20261014-r03",
+      "id": "5b398bbb456d66f04dd4039486890ac1f8425ae65a2c8b7a7c8a7bacf76b5ce2",
+      "running": false,
+      "started": "2026-10-14T05:46:57.579916058Z",
+      "image_id": "sha256:2b93046aac08666f1b7e70c9d3e6fd62261c50cd1d9f73108bfe6d0aa2c35713",
+      "image": "pld-rl:thor-continuous-20261014-r1"
+    },
+    {
+      "name": "pld-rl-preflight-pld-continuous-20261014-r1",
+      "id": "8f2015d0dcb37c8f224a9f47990d2ead0cd46ce3e9ebffb8afdbbd9c257c9431",
+      "running": false,
+      "started": "2026-10-14T03:03:53.856391396Z",
+      "image_id": "sha256:2b93046aac08666f1b7e70c9d3e6fd62261c50cd1d9f73108bfe6d0aa2c35713",
+      "image": "pld-rl:thor-continuous-20261014-r1"
+    },
+    {
+      "name": "pld-rl-retained-pld-continuous-20261014-r1",
+      "id": "962ea4491ba316b0388554ce9249a56ceab5a6de6e6a7e0cd7ccd57fa350e61a",
+      "running": false,
+      "started": "2026-10-14T01:43:55.514404592Z",
+      "image_id": "sha256:09d2f9dec4c188df20e140cdc48a98b3f485ee00f07feff6aa07fb551bbaeeb0",
+      "image": "pld-rl:thor-wide008-20261013-r1"
+    },
+    {
+      "name": "pld-rl-preflight-pld-wide008-20261013-r1",
+      "id": "62d8ce105def2373f74a8958711373f1879bc7e1366de1351c013f275df29454",
+      "running": false,
+      "started": "2026-10-14T01:42:44.99146608Z",
+      "image_id": "sha256:09d2f9dec4c188df20e140cdc48a98b3f485ee00f07feff6aa07fb551bbaeeb0",
+      "image": "pld-rl:thor-wide008-20261013-r1"
+    },
+    {
+      "name": "pld-rl-retained-pld-wide008-20261013-r1",
+      "id": "fe52d8d21da6b2f84bac1e157e586dcf4f25cdfc1af4b3e3d1c8b7d0823ba9f8",
+      "running": false,
+      "started": "2026-10-13T10:34:00.317657265Z",
+      "image_id": "sha256:f6dfaba965ec61b4022cc4b26cdda420ac3de4b79ccec42687dcf84f35295bd0",
+      "image": "sha256:f6dfaba965ec61b4022cc4b26cdda420ac3de4b79ccec42687dcf84f35295bd0"
+    },
+    {
+      "name": "pld-rl-preflight-pld-balanced-20261013-r02",
+      "id": "e30f37ac5b24581d9b2bc7f9100f057f9e2dba3f60ef6e6a42a536942f3333f2",
+      "running": false,
+      "started": "2026-10-13T10:31:24.665584715Z",
+      "image_id": "sha256:f6dfaba965ec61b4022cc4b26cdda420ac3de4b79ccec42687dcf84f35295bd0",
+      "image": "sha256:f6dfaba965ec61b4022cc4b26cdda420ac3de4b79ccec42687dcf84f35295bd0"
+    },
+    {
+      "name": "pld-rl-train-retained-continuous10-20261014",
+      "id": "8c202a2a98a98248ad538f407b09632776688b35fd55824d0643ced78ea90026",
+      "running": false,
+      "started": "2026-10-13T10:16:35.295392829Z",
+      "image_id": "sha256:325ef815f1ae6b153c04425ff96d55595c2d17a86ee29b56cbe5752201780afd",
+      "image": "sha256:325ef815f1ae6b153c04425ff96d55595c2d17a86ee29b56cbe5752201780afd"
+    },
+    {
+      "name": "pld-rl-train-retained-1a0b23d",
+      "id": "01ea23dfa74449d3d8c1f5a6e6f062c405488a512328b112add178f95e2529b3",
+      "running": false,
+      "started": "2026-10-13T10:02:41.966819637Z",
+      "image_id": "sha256:325ef815f1ae6b153c04425ff96d55595c2d17a86ee29b56cbe5752201780afd",
+      "image": "sha256:325ef815f1ae6b153c04425ff96d55595c2d17a86ee29b56cbe5752201780afd"
+    },
+    {
+      "name": "pld-rl-train-retained-cf79893",
+      "id": "5bbe9e4e35ffb54d0268a65c8355dab78b53c14fcf7438558255b6f3706f306a",
+      "running": false,
+      "started": "2026-10-13T07:55:35.220143769Z",
+      "image_id": "sha256:325ef815f1ae6b153c04425ff96d55595c2d17a86ee29b56cbe5752201780afd",
+      "image": "sha256:325ef815f1ae6b153c04425ff96d55595c2d17a86ee29b56cbe5752201780afd"
+    },
+    {
+      "name": "pld-rl-retained-pld-balanced-20261013-r02",
+      "id": "1f7f6b89397e3df5214c6db941e6b50c145f31861f0211c44970d706eecd232d",
+      "running": false,
+      "started": "2026-10-13T07:59:57.12735326Z",
+      "image_id": "sha256:963d5a2863db85fb8a4c2230ded97de6390f5738a386b994e29c3889b8dd763f",
+      "image": "pld-rl:thor-latency-20261013-r1"
+    },
+    {
+      "name": "pld-rl-preflight-pld-latency-20261013-r1",
+      "id": "f0175c1ccb4cb793229fc86d052c960b950b342d5a7e3eaf8cf021fdae49828b",
+      "running": false,
+      "started": "2026-10-13T04:57:38.490346255Z",
+      "image_id": "sha256:963d5a2863db85fb8a4c2230ded97de6390f5738a386b994e29c3889b8dd763f",
+      "image": "pld-rl:thor-latency-20261013-r1"
+    },
+    {
+      "name": "pld-latency-ab-new-20261013-r1",
+      "id": "8f26a7315b9cb3cebeb93dfa2a64aaa8e78011b807a4748964faa640487e8b55",
+      "running": false,
+      "started": "2026-10-13T04:56:37.291571734Z",
+      "image_id": "sha256:963d5a2863db85fb8a4c2230ded97de6390f5738a386b994e29c3889b8dd763f",
+      "image": "pld-rl:thor-latency-20261013-r1"
+    },
+    {
+      "name": "pld-latency-ab-old-20261013-r1",
+      "id": "7954462e0eff5ada97e527a11a8d653ef2e5fd9782589668b80dfada7a79314e",
+      "running": false,
+      "started": "2026-10-13T04:56:05.191049704Z",
+      "image_id": "sha256:5b072a86671680654d4b9d03d4bb5d0102b191b8a20719debc8aa1d12719f8cf",
+      "image": "pld-rl:thor-collect-20261013-r1"
+    },
+    {
+      "name": "pld-latency-cpu-20261013-r2",
+      "id": "8fc993610c69fac6bfa2a6bef2f7667c5e04e95b994522816fd28c8a4d98d03a",
+      "running": false,
+      "started": "2026-10-13T04:51:06.619283051Z",
+      "image_id": "sha256:5b072a86671680654d4b9d03d4bb5d0102b191b8a20719debc8aa1d12719f8cf",
+      "image": "pld-rl:thor-collect-20261013-r1"
+    },
+    {
+      "name": "pld-latency-cpu-20261013-r1",
+      "id": "b9ec1fbe872f05b4d8d9208518ae2e34efdc3542bb82b2ada64a3e58aa2c2858",
+      "running": false,
+      "started": "2026-10-13T04:49:28.931514102Z",
+      "image_id": "sha256:5b072a86671680654d4b9d03d4bb5d0102b191b8a20719debc8aa1d12719f8cf",
+      "image": "pld-rl:thor-collect-20261013-r1"
+    },
+    {
+      "name": "pld-rl-retained-pld-latency-20261013-r1",
+      "id": "b8a8d13e028282755b9e870150a24858bdfc75bab79e85ce447847f821dc549e",
+      "running": false,
+      "started": "2026-10-13T02:39:51.680304733Z",
+      "image_id": "sha256:5b072a86671680654d4b9d03d4bb5d0102b191b8a20719debc8aa1d12719f8cf",
+      "image": "pld-rl:thor-collect-20261013-r1"
+    },
+    {
+      "name": "pld-v3-draining-check-20261013-r2",
+      "id": "79be010cab16e6c6538f50de13f3b4176e64244edcf61dc413e88da05a841637",
+      "running": false,
+      "started": "2026-10-13T02:38:28.75641019Z",
+      "image_id": "sha256:5b072a86671680654d4b9d03d4bb5d0102b191b8a20719debc8aa1d12719f8cf",
+      "image": "pld-rl:thor-collect-20261013-r1"
+    },
+    {
+      "name": "pld-v3-draining-check-20261013",
+      "id": "016ab67e6b2fb02e4019c85c007c01427875bd233163df482e2f517851c67757",
+      "running": false,
+      "started": "2026-10-13T02:37:47.087405964Z",
+      "image_id": "sha256:5b072a86671680654d4b9d03d4bb5d0102b191b8a20719debc8aa1d12719f8cf",
+      "image": "pld-rl:thor-collect-20261013-r1"
+    },
+    {
+      "name": "pld-rl-preflight-pld-collect-20261013-r1",
+      "id": "6b9a9ccfa6eb01788309e0a7ac867b6b088fe5aaa6744a74ea04c15303987bd5",
+      "running": false,
+      "started": "2026-10-13T02:35:07.73666971Z",
+      "image_id": "sha256:5b072a86671680654d4b9d03d4bb5d0102b191b8a20719debc8aa1d12719f8cf",
+      "image": "pld-rl:thor-collect-20261013-r1"
+    },
+    {
+      "name": "pld-rl-retained-pld-collect-20261013-r1",
+      "id": "da64ef10fbf3d2cc93fef082576148b580e4e790f4c8c5b04b0cfed3cafb6f7d",
+      "running": false,
+      "started": "2026-10-12T11:54:48.283840743Z",
+      "image_id": "sha256:37ab017566f6984cee94c8b546745c7cf9af4316863c4094bb35c1c00c611c64",
+      "image": "pld-rl:thor-collect-20261012-r2"
+    },
+    {
+      "name": "pld-rl-preflight-pld-collect-20261012-r2",
+      "id": "4d34f3e3a75724cb61af4793641b28d3296fe472ac66de7639687c061d867fbc",
+      "running": false,
+      "started": "2026-10-12T11:52:58.945632417Z",
+      "image_id": "sha256:37ab017566f6984cee94c8b546745c7cf9af4316863c4094bb35c1c00c611c64",
+      "image": "pld-rl:thor-collect-20261012-r2"
+    },
+    {
+      "name": "pld-rl-retained-pld-collect-20261012-r2",
+      "id": "912007d2b33d60fb37b6c0c5acb799dff2c62d1556441f84e8eabf51c0db9664",
+      "running": false,
+      "started": "2026-10-12T11:46:13.670801541Z",
+      "image_id": "sha256:3276d4085ccc0f6813ba26ba67594be8091a637ba69beb34c5b606281b920b18",
+      "image": "pld-rl:thor-collect-20261012-r1"
+    },
+    {
+      "name": "pld-rl-collect-preflight-20261012-r1",
+      "id": "3fd3fc8ea4021f7750c0773dd9f58137cc25a4669bfab18ce297987657f637f7",
+      "running": false,
+      "started": "2026-10-12T11:43:58.750119295Z",
+      "image_id": "sha256:3276d4085ccc0f6813ba26ba67594be8091a637ba69beb34c5b606281b920b18",
+      "image": "pld-rl:thor-collect-20261012-r1"
+    },
+    {
+      "name": "pld-rl-probe-retained-20261012-r1",
+      "id": "7cd2f8fcf631974ae30258be3c863fbaf8a45cf46986c69f7264f96a88a61c36",
+      "running": false,
+      "started": "2026-10-12T07:30:56.145837191Z",
+      "image_id": "sha256:080d09d5426928029a8e78e6a213e8cd6d27e20b8482518701f088a1d6323499",
+      "image": "pld-rl:thor-probe-20261012-r1"
+    },
+    {
+      "name": "pld-rl-preflight-20261012-r1",
+      "id": "514b73abcf80da7a6d8c7006bed9574a4ed7c9546fbd32e3cfa8972d4eb55574",
+      "running": false,
+      "started": "2026-10-12T07:28:52.911022841Z",
+      "image_id": "sha256:080d09d5426928029a8e78e6a213e8cd6d27e20b8482518701f088a1d6323499",
+      "image": "pld-rl:thor-probe-20261012-r1"
+    },
+    {
+      "name": "pi05-rtc-50h200000-preserved-20261023",
+      "id": "bcf41584a66d42cfc454d84a4270b3e04d51b7ba0b6bfb76c70446a3f2a41ab1",
+      "running": false,
+      "started": "2026-10-23T02:52:08.86742709Z",
+      "image_id": "sha256:a6227665c32d1c7b2b7ca01a2d1a29e18d64bf764e5914db6eb06db5419a8e56",
+      "image": "openpi-pi:thor-trained-rtc-candidate-20260916"
+    },
+    {
+      "name": "pi05-rtc-50h230000-preserved-20261010",
+      "id": "8585d918aa6f6de2543bb0e8e124cac055b8d84ccdcec57a601595c020e882bd",
+      "running": false,
+      "started": "2026-10-10T02:25:34.405723496Z",
+      "image_id": "sha256:a6227665c32d1c7b2b7ca01a2d1a29e18d64bf764e5914db6eb06db5419a8e56",
+      "image": "openpi-pi:thor-trained-rtc-candidate-20260916"
+    },
+    {
+      "name": "rtc-60000-convert-20260918",
+      "id": "a6f9ce76724ab1398a7a1b6254775f633ffa22bd688f7d310f61ff528259c99d",
+      "running": false,
+      "started": "2026-09-18T02:48:30.587722706Z",
+      "image_id": "sha256:a6227665c32d1c7b2b7ca01a2d1a29e18d64bf764e5914db6eb06db5419a8e56",
+      "image": "openpi-pi:thor-trained-rtc-candidate-20260916"
+    }
+  ],
+  "image_tags": [
+    {
+      "id": "sha256:080d09d5426928029a8e78e6a213e8cd6d27e20b8482518701f088a1d6323499",
+      "tag": "pld-rl:thor-probe-20261012-r1"
+    },
+    {
+      "id": "sha256:09d2f9dec4c188df20e140cdc48a98b3f485ee00f07feff6aa07fb551bbaeeb0",
+      "tag": "pld-rl:thor-wide008-20261013-r1"
+    },
+    {
+      "id": "sha256:0abd010efa86b9339462d4ea03a98a145829581962c7217bb7f94a28df4de3ef",
+      "tag": "pld-rl:thor-actor2-continuous10-20261014-r03"
+    },
+    {
+      "id": "sha256:1a0d2613766616dce1c00ca40d3a677f9c7614f106ae4b041988c922f3faa8d9",
+      "tag": "pld-rl:thor-closing-collect-20261014-r05"
+    },
+    {
+      "id": "sha256:2b93046aac08666f1b7e70c9d3e6fd62261c50cd1d9f73108bfe6d0aa2c35713",
+      "tag": "pld-rl:thor-continuous-20261014-r1"
+    },
+    {
+      "id": "sha256:325ef815f1ae6b153c04425ff96d55595c2d17a86ee29b56cbe5752201780afd",
+      "tag": "pld-rl-train:thor-sac-20261013-r1"
+    },
+    {
+      "id": "sha256:3276d4085ccc0f6813ba26ba67594be8091a637ba69beb34c5b606281b920b18",
+      "tag": "pld-rl:thor-collect-20261012-r1"
+    },
+    {
+      "id": "sha256:37ab017566f6984cee94c8b546745c7cf9af4316863c4094bb35c1c00c611c64",
+      "tag": "pld-rl:thor-collect-20261012-r2"
+    },
+    {
+      "id": "sha256:5b072a86671680654d4b9d03d4bb5d0102b191b8a20719debc8aa1d12719f8cf",
+      "tag": "pld-rl:thor-collect-20261013-r1"
+    },
+    {
+      "id": "sha256:5c8fb3955743e81e4bed211b91c19f9bf85fa50cca6aeebb4cd92b60417424b9",
+      "tag": "openwam:thor-20260922-r2"
+    },
+    {
+      "id": "sha256:64db4807705b493ac56150377f238ad8dceab8e702fd86b2f76456eff0549e51",
+      "tag": "xiaomi-xr1:thor-20260923"
+    },
+    {
+      "id": "sha256:92b71c9d6c22034f6a7032e44621af2a3b5f2ae3dd1b386abd6146777b1aeefd",
+      "tag": "pld-rl:thor-closing-collect-20261014-r05-v2"
+    },
+    {
+      "id": "sha256:963d5a2863db85fb8a4c2230ded97de6390f5738a386b994e29c3889b8dd763f",
+      "tag": "pld-rl:thor-latency-20261013-r1"
+    },
+    {
+      "id": "sha256:9d0be210f8ce56010790e5ffef9b65bd5760cfb1cae6e8cf206cddc887496f7e",
+      "tag": "xiaomi-xr1:thor-native-rtc-20261010"
+    },
+    {
+      "id": "sha256:9e6c0cc266bf05a06b5725242f17d5625733458deda51490643946595d90e6d0",
+      "tag": "comfyui-h3:thor-20261026"
+    },
+    {
+      "id": "sha256:e8b039d0e55ff193439df46fd74956a2407c5e72e0676ad6908612b48bb943bc",
+      "tag": "openwam:thor-20260922-r1"
+    },
+    {
+      "id": "sha256:f6dfaba965ec61b4022cc4b26cdda420ac3de4b79ccec42687dcf84f35295bd0",
+      "tag": "pld-rl:thor-balanced-20261013-r02"
+    }
+  ],
+  "protected_active": [
+    {
+      "name": "flora-annotation",
+      "id": "e5d23659853e182bfbd9682c909ba300271bc5aac025fee7dbdf2e5c38345c28",
+      "running": true,
+      "started": "2026-10-31T05:32:05.642191721Z",
+      "image_id": "sha256:a28653c877009eec2e82e2b825b2e340d1d2e344bcc1cf088e0350b1be824ec7",
+      "image": "flora:thor-20261031-r1"
+    },
+    {
+      "name": "yam-agent-perception",
+      "id": "222e6d2eaa96809f45c6212b430c036462619234d0e5b8a7d333b06a101fb6a2",
+      "running": true,
+      "started": "2026-10-26T07:58:40.648507181Z",
+      "image_id": "sha256:2dde288c8596ac3d8403a654dad09574e6debd45eb17722e05fdce4aff012e7f",
+      "image": "sha256:2dde288c8596ac3d8403a654dad09574e6debd45eb17722e05fdce4aff012e7f"
+    }
+  ],
+  "retained_pi": [
+    {
+      "name": "pi05-rtc-infer",
+      "id": "d80c40497577a3028a4ca7bc16fd49c861c0c3893937df62f291e5887b5ef523",
+      "running": false,
+      "started": "2026-10-27T02:45:12.947969276Z",
+      "image_id": "sha256:a6227665c32d1c7b2b7ca01a2d1a29e18d64bf764e5914db6eb06db5419a8e56",
+      "image": "openpi-pi:thor-trained-rtc-candidate-20260916"
+    }
+  ],
+  "protected_pi_files": {
+    "/home/wuyan-lyj/thor/pi/checkpoints/lego-pi05-rtc-base-50h-20260921/200000/params/_METADATA": [
+      59905478,
+      23498
+    ],
+    "/home/wuyan-lyj/thor/pi/checkpoints/lego-pi05-rtc-base-50h-20260921/200000-pytorch-fp32-r1/model.safetensors": [
+      59905485,
+      14467165872
+    ],
+    "/home/wuyan-lyj/thor/pi/artifacts/rtc-50h-200000-trt-tf32-cache80-7step-20261010-r1/sampler.engine": [
+      59905553,
+      12516604428
+    ],
+    "/home/wuyan-lyj/thor/pi/checkpoints/lego-pi05-rtc-base-50h-20260921/230000/params/_METADATA": [
+      59390294,
+      23498
+    ],
+    "/home/wuyan-lyj/thor/pi/checkpoints/lego-pi05-rtc-base-50h-20260921/230000-pytorch-fp32-r1/model.safetensors": [
+      59390305,
+      14467165872
+    ],
+    "/home/wuyan-lyj/thor/pi/artifacts/rtc-50h-230000-trt-tf32-cache80-7step-20261010-r1/sampler.engine": [
+      59905360,
+      12516525012
+    ],
+    "/home/wuyan-lyj/thor/pi/checkpoints/lego-pi05-rtc-base-50h-20260921/240000/params/_METADATA": [
+      60197238,
+      23498
+    ],
+    "/home/wuyan-lyj/thor/pi/checkpoints/lego-pi05-rtc-base-50h-20260921/240000-pytorch-fp32-r1/model.safetensors": [
+      60197345,
+      14467165872
+    ],
+    "/home/wuyan-lyj/thor/pi/artifacts/rtc-50h-240000-trt-tf32-cache80-7step-20261014-r1/sampler.engine": [
+      59279755,
+      12516794036
+    ],
+    "/home/wuyan-lyj/thor/pi/checkpoints/earbuds-pi05-rtc-clean-v2-excl-pantheon-retry4-20261022/62000/params/_METADATA": [
+      5767301,
+      23498
+    ],
+    "/home/wuyan-lyj/thor/pi/checkpoints/earbuds-pi05-rtc-clean-v2-excl-pantheon-retry4-20261022/62000-pytorch-fp32-r1/model.safetensors": [
+      5767400,
+      14467165872
+    ],
+    "/home/wuyan-lyj/thor/pi/artifacts/rtc-earbuds-clean-v2-62000-trt-tf32-cache80-7step-20261030-r1/sampler.engine": [
+      5767766,
+      12516976164
+    ],
+    "/home/wuyan-lyj/thor/pi/checkpoints/pi05_base/params/_METADATA": [
+      59244902,
+      21402
+    ],
+    "/home/wuyan-lyj/thor/pi/checkpoints/pi05_base_pytorch_fp32_v1/model.safetensors": [
+      59246169,
+      14467165872
+    ]
+  },
+  "completed": [
+    {
+      "container": "/sun-yat-sen-audio-04-fist-final-qa-20261028",
+      "id": "e3f4860bd52a9d3d84549fc73107d4ef2948d9ebc2c7e90c7b0de61e1e81ff91"
+    },
+    {
+      "container": "/sun-yat-sen-audio-04-fist-native-qa-20261028",
+      "id": "abf5196df19a3a926af13f69697f42bf74055f6e3525c32e32b336acdb4bc4df"
+    },
+    {
+      "container": "/sun-yat-sen-audio-04-fist-20261028",
+      "id": "74acb66879622fa2632faa78b4c505c5d53ec36fefd9caebd680f8dc5a402419"
+    },
+    {
+      "container": "/sun-yat-sen-audio-04-earnest-final-qa-20261027",
+      "id": "8cf7940e09fc8d1baa2cb2f9def22f20537771aa4fce4c1bfa8d790857ee495e"
+    },
+    {
+      "container": "/sun-yat-sen-audio-04-earnest-qa-20261027",
+      "id": "d54aaa868593a684542f3113aeb6cbd5f61b1aa557fc514764664f12c129bdf9"
+    },
+    {
+      "container": "/sun-yat-sen-audio-04-earnest-20261027",
+      "id": "22838b02d4a143416f60f2d7c9ee6e3aa511e7bd47541834ca58a44683319752"
+    },
+    {
+      "container": "/sun-yat-sen-audio-04-uplift-final-qa-20261027",
+      "id": "b39e10f42b1afd59e5a9b17450bd221e9fc7aac7296a03ada5abf233b79ec979"
+    },
+    {
+      "container": "/sun-yat-sen-audio-04-uplift-qa-20261027",
+      "id": "50ba539b7fc95ae4d3a9bfc1a90727a8c7d77dbee67929db8504712875cafe34"
+    },
+    {
+      "container": "/sun-yat-sen-audio-04-uplift-20261027",
+      "id": "45495b2a30834a9665688871343857a553e03253309721b07d5ac8d51fb5d718"
+    },
+    {
+      "container": "/sun-yat-sen-audio-234-speaker-qa",
+      "id": "50c694d03c8e60fbac57c84048bed0e1b443658621e6aecd29731e5eec11d088"
+    },
+    {
+      "container": "/sun-yat-sen-audio-234-final-qa",
+      "id": "0ed8ddb19940a5fd63b47dd3f67756ff6400bf4ba459008a7886d1cf2f625517"
+    },
+    {
+      "container": "/sun-yat-sen-audio-234-native-qa",
+      "id": "93c9bcdc045b721331afbdd47442a4f7a940a4730733d962f599831eb9ebff16"
+    },
+    {
+      "container": "/sun-yat-sen-audio-234-20261027",
+      "id": "a9837c4b47e3a78965d9249aad4a9b165dc287bf946927284fb2136c1d6b92d6"
+    },
+    {
+      "container": "/sun-yat-sen-ep02-emotion-v4-final-qa",
+      "id": "ac1a6fe00941e00cbd54f05df0c21fd01938f4620894ec6f90e7dd10a879457b"
+    },
+    {
+      "container": "/sun-yat-sen-ep02-emotion-v4-source-qa",
+      "id": "e68ceeff05e0831d83f3ed77a363e6f31ee60be28238b775abe3a0c5fe362071"
+    },
+    {
+      "container": "/sun-yat-sen-ep02-tone-v3-final-qa",
+      "id": "33b868e7d2f56c770a66f29b0a676f7b200dbf68d6ad8bf781a6d2d94f84adc2"
+    },
+    {
+      "container": "/sun-yat-sen-ep02-tone-match-v3",
+      "id": "937686c22a1077e6e66ff7cb04ebc0556b4b6fc190bb0496f01e314f49a9a9cd"
+    },
+    {
+      "container": "/sun-yat-sen-ep03-audio-v2-qa",
+      "id": "2a849653ea2b00b1a5a5cf62beaea66b0cb06f455b477c5fa240c6c1a85798f6"
+    },
+    {
+      "container": "/sun-yat-sen-ep03-audio-v2-qa-entrypoint-failed",
+      "id": "a07c26c105c350af89a099b5ea09ae4c8d17be8661798569de8f28de5420f4c9"
+    },
+    {
+      "container": "/sun-yat-sen-ep03-audio-v2",
+      "id": "c772bc4f50159b575e6cc9e93232a1f342757bb336656e601acdde9ae96a5b41"
+    },
+    {
+      "container": "/sun-yat-sen-ep03-audio-v1-qa",
+      "id": "e13ec285891a1cc1cd1130951f9f5b4b9bad67727915bff858647eb6d95fa8b1"
+    },
+    {
+      "container": "/sun-yat-sen-ep03-audio-v1",
+      "id": "e0e702d757d089af8711ae9700494f71d6c8c57da7c19e26a26ba3a424cb8072"
+    },
+    {
+      "container": "/sun-yat-sen-ep02-emotion-continuous-final-qa",
+      "id": "300bdc30c356b491ae034d350449252ea198f81e273dea8e8eb2f69bfc6e36c5"
+    },
+    {
+      "container": "/sun-yat-sen-ep02-emotion-continuous-qa",
+      "id": "c0697e91ab5db803ec177dea1ccd7112bc86b494d1b96ede068324c6041b201a"
+    },
+    {
+      "container": "/sun-yat-sen-ep02-emotion-continuous",
+      "id": "d5c6d1b8ec98b59ffae5bd5a7a17613443a5fd836c7cac74d6b3f02e0e5631db"
+    },
+    {
+      "container": "/sun-yat-sen-ep02-emotion-v2-asr-fix",
+      "id": "1721f685230e56fa5bf6f28087e13859cdfe34fc765b35d5374baabe0ae84bda"
+    },
+    {
+      "container": "/sun-yat-sen-ep02-emotion-v2-asr",
+      "id": "f5f3f9f7631a7aef667dc690d61326c1a25b9d6a1d54378acfe6f6accd9c5a8a"
+    },
+    {
+      "container": "/sun-yat-sen-ep02-emotion-v2-qa",
+      "id": "3792dcd90f55409e13d4bf810cb326122086176f0b7cc57c91376f27bd92c83d"
+    },
+    {
+      "container": "/sun-yat-sen-ep02-emotion-v2",
+      "id": "bef58a86068d1935df65ae631c52b5eafb9619734a9ab575ca6a9596f44d3e80"
+    },
+    {
+      "container": "/sun-yat-sen-ep02-asr-final",
+      "id": "e5b632396147b0fa8aa8d10aaded99f055adb4f5b6932eebe46e47fb232b66be"
+    },
+    {
+      "container": "/sun-yat-sen-ep02-asr",
+      "id": "cf20c9582c83c77935663453571b2c4bf798c7176025cfd65909bb39a1269e49"
+    },
+    {
+      "container": "/sun-yat-sen-ep02-audio",
+      "id": "ff40eff9899ef1f26d5e0612a8d76a641c6c396cea70725f937312f7bd6145d7"
+    },
+    {
+      "container": "/comfyui-h3",
+      "id": "b1b6591d7e3c8dafd1223e967efd4ba8717083f2287cb5e8dac33218faeaaf8e"
+    },
+    {
+      "container": "/pld-rl",
+      "id": "514f92c73435418e0f1022d47994a57224ec5065910bc8b38ab0bab11b32a957"
+    },
+    {
+      "container": "/pld-rl-preflight-pld-actor3-iql-closing8-20261015-r06",
+      "id": "67d06339bbb28ad14d41d5f3c85c4b8306af0f8cd45e8bf80e7f51ce481d0af2"
+    },
+    {
+      "container": "/pld-actor3-iql-gpu-authority-r06",
+      "id": "72b5edfa8d7e05ec3343a7b2b93377a62f2ea5fdff1fed06046ee9a3014fc41f"
+    },
+    {
+      "container": "/pld-closing8-review-r06",
+      "id": "cb21e522e0ceb030c5178d178cbc6e6c868680d3418175c9a1b036b96d401c06"
+    },
+    {
+      "container": "/nice_diffie",
+      "id": "439d7cd490feb78bddf638f063302cb3a87490199b9389d992d65ff036bc14dd"
+    },
+    {
+      "container": "/pld-closing8-eval-geometry-v1",
+      "id": "3490b5103c503b24619ed03ea267fe49e4a8113a2952bc3887c44e84bfaeaced"
+    },
+    {
+      "container": "/frosty_bassi",
+      "id": "1dd688b89565d13860148c24a2f5f34263bbb21f7d30677500ea1cbdce854e82"
+    },
+    {
+      "container": "/magical_nobel",
+      "id": "d8615d2696a6fe0d4e68b98dec38e91205be497cc45be71d5ee44d3c5db2c64c"
+    },
+    {
+      "container": "/vigorous_dirac",
+      "id": "0ccc824fb440105dfd84e6f471c54a95ac51f4079a3fb9940b93129db65eea3d"
+    },
+    {
+      "container": "/zen_kare",
+      "id": "c606f58bb8ed4c7e18cb9401e47f85c4be2b4d150bd83aa96fcfa42af17adf76"
+    },
+    {
+      "container": "/pld-closing8-merge-v2",
+      "id": "4f2f6715d459a8e097c5febb38c93a81d08601646c6a95169a0460065dd9cb5b"
+    },
+    {
+      "container": "/pld-rl-train",
+      "id": "8a82ae134ba8884772d23be5f3b831c5107a68a6c38c7877f984ceb94ce8c2ca"
+    },
+    {
+      "container": "/pld-closing8-intent-v2-full",
+      "id": "5562de7d630a31801191a051b926e722b5da21255bb2c1a582a991081765f790"
+    },
+    {
+      "container": "/pld-closing8-intent-v2-pilot",
+      "id": "4741388125fd3ba60f244e93275c81a4bcde4d95efd6d5de90b0546d9f3250fd"
+    },
+    {
+      "container": "/pld-reward-closing8-20261015-v1-learning-7c136370",
+      "id": "c226160c7f52842ce321c795989142ae7c8f09f88e3ea300b013203f9f9117d2"
+    },
+    {
+      "container": "/pld-reward-closing8-20261015-v1-replay-7c136370",
+      "id": "508d9030fe762d9c06d9e542acbf03a75fe8f4812f65e2318cabcd3df5a7c536"
+    },
+    {
+      "container": "/pld-reward-closing8-20261015-v1-rewards-7c136370",
+      "id": "978acb025653ef442aaff58a297138896c9ef652730d75c0ddaed4c936e87efd"
+    },
+    {
+      "container": "/pld-reward-closing8-20261015-v1-merge-7c136370",
+      "id": "57a5fa412a0e4b824c030c49e4fc2b53af14dd53a6a18344b498d53c4dc704de"
+    },
+    {
+      "container": "/admiring_hellman",
+      "id": "7706cd4803aa87e7f4d2d407fdc5a563d8a9bc09f86453b015e06e6edc715685"
+    },
+    {
+      "container": "/relaxed_hopper",
+      "id": "d4994203cb94de15807ebe3078e17c4350a0fb78a0ce102895f214ba95b2d7ce"
+    },
+    {
+      "container": "/pld-reward-closing8-20261015-v1-classify-dc814e05",
+      "id": "f4caacd461216c2a82a3187da56eff91698fdd80f7212fab85e47b7876d118b3"
+    },
+    {
+      "container": "/pld-reward-closing8-20261015-v1-intent-dc814e05",
+      "id": "823be7f905c595665ee39bdc2758561b810640533500c1048c777726c23b1717"
+    },
+    {
+      "container": "/pld-rl-train-retained-dc814e0-r06",
+      "id": "0b503bfbc091209fe33335b23addb54ca7c18ffdafc1a56a5d66ee6ed48c54f8"
+    },
+    {
+      "container": "/pld-closing8-trace-audit-r06",
+      "id": "46b05475ee6d9dbe5de9cef4035217826efff6297c06774ac38ef47eaa9fc239"
+    },
+    {
+      "container": "/pld-reward-closing8-20261015-v1-qwen-dc814e05",
+      "id": "93f48cd20651873852acdba56c598bd3b3c0e355c88954d80d8afe7df69eefcc"
+    },
+    {
+      "container": "/pld-reward-closing8-20261015-v1-dino-dc814e05",
+      "id": "eeb676078a3c4ad04c7d37f838e46e9f5e3764561448cc2062bd5819515a8ed1"
+    },
+    {
+      "container": "/pld-closing8-crops-r06",
+      "id": "5af9b6d790f0be48398f2a95f1efe54b6b5eca17cf8bbf333505726b59967f78"
+    },
+    {
+      "container": "/pld-closing8-stage-r06",
+      "id": "6006bbcc498f983c0a30578214830bc075ff56dc6487c039da3a4146692b5f74"
+    },
+    {
+      "container": "/pld-closing8-curate-r06",
+      "id": "d1d327f458bdfcdba000aaf120711a27dd2ffacd665b0040036a6470f61bc0ee"
+    },
+    {
+      "container": "/pld-rl-retained-pld-actor3-iql-closing8-20261015-r06",
+      "id": "cd3829c70673ac354365fd959693caad6015287ceb78e16e14e0f74f431e98ff"
+    },
+    {
+      "container": "/pld-rl-preflight-pld-closing-collect-20261014-r05",
+      "id": "80be663d7bc37b668640f06cdb627611f60b9a2473c9d50a1d07fe4c08749fd2"
+    },
+    {
+      "container": "/pld-rl-train-retained-229bc2f-r06",
+      "id": "4ba0d53916b138e416e4c87ef2b5cc9157ff02107bdd71a6b1ed3b38187d79c4"
+    },
+    {
+      "container": "/pld-rl-retained-pld-closing-collect-20261014-r05",
+      "id": "0fdb1aad6ec995a30a4fd41d4f46de359b30dcb44217e34acca0d09ae717f5f6"
+    },
+    {
+      "container": "/pld-rl-preflight-pld-actor2-bc-continuous10-20261014-r03",
+      "id": "24db0c63c9f4ff35b098e3d76519f2a06afd0dd870a21eb05b5d73e59ebdac8b"
+    },
+    {
+      "container": "/pld-rl-preflight-pld-actor2-continuous10-20261014-r03",
+      "id": "5ba1d81b854ffd289f611ab795d1ef7c33607a8fb3a8a9ab0edae7d3525144d0"
+    },
+    {
+      "container": "/pld-rl-train-retained-26c1b76-r04",
+      "id": "74ba93b88d0f4837c8ab785e56075d3318fa92788827160c6b7aaeb98b6fdd78"
+    },
+    {
+      "container": "/pld-rl-train-retained-834e64e-continuous10",
+      "id": "4dcf10fc160391178c67f8b3cd65f203ea28bad0258a572b9b8b0afce7a5e509"
+    },
+    {
+      "container": "/pld-continuous10-judge-20261014-v1",
+      "id": "4315a6d9f4f05ca8cd619d88ca4bd3f4503018f45bb715cc92934ee7354d3a32"
+    },
+    {
+      "container": "/pld-rl-train-retained-9083b5b-continuous10",
+      "id": "0b0329dbaea29a51b873ee1f18109b7ccf46cde2f3fea0992f6b113add574a36"
+    },
+    {
+      "container": "/pld-rl-retained-pld-actor2-continuous10-20261014-r03",
+      "id": "5b398bbb456d66f04dd4039486890ac1f8425ae65a2c8b7a7c8a7bacf76b5ce2"
+    },
+    {
+      "container": "/pld-rl-preflight-pld-continuous-20261014-r1",
+      "id": "8f2015d0dcb37c8f224a9f47990d2ead0cd46ce3e9ebffb8afdbbd9c257c9431"
+    },
+    {
+      "container": "/pld-rl-retained-pld-continuous-20261014-r1",
+      "id": "962ea4491ba316b0388554ce9249a56ceab5a6de6e6a7e0cd7ccd57fa350e61a"
+    },
+    {
+      "container": "/pld-rl-preflight-pld-wide008-20261013-r1",
+      "id": "62d8ce105def2373f74a8958711373f1879bc7e1366de1351c013f275df29454"
+    },
+    {
+      "container": "/pld-rl-retained-pld-wide008-20261013-r1",
+      "id": "fe52d8d21da6b2f84bac1e157e586dcf4f25cdfc1af4b3e3d1c8b7d0823ba9f8"
+    },
+    {
+      "container": "/pld-rl-preflight-pld-balanced-20261013-r02",
+      "id": "e30f37ac5b24581d9b2bc7f9100f057f9e2dba3f60ef6e6a42a536942f3333f2"
+    },
+    {
+      "container": "/pld-rl-train-retained-continuous10-20261014",
+      "id": "8c202a2a98a98248ad538f407b09632776688b35fd55824d0643ced78ea90026"
+    },
+    {
+      "container": "/pld-rl-train-retained-1a0b23d",
+      "id": "01ea23dfa74449d3d8c1f5a6e6f062c405488a512328b112add178f95e2529b3"
+    },
+    {
+      "container": "/pld-rl-train-retained-cf79893",
+      "id": "5bbe9e4e35ffb54d0268a65c8355dab78b53c14fcf7438558255b6f3706f306a"
+    },
+    {
+      "container": "/pld-rl-retained-pld-balanced-20261013-r02",
+      "id": "1f7f6b89397e3df5214c6db941e6b50c145f31861f0211c44970d706eecd232d"
+    },
+    {
+      "container": "/pld-rl-preflight-pld-latency-20261013-r1",
+      "id": "f0175c1ccb4cb793229fc86d052c960b950b342d5a7e3eaf8cf021fdae49828b"
+    },
+    {
+      "container": "/pld-latency-ab-new-20261013-r1",
+      "id": "8f26a7315b9cb3cebeb93dfa2a64aaa8e78011b807a4748964faa640487e8b55"
+    },
+    {
+      "container": "/pld-latency-ab-old-20261013-r1",
+      "id": "7954462e0eff5ada97e527a11a8d653ef2e5fd9782589668b80dfada7a79314e"
+    },
+    {
+      "container": "/pld-latency-cpu-20261013-r2",
+      "id": "8fc993610c69fac6bfa2a6bef2f7667c5e04e95b994522816fd28c8a4d98d03a"
+    },
+    {
+      "container": "/pld-latency-cpu-20261013-r1",
+      "id": "b9ec1fbe872f05b4d8d9208518ae2e34efdc3542bb82b2ada64a3e58aa2c2858"
+    },
+    {
+      "container": "/pld-rl-retained-pld-latency-20261013-r1",
+      "id": "b8a8d13e028282755b9e870150a24858bdfc75bab79e85ce447847f821dc549e"
+    },
+    {
+      "container": "/pld-v3-draining-check-20261013-r2",
+      "id": "79be010cab16e6c6538f50de13f3b4176e64244edcf61dc413e88da05a841637"
+    },
+    {
+      "container": "/pld-v3-draining-check-20261013",
+      "id": "016ab67e6b2fb02e4019c85c007c01427875bd233163df482e2f517851c67757"
+    },
+    {
+      "container": "/pld-rl-preflight-pld-collect-20261013-r1",
+      "id": "6b9a9ccfa6eb01788309e0a7ac867b6b088fe5aaa6744a74ea04c15303987bd5"
+    },
+    {
+      "container": "/pld-rl-retained-pld-collect-20261013-r1",
+      "id": "da64ef10fbf3d2cc93fef082576148b580e4e790f4c8c5b04b0cfed3cafb6f7d"
+    },
+    {
+      "container": "/pld-rl-preflight-pld-collect-20261012-r2",
+      "id": "4d34f3e3a75724cb61af4793641b28d3296fe472ac66de7639687c061d867fbc"
+    },
+    {
+      "container": "/pld-rl-retained-pld-collect-20261012-r2",
+      "id": "912007d2b33d60fb37b6c0c5acb799dff2c62d1556441f84e8eabf51c0db9664"
+    },
+    {
+      "container": "/pld-rl-collect-preflight-20261012-r1",
+      "id": "3fd3fc8ea4021f7750c0773dd9f58137cc25a4669bfab18ce297987657f637f7"
+    },
+    {
+      "container": "/pld-rl-probe-retained-20261012-r1",
+      "id": "7cd2f8fcf631974ae30258be3c863fbaf8a45cf46986c69f7264f96a88a61c36"
+    },
+    {
+      "container": "/pld-rl-preflight-20261012-r1",
+      "id": "514b73abcf80da7a6d8c7006bed9574a4ed7c9546fbd32e3cfa8972d4eb55574"
+    },
+    {
+      "container": "/pi05-rtc-50h200000-preserved-20261023",
+      "id": "bcf41584a66d42cfc454d84a4270b3e04d51b7ba0b6bfb76c70446a3f2a41ab1"
+    },
+    {
+      "container": "/pi05-rtc-50h230000-preserved-20261010",
+      "id": "8585d918aa6f6de2543bb0e8e124cac055b8d84ccdcec57a601595c020e882bd"
+    },
+    {
+      "container": "/rtc-60000-convert-20260918",
+      "id": "a6f9ce76724ab1398a7a1b6254775f633ffa22bd688f7d310f61ff528259c99d"
+    },
+    {
+      "directory": "/home/wuyan-lyj/thor/rl-training"
+    },
+    {
+      "directory": "/home/wuyan-lyj/comfyui-h3"
+    },
+    {
+      "directory": "/home/wuyan-lyj/thor/xr1"
+    },
+    {
+      "directory": "/home/wuyan-lyj/thor/openwam"
+    },
+    {
+      "image_tag": "pld-rl:thor-probe-20261012-r1",
+      "image_id": "sha256:080d09d5426928029a8e78e6a213e8cd6d27e20b8482518701f088a1d6323499"
+    },
+    {
+      "image_tag": "pld-rl:thor-wide008-20261013-r1",
+      "image_id": "sha256:09d2f9dec4c188df20e140cdc48a98b3f485ee00f07feff6aa07fb551bbaeeb0"
+    },
+    {
+      "image_tag": "pld-rl:thor-actor2-continuous10-20261014-r03",
+      "image_id": "sha256:0abd010efa86b9339462d4ea03a98a145829581962c7217bb7f94a28df4de3ef"
+    },
+    {
+      "image_tag": "pld-rl:thor-closing-collect-20261014-r05",
+      "image_id": "sha256:1a0d2613766616dce1c00ca40d3a677f9c7614f106ae4b041988c922f3faa8d9"
+    },
+    {
+      "image_tag": "pld-rl:thor-continuous-20261014-r1",
+      "image_id": "sha256:2b93046aac08666f1b7e70c9d3e6fd62261c50cd1d9f73108bfe6d0aa2c35713"
+    },
+    {
+      "image_tag": "pld-rl-train:thor-sac-20261013-r1",
+      "image_id": "sha256:325ef815f1ae6b153c04425ff96d55595c2d17a86ee29b56cbe5752201780afd"
+    },
+    {
+      "image_tag": "pld-rl:thor-collect-20261012-r1",
+      "image_id": "sha256:3276d4085ccc0f6813ba26ba67594be8091a637ba69beb34c5b606281b920b18"
+    },
+    {
+      "image_tag": "pld-rl:thor-collect-20261012-r2",
+      "image_id": "sha256:37ab017566f6984cee94c8b546745c7cf9af4316863c4094bb35c1c00c611c64"
+    },
+    {
+      "image_tag": "pld-rl:thor-collect-20261013-r1",
+      "image_id": "sha256:5b072a86671680654d4b9d03d4bb5d0102b191b8a20719debc8aa1d12719f8cf"
+    },
+    {
+      "image_tag": "openwam:thor-20260922-r2",
+      "image_id": "sha256:5c8fb3955743e81e4bed211b91c19f9bf85fa50cca6aeebb4cd92b60417424b9"
+    },
+    {
+      "image_tag": "xiaomi-xr1:thor-20260923",
+      "image_id": "sha256:64db4807705b493ac56150377f238ad8dceab8e702fd86b2f76456eff0549e51"
+    },
+    {
+      "image_tag": "pld-rl:thor-closing-collect-20261014-r05-v2",
+      "image_id": "sha256:92b71c9d6c22034f6a7032e44621af2a3b5f2ae3dd1b386abd6146777b1aeefd"
+    },
+    {
+      "image_tag": "pld-rl:thor-latency-20261013-r1",
+      "image_id": "sha256:963d5a2863db85fb8a4c2230ded97de6390f5738a386b994e29c3889b8dd763f"
+    },
+    {
+      "image_tag": "xiaomi-xr1:thor-native-rtc-20261010",
+      "image_id": "sha256:9d0be210f8ce56010790e5ffef9b65bd5760cfb1cae6e8cf206cddc887496f7e"
+    },
+    {
+      "image_tag": "comfyui-h3:thor-20261026",
+      "image_id": "sha256:9e6c0cc266bf05a06b5725242f17d5625733458deda51490643946595d90e6d0"
+    },
+    {
+      "image_tag": "openwam:thor-20260922-r1",
+      "image_id": "sha256:e8b039d0e55ff193439df46fd74956a2407c5e72e0676ad6908612b48bb943bc"
+    },
+    {
+      "image_tag": "pld-rl:thor-balanced-20261013-r02",
+      "image_id": "sha256:f6dfaba965ec61b4022cc4b26cdda420ac3de4b79ccec42687dcf84f35295bd0"
+    }
+  ],
+  "image_skipped": [],
+  "available_before": 282976559104,
+  "completed_at": "2026-10-31T05:41:11.930281+00:00",
+  "available_after": 524124893184,
+  "remaining_containers": [
+    {
+      "name": "flora-annotation",
+      "id": "e5d23659853e182bfbd9682c909ba300271bc5aac025fee7dbdf2e5c38345c28",
+      "running": true,
+      "started": "2026-10-31T05:32:05.642191721Z",
+      "image_id": "sha256:a28653c877009eec2e82e2b825b2e340d1d2e344bcc1cf088e0350b1be824ec7",
+      "image": "flora:thor-20261031-r1"
+    },
+    {
+      "name": "yam-agent-perception",
+      "id": "222e6d2eaa96809f45c6212b430c036462619234d0e5b8a7d333b06a101fb6a2",
+      "running": true,
+      "started": "2026-10-26T07:58:40.648507181Z",
+      "image_id": "sha256:2dde288c8596ac3d8403a654dad09574e6debd45eb17722e05fdce4aff012e7f",
+      "image": "sha256:2dde288c8596ac3d8403a654dad09574e6debd45eb17722e05fdce4aff012e7f"
+    },
+    {
+      "name": "pi05-rtc-infer",
+      "id": "d80c40497577a3028a4ca7bc16fd49c861c0c3893937df62f291e5887b5ef523",
+      "running": false,
+      "started": "2026-10-27T02:45:12.947969276Z",
+      "image_id": "sha256:a6227665c32d1c7b2b7ca01a2d1a29e18d64bf764e5914db6eb06db5419a8e56",
+      "image": "openpi-pi:thor-trained-rtc-candidate-20260916"
+    },
+    {
+      "name": "pld-collect13-qwen-20261013-v1",
+      "id": "c87fd94802fbb385336eae1119bf7c337a6efad7fae024bf05c18b922325149b",
+      "running": false,
+      "started": "2026-10-13T07:41:17.642457549Z",
+      "image_id": "sha256:5957f49ff9062148d8c66c85aab0ec862d135a989c772c8f259fafbdf0161235",
+      "image": "sha256:5957f49ff9062148d8c66c85aab0ec862d135a989c772c8f259fafbdf0161235"
+    },
+    {
+      "name": "pld-collect13-dino-20261013-v1",
+      "id": "0bb4f33d3e04673787c4af3bb06e2ae30dfc99e7df5d81953a41f70729b96ab5",
+      "running": false,
+      "started": "2026-10-13T07:39:51.380111407Z",
+      "image_id": "sha256:2711020dd277e9114ef6296ddc0ed721de376a4b1156183ed39c6c1450a2439c",
+      "image": "sha256:2711020dd277e9114ef6296ddc0ed721de376a4b1156183ed39c6c1450a2439c"
+    },
+    {
+      "name": "pld-curator-probe-20261012T121256237796",
+      "id": "319de8163b7d736a101c9ee40f58f5da7dac767b20f9f90994bb8f8f43895ae8",
+      "running": false,
+      "started": "2026-10-12T12:12:56.307078544Z",
+      "image_id": "sha256:2711020dd277e9114ef6296ddc0ed721de376a4b1156183ed39c6c1450a2439c",
+      "image": "sha256:2711020dd277e9114ef6296ddc0ed721de376a4b1156183ed39c6c1450a2439c"
+    },
+    {
+      "name": "pld-curator-probe-20261012T115344671219",
+      "id": "617f5a18cee691253d2b2f2fc28bcbf2b893f2f66ac2d726f46f87f128570c4c",
+      "running": false,
+      "started": "2026-10-12T11:53:44.73510535Z",
+      "image_id": "sha256:2711020dd277e9114ef6296ddc0ed721de376a4b1156183ed39c6c1450a2439c",
+      "image": "sha256:2711020dd277e9114ef6296ddc0ed721de376a4b1156183ed39c6c1450a2439c"
+    },
+    {
+      "name": "pld-curator-probe-20261012T103108332827",
+      "id": "63b2fd853d2c05176968408b4c926438e1d21504d8eb322f2f85abc50b379386",
+      "running": false,
+      "started": "2026-10-12T10:31:08.402135723Z",
+      "image_id": "sha256:2711020dd277e9114ef6296ddc0ed721de376a4b1156183ed39c6c1450a2439c",
+      "image": "sha256:2711020dd277e9114ef6296ddc0ed721de376a4b1156183ed39c6c1450a2439c"
+    },
+    {
+      "name": "pld-probe-e01-details-20261012-r1",
+      "id": "c73c67e2379003bd39d53d57a366a18fd03c12665be70e2dabdb10d6fbeee7a5",
+      "running": false,
+      "started": "2026-10-12T10:21:04.965283512Z",
+      "image_id": "sha256:2711020dd277e9114ef6296ddc0ed721de376a4b1156183ed39c6c1450a2439c",
+      "image": "sha256:2711020dd277e9114ef6296ddc0ed721de376a4b1156183ed39c6c1450a2439c"
+    },
+    {
+      "name": "pld-curator-probe-20261012T101154926955",
+      "id": "b3bbcdc4e634aacfb3e4483afe7484e23de52980831c0ae61e450be9fa794ef5",
+      "running": false,
+      "started": "2026-10-12T10:11:55.046226246Z",
+      "image_id": "sha256:2711020dd277e9114ef6296ddc0ed721de376a4b1156183ed39c6c1450a2439c",
+      "image": "sha256:2711020dd277e9114ef6296ddc0ed721de376a4b1156183ed39c6c1450a2439c"
+    },
+    {
+      "name": "pld-curator-probe-20261012T082325334095",
+      "id": "20c2c33682b218bb5ab27b505f3f659846e313f5e73696b8ce5757475706bc52",
+      "running": false,
+      "started": "2026-10-12T08:23:25.39784716Z",
+      "image_id": "sha256:2711020dd277e9114ef6296ddc0ed721de376a4b1156183ed39c6c1450a2439c",
+      "image": "sha256:2711020dd277e9114ef6296ddc0ed721de376a4b1156183ed39c6c1450a2439c"
+    },
+    {
+      "name": "parts-vlm-snapshot-pilot-20261011",
+      "id": "ac2ff7331567472d143beff0fd48554294d64e24a3e6041f467deab5fdfd588f",
+      "running": false,
+      "started": "2026-10-11T09:18:09.054995825Z",
+      "image_id": "sha256:5957f49ff9062148d8c66c85aab0ec862d135a989c772c8f259fafbdf0161235",
+      "image": "parts-vlm:thor-qwen3vl4b-20261011"
+    },
+    {
+      "name": "parts-vlm-sequence-full-20261011",
+      "id": "9233e1bd79ae3b9f8b9501961f39babe9f4ded7f4a02a3efdc0b3f932e0bd68c",
+      "running": false,
+      "started": "2026-10-11T09:15:30.874595034Z",
+      "image_id": "sha256:5957f49ff9062148d8c66c85aab0ec862d135a989c772c8f259fafbdf0161235",
+      "image": "parts-vlm:thor-qwen3vl4b-20261011"
+    },
+    {
+      "name": "parts-dino-v3r3-20261011",
+      "id": "92f5d3a0041861266181be2c1ee0d3120e5650b0958b2523bad7ac6643269d9e",
+      "running": false,
+      "started": "2026-10-11T09:14:22.692093877Z",
+      "image_id": "sha256:2711020dd277e9114ef6296ddc0ed721de376a4b1156183ed39c6c1450a2439c",
+      "image": "parts-vision:thor-sam3-0570b3a-20261010-r3"
+    },
+    {
+      "name": "parts-vlm-images-pilot-20261011",
+      "id": "175e47a30e626f52ff044682b46ce1d2c22dc7aa8ef500eb756b058c582d2129",
+      "running": false,
+      "started": "2026-10-11T09:13:38.482759636Z",
+      "image_id": "sha256:5957f49ff9062148d8c66c85aab0ec862d135a989c772c8f259fafbdf0161235",
+      "image": "parts-vlm:thor-qwen3vl4b-20261011"
+    },
+    {
+      "name": "parts-vlm-pilot-20261011",
+      "id": "9f641920ff22727d070459ae7b8cc51daaf4025079e88bca5a0f5a31e8b1a147",
+      "running": false,
+      "started": "2026-10-11T09:11:12.021345514Z",
+      "image_id": "sha256:5957f49ff9062148d8c66c85aab0ec862d135a989c772c8f259fafbdf0161235",
+      "image": "parts-vlm:thor-qwen3vl4b-20261011"
+    },
+    {
+      "name": "parts-dino-v3r2-20261011",
+      "id": "7c0a7f4f0ffdf79f302f75f55c96a7068f44122720dcc54db08a45fbe4fe2513",
+      "running": false,
+      "started": "2026-10-11T09:07:37.299887624Z",
+      "image_id": "sha256:2711020dd277e9114ef6296ddc0ed721de376a4b1156183ed39c6c1450a2439c",
+      "image": "parts-vision:thor-sam3-0570b3a-20261010-r3"
+    },
+    {
+      "name": "parts-dino-v3-20261011-r2",
+      "id": "0ba8c434c1faf32cad97c6ac8946761016022c7289fc2f972b8ac120efcf03af",
+      "running": false,
+      "started": "2026-10-11T08:57:40.110635591Z",
+      "image_id": "sha256:2711020dd277e9114ef6296ddc0ed721de376a4b1156183ed39c6c1450a2439c",
+      "image": "parts-vision:thor-sam3-0570b3a-20261010-r3"
+    },
+    {
+      "name": "parts-dino-v3-20261011",
+      "id": "845ae643cf66f4c2353fe3bfc39bef313da97571fbd818336f368f2fe95ec09b",
+      "running": false,
+      "started": "0001-01-01T00:00:00Z",
+      "image_id": "sha256:2711020dd277e9114ef6296ddc0ed721de376a4b1156183ed39c6c1450a2439c",
+      "image": "parts-vision:thor-sam3-0570b3a-20261010-r3"
+    },
+    {
+      "name": "parts-full-dinov3-999-20261010",
+      "id": "34ddb5db8e1f8fc6f11dcf0e1a8d503d44629123fea998bd405c02e1e88de52b",
+      "running": false,
+      "started": "2026-10-10T14:09:23.433443441Z",
+      "image_id": "sha256:2711020dd277e9114ef6296ddc0ed721de376a4b1156183ed39c6c1450a2439c",
+      "image": "parts-vision:thor-sam3-0570b3a-20261010-r3"
+    },
+    {
+      "name": "parts-full-sam3-1019-20261010",
+      "id": "65e576432c363e29f396ca14c9b634e0fcd74c38ae91989324a7cffb252641a5",
+      "running": false,
+      "started": "2026-10-10T14:00:48.062643372Z",
+      "image_id": "sha256:2711020dd277e9114ef6296ddc0ed721de376a4b1156183ed39c6c1450a2439c",
+      "image": "parts-vision:thor-sam3-0570b3a-20261010-r3"
+    },
+    {
+      "name": "parts-dinov3-features40-20261010",
+      "id": "aaab738007cab61c548d3753ea95b62f7622b9b57374a3f5c3e5dd1ad0fc716a",
+      "running": false,
+      "started": "2026-10-10T13:24:58.079019375Z",
+      "image_id": "sha256:2711020dd277e9114ef6296ddc0ed721de376a4b1156183ed39c6c1450a2439c",
+      "image": "parts-vision:thor-sam3-0570b3a-20261010-r3"
+    },
+    {
+      "name": "parts-dinov3-sam3-eval20-20261010",
+      "id": "227da2ef199851a63d3f4d7761ca0780b30c8d72fba49ca00dde5626f87a97b6",
+      "running": false,
+      "started": "2026-10-10T13:21:19.620463462Z",
+      "image_id": "sha256:2711020dd277e9114ef6296ddc0ed721de376a4b1156183ed39c6c1450a2439c",
+      "image": "parts-vision:thor-sam3-0570b3a-20261010-r3"
+    },
+    {
+      "name": "parts-fingertip-roi20-20261010",
+      "id": "4acb3eeb412e05f797684d818ab96fa0574b425c177ce58bd2505a3255ee83e6",
+      "running": false,
+      "started": "2026-10-10T11:31:31.189699779Z",
+      "image_id": "sha256:2711020dd277e9114ef6296ddc0ed721de376a4b1156183ed39c6c1450a2439c",
+      "image": "parts-vision:thor-sam3-0570b3a-20261010-r3"
+    },
+    {
+      "name": "parts-motion-probe-20261010-r1",
+      "id": "26a993f793da5e9ab8ca482267eda1ffea2cf4bb360607cb499bbbd5d1dd56ed",
+      "running": false,
+      "started": "2026-10-10T11:19:43.670290788Z",
+      "image_id": "sha256:4e52c8159c3f7b425230e0fd96e89b151b7fc19450bc5fb6595493fc1ef25509",
+      "image": "parts-motion:thor-opencv410-20261010-r1"
+    },
+    {
+      "name": "parts-motion-probe-20261010",
+      "id": "ed517c0e9a69e0adf0762b5347fc092c4730afe6c5c475554c63497cc34541be",
+      "running": false,
+      "started": "2026-10-10T11:17:43.699934925Z",
+      "image_id": "sha256:2711020dd277e9114ef6296ddc0ed721de376a4b1156183ed39c6c1450a2439c",
+      "image": "parts-vision:thor-sam3-0570b3a-20261010-r3"
+    },
+    {
+      "name": "parts-point-adaptive-probe-20261010",
+      "id": "b312e7cda8efe80ecdc3d3d91d8a9dcb4c28ad772c89325ef5ac6e57d4a383da",
+      "running": false,
+      "started": "2026-10-10T11:05:59.361774338Z",
+      "image_id": "sha256:2711020dd277e9114ef6296ddc0ed721de376a4b1156183ed39c6c1450a2439c",
+      "image": "parts-vision:thor-sam3-0570b3a-20261010-r3"
+    },
+    {
+      "name": "parts-point-probe-20261010",
+      "id": "196ca9b2e854abc8b77ba2fb11337063b63a451a96e92529d5b0199fa17c74ee",
+      "running": false,
+      "started": "2026-10-10T11:03:24.013514069Z",
+      "image_id": "sha256:2711020dd277e9114ef6296ddc0ed721de376a4b1156183ed39c6c1450a2439c",
+      "image": "parts-vision:thor-sam3-0570b3a-20261010-r3"
+    },
+    {
+      "name": "parts-visual-box-probe-20261010",
+      "id": "15fdbf84225bf05276cb30dea6f25804489038ea86f4848a5e189ca46a2fba28",
+      "running": false,
+      "started": "2026-10-10T10:59:54.850414965Z",
+      "image_id": "sha256:2711020dd277e9114ef6296ddc0ed721de376a4b1156183ed39c6c1450a2439c",
+      "image": "parts-vision:thor-sam3-0570b3a-20261010-r3"
+    },
+    {
+      "name": "parts-prompt-probe-20261010-r1",
+      "id": "0788492ccfe6b311908d59766787ea8431252fb56540d983cac6bbdc0507231c",
+      "running": false,
+      "started": "2026-10-10T10:57:25.872165965Z",
+      "image_id": "sha256:2711020dd277e9114ef6296ddc0ed721de376a4b1156183ed39c6c1450a2439c",
+      "image": "parts-vision:thor-sam3-0570b3a-20261010-r3"
+    },
+    {
+      "name": "parts-prompt-probe-20261010",
+      "id": "c41e99c2c553fb272ccd69998cc0fd94ba1e6a02c75b6a4d50a13032661c17ec",
+      "running": false,
+      "started": "0001-01-01T00:00:00Z",
+      "image_id": "sha256:2711020dd277e9114ef6296ddc0ed721de376a4b1156183ed39c6c1450a2439c",
+      "image": "parts-vision:thor-sam3-0570b3a-20261010-r3"
+    },
+    {
+      "name": "parts-grasp-labels-20261010",
+      "id": "865fe719aa01d9a22cf66268144c04436550bd34f15504ef5f45d2efa1da57fc",
+      "running": false,
+      "started": "2026-10-10T10:25:29.888821245Z",
+      "image_id": "sha256:2711020dd277e9114ef6296ddc0ed721de376a4b1156183ed39c6c1450a2439c",
+      "image": "parts-vision:thor-sam3-0570b3a-20261010-r3"
+    }
+  ]
+}

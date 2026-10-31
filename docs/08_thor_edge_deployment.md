@@ -1,6 +1,6 @@
 # 08 · Thor 端侧部署
 
-OpenWAM独立镜像、官方权重、LoRA合并与压缩候选见 [14 · OpenWAM推理实验](reference/thor/14_openwam_inference.md)。2026-09-23 用户暂停 OpenWAM，Thor 的已停止试验容器已清理；原始权重、环境镜像和日志保留。Pi 当前测试部署见下方当前决策；历史136000证据归[136000报告](reports/thor/rtc-20h-136000-20260923/README.md)。
+OpenWAM独立镜像、官方权重、LoRA合并与压缩候选的历史见 [14 · OpenWAM推理实验](reference/thor/14_openwam_inference.md)。2026-10-31按用户授权，Thor的OpenWAM整个目录及专属镜像已清理，不再保留本机权重/环境；恢复需重新部署。Pi当前状态见下方当前决策；历史136000证据归[136000报告](reports/thor/rtc-20h-136000-20260923/README.md)。
 
 逐步安装指导的冷记忆入口：[Thor 安装系列 00](reference/thor/00_start_here.md)。该组按 G0–G5 持有设备预检、ISO/USB 制作、固件/NVMe 安装、宿主/容器检查、Pi 工程闸门及故障交接；本页继续持有版本、精度决策和当前状态。指导 agent 不得把下文安装概览当成跳过目标确认的操作脚本。
 
@@ -9,6 +9,8 @@ OpenWAM独立镜像、官方权重、LoRA合并与压缩候选见 [14 · OpenWAM
 本页是 NVIDIA Jetson AGX Thor IPC 的端侧系统、Pi0.5 转换/加速及多模型端侧推理验收的唯一 owner。训练仍在服务器 GPU 上进行；3588 IPC 负责相机采集、机械臂驱动、CAN、GUI、home pose、限位和急停，本仓库不读取或修改 3588 的实现。
 
 ## 1. 当前决策
+
+- **2026-10-31 13:41 CST存储清理完成**：按用户授权永久删除Thor `thor/rl-training`、`comfyui-h3`、`thor/xr1`、`thor/openwam`四个精确目录（合计222.65GiB）及100个专属/附属容器、17个专属镜像标签；磁盘可用净增224.59GiB，回执可用488.13GiB。H3已停止移除，不再自动恢复；Flora与agent保持同一ID/StartedAt运行，Pi仍停止，系统/网络/功耗、共用dubbing/视觉/Pi/镜像安装归档和共享镜像层不动，无全局prune。Pi追加要求只删容器：20万、23万旧服务与历史60000转换容器已删，只保留24万停止服务；耳机62000离线产物完整，但本来没有常驻容器，不新建或上线。**Pi全部模型权重、ONNX与引擎本轮未删，20万/23万恢复须重建容器。** 目录删除不可本机撤销，旧XR-1/OpenWAM/H3就绪描述为历史；身份、精确路径/ID、验证与范围归[清理报告](reports/thor/storage-cleanup-20261031/README.md)。不操作服务器或3588。
 
 - **2026-10-30约16:47 CST：耳机clean-v2 retry4/62000已转换、构建并通过离线校验，按用户要求暂不上线**。原始非有限0、811张量FP32逐位映射，七步FP32权重＋TF32/quantile、缓存80/CUDA Graph、九例d=0/1/10独立JAX/Torch/TRT及0.2rad/tick步进检查通过；最大单关节差0.000626rad、夹爪0.000570。agent保持运行的共享GPU下，预热后推理P50/P95=188.20/188.58ms，本机总处理191.78/192.46ms；首轮含Graph捕获P95=367.29ms单列，不是WebSocket/3588全链路或任务效果。按明确授权只暂停H3，退出后已恢复running/healthy；agent未重启。Pi仍running=false、8000无监听，原容器配置仍是乐高24万，未启动或切换在线服务。沿用已有MAXN/锁频，不改其他任务电源，无Pi专属watcher；可用约267GiB。新norm/权重/引擎/脚本/回执及后续上线边界归[62000离线交接](reports/thor/rtc-earbuds-clean-v2-62000-20261030/README.md)，不得复用旧114000 norm或引擎，不重跑冻结流水线。旧114000仍已清理，其他模型原件不动，不操作3588或训练。
 
