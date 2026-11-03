@@ -1,0 +1,212 @@
+{
+  "kind": "bounded_mp4_sample_table_probe",
+  "source_repo": "lerobot/abc_130k_v3_train",
+  "source_hf_revision": "68651e4929d9fb00f798937b2d62617cab5c771d",
+  "mirror_revision": "5b1e1b0e4384922c118b0fd4a68d803feea37d73",
+  "metadata_only_transfer_bytes": 2123905,
+  "samples": [
+    {
+      "episode": 4201,
+      "role": "top",
+      "path": "videos/observation.images.top/chunk-000/file-232.mp4",
+      "source_file_bytes": 201233398,
+      "metadata_transferred_bytes": 370133,
+      "timescale": 15360,
+      "video_sample_count": 61105,
+      "video_duration_s": 2036.8333333333333,
+      "episode_samples": 2700,
+      "interval_s": [
+        1172.9666666666665,
+        1262.9666666666665
+      ],
+      "payload_bytes": 6822074,
+      "prior_keyframe_extra_bytes": 0,
+      "approx_total_payload_with_preroll": 6822074,
+      "sample_pts_start_s": 1172.9666666666667,
+      "sample_pts_end_s": 1262.9333333333334
+    },
+    {
+      "episode": 4201,
+      "role": "left_wrist",
+      "path": "videos/observation.images.left_wrist/chunk-000/file-196.mp4",
+      "source_file_bytes": 206268602,
+      "metadata_transferred_bytes": 460069,
+      "timescale": 15360,
+      "video_sample_count": 76023,
+      "video_duration_s": 2534.1,
+      "episode_samples": 2700,
+      "interval_s": [
+        1172.9666666666665,
+        1262.9666666666665
+      ],
+      "payload_bytes": 4731787,
+      "prior_keyframe_extra_bytes": 0,
+      "approx_total_payload_with_preroll": 4731787,
+      "sample_pts_start_s": 1172.9666666666667,
+      "sample_pts_end_s": 1262.9333333333334
+    },
+    {
+      "episode": 4201,
+      "role": "right_wrist",
+      "path": "videos/observation.images.right_wrist/chunk-000/file-190.mp4",
+      "source_file_bytes": 202030852,
+      "metadata_transferred_bytes": 459981,
+      "timescale": 15360,
+      "video_sample_count": 76023,
+      "video_duration_s": 2534.1,
+      "episode_samples": 2700,
+      "interval_s": [
+        1172.9666666666665,
+        1262.9666666666665
+      ],
+      "payload_bytes": 4697567,
+      "prior_keyframe_extra_bytes": 0,
+      "approx_total_payload_with_preroll": 4697567,
+      "sample_pts_start_s": 1172.9666666666667,
+      "sample_pts_end_s": 1262.9333333333334
+    },
+    {
+      "episode": 50304,
+      "role": "top",
+      "path": "videos/observation.images.top/chunk-003/file-160.mp4",
+      "source_file_bytes": 90181586,
+      "metadata_transferred_bytes": 165393,
+      "timescale": 15360,
+      "video_sample_count": 27234,
+      "video_duration_s": 907.8,
+      "episode_samples": 2701,
+      "interval_s": [
+        67.0,
+        157.03333333333333
+      ],
+      "payload_bytes": 15288297,
+      "prior_keyframe_extra_bytes": 0,
+      "approx_total_payload_with_preroll": 15288297,
+      "sample_pts_start_s": 67.0,
+      "sample_pts_end_s": 157.0
+    },
+    {
+      "episode": 50304,
+      "role": "left_wrist",
+      "path": "videos/observation.images.left_wrist/chunk-002/file-731.mp4",
+      "source_file_bytes": 68473172,
+      "metadata_transferred_bytes": 165237,
+      "timescale": 15360,
+      "video_sample_count": 27234,
+      "video_duration_s": 907.8,
+      "episode_samples": 2701,
+      "interval_s": [
+        67.0,
+        157.03333333333333
+      ],
+      "payload_bytes": 5794070,
+      "prior_keyframe_extra_bytes": 0,
+      "approx_total_payload_with_preroll": 5794070,
+      "sample_pts_start_s": 67.0,
+      "sample_pts_end_s": 157.0
+    },
+    {
+      "episode": 50304,
+      "role": "right_wrist",
+      "path": "videos/observation.images.right_wrist/chunk-002/file-666.mp4",
+      "source_file_bytes": 66942612,
+      "metadata_transferred_bytes": 165205,
+      "timescale": 15360,
+      "video_sample_count": 27234,
+      "video_duration_s": 907.8,
+      "episode_samples": 2701,
+      "interval_s": [
+        67.0,
+        157.03333333333333
+      ],
+      "payload_bytes": 5538253,
+      "prior_keyframe_extra_bytes": 0,
+      "approx_total_payload_with_preroll": 5538253,
+      "sample_pts_start_s": 67.0,
+      "sample_pts_end_s": 157.0
+    },
+    {
+      "episode": 100500,
+      "role": "top",
+      "path": "videos/observation.images.top/chunk-009/file-435.mp4",
+      "source_file_bytes": 59616484,
+      "metadata_transferred_bytes": 112733,
+      "timescale": 15360,
+      "video_sample_count": 18513,
+      "video_duration_s": 617.1,
+      "episode_samples": 2700,
+      "interval_s": [
+        226.16666666666666,
+        316.16666666666663
+      ],
+      "payload_bytes": 10956524,
+      "prior_keyframe_extra_bytes": 0,
+      "approx_total_payload_with_preroll": 10956524,
+      "sample_pts_start_s": 226.16666666666666,
+      "sample_pts_end_s": 316.1333333333333
+    },
+    {
+      "episode": 100500,
+      "role": "left_wrist",
+      "path": "videos/observation.images.left_wrist/chunk-009/file-006.mp4",
+      "source_file_bytes": 47188530,
+      "metadata_transferred_bytes": 112577,
+      "timescale": 15360,
+      "video_sample_count": 18513,
+      "video_duration_s": 617.1,
+      "episode_samples": 2700,
+      "interval_s": [
+        226.16666666666666,
+        316.16666666666663
+      ],
+      "payload_bytes": 9244867,
+      "prior_keyframe_extra_bytes": 0,
+      "approx_total_payload_with_preroll": 9244867,
+      "sample_pts_start_s": 226.16666666666666,
+      "sample_pts_end_s": 316.1333333333333
+    },
+    {
+      "episode": 100500,
+      "role": "right_wrist",
+      "path": "videos/observation.images.right_wrist/chunk-008/file-941.mp4",
+      "source_file_bytes": 46466843,
+      "metadata_transferred_bytes": 112577,
+      "timescale": 15360,
+      "video_sample_count": 18513,
+      "video_duration_s": 617.1,
+      "episode_samples": 2700,
+      "interval_s": [
+        226.16666666666666,
+        316.16666666666663
+      ],
+      "payload_bytes": 9220816,
+      "prior_keyframe_extra_bytes": 0,
+      "approx_total_payload_with_preroll": 9220816,
+      "sample_pts_start_s": 226.16666666666666,
+      "sample_pts_end_s": 316.1333333333333
+    }
+  ],
+  "complete_episode_summaries": [
+    {
+      "episode": 4201,
+      "seconds": 90.0,
+      "three_camera_payload_bytes": 16251428,
+      "three_camera_bytes_per_second": 180571.42222222223,
+      "estimated_video_10h_decimal_GB": 6.5005712
+    },
+    {
+      "episode": 50304,
+      "seconds": 90.03333333333333,
+      "three_camera_payload_bytes": 26620620,
+      "three_camera_bytes_per_second": 295675.15734912996,
+      "estimated_video_10h_decimal_GB": 10.644305664568678
+    },
+    {
+      "episode": 100500,
+      "seconds": 90.0,
+      "three_camera_payload_bytes": 29422207,
+      "three_camera_bytes_per_second": 326913.4111111111,
+      "estimated_video_10h_decimal_GB": 11.7688828
+    }
+  ]
+}

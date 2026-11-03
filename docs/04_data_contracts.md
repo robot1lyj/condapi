@@ -1,5 +1,13 @@
 # 04 · 数据合同
 
+## T恤10h与FineART子任务数据（2026-11-03）
+
+用户选择ABC-130K唯一任务`fold and stack the t-shirts`，保留并增加>120s完整轨迹；随后授权在Thor下载、清洗、开始FLORA标注与加速探索。当前按固定train revision设计319集/10h主集，其中123集/6h>120s，另有29集/约1h开发及63集/2h备用。名单只通过metadata约束和episode互斥，任务成功、场景/会话/衣物组间隔离及完整语言审核尚未完成，不是训练READY。官方82集val独立保留。
+
+现成三路224×224/AV1/30fps的10h净导出估计6–13GB、预算15GB；全候选整源分片精算137.16GB，Thor工作盘按200GB预算。仅标注输入按≤120s窗口处理，训练保留父episode、原始14D absolute值和H50跨正常子任务边界。FineART使用完整`language_persistent`时间线与train-only QUANTILES；显式小UNKNOWN模式只在占比≤2%、连续≤30帧且有绑定selector回执的anchor写两语言列`[]`，保留动作并跳过文本监督，不用null tombstone或伪造标签。其余未知进补标队列，合格父集继续导出；无需逐条用户/agent审批。不得复用OpenPI delta/norm。公开checkpoint及代码固定，processor/FAST资产单独核对，不把加载权重当完成对齐。
+
+方案、候选、来源hash、存储证据与执行回执归[本轮数据报告](reports/data-tshirt-fineart-design-20261103/README.md)；训练准备归[FineART配置](reference/fineart_tshirt_training.md)，FLORA调度与加速归[Thor标注说明](reference/flora_thor_annotation.md)。训练服务器维护期间不访问服务器或启动训练；Thor仅写本任务新目录，不改既有数据、其他服务或3588。
+
 ## 折纸盒 ABC-130k 下载与筛查（2026-10-29）
 
 按用户要求下载 `fold the paper box` 到服务器新目录 `/home/wuyan/lyj/YAM/YAM_data/ABC-130k-paper-box-20261029`。排除前 train 2,387 集/99.341148h、val 29 集/1.192657h；CPU-only Slurm 2640 已启动，状态为下载/逐集筛查中，不是完成或训练 READY。通过有界 HTTP Range 保存完整目标 episode 的原 14D 行及不重编码视频，关键帧预滚通过 `offset_s` 显式对齐；原数据、此前既有下载和训练不修改。

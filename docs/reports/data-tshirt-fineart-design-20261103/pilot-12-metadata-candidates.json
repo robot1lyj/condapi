@@ -1,0 +1,143 @@
+{
+  "source": "10h provisional train candidate pool",
+  "episodes": 12,
+  "seconds": 1942.2666666666667,
+  "minutes": 32.37111111111111,
+  "frames": 58268,
+  "proposed_uniform_window_count": 23,
+  "window_estimate_only": "Prefer semantic cut points; preserve original whole episodes. Annotation window count is not number of training episodes.",
+  "pilots": [
+    {
+      "stratum": "short_le60",
+      "source_episode_index": 128691,
+      "frames": 1434,
+      "seconds": 47.8,
+      "uniform_120s_windows_with_10s_overlap": 1,
+      "data_chunk": 0,
+      "data_file": 739,
+      "row_offset": 380950338,
+      "role": "metadata candidate only, requires full three-view QC and subtask review"
+    },
+    {
+      "stratum": "short_le60",
+      "source_episode_index": 69431,
+      "frames": 1718,
+      "seconds": 57.266666666666666,
+      "uniform_120s_windows_with_10s_overlap": 1,
+      "data_chunk": 0,
+      "data_file": 465,
+      "row_offset": 205870835,
+      "role": "metadata candidate only, requires full three-view QC and subtask review"
+    },
+    {
+      "stratum": "medium_60_120",
+      "source_episode_index": 42704,
+      "frames": 2058,
+      "seconds": 68.6,
+      "uniform_120s_windows_with_10s_overlap": 1,
+      "data_chunk": 0,
+      "data_file": 338,
+      "row_offset": 126892693,
+      "role": "metadata candidate only, requires full three-view QC and subtask review"
+    },
+    {
+      "stratum": "medium_60_120",
+      "source_episode_index": 21157,
+      "frames": 2553,
+      "seconds": 85.1,
+      "uniform_120s_windows_with_10s_overlap": 1,
+      "data_chunk": 0,
+      "data_file": 167,
+      "row_offset": 63824958,
+      "role": "metadata candidate only, requires full three-view QC and subtask review"
+    },
+    {
+      "stratum": "medium_60_120",
+      "source_episode_index": 22919,
+      "frames": 3098,
+      "seconds": 103.26666666666667,
+      "uniform_120s_windows_with_10s_overlap": 1,
+      "data_chunk": 0,
+      "data_file": 181,
+      "row_offset": 69023797,
+      "role": "metadata candidate only, requires full three-view QC and subtask review"
+    },
+    {
+      "stratum": "long_120_180",
+      "source_episode_index": 85871,
+      "frames": 3749,
+      "seconds": 124.96666666666667,
+      "uniform_120s_windows_with_10s_overlap": 2,
+      "data_chunk": 0,
+      "data_file": 541,
+      "row_offset": 254264217,
+      "role": "metadata candidate only, requires full three-view QC and subtask review"
+    },
+    {
+      "stratum": "long_120_180",
+      "source_episode_index": 13347,
+      "frames": 4089,
+      "seconds": 136.3,
+      "uniform_120s_windows_with_10s_overlap": 2,
+      "data_chunk": 0,
+      "data_file": 105,
+      "row_offset": 40401520,
+      "role": "metadata candidate only, requires full three-view QC and subtask review"
+    },
+    {
+      "stratum": "long_120_180",
+      "source_episode_index": 22039,
+      "frames": 4777,
+      "seconds": 159.23333333333332,
+      "uniform_120s_windows_with_10s_overlap": 2,
+      "data_chunk": 0,
+      "data_file": 174,
+      "row_offset": 66444019,
+      "role": "metadata candidate only, requires full three-view QC and subtask review"
+    },
+    {
+      "stratum": "long_180_240",
+      "source_episode_index": 47604,
+      "frames": 5730,
+      "seconds": 191.0,
+      "uniform_120s_windows_with_10s_overlap": 2,
+      "data_chunk": 0,
+      "data_file": 364,
+      "row_offset": 141511951,
+      "role": "metadata candidate only, requires full three-view QC and subtask review"
+    },
+    {
+      "stratum": "long_180_240",
+      "source_episode_index": 90913,
+      "frames": 6465,
+      "seconds": 215.5,
+      "uniform_120s_windows_with_10s_overlap": 2,
+      "data_chunk": 0,
+      "data_file": 564,
+      "row_offset": 269201566,
+      "role": "metadata candidate only, requires full three-view QC and subtask review"
+    },
+    {
+      "stratum": "long_gt240",
+      "source_episode_index": 88416,
+      "frames": 7219,
+      "seconds": 240.63333333333333,
+      "uniform_120s_windows_with_10s_overlap": 3,
+      "data_chunk": 0,
+      "data_file": 552,
+      "row_offset": 261772369,
+      "role": "metadata candidate only, requires full three-view QC and subtask review"
+    },
+    {
+      "stratum": "long_gt240",
+      "source_episode_index": 126660,
+      "frames": 15378,
+      "seconds": 512.6,
+      "uniform_120s_windows_with_10s_overlap": 5,
+      "data_chunk": 0,
+      "data_file": 729,
+      "row_offset": 374908221,
+      "role": "metadata candidate only, requires full three-view QC and subtask review"
+    }
+  ]
+}

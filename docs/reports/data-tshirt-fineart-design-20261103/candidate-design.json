@@ -1,0 +1,361 @@
+{
+  "source_metadata": "Filtered inventory derived from source-provenance.json pinned metadata files; original temporary inventory is not a required runtime input",
+  "source_metadata_sha256": "fcf27732bdad16052d8f10c7b8bb53610bea2356d30aea8e1fd2b65643f3805e",
+  "task": "fold and stack the t-shirts",
+  "train_source_revision": "68651e4929d9fb00f798937b2d62617cab5c771d",
+  "selection_method": "duration-stratified, deterministic seeded source-index-band spread, compact subset-sum completion",
+  "source_index_bands_are_not_sessions": true,
+  "leakage_status": "EPISODE-DISJOINT ONLY; session/scene/clothing identity unavailable and must be audited before split release",
+  "official_val": "82 episodes / 2.047546 h preserved untouched; excluded from all candidate pools",
+  "candidate_train_plus_reserve_hours": 12.0,
+  "all_candidates_hours": 12.9995,
+  "summaries": [
+    {
+      "pool": "train",
+      "status": "METADATA_CANDIDATES_NOT_QUALITY_RELEASED",
+      "target_hours": 10,
+      "hours": 10.0,
+      "frames": 1080000,
+      "episodes": 319,
+      "full_H50_windows": 1064369,
+      "gt120_episodes": 123,
+      "gt120_hours": 6.0,
+      "gt360_episodes": 4,
+      "strata": [
+        {
+          "stratum": "short_le60",
+          "target_hours": 1.0,
+          "episodes": 70,
+          "frames": 108000,
+          "hours": 1.0,
+          "min_s": 32.86666666666667,
+          "median_s": 53.45,
+          "max_s": 59.6,
+          "full_H50_windows": 104570,
+          "source_index_band_counts": {
+            "0": 8,
+            "1": 8,
+            "2": 7,
+            "3": 7,
+            "4": 7,
+            "5": 8,
+            "6": 7,
+            "7": 6,
+            "8": 6,
+            "9": 6
+          }
+        },
+        {
+          "stratum": "medium_60_120",
+          "target_hours": 3.0,
+          "episodes": 126,
+          "frames": 324000,
+          "hours": 3.0,
+          "min_s": 60.46666666666667,
+          "median_s": 85.08333333333333,
+          "max_s": 119.3,
+          "full_H50_windows": 317826,
+          "source_index_band_counts": {
+            "0": 13,
+            "1": 13,
+            "2": 13,
+            "3": 12,
+            "4": 13,
+            "5": 13,
+            "6": 12,
+            "7": 13,
+            "8": 12,
+            "9": 12
+          }
+        },
+        {
+          "stratum": "long_120_180",
+          "target_hours": 3.0,
+          "episodes": 77,
+          "frames": 324000,
+          "hours": 3.0,
+          "min_s": 120.06666666666666,
+          "median_s": 136.3,
+          "max_s": 177.53333333333333,
+          "full_H50_windows": 320227,
+          "source_index_band_counts": {
+            "0": 9,
+            "1": 8,
+            "2": 7,
+            "3": 8,
+            "4": 7,
+            "5": 7,
+            "6": 7,
+            "7": 8,
+            "8": 8,
+            "9": 8
+          }
+        },
+        {
+          "stratum": "long_180_240",
+          "target_hours": 2.0,
+          "episodes": 35,
+          "frames": 216000,
+          "hours": 2.0,
+          "min_s": 180.6,
+          "median_s": 206.86666666666667,
+          "max_s": 240.0,
+          "full_H50_windows": 214285,
+          "source_index_band_counts": {
+            "0": 4,
+            "1": 4,
+            "2": 4,
+            "3": 4,
+            "4": 2,
+            "5": 3,
+            "6": 4,
+            "7": 4,
+            "8": 3,
+            "9": 3
+          }
+        },
+        {
+          "stratum": "long_gt240",
+          "target_hours": 1.0,
+          "episodes": 11,
+          "frames": 108000,
+          "hours": 1.0,
+          "min_s": 240.63333333333333,
+          "median_s": 297.3666666666667,
+          "max_s": 512.6,
+          "full_H50_windows": 107461,
+          "source_index_band_counts": {
+            "0": 1,
+            "1": 2,
+            "3": 1,
+            "4": 2,
+            "5": 1,
+            "6": 1,
+            "8": 1,
+            "9": 2
+          }
+        }
+      ]
+    },
+    {
+      "pool": "dev",
+      "status": "METADATA_CANDIDATES_NOT_QUALITY_RELEASED",
+      "target_hours": 1,
+      "hours": 0.9995,
+      "frames": 107946,
+      "episodes": 29,
+      "full_H50_windows": 106525,
+      "gt120_episodes": 11,
+      "gt120_hours": 0.5995,
+      "gt360_episodes": 0,
+      "strata": [
+        {
+          "stratum": "short_le60",
+          "target_hours": 0.1,
+          "episodes": 7,
+          "frames": 10800,
+          "hours": 0.1,
+          "min_s": 45.4,
+          "median_s": 53.333333333333336,
+          "max_s": 57.733333333333334,
+          "full_H50_windows": 10457,
+          "source_index_band_counts": {
+            "1": 1,
+            "2": 2,
+            "5": 1,
+            "6": 1,
+            "7": 1,
+            "8": 1
+          }
+        },
+        {
+          "stratum": "medium_60_120",
+          "target_hours": 0.3,
+          "episodes": 11,
+          "frames": 32400,
+          "hours": 0.3,
+          "min_s": 63.96666666666667,
+          "median_s": 105.76666666666667,
+          "max_s": 114.63333333333334,
+          "full_H50_windows": 31861,
+          "source_index_band_counts": {
+            "0": 2,
+            "1": 1,
+            "3": 1,
+            "4": 1,
+            "5": 2,
+            "6": 2,
+            "7": 1,
+            "8": 1
+          }
+        },
+        {
+          "stratum": "long_120_180",
+          "target_hours": 0.3,
+          "episodes": 7,
+          "frames": 32400,
+          "hours": 0.3,
+          "min_s": 123.03333333333333,
+          "median_s": 163.96666666666667,
+          "max_s": 173.7,
+          "full_H50_windows": 32057,
+          "source_index_band_counts": {
+            "0": 2,
+            "1": 1,
+            "4": 1,
+            "6": 1,
+            "7": 1,
+            "8": 1
+          }
+        },
+        {
+          "stratum": "long_180_240",
+          "target_hours": 0.2,
+          "episodes": 3,
+          "frames": 21588,
+          "hours": 0.1998888888888889,
+          "min_s": 239.7,
+          "median_s": 239.93333333333334,
+          "max_s": 239.96666666666667,
+          "full_H50_windows": 21441,
+          "source_index_band_counts": {
+            "2": 2,
+            "5": 1
+          }
+        },
+        {
+          "stratum": "long_gt240",
+          "target_hours": 0.1,
+          "episodes": 1,
+          "frames": 10758,
+          "hours": 0.09961111111111111,
+          "min_s": 358.6,
+          "median_s": 358.6,
+          "max_s": 358.6,
+          "full_H50_windows": 10709,
+          "source_index_band_counts": {
+            "1": 1
+          }
+        }
+      ]
+    },
+    {
+      "pool": "reserve",
+      "status": "METADATA_CANDIDATES_NOT_QUALITY_RELEASED",
+      "target_hours": 2,
+      "hours": 2.0,
+      "frames": 216000,
+      "episodes": 63,
+      "full_H50_windows": 212913,
+      "gt120_episodes": 24,
+      "gt120_hours": 1.2,
+      "gt360_episodes": 1,
+      "strata": [
+        {
+          "stratum": "short_le60",
+          "target_hours": 0.2,
+          "episodes": 14,
+          "frames": 21600,
+          "hours": 0.2,
+          "min_s": 37.03333333333333,
+          "median_s": 52.71666666666667,
+          "max_s": 58.4,
+          "full_H50_windows": 20914,
+          "source_index_band_counts": {
+            "0": 2,
+            "1": 2,
+            "2": 2,
+            "3": 1,
+            "4": 2,
+            "5": 2,
+            "6": 1,
+            "9": 2
+          }
+        },
+        {
+          "stratum": "medium_60_120",
+          "target_hours": 0.6,
+          "episodes": 25,
+          "frames": 64800,
+          "hours": 0.6,
+          "min_s": 61.266666666666666,
+          "median_s": 82.96666666666667,
+          "max_s": 119.83333333333333,
+          "full_H50_windows": 63575,
+          "source_index_band_counts": {
+            "0": 3,
+            "1": 3,
+            "2": 2,
+            "3": 3,
+            "4": 1,
+            "5": 3,
+            "6": 3,
+            "7": 2,
+            "8": 3,
+            "9": 2
+          }
+        },
+        {
+          "stratum": "long_120_180",
+          "target_hours": 0.6,
+          "episodes": 15,
+          "frames": 64800,
+          "hours": 0.6,
+          "min_s": 120.46666666666667,
+          "median_s": 139.13333333333333,
+          "max_s": 177.26666666666668,
+          "full_H50_windows": 64065,
+          "source_index_band_counts": {
+            "0": 2,
+            "1": 2,
+            "2": 2,
+            "3": 1,
+            "4": 1,
+            "5": 1,
+            "6": 2,
+            "7": 2,
+            "8": 1,
+            "9": 1
+          }
+        },
+        {
+          "stratum": "long_180_240",
+          "target_hours": 0.4,
+          "episodes": 7,
+          "frames": 43200,
+          "hours": 0.4,
+          "min_s": 181.9,
+          "median_s": 199.4,
+          "max_s": 238.36666666666667,
+          "full_H50_windows": 42857,
+          "source_index_band_counts": {
+            "0": 1,
+            "1": 1,
+            "4": 1,
+            "5": 1,
+            "6": 1,
+            "7": 1,
+            "8": 1
+          }
+        },
+        {
+          "stratum": "long_gt240",
+          "target_hours": 0.2,
+          "episodes": 2,
+          "frames": 21600,
+          "hours": 0.2,
+          "min_s": 319.56666666666666,
+          "median_s": 360.0,
+          "max_s": 400.43333333333334,
+          "full_H50_windows": 21502,
+          "source_index_band_counts": {
+            "0": 1,
+            "1": 1
+          }
+        }
+      ]
+    }
+  ],
+  "replacement_rule": "QC rejection or annotation failure replaced from same duration stratum; never cut original episode to hit exact hours",
+  "H50_count_rule": "sum(max(L-49,0)) for complete non-padded episode windows; native loader may pad tails. Subtask boundaries do not create new episodes or automatically terminate H50 chunks."
+}

@@ -1,0 +1,108 @@
+{
+  "schema_version": 1,
+  "status": "PREPARATION_NOT_TRAINING_READY",
+  "automatic_training_start": false,
+  "local_training_allowed": false,
+  "native_entrypoint": "python -m lerobot.scripts.lerobot_train --config_path=<resolved-native-config.json>",
+  "code": {
+    "repository": "https://github.com/huggingface/lerobot",
+    "commit": "f5c9bc02137c331b009eccd44ece6f11b62187a8"
+  },
+  "checkpoint": {
+    "repo_id": "lerobot/fineart_vla_base",
+    "legacy_alias": "lerobot/FineART-VLA-subtask-midtrained",
+    "revision": "b6cf4faf2630f971dd390bc32365e9d9c330da8e",
+    "sha256": {
+      "config.json": "6e4cb5a7b5561e8e32f18b184acc82e800d17a0e54cf7e661c86c9a905ca049c",
+      "policy_preprocessor.json": "a3621dd82bd83f16d6e1c8daae82d0cf899910a4c380edf493a13a20fb2d1d24",
+      "model.safetensors": "9e384c7351e5e42008efa34c5e3485bf071ca0d5c00490aa6bb63167022dd197",
+      "action_tokenizer/processor_config.json": "6a2866f14a3f30b6460b568442c6a75ff4c831879f3d3faf650ffbfd70a2fef0",
+      "action_tokenizer/processing_action_tokenizer.py": "6f021ca1f4c1b194ab6fa399d80baf3d642eadb17efb8f73301e4ac401522c20",
+      "action_tokenizer/bpe_tokenizer/tokenizer.json": "d799b47a724a5269c57583824f3d05ed11ca901d4644dc0b0ddeea82e02d0e24",
+      "action_tokenizer/bpe_tokenizer/tokenizer_config.json": "16b4f099a54afae6870d509c2dfabe66b4b021dee9bb96467d72bd6716bfc28b"
+    }
+  },
+  "text_tokenizer": {
+    "repo_id": "google/paligemma-3b-pt-224",
+    "revision": "35e4f46485b4d07967e7e9935bc3786aad50687c",
+    "access": "manual-gated upstream; use an already authorized local snapshot; no download attempted",
+    "sha256": {
+      "tokenizer.json": "ef6773c135b77b834de1d13c75a4c98ab7a3684ffd602d1831e1f1bf5467c563",
+      "tokenizer.model": "8986bb4f423f07f8c7f70d0dbe3526fb2316056c17bae71b1ea975e77a168fc6"
+    },
+    "git_blob_sha1": {
+      "added_tokens.json": "ff9246e420971b10c510b39a0de289132c2bf23f",
+      "special_tokens_map.json": "0c18fdd94629ea652e2ef36ed9a422474ad0a8e8",
+      "tokenizer_config.json": "960dcec0bccc6e594d865eceb63c8078e164cfb2"
+    }
+  },
+  "source": {
+    "repo_id": "lerobot/abc_130k_v3_train",
+    "revision": "68651e4929d9fb00f798937b2d62617cab5c771d",
+    "task": "fold and stack the t-shirts",
+    "candidate_directory": "docs/reports/data-tshirt-fineart-design-20261103",
+    "candidate_design": "candidate-design.json",
+    "train_candidates": "train-candidate-episodes.json",
+    "dev_candidates": "dev-candidate-episodes.json",
+    "reserve_candidates": "reserve-candidate-episodes.json",
+    "train": {"episodes": 319, "frames": 1080000, "hours": 10.0},
+    "dev": {"episodes": 29, "frames": 107946, "hours": 0.9995},
+    "reserve": {"episodes": 63, "frames": 216000, "hours": 2.0},
+    "official_val": "82 episodes; excluded from train/dev/reserve; reserved final evaluation",
+    "candidate_status": "METADATA_ONLY_NOT_QUALITY_RELEASED"
+  },
+  "data_contract": {
+    "state_action_dim": 14,
+    "order": "left_joint_1..6,left_gripper,right_joint_1..6,right_gripper",
+    "action_semantics": "absolute",
+    "raw_numeric_values": "preserve exactly; no OpenPI delta, padding, or norm conversion in dataset",
+    "fps": 30,
+    "normalization": "QUANTILES from released train-only absolute data; dev reuses train stats",
+    "normalizer_owner": "native FineART processor; no OpenPI norm_stats.json",
+    "language": "strict-parent defaults to a complete timeline on every frame; optional audited native-empty-anchor-fallback keeps known timelines and explicit two-column empty lists only at bounded UNKNOWN anchors",
+    "keep_parent_episodes": true,
+    "annotation_windows_are_episodes": false,
+    "dev_in_native_training": false
+  },
+  "fast": {
+    "strategy": "preserve checkpoint-bundled tokenizer for first aligned baseline",
+    "auto_fit_fast_tokenizer": false,
+    "fast_skip_tokens": 128,
+    "max_action_tokens": 384,
+    "audit_split": "train",
+    "max_reconstruction_rmse": 0.1,
+    "max_dim_rmse": 0.2,
+    "truncation_allowed": false,
+    "failure_action": "block resolution; explicitly version and review a train-only refitted tokenizer before changing recipe"
+  },
+  "language_supervision": {
+    "default_mode": "strict-parent",
+    "supported_modes": ["strict-parent", "native-empty-anchor-fallback"],
+    "fallback_max_parent_unknown_fraction": 0.02,
+    "fallback_max_contiguous_unknown_frames": 30,
+    "fallback_threshold_basis": "initial engineering thresholds, not a paper conclusion",
+    "fallback_requirements": "explicit release mode; nonempty original task; effective language/action coverage reported separately; actual v3 all-row Parquet materialization audit and source hashes",
+    "sidecar_only_status": "NOT_MATERIALIZED_NOT_TRAINING_READY",
+    "recipe_or_native_trainer_changes": false
+  },
+  "hyperparameters": {
+    "status": "DRAFT_NOT_SERVER_RESOURCE_VALIDATED",
+    "full_finetune": true,
+    "batch_size_per_process": 8,
+    "steps": 30000,
+    "learning_rate": 0.00001,
+    "warmup_steps": 1000,
+    "decay_learning_rate": 0.000001,
+    "distributed_topology": "unassigned; native single-process defaults only, not a hardware sizing claim"
+  },
+  "blockers": [
+    "train/dev download and complete data audit have not been released",
+    "Flora raw outputs are not yet a mode-specific audited FineART language data materialization",
+    "session/scene/clothing leakage review is pending",
+    "train-only absolute QUANTILES statistics and source numeric identity receipts are pending",
+    "bundled FAST reconstruction/token-length and text-length audits are pending",
+    "fixed checkpoint/text-tokenizer snapshots and fixed upstream checkout paths on training server are unassigned",
+    "server environment, GPU memory and throughput validation are deferred while server is under maintenance",
+    "independent dev evaluation is not integrated by the native train-only template"
+  ]
+}

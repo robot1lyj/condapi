@@ -1,0 +1,39 @@
+{
+  "schema_version": "condapi_fineart_annotation_regression_summary_v1",
+  "purpose": "Boundary/choice correspondence summarized from one agent-visual-review example; no original Flora JSON, caption text, video or contact sheet is stored here",
+  "source_example": {"pool": "train", "source_episode_index": 128691, "frames": 1434, "fps": 30, "review_method": "agent_visual_review", "task_success": "NOT_REVIEWED", "training_ready": false},
+  "raw_label_aliases": {
+    "L0": "initial spreading goal",
+    "L1": "first near-side folding attempt with an overlong raw interval",
+    "L2": "respreading/reset goal",
+    "L3": "second near-side folding attempt",
+    "L4": "near-edge alignment goal",
+    "L5": "far-side folding goal with an early raw start",
+    "L6": "lengthwise reorientation goal",
+    "L7": "near-end folding goal",
+    "L8": "final compact-fold goal"
+  },
+  "alias_binding": "Ln maps to source label tshirt-train-128691-w000:s0000n; the automatic planner assigns task-local Cxxx IDs, so regression resolves expected candidates through source_label_ids, not a cross-task Cxxx comparison",
+  "atom_edges": [0, 150, 345, 495, 615, 720, 885, 1050, 1065, 1275, 1434],
+  "expected_atom_choices": [
+    {"from_frame": 0, "to_frame": 150, "active": ["L0"], "expected_primary": "L0", "route": "RULE_SINGLE_ACTIVE"},
+    {"from_frame": 150, "to_frame": 345, "active": ["L1"], "expected_primary": "L1", "route": "RULE_SINGLE_ACTIVE"},
+    {"from_frame": 345, "to_frame": 495, "active": ["L1", "L2"], "expected_primary": "L2", "route": "VLM_SELECTED_CANDIDATE"},
+    {"from_frame": 495, "to_frame": 615, "active": ["L3"], "expected_primary": "L3", "route": "RULE_SINGLE_ACTIVE"},
+    {"from_frame": 615, "to_frame": 720, "active": ["L4", "L5"], "expected_primary": "L4", "route": "VLM_SELECTED_CANDIDATE"},
+    {"from_frame": 720, "to_frame": 885, "active": ["L5"], "expected_primary": "L5", "route": "RULE_SINGLE_ACTIVE"},
+    {"from_frame": 885, "to_frame": 1050, "active": ["L6"], "expected_primary": "L6", "route": "RULE_SINGLE_ACTIVE"},
+    {"from_frame": 1050, "to_frame": 1065, "active": [], "required_neighbor_options": ["L6", "L7"], "expected_primary": "L7", "route": "VLM_SELECTED_CANDIDATE"},
+    {"from_frame": 1065, "to_frame": 1275, "active": ["L7"], "expected_primary": "L7", "route": "RULE_SINGLE_ACTIVE"},
+    {"from_frame": 1275, "to_frame": 1434, "active": ["L8"], "expected_primary": "L8", "route": "RULE_SINGLE_ACTIVE"}
+  ],
+  "expected_merged_intervals": [[0, 150], [150, 345], [345, 495], [495, 615], [615, 720], [720, 885], [885, 1050], [1050, 1275], [1275, 1434]],
+  "invariants": [
+    "10 atoms become9 primary intervals by merging the adjacent L7 choices",
+    "a real respreading/reset remains between folding attempts",
+    "near-edge alignment precedes the opposite-side fold; overlaps do not become concurrent native labels",
+    "the15-frame gap is resolved by evidence-backed neighbor choice, not previous-label carry-forward",
+    "no fixed folding order or stack-success label is introduced",
+    "the choice mapping is a regression reference for this example, not a semantic accuracy benchmark for319 episodes"
+  ]
+}

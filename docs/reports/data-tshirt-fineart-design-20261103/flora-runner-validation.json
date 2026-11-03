@@ -1,0 +1,20 @@
+{
+  "static_ast": "pass",
+  "mock_protocol": "pass",
+  "cases": [
+    "baseline: expected 4 actual loads for two jobs",
+    "session-cache: expected 2 actual loads for two jobs",
+    "resume makes zero native calls",
+    "caption-checkpoint crash recovery republishes exact final",
+    "tampered final rejected",
+    "instruction contract mismatch rejected",
+    "exclusive worker flock",
+    "exclusive atomic publication",
+    "stage artifact filename collision rejected",
+    "mock native CPU validation entrypoint does not import torch or create output"
+  ],
+  "script_sha256": "ab0ef5ec88ea36d1dc34a366d60d5c5e87ca303f770d4af4439f5378c2df9009",
+  "gpu_calls": 0,
+  "training_loops": 0,
+  "limitations": "Native Flora GPU parity and performance were not tested; native functions were CPU stubs for orchestration checks only."
+}

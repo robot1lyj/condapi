@@ -1,0 +1,4849 @@
+{
+  "status": "DESIGN_ONLY_NOT_YET_RENDERED",
+  "fps": 30,
+  "max_window_frames": 3600,
+  "core_frames": 3300,
+  "context_frames_each_side": 150,
+  "pools": {
+    "train": {
+      "episodes": 319,
+      "unique_frames": 1080000,
+      "window_count": 465,
+      "annotation_input_frames_including_context": 1123723,
+      "windows": [
+        {
+          "parent_episode_index": 137,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2796,
+          "from_frame": 0,
+          "to_frame": 2796
+        },
+        {
+          "parent_episode_index": 779,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 779,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 3714,
+          "from_frame": 3150,
+          "to_frame": 3714
+        },
+        {
+          "parent_episode_index": 780,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 780,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 4222,
+          "from_frame": 3150,
+          "to_frame": 4222
+        },
+        {
+          "parent_episode_index": 781,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 781,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 4670,
+          "from_frame": 3150,
+          "to_frame": 4670
+        },
+        {
+          "parent_episode_index": 1415,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1995,
+          "from_frame": 0,
+          "to_frame": 1995
+        },
+        {
+          "parent_episode_index": 1669,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1925,
+          "from_frame": 0,
+          "to_frame": 1925
+        },
+        {
+          "parent_episode_index": 2051,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1734,
+          "from_frame": 0,
+          "to_frame": 1734
+        },
+        {
+          "parent_episode_index": 3067,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1724,
+          "from_frame": 0,
+          "to_frame": 1724
+        },
+        {
+          "parent_episode_index": 3192,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1931,
+          "from_frame": 0,
+          "to_frame": 1931
+        },
+        {
+          "parent_episode_index": 3193,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1732,
+          "from_frame": 0,
+          "to_frame": 1732
+        },
+        {
+          "parent_episode_index": 3319,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2679,
+          "from_frame": 0,
+          "to_frame": 2679
+        },
+        {
+          "parent_episode_index": 3701,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1490,
+          "from_frame": 0,
+          "to_frame": 1490
+        },
+        {
+          "parent_episode_index": 3824,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2929,
+          "from_frame": 0,
+          "to_frame": 2929
+        },
+        {
+          "parent_episode_index": 3825,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1814,
+          "from_frame": 0,
+          "to_frame": 1814
+        },
+        {
+          "parent_episode_index": 4076,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1435,
+          "from_frame": 0,
+          "to_frame": 1435
+        },
+        {
+          "parent_episode_index": 4332,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 4332,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 3986,
+          "from_frame": 3150,
+          "to_frame": 3986
+        },
+        {
+          "parent_episode_index": 4584,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 4584,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 3948,
+          "from_frame": 3150,
+          "to_frame": 3948
+        },
+        {
+          "parent_episode_index": 5097,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 5097,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 6600,
+          "from_frame": 3150,
+          "to_frame": 6750
+        },
+        {
+          "parent_episode_index": 5097,
+          "window_index": 2,
+          "core_from_frame": 6600,
+          "core_to_frame": 7562,
+          "from_frame": 6450,
+          "to_frame": 7562
+        },
+        {
+          "parent_episode_index": 7376,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2745,
+          "from_frame": 0,
+          "to_frame": 2745
+        },
+        {
+          "parent_episode_index": 7757,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3557,
+          "from_frame": 0,
+          "to_frame": 3557
+        },
+        {
+          "parent_episode_index": 7884,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 7884,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 5418,
+          "from_frame": 3150,
+          "to_frame": 5418
+        },
+        {
+          "parent_episode_index": 8399,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 8399,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 6600,
+          "from_frame": 3150,
+          "to_frame": 6750
+        },
+        {
+          "parent_episode_index": 8399,
+          "window_index": 2,
+          "core_from_frame": 6600,
+          "core_to_frame": 7200,
+          "from_frame": 6450,
+          "to_frame": 7200
+        },
+        {
+          "parent_episode_index": 10170,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 10170,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 6600,
+          "from_frame": 3150,
+          "to_frame": 6750
+        },
+        {
+          "parent_episode_index": 10170,
+          "window_index": 2,
+          "core_from_frame": 6600,
+          "core_to_frame": 7142,
+          "from_frame": 6450,
+          "to_frame": 7142
+        },
+        {
+          "parent_episode_index": 10176,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3282,
+          "from_frame": 0,
+          "to_frame": 3282
+        },
+        {
+          "parent_episode_index": 10811,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2297,
+          "from_frame": 0,
+          "to_frame": 2297
+        },
+        {
+          "parent_episode_index": 10932,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1653,
+          "from_frame": 0,
+          "to_frame": 1653
+        },
+        {
+          "parent_episode_index": 11060,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1685,
+          "from_frame": 0,
+          "to_frame": 1685
+        },
+        {
+          "parent_episode_index": 11315,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2018,
+          "from_frame": 0,
+          "to_frame": 2018
+        },
+        {
+          "parent_episode_index": 11446,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 11446,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 6085,
+          "from_frame": 3150,
+          "to_frame": 6085
+        },
+        {
+          "parent_episode_index": 11447,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2111,
+          "from_frame": 0,
+          "to_frame": 2111
+        },
+        {
+          "parent_episode_index": 11567,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 11567,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 3848,
+          "from_frame": 3150,
+          "to_frame": 3848
+        },
+        {
+          "parent_episode_index": 11821,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 11821,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 3638,
+          "from_frame": 3150,
+          "to_frame": 3638
+        },
+        {
+          "parent_episode_index": 12329,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 12329,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 3602,
+          "from_frame": 3150,
+          "to_frame": 3602
+        },
+        {
+          "parent_episode_index": 13347,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 13347,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 4089,
+          "from_frame": 3150,
+          "to_frame": 4089
+        },
+        {
+          "parent_episode_index": 13724,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1630,
+          "from_frame": 0,
+          "to_frame": 1630
+        },
+        {
+          "parent_episode_index": 14729,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2851,
+          "from_frame": 0,
+          "to_frame": 2851
+        },
+        {
+          "parent_episode_index": 14732,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2776,
+          "from_frame": 0,
+          "to_frame": 2776
+        },
+        {
+          "parent_episode_index": 14855,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3536,
+          "from_frame": 0,
+          "to_frame": 3536
+        },
+        {
+          "parent_episode_index": 15490,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1312,
+          "from_frame": 0,
+          "to_frame": 1312
+        },
+        {
+          "parent_episode_index": 15491,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3108,
+          "from_frame": 0,
+          "to_frame": 3108
+        },
+        {
+          "parent_episode_index": 15989,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 15989,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 3950,
+          "from_frame": 3150,
+          "to_frame": 3950
+        },
+        {
+          "parent_episode_index": 16118,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1699,
+          "from_frame": 0,
+          "to_frame": 1699
+        },
+        {
+          "parent_episode_index": 16119,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1961,
+          "from_frame": 0,
+          "to_frame": 1961
+        },
+        {
+          "parent_episode_index": 16372,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 16372,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 4394,
+          "from_frame": 3150,
+          "to_frame": 4394
+        },
+        {
+          "parent_episode_index": 16621,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 16621,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 5743,
+          "from_frame": 3150,
+          "to_frame": 5743
+        },
+        {
+          "parent_episode_index": 17002,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 17002,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 5453,
+          "from_frame": 3150,
+          "to_frame": 5453
+        },
+        {
+          "parent_episode_index": 17252,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 17252,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 4104,
+          "from_frame": 3150,
+          "to_frame": 4104
+        },
+        {
+          "parent_episode_index": 17627,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 17627,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 4743,
+          "from_frame": 3150,
+          "to_frame": 4743
+        },
+        {
+          "parent_episode_index": 18517,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1109,
+          "from_frame": 0,
+          "to_frame": 1109
+        },
+        {
+          "parent_episode_index": 19142,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 19142,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 4500,
+          "from_frame": 3150,
+          "to_frame": 4500
+        },
+        {
+          "parent_episode_index": 19269,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2488,
+          "from_frame": 0,
+          "to_frame": 2488
+        },
+        {
+          "parent_episode_index": 19390,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1490,
+          "from_frame": 0,
+          "to_frame": 1490
+        },
+        {
+          "parent_episode_index": 19394,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1504,
+          "from_frame": 0,
+          "to_frame": 1504
+        },
+        {
+          "parent_episode_index": 19522,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1848,
+          "from_frame": 0,
+          "to_frame": 1848
+        },
+        {
+          "parent_episode_index": 21033,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2120,
+          "from_frame": 0,
+          "to_frame": 2120
+        },
+        {
+          "parent_episode_index": 21157,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2553,
+          "from_frame": 0,
+          "to_frame": 2553
+        },
+        {
+          "parent_episode_index": 21536,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3430,
+          "from_frame": 0,
+          "to_frame": 3430
+        },
+        {
+          "parent_episode_index": 21542,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 21542,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 6017,
+          "from_frame": 3150,
+          "to_frame": 6017
+        },
+        {
+          "parent_episode_index": 22039,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 22039,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 4777,
+          "from_frame": 3150,
+          "to_frame": 4777
+        },
+        {
+          "parent_episode_index": 22293,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2698,
+          "from_frame": 0,
+          "to_frame": 2698
+        },
+        {
+          "parent_episode_index": 22798,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1254,
+          "from_frame": 0,
+          "to_frame": 1254
+        },
+        {
+          "parent_episode_index": 22919,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3098,
+          "from_frame": 0,
+          "to_frame": 3098
+        },
+        {
+          "parent_episode_index": 23044,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 23044,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 4887,
+          "from_frame": 3150,
+          "to_frame": 4887
+        },
+        {
+          "parent_episode_index": 23683,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1767,
+          "from_frame": 0,
+          "to_frame": 1767
+        },
+        {
+          "parent_episode_index": 24440,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3548,
+          "from_frame": 0,
+          "to_frame": 3548
+        },
+        {
+          "parent_episode_index": 24565,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 24565,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 4859,
+          "from_frame": 3150,
+          "to_frame": 4859
+        },
+        {
+          "parent_episode_index": 25573,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 25573,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 6600,
+          "from_frame": 3150,
+          "to_frame": 6750
+        },
+        {
+          "parent_episode_index": 25573,
+          "window_index": 2,
+          "core_from_frame": 6600,
+          "core_to_frame": 8090,
+          "from_frame": 6450,
+          "to_frame": 8090
+        },
+        {
+          "parent_episode_index": 26199,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 26199,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 6275,
+          "from_frame": 3150,
+          "to_frame": 6275
+        },
+        {
+          "parent_episode_index": 26201,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 26201,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 6600,
+          "from_frame": 3150,
+          "to_frame": 6750
+        },
+        {
+          "parent_episode_index": 26201,
+          "window_index": 2,
+          "core_from_frame": 6600,
+          "core_to_frame": 8630,
+          "from_frame": 6450,
+          "to_frame": 8630
+        },
+        {
+          "parent_episode_index": 26446,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1188,
+          "from_frame": 0,
+          "to_frame": 1188
+        },
+        {
+          "parent_episode_index": 26705,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2158,
+          "from_frame": 0,
+          "to_frame": 2158
+        },
+        {
+          "parent_episode_index": 28215,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 28215,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 3858,
+          "from_frame": 3150,
+          "to_frame": 3858
+        },
+        {
+          "parent_episode_index": 28216,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2461,
+          "from_frame": 0,
+          "to_frame": 2461
+        },
+        {
+          "parent_episode_index": 28337,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1385,
+          "from_frame": 0,
+          "to_frame": 1385
+        },
+        {
+          "parent_episode_index": 28343,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2866,
+          "from_frame": 0,
+          "to_frame": 2866
+        },
+        {
+          "parent_episode_index": 28594,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2106,
+          "from_frame": 0,
+          "to_frame": 2106
+        },
+        {
+          "parent_episode_index": 28720,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1777,
+          "from_frame": 0,
+          "to_frame": 1777
+        },
+        {
+          "parent_episode_index": 29602,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2273,
+          "from_frame": 0,
+          "to_frame": 2273
+        },
+        {
+          "parent_episode_index": 30986,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2217,
+          "from_frame": 0,
+          "to_frame": 2217
+        },
+        {
+          "parent_episode_index": 31612,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2505,
+          "from_frame": 0,
+          "to_frame": 2505
+        },
+        {
+          "parent_episode_index": 31993,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 31993,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 4292,
+          "from_frame": 3150,
+          "to_frame": 4292
+        },
+        {
+          "parent_episode_index": 31999,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1214,
+          "from_frame": 0,
+          "to_frame": 1214
+        },
+        {
+          "parent_episode_index": 33126,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 33126,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 6265,
+          "from_frame": 3150,
+          "to_frame": 6265
+        },
+        {
+          "parent_episode_index": 33386,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1719,
+          "from_frame": 0,
+          "to_frame": 1719
+        },
+        {
+          "parent_episode_index": 33756,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1453,
+          "from_frame": 0,
+          "to_frame": 1453
+        },
+        {
+          "parent_episode_index": 34010,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 34010,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 5886,
+          "from_frame": 3150,
+          "to_frame": 5886
+        },
+        {
+          "parent_episode_index": 34137,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1786,
+          "from_frame": 0,
+          "to_frame": 1786
+        },
+        {
+          "parent_episode_index": 34516,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 34516,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 5149,
+          "from_frame": 3150,
+          "to_frame": 5149
+        },
+        {
+          "parent_episode_index": 34762,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2843,
+          "from_frame": 0,
+          "to_frame": 2843
+        },
+        {
+          "parent_episode_index": 34764,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 34764,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 4805,
+          "from_frame": 3150,
+          "to_frame": 4805
+        },
+        {
+          "parent_episode_index": 34767,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1896,
+          "from_frame": 0,
+          "to_frame": 1896
+        },
+        {
+          "parent_episode_index": 36023,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3110,
+          "from_frame": 0,
+          "to_frame": 3110
+        },
+        {
+          "parent_episode_index": 37037,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2708,
+          "from_frame": 0,
+          "to_frame": 2708
+        },
+        {
+          "parent_episode_index": 37162,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 37162,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 4460,
+          "from_frame": 3150,
+          "to_frame": 4460
+        },
+        {
+          "parent_episode_index": 37541,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 37541,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 5159,
+          "from_frame": 3150,
+          "to_frame": 5159
+        },
+        {
+          "parent_episode_index": 37796,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 37796,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 3625,
+          "from_frame": 3150,
+          "to_frame": 3625
+        },
+        {
+          "parent_episode_index": 37913,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 37913,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 6232,
+          "from_frame": 3150,
+          "to_frame": 6232
+        },
+        {
+          "parent_episode_index": 38290,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3374,
+          "from_frame": 0,
+          "to_frame": 3374
+        },
+        {
+          "parent_episode_index": 38297,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2797,
+          "from_frame": 0,
+          "to_frame": 2797
+        },
+        {
+          "parent_episode_index": 38422,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1459,
+          "from_frame": 0,
+          "to_frame": 1459
+        },
+        {
+          "parent_episode_index": 39050,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 39050,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 5863,
+          "from_frame": 3150,
+          "to_frame": 5863
+        },
+        {
+          "parent_episode_index": 39053,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 39053,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 3873,
+          "from_frame": 3150,
+          "to_frame": 3873
+        },
+        {
+          "parent_episode_index": 39555,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1890,
+          "from_frame": 0,
+          "to_frame": 1890
+        },
+        {
+          "parent_episode_index": 40059,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1398,
+          "from_frame": 0,
+          "to_frame": 1398
+        },
+        {
+          "parent_episode_index": 40063,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3023,
+          "from_frame": 0,
+          "to_frame": 3023
+        },
+        {
+          "parent_episode_index": 40439,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1663,
+          "from_frame": 0,
+          "to_frame": 1663
+        },
+        {
+          "parent_episode_index": 40693,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1660,
+          "from_frame": 0,
+          "to_frame": 1660
+        },
+        {
+          "parent_episode_index": 40812,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2880,
+          "from_frame": 0,
+          "to_frame": 2880
+        },
+        {
+          "parent_episode_index": 40817,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 40817,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 4602,
+          "from_frame": 3150,
+          "to_frame": 4602
+        },
+        {
+          "parent_episode_index": 42071,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3316,
+          "from_frame": 0,
+          "to_frame": 3316
+        },
+        {
+          "parent_episode_index": 42077,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2289,
+          "from_frame": 0,
+          "to_frame": 2289
+        },
+        {
+          "parent_episode_index": 42329,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 42329,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 3784,
+          "from_frame": 3150,
+          "to_frame": 3784
+        },
+        {
+          "parent_episode_index": 42704,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2058,
+          "from_frame": 0,
+          "to_frame": 2058
+        },
+        {
+          "parent_episode_index": 43332,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1693,
+          "from_frame": 0,
+          "to_frame": 1693
+        },
+        {
+          "parent_episode_index": 44043,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 44043,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 6600,
+          "from_frame": 3150,
+          "to_frame": 6750
+        },
+        {
+          "parent_episode_index": 44043,
+          "window_index": 2,
+          "core_from_frame": 6600,
+          "core_to_frame": 6780,
+          "from_frame": 6450,
+          "to_frame": 6780
+        },
+        {
+          "parent_episode_index": 44053,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2030,
+          "from_frame": 0,
+          "to_frame": 2030
+        },
+        {
+          "parent_episode_index": 44065,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1485,
+          "from_frame": 0,
+          "to_frame": 1485
+        },
+        {
+          "parent_episode_index": 45065,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2267,
+          "from_frame": 0,
+          "to_frame": 2267
+        },
+        {
+          "parent_episode_index": 45075,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3103,
+          "from_frame": 0,
+          "to_frame": 3103
+        },
+        {
+          "parent_episode_index": 45111,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 45111,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 4347,
+          "from_frame": 3150,
+          "to_frame": 4347
+        },
+        {
+          "parent_episode_index": 45264,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 45264,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 3932,
+          "from_frame": 3150,
+          "to_frame": 3932
+        },
+        {
+          "parent_episode_index": 46083,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 46083,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 5280,
+          "from_frame": 3150,
+          "to_frame": 5280
+        },
+        {
+          "parent_episode_index": 46119,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2286,
+          "from_frame": 0,
+          "to_frame": 2286
+        },
+        {
+          "parent_episode_index": 46248,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 46248,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 6600,
+          "from_frame": 3150,
+          "to_frame": 6750
+        },
+        {
+          "parent_episode_index": 46248,
+          "window_index": 2,
+          "core_from_frame": 6600,
+          "core_to_frame": 9668,
+          "from_frame": 6450,
+          "to_frame": 9668
+        },
+        {
+          "parent_episode_index": 47029,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2723,
+          "from_frame": 0,
+          "to_frame": 2723
+        },
+        {
+          "parent_episode_index": 47099,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 47099,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 6338,
+          "from_frame": 3150,
+          "to_frame": 6338
+        },
+        {
+          "parent_episode_index": 47119,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 986,
+          "from_frame": 0,
+          "to_frame": 986
+        },
+        {
+          "parent_episode_index": 47151,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 47151,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 3646,
+          "from_frame": 3150,
+          "to_frame": 3646
+        },
+        {
+          "parent_episode_index": 47596,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 47596,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 4526,
+          "from_frame": 3150,
+          "to_frame": 4526
+        },
+        {
+          "parent_episode_index": 47604,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 47604,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 5730,
+          "from_frame": 3150,
+          "to_frame": 5730
+        },
+        {
+          "parent_episode_index": 48045,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1857,
+          "from_frame": 0,
+          "to_frame": 1857
+        },
+        {
+          "parent_episode_index": 48296,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1733,
+          "from_frame": 0,
+          "to_frame": 1733
+        },
+        {
+          "parent_episode_index": 50069,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 50069,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 5844,
+          "from_frame": 3150,
+          "to_frame": 5844
+        },
+        {
+          "parent_episode_index": 53215,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 53215,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 5141,
+          "from_frame": 3150,
+          "to_frame": 5141
+        },
+        {
+          "parent_episode_index": 54091,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2243,
+          "from_frame": 0,
+          "to_frame": 2243
+        },
+        {
+          "parent_episode_index": 54586,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 54586,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 6600,
+          "from_frame": 3150,
+          "to_frame": 6750
+        },
+        {
+          "parent_episode_index": 54586,
+          "window_index": 2,
+          "core_from_frame": 6600,
+          "core_to_frame": 7140,
+          "from_frame": 6450,
+          "to_frame": 7140
+        },
+        {
+          "parent_episode_index": 55117,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2164,
+          "from_frame": 0,
+          "to_frame": 2164
+        },
+        {
+          "parent_episode_index": 55215,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1668,
+          "from_frame": 0,
+          "to_frame": 1668
+        },
+        {
+          "parent_episode_index": 55598,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2461,
+          "from_frame": 0,
+          "to_frame": 2461
+        },
+        {
+          "parent_episode_index": 55614,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2783,
+          "from_frame": 0,
+          "to_frame": 2783
+        },
+        {
+          "parent_episode_index": 55654,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2624,
+          "from_frame": 0,
+          "to_frame": 2624
+        },
+        {
+          "parent_episode_index": 56279,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 56279,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 3849,
+          "from_frame": 3150,
+          "to_frame": 3849
+        },
+        {
+          "parent_episode_index": 56287,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2713,
+          "from_frame": 0,
+          "to_frame": 2713
+        },
+        {
+          "parent_episode_index": 56642,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1942,
+          "from_frame": 0,
+          "to_frame": 1942
+        },
+        {
+          "parent_episode_index": 56650,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3579,
+          "from_frame": 0,
+          "to_frame": 3579
+        },
+        {
+          "parent_episode_index": 57177,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2369,
+          "from_frame": 0,
+          "to_frame": 2369
+        },
+        {
+          "parent_episode_index": 57440,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3495,
+          "from_frame": 0,
+          "to_frame": 3495
+        },
+        {
+          "parent_episode_index": 57670,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 57670,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 4115,
+          "from_frame": 3150,
+          "to_frame": 4115
+        },
+        {
+          "parent_episode_index": 58121,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1424,
+          "from_frame": 0,
+          "to_frame": 1424
+        },
+        {
+          "parent_episode_index": 58171,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1717,
+          "from_frame": 0,
+          "to_frame": 1717
+        },
+        {
+          "parent_episode_index": 58287,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3075,
+          "from_frame": 0,
+          "to_frame": 3075
+        },
+        {
+          "parent_episode_index": 59440,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 59440,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 4580,
+          "from_frame": 3150,
+          "to_frame": 4580
+        },
+        {
+          "parent_episode_index": 59662,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 59662,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 3988,
+          "from_frame": 3150,
+          "to_frame": 3988
+        },
+        {
+          "parent_episode_index": 59670,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1726,
+          "from_frame": 0,
+          "to_frame": 1726
+        },
+        {
+          "parent_episode_index": 61155,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 61155,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 4679,
+          "from_frame": 3150,
+          "to_frame": 4679
+        },
+        {
+          "parent_episode_index": 61666,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 61666,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 6600,
+          "from_frame": 3150,
+          "to_frame": 6750
+        },
+        {
+          "parent_episode_index": 61666,
+          "window_index": 2,
+          "core_from_frame": 6600,
+          "core_to_frame": 9900,
+          "from_frame": 6450,
+          "to_frame": 10050
+        },
+        {
+          "parent_episode_index": 61666,
+          "window_index": 3,
+          "core_from_frame": 9900,
+          "core_to_frame": 12312,
+          "from_frame": 9750,
+          "to_frame": 12312
+        },
+        {
+          "parent_episode_index": 62147,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1754,
+          "from_frame": 0,
+          "to_frame": 1754
+        },
+        {
+          "parent_episode_index": 62165,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 62165,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 6600,
+          "from_frame": 3150,
+          "to_frame": 6750
+        },
+        {
+          "parent_episode_index": 62165,
+          "window_index": 2,
+          "core_from_frame": 6600,
+          "core_to_frame": 9900,
+          "from_frame": 6450,
+          "to_frame": 10050
+        },
+        {
+          "parent_episode_index": 62165,
+          "window_index": 3,
+          "core_from_frame": 9900,
+          "core_to_frame": 11765,
+          "from_frame": 9750,
+          "to_frame": 11765
+        },
+        {
+          "parent_episode_index": 62351,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1530,
+          "from_frame": 0,
+          "to_frame": 1530
+        },
+        {
+          "parent_episode_index": 62383,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3164,
+          "from_frame": 0,
+          "to_frame": 3164
+        },
+        {
+          "parent_episode_index": 63219,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1455,
+          "from_frame": 0,
+          "to_frame": 1455
+        },
+        {
+          "parent_episode_index": 64173,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 64173,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 6600,
+          "from_frame": 3150,
+          "to_frame": 6750
+        },
+        {
+          "parent_episode_index": 64173,
+          "window_index": 2,
+          "core_from_frame": 6600,
+          "core_to_frame": 7109,
+          "from_frame": 6450,
+          "to_frame": 7109
+        },
+        {
+          "parent_episode_index": 64211,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3475,
+          "from_frame": 0,
+          "to_frame": 3475
+        },
+        {
+          "parent_episode_index": 64227,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 64227,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 4314,
+          "from_frame": 3150,
+          "to_frame": 4314
+        },
+        {
+          "parent_episode_index": 65576,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2480,
+          "from_frame": 0,
+          "to_frame": 2480
+        },
+        {
+          "parent_episode_index": 65714,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 65714,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 3632,
+          "from_frame": 3150,
+          "to_frame": 3632
+        },
+        {
+          "parent_episode_index": 67431,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1864,
+          "from_frame": 0,
+          "to_frame": 1864
+        },
+        {
+          "parent_episode_index": 67608,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 67608,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 4041,
+          "from_frame": 3150,
+          "to_frame": 4041
+        },
+        {
+          "parent_episode_index": 67738,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2568,
+          "from_frame": 0,
+          "to_frame": 2568
+        },
+        {
+          "parent_episode_index": 68205,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2453,
+          "from_frame": 0,
+          "to_frame": 2453
+        },
+        {
+          "parent_episode_index": 68211,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 68211,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 3785,
+          "from_frame": 3150,
+          "to_frame": 3785
+        },
+        {
+          "parent_episode_index": 68608,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1667,
+          "from_frame": 0,
+          "to_frame": 1667
+        },
+        {
+          "parent_episode_index": 68632,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1841,
+          "from_frame": 0,
+          "to_frame": 1841
+        },
+        {
+          "parent_episode_index": 68694,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1576,
+          "from_frame": 0,
+          "to_frame": 1576
+        },
+        {
+          "parent_episode_index": 68700,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3081,
+          "from_frame": 0,
+          "to_frame": 3081
+        },
+        {
+          "parent_episode_index": 68748,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1339,
+          "from_frame": 0,
+          "to_frame": 1339
+        },
+        {
+          "parent_episode_index": 69235,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3046,
+          "from_frame": 0,
+          "to_frame": 3046
+        },
+        {
+          "parent_episode_index": 69275,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 69275,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 6600,
+          "from_frame": 3150,
+          "to_frame": 6750
+        },
+        {
+          "parent_episode_index": 69275,
+          "window_index": 2,
+          "core_from_frame": 6600,
+          "core_to_frame": 7541,
+          "from_frame": 6450,
+          "to_frame": 7541
+        },
+        {
+          "parent_episode_index": 69431,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1718,
+          "from_frame": 0,
+          "to_frame": 1718
+        },
+        {
+          "parent_episode_index": 69702,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 69702,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 3920,
+          "from_frame": 3150,
+          "to_frame": 3920
+        },
+        {
+          "parent_episode_index": 69750,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1448,
+          "from_frame": 0,
+          "to_frame": 1448
+        },
+        {
+          "parent_episode_index": 70275,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2044,
+          "from_frame": 0,
+          "to_frame": 2044
+        },
+        {
+          "parent_episode_index": 70748,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 70748,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 5629,
+          "from_frame": 3150,
+          "to_frame": 5629
+        },
+        {
+          "parent_episode_index": 71267,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 71267,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 4203,
+          "from_frame": 3150,
+          "to_frame": 4203
+        },
+        {
+          "parent_episode_index": 72229,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1675,
+          "from_frame": 0,
+          "to_frame": 1675
+        },
+        {
+          "parent_episode_index": 72245,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 72245,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 6263,
+          "from_frame": 3150,
+          "to_frame": 6263
+        },
+        {
+          "parent_episode_index": 72732,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2787,
+          "from_frame": 0,
+          "to_frame": 2787
+        },
+        {
+          "parent_episode_index": 73814,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3108,
+          "from_frame": 0,
+          "to_frame": 3108
+        },
+        {
+          "parent_episode_index": 74297,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2852,
+          "from_frame": 0,
+          "to_frame": 2852
+        },
+        {
+          "parent_episode_index": 74720,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 74720,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 3787,
+          "from_frame": 3150,
+          "to_frame": 3787
+        },
+        {
+          "parent_episode_index": 74728,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 74728,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 4216,
+          "from_frame": 3150,
+          "to_frame": 4216
+        },
+        {
+          "parent_episode_index": 75704,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2718,
+          "from_frame": 0,
+          "to_frame": 2718
+        },
+        {
+          "parent_episode_index": 75744,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 75744,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 5420,
+          "from_frame": 3150,
+          "to_frame": 5420
+        },
+        {
+          "parent_episode_index": 75762,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1188,
+          "from_frame": 0,
+          "to_frame": 1188
+        },
+        {
+          "parent_episode_index": 75822,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2373,
+          "from_frame": 0,
+          "to_frame": 2373
+        },
+        {
+          "parent_episode_index": 75826,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1488,
+          "from_frame": 0,
+          "to_frame": 1488
+        },
+        {
+          "parent_episode_index": 77786,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 77786,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 5106,
+          "from_frame": 3150,
+          "to_frame": 5106
+        },
+        {
+          "parent_episode_index": 78301,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1751,
+          "from_frame": 0,
+          "to_frame": 1751
+        },
+        {
+          "parent_episode_index": 78774,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2744,
+          "from_frame": 0,
+          "to_frame": 2744
+        },
+        {
+          "parent_episode_index": 79799,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 79799,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 6233,
+          "from_frame": 3150,
+          "to_frame": 6233
+        },
+        {
+          "parent_episode_index": 79841,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2937,
+          "from_frame": 0,
+          "to_frame": 2937
+        },
+        {
+          "parent_episode_index": 79843,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 79843,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 6426,
+          "from_frame": 3150,
+          "to_frame": 6426
+        },
+        {
+          "parent_episode_index": 79845,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2073,
+          "from_frame": 0,
+          "to_frame": 2073
+        },
+        {
+          "parent_episode_index": 79859,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 79859,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 3875,
+          "from_frame": 3150,
+          "to_frame": 3875
+        },
+        {
+          "parent_episode_index": 80320,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2742,
+          "from_frame": 0,
+          "to_frame": 2742
+        },
+        {
+          "parent_episode_index": 80336,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 80336,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 3708,
+          "from_frame": 3150,
+          "to_frame": 3708
+        },
+        {
+          "parent_episode_index": 81320,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1717,
+          "from_frame": 0,
+          "to_frame": 1717
+        },
+        {
+          "parent_episode_index": 81809,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3044,
+          "from_frame": 0,
+          "to_frame": 3044
+        },
+        {
+          "parent_episode_index": 81813,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1760,
+          "from_frame": 0,
+          "to_frame": 1760
+        },
+        {
+          "parent_episode_index": 81853,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 81853,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 4983,
+          "from_frame": 3150,
+          "to_frame": 4983
+        },
+        {
+          "parent_episode_index": 82298,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3075,
+          "from_frame": 0,
+          "to_frame": 3075
+        },
+        {
+          "parent_episode_index": 82340,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1495,
+          "from_frame": 0,
+          "to_frame": 1495
+        },
+        {
+          "parent_episode_index": 83324,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2203,
+          "from_frame": 0,
+          "to_frame": 2203
+        },
+        {
+          "parent_episode_index": 83819,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1870,
+          "from_frame": 0,
+          "to_frame": 1870
+        },
+        {
+          "parent_episode_index": 83853,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1208,
+          "from_frame": 0,
+          "to_frame": 1208
+        },
+        {
+          "parent_episode_index": 83877,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 83877,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 3987,
+          "from_frame": 3150,
+          "to_frame": 3987
+        },
+        {
+          "parent_episode_index": 84895,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3327,
+          "from_frame": 0,
+          "to_frame": 3327
+        },
+        {
+          "parent_episode_index": 85356,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2473,
+          "from_frame": 0,
+          "to_frame": 2473
+        },
+        {
+          "parent_episode_index": 85380,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2398,
+          "from_frame": 0,
+          "to_frame": 2398
+        },
+        {
+          "parent_episode_index": 85871,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 85871,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 3749,
+          "from_frame": 3150,
+          "to_frame": 3749
+        },
+        {
+          "parent_episode_index": 86726,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1610,
+          "from_frame": 0,
+          "to_frame": 1610
+        },
+        {
+          "parent_episode_index": 86897,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 86897,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 6135,
+          "from_frame": 3150,
+          "to_frame": 6135
+        },
+        {
+          "parent_episode_index": 87871,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 87871,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 6600,
+          "from_frame": 3150,
+          "to_frame": 6750
+        },
+        {
+          "parent_episode_index": 87871,
+          "window_index": 2,
+          "core_from_frame": 6600,
+          "core_to_frame": 6836,
+          "from_frame": 6450,
+          "to_frame": 6836
+        },
+        {
+          "parent_episode_index": 88416,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 88416,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 6600,
+          "from_frame": 3150,
+          "to_frame": 6750
+        },
+        {
+          "parent_episode_index": 88416,
+          "window_index": 2,
+          "core_from_frame": 6600,
+          "core_to_frame": 7219,
+          "from_frame": 6450,
+          "to_frame": 7219
+        },
+        {
+          "parent_episode_index": 88885,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1641,
+          "from_frame": 0,
+          "to_frame": 1641
+        },
+        {
+          "parent_episode_index": 88891,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 88891,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 4103,
+          "from_frame": 3150,
+          "to_frame": 4103
+        },
+        {
+          "parent_episode_index": 89408,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2603,
+          "from_frame": 0,
+          "to_frame": 2603
+        },
+        {
+          "parent_episode_index": 90899,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 90899,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 4928,
+          "from_frame": 3150,
+          "to_frame": 4928
+        },
+        {
+          "parent_episode_index": 90913,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 90913,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 6465,
+          "from_frame": 3150,
+          "to_frame": 6465
+        },
+        {
+          "parent_episode_index": 91822,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 91822,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 3881,
+          "from_frame": 3150,
+          "to_frame": 3881
+        },
+        {
+          "parent_episode_index": 91897,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1358,
+          "from_frame": 0,
+          "to_frame": 1358
+        },
+        {
+          "parent_episode_index": 91933,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2794,
+          "from_frame": 0,
+          "to_frame": 2794
+        },
+        {
+          "parent_episode_index": 92822,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1876,
+          "from_frame": 0,
+          "to_frame": 1876
+        },
+        {
+          "parent_episode_index": 92933,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 92933,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 3619,
+          "from_frame": 3150,
+          "to_frame": 3619
+        },
+        {
+          "parent_episode_index": 95907,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1498,
+          "from_frame": 0,
+          "to_frame": 1498
+        },
+        {
+          "parent_episode_index": 95983,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2126,
+          "from_frame": 0,
+          "to_frame": 2126
+        },
+        {
+          "parent_episode_index": 96956,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1489,
+          "from_frame": 0,
+          "to_frame": 1489
+        },
+        {
+          "parent_episode_index": 96974,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2301,
+          "from_frame": 0,
+          "to_frame": 2301
+        },
+        {
+          "parent_episode_index": 97493,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 97493,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 5557,
+          "from_frame": 3150,
+          "to_frame": 5557
+        },
+        {
+          "parent_episode_index": 97936,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 97936,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 3956,
+          "from_frame": 3150,
+          "to_frame": 3956
+        },
+        {
+          "parent_episode_index": 97946,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 97946,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 6490,
+          "from_frame": 3150,
+          "to_frame": 6490
+        },
+        {
+          "parent_episode_index": 97986,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2355,
+          "from_frame": 0,
+          "to_frame": 2355
+        },
+        {
+          "parent_episode_index": 98505,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 98505,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 3769,
+          "from_frame": 3150,
+          "to_frame": 3769
+        },
+        {
+          "parent_episode_index": 99009,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1382,
+          "from_frame": 0,
+          "to_frame": 1382
+        },
+        {
+          "parent_episode_index": 99475,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 99475,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 5515,
+          "from_frame": 3150,
+          "to_frame": 5515
+        },
+        {
+          "parent_episode_index": 100978,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1207,
+          "from_frame": 0,
+          "to_frame": 1207
+        },
+        {
+          "parent_episode_index": 101469,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 101469,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 5326,
+          "from_frame": 3150,
+          "to_frame": 5326
+        },
+        {
+          "parent_episode_index": 101951,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2739,
+          "from_frame": 0,
+          "to_frame": 2739
+        },
+        {
+          "parent_episode_index": 101952,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2439,
+          "from_frame": 0,
+          "to_frame": 2439
+        },
+        {
+          "parent_episode_index": 101975,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2310,
+          "from_frame": 0,
+          "to_frame": 2310
+        },
+        {
+          "parent_episode_index": 102024,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2552,
+          "from_frame": 0,
+          "to_frame": 2552
+        },
+        {
+          "parent_episode_index": 102028,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2085,
+          "from_frame": 0,
+          "to_frame": 2085
+        },
+        {
+          "parent_episode_index": 102452,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 102452,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 3700,
+          "from_frame": 3150,
+          "to_frame": 3700
+        },
+        {
+          "parent_episode_index": 102474,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3229,
+          "from_frame": 0,
+          "to_frame": 3229
+        },
+        {
+          "parent_episode_index": 102492,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1454,
+          "from_frame": 0,
+          "to_frame": 1454
+        },
+        {
+          "parent_episode_index": 102532,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 102532,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 3741,
+          "from_frame": 3150,
+          "to_frame": 3741
+        },
+        {
+          "parent_episode_index": 102957,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2179,
+          "from_frame": 0,
+          "to_frame": 2179
+        },
+        {
+          "parent_episode_index": 102996,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2357,
+          "from_frame": 0,
+          "to_frame": 2357
+        },
+        {
+          "parent_episode_index": 103032,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 103032,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 6206,
+          "from_frame": 3150,
+          "to_frame": 6206
+        },
+        {
+          "parent_episode_index": 104025,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3286,
+          "from_frame": 0,
+          "to_frame": 3286
+        },
+        {
+          "parent_episode_index": 105013,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 105013,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 5726,
+          "from_frame": 3150,
+          "to_frame": 5726
+        },
+        {
+          "parent_episode_index": 105023,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1691,
+          "from_frame": 0,
+          "to_frame": 1691
+        },
+        {
+          "parent_episode_index": 105987,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2112,
+          "from_frame": 0,
+          "to_frame": 2112
+        },
+        {
+          "parent_episode_index": 107035,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2928,
+          "from_frame": 0,
+          "to_frame": 2928
+        },
+        {
+          "parent_episode_index": 107051,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2094,
+          "from_frame": 0,
+          "to_frame": 2094
+        },
+        {
+          "parent_episode_index": 107510,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1740,
+          "from_frame": 0,
+          "to_frame": 1740
+        },
+        {
+          "parent_episode_index": 107532,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1727,
+          "from_frame": 0,
+          "to_frame": 1727
+        },
+        {
+          "parent_episode_index": 108030,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2010,
+          "from_frame": 0,
+          "to_frame": 2010
+        },
+        {
+          "parent_episode_index": 108047,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1788,
+          "from_frame": 0,
+          "to_frame": 1788
+        },
+        {
+          "parent_episode_index": 108048,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 108048,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 3856,
+          "from_frame": 3150,
+          "to_frame": 3856
+        },
+        {
+          "parent_episode_index": 108056,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 108056,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 3645,
+          "from_frame": 3150,
+          "to_frame": 3645
+        },
+        {
+          "parent_episode_index": 108505,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 108505,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 4031,
+          "from_frame": 3150,
+          "to_frame": 4031
+        },
+        {
+          "parent_episode_index": 108563,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 108563,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 4311,
+          "from_frame": 3150,
+          "to_frame": 4311
+        },
+        {
+          "parent_episode_index": 109054,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1819,
+          "from_frame": 0,
+          "to_frame": 1819
+        },
+        {
+          "parent_episode_index": 110053,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1756,
+          "from_frame": 0,
+          "to_frame": 1756
+        },
+        {
+          "parent_episode_index": 110522,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2490,
+          "from_frame": 0,
+          "to_frame": 2490
+        },
+        {
+          "parent_episode_index": 110570,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 110570,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 6600,
+          "from_frame": 3150,
+          "to_frame": 6750
+        },
+        {
+          "parent_episode_index": 110570,
+          "window_index": 2,
+          "core_from_frame": 6600,
+          "core_to_frame": 8921,
+          "from_frame": 6450,
+          "to_frame": 8921
+        },
+        {
+          "parent_episode_index": 111075,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2796,
+          "from_frame": 0,
+          "to_frame": 2796
+        },
+        {
+          "parent_episode_index": 111552,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1135,
+          "from_frame": 0,
+          "to_frame": 1135
+        },
+        {
+          "parent_episode_index": 112093,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3386,
+          "from_frame": 0,
+          "to_frame": 3386
+        },
+        {
+          "parent_episode_index": 112563,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 112563,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 4078,
+          "from_frame": 3150,
+          "to_frame": 4078
+        },
+        {
+          "parent_episode_index": 112593,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2101,
+          "from_frame": 0,
+          "to_frame": 2101
+        },
+        {
+          "parent_episode_index": 113048,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2905,
+          "from_frame": 0,
+          "to_frame": 2905
+        },
+        {
+          "parent_episode_index": 113101,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 113101,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 4234,
+          "from_frame": 3150,
+          "to_frame": 4234
+        },
+        {
+          "parent_episode_index": 113106,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 113106,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 6273,
+          "from_frame": 3150,
+          "to_frame": 6273
+        },
+        {
+          "parent_episode_index": 114080,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2230,
+          "from_frame": 0,
+          "to_frame": 2230
+        },
+        {
+          "parent_episode_index": 114609,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 114609,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 3632,
+          "from_frame": 3150,
+          "to_frame": 3632
+        },
+        {
+          "parent_episode_index": 115545,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 115545,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 4160,
+          "from_frame": 3150,
+          "to_frame": 4160
+        },
+        {
+          "parent_episode_index": 116607,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2561,
+          "from_frame": 0,
+          "to_frame": 2561
+        },
+        {
+          "parent_episode_index": 116631,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 116631,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 5535,
+          "from_frame": 3150,
+          "to_frame": 5535
+        },
+        {
+          "parent_episode_index": 117096,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1788,
+          "from_frame": 0,
+          "to_frame": 1788
+        },
+        {
+          "parent_episode_index": 117136,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 117136,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 3958,
+          "from_frame": 3150,
+          "to_frame": 3958
+        },
+        {
+          "parent_episode_index": 117197,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2374,
+          "from_frame": 0,
+          "to_frame": 2374
+        },
+        {
+          "parent_episode_index": 118084,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1612,
+          "from_frame": 0,
+          "to_frame": 1612
+        },
+        {
+          "parent_episode_index": 118603,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1652,
+          "from_frame": 0,
+          "to_frame": 1652
+        },
+        {
+          "parent_episode_index": 120582,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2000,
+          "from_frame": 0,
+          "to_frame": 2000
+        },
+        {
+          "parent_episode_index": 121086,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2004,
+          "from_frame": 0,
+          "to_frame": 2004
+        },
+        {
+          "parent_episode_index": 121102,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 121102,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 4366,
+          "from_frame": 3150,
+          "to_frame": 4366
+        },
+        {
+          "parent_episode_index": 122599,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2710,
+          "from_frame": 0,
+          "to_frame": 2710
+        },
+        {
+          "parent_episode_index": 122617,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 122617,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 6600,
+          "from_frame": 3150,
+          "to_frame": 6750
+        },
+        {
+          "parent_episode_index": 122617,
+          "window_index": 2,
+          "core_from_frame": 6600,
+          "core_to_frame": 9900,
+          "from_frame": 6450,
+          "to_frame": 10050
+        },
+        {
+          "parent_episode_index": 122617,
+          "window_index": 3,
+          "core_from_frame": 9900,
+          "core_to_frame": 10914,
+          "from_frame": 9750,
+          "to_frame": 10914
+        },
+        {
+          "parent_episode_index": 123127,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 123127,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 4298,
+          "from_frame": 3150,
+          "to_frame": 4298
+        },
+        {
+          "parent_episode_index": 123623,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3385,
+          "from_frame": 0,
+          "to_frame": 3385
+        },
+        {
+          "parent_episode_index": 124178,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1597,
+          "from_frame": 0,
+          "to_frame": 1597
+        },
+        {
+          "parent_episode_index": 124273,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2599,
+          "from_frame": 0,
+          "to_frame": 2599
+        },
+        {
+          "parent_episode_index": 124621,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1320,
+          "from_frame": 0,
+          "to_frame": 1320
+        },
+        {
+          "parent_episode_index": 124661,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 124661,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 5204,
+          "from_frame": 3150,
+          "to_frame": 5204
+        },
+        {
+          "parent_episode_index": 125193,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 125193,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 4168,
+          "from_frame": 3150,
+          "to_frame": 4168
+        },
+        {
+          "parent_episode_index": 125638,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 125638,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 6098,
+          "from_frame": 3150,
+          "to_frame": 6098
+        },
+        {
+          "parent_episode_index": 126376,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2596,
+          "from_frame": 0,
+          "to_frame": 2596
+        },
+        {
+          "parent_episode_index": 126660,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 126660,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 6600,
+          "from_frame": 3150,
+          "to_frame": 6750
+        },
+        {
+          "parent_episode_index": 126660,
+          "window_index": 2,
+          "core_from_frame": 6600,
+          "core_to_frame": 9900,
+          "from_frame": 6450,
+          "to_frame": 10050
+        },
+        {
+          "parent_episode_index": 126660,
+          "window_index": 3,
+          "core_from_frame": 9900,
+          "core_to_frame": 13200,
+          "from_frame": 9750,
+          "to_frame": 13350
+        },
+        {
+          "parent_episode_index": 126660,
+          "window_index": 4,
+          "core_from_frame": 13200,
+          "core_to_frame": 15378,
+          "from_frame": 13050,
+          "to_frame": 15378
+        },
+        {
+          "parent_episode_index": 127161,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 127161,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 4072,
+          "from_frame": 3150,
+          "to_frame": 4072
+        },
+        {
+          "parent_episode_index": 127665,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 127665,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 6600,
+          "from_frame": 3150,
+          "to_frame": 6673
+        },
+        {
+          "parent_episode_index": 127665,
+          "window_index": 2,
+          "core_from_frame": 6600,
+          "core_to_frame": 6673,
+          "from_frame": 6450,
+          "to_frame": 6673
+        },
+        {
+          "parent_episode_index": 128158,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2771,
+          "from_frame": 0,
+          "to_frame": 2771
+        },
+        {
+          "parent_episode_index": 128162,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 128162,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 4174,
+          "from_frame": 3150,
+          "to_frame": 4174
+        },
+        {
+          "parent_episode_index": 128186,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2139,
+          "from_frame": 0,
+          "to_frame": 2139
+        },
+        {
+          "parent_episode_index": 128208,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 128208,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 3863,
+          "from_frame": 3150,
+          "to_frame": 3863
+        },
+        {
+          "parent_episode_index": 128216,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2942,
+          "from_frame": 0,
+          "to_frame": 2942
+        },
+        {
+          "parent_episode_index": 128665,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2499,
+          "from_frame": 0,
+          "to_frame": 2499
+        },
+        {
+          "parent_episode_index": 128691,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1434,
+          "from_frame": 0,
+          "to_frame": 1434
+        }
+      ]
+    },
+    "dev": {
+      "episodes": 29,
+      "unique_frames": 107946,
+      "window_count": 45,
+      "annotation_input_frames_including_context": 112746,
+      "windows": [
+        {
+          "parent_episode_index": 265,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3428,
+          "from_frame": 0,
+          "to_frame": 3428
+        },
+        {
+          "parent_episode_index": 6490,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 6490,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 4299,
+          "from_frame": 3150,
+          "to_frame": 4299
+        },
+        {
+          "parent_episode_index": 8526,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3414,
+          "from_frame": 0,
+          "to_frame": 3414
+        },
+        {
+          "parent_episode_index": 12719,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 12719,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 4919,
+          "from_frame": 3150,
+          "to_frame": 4919
+        },
+        {
+          "parent_episode_index": 14735,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1398,
+          "from_frame": 0,
+          "to_frame": 1398
+        },
+        {
+          "parent_episode_index": 17880,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 17880,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 6600,
+          "from_frame": 3150,
+          "to_frame": 6750
+        },
+        {
+          "parent_episode_index": 17880,
+          "window_index": 2,
+          "core_from_frame": 6600,
+          "core_to_frame": 9900,
+          "from_frame": 6450,
+          "to_frame": 10050
+        },
+        {
+          "parent_episode_index": 17880,
+          "window_index": 3,
+          "core_from_frame": 9900,
+          "core_to_frame": 10758,
+          "from_frame": 9750,
+          "to_frame": 10758
+        },
+        {
+          "parent_episode_index": 20659,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 20659,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 5001,
+          "from_frame": 3150,
+          "to_frame": 5001
+        },
+        {
+          "parent_episode_index": 23430,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2816,
+          "from_frame": 0,
+          "to_frame": 2816
+        },
+        {
+          "parent_episode_index": 27337,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 27337,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 6600,
+          "from_frame": 3150,
+          "to_frame": 6750
+        },
+        {
+          "parent_episode_index": 27337,
+          "window_index": 2,
+          "core_from_frame": 6600,
+          "core_to_frame": 7191,
+          "from_frame": 6450,
+          "to_frame": 7191
+        },
+        {
+          "parent_episode_index": 28214,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1376,
+          "from_frame": 0,
+          "to_frame": 1376
+        },
+        {
+          "parent_episode_index": 32245,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1698,
+          "from_frame": 0,
+          "to_frame": 1698
+        },
+        {
+          "parent_episode_index": 33259,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 33259,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 6600,
+          "from_frame": 3150,
+          "to_frame": 6750
+        },
+        {
+          "parent_episode_index": 33259,
+          "window_index": 2,
+          "core_from_frame": 6600,
+          "core_to_frame": 7199,
+          "from_frame": 6450,
+          "to_frame": 7199
+        },
+        {
+          "parent_episode_index": 41693,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3344,
+          "from_frame": 0,
+          "to_frame": 3344
+        },
+        {
+          "parent_episode_index": 57626,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3429,
+          "from_frame": 0,
+          "to_frame": 3429
+        },
+        {
+          "parent_episode_index": 58472,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 58472,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 3691,
+          "from_frame": 3150,
+          "to_frame": 3691
+        },
+        {
+          "parent_episode_index": 65746,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1600,
+          "from_frame": 0,
+          "to_frame": 1600
+        },
+        {
+          "parent_episode_index": 67249,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3439,
+          "from_frame": 0,
+          "to_frame": 3439
+        },
+        {
+          "parent_episode_index": 73738,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1919,
+          "from_frame": 0,
+          "to_frame": 1919
+        },
+        {
+          "parent_episode_index": 76331,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 76331,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 6600,
+          "from_frame": 3150,
+          "to_frame": 6750
+        },
+        {
+          "parent_episode_index": 76331,
+          "window_index": 2,
+          "core_from_frame": 6600,
+          "core_to_frame": 7198,
+          "from_frame": 6450,
+          "to_frame": 7198
+        },
+        {
+          "parent_episode_index": 79795,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 79795,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 5211,
+          "from_frame": 3150,
+          "to_frame": 5211
+        },
+        {
+          "parent_episode_index": 81336,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2686,
+          "from_frame": 0,
+          "to_frame": 2686
+        },
+        {
+          "parent_episode_index": 83809,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1362,
+          "from_frame": 0,
+          "to_frame": 1362
+        },
+        {
+          "parent_episode_index": 85877,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2816,
+          "from_frame": 0,
+          "to_frame": 2816
+        },
+        {
+          "parent_episode_index": 91931,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3173,
+          "from_frame": 0,
+          "to_frame": 3173
+        },
+        {
+          "parent_episode_index": 93450,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1634,
+          "from_frame": 0,
+          "to_frame": 1634
+        },
+        {
+          "parent_episode_index": 93895,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 93895,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 4340,
+          "from_frame": 3150,
+          "to_frame": 4340
+        },
+        {
+          "parent_episode_index": 104012,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 104012,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 4939,
+          "from_frame": 3150,
+          "to_frame": 4939
+        },
+        {
+          "parent_episode_index": 104035,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1732,
+          "from_frame": 0,
+          "to_frame": 1732
+        },
+        {
+          "parent_episode_index": 104965,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1936,
+          "from_frame": 0,
+          "to_frame": 1936
+        }
+      ]
+    },
+    "reserve": {
+      "episodes": 63,
+      "unique_frames": 216000,
+      "window_count": 92,
+      "annotation_input_frames_including_context": 224613,
+      "windows": [
+        {
+          "parent_episode_index": 1155,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 1155,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 6600,
+          "from_frame": 3150,
+          "to_frame": 6750
+        },
+        {
+          "parent_episode_index": 1155,
+          "window_index": 2,
+          "core_from_frame": 6600,
+          "core_to_frame": 9900,
+          "from_frame": 6450,
+          "to_frame": 10050
+        },
+        {
+          "parent_episode_index": 1155,
+          "window_index": 3,
+          "core_from_frame": 9900,
+          "core_to_frame": 12013,
+          "from_frame": 9750,
+          "to_frame": 12013
+        },
+        {
+          "parent_episode_index": 1281,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3169,
+          "from_frame": 0,
+          "to_frame": 3169
+        },
+        {
+          "parent_episode_index": 1795,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 1795,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 6600,
+          "from_frame": 3150,
+          "to_frame": 6750
+        },
+        {
+          "parent_episode_index": 1795,
+          "window_index": 2,
+          "core_from_frame": 6600,
+          "core_to_frame": 7151,
+          "from_frame": 6450,
+          "to_frame": 7151
+        },
+        {
+          "parent_episode_index": 3065,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1676,
+          "from_frame": 0,
+          "to_frame": 1676
+        },
+        {
+          "parent_episode_index": 5607,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3231,
+          "from_frame": 0,
+          "to_frame": 3231
+        },
+        {
+          "parent_episode_index": 10175,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 10175,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 3796,
+          "from_frame": 3150,
+          "to_frame": 3796
+        },
+        {
+          "parent_episode_index": 12458,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3595,
+          "from_frame": 0,
+          "to_frame": 3595
+        },
+        {
+          "parent_episode_index": 12591,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1459,
+          "from_frame": 0,
+          "to_frame": 1459
+        },
+        {
+          "parent_episode_index": 13346,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 13346,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 5318,
+          "from_frame": 3150,
+          "to_frame": 5318
+        },
+        {
+          "parent_episode_index": 14863,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 14863,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 6109,
+          "from_frame": 3150,
+          "to_frame": 6109
+        },
+        {
+          "parent_episode_index": 15737,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 15737,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 6600,
+          "from_frame": 3150,
+          "to_frame": 6750
+        },
+        {
+          "parent_episode_index": 15737,
+          "window_index": 2,
+          "core_from_frame": 6600,
+          "core_to_frame": 9587,
+          "from_frame": 6450,
+          "to_frame": 9587
+        },
+        {
+          "parent_episode_index": 16245,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1752,
+          "from_frame": 0,
+          "to_frame": 1752
+        },
+        {
+          "parent_episode_index": 17258,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2043,
+          "from_frame": 0,
+          "to_frame": 2043
+        },
+        {
+          "parent_episode_index": 18008,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2373,
+          "from_frame": 0,
+          "to_frame": 2373
+        },
+        {
+          "parent_episode_index": 19523,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 19523,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 4863,
+          "from_frame": 3150,
+          "to_frame": 4863
+        },
+        {
+          "parent_episode_index": 20408,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1531,
+          "from_frame": 0,
+          "to_frame": 1531
+        },
+        {
+          "parent_episode_index": 22169,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2905,
+          "from_frame": 0,
+          "to_frame": 2905
+        },
+        {
+          "parent_episode_index": 23431,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 23431,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 4473,
+          "from_frame": 3150,
+          "to_frame": 4473
+        },
+        {
+          "parent_episode_index": 27080,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1728,
+          "from_frame": 0,
+          "to_frame": 1728
+        },
+        {
+          "parent_episode_index": 30484,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 30484,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 3852,
+          "from_frame": 3150,
+          "to_frame": 3852
+        },
+        {
+          "parent_episode_index": 31742,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2540,
+          "from_frame": 0,
+          "to_frame": 2540
+        },
+        {
+          "parent_episode_index": 34263,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 34263,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 4174,
+          "from_frame": 3150,
+          "to_frame": 4174
+        },
+        {
+          "parent_episode_index": 36652,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2944,
+          "from_frame": 0,
+          "to_frame": 2944
+        },
+        {
+          "parent_episode_index": 38925,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1640,
+          "from_frame": 0,
+          "to_frame": 1640
+        },
+        {
+          "parent_episode_index": 39425,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 39425,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 4827,
+          "from_frame": 3150,
+          "to_frame": 4827
+        },
+        {
+          "parent_episode_index": 39808,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3393,
+          "from_frame": 0,
+          "to_frame": 3393
+        },
+        {
+          "parent_episode_index": 47069,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1467,
+          "from_frame": 0,
+          "to_frame": 1467
+        },
+        {
+          "parent_episode_index": 51368,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2630,
+          "from_frame": 0,
+          "to_frame": 2630
+        },
+        {
+          "parent_episode_index": 51606,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2431,
+          "from_frame": 0,
+          "to_frame": 2431
+        },
+        {
+          "parent_episode_index": 54578,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1649,
+          "from_frame": 0,
+          "to_frame": 1649
+        },
+        {
+          "parent_episode_index": 55165,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 55165,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 6600,
+          "from_frame": 3150,
+          "to_frame": 6663
+        },
+        {
+          "parent_episode_index": 55165,
+          "window_index": 2,
+          "core_from_frame": 6600,
+          "core_to_frame": 6663,
+          "from_frame": 6450,
+          "to_frame": 6663
+        },
+        {
+          "parent_episode_index": 57464,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2848,
+          "from_frame": 0,
+          "to_frame": 2848
+        },
+        {
+          "parent_episode_index": 61163,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 61163,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 4009,
+          "from_frame": 3150,
+          "to_frame": 4009
+        },
+        {
+          "parent_episode_index": 63686,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1111,
+          "from_frame": 0,
+          "to_frame": 1111
+        },
+        {
+          "parent_episode_index": 66455,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 66455,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 5858,
+          "from_frame": 3150,
+          "to_frame": 5858
+        },
+        {
+          "parent_episode_index": 67221,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 67221,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 3614,
+          "from_frame": 3150,
+          "to_frame": 3614
+        },
+        {
+          "parent_episode_index": 70780,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2736,
+          "from_frame": 0,
+          "to_frame": 2736
+        },
+        {
+          "parent_episode_index": 72251,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2394,
+          "from_frame": 0,
+          "to_frame": 2394
+        },
+        {
+          "parent_episode_index": 74794,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2275,
+          "from_frame": 0,
+          "to_frame": 2275
+        },
+        {
+          "parent_episode_index": 75277,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1591,
+          "from_frame": 0,
+          "to_frame": 1591
+        },
+        {
+          "parent_episode_index": 75778,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1449,
+          "from_frame": 0,
+          "to_frame": 1449
+        },
+        {
+          "parent_episode_index": 77794,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2283,
+          "from_frame": 0,
+          "to_frame": 2283
+        },
+        {
+          "parent_episode_index": 78792,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2254,
+          "from_frame": 0,
+          "to_frame": 2254
+        },
+        {
+          "parent_episode_index": 79341,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 79341,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 5457,
+          "from_frame": 3150,
+          "to_frame": 5457
+        },
+        {
+          "parent_episode_index": 84396,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 84396,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 4084,
+          "from_frame": 3150,
+          "to_frame": 4084
+        },
+        {
+          "parent_episode_index": 84702,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1572,
+          "from_frame": 0,
+          "to_frame": 1572
+        },
+        {
+          "parent_episode_index": 89903,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 89903,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 4795,
+          "from_frame": 3150,
+          "to_frame": 4795
+        },
+        {
+          "parent_episode_index": 90402,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2154,
+          "from_frame": 0,
+          "to_frame": 2154
+        },
+        {
+          "parent_episode_index": 91424,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 91424,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 5980,
+          "from_frame": 3150,
+          "to_frame": 5980
+        },
+        {
+          "parent_episode_index": 91877,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2291,
+          "from_frame": 0,
+          "to_frame": 2291
+        },
+        {
+          "parent_episode_index": 91927,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 91927,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 4327,
+          "from_frame": 3150,
+          "to_frame": 4327
+        },
+        {
+          "parent_episode_index": 96455,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 96455,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 5054,
+          "from_frame": 3150,
+          "to_frame": 5054
+        },
+        {
+          "parent_episode_index": 96859,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2106,
+          "from_frame": 0,
+          "to_frame": 2106
+        },
+        {
+          "parent_episode_index": 103482,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1838,
+          "from_frame": 0,
+          "to_frame": 1838
+        },
+        {
+          "parent_episode_index": 108079,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 108079,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 3666,
+          "from_frame": 3150,
+          "to_frame": 3666
+        },
+        {
+          "parent_episode_index": 112571,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3204,
+          "from_frame": 0,
+          "to_frame": 3204
+        },
+        {
+          "parent_episode_index": 114535,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 114535,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 5982,
+          "from_frame": 3150,
+          "to_frame": 5982
+        },
+        {
+          "parent_episode_index": 116056,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2737,
+          "from_frame": 0,
+          "to_frame": 2737
+        },
+        {
+          "parent_episode_index": 116112,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1711,
+          "from_frame": 0,
+          "to_frame": 1711
+        },
+        {
+          "parent_episode_index": 117563,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1937,
+          "from_frame": 0,
+          "to_frame": 1937
+        },
+        {
+          "parent_episode_index": 117639,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 3300,
+          "from_frame": 0,
+          "to_frame": 3450
+        },
+        {
+          "parent_episode_index": 117639,
+          "window_index": 1,
+          "core_from_frame": 3300,
+          "core_to_frame": 3948,
+          "from_frame": 3150,
+          "to_frame": 3948
+        },
+        {
+          "parent_episode_index": 119114,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 1264,
+          "from_frame": 0,
+          "to_frame": 1264
+        },
+        {
+          "parent_episode_index": 124148,
+          "window_index": 0,
+          "core_from_frame": 0,
+          "core_to_frame": 2489,
+          "from_frame": 0,
+          "to_frame": 2489
+        }
+      ]
+    }
+  }
+}

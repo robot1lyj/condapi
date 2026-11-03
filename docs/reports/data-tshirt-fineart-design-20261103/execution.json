@@ -1,0 +1,654 @@
+{
+  "observed_utc": "2026-11-03T06:04:32.950479+00:00",
+  "device": "Thor aarch64",
+  "task_root": "/home/wuyan-lyj/thor/flora/data/tshirt-fineart-20261103",
+  "server_accessed": false,
+  "training_started": false,
+  "pilot": {
+    "parents": 12,
+    "frames": 58268,
+    "hours": 0.5395185185185185,
+    "all_three_camera_frame_counts_and_sha_passed": true,
+    "annotation_windows": 23,
+    "annotation_frames_including_context": 61568
+  },
+  "all_candidates_progress": {
+    "status": "PARTIAL_PREPARATION_NOT_TRAINING_READY",
+    "training_ready": false,
+    "task_success": "NOT_REVIEWED",
+    "processed": 276,
+    "expected": 411,
+    "selected_remaining": 135,
+    "counts": {
+      "PREPARED_REVIEW_PENDING": 276
+    },
+    "plan_sha256": "15dfa406629a5551328434280e90a622ef50c25d2e25426942f6600d4fe96a70",
+    "audit_sha256": "af55582fbc255237368dce7dc18867144aa3dff976d4d7c3084639a69c004565",
+    "updated_unix_s": 1793685712.0813537
+  },
+  "exits": {
+    "prepare-pilot": 0,
+    "prepare-all": null,
+    "annotate-baseline-first": 0,
+    "gdn-overlay-build": 1,
+    "gdn-overlay-build-02": 0,
+    "gdn-import-check": 0,
+    "gdn-kernel-check-65-v1": 0,
+    "annotate-gdn-cache-reverse-v1": 0,
+    "auto-selector-pilot-v3": 0,
+    "auto-batch-demo-v1": 0
+  },
+  "baseline": {
+    "id": "tshirt-train-128691-w000",
+    "video_seconds": 47.8,
+    "captions": 9,
+    "incomplete": 0,
+    "metrics": [
+      {
+        "stage": "tempseg",
+        "timing": {
+          "stage_wall_s": 184.4193536839448,
+          "model_load_wall_s": 101.5399859668687,
+          "native_work_wall_s": 82.8793677170761,
+          "actual_model_loads": 1,
+          "reused_model_loads": 0
+        },
+        "artifact_sha256": "8b9ca94b0daf2057a02797984eca1bbcd669c3fb6b51efb0600e675b4b63512f"
+      },
+      {
+        "stage": "captioner",
+        "timing": {
+          "stage_wall_s": 939.3254892351106,
+          "model_load_wall_s": 319.63651140686125,
+          "native_work_wall_s": 619.6889778282493,
+          "actual_model_loads": 1,
+          "reused_model_loads": 0
+        },
+        "artifact_sha256": "23a33c7ba28a5ba2235db6f8baeb3ed0811c829287c699d33723103c810dba1e"
+      }
+    ],
+    "full_wall_s": 1125.6909668659791,
+    "contention": "Concurrent CPU preparation and operator build; cold model loads included. Not an uncontended throughput claim.",
+    "semantic_review_draft": {
+      "overlap_intervals": 2,
+      "uncovered_frames": 15,
+      "gap_seconds": 0.5,
+      "training_ready": false,
+      "resolution": "Actual automatic selector resolves both overlaps; gap returns UNKNOWN and uses two-column native empty-anchor fallback; reference visual review only for calibration, not per-episode approval."
+    }
+  },
+  "gdn_overlay": {
+    "root": "/home/wuyan-lyj/thor/flora/data/tshirt-fineart-20261103/gdn-overlay-candidate-02",
+    "runtime": {
+      "machine": "aarch64",
+      "python": "3.12.3 (main, Mar 23 2026, 19:04:32) [GCC 13.3.0]",
+      "torch": "2.12.0a0+5aff3928d8.nv26.05",
+      "torch_cuda": "13.2",
+      "torch_cxx11_abi": true,
+      "torch_file": "/usr/local/lib/python3.12/dist-packages/torch/__init__.py",
+      "triton": "3.7.0",
+      "triton_distribution": "3.7.0+gitb4e20bb.nv26.5",
+      "triton_file": "/usr/local/lib/python3.12/dist-packages/triton/__init__.py"
+    },
+    "kernel_status": "DRAFT_KERNEL_NUMERIC_CHECKS_PASS_NOT_FLORA_PARITY",
+    "kernel_metrics": [
+      {
+        "name": "gdn_prefill_zero_state_T65",
+        "draft_pass": true,
+        "outputs": [
+          {
+            "max_abs_diff": 0.000244140625,
+            "rms_diff": 2.964242894332965e-05,
+            "dtype_equal": true,
+            "finite": true
+          },
+          {
+            "max_abs_diff": 0.004963099956512451,
+            "rms_diff": 0.00021918751984720283,
+            "dtype_equal": true,
+            "finite": true
+          }
+        ],
+        "reference_timing": {
+          "first_call_wall_s_includes_possible_jit": 0.1849752082489431,
+          "warm_wall_s": [
+            0.003329596947878599,
+            0.0032905880361795425,
+            0.0032480969093739986
+          ],
+          "warm_cuda_event_ms": [
+            3.2722880840301514,
+            3.255552053451538,
+            3.2234559059143066
+          ],
+          "warm_wall_median_s": 0.0032905880361795425,
+          "warm_cuda_event_median_ms": 3.255552053451538
+        },
+        "candidate_timing": {
+          "first_call_wall_s_includes_possible_jit": 39.67318274313584,
+          "warm_wall_s": [
+            0.0005864808335900307,
+            0.0005295099690556526,
+            0.0004988140426576138
+          ],
+          "warm_cuda_event_ms": [
+            0.5579839944839478,
+            0.5111680030822754,
+            0.48313599824905396
+          ],
+          "warm_wall_median_s": 0.0005295099690556526,
+          "warm_cuda_event_median_ms": 0.5111680030822754
+        }
+      },
+      {
+        "name": "gdn_prefill_fp32_state_T65",
+        "draft_pass": true,
+        "outputs": [
+          {
+            "max_abs_diff": 0.00048828125,
+            "rms_diff": 2.9652990985719944e-05,
+            "dtype_equal": true,
+            "finite": true
+          },
+          {
+            "max_abs_diff": 0.004963099956512451,
+            "rms_diff": 0.00021918751984720283,
+            "dtype_equal": true,
+            "finite": true
+          }
+        ],
+        "reference_timing": {
+          "first_call_wall_s_includes_possible_jit": 0.0038452069275081158,
+          "warm_wall_s": [
+            0.00336364284157753,
+            0.0032851709984242916,
+            0.003280439879745245
+          ],
+          "warm_cuda_event_ms": [
+            3.313983917236328,
+            3.2616000175476074,
+            3.2590720653533936
+          ],
+          "warm_wall_median_s": 0.0032851709984242916,
+          "warm_cuda_event_median_ms": 3.2616000175476074
+        },
+        "candidate_timing": {
+          "first_call_wall_s_includes_possible_jit": 18.334512748289853,
+          "warm_wall_s": [
+            0.0005768607370555401,
+            0.0005261749029159546,
+            0.0004907869733870029
+          ],
+          "warm_cuda_event_ms": [
+            0.549888014793396,
+            0.5093439817428589,
+            0.4747520089149475
+          ],
+          "warm_wall_median_s": 0.0005261749029159546,
+          "warm_cuda_event_median_ms": 0.5093439817428589
+        }
+      },
+      {
+        "name": "gdn_recurrent_common_fp32_state_T65",
+        "draft_pass": true,
+        "outputs": [
+          {
+            "max_abs_diff": 0.000244140625,
+            "rms_diff": 3.4460794231171836e-05,
+            "dtype_equal": true,
+            "finite": true
+          },
+          {
+            "max_abs_diff": 0.0019366741180419922,
+            "rms_diff": 0.00016477636665414785,
+            "dtype_equal": true,
+            "finite": true
+          }
+        ],
+        "reference_timing": {
+          "first_call_wall_s_includes_possible_jit": 0.0003967592492699623,
+          "warm_wall_s": [
+            0.0002529541961848736,
+            0.0002312040887773037,
+            0.00022785132750868797
+          ],
+          "warm_cuda_event_ms": [
+            0.2285120040178299,
+            0.21651199460029602,
+            0.21376000344753265
+          ],
+          "warm_wall_median_s": 0.0002312040887773037,
+          "warm_cuda_event_median_ms": 0.21651199460029602
+        },
+        "candidate_timing": {
+          "first_call_wall_s_includes_possible_jit": 0.27417366299778223,
+          "warm_wall_s": [
+            0.00017222203314304352,
+            0.00010633375495672226,
+            0.0001187310554087162
+          ],
+          "warm_cuda_event_ms": [
+            0.1305599957704544,
+            0.09206400066614151,
+            0.08620800077915192
+          ],
+          "warm_wall_median_s": 0.0001187310554087162,
+          "warm_cuda_event_median_ms": 0.09206400066614151
+        }
+      },
+      {
+        "name": "gdn_recurrent_after_prefill_T65",
+        "draft_pass": true,
+        "outputs": [
+          {
+            "max_abs_diff": 0.000244140625,
+            "rms_diff": 3.36272608356012e-05,
+            "dtype_equal": true,
+            "finite": true
+          },
+          {
+            "max_abs_diff": 0.003367096185684204,
+            "rms_diff": 0.0002241718743839128,
+            "dtype_equal": true,
+            "finite": true
+          }
+        ],
+        "reference_timing": {
+          "first_call_wall_s_includes_possible_jit": 0.00043546268716454506,
+          "warm_wall_s": [
+            0.0002564629539847374,
+            0.00023354683071374893,
+            0.00023341737687587738
+          ],
+          "warm_cuda_event_ms": [
+            0.23132799565792084,
+            0.21910400688648224,
+            0.2194560021162033
+          ],
+          "warm_wall_median_s": 0.00023354683071374893,
+          "warm_cuda_event_median_ms": 0.2194560021162033
+        },
+        "candidate_timing": {
+          "first_call_wall_s_includes_possible_jit": 0.00014319457113742828,
+          "warm_wall_s": [
+            9.836116805672646e-05,
+            8.89897346496582e-05,
+            8.615711703896523e-05
+          ],
+          "warm_cuda_event_ms": [
+            0.08099199831485748,
+            0.07631999999284744,
+            0.07206399738788605
+          ],
+          "warm_wall_median_s": 8.89897346496582e-05,
+          "warm_cuda_event_median_ms": 0.07631999999284744
+        }
+      },
+      {
+        "name": "causal_conv_full_T65",
+        "draft_pass": true,
+        "outputs": [
+          {
+            "max_abs_diff": 0.0078125,
+            "rms_diff": 0.00045274534727624954,
+            "dtype_equal": true,
+            "finite": true
+          }
+        ],
+        "reference_timing": {
+          "first_call_wall_s_includes_possible_jit": 0.03781322203576565,
+          "warm_wall_s": [
+            8.538877591490746e-05,
+            4.85740602016449e-05,
+            4.2110681533813477e-05
+          ],
+          "warm_cuda_event_ms": [
+            0.044863998889923096,
+            0.02985600009560585,
+            0.028831999748945236
+          ],
+          "warm_wall_median_s": 4.85740602016449e-05,
+          "warm_cuda_event_median_ms": 0.02985600009560585
+        },
+        "candidate_timing": {
+          "first_call_wall_s_includes_possible_jit": 0.003162977285683155,
+          "warm_wall_s": [
+            7.584318518638611e-05,
+            5.5629294365644455e-05,
+            5.083298310637474e-05
+          ],
+          "warm_cuda_event_ms": [
+            0.050592001527547836,
+            0.042047999799251556,
+            0.03779200091958046
+          ],
+          "warm_wall_median_s": 5.5629294365644455e-05,
+          "warm_cuda_event_median_ms": 0.042047999799251556
+        }
+      },
+      {
+        "name": "causal_conv_update_after_prefill_T65",
+        "draft_pass": true,
+        "outputs": [
+          {
+            "max_abs_diff": 0.00390625,
+            "rms_diff": 0.00038822217834244083,
+            "dtype_equal": true,
+            "finite": true
+          },
+          {
+            "max_abs_diff": 0.0,
+            "rms_diff": 0.0,
+            "dtype_equal": true,
+            "finite": true
+          }
+        ],
+        "reference_timing": {
+          "first_call_wall_s_includes_possible_jit": 0.005617083981633186,
+          "warm_wall_s": [
+            9.617581963539124e-05,
+            7.174117490649223e-05,
+            7.038796320557594e-05
+          ],
+          "warm_cuda_event_ms": [
+            0.06831999868154526,
+            0.0575999990105629,
+            0.056543998420238495
+          ],
+          "warm_wall_median_s": 7.174117490649223e-05,
+          "warm_cuda_event_median_ms": 0.0575999990105629
+        },
+        "candidate_timing": {
+          "first_call_wall_s_includes_possible_jit": 0.0015329890884459019,
+          "warm_wall_s": [
+            5.6786928325891495e-05,
+            4.5806169509887695e-05,
+            4.3102074414491653e-05
+          ],
+          "warm_cuda_event_ms": [
+            0.03763199970126152,
+            0.03248000144958496,
+            0.03030399978160858
+          ],
+          "warm_wall_median_s": 4.5806169509887695e-05,
+          "warm_cuda_event_median_ms": 0.03248000144958496
+        }
+      },
+      {
+        "name": "gated_rmsnorm_T65",
+        "draft_pass": true,
+        "outputs": [
+          {
+            "max_abs_diff": 0.03125,
+            "rms_diff": 0.002057184452992323,
+            "dtype_equal": true,
+            "finite": true
+          }
+        ],
+        "reference_timing": {
+          "first_call_wall_s_includes_possible_jit": 0.028424706775695086,
+          "warm_wall_s": [
+            0.00015327800065279007,
+            0.00010924926027655602,
+            0.00010490836575627327
+          ],
+          "warm_cuda_event_ms": [
+            0.10681600123643875,
+            0.09468799829483032,
+            0.09100800007581711
+          ],
+          "warm_wall_median_s": 0.00010924926027655602,
+          "warm_cuda_event_median_ms": 0.09468799829483032
+        },
+        "candidate_timing": {
+          "first_call_wall_s_includes_possible_jit": 2.767567913979292,
+          "warm_wall_s": [
+            0.00015669502317905426,
+            0.00012217601761221886,
+            0.00011345231905579567
+          ],
+          "warm_cuda_event_ms": [
+            0.13148799538612366,
+            0.10742399841547012,
+            0.0990080013871193
+          ],
+          "warm_wall_median_s": 0.00012217601761221886,
+          "warm_cuda_event_median_ms": 0.10742399841547012
+        }
+      }
+    ],
+    "flora_semantic_parity": "Final supervision fields and input tensor digests equal on one full input; strict raw-audit parity FAILED on one adaptive retry. See acceleration_ab; no bitwise claim."
+  },
+  "preview": {
+    "url": "http://192.168.31.118:7865/",
+    "dataset": "tshirt-pilot-baseline-20261103",
+    "registered": 1,
+    "indexed": 1,
+    "errors": 0
+  },
+  "retained_failures": [
+    {
+      "phase": "gdn-overlay-candidate-01",
+      "reason": "Triton module version 3.7.0 differs from distribution metadata 3.7.0+gitb4e20bb.nv26.5; exact dual version guard corrected, new candidate-02 built",
+      "base_environment_changed": false
+    },
+    {
+      "phase": "pilot-v2 initial window preparation",
+      "reason": "Fractional offset residue caused one extra end frame; endpoint snapped to integer stream clock, original partial/log retained and retry succeeded",
+      "original_episode_damaged": false
+    }
+  ],
+  "scope_note": "An observation receipt, not a completion certificate. Native Flora annotation JSON/media are retained on Thor, not committed.",
+  "acceleration_ab": {
+    "status": "EXACT_TASK_SUPERVISION_FIELDS_AND_INPUTS",
+    "observed_utc": "2026-11-03T05:11:49.308721+00:00",
+    "id": "tshirt-train-128691-w000",
+    "checks": {
+      "input_sha256": true,
+      "model_revisions": true,
+      "profile": true,
+      "camera_roles": true,
+      "duration_s": true,
+      "segments": true
+    },
+    "input_checks": {
+      "tempseg": {
+        "calls": 8,
+        "candidate_calls": 8,
+        "all_input_tensors_equal": true
+      },
+      "captioner": {
+        "calls": 9,
+        "candidate_calls": 9,
+        "all_input_tensors_equal": true
+      }
+    },
+    "timings": {
+      "tempseg": {
+        "baseline": {
+          "stage_wall_s": 184.4193536839448,
+          "model_load_wall_s": 101.5399859668687,
+          "native_work_wall_s": 82.8793677170761,
+          "actual_model_loads": 1,
+          "reused_model_loads": 0
+        },
+        "candidate": {
+          "stage_wall_s": 70.78414451517165,
+          "model_load_wall_s": 0.0,
+          "native_work_wall_s": 70.78414451517165,
+          "actual_model_loads": 0,
+          "reused_model_loads": 1
+        },
+        "baseline_generation_s": [
+          8.408,
+          9.515,
+          9.39,
+          7.827,
+          6.197,
+          7.757,
+          9.4,
+          9.509
+        ],
+        "candidate_generation_s": [
+          6.313,
+          7.798,
+          7.689,
+          6.217,
+          4.673,
+          7.712,
+          7.687,
+          7.786
+        ],
+        "baseline_generation_median_s": 8.899000000000001,
+        "candidate_generation_median_s": 7.688000000000001
+      },
+      "captioner": {
+        "baseline": {
+          "stage_wall_s": 939.3254892351106,
+          "model_load_wall_s": 319.63651140686125,
+          "native_work_wall_s": 619.6889778282493,
+          "actual_model_loads": 1,
+          "reused_model_loads": 0
+        },
+        "candidate": {
+          "stage_wall_s": 442.51115652313456,
+          "model_load_wall_s": 0.0,
+          "native_work_wall_s": 442.51115652313456,
+          "actual_model_loads": 0,
+          "reused_model_loads": 1
+        },
+        "baseline_generation_s": [
+          80.687,
+          278.371,
+          33.661,
+          33.762,
+          28.221,
+          33.791,
+          34.859,
+          35.144,
+          27.854
+        ],
+        "candidate_generation_s": [
+          16.354,
+          259.829,
+          19.497,
+          21.199,
+          16.752,
+          19.849,
+          20.795,
+          20.56,
+          16.827
+        ],
+        "baseline_generation_median_s": 33.791,
+        "candidate_generation_median_s": 19.849
+      }
+    },
+    "raw_audit_exact_parity": false,
+    "raw_audit_difference": "One adaptive TempSeg retry emits an extra candidate segment; final nine boundaries, captions, status and provenance are identical. Full raw comparison retained separately.",
+    "selection_scope": "Raw annotation pipeline; source raw outputs kept, semantic automation is separate. One-clip supervision equality is not a global quality claim.",
+    "contention": "Concurrent CPU preparation. Baseline is cold loading, matched candidate is second job with resident models. Generation medians report matched inputs, not uncontended system throughput."
+  },
+  "backend_selection_sha256": "0a7f28f17dc2f9a92990c982786b1ac06ed1395f850b2428ecbd669cabaf6432",
+  "automatic_batch": {
+    "status": "LANGUAGE_COLUMNS_MATERIALIZED_NOT_DATASET_RELEASED",
+    "training_ready": false,
+    "dataset_release": false,
+    "task_success": "NOT_REVIEWED",
+    "selector_tasks": 3,
+    "unknown_mode": "native-empty-anchor-fallback",
+    "view_status": "NOT_MATERIALIZED_NOT_TRAINING_READY",
+    "coverage": {
+      "action_frames": 1434,
+      "valid_language_frames": 1419,
+      "empty_language_anchor_frames": 15,
+      "action_hours": 0.013277777777777777,
+      "valid_language_hours": 0.013138888888888887,
+      "empty_language_anchor_hours": 0.0001388888888888889
+    },
+    "pending_parent_count": 0,
+    "materialization_counts": {
+      "parents": 1,
+      "action_frames": 1434,
+      "valid_language_frames": 1419,
+      "empty_language_anchor_frames": 15,
+      "action_hours": 0.013277777777777777,
+      "valid_language_hours": 0.013138888888888887
+    },
+    "artifacts": {
+      "draft": {
+        "path": "/data/tshirt-fineart-20261103/auto-batch-demo-128691-v1/draft.json",
+        "sha256": "343b0f4a43a7f8ff738e3efdc823192c2efc05a6fc941239cae602b188ed2509"
+      },
+      "plan": {
+        "path": "/data/tshirt-fineart-20261103/auto-batch-demo-128691-v1/plan.json",
+        "sha256": "3c6c265e9e050d5055405abb4fe7df56619fd96eb00764ee789510d6f72ab010"
+      },
+      "actual_timestamps": {
+        "path": "/data/tshirt-fineart-20261103/auto-batch-demo-128691-v1/actual-timestamps.json",
+        "sha256": "1bb9210d32ada665a9240382793dee2ed1e1c5e7993b932797da508866b2da33"
+      },
+      "auto_view": {
+        "path": "/data/tshirt-fineart-20261103/auto-batch-demo-128691-v1/auto-view.json",
+        "sha256": "4479585262f91be06a6b480363a2d07771b8037664600591a7e8cf79ea80e15e"
+      },
+      "decisions": {
+        "path": "/data/tshirt-fineart-20261103/auto-batch-demo-128691-v1/selector/decisions.json",
+        "sha256": "02de7a19742c14d80ec69bbd046963092d5c146da6f391cb83a8a3697520ede6"
+      },
+      "materialization_manifest": {
+        "path": "/data/tshirt-fineart-20261103/auto-batch-demo-128691-v1/materialized/manifest.json",
+        "sha256": "be8735d57f7b891fbcaf2e4af33d6df84c0c213ececc10b15a5b488d50b62ad3"
+      }
+    },
+    "root": "/home/wuyan-lyj/thor/flora/data/tshirt-fineart-20261103/auto-batch-demo-128691-v1",
+    "quality_limit": "Single-clip runtime calibration, not semantic accuracy or full-dataset release"
+  },
+  "validation": {
+    "cpu_protocol_and_data_tests": 112,
+    "cpu_tests_passed": true,
+    "ruff_all_enabled_rules": "PASS",
+    "training_loop_or_local_model_run": false
+  },
+  "long_batch_pipeline": {
+    "status": "RUNNING",
+    "host_script": "tools/automatic-v3/run_tshirt_annotation_pipeline.sh",
+    "tool_snapshot": "tools/automatic-v3",
+    "scope": "pilot23 then train/dev; reserve download only; no automatic training start",
+    "unknown_mode": "native-empty-anchor-fallback",
+    "small_unknown_bounds": {
+      "max_fraction": 0.02,
+      "max_consecutive_frames": 30
+    },
+    "repair_loop": "not implemented; explicit pending queue retained; unrelated accepted parents continue",
+    "run_state": {
+      "backend": "gdn",
+      "stage": "ANNOTATING_pilot-gdn-v1",
+      "run_id": "20261103T060301Z-1444798",
+      "status": "RUNNING",
+      "exit_code": null,
+      "updated_utc": "2026-11-03T06:03:01.429064+00:00",
+      "training_ready": false,
+      "semantic_resolution": "AUTOMATIC_WITH_EXPLICIT_PENDING_QUEUE",
+      "scope": "this Thor task only; no training/server/3588 operations"
+    },
+    "events": {
+      "worker_lock_acquired": 1,
+      "input_validated": 23,
+      "run_start": 1
+    },
+    "binding_sha256": "e873026ed166e5dc6cdc69ba82bf1cc6871a3fad7554445bfaab895efee7dc71",
+    "tools_sha256": {
+      "run_flora_tshirt_batch.py": "525095655449a2f3e223d48980e4470ab3cadde4a452576520bb07312eb1cea1",
+      "prepare_flora_windows.py": "d7922c1c1518532ad2ae4acc9348ace9a9ffa10bbbd8d50ded3ce51208f09d50",
+      "run_fineart_auto_batch.py": "ea9c76a4036394a70f30d64c94d4c5a83b0ffad3dd49ce841f900c18f89aebea",
+      "prepare_fineart_subtask_review.py": "6a90c6d457cf3015ce7fb4ddc8e9eb771fd67da6b03b47b4453ec8a6cdb95b4a",
+      "auto_fineart_timeline.py": "2f3d01d295c0d67de0e8b3a6f716d13fdfd7608ebc9819ccd9e554a02dc9450c",
+      "select_fineart_candidates.py": "bfc62b717546962cfdbbbca310ae9a24b6d84ecc28784462f4bc953dcd4cc960",
+      "materialize_fineart_language.py": "2ef910736f5e71242a283d7f151b9165c94e4d49a8d1f7dbf71fb1ef788d7884",
+      "tshirt-fineart-v1.json": "7edb2b8282994b403712e2f63f7c1151f70e610b82f8c1e4cf9e353af9faf00e",
+      "run_tshirt_annotation_pipeline.sh": "d1988d44ce8e3a647378483fba7b6f6beccbf084b47a4288a592446e97481132"
+    },
+    "resume_check": "Actual existing oneclip summary, ownership, source parent metadata and derived Parquet SHA revalidated with the v3 embedded protocol: VERIFIED",
+    "tool_versions": "formal-v1 GPU demo preserved; v3 Python tools have identical AST after formatting; host resume validation/pointer added separately"
+  }
+}

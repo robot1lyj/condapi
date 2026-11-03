@@ -1,0 +1,253 @@
+{
+  "repo": "lerobot/abc_130k_v3_train",
+  "revision": "68651e4929d9fb00f798937b2d62617cab5c771d",
+  "method": "Fixed-revision Hugging Face paths-info API POST batches (100 paths maximum); response size/lfs.size cross-checked; no file payload downloaded. Each request timeout 20s, 3 concurrent workers.",
+  "metadata_network_bytes": 465986,
+  "metadata_requests": 14,
+  "candidate_inputs": {
+    "train": {
+      "path": "/tmp/condapi-tshirt-design-20261103/train-candidate-episodes.json",
+      "sha256": "d214eadc915d96c6e7941a4dfcff26a92a74a959abf2e3760f098c26a54e4248",
+      "episodes": 319,
+      "seconds": 36000.0,
+      "source_paths": 1095,
+      "data_shards": 219,
+      "video_shards": 876
+    },
+    "dev": {
+      "path": "/tmp/condapi-tshirt-design-20261103/dev-candidate-episodes.json",
+      "sha256": "07f799e6fcd41b52ac87c28d5b81eadf3193298d4f5d4b3e1b124d92bc9656b0",
+      "episodes": 29,
+      "seconds": 3598.2,
+      "source_paths": 115,
+      "data_shards": 28,
+      "video_shards": 87
+    },
+    "reserve": {
+      "path": "/tmp/condapi-tshirt-design-20261103/reserve-candidate-episodes.json",
+      "sha256": "f2d7024ef188d3b4002df027d02dc225d234289703d91f90c2b4b83604be5db1",
+      "episodes": 63,
+      "seconds": 7200.0,
+      "source_paths": 249,
+      "data_shards": 60,
+      "video_shards": 189
+    }
+  },
+  "individual_sets": {
+    "train": {
+      "unique_paths": 1095,
+      "bytes": 106636597992,
+      "data_parquet": {
+        "files": 219,
+        "bytes": 15058144242,
+        "decimal_GB": 15.058144242,
+        "GiB": 14.023989664390683
+      },
+      "top_mp4": {
+        "files": 296,
+        "bytes": 33599766552,
+        "decimal_GB": 33.599766552,
+        "GiB": 31.29222109168768
+      },
+      "left_wrist_mp4": {
+        "files": 290,
+        "bytes": 29152580496,
+        "decimal_GB": 29.152580496,
+        "GiB": 27.150456324219704
+      },
+      "right_wrist_mp4": {
+        "files": 290,
+        "bytes": 28826106702,
+        "decimal_GB": 28.826106702,
+        "GiB": 26.84640390984714
+      },
+      "decimal_GB": 106.636597992,
+      "GiB": 99.3130709901452
+    },
+    "dev": {
+      "unique_paths": 115,
+      "bytes": 12560504014,
+      "data_parquet": {
+        "files": 28,
+        "bytes": 1877235462,
+        "decimal_GB": 1.877235462,
+        "GiB": 1.7483117636293173
+      },
+      "top_mp4": {
+        "files": 29,
+        "bytes": 3749776845,
+        "decimal_GB": 3.749776845,
+        "GiB": 3.492251825518906
+      },
+      "left_wrist_mp4": {
+        "files": 29,
+        "bytes": 3479013574,
+        "decimal_GB": 3.479013574,
+        "GiB": 3.2400838788598776
+      },
+      "right_wrist_mp4": {
+        "files": 29,
+        "bytes": 3454478133,
+        "decimal_GB": 3.454478133,
+        "GiB": 3.2172334687784314
+      },
+      "decimal_GB": 12.560504014,
+      "GiB": 11.697880936786532
+    },
+    "reserve": {
+      "unique_paths": 249,
+      "bytes": 26201306481,
+      "data_parquet": {
+        "files": 60,
+        "bytes": 4151738248,
+        "decimal_GB": 4.151738248,
+        "GiB": 3.866607554256916
+      },
+      "top_mp4": {
+        "files": 63,
+        "bytes": 7829194113,
+        "decimal_GB": 7.829194113,
+        "GiB": 7.291505218483508
+      },
+      "left_wrist_mp4": {
+        "files": 63,
+        "bytes": 7129601068,
+        "decimal_GB": 7.129601068,
+        "GiB": 6.639958422631025
+      },
+      "right_wrist_mp4": {
+        "files": 63,
+        "bytes": 7090773052,
+        "decimal_GB": 7.090773052,
+        "GiB": 6.603797014802694
+      },
+      "decimal_GB": 26.201306481,
+      "GiB": 24.401868210174143
+    }
+  },
+  "cumulative_sets": {
+    "train": {
+      "unique_paths": 1095,
+      "bytes": 106636597992,
+      "data_parquet": {
+        "files": 219,
+        "bytes": 15058144242,
+        "decimal_GB": 15.058144242,
+        "GiB": 14.023989664390683
+      },
+      "top_mp4": {
+        "files": 296,
+        "bytes": 33599766552,
+        "decimal_GB": 33.599766552,
+        "GiB": 31.29222109168768
+      },
+      "left_wrist_mp4": {
+        "files": 290,
+        "bytes": 29152580496,
+        "decimal_GB": 29.152580496,
+        "GiB": 27.150456324219704
+      },
+      "right_wrist_mp4": {
+        "files": 290,
+        "bytes": 28826106702,
+        "decimal_GB": 28.826106702,
+        "GiB": 26.84640390984714
+      },
+      "decimal_GB": 106.636597992,
+      "GiB": 99.3130709901452
+    },
+    "train_dev": {
+      "unique_paths": 1187,
+      "bytes": 116990538584,
+      "data_parquet": {
+        "files": 235,
+        "bytes": 16014166731,
+        "decimal_GB": 16.014166731,
+        "GiB": 14.914354990236461
+      },
+      "top_mp4": {
+        "files": 322,
+        "bytes": 37032765872,
+        "decimal_GB": 37.032765872,
+        "GiB": 34.489450857043266
+      },
+      "left_wrist_mp4": {
+        "files": 315,
+        "bytes": 32146305743,
+        "decimal_GB": 32.146305743,
+        "GiB": 29.938580228947103
+      },
+      "right_wrist_mp4": {
+        "files": 315,
+        "bytes": 31797300238,
+        "decimal_GB": 31.797300238,
+        "GiB": 29.613543523475528
+      },
+      "decimal_GB": 116.990538584,
+      "GiB": 108.95592959970236
+    },
+    "train_dev_reserve": {
+      "unique_paths": 1389,
+      "bytes": 137162693985,
+      "data_parquet": {
+        "files": 271,
+        "bytes": 18382909181,
+        "decimal_GB": 18.382909181,
+        "GiB": 17.120418307371438
+      },
+      "top_mp4": {
+        "files": 378,
+        "bytes": 43562891338,
+        "decimal_GB": 43.562891338,
+        "GiB": 40.57110411860049
+      },
+      "left_wrist_mp4": {
+        "files": 370,
+        "bytes": 37792010838,
+        "decimal_GB": 37.792010838,
+        "GiB": 35.19655283354223
+      },
+      "right_wrist_mp4": {
+        "files": 370,
+        "bytes": 37424882628,
+        "decimal_GB": 37.424882628,
+        "GiB": 34.854638043791056
+      },
+      "decimal_GB": 137.162693985,
+      "GiB": 127.74271330330521
+    }
+  },
+  "incremental_cumulative_bytes": {
+    "add_dev_to_train": 10353940592,
+    "add_reserve_to_train_dev": 20172155401
+  },
+  "cross_set_shard_overlap_counts": {
+    "train__dev": 23,
+    "train__reserve": 42,
+    "dev__reserve": 9
+  },
+  "metadata_files_excluded": "LeRobot meta/*.json + meta/episodes shards and source README; this request measures exact candidate data Parquet + three MP4 views only. Their small additional size can be added from meta manifest.",
+  "files_evidence": "/tmp/condapi-tshirt-design-20261103/storage-source-shards-path-metadata.json",
+  "workspace_note": "Exact immutable source-shard cache sizes above; final task-only remuxed training data is additional. Annotation clips, model weights, training checkpoints, and upstream native MCAP are excluded. Download to a temporary file then atomic-rename avoids a duplicate final/cache copy; peak temporary overhead is at most concurrency times largest selected shard if cache and derived output are otherwise not duplicated.",
+  "largest_selected_shard": {
+    "path": "videos/observation.images.right_wrist/chunk-000/file-082.mp4",
+    "bytes": 209603833,
+    "decimal_GB": 0.209603833
+  },
+  "recommended_free_workspace": {
+    "decimal_GB": 200,
+    "GiB": 186.2645149230957,
+    "basis": {
+      "immutable_all_three_source_cache_bytes": 137162693985,
+      "derived_13h_compressed_dataset_budget_bytes": 20000000000,
+      "three_concurrent_shard_temp_budget_bytes": 628811499,
+      "other_headroom_bytes": 42208494516
+    },
+    "conditions": [
+      "Store one deduplicated fixed-revision source cache; no second complete source copy.",
+      "Final per-episode/packed LeRobot derivative is additional; do not materialize full RGB/PNG frame cache.",
+      "Annotation windows reference timestamps; saved re-encoded clips and many alternative derivatives consume additional space.",
+      "Model/checkpoint/FLORA caches excluded."
+    ]
+  }
+}

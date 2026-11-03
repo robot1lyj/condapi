@@ -1,0 +1,63 @@
+{
+  "status": "PURE_PROTOCOL_CHECK_PASS",
+  "commit": "f5c9bc02137c331b009eccd44ece6f11b62187a8",
+  "training_run": false,
+  "model_or_tensor_library_imported": false,
+  "tests": [
+    "1000 empty-language single anchors: task-to-action fallback, no text targets, H50 unchanged",
+    "known anchors retain native deterministic30/70 routing",
+    "mixed known/empty batch keeps all4 samples, including both recipe-index branches at empty anchors",
+    "native language collate and HF transform preserve mixed per-anchor[] without cross-frame broadcast check",
+    "known->empty UNKNOWN anchor->known does not carry the previous subtask through the gap",
+    "null-content subtask is NOT absence: empty target+EOS or empty low-level instruction; official writer rejects null/null",
+    "fallback formatter has no supervised payload span; native tokenizer initializes all labels to-100"
+  ],
+  "source_snapshots": {
+    "src/lerobot/annotations/steerable_pipeline/writer.py": {
+      "sha256": "855dabe6b1697c8e8f551d33efc8159089ea2b639601d6cb87ca73ded243350d",
+      "url": "https://github.com/huggingface/lerobot/blob/f5c9bc02137c331b009eccd44ece6f11b62187a8/src/lerobot/annotations/steerable_pipeline/writer.py"
+    },
+    "src/lerobot/datasets/dataset_reader.py": {
+      "sha256": "0cb7190b9f6eccfa174bf3e89ad7b4868c32b85aa3db1ebf0dfd740682561b8f",
+      "url": "https://github.com/huggingface/lerobot/blob/f5c9bc02137c331b009eccd44ece6f11b62187a8/src/lerobot/datasets/dataset_reader.py"
+    },
+    "src/lerobot/datasets/io_utils.py": {
+      "sha256": "5179ceeb98cc9a1e5859fbcd4fc36e28cd9573a5a9aba26122fb1a86f2b59272",
+      "url": "https://github.com/huggingface/lerobot/blob/f5c9bc02137c331b009eccd44ece6f11b62187a8/src/lerobot/datasets/io_utils.py"
+    },
+    "src/lerobot/datasets/language.py": {
+      "sha256": "251f09d150c7058c166b2caa7c8fb0983978ce1188fa955e397a69fe87750587",
+      "url": "https://github.com/huggingface/lerobot/blob/f5c9bc02137c331b009eccd44ece6f11b62187a8/src/lerobot/datasets/language.py"
+    },
+    "src/lerobot/datasets/language_render.py": {
+      "sha256": "60f3c72939a6edce42f2a45c185ebe850740cd1d87f949092eb18f1dfa5e5224",
+      "url": "https://github.com/huggingface/lerobot/blob/f5c9bc02137c331b009eccd44ece6f11b62187a8/src/lerobot/datasets/language_render.py"
+    },
+    "src/lerobot/datasets/recipe.py": {
+      "sha256": "05bf54bd3678cef59698af5ee70c3606b84d48acc42b7f66f5a8925358f146b6",
+      "url": "https://github.com/huggingface/lerobot/blob/f5c9bc02137c331b009eccd44ece6f11b62187a8/src/lerobot/datasets/recipe.py"
+    },
+    "src/lerobot/policies/fineart_vla/configuration_fineart_vla.py": {
+      "sha256": "9d664802b713c7bb7fa3d62c50a8f3fc8041ff553db6b21d299f426fa7edfdba",
+      "url": "https://github.com/huggingface/lerobot/blob/f5c9bc02137c331b009eccd44ece6f11b62187a8/src/lerobot/policies/fineart_vla/configuration_fineart_vla.py"
+    },
+    "src/lerobot/policies/fineart_vla/modeling_fineart_vla.py": {
+      "sha256": "60158c1e1ffb3b40fc89d71f3977ce287341e7e4a1631d3317aa2d9d7e148c95",
+      "url": "https://github.com/huggingface/lerobot/blob/f5c9bc02137c331b009eccd44ece6f11b62187a8/src/lerobot/policies/fineart_vla/modeling_fineart_vla.py"
+    },
+    "src/lerobot/policies/fineart_vla/processor_fineart_vla.py": {
+      "sha256": "5d3a3440c03756926d55a3ed20bd51fe8f67c92a2c52a7e9deb56fce66ddab6f",
+      "url": "https://github.com/huggingface/lerobot/blob/f5c9bc02137c331b009eccd44ece6f11b62187a8/src/lerobot/policies/fineart_vla/processor_fineart_vla.py"
+    },
+    "src/lerobot/processor/render_messages_processor.py": {
+      "sha256": "ead5c7ccdcdc256bf23f76369415670015b659b7a52db94c5e2ae79a0dba62f2",
+      "url": "https://github.com/huggingface/lerobot/blob/f5c9bc02137c331b009eccd44ece6f11b62187a8/src/lerobot/processor/render_messages_processor.py"
+    },
+    "src/lerobot/utils/collate.py": {
+      "sha256": "6247666ba1e0beff90b25f41a606c84195ab15f1537f8331c00988b31f3ea9dc",
+      "url": "https://github.com/huggingface/lerobot/blob/f5c9bc02137c331b009eccd44ece6f11b62187a8/src/lerobot/utils/collate.py"
+    }
+  },
+  "scope_limit": "Native AST recipe/render/collate/formatter logic with dependency stubs, not a real Arrow/HF Dataset load, tokenizer or numerical loss execution",
+  "native_text_loss_evidence": "processor labels initialize-100, only target spans replace them; _lin_ce_small uses ignore_index=-100/reduction=sum and n_valid.clamp(min=1), so no subtask target contributes CE/z-loss"
+}

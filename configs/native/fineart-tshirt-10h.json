@@ -1,0 +1,102 @@
+{
+  "dataset": {
+    "repo_id": "yam/tshirt-fineart-train-20261103",
+    "root": "${TRAIN_DATASET_ROOT}",
+    "episodes": null,
+    "exclude_episodes": null,
+    "streaming": false,
+    "eval_split": 0.0,
+    "use_imagenet_stats": false,
+    "image_transforms": {"enable": false}
+  },
+  "policy": {
+    "type": "fineart_vla",
+    "pretrained_path": "${CHECKPOINT_SNAPSHOT}",
+    "pretrained_revision": "b6cf4faf2630f971dd390bc32365e9d9c330da8e",
+    "input_features": null,
+    "output_features": null,
+    "action_feature_names": null,
+    "device": "cuda",
+    "dtype": "bfloat16",
+    "use_peft": false,
+    "push_to_hub": false,
+    "chunk_size": 50,
+    "n_action_steps": 50,
+    "use_relative_actions": false,
+    "normalization_mapping": {"VISUAL": "IDENTITY", "STATE": "QUANTILES", "ACTION": "QUANTILES"},
+    "recipe_path": null,
+    "recipe": {
+      "blend": {
+        "high_level_subtask": {
+          "weight": 0.3,
+          "messages": [
+            {"role": "user", "content": "${task}", "stream": "high_level"},
+            {"role": "assistant", "content": "${subtask}", "stream": "high_level", "target": true, "if_present": "subtask"}
+          ]
+        },
+        "low_level_execution": {
+          "weight": 0.7,
+          "messages": [
+            {"role": "user", "content": "${subtask}", "stream": "low_level", "if_present": "subtask"}
+          ]
+        }
+      }
+    },
+    "tokenizer_max_length": 128,
+    "text_tokenizer_name": "${TEXT_TOKENIZER_SNAPSHOT}",
+    "enable_fast_action_loss": true,
+    "action_tokenizer_name": "${CHECKPOINT_SNAPSHOT}/action_tokenizer",
+    "auto_fit_fast_tokenizer": false,
+    "fast_skip_tokens": 128,
+    "max_action_tokens": 384,
+    "text_loss_weight": 1.0,
+    "flow_loss_weight": 10.0,
+    "fast_action_loss_weight": 1.0,
+    "knowledge_insulation": true,
+    "unfreeze_lm_head": true,
+    "freeze_vision_encoder": false,
+    "train_expert_only": false,
+    "gradient_checkpointing": true,
+    "compile_model": false,
+    "use_liger_kernels": false,
+    "use_flashrt_adarms": false,
+    "use_compiled_text_ce": false,
+    "use_compiled_vision": false,
+    "use_flex_attention": false,
+    "use_manual_attention": false,
+    "flow_num_repeats": 1,
+    "rtc_config": null,
+    "rtc_training_max_delay": 0,
+    "memory_scratchpad": false,
+    "optimizer_lr": 0.00001,
+    "optimizer_betas": [0.9, 0.95],
+    "optimizer_eps": 0.00000001,
+    "optimizer_weight_decay": 0.01,
+    "optimizer_grad_clip_norm": 1.0,
+    "optimizer_foreach": false,
+    "optimizer_fused": true,
+    "scheduler_warmup_steps": 1000,
+    "scheduler_decay_steps": 30000,
+    "scheduler_decay_lr": 0.000001
+  },
+  "rename_map": {
+    "observation.images.top_rgb": "observation.images.cam_high",
+    "observation.images.left_rgb": "observation.images.cam_left_wrist",
+    "observation.images.right_rgb": "observation.images.cam_right_wrist"
+  },
+  "output_dir": "${TRAIN_OUTPUT_DIR}",
+  "job_name": "fineart_tshirt_10h_fullft_draft_20261103",
+  "resume": false,
+  "seed": 42,
+  "num_workers": 4,
+  "batch_size": 8,
+  "steps": 30000,
+  "env_eval_freq": 0,
+  "eval_steps": 0,
+  "log_freq": 100,
+  "save_checkpoint": true,
+  "save_freq": 1000,
+  "use_policy_training_preset": true,
+  "trackio": {"enable": false},
+  "save_checkpoint_to_hub": false
+}

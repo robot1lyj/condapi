@@ -1,0 +1,48 @@
+{
+  "status": "AST_EQUIVALENT",
+  "scope": "formal automatic-v1 validated native/GPU code versus formatted automatic-v3 Python tools; v2/v3 Python sources identical, host shell orchestration changed separately",
+  "comparisons": [
+    {
+      "file": "scripts/data/run_flora_tshirt_batch.py",
+      "before_sha256": "30bd8fd46ebceba553a85a36c47e22751d619c4a6c03fc9c1b1b2725131191e2",
+      "after_sha256": "525095655449a2f3e223d48980e4470ab3cadde4a452576520bb07312eb1cea1",
+      "ast_equal": true
+    },
+    {
+      "file": "scripts/data/prepare_flora_windows.py",
+      "before_sha256": "533585f75179d911958058da58612f4f35ec3074f92fb95348b1b8eaea7eaee2",
+      "after_sha256": "d7922c1c1518532ad2ae4acc9348ace9a9ffa10bbbd8d50ded3ce51208f09d50",
+      "ast_equal": true
+    },
+    {
+      "file": "scripts/data/run_fineart_auto_batch.py",
+      "before_sha256": "ea9c76a4036394a70f30d64c94d4c5a83b0ffad3dd49ce841f900c18f89aebea",
+      "after_sha256": "ea9c76a4036394a70f30d64c94d4c5a83b0ffad3dd49ce841f900c18f89aebea",
+      "ast_equal": true
+    },
+    {
+      "file": "scripts/prepare_fineart_subtask_review.py",
+      "before_sha256": "8ee15c15b44e9cc527c7afa0ad55b59d4a5e78ef2ebebdaed4a371c3b7f2d350",
+      "after_sha256": "6a90c6d457cf3015ce7fb4ddc8e9eb771fd67da6b03b47b4453ec8a6cdb95b4a",
+      "ast_equal": true
+    },
+    {
+      "file": "scripts/data/auto_fineart_timeline.py",
+      "before_sha256": "2f3d01d295c0d67de0e8b3a6f716d13fdfd7608ebc9819ccd9e554a02dc9450c",
+      "after_sha256": "2f3d01d295c0d67de0e8b3a6f716d13fdfd7608ebc9819ccd9e554a02dc9450c",
+      "ast_equal": true
+    },
+    {
+      "file": "scripts/data/select_fineart_candidates.py",
+      "before_sha256": "bfc62b717546962cfdbbbca310ae9a24b6d84ecc28784462f4bc953dcd4cc960",
+      "after_sha256": "bfc62b717546962cfdbbbca310ae9a24b6d84ecc28784462f4bc953dcd4cc960",
+      "ast_equal": true
+    },
+    {
+      "file": "scripts/data/materialize_fineart_language.py",
+      "before_sha256": "2ef910736f5e71242a283d7f151b9165c94e4d49a8d1f7dbf71fb1ef788d7884",
+      "after_sha256": "2ef910736f5e71242a283d7f151b9165c94e4d49a8d1f7dbf71fb1ef788d7884",
+      "ast_equal": true
+    }
+  ]
+}

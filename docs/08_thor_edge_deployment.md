@@ -10,6 +10,8 @@ OpenWAM独立镜像、官方权重、LoRA合并与压缩候选的历史见 [14 �
 
 ## 1. 当前决策
 
+- **2026-11-03 FLORA T恤标注准备**：按用户授权，复核现有`flora-annotation`空闲后在`thor/flora/data/tshirt-fineart-20261103`新目录下载/逐帧审核ABC T恤候选，首条47.8s通过三路结构检查并开始真实原生推理。保留完整>120s父episode，仅标注使用≤120s同步窗口。常驻Session与独立GDN overlay已通过短内核排查及单条完整比较，最终监督字段和输入tensor digest一致，raw重试audit不同、严格raw parity未通过。原Torch/模型精度不变；不能外推受控倍速。自动约束selector及小UNKNOWN空列回退已实际物化首条Parquet，批处理按机器策略执行，语义质量仍需分层抽样验收。现有viewer/agent及Pi停服状态未改变，不操作3588或维护中的训练服务器。规模、当前运行回执与后续进度归[本轮数据报告](reports/data-tshirt-fineart-design-20261103/README.md)，模型/精度/调度归[FLORA说明](reference/flora_thor_annotation.md)。
+
 - **2026-10-31 13:41 CST存储清理完成**：按用户授权永久删除Thor `thor/rl-training`、`comfyui-h3`、`thor/xr1`、`thor/openwam`四个精确目录（合计222.65GiB）及100个专属/附属容器、17个专属镜像标签；磁盘可用净增224.59GiB，回执可用488.13GiB。H3已停止移除，不再自动恢复；Flora与agent保持同一ID/StartedAt运行，Pi仍停止，系统/网络/功耗、共用dubbing/视觉/Pi/镜像安装归档和共享镜像层不动，无全局prune。Pi追加要求只删容器：20万、23万旧服务与历史60000转换容器已删，只保留24万停止服务；耳机62000离线产物完整，但本来没有常驻容器，不新建或上线。**Pi全部模型权重、ONNX与引擎本轮未删，20万/23万恢复须重建容器。** 目录删除不可本机撤销，旧XR-1/OpenWAM/H3就绪描述为历史；身份、精确路径/ID、验证与范围归[清理报告](reports/thor/storage-cleanup-20261031/README.md)。不操作服务器或3588。
 
 - **2026-10-30约16:47 CST：耳机clean-v2 retry4/62000已转换、构建并通过离线校验，按用户要求暂不上线**。原始非有限0、811张量FP32逐位映射，七步FP32权重＋TF32/quantile、缓存80/CUDA Graph、九例d=0/1/10独立JAX/Torch/TRT及0.2rad/tick步进检查通过；最大单关节差0.000626rad、夹爪0.000570。agent保持运行的共享GPU下，预热后推理P50/P95=188.20/188.58ms，本机总处理191.78/192.46ms；首轮含Graph捕获P95=367.29ms单列，不是WebSocket/3588全链路或任务效果。按明确授权只暂停H3，退出后已恢复running/healthy；agent未重启。Pi仍running=false、8000无监听，原容器配置仍是乐高24万，未启动或切换在线服务。沿用已有MAXN/锁频，不改其他任务电源，无Pi专属watcher；可用约267GiB。新norm/权重/引擎/脚本/回执及后续上线边界归[62000离线交接](reports/thor/rtc-earbuds-clean-v2-62000-20261030/README.md)，不得复用旧114000 norm或引擎，不重跑冻结流水线。旧114000仍已清理，其他模型原件不动，不操作3588或训练。

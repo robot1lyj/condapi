@@ -1,0 +1,16 @@
+{
+  "status": "PASS",
+  "cases": [
+    "exact native/input parity passes with differing elapsed/timing",
+    "caption change rejected",
+    "raw temporal text change rejected",
+    "validly recomputed but different tensor audit rejected",
+    "incomplete EOS generation rejected",
+    "missing original generation logs rejected",
+    "explicit matched subset supports unequal output job sets"
+  ],
+  "script_sha256": "498b479435fdc72a48b66b2e578642465f33a21826f56f9bc323195514bc363a",
+  "gpu_calls": 0,
+  "training_loops": 0,
+  "limitation": "Synthetic CPU protocol fixtures only; actual native GPU parity not yet measured."
+}

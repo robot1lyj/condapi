@@ -1,0 +1,8 @@
+{
+  "status": "PASS",
+  "test": "publish_exclusive mode 0644 under umask 0077; existing output remains unchanged",
+  "mode": "0o644",
+  "script_sha256": "6cc6dd7d1111e6c6e30b8e37690696638b3596f06ac52b84a838a2990a99ad61",
+  "gpu_calls": 0,
+  "training_loops": 0
+}

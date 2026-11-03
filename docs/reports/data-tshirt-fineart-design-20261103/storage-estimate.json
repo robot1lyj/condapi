@@ -1,0 +1,149 @@
+{
+  "scope": "Read-only ABC-130K LeRobot train T-shirt task storage estimate; no video payload downloaded or decoded; not a visual quality audit",
+  "source_repo": "lerobot/abc_130k_v3_train",
+  "source_hf_revision": "68651e4929d9fb00f798937b2d62617cab5c771d",
+  "mirror_revision": "5b1e1b0e4384922c118b0fd4a68d803feea37d73",
+  "format": {
+    "fps": 30,
+    "cameras": 3,
+    "resolution": [
+      224,
+      224
+    ],
+    "codec": "AV1",
+    "state_dimensions": 14,
+    "action_dimensions": 14
+  },
+  "method": "Bounded HTTP Range requests read MP4 atom headers and moov sample tables only; sum stsz video sample bytes by stts/ctts timestamps within source episode interval. Per-request timeout 20 s, exact206 validation, no long retries.",
+  "evidence_files": [
+    "storage-probe.json",
+    "storage-probe-long.json",
+    "storage-probe-long-late.json"
+  ],
+  "sample": {
+    "episodes": 9,
+    "cameras_probed": 27,
+    "unique_seconds": 1798.2,
+    "compressed_video_payload_bytes_in_selected_intervals": 341436619,
+    "metadata_network_bytes": 7706467,
+    "all_sample_counts_match_metadata_length": true,
+    "extra_preroll_payload_bytes": 0,
+    "episode_summaries": [
+      {
+        "episode": 4201,
+        "seconds": 90.0,
+        "three_camera_payload_bytes": 16251428,
+        "three_camera_bytes_per_second": 180571.42222222223,
+        "estimated_video_10h_decimal_GB": 6.5005712
+      },
+      {
+        "episode": 50304,
+        "seconds": 90.03333333333333,
+        "three_camera_payload_bytes": 26620620,
+        "three_camera_bytes_per_second": 295675.15734912996,
+        "estimated_video_10h_decimal_GB": 10.644305664568678
+      },
+      {
+        "episode": 100500,
+        "seconds": 90.0,
+        "three_camera_payload_bytes": 29422207,
+        "three_camera_bytes_per_second": 326913.4111111111,
+        "estimated_video_10h_decimal_GB": 11.7688828
+      },
+      {
+        "episode": 19142,
+        "seconds": 150.0,
+        "three_camera_payload_bytes": 25989531,
+        "three_camera_bytes_per_second": 173263.54,
+        "estimated_video_10h_decimal_GB": 6.23748744
+      },
+      {
+        "episode": 19268,
+        "seconds": 210.16666666666666,
+        "three_camera_payload_bytes": 37379680,
+        "three_camera_bytes_per_second": 177857.31958762888,
+        "estimated_video_10h_decimal_GB": 6.402863505154639
+      },
+      {
+        "episode": 1155,
+        "seconds": 400.43333333333334,
+        "three_camera_payload_bytes": 70184802,
+        "three_camera_bytes_per_second": 175272.12686256555,
+        "estimated_video_10h_decimal_GB": 6.309796567052359
+      },
+      {
+        "episode": 92905,
+        "seconds": 149.96666666666667,
+        "three_camera_payload_bytes": 30091890,
+        "three_camera_bytes_per_second": 200657.19048677484,
+        "estimated_video_10h_decimal_GB": 7.223658857523894
+      },
+      {
+        "episode": 86887,
+        "seconds": 210.23333333333332,
+        "three_camera_payload_bytes": 39125694,
+        "three_camera_bytes_per_second": 186106.04407800856,
+        "estimated_video_10h_decimal_GB": 6.699817586808309
+      },
+      {
+        "episode": 109548,
+        "seconds": 407.3666666666667,
+        "three_camera_payload_bytes": 66370767,
+        "three_camera_bytes_per_second": 162926.3570902545,
+        "estimated_video_10h_decimal_GB": 5.865348855249162
+      }
+    ]
+  },
+  "ten_hours": {
+    "unique_seconds": 36000,
+    "frames_per_camera": 1080000,
+    "total_rgb_frames": 3240000,
+    "sample_weighted_video_decimal_GB": 6.835567947947949,
+    "sample_episode_min_video_decimal_GB": 5.865348855249162,
+    "sample_episode_max_video_decimal_GB": 11.7688828,
+    "raw_fp32_state_plus_action_bytes": 120960000,
+    "suggested_net_dataset_decimal_GB_range": [
+      6,
+      13
+    ],
+    "suggested_net_dataset_budget_decimal_GB": 15
+  },
+  "download_cache": {
+    "whole_source_video_files_in_sample_bytes": 3279074154,
+    "selected_payload_bytes": 341436619,
+    "sample_whole_shards_to_selected_payload_ratio": 9.603756514470406,
+    "interpretation": "Source MP4 shards contain multiple episodes/tasks. Whole-shard downloads/cache can exceed final task-only bytes by several-fold; this sample uses 3.279 GB of source shards for 0.341 GB of selected episode payload. This ratio is not a guarantee for a 10h selection because shard reuse matters."
+  },
+  "workspace_budget": {
+    "range_read_or_reuse_source_cache_decimal_GB": [
+      30,
+      50
+    ],
+    "retain_scattered_full_shards_plus_derived_decimal_GB": [
+      200,
+      200
+    ],
+    "excludes": [
+      "model weights",
+      "training checkpoints",
+      "existing FLORA model cache",
+      "uncompressed RGB/PNG caches"
+    ],
+    "note": "The initial 80–120GB allowance is superseded by exact final-candidate source-path metadata: source cache train106.64GB; train+dev116.99GB; train+dev+reserve137.16GB. Reserve 200GB free workspace for the all-three source cache + ~20GB compressed derivative + temporary files/headroom; weights/checkpoints excluded.",
+    "superseded_by_final_candidate_manifest": "/tmp/condapi-tshirt-design-20261103/storage-source-shards.json"
+  },
+  "annotation": {
+    "preferred": "Window manifests referencing episode ID + source timestamps; keep no permanent duplicated clips by default. Annotation JSON/JSONL is negligible next to video. If saving overlapping clips, account for measured clip durations and overlap independently.",
+    "windows_110s_stride_100s_duration_expansion_approx": 1.1
+  },
+  "raw_native_mcap": {
+    "measured": false,
+    "conclusion": "Do not substitute this LeRobot estimate for high-resolution native MCAP. Cameras, resolution, compression and extra streams differ; exact T-shirt native size requires a native file manifest."
+  },
+  "limitations": [
+    "9 metadata samples covering about 30min; not random/stratified by all visual conditions.",
+    "No pixel/video payload was inspected; cannot conclude task identity/visual quality from sample tables.",
+    "MP4 container and Parquet metadata overhead not directly measured; included conservatively in 15GB net planning allowance.",
+    "No raw native MCAP files were probed."
+  ]
+}

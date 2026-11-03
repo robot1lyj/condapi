@@ -1,5 +1,11 @@
 # 03 · 训练与评估
 
+## FineART T恤10h训练准备（2026-11-03）
+
+用户授权先在Thor准备T恤数据/FLORA子任务，并建立FineART配置；训练服务器维护中，本轮不访问服务器或启动训练。独立原生模板为[FineART full-FT配置](../configs/native/fineart-tshirt-10h.json)，固定公开FineART checkpoint与LeRobot版本，绝对14D/H50、train-only QUANTILES、30/70子任务recipe、FAST offset128；不复用OpenPI训练入口、delta或norm。30k步、每进程batch8、LR1e-5仅为资源未验算草案，分布式拓扑尚未指定。
+
+配置状态为`PREPARATION_NOT_TRAINING_READY`。标准库[解析器](../scripts/prepare_fineart_tshirt_training.py)可做静态检查；真实数据发布、单一语言时间线或审计过的小UNKNOWN原生空列回退、分组隔离、统计/FAST与文本长度回执、固定权重和tokenizer快照齐备后才能生成原生可运行JSON。它不导入模型或启动训练。独立29集dev尚未接入原生离线评估，不用随机`eval_split`冒充显式dev。完整合同与后续入口归[FineART训练说明](reference/fineart_tshirt_training.md)，数据与Thor执行状态归[本轮数据报告](reports/data-tshirt-fineart-design-20261103/README.md)。
+
 ## 服务器产物保留状态（2026-10-29）
 
 按用户明确授权，服务器乐高10h、专项10k整个run目录及XR-1的runs目录已删除；乐高50h只保留200000（含）、205000至240000每5000步及241000共10份，metrics保留。27份旧CUDA转储也已删除，包括下文2598/2600的原生GPU core，已有分析/哈希/报告仍保存，但不能再从这些服务器原路径复读转储。当前耳机2637的输出、114000/params启动来源、数据/norm与训练合同未改；未启动新训练或改训练配方。删除前后清单和保留身份见[存储清理回执](reports/server-storage-20261029/README.md)。下文训练过程为历史证据，不表示已删除的服务器产物仍可用。

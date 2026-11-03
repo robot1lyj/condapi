@@ -1,0 +1,322 @@
+{
+  "pilot_exit": "0",
+  "pilot_count": 12,
+  "frames": 58268,
+  "seconds": 1942.2666666666667,
+  "audit": "recorded full-decode frame counts checked against parent length; current three-camera artifact SHA256 verified; no repeated full decode",
+  "free_bytes": 391389200384,
+  "episodes": [
+    {
+      "id": 13347,
+      "pool": "train",
+      "length": 4089,
+      "status": "PREPARED_REVIEW_PENDING",
+      "training_ready": false,
+      "task_success": "NOT_REVIEWED",
+      "review_flags": [],
+      "cameras": {
+        "top": {
+          "frames": 4089,
+          "sha256": "0f9a07c020e575801783e91e394bda52e642207baef779dd6a4f730a6737aec5",
+          "offset_s": 5.684341886080802e-14
+        },
+        "left_wrist": {
+          "frames": 4089,
+          "sha256": "d4707c1e1c3f23084bc0a9439c3e5182cf0225c817ae0b6ba6bb9566a43f5c0e",
+          "offset_s": 4.547473508864641e-13
+        },
+        "right_wrist": {
+          "frames": 4089,
+          "sha256": "171c089aa8e35821dae4dc8bc6ad48f615d3988ce467b6bfd3a1956a2c568402",
+          "offset_s": 4.547473508864641e-13
+        }
+      }
+    },
+    {
+      "id": 21157,
+      "pool": "train",
+      "length": 2553,
+      "status": "PREPARED_REVIEW_PENDING",
+      "training_ready": false,
+      "task_success": "NOT_REVIEWED",
+      "review_flags": [],
+      "cameras": {
+        "top": {
+          "frames": 2553,
+          "sha256": "6cd20d08624127b075377370c955ba257c3f22e19fd34321db5ecbe240033dd6",
+          "offset_s": 0.0
+        },
+        "left_wrist": {
+          "frames": 2553,
+          "sha256": "1cd65c73731437e68e3a9b6b36111fed3c5744e50f09482332f4cc53954d2ba8",
+          "offset_s": 0.0
+        },
+        "right_wrist": {
+          "frames": 2553,
+          "sha256": "1226a0f090e9c0da96864fea29fce6b7f8c81752d45986a1a363823ea08b3ab8",
+          "offset_s": 0.0
+        }
+      }
+    },
+    {
+      "id": 22039,
+      "pool": "train",
+      "length": 4777,
+      "status": "PREPARED_REVIEW_PENDING",
+      "training_ready": false,
+      "task_success": "NOT_REVIEWED",
+      "review_flags": [],
+      "cameras": {
+        "top": {
+          "frames": 4777,
+          "sha256": "328e06d393091d2e71ca91903d1409bb78f74ec75772dcd410c2b5711d5a4cfb",
+          "offset_s": 0.0
+        },
+        "left_wrist": {
+          "frames": 4777,
+          "sha256": "044d4e66d7175e91246ed70690f72b13299bb0e788f0718f4768b7cd739a1acb",
+          "offset_s": 0.0
+        },
+        "right_wrist": {
+          "frames": 4777,
+          "sha256": "80edf44d5627f9e05b269a08f68765ffcecd011569cf141d2dc1f071a5424974",
+          "offset_s": 0.0
+        }
+      }
+    },
+    {
+      "id": 22919,
+      "pool": "train",
+      "length": 3098,
+      "status": "PREPARED_REVIEW_PENDING",
+      "training_ready": false,
+      "task_success": "NOT_REVIEWED",
+      "review_flags": [],
+      "cameras": {
+        "top": {
+          "frames": 3098,
+          "sha256": "974082ba0df18b4cc591fe32294d67a2834de90832bfbe749f691d9b323ed7a9",
+          "offset_s": 0.0
+        },
+        "left_wrist": {
+          "frames": 3098,
+          "sha256": "5c4e5bdc18bf2efe78a8596d8c80735c683e4207c66ee6be263edcc37e108d07",
+          "offset_s": 0.0
+        },
+        "right_wrist": {
+          "frames": 3098,
+          "sha256": "dab8afece5eca905c5b5eb41460e066b9f4eb492894bf1f728bd790e8c74a950",
+          "offset_s": 0.0
+        }
+      }
+    },
+    {
+      "id": 42704,
+      "pool": "train",
+      "length": 2058,
+      "status": "PREPARED_REVIEW_PENDING",
+      "training_ready": false,
+      "task_success": "NOT_REVIEWED",
+      "review_flags": [],
+      "cameras": {
+        "top": {
+          "frames": 2058,
+          "sha256": "20a7e9b73f7a077aa9bf54f6a35c794eaf62bab078a4eb441f43fc8f4382ede3",
+          "offset_s": 0.0
+        },
+        "left_wrist": {
+          "frames": 2058,
+          "sha256": "53bbafc2528fdb398a1279c40771f17365a86112c2ee61f2d4e1543ed5f494e1",
+          "offset_s": 0.0
+        },
+        "right_wrist": {
+          "frames": 2058,
+          "sha256": "a091e8bca5705170edf499dfae4cfa7d3264ab452f07bd29992cc191160cb605",
+          "offset_s": 0.0
+        }
+      }
+    },
+    {
+      "id": 47604,
+      "pool": "train",
+      "length": 5730,
+      "status": "PREPARED_REVIEW_PENDING",
+      "training_ready": false,
+      "task_success": "NOT_REVIEWED",
+      "review_flags": [],
+      "cameras": {
+        "top": {
+          "frames": 5730,
+          "sha256": "75b33fc495da4b049ad483b6a52d6411c824ef15d5e82b28db99d02738fbfdf0",
+          "offset_s": 0.0
+        },
+        "left_wrist": {
+          "frames": 5730,
+          "sha256": "43e5a820e85b7c6359e9cd310aa516f844f895d0b0fdf2297a19c249f8b0740f",
+          "offset_s": 0.0
+        },
+        "right_wrist": {
+          "frames": 5730,
+          "sha256": "0b5135843465d030a690c4124d50dda3cabfeca380dbdaa997b8d67419132982",
+          "offset_s": 0.0
+        }
+      }
+    },
+    {
+      "id": 69431,
+      "pool": "train",
+      "length": 1718,
+      "status": "PREPARED_REVIEW_PENDING",
+      "training_ready": false,
+      "task_success": "NOT_REVIEWED",
+      "review_flags": [],
+      "cameras": {
+        "top": {
+          "frames": 1718,
+          "sha256": "23ccd60969becfbf9fb5c857816e0e964d1744c9ebfbc3d2757b65454e811e12",
+          "offset_s": 0.0
+        },
+        "left_wrist": {
+          "frames": 1718,
+          "sha256": "566b6727d28bd3626e1187abd753643254bc483567450cf8462b7433d618fafe",
+          "offset_s": 0.0
+        },
+        "right_wrist": {
+          "frames": 1718,
+          "sha256": "e013b29ae4b3c99a4e42ba7dbc34c8e8c2d259304bb4337ddcf1180a9e496fa6",
+          "offset_s": 0.0
+        }
+      }
+    },
+    {
+      "id": 85871,
+      "pool": "train",
+      "length": 3749,
+      "status": "PREPARED_REVIEW_PENDING",
+      "training_ready": false,
+      "task_success": "NOT_REVIEWED",
+      "review_flags": [],
+      "cameras": {
+        "top": {
+          "frames": 3749,
+          "sha256": "11274f9e22f44d548597ff9aea4d2af94205664c8202a754d5fbc98e7d0864f5",
+          "offset_s": 0.0
+        },
+        "left_wrist": {
+          "frames": 3749,
+          "sha256": "3e1dbfc6e20c77acc6d51eb03d3f94e6c2a58485a2222473547f7d25f513ffcb",
+          "offset_s": 0.0
+        },
+        "right_wrist": {
+          "frames": 3749,
+          "sha256": "eb43fbabaff319828132bf4a9292ecdc7590fbf0fb778b743d262084e752e291",
+          "offset_s": 0.0
+        }
+      }
+    },
+    {
+      "id": 88416,
+      "pool": "train",
+      "length": 7219,
+      "status": "PREPARED_REVIEW_PENDING",
+      "training_ready": false,
+      "task_success": "NOT_REVIEWED",
+      "review_flags": [],
+      "cameras": {
+        "top": {
+          "frames": 7219,
+          "sha256": "119d44be07d2763585447eccb8996f3bffc93efefb1eb64b8a28b6c5d4bef4ac",
+          "offset_s": 0.0
+        },
+        "left_wrist": {
+          "frames": 7219,
+          "sha256": "db40dfaf1a467ee4246ff721afca92ae75675ef1daba44789884a5b8a94b48f9",
+          "offset_s": 0.0
+        },
+        "right_wrist": {
+          "frames": 7219,
+          "sha256": "f200dee2a273ce6e219a6134170102bbcdb4df3cd01def60226b1d672264bc0c",
+          "offset_s": 0.0
+        }
+      }
+    },
+    {
+      "id": 90913,
+      "pool": "train",
+      "length": 6465,
+      "status": "PREPARED_REVIEW_PENDING",
+      "training_ready": false,
+      "task_success": "NOT_REVIEWED",
+      "review_flags": [],
+      "cameras": {
+        "top": {
+          "frames": 6465,
+          "sha256": "062eb8feef727c6c015fd8c530965a24d90dc6729dbdb0642ba1a6c9367b250f",
+          "offset_s": 0.0
+        },
+        "left_wrist": {
+          "frames": 6465,
+          "sha256": "084bc613bc6240ea798a4da11db0d352a9607bc8faf318fbe9d8ba85b398e94a",
+          "offset_s": 0.0
+        },
+        "right_wrist": {
+          "frames": 6465,
+          "sha256": "5e95dd666759d2a4b2216de9360b6bd78aa5bfa886ec4f73b1baa47571f29534",
+          "offset_s": 0.0
+        }
+      }
+    },
+    {
+      "id": 126660,
+      "pool": "train",
+      "length": 15378,
+      "status": "PREPARED_REVIEW_PENDING",
+      "training_ready": false,
+      "task_success": "NOT_REVIEWED",
+      "review_flags": [],
+      "cameras": {
+        "top": {
+          "frames": 15378,
+          "sha256": "e1c49adf9532d7e0ade04bc5815441f679cd70bb477c6609ba39b7e26c600ac3",
+          "offset_s": 5.684341886080802e-14
+        },
+        "left_wrist": {
+          "frames": 15378,
+          "sha256": "143452e8d2c49928bcd641c7a856d6fcd3869f7856c63a8aed142d32f5e86c7f",
+          "offset_s": 5.684341886080802e-14
+        },
+        "right_wrist": {
+          "frames": 15378,
+          "sha256": "ca3252a0ff553a116cc64ed37062ec03c0d53688dbb9124d402a88416e99893f",
+          "offset_s": 5.684341886080802e-14
+        }
+      }
+    },
+    {
+      "id": 128691,
+      "pool": "train",
+      "length": 1434,
+      "status": "PREPARED_REVIEW_PENDING",
+      "training_ready": false,
+      "task_success": "NOT_REVIEWED",
+      "review_flags": [],
+      "cameras": {
+        "top": {
+          "frames": 1434,
+          "sha256": "a7273755e274e6f0c2e314d0f417fa8fb93b1b47b7c3ae8610751cdda571c733",
+          "offset_s": -5.684341886080802e-14
+        },
+        "left_wrist": {
+          "frames": 1434,
+          "sha256": "e45d3a54e2055bf7e8347aae44fc5b6333558d44a400cc30af4a47a57ea989dc",
+          "offset_s": -5.684341886080802e-14
+        },
+        "right_wrist": {
+          "frames": 1434,
+          "sha256": "79d04a51676fc7775bb9f7457174f636cb92e0fbe331ea12f5395bd1e308ab7f",
+          "offset_s": -5.684341886080802e-14
+        }
+      }
+    }
+  ]
+}

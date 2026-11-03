@@ -1,0 +1,128 @@
+{
+  "pilot_prepare_exit": "0",
+  "pilot_windows_first_exit": "1",
+  "pilot_windows_retry_exit": "0",
+  "pilot_v1_manifest_sha256": "b764196af6fe57d217d3a55e855ac5fa6a038549ccdc44960576a5afa53076b4",
+  "pilot_v2_manifest_sha256": "215f1aa8e0ec6ba637ce03b81f95ff44877e1ffd54e16a6bebe92196ffd1a2f8",
+  "pilot_parents": 12,
+  "pilot_annotation_windows": 23,
+  "original_parent_frames": 58268,
+  "annotation_frames_with_context": 61568,
+  "max_annotation_frames": 3600,
+  "retained_failed_partials": [
+    "/data/tshirt-fineart-20261103/annotation/pilot-v2/tshirt-train-013347-w000/top.partial.mp4.retained-59dc8ad657b14651a54a9cb991220cb4"
+  ],
+  "ab": {
+    "schema_version": "condapi_flora_ab_manifest_v1",
+    "frozen": true,
+    "created_unix_s": 1793677982.1974103,
+    "manifest": "/data/tshirt-fineart-20261103/annotation/ab-two-v1.jsonl",
+    "manifest_sha256": "8e5f4625a239dc8086e4f36151e51ec08feaf1342ad4fa132f06ac068b87ce9d",
+    "second_manifest": "/data/tshirt-fineart-20261103/annotation/ab-second-v1.jsonl",
+    "second_manifest_sha256": "54b4eed6db431fed662a9a7a700c4ad76ca4a76ccd2fb502fd0e8be180fc71de",
+    "sources": [
+      {
+        "manifest": "/data/tshirt-fineart-20261103/annotation/pilot-v1/jobs.jsonl",
+        "sha256": "b764196af6fe57d217d3a55e855ac5fa6a038549ccdc44960576a5afa53076b4"
+      },
+      {
+        "manifest": "/data/tshirt-fineart-20261103/annotation/pilot-v2/jobs.jsonl",
+        "sha256": "215f1aa8e0ec6ba637ce03b81f95ff44877e1ffd54e16a6bebe92196ffd1a2f8"
+      }
+    ],
+    "jobs": [
+      {
+        "id": "tshirt-train-128691-w000",
+        "job": {
+          "id": "tshirt-train-128691-w000",
+          "video": "/data/tshirt-fineart-20261103/annotation/pilot-v1/tshirt-train-128691-w000/top.mp4",
+          "left_wrist": "/data/tshirt-fineart-20261103/annotation/pilot-v1/tshirt-train-128691-w000/left_wrist.mp4",
+          "right_wrist": "/data/tshirt-fineart-20261103/annotation/pilot-v1/tshirt-train-128691-w000/right_wrist.mp4",
+          "profile": "yam",
+          "instruction": "fold and stack the t-shirts"
+        },
+        "input_sha256_by_jsonl_key": {
+          "video": "accee46fe72273e59d3034214b4bc9c3edd5451859e190211781efd626d81953",
+          "left_wrist": "520dcad940b35b89a97f1e8b5fe89c68da76ba3d117adfb8c8c7ef2b9ae7bf93",
+          "right_wrist": "d4f43e385d130cb49ea50576378fd81fcf02d3e964c5392752d4e255c24f77ca"
+        }
+      },
+      {
+        "id": "tshirt-train-069431-w000",
+        "job": {
+          "id": "tshirt-train-069431-w000",
+          "video": "/data/tshirt-fineart-20261103/annotation/pilot-v2/tshirt-train-069431-w000/top.mp4",
+          "left_wrist": "/data/tshirt-fineart-20261103/annotation/pilot-v2/tshirt-train-069431-w000/left_wrist.mp4",
+          "right_wrist": "/data/tshirt-fineart-20261103/annotation/pilot-v2/tshirt-train-069431-w000/right_wrist.mp4",
+          "profile": "yam",
+          "instruction": "fold and stack the t-shirts"
+        },
+        "input_sha256_by_jsonl_key": {
+          "video": "23ccd60969becfbf9fb5c857816e0e964d1744c9ebfbc3d2757b65454e811e12",
+          "left_wrist": "e4da77f1cf892558c06669f89ce88922a4e956e493fe936522feab0f3684a1cc",
+          "right_wrist": "951fa07eb5e62c49ff7affe95c61692ceb60f716fbe6915cd3fd381c2109271a"
+        }
+      }
+    ],
+    "purpose": "functional/native-output parity; one-job comparison cannot measure resident-load reuse",
+    "contention_note": "all-candidate CPU download/preparation runs concurrently; root-managed baseline and GDN build were reported concurrent at dispatch; these are not uncontended speed measurements"
+  },
+  "all_prepare_exit": null,
+  "all_prepare_launch": {
+    "wrapper_pid": 2658,
+    "child_pid": 2664,
+    "started_unix_s": 1793677603.488665,
+    "command": [
+      "/opt/flora/bin/python",
+      "/data/tshirt-fineart-20261103/tools/prepare_tshirt_fineart.py",
+      "--root",
+      "/data/tshirt-fineart-20261103/dataset",
+      "--train-manifest",
+      "/data/tshirt-fineart-20261103/input/train-candidate-episodes.json",
+      "--dev-manifest",
+      "/data/tshirt-fineart-20261103/input/dev-candidate-episodes.json",
+      "--reserve-manifest",
+      "/data/tshirt-fineart-20261103/input/reserve-candidate-episodes.json",
+      "--source-metadata",
+      "/data/tshirt-fineart-20261103/input/storage-source-shards-path-metadata.json",
+      "--pilots",
+      "/data/tshirt-fineart-20261103/input/pilot-12-metadata-candidates.json",
+      "--min-free-gb",
+      "30"
+    ],
+    "CUDA_VISIBLE_DEVICES": "",
+    "OMP_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1"
+  },
+  "all_prepare_progress": {
+    "status": "PARTIAL_PREPARATION_NOT_TRAINING_READY",
+    "training_ready": false,
+    "task_success": "NOT_REVIEWED",
+    "processed": 30,
+    "expected": 411,
+    "selected_remaining": 381,
+    "counts": {
+      "PREPARED_REVIEW_PENDING": 30
+    },
+    "plan_sha256": "15dfa406629a5551328434280e90a622ef50c25d2e25426942f6600d4fe96a70",
+    "audit_sha256": "3ed96f9170d090799a8a44a606886aacc8658d0c0479810d1d6d26ef58cb76eb",
+    "updated_unix_s": 1793677987.0607615
+  },
+  "all_prepare_processes": [
+    {
+      "role": "wrapper_pid",
+      "pid": 2658,
+      "state": "running",
+      "nice": 10,
+      "ionice": "best-effort: prio 7"
+    },
+    {
+      "role": "child_pid",
+      "pid": 2664,
+      "state": "running",
+      "nice": 10,
+      "ionice": "best-effort: prio 7"
+    }
+  ],
+  "thor_window_tool_sha256": "7de05f4d23232aa22ff82cde18300384c8b36a9fea03463c6f1cbc809368e4ef"
+}

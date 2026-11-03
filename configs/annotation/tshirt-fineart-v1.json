@@ -1,0 +1,179 @@
+{
+  "schema_version": "condapi_fineart_annotation_contract_v1",
+  "contract_id": "tshirt-fineart-v1",
+  "status": "AUTOMATION_CONTRACT_RUNTIME_QUALITY_NOT_YET_VALIDATED",
+  "policy_loading": "plan reads this JSON; stores complete policy_contract and policy_source path/SHA256; apply revalidates the same policy version",
+  "training_ready": false,
+  "human_approval_required": false,
+  "scope": {
+    "task": "fold and stack the t-shirts",
+    "source_repo": "lerobot/abc_130k_v3_train",
+    "source_revision": "68651e4929d9fb00f798937b2d62617cab5c771d",
+    "fps": 30,
+    "keep_parent_episodes": true,
+    "raw_state_action_values": "unchanged absolute14D",
+    "task_success_default": "NOT_REVIEWED"
+  },
+  "models": {
+    "flora": {
+      "code_commit": "129a2ada74c526ee4692f3d1b111bea6ca19d5b7",
+      "official_prompt_modified": false,
+      "raw_outputs_modified": false
+    },
+    "selector": {
+      "model_id": "Qwen/Qwen3.5-9B",
+      "model_revision": "c202236235762e1c871ad0ccb60c8ee5ba337b9a",
+      "prompt_owner": "separate candidate-selector prompt; never overwrite Flora prompt",
+      "runtime_implementation_and_prompt_hash": "required in each decision envelope"
+    },
+    "training_target": {
+      "repo_id": "lerobot/fineart_vla_base",
+      "revision": "b6cf4faf2630f971dd390bc32365e9d9c330da8e",
+      "lerobot_commit": "f5c9bc02137c331b009eccd44ece6f11b62187a8"
+    }
+  },
+  "input_versioning": {
+    "snapshot_before_draft": ["lineage.json", "parent audit.jsonl"],
+    "relative_path_base": "freeze to new sibling filenames in each original directory; do not rewrite receipt paths or source record fields",
+    "immutable_batch": "one draft/plan binds a frozen batch; ongoing downloads/window preparation continue on their original files",
+    "change_action": "new source bytes, task policy or prompt produce a new version; never ignore hash mismatches"
+  },
+  "atomizer": {
+    "interval_semantics": "half-open integer parent frame intervals",
+    "local_seconds_to_frame": "ceil(seconds*30-1e-6); reject invalid bounds, never ask a model for timestamps",
+    "edges": ["0", "parent_length", "all valid raw parent_interval endpoints", "core_owned_interval endpoints", "window core boundaries"],
+    "context_event_bounds": "clip to the parent; retain raw unmodified interval in provenance",
+    "active_definition": "eligible raw label core_owned_interval covers the complete atom",
+    "eligible_label": "complete final caption with valid source binding and nonempty instruction; unknown/mistake/incomplete and invalid-source labels are excluded",
+    "required_invariants": ["positive atom length", "ordered atoms", "no gaps", "no overlaps", "exact parent coverage 0..length"],
+    "boundary_owner": "program only"
+  },
+  "candidates": {
+    "candidate_id_scope": "task-local C000/C001/...; compare IDs only within their task",
+    "caption_equivalence": "whitespace-only normalization: ' '.join(text.split()); exact case-sensitive equality; no synonym rewrite",
+    "active_candidate_limit": null,
+    "neighbor_max_distance_frames": 150,
+    "neighbor_max_distinct_captions": 4,
+    "neighbor_order": "temporal distance then stable raw-label ID",
+    "context_only_labels": "retained as neighbor candidates and raw provenance; never become extra simultaneous native rows",
+    "include_UNKNOWN": true,
+    "allow_free_caption_in_selector": false,
+    "allow_free_boundary_in_selector": false
+  },
+  "routing": {
+    "single_eligible_active_caption": "RULE_SINGLE_ACTIVE",
+    "multiple_active_same_normalized_caption": "RULE_DUPLICATE_CAPTION",
+    "distinct_active_captions": "REQUEST_SELECTOR",
+    "no_eligible_active_caption": "REQUEST_SELECTOR",
+    "window_seam": "REQUEST_SELECTOR with reason_codes including WINDOW_SEAM; never assume mechanical core coverage validates semantic continuity",
+    "invalid_source_binding": "SOURCE_REPAIR_QUEUE; do not repair video identity by choosing a label",
+    "default_previous_label": "FORBIDDEN",
+    "fixed_folding_order": "FORBIDDEN; respreading, recovery and repeated attempts are valid goals",
+    "infer_stack_or_task_success_from_stage": "FORBIDDEN"
+  },
+  "window_seam": {
+    "boundary_source": "internal boundaries between window cores in the same parent",
+    "radius_frames": 150,
+    "context_conflict_trigger": "within boundary +/-150 frames, valid raw parent_intervals from different windows fully cover the atom with different normalized captions; selector required even if only one is core-active",
+    "adjacent_goal_trigger": "atom directly touches a core boundary and the two sides have different valid core-owned normalized captions",
+    "same_caption": "rule resolution and adjacent merge remain allowed",
+    "task_fields": ["reason_codes", "seam_boundaries"],
+    "scope_note": "plan.seam_scope must distinguish mechanical frame coverage from semantically validated window seams"
+  },
+  "evidence": {
+    "source": "actual parent video paths, SHA256, offset_s and parent_frame_zero_source_index",
+    "sampling": "atom first/middle/last parent frame plus30 frames before/after, clipped to parent",
+    "context_frames_each_side": 30,
+    "cameras": ["top", "left_wrist", "right_wrist"],
+    "planned_descriptor_fields": ["frame_id", "camera", "parent_frame_index", "source_frame_index", "video_sha256"],
+    "inference_receipt_evidence_fields": ["frame_id", "path", "sha256"],
+    "rule_route": "raw-label/source receipts are sufficient; no fictional VLM call receipt",
+    "selector_route": "bind consumed evidence IDs and actual image file hashes; apply rehashes them"
+  },
+  "selector_io": {
+    "plan_schema_version": "condapi_fineart_auto_timeline_v1",
+    "decision_schema_version": "condapi_fineart_selector_decisions_v1",
+    "transport": "JSON envelope with tasks[]",
+    "task_required_fields": ["task_id", "atom_id", "from_frame", "to_frame", "active_candidate_ids", "neighbor_candidate_ids", "candidates", "evidence", "evidence_frame_ids", "task_sha256"],
+    "task_evidence_fields": ["videos", "parent_frame_indices", "frames"],
+    "candidate_required_fields": ["candidate_id", "caption", "source_label_ids", "origin"],
+    "task_hash": "SHA256 of task without task_sha256; json.dumps(sort_keys=True,separators=(',',':'),ensure_ascii=False,allow_nan=False).encode('utf-8')",
+    "decision_envelope_required_fields": ["schema_version", "task_manifest_sha256", "selector", "decisions"],
+    "selector_identity_required_fields": ["model_id", "model_revision", "implementation_version", "prompt_sha256"],
+    "decision_required_fields": ["task_id", "atom_id", "task_sha256", "selected_id", "evidence_frame_ids", "input_video_sha256", "inference_receipt"],
+    "selected_id": "one offered candidate_id or literal UNKNOWN",
+    "generation_constraint": "token Trie restricts output to the offered ID strings plus UNKNOWN; wrapper emits JSON and program derives caption/bounds",
+    "manifest_hash": "SHA256 of exact input plan file bytes",
+    "receipt": "path+SHA256; binds selector identity, task hash, source video hashes, selected_id and actual evidence images",
+    "cache_reuse": "only same task_sha256, selector model/revision, implementation/prompt and evidence hashes; rebind envelope to current plan bytes",
+    "invalid_response": "record retry/UNKNOWN; never parse a free caption or use nearest valid ID as a silent fallback"
+  },
+  "auxiliary_actions": {
+    "storage": "sidecar only; retain all raw concurrent labels and their source IDs",
+    "possible_roles": ["hold", "support", "smooth", "unselected_or_unresolved"],
+    "native_language_effect": "none; exactly one primary instruction active per atom",
+    "context_dependent_roles": "hold/smooth can be the primary goal when evidence makes them the current task; no global keyword ban"
+  },
+  "merge": {
+    "adjacent_only": true,
+    "equivalence": "same selected whitespace-normalized caption; task-local C000 IDs alone are not a cross-atom key",
+    "cross_parent_episode": false,
+    "preserve": ["all atom IDs", "task-local selected IDs", "raw source-label references", "decision routes", "evidence and receipt hashes"]
+  },
+  "quality_grades": {
+    "RULE_SINGLE_ACTIVE": {"resolved": true, "meaning": "one eligible active caption; rule accepted, not independently verified semantic accuracy"},
+    "RULE_DUPLICATE_CAPTION": {"resolved": true, "meaning": "equivalent active captions grouped deterministically; all raw references retained"},
+    "VLM_SELECTED_CANDIDATE": {"resolved": true, "meaning": "constrained candidate choice with source/evidence/identity receipts"},
+    "LOCALLY_REPAIRED": {"resolved": true, "meaning": "local reannotation registered new candidate provenance and a new versioned selection decision"},
+    "UNKNOWN": {"resolved": false, "meaning": "local evidence or label repair pending; cannot be emitted as an instruction"},
+    "SOURCE_REPAIR_PENDING": {"resolved": false, "meaning": "missing/incomplete/incorrectly bound source assets; selector cannot certify source identity"}
+  },
+  "unknown_repair": {
+    "scope": "only unresolved atoms with bounded neighbor context; unrelated resolved episodes continue",
+    "first": "expand local evidence/context and rerun constrained selector with a newly hashed task",
+    "second": "local caption reannotation as a separate stage; register a new candidate/source receipt, then rerun selector; selector itself still cannot invent caption/boundary",
+    "budget_draft": {"selector_rounds_per_atom": 2, "local_reannotation_rounds_per_atom": 1},
+    "remaining": "small explicit exception queue for agent visual review or stronger model; no default user approval step",
+    "never": ["delete UNKNOWN and carry previous text forward", "assign UNKNOWN as native subtask", "cut an episode into annotation atoms for training", "mark entire dataset ready because temporal coverage is100%"]
+  },
+  "unknown_anchor_fallback": {
+    "enabled_by_default": false,
+    "default_mode": "strict-parent",
+    "mode": "native-empty-anchor-fallback",
+    "max_parent_unknown_fraction": 0.02,
+    "max_contiguous_unknown_frames": 30,
+    "threshold_basis": "initial engineering routing thresholds; not a paper result or calibrated semantic accuracy guarantee",
+    "language_persistent": [],
+    "language_events": [],
+    "require_nonempty_original_task": true,
+    "eligible_unknown_reason": "explicit hash-bound selector UNKNOWN only; missing decisions and hard source issues do not qualify",
+    "normal_anchor_rows": "retain the full known persistent timeline; clear both language columns only at explicitly recorded UNKNOWN anchor frames",
+    "native_effect": "task-only low_level action supervision with no subtask text targets; flow and enabled FAST action loss remain native",
+    "forbidden": ["null-content subtask tombstones", "putting UNKNOWN into content", "dropping action/video frames", "cutting episodes or H50", "reporting effective language coverage as1.0"],
+    "coverage_metrics": ["action_coverage", "effective_language_coverage", "unknown_anchor_frames", "per_parent_fraction", "max_contiguous_unknown_frames"],
+    "materialization_required": true,
+    "materialization_audit": "scan every row of actual derived v3 parquet; verify empty columns exactly at recorded UNKNOWN anchors, normal timelines elsewhere, and unchanged raw state/action/timestamp identity",
+    "status": "NOT_MATERIALIZED_NOT_TRAINING_READY"
+  },
+  "native_adapter": {
+    "validator": "scripts/prepare_fineart_subtask_review.py:validate_review",
+    "review_method": "automatic_candidate_selector",
+    "reviewer": "actual pipeline/selector implementation identity",
+    "interval_status": "APPROVED is a machine-generated semantic-resolution result, not human/user approval",
+    "issue_resolutions": "program writes rule/selector/repair decisions and receipt references for every source issue",
+    "timestamps": "actual complete parquet timestamp column with source SHA256; never synthesize frame/30 as if read from data",
+    "rows": {"role": "assistant", "style": "subtask", "content": "selected candidate caption from program", "timestamp": "actual timestamp at interval start frame", "camera": null, "tool_calls": null},
+    "language_events": [],
+    "full_parent_coverage_before_export": true,
+    "unresolved_parent": "strict-parent remains pending; explicit small-gap fallback may retain the parent under unknown_anchor_fallback bounds, using native per-row empty-column task fallback rather than a new loss mask",
+    "partial_release": "explicit included/pending parent lists and corresponding hashed subset artifacts; retain full original plan/draft references",
+    "success_status": "LANGUAGE_ROWS_VALIDATED_DATASET_RELEASE_PENDING",
+    "training_ready": false
+  },
+  "monitoring": {
+    "automatic_counters": ["atoms and hours by quality grade", "raw overlaps/gaps", "selector/UNKNOWN/repair rates", "unresolved parent counts", "invalid IDs/receipts", "coverage and native row count", "latency and cache hit rate"],
+    "semantic_audit": "stratified automatic visual monitoring across duration strata and rule/selector grades; set runtime budget after measurement",
+    "interpretation": "unique complete frame coverage is a program invariant, not a measured semantic accuracy score"
+  },
+  "regression_reference": "tshirt-fineart-v1.regression.json"
+}

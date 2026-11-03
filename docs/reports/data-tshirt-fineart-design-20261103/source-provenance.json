@@ -1,0 +1,63 @@
+{
+  "train_repo": "lerobot/abc_130k_v3_train",
+  "train_revision": "68651e4929d9fb00f798937b2d62617cab5c771d",
+  "val_repo": "lerobot/abc_130k_v3_val",
+  "val_revision": "46ca817c39d3df08115a75c31b3cd3867e3d875a",
+  "episode_metadata_sha256_verified_against_pinned_hub": true,
+  "files": [
+    {
+      "bytes": 86269609,
+      "sha256": "de3740e191fbcbf2b2a3e97a01276d543f0ef23dbb1eb14e5c41cbd804a17857",
+      "repo": "lerobot/abc_130k_v3_train",
+      "revision": "68651e4929d9fb00f798937b2d62617cab5c771d",
+      "path": "meta/episodes/chunk-000/file-000.parquet"
+    },
+    {
+      "bytes": 86541350,
+      "sha256": "1e42fcf9d91a84f948fc398332c8c82ce44cbce0074a4f2528aba84cc29810f1",
+      "repo": "lerobot/abc_130k_v3_train",
+      "revision": "68651e4929d9fb00f798937b2d62617cab5c771d",
+      "path": "meta/episodes/chunk-000/file-001.parquet"
+    },
+    {
+      "bytes": 86797367,
+      "sha256": "0fce0ccdf597b8a33ea328d0183ac6898288c61b89f4cb7a1a055648a78310f0",
+      "repo": "lerobot/abc_130k_v3_train",
+      "revision": "68651e4929d9fb00f798937b2d62617cab5c771d",
+      "path": "meta/episodes/chunk-000/file-002.parquet"
+    },
+    {
+      "bytes": 34678117,
+      "sha256": "5201f7673e89d839c35832b5f5bd22153609bf7b2d542602eb89fc30452d3df4",
+      "repo": "lerobot/abc_130k_v3_train",
+      "revision": "68651e4929d9fb00f798937b2d62617cab5c771d",
+      "path": "meta/episodes/chunk-000/file-003.parquet"
+    },
+    {
+      "bytes": 4335555,
+      "sha256": "d1aaf934954220b60a8d2dcc22481acba57cc1a34ba473b74595027650a7b6e8",
+      "repo": "lerobot/abc_130k_v3_val",
+      "revision": "46ca817c39d3df08115a75c31b3cd3867e3d875a",
+      "path": "meta/episodes/chunk-000/file-000.parquet"
+    },
+    {
+      "bytes": 7033,
+      "sha256": "2631a2acd513957599649e8a844e844e9a57e41555f986eec35e29a715d14dad",
+      "repo": "lerobot/abc_130k_v3_train",
+      "revision": "68651e4929d9fb00f798937b2d62617cab5c771d",
+      "path": "meta/tasks.parquet"
+    }
+  ],
+  "scope": "Metadata-only inventory; no video or task-success certification",
+  "candidate_inventory_sha256": "fcf27732bdad16052d8f10c7b8bb53610bea2356d30aea8e1fd2b65643f3805e",
+  "fineart": {
+    "repo": "lerobot/fineart_vla_base",
+    "revision": "b6cf4faf2630f971dd390bc32365e9d9c330da8e",
+    "lerobot_commit": "f5c9bc02137c331b009eccd44ece6f11b62187a8"
+  },
+  "flora": {
+    "repo": "NVIDIA/Flora",
+    "commit": "129a2ada74c526ee4692f3d1b111bea6ca19d5b7",
+    "official_code_modified": false
+  }
+}
