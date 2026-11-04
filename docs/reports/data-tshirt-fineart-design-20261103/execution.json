@@ -1,5 +1,5 @@
 {
-  "observed_utc": "2026-11-03T06:04:32.950479+00:00",
+  "observed_utc": "2026-11-04T10:49:08+00:00",
   "device": "Thor aarch64",
   "task_root": "/home/wuyan-lyj/thor/flora/data/tshirt-fineart-20261103",
   "server_accessed": false,
@@ -650,5 +650,83 @@
     },
     "resume_check": "Actual existing oneclip summary, ownership, source parent metadata and derived Parquet SHA revalidated with the v3 embedded protocol: VERIFIED",
     "tool_versions": "formal-v1 GPU demo preserved; v3 Python tools have identical AST after formatting; host resume validation/pointer added separately"
+  },
+  "latest_performance_snapshot": {
+    "observed_cst": "2026-11-04T18:51:51+08:00",
+    "pipeline": {
+      "status": "RUNNING",
+      "stage": "ANNOTATING_train-dev-gdn-v1",
+      "tempseg_windows_complete": 510,
+      "captioner_windows_complete": 12,
+      "captioner_windows_total": 510
+    },
+    "captioner_generate_calls": {
+      "sample_scope": "all caption-stage calls logged through the snapshot, including pilot and resumed train/dev; one incomplete call is included in the aggregate.",
+      "calls": 375,
+      "complete_calls": 374,
+      "generated_tokens": 6271,
+      "elapsed_s": 7117.61,
+      "effective_output_tokens_per_generation_second": 0.881,
+      "recent_50_calls": {
+        "calls": 50,
+        "effective_output_tokens_per_generation_second": 0.985,
+        "median_generation_wall_s": 18.81
+      },
+      "median_generated_tokens_per_call": 15,
+      "median_generation_wall_s": 17.88,
+      "peak_allocated_gib": 65.828,
+      "limitation": "generate wall time includes visual encoding, prompt prefill and decoding; pure decoder-only tokens/s is not instrumented.",
+      "median_effective_tokens_per_second": 0.945,
+      "median_input_tokens": 14099
+    },
+    "current_gpu_observation": {
+      "gpu_utilization_percent": 98,
+      "temperature_c": 76,
+      "flora_process_memory_mib": 71627,
+      "observed_cst": "2026-11-04T18:49:08+08:00"
+    },
+    "implemented_acceleration": [
+      "TempSeg and Captioner stay resident across the batch; completed stages/checkpoints are reused on recovery.",
+      "FLA 0.6.0 and causal-conv1d 1.7.0 Gated DeltaNet overlay; BF16 main model and native FP32 GDN/LoRA values retained."
+    ],
+    "gdn_ab_reference": {
+      "captioner_generation_median_s_baseline": 33.791,
+      "captioner_generation_median_s_candidate": 19.849,
+      "matched_input_calls": 9,
+      "final_supervision_fields_equal": true,
+      "raw_audit_exact_parity": false,
+      "interpretation": "Small matched A/B; one extra adaptive retry candidate in raw audit, so this is not a full-batch quality or strict parity claim."
+    },
+    "next_candidate": "In Flora caption_three, each segment calls frames_for separately; decode_selected reopens each of 3 videos and decodes from frame 0 to that segment’s highest requested frame. A one-pass union of requested frame IDs, with the exact existing canonical RGB and mosaic functions, may reduce repeated CPU decode while preserving the model inputs.",
+    "cpu_decode_examples": [
+      {
+        "window_id": "tshirt-train-000779-w001",
+        "segments": 4,
+        "union_frames": 187,
+        "max_source_index": 562,
+        "current_prefix_decode_iterations_per_camera": 1751,
+        "one_pass_prefix_iterations_per_camera": 563,
+        "estimated_iteration_ratio": 3.11
+      },
+      {
+        "window_id": "tshirt-train-000137-w000",
+        "segments": 13,
+        "union_frames": 675,
+        "max_source_index": 2793,
+        "current_prefix_decode_iterations_per_camera": 20125,
+        "one_pass_prefix_iterations_per_camera": 2794,
+        "estimated_iteration_ratio": 7.2
+      },
+      {
+        "window_id": "tshirt-train-002051-w000",
+        "segments": 11,
+        "union_frames": 526,
+        "max_source_index": 1732,
+        "current_prefix_decode_iterations_per_camera": 11973,
+        "one_pass_prefix_iterations_per_camera": 1733,
+        "estimated_iteration_ratio": 6.91
+      }
+    ],
+    "cpu_decode_limit": "Frame-iteration ratios are static calculations from completed caption plans, not measured wall-time or end-to-end speedup. A future isolated candidate must preserve pixel and input-tensor digests on identical windows before use."
   }
 }
