@@ -56,7 +56,7 @@
 
 ### 默认自动化标注合同
 
-批量处理采用[自动化合同](../../configs/annotation/tshirt-fineart-v1.json)：`review_method=automatic_candidate_selector`。程序接受无冲突标签，独立VLM只处理需要选择的局部区间；不要求319集逐段由用户或人工批准。下面的review表是统一机器接口，规则/模型流水线可自动填写`APPROVED`和证据记录，agent视觉复核是少量异常的处理方式之一。当前合同固定I/O与质量等级；独立9B selector已在47.8s单条校准中自动解决两处冲突，并对0.5s空白返回UNKNOWN。新派生Parquet实测1434帧动作均保留，1419帧有效语言，15帧两语言列为空；非语言列及源metadata逐值保持。该98.95%是语言覆盖率，不是准确率，整体语义质量与跨长窗效果仍待分层抽样验证。
+批量处理采用[自动化合同](../../configs/annotation/tshirt-fineart-v1.json)：`review_method=automatic_candidate_selector`。程序接受无冲突标签，独立VLM只处理需要选择的局部区间；不要求319集逐段由用户或人工批准。下面的review表是统一机器接口，规则/模型流水线可自动填写`APPROVED`和证据记录，agent视觉复核是少量异常的处理方式之一。当前合同固定I/O与质量等级。对47.8s pilot 的派生 Parquet 回看后发现：selector v3 在两处冲突都选错了——11.5–16.5s 把“重新铺平”选成继续折叠，20.5–24s 把“整理近边”并入折叠远边；另有35–35.5s共15帧按保守策略返回 UNKNOWN。1434帧动作均保留，1419帧有语言、15帧两语言列为空，非语言列及源metadata逐值保持；98.95%只是语言覆盖率。该样本的自动selector语义验收失败：对照已有三相机视觉复核，两个冲突都选错候选。整体语义质量与长窗仍未通过分层抽样，不能视为训练合格样本。当前全量主集语言归一尚未完成。
 
 该JSON作为planner的实际policy输入，plan保存完整`policy_contract`和`policy_source`路径/SHA；apply重新核验同一policy文件。当前实现只接受本版支持的参数和硬约束，修改策略需形成可追溯的新policy/plan版本，不会静默放宽覆盖、候选集合或原始episode边界。
 

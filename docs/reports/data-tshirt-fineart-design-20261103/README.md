@@ -41,7 +41,7 @@
 
 1. **身份与结构，全量检查**：固定源revision及文件size/SHA；原14D `observation.state` / `action` 有限值、shape、顺序；连续帧号及30fps时间戳；三相机帧数/时轴一致；原AV1包无重编码抽取，三路逐帧解码。网络、权限、容量、下载中断属于操作错误，保留现场续跑，不标为损坏。
 2. **视频异常与任务质量分开审核**：冻结、曝光、低对比、重复帧先生成review标记；持衣、等布料落稳、30fps重采样可产生静止/重复，不因静止1秒自动剔除。确认损坏则整集排除并保留原件。长轨迹优先保留完整展开、连续折叠、叠放和有效整理/重抓；排除无效等待堆时长、持续故障、任务不符、未完成且无法说明的轨迹。
-3. **自动语义归一与批次抽样**：FLORA的`complete`只代表生成完成。按[运行策略](../../../configs/annotation/tshirt-fineart-v1.json)对全部轨迹建立整数帧时间轴：唯一候选或同文重复由规则处理；不同候选、空白及跨窗接缝交给本地9B视觉selector，只能选择候选ID或UNKNOWN，不能编造文本或时间。未知占比≤2%且连续≤30帧时，显式使用FineART原生两语言列`[]`跳过这些anchor的文本监督，保留全部动作/H50；这些是工程初值，不是论文质量指标。较大未知或来源问题进入父episode补标队列，合格父集继续导出。无需用户或agent逐集审批。局部扩证据/重标的预算已设计，自动修复循环尚未实现，不能把队列称为已修复。语义准确率仍须按时长、规则/selector路由、接缝及返工分层抽样测量；程序覆盖率不能替代准确率。 首批建议从319集分层抽16–20集；这是质量验收计划，尚未执行。出现集中错误时调整该类规则并重跑相应层，不要求逐条复核所有episode。
+3. **自动语义归一与批次抽样**：FLORA的`complete`只代表生成完成。按[运行策略](../../../configs/annotation/tshirt-fineart-v1.json)对全部轨迹建立整数帧时间轴：唯一候选或同文重复由规则处理；不同候选、空白及跨窗接缝交给本地9B视觉selector，只能选择候选ID或UNKNOWN，不能编造文本或时间。未知占比≤2%且连续≤30帧时，显式使用FineART原生两语言列`[]`跳过这些anchor的文本监督，保留全部动作/H50；这些是工程初值，不是论文质量指标。较大未知或来源问题进入父episode补标队列，合格父集继续导出。无需用户或agent逐集审批。局部扩证据/重标的预算已设计，自动修复循环尚未实现，不能把队列称为已修复。语义准确率仍须按时长、规则/selector路由、接缝及返工分层抽样测量；程序覆盖率不能替代准确率。首批建议从319集分层抽16–20集；这是质量验收计划，尚未执行。出现集中错误时调整该类规则并重跑相应层，不要求逐条复核所有episode。2026-11-05回看pilot派生Parquet发现，selector v3在11.5–16.5秒把重新铺平选成继续折叠，在20.5–24秒把整理近边选成折叠远边；35–35.5秒15帧以UNKNOWN空列回退。当前两个冲突的自动选择与既有agent三相机复核参考均不一致，因此单clip自动归一**语义QA未通过**，此前“两个选择正确”的记录作废。此结果只覆盖一个calibration pilot，不外推为354个raw窗口错误率；主集FineART归一汇总仍未生成。
 4. **release**：原始抽取、结构审核、FLORA原JSON、语义修订及FineART转换分别留版本。最终发布冻结父episode、split/group、帧数、图像映射、动作单位/顺序证据、完整语言时间线、源及输出哈希。未达标不生成训练READY。当前候选不因下载成功就变成10h合格数据。
 
 原数据值不裁剪、不猜测单位、不做OpenPI delta处理。图像分辨率沿源224，不放大到640冒充高分辨率。离线转换仅写新目录。
@@ -52,7 +52,7 @@ FLORA固定官方commit及模型revision、prompt、YAM三视角profile、采样
 
 主集319集对应465个计划窗口；输入含上下文约10.405h，但独立训练时长仍是10h。[逐窗口设计](annotation-window-design.json)。12集pilot覆盖全部时长层，合计32.37min；源ID见[pilot清单](pilot-12-metadata-candidates.json)。
 
-每个窗口记录父episode、源revision、起止frame、核心区间、原始任务、原三图引用和local→parent时间映射。FLORA原JSON不改；合并时映射回父episode真实帧时间戳，以核心区间确定拥有关系，合并跨窗口一致的目标，冲突由约束selector处理，未解决项入补标队列。不将重叠片段作为重复训练小时，也不将窗口发布成独立训练episode。
+每个窗口记录父episode、源revision、起止frame、核心区间、原始任务、原三图引用和local→parent时间映射。FLORA原JSON不改；合并时映射回父episode真实帧时间戳，以核心区间确定拥有关系，合并跨窗口一致的目标，冲突由约束selector处理，未解决项入补标队列；pilot抽样已发现selector会选错候选，因此任何自动选择结果都需纳入分层语义抽样。不将重叠片段作为重复训练小时，也不将窗口发布成独立训练episode。
 
 FineART H50在普通子任务边界自然跨越；只按原生episode末端裁夹/padding，不在每个语言边界额外截断。
 
@@ -85,4 +85,4 @@ FineART H50在普通子任务边界自然跨越；只按原生episode末端裁�
 
 Thor新目录：`/home/wuyan-lyj/thor/flora/data/tshirt-fineart-20261103/`。复用现有独立FLORA容器进行数据准备/推理；不重启其他服务、不操作3588、不访问维护中的训练服务器。先下载并审核pilot，再按相同断点任务覆盖主集、开发和备用池；未解决的质量项不自动进入训练release。
 
-已实现原生Session复用、两阶段断点及独立GDN overlay；同条47.8s输入的最终监督字段一致，但raw重试audit有差异，严格raw parity未通过，不能宣称逐位等价或受控倍速。单条自动链已实际写出1434帧派生Parquet，其中1419帧有语言、15帧为空列回退，原动作和非语言列逐值一致；这是98.95%语言覆盖，不是语义准确率。批处理入口为[`run_fineart_auto_batch.py`](../../../scripts/data/run_fineart_auto_batch.py)，Thor host编排为[`run_tshirt_annotation_pipeline.sh`](../../../scripts/data/run_tshirt_annotation_pipeline.sh)。当前批量进度归[执行回执](execution.json)，原始预测与图像留Thor，不提交仓库。加速与实际限制归[FLORA Thor标注](../../reference/flora_thor_annotation.md)。
+已实现原生Session复用、两阶段断点及独立GDN overlay；同条47.8s输入的最终监督字段一致，但raw重试audit有差异，严格raw parity未通过，不能宣称逐位等价或受控倍速。单条自动链写出1434帧派生Parquet，其中1419帧有语言、15帧为空列回退，原动作和非语言列逐值一致；回审发现两处冲突选择都与视觉参考不一致，所以98.95%只是语言覆盖率，且样本语义QA失败。批处理入口为[`run_fineart_auto_batch.py`](../../../scripts/data/run_fineart_auto_batch.py)，Thor host编排为[`run_tshirt_annotation_pipeline.sh`](../../../scripts/data/run_tshirt_annotation_pipeline.sh)。当前批量进度归[执行回执](execution.json)，原始预测与图像留Thor，不提交仓库。加速与实际限制归[FLORA Thor标注](../../reference/flora_thor_annotation.md)。

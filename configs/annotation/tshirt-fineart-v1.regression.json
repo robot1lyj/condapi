@@ -1,6 +1,6 @@
 {
   "schema_version": "condapi_fineart_annotation_regression_summary_v1",
-  "purpose": "Boundary/choice correspondence summarized from one agent-visual-review example; no original Flora JSON, caption text, video or contact sheet is stored here",
+  "purpose": "Visual-review reference timeline for one pilot episode plus observed automatic-v3 choices; no original Flora JSON, caption text, video or contact sheet is stored here",
   "source_example": {"pool": "train", "source_episode_index": 128691, "frames": 1434, "fps": 30, "review_method": "agent_visual_review", "task_success": "NOT_REVIEWED", "training_ready": false},
   "raw_label_aliases": {
     "L0": "initial spreading goal",
@@ -27,6 +27,16 @@
     {"from_frame": 1065, "to_frame": 1275, "active": ["L7"], "expected_primary": "L7", "route": "RULE_SINGLE_ACTIVE"},
     {"from_frame": 1275, "to_frame": 1434, "active": ["L8"], "expected_primary": "L8", "route": "RULE_SINGLE_ACTIVE"}
   ],
+  "automatic_selector_v3_observed": {
+    "status": "MISMATCH_ON_BOTH_CONFLICT_ATOMS",
+    "selector_model": "Qwen/Qwen3.5-9B@c202236235762e1c871ad0ccb60c8ee5ba337b9a",
+    "observations": [
+      {"from_frame": 345, "to_frame": 495, "selected_source_label": "L1", "reference_source_label": "L2", "reference_goal": "respread_reset"},
+      {"from_frame": 615, "to_frame": 720, "selected_source_label": "L5", "reference_source_label": "L4", "reference_goal": "near_edge_alignment"}
+    ],
+    "unknown_interval": {"from_frame": 1050, "to_frame": 1065, "frames": 15, "seconds": 0.5, "modeled_as": "UNKNOWN native two-column empty-anchor fallback", "visual_reference_goal": "near_end_fold begins at frame1050"},
+    "interpretation": "The v3 selector differs from the prior agent visual-review reference on both conflict atoms. The UNKNOWN gap is a conservative language-coverage loss. Do not treat this one-clip materialization as a passing semantic regression or training-ready sample."
+  },
   "expected_merged_intervals": [[0, 150], [150, 345], [345, 495], [495, 615], [615, 720], [720, 885], [885, 1050], [1050, 1275], [1275, 1434]],
   "invariants": [
     "10 atoms become9 primary intervals by merging the adjacent L7 choices",
@@ -34,6 +44,7 @@
     "near-edge alignment precedes the opposite-side fold; overlaps do not become concurrent native labels",
     "the15-frame gap is resolved by evidence-backed neighbor choice, not previous-label carry-forward",
     "no fixed folding order or stack-success label is introduced",
-    "the choice mapping is a regression reference for this example, not a semantic accuracy benchmark for319 episodes"
+    "the choice mapping is a regression reference for this example, not a semantic accuracy benchmark for319 episodes",
+    "automatic-selector v3 observed choices mismatch both conflict atoms; keep this as a failed QA fixture until corrected or explicitly reviewed"
   ]
 }

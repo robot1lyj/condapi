@@ -1,5 +1,5 @@
 {
-  "observed_utc": "2026-11-04T10:49:08+00:00",
+  "observed_utc": "2026-11-05T08:59:33+00:00",
   "device": "Thor aarch64",
   "task_root": "/home/wuyan-lyj/thor/flora/data/tshirt-fineart-20261103",
   "server_accessed": false,
@@ -652,12 +652,12 @@
     "tool_versions": "formal-v1 GPU demo preserved; v3 Python tools have identical AST after formatting; host resume validation/pointer added separately"
   },
   "latest_performance_snapshot": {
-    "observed_cst": "2026-11-04T18:51:51+08:00",
+    "observed_cst": "2026-11-05T16:59:33+08:00",
     "pipeline": {
       "status": "RUNNING",
       "stage": "ANNOTATING_train-dev-gdn-v1",
       "tempseg_windows_complete": 510,
-      "captioner_windows_complete": 12,
+      "captioner_windows_complete": 357,
       "captioner_windows_total": 510
     },
     "captioner_generate_calls": {
@@ -728,5 +728,67 @@
       }
     ],
     "cpu_decode_limit": "Frame-iteration ratios are static calculations from completed caption plans, not measured wall-time or end-to-end speedup. A future isolated candidate must preserve pixel and input-tensor digests on identical windows before use."
+  },
+  "sample_quality_audit": {
+    "observed_cst": "2026-11-05T16:59:33+08:00",
+    "scope": {
+      "visual_sample": "one 47.8s calibration pilot episode train:128691, three synchronized camera streams",
+      "main_train_dev_raw_windows_completed": 357,
+      "main_train_dev_raw_windows_total": 510,
+      "random_main_video_windows_visually_reviewed": 0
+    },
+    "main_raw_structural_scan": {
+      "captioner_windows": 354,
+      "invalid_intervals_or_empty_captions": 0,
+      "observed_at_cst": "2026-11-05T16:50:35+08:00",
+      "limit": "Structural checks only; this was not a semantic video audit."
+    },
+    "pilot_materialized_parquet": {
+      "action_frames": 1434,
+      "valid_language_frames": 1419,
+      "unknown_anchor_frames": 15,
+      "training_ready": false,
+      "dataset_release": false
+    },
+    "automatic_selector_v3_comparison": {
+      "result": "SEMANTIC_QA_NOT_PASSED_ON_CALIBRATION_SAMPLE",
+      "basis": "Two constrained selector choices conflict with the prior three-camera agent visual-review reference and the sampled video frames.",
+      "conflicts": [
+        {
+          "from_s": [
+            11.5,
+            16.5
+          ],
+          "selected_goal": "near-side-fold continuation",
+          "visual_reference_goal": "respread/reset",
+          "evidence_note": "At 14s the three-camera viewer shows both grippers holding the shirt broad and flat; automatic timeline keeps the fold label across this interval."
+        },
+        {
+          "from_s": [
+            20.5,
+            24.0
+          ],
+          "selected_goal": "far-side fold",
+          "visual_reference_goal": "near-edge straightening",
+          "evidence_note": "The four-second overlap is assigned to the far-side fold by selector; prior frame-level review split straightening at 20.5–24s from far-side folding at 24–29.5s."
+        }
+      ],
+      "short_gap": {
+        "from_s": [
+          35.0,
+          35.5
+        ],
+        "outcome": "UNKNOWN; both language columns empty at 15 anchors, action retained",
+        "visual_reference": "prior review begins the near-end-fold goal at 35s",
+        "interpretation": "Conservative fallback avoids false text, but leaves a short language-coverage gap."
+      }
+    },
+    "impact": "This is a one-clip calibration disagreement, not a measured error rate for 357 raw train/dev windows. The main raw-caption batch is still running; its FineART materialization summary does not exist yet. Keep any later derived data marked training_ready=false until selector behavior is corrected or the affected examples are explicitly audited.",
+    "source_receipts": {
+      "plan": "/home/wuyan-lyj/thor/flora/data/tshirt-fineart-20261103/auto-calibration-128691-v3/plan.json",
+      "decisions": "/home/wuyan-lyj/thor/flora/data/tshirt-fineart-20261103/auto-calibration-128691-v3/selector-run-v1/decisions.json",
+      "materialized_parquet_manifest": "/home/wuyan-lyj/thor/flora/data/tshirt-fineart-20261103/auto-calibration-128691-v3/materialized-v2/manifest.json",
+      "visual_review_reference": "/tmp/fineart-agent-review-128691/canonical.reviewed.json"
+    }
   }
 }

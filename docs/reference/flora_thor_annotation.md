@@ -8,7 +8,7 @@
 | 原生 baseline | `tshirt-train-128691-w000`，47.8 秒，9 条 final caption，完整 wall 1125.69 秒 | 含冷加载及当时并行负载，不是稳定吞吐 |
 | GDN + resident 同 clip | 完整 wall 513.295 秒 | 冷暖/加载条件与 baseline 不同，不能据此承诺固定倍数或单独归因 GDN |
 | 两路径输出比较 | 最终 9 条 caption、边界、status、provenance 及已对齐输入 tensor digest 一致 | raw audit 有一处重试分支不同，严格完整比较失败，不能宣称 bitwise parity |
-| 9B selector v3 | 真实处理 3 个冲突/缺口 atom：两处选择与该 clip 视觉诊断一致，0.5 秒缺口返回 `UNKNOWN` | 单 clip 校准，不是语义准确率指标 |
+| 9B selector v3 | 在47.8s pilot的两个冲突 atom 均与视觉复核参考不一致（复审后作废旧“一致”结论）；35–35.5s缺口返回`UNKNOWN` | 单 clip 语义抽样未通过；它是已知QA反例，不是准确率估计 |
 | 语言列实际写入 | 新 Parquet 保留 1434 个 action anchor：1419 个有语言、15 个双语言列为空 | 已 materialize 语言列，尚非完整 LeRobot v3 数据发布或训练 READY |
 
 GDN 使用独立 `gdn-overlay-candidate-02`，原容器环境、模型权重与无 overlay 路径保留。当前批量路线是原生 Flora 阶段批处理/模型驻留，加程序 atom 约束与独立 selector；无需逐 episode 请求用户或 agent 审批。质量证据目前仍只有 1 条 clip 校准，分层抽样和批次语义质量验收尚待实测。
@@ -132,7 +132,7 @@ host 入口为 [`run_tshirt_annotation_pipeline.sh`](../../scripts/data/run_tshi
 
 当前policy允许显式 `native-empty-anchor-fallback`：仅真实 selector `UNKNOWN`，每父累计未知帧 **≤2%且合并后的连续run≤30帧**，可以保留整父动作和视频。这是初始工程阈值，不是论文结论或已验证准确率。小 UNKNOWN anchor 的 `language_persistent=[]`、`language_events=[]` 触发固定原生 task→action fallback，不监督空 assistant/subtask 文本；flow 与原生启用的 FAST 动作监督仍保留。不能用null-content row或把`UNKNOWN`写成指令。超阈值、大缺口、缺decision或hard source问题保留pending，不强行填词，也不阻断其他父episode。
 
-这保留原task、绝对14D state/action、完整父episode和H50；标注窗口不变成训练episode。当前单 clip 实际写出1434个 action anchor，其中1419个有效语言anchor、15个双空列表（35–35.5秒）；动作coverage100%，有效语言coverage约98.954%，不能写成语言100%或当作accuracy。真实9B对该clip的两个重叠分别选择重新spread和straighten，与已有视觉诊断一致；0.5秒gap诚实返回UNKNOWN，而非自动继承前一句。
+这保留原task、绝对14D state/action、完整父episode和H50；标注窗口不变成训练episode。pilot派生Parquet有1434个action anchor：1419个有效语言anchor、15个双空列表（35–35.5秒），非语言列和时间戳身份逐值保留。这只是98.954%语言覆盖率。样本回审发现两个重叠选择都与视觉复核参考不一致：11.5–16.5秒选择继续折叠而参考是重新铺平；20.5–24秒选择折叠远边而参考是整理近边。0.5秒gap被保守地回退为无语言监督。selector v3在该回归样本未通过；当前主批次有354个 raw captioner窗口完成，FineART归一汇总尚未生成，不能据结构检查把它视作语义验收。
 
 语言列产物状态为 `LANGUAGE_COLUMNS_MATERIALIZED_NOT_DATASET_RELEASED`：已实际写Parquet不等于完整LeRobot v3 metadata/发布完成，`training_ready=false`。后续还需分层批次语义抽样、窗口接缝质量、数据身份/切分、训练集norm和FAST审计；`task_success`保持`NOT_REVIEWED`。当前仅1clip做过selector校准，不能据12pilot结构通过或单clip输出一致，声称12集/319集已完成语义验收或全量标注。
 
